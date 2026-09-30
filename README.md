@@ -20,6 +20,7 @@ Benchmark from the command line (vsync off, prints a frame-time summary and quit
 ```
 godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/shot.png
 ```
+More testbed flags: `--spawn=x,z` starts on the nearest road to a local coordinate, `--topdown=<height>` looks straight down, `--graph` shows the road graph overlay, `--telemetry` prints the car state every second.
 
 ## Build the map pack
 ```

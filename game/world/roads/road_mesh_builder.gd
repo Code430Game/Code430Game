@@ -8,6 +8,8 @@ extends RefCounted
 ## watertight. Junction polygons are triangulated and go to the node's chunk.
 
 const SURFACE_LIFT_M := 0.02
+## Links (ramps) sit slightly higher so their overlap with the road they merge into does not z-fight.
+const LINK_EXTRA_LIFT_M := 0.015
 const LOD1_TOLERANCE_M := 1.5
 
 const CLASS_COLORS := {
@@ -96,9 +98,10 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> Result:
 		var dir_start := _continuation_dir(graph, edge, edge.from_node, junctions)
 		var dir_end := _continuation_dir(graph, edge, edge.to_node, junctions)
 		var color: Color = CLASS_COLORS.get(edge.road_class, Color(0.5, 0.5, 0.5))
-		_extrude(RoadGeometry.split_at_chunk_bounds(pl), edge.width_m * 0.5, dir_start, dir_end, color, result.roads, result)
+		var lift := SURFACE_LIFT_M + (LINK_EXTRA_LIFT_M if edge.road_class.ends_with("_link") else 0.0)
+		_extrude(RoadGeometry.split_at_chunk_bounds(pl), edge.width_m * 0.5, dir_start, dir_end, color, lift, result.roads, result)
 		var lod1 := RoadGeometry.simplify(pl, LOD1_TOLERANCE_M)
-		_extrude(RoadGeometry.split_at_chunk_bounds(lod1), edge.width_m * 0.5, dir_start, dir_end, color, result.roads_lod1, result)
+		_extrude(RoadGeometry.split_at_chunk_bounds(lod1), edge.width_m * 0.5, dir_start, dir_end, color, lift, result.roads_lod1, result)
 		result.edges_built += 1
 	for nid in junctions.keys():
 		var j: JunctionBuilder.Junction = junctions[nid]
@@ -122,7 +125,7 @@ static func _continuation_dir(graph: RoadGraph, edge: RoadGraph.RoadEdge, node_i
 	return Vector2.ZERO
 
 
-static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vector2, dir_end: Vector2, color: Color, buckets: Dictionary, result: Result) -> void:
+static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vector2, dir_end: Vector2, color: Color, lift: float, buckets: Dictionary, result: Result) -> void:
 	if pl.size() < 2:
 		return
 	var normals := RoadGeometry.miter_normals(pl, dir_start, dir_end)
@@ -130,7 +133,7 @@ static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vecto
 	var right := PackedVector3Array()
 	for i in range(pl.size()):
 		var n := normals[i] * half_width
-		var p := pl[i] + Vector3(0.0, SURFACE_LIFT_M, 0.0)
+		var p := pl[i] + Vector3(0.0, lift, 0.0)
 		left.append(p + Vector3(n.x, 0.0, n.y))
 		right.append(p - Vector3(n.x, 0.0, n.y))
 	for i in range(pl.size() - 1):

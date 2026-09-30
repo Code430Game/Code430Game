@@ -107,3 +107,13 @@ func test_spawn_is_on_the_highway() -> void:
 			var q := Geometry2D.get_closest_point_to_segment(Vector2(t.origin.x, t.origin.z), a, b)
 			best = minf(best, q.distance_to(Vector2(t.origin.x, t.origin.z)))
 	assert_float(best).is_less(1.0)
+
+
+func test_nearest_edge_finds_the_spawn_road() -> void:
+	var t := _pack.spawn_transform()
+	var hit := _pack.graph.nearest_edge(t.origin, 30.0)
+	assert_bool(hit.is_empty()).is_false()
+	var e: RoadGraph.RoadEdge = hit["edge"]
+	assert_str(e.road_class).is_equal("motorway")
+	assert_float(hit["distance"]).is_less(1.0)
+	assert_bool(_pack.graph.nearest_edge(Vector3(99999, 0, 99999), 30.0).is_empty()).is_true()

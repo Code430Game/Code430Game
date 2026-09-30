@@ -120,7 +120,9 @@ static func build_collision(meshes: Array[Mesh]) -> StaticBody3D:
 	body.name = "collision"
 	for m in meshes:
 		var shape := CollisionShape3D.new()
-		shape.shape = m.create_trimesh_shape()
+		var trimesh: ConcavePolygonShape3D = m.create_trimesh_shape()
+		trimesh.backface_collision = true  # a fast body that gets below a surface is pushed back, not lost
+		shape.shape = trimesh
 		body.add_child(shape)
 	return body
 

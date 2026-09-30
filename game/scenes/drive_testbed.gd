@@ -31,6 +31,10 @@ var _autodrive_distance: float = 0.0
 var _telemetry: bool = false
 var _telemetry_next: float = 0.0
 var _topdown: bool = false
+var _topdown_height: float = 160.0
+var _spawn_override: Vector3 = Vector3.INF
+var _road_label: String = ""
+var _road_label_next: float = 0.0
 
 
 func _ready() -> void:
@@ -51,6 +55,11 @@ func _ready() -> void:
 	_car = CAR_SCENE.instantiate()
 	add_child(_car)
 	var spawn := _pack.spawn_transform()
+	if _spawn_override != Vector3.INF:
+		var hit := _pack.graph.nearest_edge(_spawn_override, 200.0)
+		if not hit.is_empty():
+			spawn = _spawn_on_edge(hit)
+	_car.recover_callback = _recover_car
 	_car.global_transform = spawn
 	_car.set_spawn(spawn)
 	_camera.target = _car
@@ -60,6 +69,42 @@ func _ready() -> void:
 	_autodrive_distance = 20.0
 	if _bench_seconds > 0.0:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+
+
+## Transform on the road surface at the nearest-edge hit, facing along the edge.
+func _spawn_on_edge(hit: Dictionary) -> Transform3D:
+	var e: RoadGraph.RoadEdge = hit["edge"]
+	var i: int = hit["segment"]
+	var forward := e.polyline[i + 1] - e.polyline[i]
+	forward.y = 0.0
+	if forward.length_squared() < 1e-6:
+		forward = Vector3.FORWARD
+	return Transform3D(Basis.looking_at(forward.normalized(), Vector3.UP), hit["point"] + Vector3.UP * 1.0)
+
+
+## Puts a rolled or lost car back on the nearest road, or at the spawn if none is near.
+func _recover_car(car: VehicleBody3D) -> void:
+	var hit := _pack.graph.nearest_edge(car.global_position, 80.0)
+	if hit.is_empty() or car.global_position.y < car.world_floor_y:
+		car.reset_to_spawn()
+		return
+	car.global_transform = _spawn_on_edge(hit)
+	car.linear_velocity = Vector3.ZERO
+	car.angular_velocity = Vector3.ZERO
+
+
+func _bench_elapsed_hud(delta: float) -> void:
+	_road_label_next -= delta
+	if _road_label_next > 0.0:
+		return
+	_road_label_next = 0.25
+	var hit := _pack.graph.nearest_edge(_car.global_position, 40.0)
+	if hit.is_empty():
+		_road_label = "off road"
+		return
+	var e: RoadGraph.RoadEdge = hit["edge"]
+	var name := e.name if e.name != "" else e.road_class.replace("_", " ")
+	_road_label = "%s (%s%s)" % [name, e.road_class, ", one-way" if e.oneway else ""]
 
 
 func _parse_args() -> void:
@@ -74,14 +119,23 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--telemetry":
 			_telemetry = true
-		elif arg == "--topdown":
+		elif arg.begins_with("--topdown"):
 			_topdown = true
+			if arg.contains("="):
+				_topdown_height = float(arg.get_slice("=", 1))
+		elif arg == "--graph":
+			_graph_view.visible = true
+		elif arg.begins_with("--spawn="):
+			var parts := arg.get_slice("=", 1).split(",")
+			if parts.size() == 2:
+				_spawn_override = Vector3(float(parts[0]), 0.0, float(parts[1]))
 
 
 func _process(delta: float) -> void:
 	if _car != null:
-		_hud.text = "%d km/h   x %.0f  y %.1f  z %.0f\nRT accelerate, LT brake/reverse, RB handbrake, Back+Y reset, Back+B road graph, Back+X stats" % [
-			int(_car.speed_kph()), _car.global_position.x, _car.global_position.y, _car.global_position.z,
+		_bench_elapsed_hud(delta)
+		_hud.text = "%d km/h   %s\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Back+Y reset, Back+B road graph, Back+X stats" % [
+			int(_car.speed_kph()), _road_label, _car.global_position.x, _car.global_position.y, _car.global_position.z,
 		]
 	if _autodrive and _car != null:
 		_autodrive_step()
@@ -94,7 +148,7 @@ func _process(delta: float) -> void:
 		])
 	if _topdown and _car != null:
 		_camera.set_process(false)
-		_camera.global_position = _car.global_position + Vector3(0, 160, 0.01)
+		_camera.global_position = _car.global_position + Vector3(0, _topdown_height, 0.01)
 		_camera.look_at(_car.global_position, Vector3.UP)
 	if Input.is_action_just_pressed("pause"):
 		get_tree().quit()

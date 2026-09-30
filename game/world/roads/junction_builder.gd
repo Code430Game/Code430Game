@@ -11,6 +11,9 @@ extends RefCounted
 
 const TRIM_MARGIN_M := 0.5
 const MAX_TRIM_M := 60.0
+## A corner may sit at most this many half-widths down the road. Beyond that the
+## two roads are nearly parallel (a ramp merge) and their ribbons overlap anyway.
+const MAX_CORNER_HALF_WIDTHS := 3.0
 
 
 class Junction:
@@ -58,16 +61,20 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		var corner: Vector2
 		var ta := 0.0
 		var tb := 0.0
-		if hit == null:
-			corner = centre + (na * float(a["hw"]) - nb * float(b["hw"])) * 0.5
-		else:
+		var widest := maxf(float(a["hw"]), float(b["hw"]))
+		var cap := minf(MAX_CORNER_HALF_WIDTHS * widest, MAX_TRIM_M)
+		if hit != null:
 			corner = hit
 			ta = (corner - pa).dot(da)
 			tb = (corner - pb).dot(db)
-			if ta < 0.0 or tb < 0.0 or ta > MAX_TRIM_M or tb > MAX_TRIM_M:
-				corner = centre + (na * float(a["hw"]) - nb * float(b["hw"])) * 0.5 + (da + db).normalized() * maxf(float(a["hw"]), float(b["hw"]))
-				ta = maxf((corner - pa).dot(da), 0.0)
-				tb = maxf((corner - pb).dot(db), 0.0)
+		if hit == null or ta < 0.0 or tb < 0.0 or ta > cap or tb > cap:
+			# Parallel-ish arms (ramp merges) or a corner behind the node: place the corner a
+			# capped distance along the bisector, between the two side offsets.
+			var bisector := (da + db)
+			bisector = bisector.normalized() if bisector.length_squared() > 1e-9 else da
+			corner = centre + (na * float(a["hw"]) - nb * float(b["hw"])) * 0.5 + bisector * minf(cap, widest * 1.5)
+			ta = maxf((corner - pa).dot(da), 0.0)
+			tb = maxf((corner - pb).dot(db), 0.0)
 		corners.append(corner)
 		corner_t.append(Vector2(ta, tb))
 	var trims := {}

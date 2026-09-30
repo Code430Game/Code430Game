@@ -80,10 +80,13 @@ def test_flatten_puts_terrain_under_road():
     assert changed > 0
     row = int(20 / TERRAIN_RES_M)  # z = 20 is on the centreline
     assert chunk.heights[row, 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
-    assert chunk.heights[row + 3, 10] == pytest.approx(
+    assert chunk.heights[row + 4, 10] == pytest.approx(
         55.0
-    )  # 12 m away: beyond the 6 m half width + 3 m shoulder
-    assert 50.0 < chunk.heights[row + 2, 10] < 55.0  # 8 m away: in the shoulder blend
+    )  # 16 m: beyond half width 6 + margin 4 + shoulder 3
+    assert chunk.heights[row + 2, 10] == pytest.approx(
+        50.0 - 0.03, abs=1e-3
+    )  # 8 m: inside the flat margin
+    assert 50.0 < chunk.heights[row + 3, 10] < 55.0  # 12 m: in the shoulder blend
 
 
 def test_carve_removes_bridge_deck_ridge():

@@ -3240,7 +3240,7 @@
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 4238,
-   "cells_flattened": 147821,
+   "cells_flattened": 223647,
    "chunks": 196
   },
   "total_length_km": 193.405

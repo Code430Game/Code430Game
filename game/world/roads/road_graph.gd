@@ -120,6 +120,51 @@ func direction_from(edge: RoadEdge, node_id: String) -> Vector2:
 	return d.normalized() if d.length_squared() > 0.0 else Vector2.RIGHT
 
 
+const INDEX_CELL_M := 64.0
+var _segment_index: Dictionary = {}  # Vector2i cell -> Array of [edge id, segment index]
+
+
+## Nearest edge to a position in the xz plane. Returns {"edge": RoadEdge, "distance": float,
+## "point": Vector3, "t": float along the polyline in metres}, or {} when nothing is within `radius`.
+func nearest_edge(position: Vector3, radius: float = 60.0) -> Dictionary:
+	if _segment_index.is_empty():
+		_build_segment_index()
+	var p := Vector2(position.x, position.z)
+	var best := {}
+	var best_d := radius
+	var cells := int(ceil(radius / INDEX_CELL_M))
+	var centre := Vector2i(int(floor(p.x / INDEX_CELL_M)), int(floor(p.y / INDEX_CELL_M)))
+	for dx in range(-cells, cells + 1):
+		for dz in range(-cells, cells + 1):
+			for item in _segment_index.get(Vector2i(centre.x + dx, centre.y + dz), []):
+				var e: RoadEdge = edges[item[0]]
+				var i: int = item[1]
+				var a := Vector2(e.polyline[i].x, e.polyline[i].z)
+				var b := Vector2(e.polyline[i + 1].x, e.polyline[i + 1].z)
+				var q := Geometry2D.get_closest_point_to_segment(p, a, b)
+				var d := q.distance_to(p)
+				if d < best_d:
+					best_d = d
+					var t := a.distance_to(q)
+					var y := lerpf(e.polyline[i].y, e.polyline[i + 1].y, t / maxf(a.distance_to(b), 0.001))
+					best = {"edge": e, "distance": d, "point": Vector3(q.x, y, q.y), "segment": i}
+	return best
+
+
+func _build_segment_index() -> void:
+	for eid in edges:
+		var e: RoadEdge = edges[eid]
+		for i in range(e.polyline.size() - 1):
+			var a := e.polyline[i]
+			var b := e.polyline[i + 1]
+			for cx in range(int(floor(minf(a.x, b.x) / INDEX_CELL_M)), int(floor(maxf(a.x, b.x) / INDEX_CELL_M)) + 1):
+				for cz in range(int(floor(minf(a.z, b.z) / INDEX_CELL_M)), int(floor(maxf(a.z, b.z) / INDEX_CELL_M)) + 1):
+					var key := Vector2i(cx, cz)
+					if not _segment_index.has(key):
+						_segment_index[key] = []
+					_segment_index[key].append([eid, i])
+
+
 ## Sorted edge ids for deterministic iteration.
 func sorted_edge_ids() -> Array:
 	var ids := edges.keys()
