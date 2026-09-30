@@ -8,7 +8,7 @@ HOST="${1:-steamdeck.local}"
 DEST="Games/code430"
 SRC="$ROOT/build/linux/"
 [ -x "$SRC/code430.x86_64" ] || { echo "no build at $SRC; run scripts/package-linux.sh first" >&2; exit 1; }
-ssh "deck@$HOST" "mkdir -p ~/$DEST"
+ssh -o ConnectTimeout=10 "deck@$HOST" "mkdir -p ~/$DEST" || { echo "Deck at $HOST not reachable" >&2; exit 1; }
 if ssh "deck@$HOST" 'command -v rsync >/dev/null'; then
   rsync -az --delete "$SRC" "deck@$HOST:$DEST/"
 else
