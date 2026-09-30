@@ -1,0 +1,109 @@
+extends GdUnitTestSuite
+## Loads the first-party Ottawa pack from the repo and checks chunks, terrain, collision, GLB round trip.
+
+const PACK_ID := "code430.ottawa-centretown"
+
+var _pack: MapPack
+
+
+func before() -> void:
+	var dir := PackLocator.find_pack(PACK_ID)
+	assert_str(dir).override_failure_message("pack not found; searched %s" % [PackLocator.search_dirs()]).is_not_empty()
+	_pack = MapPack.new()
+	assert_bool(_pack.load(dir)).is_true()
+
+
+func test_chunk_count_matches_terrain_index() -> void:
+	assert_int(_pack.chunk_coords().size()).is_equal(_pack.terrain_index["chunks"].size())
+	assert_int(_pack.chunk_coords().size()).is_greater(100)
+
+
+func test_terrain_decodes_close_to_road_ground() -> void:
+	var entry: Dictionary = _pack.terrain_index["chunks"][0]
+	var heights := TerrainBuilder.load_chunk(_pack.pack_dir, _pack.terrain_index, entry)
+	assert_object(heights).is_not_null()
+	assert_int(heights.heights.size()).is_equal(heights.samples * heights.samples)
+	var checked := 0
+	for nid in _pack.graph.sorted_node_ids():
+		var n: RoadGraph.RoadNode = _pack.graph.nodes[nid]
+		if RoadGeometry.chunk_of(n.position) != Vector2i(heights.cx, heights.cz):
+			continue
+		var has_bridge := false
+		for eid in _pack.graph.incident(nid):
+			var e: RoadGraph.RoadEdge = _pack.graph.edges[eid]
+			has_bridge = has_bridge or e.bridge or e.tunnel
+		if has_bridge:
+			continue
+		var h := heights.sample(n.position.x, n.position.z)
+		assert_float(absf(h - n.position.y)).override_failure_message("node %s road y %.2f terrain %.2f" % [nid, n.position.y, h]).is_less(0.5)
+		checked += 1
+		if checked >= 5:
+			break
+
+
+func test_terrain_lod_vertex_counts() -> void:
+	var entry: Dictionary = _pack.terrain_index["chunks"][0]
+	var heights := TerrainBuilder.load_chunk(_pack.pack_dir, _pack.terrain_index, entry)
+	for lod in range(3):
+		var mesh := TerrainBuilder.build_mesh(heights, lod)
+		var step: int = TerrainBuilder.LOD_STEPS[lod]
+		var n: int = (heights.samples - 1) / step + 1
+		assert_int(mesh.surface_get_array_len(0)).is_equal(n * n)
+
+
+func test_build_chunk_has_collision_and_lods() -> void:
+	var road_result := RoadMeshBuilder.build(_pack.graph, _pack.junctions)
+	var coord: Vector2i = road_result.roads.keys()[0]
+	var entry: Dictionary = {}
+	for e in _pack.terrain_index["chunks"]:
+		if int(e["cx"]) == coord.x and int(e["cz"]) == coord.y:
+			entry = e
+	var heights := TerrainBuilder.load_chunk(_pack.pack_dir, _pack.terrain_index, entry)
+	var chunk: Node3D = auto_free(_pack.build_chunk(coord, heights, road_result, true))
+	assert_object(chunk.get_node_or_null("roads_lod0")).is_not_null()
+	assert_object(chunk.get_node_or_null("terrain_lod0")).is_not_null()
+	assert_object(chunk.get_node_or_null("terrain_lod2")).is_not_null()
+	var body: StaticBody3D = chunk.get_node("collision")
+	assert_int(body.get_child_count()).is_greater_equal(2)
+	for shape in body.get_children():
+		assert_object((shape as CollisionShape3D).shape).is_instanceof(ConcavePolygonShape3D)
+	var lod0: MeshInstance3D = chunk.get_node("terrain_lod0")
+	var lod1: MeshInstance3D = chunk.get_node("terrain_lod1")
+	assert_float(lod0.visibility_range_end).is_equal(lod1.visibility_range_begin)
+
+
+func test_glb_round_trip_keeps_meshes() -> void:
+	var road_result := RoadMeshBuilder.build(_pack.graph, _pack.junctions)
+	var coord: Vector2i = road_result.roads.keys()[0]
+	var entry: Dictionary = {}
+	for e in _pack.terrain_index["chunks"]:
+		if int(e["cx"]) == coord.x and int(e["cz"]) == coord.y:
+			entry = e
+	var heights := TerrainBuilder.load_chunk(_pack.pack_dir, _pack.terrain_index, entry)
+	var chunk: Node3D = auto_free(_pack.build_chunk(coord, heights, road_result, false))
+	var path := ProjectSettings.globalize_path("user://test_chunk_%d.glb" % Time.get_ticks_usec())
+	assert_int(GlbChunks.export_chunk(chunk, path)).is_equal(OK)
+	var back: Node3D = auto_free(GlbChunks.import_chunk(path, _pack.road_material, _pack.terrain_material, true))
+	assert_object(back).is_not_null()
+	for role in ["roads_lod0", "terrain_lod0", "terrain_lod1", "terrain_lod2"]:
+		var a: MeshInstance3D = chunk.get_node(role)
+		var b: MeshInstance3D = back.get_node_or_null(role)
+		assert_object(b).override_failure_message("missing %s after import" % role).is_not_null()
+		assert_int(b.mesh.surface_get_array_len(0)).is_equal(a.mesh.surface_get_array_len(0))
+	assert_object(back.get_node_or_null("collision")).is_not_null()
+	DirAccess.remove_absolute(path)
+
+
+func test_spawn_is_on_the_highway() -> void:
+	var t := _pack.spawn_transform()
+	var best := INF
+	for eid in _pack.graph.sorted_edge_ids():
+		var e: RoadGraph.RoadEdge = _pack.graph.edges[eid]
+		if e.road_class != "motorway":
+			continue
+		for i in range(e.polyline.size() - 1):
+			var a := Vector2(e.polyline[i].x, e.polyline[i].z)
+			var b := Vector2(e.polyline[i + 1].x, e.polyline[i + 1].z)
+			var q := Geometry2D.get_closest_point_to_segment(Vector2(t.origin.x, t.origin.z), a, b)
+			best = minf(best, q.distance_to(Vector2(t.origin.x, t.origin.z)))
+	assert_float(best).is_less(1.0)

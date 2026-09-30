@@ -12,7 +12,25 @@ Status: Phase 0 (foundations). The project boots to an empty testbed with a cont
 ```
 godot --path game --editor
 ```
-Or open `game/project.godot` from the Godot project manager. Press F5 to run the testbed. Left stick moves, right stick looks, L3 sprints, Start quits.
+Or open `game/project.godot` from the Godot project manager. Press F5 to run the drive testbed: it loads the Ottawa map pack from `packs/`, builds the city, and drops a car on the Queensway.
+
+Driving: right trigger accelerates, left trigger brakes or reverses from a stop, left stick steers, RB is the handbrake, right stick orbits the camera. Back+Y resets to the spawn, Back+B draws the road graph, Back+X shows frame stats, Start quits. Keyboard: W/S/A/D, Space handbrake, R reset, F4 graph, F3 stats.
+
+Benchmark from the command line (vsync off, prints a frame-time summary and quits):
+```
+godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/shot.png
+```
+
+## Build the map pack
+```
+cd tools
+uv run python -m osm_import --bbox 45.405,-75.715,45.435,-75.675 --pack-out ../packs/ottawa-centretown \
+  --pack-id code430.ottawa-centretown --pack-name "Ottawa Centretown" --title "Ottawa Centretown starter district"
+```
+That fetches OpenStreetMap and NRCan elevation data (cached, gitignored), writes the road graph, terrain heightmaps, manifest, and validation report. Optionally pre-build the chunk meshes as GLB so the game loads faster:
+```
+godot --headless --path game -s res://world/build/pack_builder.gd -- code430.ottawa-centretown
+```
 
 Debug overlay: press F3, or hold Back (View) and press X on a gamepad. It shows fps, frame time, draw calls, and the active preset.
 
@@ -42,11 +60,11 @@ godot --headless --path game --export-release "Linux" ../build/linux/code430.x86
 CI does the same on every push to `main` and uploads `build/linux` as an artifact named `code430-linux-<sha>`.
 
 ## Put a build on a Steam Deck
-1. Download the `code430-linux-*` artifact from the GitHub Actions run (or export locally) and unzip it. You get `code430.x86_64` and `code430.pck`.
+1. Run `scripts/package-linux.sh` (or download the `code430-linux-*` artifact from GitHub Actions). You get `build/linux/` with `code430.x86_64`, `code430.pck`, and a `packs/` folder. The game looks for packs next to the executable, in `~/.local/share/Code 430/packs`, or in the repo when run from the editor.
 2. On the Deck, switch to Desktop Mode (Power menu > Switch to Desktop).
 3. Copy both files to the Deck, for example with a USB stick, or from a Mac over the network:
    ```
-   scp build/linux/code430.* deck@steamdeck.local:~/Games/code430/
+   scp -r build/linux/ deck@steamdeck.local:~/Games/code430/
    ```
    (Enable SSH on the Deck first: in Konsole, `passwd` then `sudo systemctl enable --now sshd`.)
 4. In Konsole on the Deck: `chmod +x ~/Games/code430/code430.x86_64`.

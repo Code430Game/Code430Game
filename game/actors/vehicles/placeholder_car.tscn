@@ -1,0 +1,102 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://actors/vehicles/placeholder_car.gd" id="1"]
+
+[sub_resource type="BoxShape3D" id="body_shape"]
+size = Vector3(1.8, 0.6, 4.2)
+
+[sub_resource type="BoxMesh" id="body_mesh"]
+size = Vector3(1.8, 0.6, 4.2)
+
+[sub_resource type="StandardMaterial3D" id="body_mat"]
+albedo_color = Color(0.85, 0.25, 0.2, 1)
+
+[sub_resource type="CylinderMesh" id="wheel_mesh"]
+top_radius = 0.35
+bottom_radius = 0.35
+height = 0.25
+
+[node name="PlaceholderCar" type="VehicleBody3D"]
+mass = 1200.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.2, 0)
+script = ExtResource("1")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+shape = SubResource("body_shape")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+mesh = SubResource("body_mesh")
+material_override = SubResource("body_mat")
+
+[node name="WheelFL" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.35)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.1
+wheel_radius = 0.35
+wheel_rest_length = 0.2
+wheel_friction_slip = 2.5
+suspension_travel = 0.25
+suspension_stiffness = 45.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="MeshFL" type="MeshInstance3D" parent="WheelFL"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("wheel_mesh")
+
+[node name="WheelFR" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.35)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.1
+wheel_radius = 0.35
+wheel_rest_length = 0.2
+wheel_friction_slip = 2.5
+suspension_travel = 0.25
+suspension_stiffness = 45.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="MeshFR" type="MeshInstance3D" parent="WheelFR"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("wheel_mesh")
+
+[node name="WheelRL" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.35)
+use_as_traction = true
+wheel_roll_influence = 0.1
+wheel_radius = 0.35
+wheel_rest_length = 0.2
+wheel_friction_slip = 2.5
+suspension_travel = 0.25
+suspension_stiffness = 45.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="MeshRL" type="MeshInstance3D" parent="WheelRL"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("wheel_mesh")
+
+[node name="WheelRR" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.35)
+use_as_traction = true
+wheel_roll_influence = 0.1
+wheel_radius = 0.35
+wheel_rest_length = 0.2
+wheel_friction_slip = 2.5
+suspension_travel = 0.25
+suspension_stiffness = 45.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="MeshRR" type="MeshInstance3D" parent="WheelRR"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("wheel_mesh")
