@@ -269,7 +269,9 @@ def _span_sign(edge) -> int:
     return 0
 
 
-FOOTPRINT_MARGIN_M = 3.0
+# Wide enough to cover the gap between the two carriageway decks of a divided highway,
+# where the DTM still reads deck height a few metres outside either footprint.
+FOOTPRINT_MARGIN_M = 10.0
 FILL_ITERATIONS = 40
 CELL_M = 50.0
 

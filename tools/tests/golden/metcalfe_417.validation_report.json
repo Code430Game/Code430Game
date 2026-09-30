@@ -318,21 +318,23 @@
  "elevation": {
   "anchorless_spans": 0,
   "bound_conflicts": 3,
-  "contaminated_vertices": 27,
+  "contaminated_vertices": 38,
   "edges_over_grade": [
    "w76421801.0",
    "w76424094.0",
    "w76726658.0",
+   "w76726906.0",
    "w76726915.0",
    "w76726925.0",
+   "w76726980.0",
    "w79571589.0"
   ],
   "fixed_vertices": 26,
   "free_vertices": 478,
-  "max_residual_grade": 0.2863,
-  "max_y": 77.389,
+  "max_residual_grade": 0.1719,
+  "max_y": 77.853,
   "min_y": 54.89,
-  "vertices_clamped": 9
+  "vertices_clamped": 10
  },
  "one_way_traps": [],
  "ramps": [],

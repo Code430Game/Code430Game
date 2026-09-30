@@ -33,7 +33,7 @@ SHOULDER_M = 3.0
 # linear interpolation between 4 m cells never rises above the road surface.
 FLAT_MARGIN_M = TERRAIN_RES_M
 ROAD_SURFACE_DROP_M = 0.03
-BRIDGE_CARVE_MARGIN_M = 4.0
+BRIDGE_CARVE_MARGIN_M = 10.0
 FILL_ITERATIONS = 60
 
 

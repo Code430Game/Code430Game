@@ -22,4 +22,4 @@
 
 ## 4. Verification
 - [x] 4.1 Regenerate the Ottawa pack, drive to the river and open the map on the Deck; record frame time (Steam Deck, deck preset, 30 s autodrive on Colonel By Drive beside the canal: avg 5.6 ms, p99 6.1 ms, max 12.9 ms; map texture 1792x1792 renders in 0.8 s at load)
-- [ ] 4.2 **Stop: human confirms the river and the map on the Deck**
+- [x] 4.2 **Stop: human confirms the river and the map on the Deck** (2026-09-30: "the maps look amazing")
