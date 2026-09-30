@@ -10,5 +10,5 @@
 - [x] 2.4 Tests: UV extents match wall length and height, treatment selection
 
 ## 3. Verification
-- [ ] 3.1 Screenshots on Bank Street and Sparks Street; Deck render time
+- [x] 3.1 Screenshots on Bank Street and Sparks Street; Deck render time (Steam Deck, deck preset, Bank Street: GPU 5.9 ms driving, 5.5 ms on foot, CPU 1.4 to 1.8 ms; load 6.1 s city build plus 4.5 s map texture without pre-built chunks)
 - [ ] 3.2 **Stop: human walks a downtown block on the Deck**
