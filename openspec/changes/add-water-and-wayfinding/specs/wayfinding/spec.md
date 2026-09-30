@@ -25,3 +25,14 @@ The game SHALL provide a toggleable full-screen map rendered from the road graph
 #### Scenario: No per-frame cost while hidden
 - **WHEN** the map is closed
 - **THEN** no map rendering happens until it is opened again
+
+### Requirement: Minimap
+While driving, the HUD SHALL show a minimap: a crop of the overview map texture around the player, rotated to the car's heading, with the road name beneath it, in both graphics presets.
+
+#### Scenario: Turning
+- **WHEN** the car turns 90 degrees to the right
+- **THEN** the minimap rotates so the road ahead still points up
+
+#### Scenario: Map open
+- **WHEN** the overview map is open
+- **THEN** the minimap is hidden
