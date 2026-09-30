@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://actors/player/player.gd" id="1"]
+[ext_resource type="Resource" path="res://actors/player/player_config.tres" id="2"]
+
+[sub_resource type="CapsuleShape3D" id="shape"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="mesh"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.2, 0.55, 0.85, 1)
+
+[node name="Player" type="CharacterBody3D"]
+floor_snap_length = 0.3
+script = ExtResource("1")
+config = ExtResource("2")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("shape")
+
+[node name="Mesh" type="Node3D" parent="."]
+
+[node name="Capsule" type="MeshInstance3D" parent="Mesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("mesh")
+material_override = SubResource("mat")
+
+[node name="Nose" type="MeshInstance3D" parent="Mesh"]
+transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 1.4, -0.4)
+mesh = SubResource("mesh")
+material_override = SubResource("mat")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 3.5
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+far = 8000.0

@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3]
 
-[ext_resource type="Script" path="res://scenes/drive_testbed.gd" id="1"]
+[ext_resource type="Script" path="res://scenes/play_testbed.gd" id="1"]
 [ext_resource type="PackedScene" path="res://ui/map/overview_map.tscn" id="5"]
 [ext_resource type="Script" path="res://ui/map/minimap.gd" id="6"]
 [ext_resource type="PackedScene" path="res://ui/pause/pause_menu.tscn" id="7"]
@@ -22,7 +22,7 @@ background_mode = 2
 sky = SubResource("sky")
 tonemap_mode = 3
 
-[node name="DriveTestbed" type="Node3D"]
+[node name="PlayTestbed" type="Node3D"]
 script = ExtResource("1")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -76,3 +76,23 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 18
 text = "loading"
+
+[node name="Prompt" type="Label" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -120.0
+offset_right = 200.0
+offset_bottom = -90.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 22
+text = ""
+horizontal_alignment = 1

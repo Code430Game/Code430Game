@@ -12,13 +12,15 @@ Status: Phase 0 (foundations). The project boots to an empty testbed with a cont
 ```
 godot --path game --editor
 ```
-Or open `game/project.godot` from the Godot project manager. Press F5 to run the drive testbed: it loads the Ottawa map pack from `packs/`, builds the city, and drops a car on the Queensway.
+Or open `game/project.godot` from the Godot project manager. Press F5 to run the play testbed: it loads the Ottawa map pack from `packs/`, builds the city, and puts you on foot beside a car on the Queensway.
+
+On foot: left stick walks, L3 runs, A jumps, right stick orbits the camera, Y gets into a nearby car. In the car, Y gets out again when you are slower than 18 km/h.
 
 Driving: right trigger accelerates, left trigger brakes or reverses from a stop, left stick steers, RB is the handbrake, right stick orbits the camera. A minimap sits in the corner. Back opens the full map (left stick pans, right stick moves a cursor that names the road under it, triggers zoom, Back closes). Back+Y puts the car back on the nearest road, Back+B draws the road graph, Back+X shows frame stats, Start quits. Keyboard: W/S/A/D, Space handbrake, M map, R reset, F4 graph, F3 stats.
 
 Benchmark from the command line (vsync off, prints a frame-time summary and quits):
 ```
-godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/shot.png
+godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/shot.png   # --drive starts in the car without autodrive
 ```
 More testbed flags: `--spawn=x,z` starts on the nearest road to a local coordinate, `--topdown=<height>` looks straight down, `--graph` shows the road graph overlay, `--telemetry` prints the car state every second.
 

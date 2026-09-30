@@ -12,13 +12,14 @@ config_version=5
 
 config/name="Code 430"
 config/description="Open-world crime game framework on real city roads. Codename Code 430."
-run/main_scene="res://scenes/drive_testbed.tscn"
+run/main_scene="res://scenes/play_testbed.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 Settings="*res://core/settings/settings.gd"
+Players="*res://core/players.gd"
 DebugOverlay="*res://core/debug/debug_overlay.tscn"
 
 [display]
