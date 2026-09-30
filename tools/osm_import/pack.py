@@ -23,6 +23,7 @@ from osm_import.graph import RoadGraph
 from osm_import.osm_data import BBox
 from osm_import.png import encode_heights, write_rgb8
 from osm_import.projection import LocalFrame
+from osm_import.water import WaterResult
 
 CHUNK_SIZE_M = 256.0
 TERRAIN_RES_M = 4.0
@@ -177,17 +178,68 @@ def flatten_roads(chunk: ChunkTerrain, ground_segments: list[tuple]) -> int:
     return changed
 
 
+def lower_water(chunk: ChunkTerrain, water: WaterResult | None, depth: float) -> int:
+    """Lower terrain cells inside water polygons to surface minus depth. Returns cells changed."""
+    if water is None or not water.polygons or depth <= 0.0:
+        return 0
+    import shapely
+    from shapely.geometry import Polygon
+
+    s = SAMPLES_PER_CHUNK
+    xs = chunk.min_x + np.arange(s) * TERRAIN_RES_M
+    zs = chunk.min_z + np.arange(s) * TERRAIN_RES_M
+    gx, gz = np.meshgrid(xs, zs)
+    h = chunk.heights.astype(np.float64)
+    changed = np.zeros((s, s), dtype=bool)
+    chunk_box = shapely.box(
+        chunk.min_x, chunk.min_z, chunk.min_x + CHUNK_SIZE_M, chunk.min_z + CHUNK_SIZE_M
+    )
+    for poly in water.polygons:
+        ring = Polygon(poly.vertices) if len(poly.vertices) >= 3 else None
+        if ring is None or not ring.intersects(chunk_box):
+            continue
+        # Triangles are the truth (holes are baked in); test membership per triangle.
+        tri = np.array(poly.triangles, dtype=np.int64).reshape(-1, 3)
+        v = np.array(poly.vertices, dtype=np.float64)
+        inside = np.zeros((s, s), dtype=bool)
+        for a, b, c in tri:
+            inside |= _in_triangle(gx, gz, v[a], v[b], v[c])
+        target = poly.surface_y - depth
+        lowered = inside & (h > target)
+        h = np.where(lowered, target, h)
+        changed |= lowered
+    chunk.heights = h.astype(np.float32)
+    return int(changed.sum())
+
+
+def _in_triangle(px: np.ndarray, pz: np.ndarray, a, b, c) -> np.ndarray:
+    def sign(p1x, p1z, p2, p3):
+        return (p1x - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1z - p3[1])
+
+    d1 = sign(px, pz, a, b)
+    d2 = sign(px, pz, b, c)
+    d3 = sign(px, pz, c, a)
+    has_neg = (d1 < 0) | (d2 < 0) | (d3 < 0)
+    has_pos = (d1 > 0) | (d2 > 0) | (d3 > 0)
+    return ~(has_neg & has_pos)
+
+
 def build_terrain(
-    graph: RoadGraph, source: ElevationSource, bounds: tuple[float, float, float, float]
+    graph: RoadGraph,
+    source: ElevationSource,
+    bounds: tuple[float, float, float, float],
+    water: WaterResult | None = None,
+    water_depth_m: float = 0.0,
 ) -> tuple[list[ChunkTerrain], dict]:
     ground, bridges = _road_footprints(graph)
     xr, zr = chunk_range(bounds)
     chunks: list[ChunkTerrain] = []
-    stats = {"chunks": 0, "cells_carved": 0, "cells_flattened": 0}
+    stats = {"chunks": 0, "cells_carved": 0, "cells_flattened": 0, "cells_lowered_for_water": 0}
     for cz in zr:
         for cx in xr:
             chunk = sample_chunk(source, cx, cz)
             stats["cells_carved"] += carve_bridges(chunk, bridges)
+            stats["cells_lowered_for_water"] += lower_water(chunk, water, water_depth_m)
             stats["cells_flattened"] += flatten_roads(chunk, ground)
             chunks.append(chunk)
             stats["chunks"] += 1
@@ -206,6 +258,7 @@ def write_pack(
     frame: LocalFrame,
     bbox: BBox,
     elevation_attribution: str | None,
+    water: WaterResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -272,6 +325,9 @@ def write_pack(
         dump_json({"schema_version": 0, "edges": {}, "nodes": {}}, paths["overrides"])
     dump_json(report_dict, paths["report_json"])
     paths["report_md"].write_text(report_md, encoding="utf-8")
+    if water is not None:
+        paths["water"] = out_dir / "water.v0.json"
+        dump_json(water.to_dict(), paths["water"])
     return paths
 
 

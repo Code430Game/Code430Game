@@ -7,6 +7,10 @@ The game SHALL provide a toggleable full-screen map rendered from the road graph
 - **WHEN** the player presses the map action while driving on Metcalfe Street
 - **THEN** the game pauses and shows the map centred on the car, north up, with the car's heading and "Metcalfe Street" beside the marker
 
+#### Scenario: Hover a road
+- **WHEN** the player moves the map cursor over Bank Street with the right stick
+- **THEN** Bank Street is highlighted on the map and its name is shown by the cursor
+
 #### Scenario: Zoom
 - **WHEN** the player holds the right trigger on the map screen
 - **THEN** the map zooms in around the player marker, and the left trigger zooms out

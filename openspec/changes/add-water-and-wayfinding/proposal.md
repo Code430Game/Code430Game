@@ -1,6 +1,6 @@
 # Change: Add water surfaces and wayfinding (road names, overview map)
 
-**Status: PROPOSED 2026-09-30, awaiting the human's approval.** Raised after the first Deck drive: without landmarks, road names, or a map it is hard to tell where you are; the first thing the human's partner looked for was the river.
+**Status: APPROVED by the human on 2026-09-30** (scope: water, minimap, overview map with hover; no always-on text). Raised after the first Deck drive: without landmarks, road names, or a map it is hard to tell where you are; the first thing the human's partner looked for was the river.
 
 ## Why
 Ottawa is defined by its rivers and canal. Rendering water gives the city its first real landmark and makes the street grid legible. A minimap and an overview map (the seed of the in-game GPS) turn "I think I went up Metcalfe" into knowing.
@@ -8,7 +8,7 @@ Ottawa is defined by its rivers and canal. Rendering water gives the city its fi
 ## What Changes
 - **Map packs gain water polygons.** The import tool fetches OpenStreetMap water (`natural=water`, `waterway=riverbank`, multipolygon relations), assembles rings, clips them to the district bbox, triangulates them, and writes `water.v0.json` with a surface height per polygon taken from the terrain. The Ottawa pack gets the Ottawa River, the Rideau River, the Rideau Canal, and Dow's Lake.
 - **The game draws water** as flat surfaces at the recorded height with a simple water material, in both presets, chunked like roads. Terrain under water is lowered slightly so shorelines read.
-- **Overview map**: a toggleable full-screen top-down map rendered from the road graph and water polygons (not a camera), centred on the player with heading, zoomable with the triggers. The GTA pause-menu map. This is the first form of the GPS; routing comes later.
+- **Overview map**: a toggleable full-screen top-down map rendered from the road graph and water polygons (not a camera), centred on the player with heading, zoomable with the triggers. The GTA pause-menu map. A cursor moved with the right stick highlights the road under it and shows its name, so street names are discoverable without a permanent label. This is the first form of the GPS; routing comes later.
 - **Minimap**: the same map texture shown in a corner while driving, rotated to the car's heading. The GTA and Cyberpunk radar layout, without blips or routes yet. No street name text while driving; the human found that distracting. The overview map prints the current road next to the player marker instead.
 - **Not in this change:** buildings, bridges over water as 3D structures, turn-by-turn routing, mission blips, any always-on text HUD.
 

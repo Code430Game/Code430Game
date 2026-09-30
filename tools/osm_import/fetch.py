@@ -47,14 +47,27 @@ def fetch_bbox(
     endpoints: tuple[str, ...] = DEFAULT_ENDPOINTS,
     attempts_per_endpoint: int = 2,
 ) -> OsmData:
-    """Return the OSM data for bbox, from cache if present, else from Overpass."""
-    query = overpass_query(bbox)
+    """Return the highway OSM data for bbox, from cache if present, else from Overpass."""
+    payload, meta = fetch_query(
+        overpass_query(bbox), bbox, cache_dir, endpoints, attempts_per_endpoint
+    )
+    return OsmData.from_overpass_json(payload, meta)
+
+
+def fetch_query(
+    query: str,
+    bbox: BBox,
+    cache_dir: Path = DEFAULT_CACHE_DIR,
+    endpoints: tuple[str, ...] = DEFAULT_ENDPOINTS,
+    attempts_per_endpoint: int = 2,
+) -> tuple[dict, dict]:
+    """Return (payload, source meta) for any Overpass query, cached by query text."""
     data_path, meta_path = _cache_paths(cache_dir, query)
     if data_path.is_file() and meta_path.is_file():
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         log.info("using cached extract %s (fetched %s)", data_path.name, meta.get("fetched_at"))
         payload = json.loads(data_path.read_text(encoding="utf-8"))
-        return OsmData.from_overpass_json(payload, meta)
+        return payload, meta
 
     cache_dir.mkdir(parents=True, exist_ok=True)
     body = urllib.parse.urlencode({"data": query}).encode("utf-8")
@@ -83,7 +96,7 @@ def fetch_bbox(
                 data_path.write_bytes(raw)
                 meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
                 log.info("cached %d bytes to %s", len(raw), data_path)
-                return OsmData.from_overpass_json(payload, meta)
+                return payload, meta
             except (urllib.error.URLError, urllib.error.HTTPError, ValueError, TimeoutError) as exc:
                 last_error = exc
                 log.warning("fetch failed: %s", exc)

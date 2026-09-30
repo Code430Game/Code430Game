@@ -13,12 +13,13 @@ import sys
 from pathlib import Path
 
 from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
-from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox
+from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pack import build_terrain, elevation_attribution_for, write_pack
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
 from osm_import.validation import render_markdown
+from osm_import.water import build_water, water_query
 
 
 def _import(args: argparse.Namespace) -> int:
@@ -42,7 +43,20 @@ def _import(args: argparse.Namespace) -> int:
         if elevation is None:
             parser_error("--pack-out needs an elevation source (use --dem flat for a test pack)")
         proj = Projector.for_bbox(bbox)
-        chunks, tstats = build_terrain(result.graph, elevation, proj.bbox_local(bbox))
+        water = None
+        if args.water:
+            if args.water_json:
+                water_payload = json.loads(args.water_json.read_text(encoding="utf-8"))
+            else:
+                water_payload, _meta = fetch_query(water_query(bbox), bbox, args.cache_dir)
+            water = build_water(water_payload, bbox, proj, elevation)
+            result.report.summary["water"] = {
+                "polygons": len(water.polygons),
+                "skipped": water.skipped,
+            }
+        chunks, tstats = build_terrain(
+            result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m
+        )
         result.report.summary["terrain"] = tstats
         paths = write_pack(
             args.pack_out,
@@ -56,8 +70,11 @@ def _import(args: argparse.Namespace) -> int:
             proj.frame,
             bbox,
             elevation_attribution_for(elevation),
+            water,
         )
         print(f"terrain: {tstats}")
+        if water is not None:
+            print(f"water: {len(water.polygons)} polygons, {len(water.skipped)} skipped")
     else:
         paths = write_outputs(result, args.out, title)
     s = result.report.summary
@@ -101,6 +118,15 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--pack-id", default="code430.map", help="Pack id for pack.json")
     imp.add_argument("--pack-name", help="Pack display name (defaults to --title)")
     imp.add_argument("--pack-version", default="0.1.0")
+    imp.add_argument(
+        "--water",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Fetch and write water polygons with --pack-out",
+    )
+    imp.add_argument(
+        "--water-json", type=Path, help="Read this Overpass water JSON instead of fetching"
+    )
     imp.add_argument(
         "--osm-json", type=Path, help="Read this Overpass JSON file instead of fetching"
     )

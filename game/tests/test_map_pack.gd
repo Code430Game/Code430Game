@@ -117,3 +117,20 @@ func test_nearest_edge_finds_the_spawn_road() -> void:
 	assert_str(e.road_class).is_equal("motorway")
 	assert_float(hit["distance"]).is_less(1.0)
 	assert_bool(_pack.graph.nearest_edge(Vector3(99999, 0, 99999), 30.0).is_empty()).is_true()
+
+
+func test_stale_chunks_are_detected() -> void:
+	var tmp := ProjectSettings.globalize_path("user://stale_pack_%d" % Time.get_ticks_usec())
+	DirAccess.make_dir_recursive_absolute(tmp.path_join("chunks"))
+	var f := FileAccess.open(tmp.path_join("road_graph.v0.json"), FileAccess.WRITE)
+	f.store_string("{}")
+	f.close()
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
+	var m := FileAccess.open(tmp.path_join("chunks").path_join(GlbChunks.BUILD_MANIFEST), FileAccess.WRITE)
+	m.store_string(JSON.stringify({"inputs_hash": GlbChunks.inputs_hash(tmp)}))
+	m.close()
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	f = FileAccess.open(tmp.path_join("road_graph.v0.json"), FileAccess.WRITE)
+	f.store_string("{\"changed\": true}")
+	f.close()
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()

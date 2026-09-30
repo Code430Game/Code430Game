@@ -22,6 +22,9 @@ var terrain_index: Dictionary = {}
 var junctions: Dictionary = {}
 var road_material: Material
 var terrain_material: Material
+var water_material: Material
+var water_polygons: Array[WaterBuilder.WaterPolygon] = []
+var water_chunks: Dictionary = {}  # Vector2i -> RoadMeshBuilder.ChunkTriangles
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
@@ -43,6 +46,9 @@ func load(dir: String) -> bool:
 	junctions = JunctionBuilder.build_all(graph)
 	road_material = _road_material()
 	terrain_material = _terrain_material()
+	water_material = WaterBuilder.material()
+	water_polygons = WaterBuilder.load_polygons(dir)
+	water_chunks = WaterBuilder.build(water_polygons)
 	return terrain_index.size() > 0
 
 
@@ -65,13 +71,17 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 		"junctions_fallback": road_result.junctions_fallback,
 		"road_triangles": 0,
 		"terrain_triangles_lod0": 0,
+		"water_polygons": water_polygons.size(),
 	}
+	var use_glb := GlbChunks.chunks_are_current(pack_dir)
+	if not use_glb and DirAccess.dir_exists_absolute(pack_dir.path_join("chunks")):
+		push_warning("MapPack: %s/chunks is stale or unverified; generating meshes at load" % pack_dir)
 	for entry in terrain_index.get("chunks", []):
 		var coord := Vector2i(int(entry["cx"]), int(entry["cz"]))
 		var glb := pack_dir.path_join("chunks").path_join("chunk_%d_%d.glb" % [coord.x, coord.y])
 		var chunk: Node3D = null
-		if FileAccess.file_exists(glb):
-			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision)
+		if use_glb and FileAccess.file_exists(glb):
+			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material)
 			stats["chunks_from_glb"] = stats.get("chunks_from_glb", 0) + 1
 		if chunk == null:
 			var heights := TerrainBuilder.load_chunk(pack_dir, terrain_index, entry)
@@ -102,6 +112,9 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 		var mj: ArrayMesh = road_result.junctions[coord].to_mesh()
 		chunk.add_child(_mesh_instance("junctions_lod0", mj, road_material, 0.0, ROAD_LOD1_END_M))
 		collision_meshes.append(mj)
+	if water_chunks.has(coord):
+		var mw: ArrayMesh = water_chunks[coord].to_mesh()
+		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))
 	var t0 := TerrainBuilder.build_mesh(heights, 0)
 	var t1 := TerrainBuilder.build_mesh(heights, 1)
 	var t2 := TerrainBuilder.build_mesh(heights, 2)

@@ -15,6 +15,9 @@ const BENCH_WARMUP_S := 3.0
 @onready var _camera: ChaseCamera = $ChaseCamera
 @onready var _hud: Label = $HUD/Label
 @onready var _graph_view: RoadGraphDebugView = $GraphView
+@onready var _minimap: Minimap = $HUD/Minimap
+@onready var _overview: OverviewMap = $OverviewMap
+var _map_renderer: MapRenderer
 
 var _pack: MapPack
 var _car: VehicleBody3D
@@ -35,9 +38,17 @@ var _topdown_height: float = 160.0
 var _spawn_override: Vector3 = Vector3.INF
 var _road_label: String = ""
 var _road_label_next: float = 0.0
+var _open_map_on_start: bool = false
 
 
 func _ready() -> void:
+	# The testbed itself keeps running while the overview map pauses the game, so the
+	# HUD, benchmark, and screenshot logic work with the map open. Children that must
+	# freeze are set pausable explicitly.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_world.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_camera.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_graph_view.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_parse_args()
 	var dir := PackLocator.find_pack(PACK_ID)
 	if dir == "":
@@ -53,6 +64,7 @@ func _ready() -> void:
 	print("testbed: built %s in %d ms" % [stats, Time.get_ticks_msec() - t0])
 	_graph_view.set_graph(_pack.graph)
 	_car = CAR_SCENE.instantiate()
+	_car.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_car)
 	var spawn := _pack.spawn_transform()
 	if _spawn_override != Vector3.INF:
@@ -65,10 +77,38 @@ func _ready() -> void:
 	_camera.target = _car
 	_camera.global_position = spawn.origin + spawn.basis.z * 8.0 + Vector3.UP * 3.0
 	_start_position = spawn.origin
+	_setup_maps()
 	_autodrive_edge = _pack.spawn_edge()
 	_autodrive_distance = 20.0
 	if _bench_seconds > 0.0:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+
+
+func _setup_maps() -> void:
+	_map_renderer = MapRenderer.new()
+	var b := Projector_bounds()
+	_map_renderer.set_bounds(b)
+	_minimap.renderer = _map_renderer
+	_minimap.player = _car
+	_overview.renderer = _map_renderer
+	_overview.graph = _pack.graph
+	_overview.player = _car
+	var t0 := Time.get_ticks_msec()
+	await _map_renderer.render(self, _pack.graph, _pack.water_polygons)
+	print("map texture %s rendered in %d ms" % [_map_renderer.size_px, Time.get_ticks_msec() - t0])
+	if _open_map_on_start:
+		_overview.open()
+
+
+## Local-metre bounds of the loaded pack: min_x, min_z, max_x, max_z, from the terrain chunks.
+func Projector_bounds() -> Vector4:
+	var min_c := Vector2i(1 << 30, 1 << 30)
+	var max_c := Vector2i(-(1 << 30), -(1 << 30))
+	for c in _pack.chunk_coords():
+		min_c = Vector2i(mini(min_c.x, c.x), mini(min_c.y, c.y))
+		max_c = Vector2i(maxi(max_c.x, c.x), maxi(max_c.y, c.y))
+	var s := RoadGeometry.CHUNK_SIZE_M
+	return Vector4(min_c.x * s, min_c.y * s, (max_c.x + 1) * s, (max_c.y + 1) * s)
 
 
 ## Transform on the road surface at the nearest-edge hit, facing along the edge.
@@ -125,6 +165,8 @@ func _parse_args() -> void:
 				_topdown_height = float(arg.get_slice("=", 1))
 		elif arg == "--graph":
 			_graph_view.visible = true
+		elif arg == "--map":
+			_open_map_on_start = true
 		elif arg.begins_with("--spawn="):
 			var parts := arg.get_slice("=", 1).split(",")
 			if parts.size() == 2:
@@ -134,17 +176,17 @@ func _parse_args() -> void:
 func _process(delta: float) -> void:
 	if _car != null:
 		_bench_elapsed_hud(delta)
-		_hud.text = "%d km/h   %s\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Back+Y reset, Back+B road graph, Back+X stats" % [
-			int(_car.speed_kph()), _road_label, _car.global_position.x, _car.global_position.y, _car.global_position.z,
+		_hud.text = "%d km/h\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Back map, Back+Y reset, Back+B road graph, Back+X stats" % [
+			int(_car.speed_kph()), _car.global_position.x, _car.global_position.y, _car.global_position.z,
 		]
 	if _autodrive and _car != null:
 		_autodrive_step()
 	if _telemetry and _car != null and _bench_elapsed >= _telemetry_next:
 		_telemetry_next += 1.0
-		print("t=%.0f pos=(%.0f, %.1f, %.0f) speed=%.0f steer=%.2f edge=%s s=%.0f up=%.2f" % [
+		print("t=%.0f pos=(%.0f, %.1f, %.0f) speed=%.0f steer=%.2f edge=%s s=%.0f up=%.2f road=%s" % [
 			_bench_elapsed, _car.global_position.x, _car.global_position.y, _car.global_position.z,
 			_car.speed_kph(), _car.steering, _autodrive_edge.id if _autodrive_edge else "-", _autodrive_distance,
-			_car.global_basis.y.y,
+			_car.global_basis.y.y, _road_label,
 		])
 	if _topdown and _car != null:
 		_camera.set_process(false)
