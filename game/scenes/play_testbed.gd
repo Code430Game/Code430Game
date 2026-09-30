@@ -40,6 +40,9 @@ var _autodrive_reverse: bool = false
 var _autodrive_distance: float = 0.0
 var _telemetry: bool = false
 var _telemetry_next: float = 0.0
+var _bumps: bool = false
+var _last_vy: float = 0.0
+const BUMP_THRESHOLD_MPS2 := 90.0
 var _topdown: bool = false
 var _topdown_height: float = 160.0
 var _spawn_override: Vector3 = Vector3.INF
@@ -76,10 +79,15 @@ func _ready() -> void:
 	_car.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_car)
 	var spawn := _pack.spawn_transform()
+	var spawn_edge: RoadGraph.RoadEdge = _pack.spawn_edge()
+	var spawn_reverse := false
+	var spawn_distance := 20.0
 	if _spawn_override != Vector3.INF:
 		var hit := _pack.graph.nearest_edge(_spawn_override, 200.0)
 		if not hit.is_empty():
 			spawn = _spawn_on_edge(hit)
+			spawn_edge = hit["edge"]
+			spawn_distance = RoadGeometry.length_xz(spawn_edge.polyline.slice(0, int(hit["segment"]) + 1)) + float(hit["t"]) if hit.has("t") else 0.0
 	_car.recover_callback = _recover_car
 	_car.global_transform = spawn
 	_car.set_spawn(spawn)
@@ -97,8 +105,9 @@ func _ready() -> void:
 	else:
 		_player.activate_camera()
 	_setup_maps()
-	_autodrive_edge = _pack.spawn_edge()
-	_autodrive_distance = 20.0
+	_autodrive_edge = spawn_edge
+	_autodrive_reverse = spawn_reverse
+	_autodrive_distance = spawn_distance
 	if _bench_seconds > 0.0:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
@@ -193,6 +202,8 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--telemetry":
 			_telemetry = true
+		elif arg == "--bumps":
+			_bumps = true
 		elif arg.begins_with("--topdown"):
 			_topdown = true
 			if arg.contains("="):
@@ -227,11 +238,22 @@ func _process(delta: float) -> void:
 		_autodrive_step()
 	if _telemetry and _car != null and _bench_elapsed >= _telemetry_next:
 		_telemetry_next += 1.0
-		print("t=%.0f pos=(%.0f, %.1f, %.0f) speed=%.0f steer=%.2f edge=%s s=%.0f up=%.2f road=%s" % [
+		print("t=%.0f pos=(%.0f, %.1f, %.0f) speed=%.0f steer=%.2f edge=%s s=%.0f up=%.2f road=%s driving=%s driver=%d" % [
 			_bench_elapsed, _car.global_position.x, _car.global_position.y, _car.global_position.z,
 			_car.speed_kph(), _car.steering, _autodrive_edge.id if _autodrive_edge else "-", _autodrive_distance,
-			_car.global_basis.y.y, _road_label,
+			_car.global_basis.y.y, _road_label, _player.is_driving(), _car.driver_peer_id,
 		])
+	if _bumps and _car != null and _player != null and _player.is_driving() and delta > 0.0:
+		var vy := _car.linear_velocity.y
+		var accel := (vy - _last_vy) / delta
+		_last_vy = vy
+		if absf(accel) > BUMP_THRESHOLD_MPS2 and _bench_elapsed > 1.0:
+			var here := _pack.graph.nearest_edge(_car.global_position, 30.0)
+			var eid: String = here["edge"].id if not here.is_empty() else "-"
+			var ename: String = here["edge"].name if not here.is_empty() else ""
+			print("BUMP t=%.1f accel_y=%.0f m/s2 vy=%.1f pos=(%.0f, %.1f, %.0f) speed=%.0f edge=%s %s" % [
+				_bench_elapsed, accel, vy, _car.global_position.x, _car.global_position.y, _car.global_position.z, _car.speed_kph(), eid, ename,
+			])
 	if _topdown and _car != null:
 		_camera.set_process(false)
 		_camera.global_position = _car.global_position + Vector3(0, _topdown_height, 0.01)
@@ -269,9 +291,11 @@ func _print_benchmark() -> void:
 	])
 
 
-const AUTODRIVE_LOOKAHEAD_M := 18.0
+const AUTODRIVE_LOOKAHEAD_M := 14.0
 const AUTODRIVE_THROTTLE := 0.6
 const AUTODRIVE_STEER_GAIN := 1.4
+## Autodrive aims for this fraction of the edge's speed limit.
+const AUTODRIVE_SPEED_FRACTION := 0.9
 
 
 ## Pure-pursuit along the road graph: steer toward a point ahead on the current
@@ -316,7 +340,8 @@ func _autodrive_step() -> void:
 	var local := _car.to_local(target)
 	var angle := atan2(-local.x, -local.z)  # forward is -z; positive = target is to the left
 	_car.override_steer = clampf(angle * AUTODRIVE_STEER_GAIN, -1.0, 1.0)
-	_car.override_throttle = AUTODRIVE_THROTTLE
+	var limit_kph := float(_autodrive_edge.speed_kph) * AUTODRIVE_SPEED_FRACTION
+	_car.override_throttle = AUTODRIVE_THROTTLE if _car.speed_kph() < limit_kph else 0.0
 
 
 ## The outgoing edge at a node that best continues the direction of `from`.

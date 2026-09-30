@@ -147,7 +147,7 @@ func nearest_edge(position: Vector3, radius: float = 60.0) -> Dictionary:
 					best_d = d
 					var t := a.distance_to(q)
 					var y := lerpf(e.polyline[i].y, e.polyline[i + 1].y, t / maxf(a.distance_to(b), 0.001))
-					best = {"edge": e, "distance": d, "point": Vector3(q.x, y, q.y), "segment": i}
+					best = {"edge": e, "distance": d, "point": Vector3(q.x, y, q.y), "segment": i, "t": t}
 	return best
 
 

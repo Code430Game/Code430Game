@@ -8,6 +8,9 @@ extends RefCounted
 ## watertight. Junction polygons are triangulated and go to the node's chunk.
 
 const SURFACE_LIFT_M := 0.02
+## When a road changes width at a pass-through node (lane count changes), the wider
+## side narrows to the neighbour's width over this distance instead of stepping.
+const TAPER_LENGTH_M := 25.0
 ## Links (ramps) sit slightly higher so their overlap with the road they merge into does not z-fight.
 const LINK_EXTRA_LIFT_M := 0.015
 const LOD1_TOLERANCE_M := 1.5
@@ -99,14 +102,48 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> Result:
 		var dir_end := _continuation_dir(graph, edge, edge.to_node, junctions)
 		var color: Color = CLASS_COLORS.get(edge.road_class, Color(0.5, 0.5, 0.5))
 		var lift := SURFACE_LIFT_M + (LINK_EXTRA_LIFT_M if edge.road_class.ends_with("_link") else 0.0)
-		_extrude(RoadGeometry.split_at_chunk_bounds(pl), edge.width_m * 0.5, dir_start, dir_end, color, lift, result.roads, result)
+		var taper := taper_for(graph, edge, junctions)
+		if float(taper["start"]) >= 0.0 or float(taper["end"]) >= 0.0:
+			pl = RoadGeometry.densify_ends(pl, TAPER_LENGTH_M, 5.0)
+		_extrude(RoadGeometry.split_at_chunk_bounds(pl), edge.width_m * 0.5, dir_start, dir_end, color, lift, result.roads, result, taper)
 		var lod1 := RoadGeometry.simplify(pl, LOD1_TOLERANCE_M)
-		_extrude(RoadGeometry.split_at_chunk_bounds(lod1), edge.width_m * 0.5, dir_start, dir_end, color, lift, result.roads_lod1, result)
+		_extrude(RoadGeometry.split_at_chunk_bounds(lod1), edge.width_m * 0.5, dir_start, dir_end, color, lift, result.roads_lod1, result, taper)
 		result.edges_built += 1
 	for nid in junctions.keys():
 		var j: JunctionBuilder.Junction = junctions[nid]
 		_add_junction(j, result)
 	return result
+
+
+## Half-width targets at each end when the neighbour across a pass-through node is narrower:
+## {"start": half width at the start or -1, "end": half width at the end or -1}. Only the wider
+## edge tapers, so the seam matches the narrower road exactly.
+static func taper_for(graph: RoadGraph, edge: RoadGraph.RoadEdge, junctions: Dictionary) -> Dictionary:
+	var out := {"start": -1.0, "end": -1.0}
+	for side in ["start", "end"]:
+		var node_id := edge.from_node if side == "start" else edge.to_node
+		if junctions.has(node_id) or graph.degree(node_id) != 2:
+			continue
+		for other_id in graph.incident(node_id):
+			if other_id == edge.id:
+				continue
+			var other: RoadGraph.RoadEdge = graph.edges[other_id]
+			if other.width_m < edge.width_m - 0.05:
+				out[side] = other.width_m * 0.5
+	return out
+
+
+## Half width at `distance` metres from the start of a polyline of `total` length, with tapers.
+static func half_width_at(base: float, distance: float, total: float, taper: Dictionary) -> float:
+	var hw := base
+	var start_hw: float = taper.get("start", -1.0)
+	var end_hw: float = taper.get("end", -1.0)
+	var taper_len := minf(TAPER_LENGTH_M, total * 0.5)
+	if start_hw >= 0.0 and distance < taper_len:
+		hw = lerpf(start_hw, base, distance / taper_len)
+	if end_hw >= 0.0 and total - distance < taper_len:
+		hw = minf(hw, lerpf(end_hw, base, (total - distance) / taper_len))
+	return hw
 
 
 ## Direction of the road continuing beyond a pass-through node, pointing into this edge.
@@ -125,14 +162,19 @@ static func _continuation_dir(graph: RoadGraph, edge: RoadGraph.RoadEdge, node_i
 	return Vector2.ZERO
 
 
-static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vector2, dir_end: Vector2, color: Color, lift: float, buckets: Dictionary, result: Result) -> void:
+static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vector2, dir_end: Vector2, color: Color, lift: float, buckets: Dictionary, result: Result, taper: Dictionary = {}) -> void:
 	if pl.size() < 2:
 		return
 	var normals := RoadGeometry.miter_normals(pl, dir_start, dir_end)
+	var total := RoadGeometry.length_xz(pl)
 	var left := PackedVector3Array()
 	var right := PackedVector3Array()
+	var walked := 0.0
 	for i in range(pl.size()):
-		var n := normals[i] * half_width
+		if i > 0:
+			walked += Vector2(pl[i].x - pl[i - 1].x, pl[i].z - pl[i - 1].z).length()
+		var hw := half_width_at(half_width, walked, total, taper) if not taper.is_empty() else half_width
+		var n := normals[i] * hw
 		var p := pl[i] + Vector3(0.0, lift, 0.0)
 		left.append(p + Vector3(n.x, 0.0, n.y))
 		right.append(p - Vector3(n.x, 0.0, n.y))
@@ -148,13 +190,14 @@ static func _add_junction(j: JunctionBuilder.Junction, result: Result) -> void:
 		return
 	var chunk := RoadGeometry.chunk_of(j.centre)
 	var bucket := result.get_bucket(result.junctions, chunk)
+	var color: Color = CLASS_COLORS.get(j.dominant_class, JUNCTION_COLOR)
 	for t in range(0, indices.size(), 3):
 		var a := _lift(j, indices[t])
 		var b := _lift(j, indices[t + 1])
 		var c := _lift(j, indices[t + 2])
 		# The polygon walks the node clockwise seen from above, and triangulate_polygon keeps
 		# that winding, which is Godot's front face.
-		bucket.add_triangle(a, b, c, JUNCTION_COLOR)
+		bucket.add_triangle(a, b, c, color)
 	result.junctions_built += 1
 	if j.fallback_hull:
 		result.junctions_fallback += 1

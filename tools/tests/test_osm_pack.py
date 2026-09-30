@@ -151,3 +151,33 @@ def test_write_pack_validates_and_round_trips(tmp_path: Path):
         "edges": {},
         "nodes": {},
     }
+
+
+def test_lower_road_owns_terrain_where_roads_cross_without_a_node():
+    """An embankment road at 71 m crossing an underpass street at 68 m must not wall off the street."""
+    from osm_import.pack import _road_footprints
+
+    data = make_data(
+        [
+            (1, [(-120, 40), (120, 40)], {"highway": "secondary", "name": "Under", "width": "10"}),
+            (2, [(40, -120), (40, 200)], {"highway": "motorway", "name": "Over", "width": "14"}),
+        ]
+    )
+    fr = filter_ways(data, CFG)
+    proj = Projector.for_bbox(BBOX)
+    g = build_graph(data, fr.drivable, fr.pedestrian, proj, CFG)
+
+    class TwoLevels:
+        def sample(self, x, z):
+            return 71.0 if abs(x - 40) < 12 else 68.0  # DTM shows the embankment
+
+        def describe(self):
+            return {"kind": "two-levels"}
+
+    apply_elevation(g, TwoLevels(), CFG)
+    ground, _ = _road_footprints(g)
+    chunk = sample_chunk(TwoLevels(), 0, 0)
+    flatten_roads(chunk, ground)
+    row, col = int(40 / TERRAIN_RES_M), int(40 / TERRAIN_RES_M)  # the crossing cell
+    assert chunk.heights[row, col] < 69.0
+    assert chunk.heights[row, col - 4] < 69.0  # still on Under, 16 m west, inside Over's shoulder
