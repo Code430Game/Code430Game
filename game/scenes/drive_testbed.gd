@@ -17,6 +17,7 @@ const BENCH_WARMUP_S := 3.0
 @onready var _graph_view: RoadGraphDebugView = $GraphView
 @onready var _minimap: Minimap = $HUD/Minimap
 @onready var _overview: OverviewMap = $OverviewMap
+@onready var _pause_menu: PauseMenu = $PauseMenu
 var _map_renderer: MapRenderer
 
 var _pack: MapPack
@@ -50,6 +51,8 @@ func _ready() -> void:
 	_camera.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_graph_view.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_parse_args()
+	_pause_menu.overview_map = _overview
+	_pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	var dir := PackLocator.find_pack(PACK_ID)
 	if dir == "":
 		_hud.text = "Map pack %s not found.\nSearched: %s" % [PACK_ID, "\n".join(PackLocator.search_dirs())]
@@ -176,7 +179,7 @@ func _parse_args() -> void:
 func _process(delta: float) -> void:
 	if _car != null:
 		_bench_elapsed_hud(delta)
-		_hud.text = "%d km/h\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Back map, Back+Y reset, Back+B road graph, Back+X stats" % [
+		_hud.text = "%d km/h\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Back map, Menu pause, Back+Y reset, Back+B graph, Back+X stats" % [
 			int(_car.speed_kph()), _car.global_position.x, _car.global_position.y, _car.global_position.z,
 		]
 	if _autodrive and _car != null:
@@ -192,8 +195,6 @@ func _process(delta: float) -> void:
 		_camera.set_process(false)
 		_camera.global_position = _car.global_position + Vector3(0, _topdown_height, 0.01)
 		_camera.look_at(_car.global_position, Vector3.UP)
-	if Input.is_action_just_pressed("pause"):
-		get_tree().quit()
 	if _bench_seconds > 0.0:
 		_bench_elapsed += delta
 		if _bench_elapsed > BENCH_WARMUP_S:
