@@ -1,6 +1,6 @@
 # Change: Add drop-in co-op for up to 4 players
 
-**Status: PROPOSED, not approved.** Written at the human's request to explore the cost of small-group multiplayer. Not scheduled before Phases 0–1. Depends on the Phase 2 player controller existing.
+**Status: APPROVED by the human on 2026-09-30.** Scheduled as Phase 5; depends on the Phase 2 player controller and pack format v1. The AGENTS.md co-op readiness rule applies from Phase 2 on.
 
 ## Why
 The human wants to play the city with a few friends. VISION.md originally said "not multiplayer"; the revised vision (pillar 8) makes small-group co-op a goal. Deciding this now is cheap and deciding it after Phase 3 is expensive, because traffic, pedestrians, and missions are much harder to make replicable after the fact than to build replicable from the start.

@@ -40,6 +40,6 @@ Mature geospatial libraries (osmium/pyosmium, shapely, pyproj, rasterio, network
 - **Bbox edges create fake dead ends.** Classify edge-touching dead ends separately; later, map packs define a world boundary.
 
 ## Open Questions
-- Exact bbox for the starter district. Starting suggestion (verify on a map): approx. lat 45.405–45.435, lon −75.715 to −75.675, which should cover Centretown, Parliament, the ByWard Market, and part of the 417 including the Nicholas St interchange. Confirm with the human before the first full import.
+- ~~Exact bbox for the starter district.~~ **Confirmed 2026-09-30:** Ottawa, Ontario, lat 45.405–45.435, lon −75.715 to −75.675. Covers Centretown, Parliament Hill, the ByWard Market / Lowertown, and the 417 including the Nicholas St interchange. The tool still takes the bbox as a parameter; this is the default in the starter pack config.
 - DEM source and resolution: HRDEM where available, else CDEM. Confirm the license text for credits.
 - Driving side and signage conventions are Canadian (right-hand traffic, km/h). Confirm no other assumptions are needed.

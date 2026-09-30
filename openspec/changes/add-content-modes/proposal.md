@@ -1,6 +1,6 @@
 # Change: Add tone modes and content tagging
 
-**Status: PROPOSED, not approved.** Written at the human's request. The tagging rules are adopted into AGENTS.md now so the first content is authored correctly; the runtime switch is scheduled with Phase 4 (packs), not before.
+**Status: APPROVED by the human on 2026-09-30.** The tagging rules are in AGENTS.md now so the first content is authored correctly; the runtime switch is scheduled with Phase 4 (packs).
 
 ## Why
 The same city can tell very different stories: a sanitized version for a modern or younger audience, the raw street reality of GTA III–IV, or a neon dystopia where everything is for sale. The base game should not pick one tone for everyone. If every content item is tagged from the first pack and can carry variants, a tone mode becomes a data switch instead of a fork of the game. Billboards are the smallest visible proof: the same board shows a good-morning ad, a satirical ad, or a wild cyberpunk implant ad, or goes blank.
