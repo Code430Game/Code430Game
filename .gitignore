@@ -7,7 +7,6 @@ streetlevel-kickoff.zip
 # Godot
 game/.godot/
 game/export/
-game/*.import
 game/android/
 *.tmp
 
@@ -38,3 +37,6 @@ tools/**/.cache/
 .idea/
 .vscode/
 *.swp
+
+# gdUnit4 reports
+game/reports/

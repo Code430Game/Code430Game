@@ -1,0 +1,37 @@
+{
+  "_comment": "Graphics presets. Every key present in one preset must be present in all presets so each feature declares its behavior everywhere. See docs/graphics-presets.md.",
+  "deck": {
+    "label": "Steam Deck",
+    "scaling_mode": "fsr2",
+    "scaling_scale": 0.77,
+    "msaa_3d": "disabled",
+    "screen_space_aa": "fxaa",
+    "sdfgi": false,
+    "ssr": false,
+    "ssao": false,
+    "ssil": false,
+    "volumetric_fog": false,
+    "glow": true,
+    "directional_shadow_size": 2048,
+    "positional_shadow_size": 2048,
+    "shadow_quality": "soft_low",
+    "max_fps": 0
+  },
+  "high": {
+    "label": "High (desktop)",
+    "scaling_mode": "bilinear",
+    "scaling_scale": 1.0,
+    "msaa_3d": "2x",
+    "screen_space_aa": "disabled",
+    "sdfgi": true,
+    "ssr": true,
+    "ssao": true,
+    "ssil": false,
+    "volumetric_fog": true,
+    "glow": true,
+    "directional_shadow_size": 4096,
+    "positional_shadow_size": 4096,
+    "shadow_quality": "soft_high",
+    "max_fps": 0
+  }
+}

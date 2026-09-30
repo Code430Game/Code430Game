@@ -1,0 +1,13 @@
+{
+  "schema_version": 0,
+  "id": "code430.example",
+  "name": "Example Pack",
+  "version": "0.1.0",
+  "type": "story",
+  "engine_api": 0,
+  "description": "Minimal manifest showing every required field. Contains no content.",
+  "authors": ["Code 430 contributors"],
+  "dependencies": [],
+  "license": "CC-BY-SA-4.0",
+  "attribution": ["Example Pack by Code 430 contributors"]
+}
