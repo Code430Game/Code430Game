@@ -16,5 +16,5 @@
 - [x] 3.3 Debug overlay of lane paths and agent states
 
 ## 4. Verification
-- [ ] 4.1 Deck: 150 agents downtown, measured render and script time recorded
+- [x] 4.1 Deck: 150 agents downtown, measured render and script time recorded (Steam Deck, deck preset, Bank Street, 150 agents: GPU 6.0 ms, render CPU 1.5 ms, physics process incl. traffic 5 to 8 ms, frame p99 9.7 ms; before the MultiMesh/pooled-body refactor traffic alone cost 39 ms)
 - [ ] 4.2 **Stop: human drives in traffic on the Deck**
