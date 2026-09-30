@@ -1,6 +1,6 @@
 # Change: Add AI traffic on the road graph (Phase 3, part 1)
 
-**Status: PROPOSED 2026-09-30, awaiting the human's approval.**
+**Status: APPROVED by the human on 2026-09-30.**
 
 ## Why
 The city is legible and fun to drive, and it is empty. Cars that follow lanes, respect one-ways, and stop for each other are what make a street feel like a street. The road graph already carries lanes, one-way direction, and speed limits, so traffic is mostly simulation, not data.
