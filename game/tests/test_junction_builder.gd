@@ -25,15 +25,14 @@ func test_four_way_cross_polygon() -> void:
 	assert_int(junctions.size()).is_equal(1)
 	var j: JunctionBuilder.Junction = junctions["n_c"]
 	assert_bool(j.fallback_hull).is_false()
-	assert_int(j.polygon_xz.size()).is_equal(12)
+	assert_int(j.polygon_xz.size()).is_equal(4 * (2 + JunctionBuilder.FILLET_STEPS))
 	for eid in ["we.0", "ww.0", "wn.0", "ws.0"]:
 		assert_float(j.trims[eid]).is_equal_approx(WIDTH * 0.5 + JunctionBuilder.TRIM_MARGIN_M, 1e-4)
 	assert_int(Geometry2D.triangulate_polygon(j.polygon_xz).size()).is_greater(0)
-	var corners := 0
+	# The sharp corners at (+-4, +-4) are replaced by curves, so no vertex sits on them.
 	for p in j.polygon_xz:
-		if absf(absf(p.x) - WIDTH * 0.5) < 1e-4 and absf(absf(p.y) - WIDTH * 0.5) < 1e-4:
-			corners += 1
-	assert_int(corners).is_equal(4)
+		var on_corner := absf(absf(p.x) - WIDTH * 0.5) < 1e-3 and absf(absf(p.y) - WIDTH * 0.5) < 1e-3
+		assert_bool(on_corner).override_failure_message("vertex %s is a sharp corner" % p).is_false()
 
 
 func test_trimmed_roads_do_not_reach_the_centre() -> void:
@@ -69,3 +68,20 @@ func test_shallow_ramp_merge_stays_compact() -> void:
 		assert_float(j.trims[eid]).override_failure_message("trim for %s is %.1f m" % [eid, j.trims[eid]]).is_less(7.0 * JunctionBuilder.MAX_CORNER_HALF_WIDTHS + 2.0)
 	for p in j.polygon_xz:
 		assert_float(p.length()).is_less(30.0)
+
+
+func test_corners_are_rounded() -> void:
+	var graph := _cross_graph()
+	var j: JunctionBuilder.Junction = JunctionBuilder.build_all(graph)["n_c"]
+	# 4 arms x (2 caps + FILLET_STEPS curve points)
+	assert_int(j.polygon_xz.size()).is_equal(4 * (2 + JunctionBuilder.FILLET_STEPS))
+	assert_int(Geometry2D.triangulate_polygon(j.polygon_xz).size()).is_greater(0)
+	# Curve points hug their sharp corner (within the 0.5 m cap margin) without landing on it.
+	var curve_points := 0
+	for p in j.polygon_xz:
+		var corner := Vector2(signf(p.x) * WIDTH * 0.5, signf(p.y) * WIDTH * 0.5)
+		var d := p.distance_to(corner)
+		if absf(p.x) > WIDTH * 0.5 - 1e-3 and absf(p.y) > WIDTH * 0.5 - 1e-3 and d < JunctionBuilder.TRIM_MARGIN_M - 1e-3:
+			assert_float(d).is_greater(1e-3)
+			curve_points += 1
+	assert_int(curve_points).is_equal(4 * JunctionBuilder.FILLET_STEPS)

@@ -81,11 +81,23 @@ func build(graph: RoadGraph, junctions: Dictionary) -> Dictionary:
 		var pl := RoadGeometry.trim(edge.polyline, trim_start, trim_end)
 		if pl.size() < 2:
 			continue
+		var taper := RoadMeshBuilder.taper_for(graph, edge, junctions)
+		var tapered: bool = float(taper["start"]) >= 0.0 or float(taper["end"]) >= 0.0
+		if tapered:
+			pl = RoadGeometry.densify_ends(pl, RoadMeshBuilder.TAPER_LENGTH_M, 5.0)
 		var normals := RoadGeometry.miter_normals(pl)
+		var total := RoadGeometry.length_xz(pl)
+		var base_hw := edge.width_m * 0.5
 		for line in lines_for(edge):
 			var offset_pl := PackedVector3Array()
+			var walked := 0.0
 			for i in range(pl.size()):
-				var n := normals[i] * float(line["offset"])
+				if i > 0:
+					walked += Vector2(pl[i].x - pl[i - 1].x, pl[i].z - pl[i - 1].z).length()
+				var scale := 1.0
+				if tapered:
+					scale = RoadMeshBuilder.half_width_at(base_hw, walked, total, taper) / base_hw
+				var n := normals[i] * float(line["offset"]) * scale
 				offset_pl.append(pl[i] + Vector3(n.x, lift, n.y))
 			var c := color(line["color"])
 			if line["style"] == "solid":

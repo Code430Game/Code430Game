@@ -381,5 +381,11 @@ def render_markdown(report: ValidationReport, title: str) -> str:
         ]
         if el["edges_over_grade"]:
             lines.append("  " + ", ".join(el["edges_over_grade"][:20]))
+        inferred = el.get("inferred_bridges", [])
+        lines.append(f"- Bridges inferred from untagged crossings: {len(inferred)}")
+        for ib in inferred[:30]:
+            lines.append(
+                f"  - {ib['edge_id']} ({ib['over_class']}) over {ib['under_edge_id']} ({ib['under_class']}), by {ib['reason']}"
+            )
     lines.append("")
     return "\n".join(lines)

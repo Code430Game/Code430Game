@@ -178,3 +178,23 @@ static func _point_segment_distance(p: Vector2, a: Vector2, b: Vector2) -> float
 		return p.distance_to(a)
 	var t := clampf((p - a).dot(ab) / l2, 0.0, 1.0)
 	return p.distance_to(a + ab * t)
+
+
+## Inserts extra vertices so no segment is longer than `max_len` within `zone` metres of either end.
+static func densify_ends(pl: PackedVector3Array, zone: float, max_len: float) -> PackedVector3Array:
+	var total := length_xz(pl)
+	var out := PackedVector3Array()
+	var walked := 0.0
+	for i in range(pl.size() - 1):
+		var a := pl[i]
+		var b := pl[i + 1]
+		var seg := Vector2(b.x - a.x, b.z - a.z).length()
+		out.append(a)
+		var near_end := walked < zone or total - (walked + seg) < zone
+		if near_end and seg > max_len:
+			var steps := int(ceil(seg / max_len))
+			for k in range(1, steps):
+				out.append(a.lerp(b, float(k) / steps))
+		walked += seg
+	out.append(pl[pl.size() - 1])
+	return out

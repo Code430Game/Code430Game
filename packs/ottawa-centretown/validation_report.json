@@ -3195,6 +3195,7 @@
   ],
   "fixed_vertices": 191,
   "free_vertices": 8714,
+  "inferred_bridges": [],
   "max_residual_grade": 0.1202,
   "max_y": 80.488,
   "min_y": 43.319,

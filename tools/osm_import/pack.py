@@ -114,6 +114,7 @@ def _distance_field(
     xs = chunk.min_x + np.arange(s) * TERRAIN_RES_M
     zs = chunk.min_z + np.arange(s) * TERRAIN_RES_M
     gx, gz = np.meshgrid(xs, zs)
+    covered_y = np.full((s, s), np.inf, dtype=np.float64)  # lowest road surface covering the cell
     for ax, az, bx, bz, ay, by, hw in _segments_near(
         segments, chunk.min_x, chunk.min_z, CHUNK_SIZE_M, reach
     ):
@@ -123,10 +124,17 @@ def _distance_field(
             continue
         t = np.clip(((gx - ax) * dx + (gz - az) * dz) / l2, 0.0, 1.0)
         d = np.hypot(gx - (ax + t * dx), gz - (az + t * dz))
+        y_here = ay + (by - ay) * t
         closer = d < dist
         dist = np.where(closer, d, dist)
-        road_y = np.where(closer, ay + (by - ay) * t, road_y)
+        road_y = np.where(closer, y_here, road_y)
         half_w = np.where(closer, hw, half_w)
+        # Where two roads cross without sharing a node (an untagged embankment over an
+        # underpass), the lower road must own the ground or a wall cuts across it.
+        under = d <= hw + FLAT_MARGIN_M
+        covered_y = np.where(under, np.minimum(covered_y, y_here), covered_y)
+    lower = covered_y < road_y - 0.5
+    road_y = np.where(lower, covered_y, road_y)
     return dist, road_y, half_w
 
 

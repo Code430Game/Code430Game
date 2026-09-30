@@ -89,3 +89,4 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 - Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 170
 - Worst residual grade: 0.1202; edges still over their class limit: 13
   w137483257.0, w399144346.0, w432336467.5, w76419763.0, w76420697.0, w76421113.0, w76423269.0, w76423834.0, w76424318.0, w76726964.0, w895111372.0, w895111373.0, w895111373.1
+- Bridges inferred from untagged crossings: 0

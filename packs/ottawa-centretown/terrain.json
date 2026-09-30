@@ -181,7 +181,7 @@
    "cz": -6,
    "file": "terrain/chunk_4_-6.png",
    "max_y": 70.243,
-   "min_y": 58.446
+   "min_y": 57.64
   },
   {
    "cx": 5,
@@ -1048,7 +1048,7 @@
    "cx": 2,
    "cz": 3,
    "file": "terrain/chunk_2_3.png",
-   "max_y": 73.853,
+   "max_y": 73.819,
    "min_y": 66.169
   },
   {
@@ -1133,7 +1133,7 @@
    "cz": 4,
    "file": "terrain/chunk_0_4.png",
    "max_y": 72.964,
-   "min_y": 65.524
+   "min_y": 65.521
   },
   {
    "cx": 1,

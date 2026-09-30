@@ -9,8 +9,12 @@ extends RefCounted
 ## cap, cap, corner around the node. If the walk is not a simple polygon, the
 ## convex hull of the same points is used and flagged.
 
-const TRIM_MARGIN_M := 0.5
+## Roads stop this far back from the corner intersection so the rounded corner has a curb-like radius.
+const TRIM_MARGIN_M := 3.0
 const MAX_TRIM_M := 60.0
+## Corners are rounded with a quadratic curve from one road's cap to the next, using the
+## sharp corner as the control point. More steps = smoother. 0 keeps sharp corners.
+const FILLET_STEPS := 4
 ## A corner may sit at most this many half-widths down the road. Beyond that the
 ## two roads are nearly parallel (a ramp merge) and their ribbons overlap anyway.
 const MAX_CORNER_HALF_WIDTHS := 3.0
@@ -24,6 +28,7 @@ class Junction:
 	var heights: PackedFloat32Array  # one per polygon vertex
 	var trims: Dictionary  # edge id -> trim metres
 	var fallback_hull: bool = false
+	var dominant_class: String = "residential"  # class of the widest road meeting here, for colouring
 
 
 ## Computes junctions for every node with degree >= 3. Returns node id -> Junction.
@@ -91,18 +96,34 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		var t: float = trims[a["edge"]]
 		var edge: RoadGraph.RoadEdge = graph.edges[a["edge"]]
 		var h := _height_along(graph, edge, node_id, t)
-		polygon.append(centre + d * t - n * float(a["hw"]))
+		var cap_minus := centre + d * t - n * float(a["hw"])
+		var cap_plus := centre + d * t + n * float(a["hw"])
+		polygon.append(cap_minus)
 		heights.append(h)
-		polygon.append(centre + d * t + n * float(a["hw"]))
+		polygon.append(cap_plus)
 		heights.append(h)
-		polygon.append(corners[i])
-		var next_edge: RoadGraph.RoadEdge = graph.edges[arms[(i + 1) % count]["edge"]]
-		var h_next := _height_along(graph, next_edge, node_id, trims[next_edge.id])
-		heights.append((h + h_next) * 0.5)
+		var b: Dictionary = arms[(i + 1) % count]
+		var next_edge: RoadGraph.RoadEdge = graph.edges[b["edge"]]
+		var t_next: float = trims[next_edge.id]
+		var h_next := _height_along(graph, next_edge, node_id, t_next)
+		var db: Vector2 = b["dir"]
+		var nb := Vector2(-db.y, db.x)
+		var next_cap_minus := centre + db * t_next - nb * float(b["hw"])
+		# Rounded corner: quadratic curve from this cap to the next road's cap through the sharp corner.
+		for k in range(1, FILLET_STEPS + 1):
+			var u := float(k) / float(FILLET_STEPS + 1)
+			var q := cap_plus.lerp(corners[i], u).lerp(corners[i].lerp(next_cap_minus, u), u)
+			polygon.append(q)
+			heights.append(lerpf(h, h_next, u))
 	var j := Junction.new()
 	j.node_id = node_id
 	j.centre = node.position
 	j.trims = trims
+	var widest := -1.0
+	for arm in arms:
+		if float(arm["hw"]) > widest:
+			widest = float(arm["hw"])
+			j.dominant_class = graph.edges[arm["edge"]].road_class
 	if Geometry2D.triangulate_polygon(polygon).size() == 0:
 		var hull := Geometry2D.convex_hull(polygon)
 		if hull.size() > 1 and hull[0] == hull[hull.size() - 1]:
