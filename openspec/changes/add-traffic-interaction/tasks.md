@@ -11,5 +11,5 @@
 - [x] 3.2 Player interact falls back to the nearest traffic car within range; testbed wires it
 
 ## 4. Verification
-- [ ] 4.1 Deck: measured render and physics time with 150 agents recorded
+- [x] 4.1 Deck: measured render and physics time with 150 agents recorded (2026-09-30, deck preset, autodrive from the old bbox-edge spawn, 145 agents: GPU 5.69 ms, render CPU 1.56 ms, physics process 5.68 ms vs 5.08 ms before the obstacle checks; frame p99 6.94 ms)
 - [ ] 4.2 **Stop: human drives, walks in traffic and takes a car on the Deck**
