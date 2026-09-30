@@ -13,14 +13,14 @@
    "cz": -7,
    "file": "terrain/chunk_-6_-7.png",
    "max_y": 51.58,
-   "min_y": 45.847
+   "min_y": 38.328
   },
   {
    "cx": -5,
    "cz": -7,
    "file": "terrain/chunk_-5_-7.png",
    "max_y": 53.847,
-   "min_y": 45.847
+   "min_y": 27.699
   },
   {
    "cx": -4,
@@ -90,7 +90,7 @@
    "cz": -7,
    "file": "terrain/chunk_5_-7.png",
    "max_y": 71.944,
-   "min_y": 53.421
+   "min_y": 21.902
   },
   {
    "cx": 6,
@@ -118,14 +118,14 @@
    "cz": -6,
    "file": "terrain/chunk_-5_-6.png",
    "max_y": 53.835,
-   "min_y": 45.885
+   "min_y": 45.877
   },
   {
    "cx": -4,
    "cz": -6,
    "file": "terrain/chunk_-4_-6.png",
-   "max_y": 52.136,
-   "min_y": 40.232
+   "max_y": 50.453,
+   "min_y": 40.202
   },
   {
    "cx": -3,
@@ -223,27 +223,27 @@
    "cz": -5,
    "file": "terrain/chunk_-4_-5.png",
    "max_y": 53.717,
-   "min_y": 40.232
+   "min_y": 40.202
   },
   {
    "cx": -3,
    "cz": -5,
    "file": "terrain/chunk_-3_-5.png",
-   "max_y": 72.464,
-   "min_y": 40.232
+   "max_y": 72.48,
+   "min_y": 40.202
   },
   {
    "cx": -2,
    "cz": -5,
    "file": "terrain/chunk_-2_-5.png",
-   "max_y": 77.013,
+   "max_y": 77.008,
    "min_y": 40.232
   },
   {
    "cx": -1,
    "cz": -5,
    "file": "terrain/chunk_-1_-5.png",
-   "max_y": 65.797,
+   "max_y": 65.645,
    "min_y": 57.973
   },
   {
@@ -327,28 +327,28 @@
    "cx": -3,
    "cz": -4,
    "file": "terrain/chunk_-3_-4.png",
-   "max_y": 55.832,
+   "max_y": 58.946,
    "min_y": 40.232
   },
   {
    "cx": -2,
    "cz": -4,
    "file": "terrain/chunk_-2_-4.png",
-   "max_y": 71.922,
+   "max_y": 71.886,
    "min_y": 40.232
   },
   {
    "cx": -1,
    "cz": -4,
    "file": "terrain/chunk_-1_-4.png",
-   "max_y": 72.806,
-   "min_y": 45.547
+   "max_y": 72.799,
+   "min_y": 45.556
   },
   {
    "cx": 0,
    "cz": -4,
    "file": "terrain/chunk_0_-4.png",
-   "max_y": 65.687,
+   "max_y": 65.616,
    "min_y": 60.084
   },
   {
@@ -398,7 +398,7 @@
    "cz": -3,
    "file": "terrain/chunk_-7_-3.png",
    "max_y": 68.191,
-   "min_y": 49.549
+   "min_y": 49.555
   },
   {
    "cx": -6,
@@ -432,7 +432,7 @@
    "cx": -2,
    "cz": -3,
    "file": "terrain/chunk_-2_-3.png",
-   "max_y": 88.304,
+   "max_y": 88.262,
    "min_y": 40.232
   },
   {
@@ -440,13 +440,13 @@
    "cz": -3,
    "file": "terrain/chunk_-1_-3.png",
    "max_y": 85.12,
-   "min_y": 41.517
+   "min_y": 41.533
   },
   {
    "cx": 0,
    "cz": -3,
    "file": "terrain/chunk_0_-3.png",
-   "max_y": 72.728,
+   "max_y": 72.702,
    "min_y": 56.649
   },
   {
@@ -454,7 +454,7 @@
    "cz": -3,
    "file": "terrain/chunk_1_-3.png",
    "max_y": 73.403,
-   "min_y": 57.047
+   "min_y": 57.257
   },
   {
    "cx": 2,
@@ -523,7 +523,7 @@
    "cx": -3,
    "cz": -2,
    "file": "terrain/chunk_-3_-2.png",
-   "max_y": 86.057,
+   "max_y": 86.097,
    "min_y": 40.232
   },
   {
@@ -537,14 +537,14 @@
    "cx": -1,
    "cz": -2,
    "file": "terrain/chunk_-1_-2.png",
-   "max_y": 82.039,
-   "min_y": 66.36
+   "max_y": 82.034,
+   "min_y": 66.146
   },
   {
    "cx": 0,
    "cz": -2,
    "file": "terrain/chunk_0_-2.png",
-   "max_y": 77.747,
+   "max_y": 75.025,
    "min_y": 56.649
   },
   {
@@ -565,7 +565,7 @@
    "cx": 3,
    "cz": -2,
    "file": "terrain/chunk_3_-2.png",
-   "max_y": 71.79,
+   "max_y": 71.747,
    "min_y": 67.256
   },
   {
@@ -600,7 +600,7 @@
    "cx": -6,
    "cz": -1,
    "file": "terrain/chunk_-6_-1.png",
-   "max_y": 54.654,
+   "max_y": 54.479,
    "min_y": 40.232
   },
   {
@@ -608,7 +608,7 @@
    "cz": -1,
    "file": "terrain/chunk_-5_-1.png",
    "max_y": 67.438,
-   "min_y": 40.232
+   "min_y": 40.202
   },
   {
    "cx": -4,
@@ -621,7 +621,7 @@
    "cx": -3,
    "cz": -1,
    "file": "terrain/chunk_-3_-1.png",
-   "max_y": 74.531,
+   "max_y": 74.498,
    "min_y": 66.65
   },
   {
@@ -713,7 +713,7 @@
    "cz": 0,
    "file": "terrain/chunk_-4_0.png",
    "max_y": 74.175,
-   "min_y": 50.115
+   "min_y": 56.619
   },
   {
    "cx": -3,
@@ -783,7 +783,7 @@
    "cz": 0,
    "file": "terrain/chunk_6_0.png",
    "max_y": 69.796,
-   "min_y": 58.408
+   "min_y": 32.015
   },
   {
    "cx": -7,
@@ -845,7 +845,7 @@
    "cx": 1,
    "cz": 1,
    "file": "terrain/chunk_1_1.png",
-   "max_y": 72.546,
+   "max_y": 72.554,
    "min_y": 68.502
   },
   {
@@ -888,7 +888,7 @@
    "cz": 2,
    "file": "terrain/chunk_-7_2.png",
    "max_y": 58.35,
-   "min_y": 50.65
+   "min_y": 37.485
   },
   {
    "cx": -6,
@@ -901,7 +901,7 @@
    "cx": -5,
    "cz": 2,
    "file": "terrain/chunk_-5_2.png",
-   "max_y": 81.211,
+   "max_y": 81.208,
    "min_y": 44.805
   },
   {
@@ -922,7 +922,7 @@
    "cx": -2,
    "cz": 2,
    "file": "terrain/chunk_-2_2.png",
-   "max_y": 78.855,
+   "max_y": 78.846,
    "min_y": 72.252
   },
   {
@@ -950,7 +950,7 @@
    "cx": 2,
    "cz": 2,
    "file": "terrain/chunk_2_2.png",
-   "max_y": 71.201,
+   "max_y": 71.246,
    "min_y": 67.791
   },
   {
@@ -1014,13 +1014,13 @@
    "cz": 3,
    "file": "terrain/chunk_-3_3.png",
    "max_y": 79.995,
-   "min_y": 74.51
+   "min_y": 74.518
   },
   {
    "cx": -2,
    "cz": 3,
    "file": "terrain/chunk_-2_3.png",
-   "max_y": 78.911,
+   "max_y": 78.918,
    "min_y": 70.115
   },
   {
@@ -1118,7 +1118,7 @@
    "cx": -2,
    "cz": 4,
    "file": "terrain/chunk_-2_4.png",
-   "max_y": 74.51,
+   "max_y": 74.518,
    "min_y": 66.984
   },
   {
@@ -1174,7 +1174,7 @@
    "cx": 6,
    "cz": 4,
    "file": "terrain/chunk_6_4.png",
-   "max_y": 64.858,
+   "max_y": 64.856,
    "min_y": 55.296
   },
   {
@@ -1301,7 +1301,7 @@
    "cz": 6,
    "file": "terrain/chunk_-4_6.png",
    "max_y": 73.953,
-   "min_y": 65.123
+   "min_y": 65.118
   },
   {
    "cx": -3,
@@ -1322,7 +1322,7 @@
    "cz": 6,
    "file": "terrain/chunk_-1_6.png",
    "max_y": 73.972,
-   "min_y": 66.946
+   "min_y": 66.963
   },
   {
    "cx": 0,
@@ -1349,15 +1349,15 @@
    "cx": 3,
    "cz": 6,
    "file": "terrain/chunk_3_6.png",
-   "max_y": 69.318,
+   "max_y": 69.274,
    "min_y": 62.18
   },
   {
    "cx": 4,
    "cz": 6,
    "file": "terrain/chunk_4_6.png",
-   "max_y": 67.641,
-   "min_y": 61.718
+   "max_y": 67.728,
+   "min_y": 50.06
   },
   {
    "cx": 5,

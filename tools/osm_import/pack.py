@@ -17,8 +17,15 @@ from pathlib import Path
 
 import numpy as np
 
+from osm_import.barriers import BarriersResult
 from osm_import.buildings import BuildingsResult
-from osm_import.elevation import HRDEM_ATTRIBUTION, ElevationSource
+from osm_import.config import ImportConfig
+from osm_import.elevation import (
+    HRDEM_ATTRIBUTION,
+    ElevationSource,
+    apply_pedestrian_elevation,
+    split_pedestrian_under_bridges,
+)
 from osm_import.export import OSM_ATTRIBUTION, dump_json
 from osm_import.graph import RoadGraph
 from osm_import.osm_data import BBox
@@ -72,12 +79,38 @@ def sample_chunk(source: ElevationSource, cx: int, cz: int) -> ChunkTerrain:
     return ChunkTerrain(cx, cz, heights)
 
 
-def _road_footprints(graph: RoadGraph) -> tuple[list[tuple], list[tuple]]:
+class ChunkSampler:
+    """Bilinear sampling over built chunks, used for pedestrian heights after carving."""
+
+    def __init__(self, chunks: list[ChunkTerrain]) -> None:
+        self._by_coord = {(c.cx, c.cz): c for c in chunks}
+
+    def sample(self, x: float, z: float) -> float:
+        cx, cz = math.floor(x / CHUNK_SIZE_M), math.floor(z / CHUNK_SIZE_M)
+        chunk = self._by_coord.get((cx, cz))
+        if chunk is None:
+            return 0.0
+        fx = min(max((x - chunk.min_x) / TERRAIN_RES_M, 0.0), SAMPLES_PER_CHUNK - 1.001)
+        fz = min(max((z - chunk.min_z) / TERRAIN_RES_M, 0.0), SAMPLES_PER_CHUNK - 1.001)
+        c0, r0 = int(fx), int(fz)
+        tx, tz = fx - c0, fz - r0
+        h = chunk.heights
+        top = h[r0, c0] * (1 - tx) + h[r0, c0 + 1] * tx
+        bottom = h[r0 + 1, c0] * (1 - tx) + h[r0 + 1, c0 + 1] * tx
+        return float(top * (1 - tz) + bottom * tz)
+
+    def describe(self) -> dict:
+        return {"kind": "chunks"}
+
+
+def _road_footprints(
+    graph: RoadGraph, include_pedestrian: bool = True
+) -> tuple[list[tuple], list[tuple]]:
     """(ground segments, bridge segments): (ax, az, bx, bz, ay, by, half_width).
     Pedestrian ways count as ground segments so the terrain meets their surface."""
     ground: list[tuple] = []
     bridges: list[tuple] = []
-    for w in graph.pedestrian:
+    for w in graph.pedestrian if include_pedestrian else []:
         if w.kind == "steps":
             continue
         hw = w.width_m / 2.0
@@ -279,8 +312,9 @@ def build_terrain(
     water: WaterResult | None = None,
     water_depth_m: float = 0.0,
     buildings: BuildingsResult | None = None,
+    cfg: ImportConfig | None = None,
 ) -> tuple[list[ChunkTerrain], dict]:
-    ground, bridges = _road_footprints(graph)
+    _roads_only, bridges = _road_footprints(graph, include_pedestrian=False)
     xr, zr = chunk_range(bounds)
     chunks: list[ChunkTerrain] = []
     stats = {
@@ -296,9 +330,16 @@ def build_terrain(
             stats["cells_carved"] += carve_bridges(chunk, bridges)
             stats["cells_lowered_for_water"] += lower_water(chunk, water, water_depth_m)
             stats["cells_under_buildings"] += flatten_buildings(chunk, buildings)
-            stats["cells_flattened"] += flatten_roads(chunk, ground)
             chunks.append(chunk)
             stats["chunks"] += 1
+    # Pedestrian heights come from the carved terrain (paths under bridges stay on the ground),
+    # then roads and sidewalks flatten the terrain to meet them.
+    if cfg is not None:
+        apply_pedestrian_elevation(graph, ChunkSampler(chunks), cfg)
+        split_pedestrian_under_bridges(graph)
+    ground, _bridges = _road_footprints(graph)
+    for chunk in chunks:
+        stats["cells_flattened"] += flatten_roads(chunk, ground)
     return chunks, stats
 
 
@@ -316,6 +357,7 @@ def write_pack(
     elevation_attribution: str | None,
     water: WaterResult | None = None,
     buildings: BuildingsResult | None = None,
+    barriers: BarriersResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -388,6 +430,9 @@ def write_pack(
     if buildings is not None:
         paths["buildings"] = out_dir / "buildings.v0.json"
         dump_json(buildings.to_dict(), paths["buildings"])
+    if barriers is not None:
+        paths["barriers"] = out_dir / "barriers.v0.json"
+        dump_json(barriers.to_dict(), paths["barriers"])
     return paths
 
 

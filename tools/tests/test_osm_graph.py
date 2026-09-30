@@ -129,3 +129,17 @@ def test_pedestrian_ways_kept_separately():
     )
     assert len(g.edges) == 1
     assert [p.osm_way_id for p in g.pedestrian] == [2]
+
+
+def test_covered_and_tunnel_paths_are_flagged():
+    g = build(
+        [
+            (1, [(0, 0), (100, 0)], {"highway": "residential"}),
+            (2, [(0, 5), (100, 5)], {"highway": "path", "covered": "yes"}),
+            (3, [(0, 9), (100, 9)], {"highway": "footway", "tunnel": "yes"}),
+            (4, [(0, 12), (100, 12)], {"highway": "footway", "tunnel": "building_passage"}),
+            (5, [(0, 15), (100, 15)], {"highway": "cycleway"}),
+        ]
+    )
+    flags = {p.osm_way_id: p.covered for p in g.pedestrian}
+    assert flags == {2: True, 3: True, 4: False, 5: False}

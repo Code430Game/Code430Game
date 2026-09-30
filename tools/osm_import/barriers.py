@@ -1,0 +1,291 @@
+"""Highway barriers: bridge parapets, median barriers, guardrails, sound walls.
+
+Approach: sample each highway edge every few metres and look sideways.
+- Parapet: every bridge edge, both deck edges, full length.
+- Median: an opposing highway edge runs alongside within `median_max_gap_m`
+  (gap between the two ribbon edges): a barrier on the mid-line of the gap.
+- Guardrail: the terrain `guardrail_probe_m` outside the ribbon edge drops more
+  than `guardrail_drop_m` below the road: a rail on that edge.
+- Sound wall: at grade or above it, housing within range on that side, no
+  median on that side: a wall on that edge, in runs of at least the minimum.
+- Curb: a sidewalk runs within `curb_sidewalk_range_m` of a street's ribbon
+  edge: a low step along that edge (kind "curb").
+Runs are strung from consecutive samples; each becomes a polyline with a kind
+and height for the game to extrude.
+"""
+
+from __future__ import annotations
+
+import logging
+import math
+from dataclasses import dataclass, field
+
+from osm_import.buildings import BuildingsResult
+from osm_import.config import ImportConfig
+from osm_import.elevation import ElevationSource, _seg_dist, _SegmentIndex
+from osm_import.graph import RoadGraph
+
+log = logging.getLogger(__name__)
+
+COORD_DECIMALS = 2
+
+
+@dataclass
+class Barrier:
+    id: str
+    kind: str  # parapet | median | guardrail | soundwall
+    height_m: float
+    edge_id: str
+    points: list[tuple[float, float, float]]
+
+
+@dataclass
+class BarriersResult:
+    barriers: list[Barrier] = field(default_factory=list)
+    counts: dict = field(default_factory=dict)
+
+    def to_dict(self) -> dict:
+        return {
+            "schema_version": 0,
+            "units": "metres, x east, y up, z south; points are the wall base line",
+            "barriers": [
+                {
+                    "id": b.id,
+                    "kind": b.kind,
+                    "height_m": round(b.height_m, 2),
+                    "edge_id": b.edge_id,
+                    "points": [
+                        [
+                            round(x, COORD_DECIMALS),
+                            round(y, COORD_DECIMALS),
+                            round(z, COORD_DECIMALS),
+                        ]
+                        for x, y, z in b.points
+                    ],
+                }
+                for b in sorted(self.barriers, key=lambda b: b.id)
+            ],
+        }
+
+
+def _samples(pl: list, step: float):
+    """Yields (x, y, z, dir_x, dir_z) every `step` metres along a polyline."""
+    total = 0.0
+    segs = []
+    for i in range(len(pl) - 1):
+        a, b = pl[i], pl[i + 1]
+        length = math.hypot(b[0] - a[0], b[2] - a[2])
+        segs.append((a, b, length))
+        total += length
+    if total <= 0:
+        return
+    s = 0.0
+    while s <= total + 1e-6:
+        walked = 0.0
+        for a, b, length in segs:
+            if s <= walked + length or (a, b, length) is segs[-1]:
+                t = (s - walked) / length if length > 0 else 0.0
+                t = max(0.0, min(1.0, t))
+                dx, dz = (b[0] - a[0]) / length, (b[2] - a[2]) / length
+                yield (
+                    a[0] + (b[0] - a[0]) * t,
+                    a[1] + (b[1] - a[1]) * t,
+                    a[2] + (b[2] - a[2]) * t,
+                    dx,
+                    dz,
+                )
+                break
+            walked += length
+        s += step
+
+
+def _runs(points: list, keep: list, min_run: float = 0.0) -> list[list]:
+    """Splits points into runs where keep[i] is true; drops runs shorter than min_run."""
+    out: list[list] = []
+    current: list = []
+    for p, k in zip(points, keep, strict=True):
+        if k:
+            current.append(p)
+        else:
+            if len(current) >= 2:
+                out.append(current)
+            current = []
+    if len(current) >= 2:
+        out.append(current)
+    if min_run > 0:
+        out = [
+            r
+            for r in out
+            if sum(
+                math.hypot(r[i + 1][0] - r[i][0], r[i + 1][2] - r[i][2]) for i in range(len(r) - 1)
+            )
+            >= min_run
+        ]
+    return out
+
+
+def build_barriers(
+    graph: RoadGraph, source: ElevationSource, buildings: BuildingsResult | None, cfg: ImportConfig
+) -> BarriersResult:
+    rules = cfg.barriers
+    result = BarriersResult()
+    if not rules:
+        return result
+    highway = set(rules.get("highway_classes", []))
+    step = float(rules.get("sample_step_m", 8.0))
+    seq = 0
+
+    def add(kind: str, height: float, edge_id: str, pts: list) -> None:
+        nonlocal seq
+        result.barriers.append(Barrier(f"b{seq}", kind, height, edge_id, pts))
+        result.counts[kind] = result.counts.get(kind, 0) + 1
+        seq += 1
+
+    # Index highway segments for the median search and building centroids for sound walls.
+    hw_index = _SegmentIndex()
+    for eid in sorted(graph.edges):
+        e = graph.edges[eid]
+        if e.road_class in highway:
+            for i in range(len(e.polyline) - 1):
+                a, b = e.polyline[i], e.polyline[i + 1]
+                hw_index.add((a[0], a[2]), (b[0], b[2]), (eid, i))
+    house_cells: dict[tuple[int, int], list[tuple[float, float]]] = {}
+    if buildings is not None:
+        kinds = set(rules.get("soundwall_kinds", []))
+        for b in buildings.buildings:
+            if b.kind not in kinds:
+                continue
+            ring = b.rings[0]
+            cx, cz = sum(p[0] for p in ring) / len(ring), sum(p[1] for p in ring) / len(ring)
+            house_cells.setdefault((int(cx // 50), int(cz // 50)), []).append((cx, cz))
+
+    def houses_near(x: float, z: float, r: float) -> bool:
+        cells = int(r // 50) + 1
+        for dx in range(-cells, cells + 1):
+            for dz in range(-cells, cells + 1):
+                for hx, hz in house_cells.get((int(x // 50) + dx, int(z // 50) + dz), []):
+                    if math.hypot(hx - x, hz - z) <= r:
+                        return True
+        return False
+
+    # Sidewalk segments for curb detection.
+    sw_index = _SegmentIndex()
+    for w in graph.pedestrian:
+        if w.kind != "sidewalk":
+            continue
+        for i in range(len(w.polyline) - 1):
+            a, b = w.polyline[i], w.polyline[i + 1]
+            sw_index.add((a[0], a[2]), (b[0], b[2]), (w.id, i))
+    curb_classes = set(rules.get("curb_classes", []))
+    curb_range = float(rules.get("curb_sidewalk_range_m", 3.5))
+
+    for eid in sorted(graph.edges):
+        e = graph.edges[eid]
+        hw = e.width_m / 2.0
+        # Curbs along streets where a sidewalk runs beside the ribbon edge.
+        if e.road_class in curb_classes and not e.bridge and not e.tunnel:
+            for side in (-1.0, 1.0):
+                pts, keep = [], []
+                for x, y, z, dx, dz in _samples(e.polyline, step):
+                    nx, nz = -dz * side, dx * side
+                    ex, ez = x + nx * hw, z + nz * hw
+                    near = False
+                    for a, b, _payload in sw_index.near(ex, ez, curb_range + 2.0):
+                        if _seg_dist(ex, ez, a[0], a[1], b[0], b[1]) <= curb_range:
+                            near = True
+                            break
+                    pts.append((ex, y, ez))
+                    keep.append(near)
+                for run in _runs(pts, keep):
+                    add("curb", float(rules.get("curb_height_m", 0.12)), eid, run)
+        # Bridge parapets on every bridge edge.
+        if e.bridge:
+            inset = float(rules.get("parapet_inset_m", 0.25))
+            for side in (-1.0, 1.0):
+                pts = []
+                for x, y, z, dx, dz in _samples(e.polyline, step):
+                    nx, nz = -dz * side, dx * side
+                    pts.append((x + nx * (hw - inset), y, z + nz * (hw - inset)))
+                if len(pts) >= 2:
+                    add("parapet", float(rules.get("parapet_height_m", 1.0)), eid, pts)
+        if e.road_class not in highway or e.bridge or e.tunnel:
+            continue
+        samples = list(_samples(e.polyline, step))
+        if len(samples) < 2:
+            continue
+        median_side = {-1.0: [False] * len(samples), 1.0: [False] * len(samples)}
+        median_pts = {-1.0: [], 1.0: []}
+        max_gap = float(rules["median_max_gap_m"])
+        for si, (x, y, z, dx, dz) in enumerate(samples):
+            for side in (-1.0, 1.0):
+                nx, nz = -dz * side, dx * side
+                best = None  # (distance, gap, other edge id)
+                for a, b, (oid, _i) in hw_index.near(x, z, max_gap + 30.0):
+                    if oid == eid:
+                        continue
+                    o = graph.edges[oid]
+                    if o.bridge != e.bridge:
+                        continue
+                    odx, odz = b[0] - a[0], b[1] - a[1]
+                    ol = math.hypot(odx, odz)
+                    if ol < 1e-6 or (odx * dx + odz * dz) / ol > -0.7:
+                        continue  # not opposing traffic
+                    d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
+                    t = max(0.0, min(1.0, ((x - a[0]) * odx + (z - a[1]) * odz) / (ol * ol)))
+                    px, pz = a[0] + odx * t, a[1] + odz * t
+                    if (px - x) * nx + (pz - z) * nz <= 0:
+                        continue  # the other carriageway is on the other side
+                    gap = d - hw - o.width_m / 2.0
+                    if 0.0 <= gap <= max_gap and (best is None or d < best[0]):
+                        best = (d, gap, oid)
+                if best is not None:
+                    median_side[side][si] = True
+                    d, gap, oid = best
+                    # One barrier per pair: only the edge with the smaller id emits it.
+                    median_pts[side].append(
+                        (x + nx * (hw + gap / 2.0), y, z + nz * (hw + gap / 2.0))
+                        if eid < oid
+                        else None
+                    )
+                else:
+                    median_pts[side].append(None)
+        for side in (-1.0, 1.0):
+            pts = median_pts[side]
+            keep = [p is not None for p in pts]
+            for run in _runs([p if p is not None else (0.0, 0.0, 0.0) for p in pts], keep):
+                add("median", float(rules.get("median_height_m", 0.9)), eid, run)
+        # Guardrails and sound walls on sides without a median.
+        for side in (-1.0, 1.0):
+            rail_pts, rail_keep = [], []
+            wall_pts, wall_keep = [], []
+            for si, (x, y, z, dx, dz) in enumerate(samples):
+                nx, nz = -dz * side, dx * side
+                edge_x, edge_z = x + nx * hw, z + nz * hw
+                probe = float(rules.get("guardrail_probe_m", 3.0))
+                ground = source.sample(edge_x + nx * probe, edge_z + nz * probe)
+                drop = y - ground
+                has_median = median_side[side][si]
+                rail_pts.append((edge_x + nx * 0.3, y, edge_z + nz * 0.3))
+                rail_keep.append(
+                    (not has_median) and drop > float(rules.get("guardrail_drop_m", 1.2))
+                )
+                at_grade = drop > -float(rules.get("soundwall_trench_depth_m", 2.0))
+                wall_pts.append((edge_x + nx * 2.0, y, edge_z + nz * 2.0))
+                wall_keep.append(
+                    (not has_median)
+                    and at_grade
+                    and houses_near(
+                        edge_x + nx * 20.0,
+                        edge_z + nz * 20.0,
+                        float(rules.get("soundwall_building_range_m", 45.0)),
+                    )
+                )
+            for run in _runs(wall_pts, wall_keep, float(rules.get("soundwall_min_run_m", 60.0))):
+                add("soundwall", float(rules.get("soundwall_height_m", 4.0)), eid, run)
+            # No guardrail where a sound wall already stands.
+            for run in _runs(
+                rail_pts, [rk and not wk for rk, wk in zip(rail_keep, wall_keep, strict=True)]
+            ):
+                add("guardrail", float(rules.get("guardrail_height_m", 0.8)), eid, run)
+    log.info("barriers: %s", result.counts)
+    return result

@@ -135,3 +135,37 @@ def test_elevation_is_deterministic():
     g2, _ = build(OVERPASS, SyntheticSource())
     for eid in g1.edges:
         assert g1.edges[eid].polyline == g2.edges[eid].polyline
+
+
+def test_path_under_a_bridge_is_cut_but_deck_sidewalk_kept():
+    from osm_import.elevation import split_pedestrian_under_bridges
+    from osm_import.graph import PedestrianWay
+
+    g, _ = build(
+        [
+            (1, [(-100, 0), (-30, 0)], {"highway": "primary"}),
+            (
+                2,
+                [(-30, 0), (30, 0)],
+                {"highway": "primary", "bridge": "yes", "layer": "1", "width": "10"},
+            ),
+            (3, [(30, 0), (100, 0)], {"highway": "primary"}),
+        ],
+        FlatSource(10.0),
+    )
+    path = PedestrianWay(
+        "p1",
+        [(0.0, 4.0, -40.0), (0.0, 4.0, -3.0), (0.0, 4.0, 3.0), (0.0, 4.0, 40.0)],
+        "footway",
+        1,
+        None,
+        "path",
+        1.5,
+    )
+    deck_walk = PedestrianWay(
+        "p2", [(-30.0, 16.1, 4.5), (30.0, 16.1, 4.5)], "footway", 2, None, "sidewalk", 2.0
+    )
+    g.pedestrian = [path, deck_walk]
+    assert split_pedestrian_under_bridges(g) == 1
+    ids = sorted(w.id for w in g.pedestrian)
+    assert ids == ["p2"]  # the path had no piece with two vertices left outside the deck

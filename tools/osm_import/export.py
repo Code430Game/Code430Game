@@ -64,18 +64,7 @@ def graph_to_dict(
                 "length_m": round(e.length_m, COORD_DECIMALS),
             }
         )
-    pedestrian = [
-        {
-            "id": p.id,
-            "polyline": [_pt(q) for q in p.polyline],
-            "class": p.road_class,
-            "kind": p.kind,
-            "width_m": round(p.width_m, 2),
-            "osm_way_id": p.osm_way_id,
-            "name": p.name,
-        }
-        for p in sorted(graph.pedestrian, key=lambda p: p.osm_way_id)
-    ]
+    pedestrian = pedestrian_to_list(graph)
     return {
         "meta": {
             "schema_version": SCHEMA_VERSION,
@@ -94,6 +83,23 @@ def graph_to_dict(
         "edges": edges,
         "pedestrian_ways": pedestrian,
     }
+
+
+def pedestrian_to_list(graph: RoadGraph) -> list[dict]:
+    """Serializable pedestrian ways; called again after the terrain stage adjusts them."""
+    return [
+        {
+            "id": p.id,
+            "polyline": [_pt(q) for q in p.polyline],
+            "class": p.road_class,
+            "kind": p.kind,
+            "width_m": round(p.width_m, 2),
+            "covered": p.covered,
+            "osm_way_id": p.osm_way_id,
+            "name": p.name,
+        }
+        for p in sorted(graph.pedestrian, key=lambda p: (p.osm_way_id, p.id))
+    ]
 
 
 def dump_json(data: dict, path: Path) -> None:

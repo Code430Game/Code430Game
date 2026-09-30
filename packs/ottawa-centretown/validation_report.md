@@ -77,6 +77,10 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 - Polygons written: 18; relations or ways skipped: 0
 
+## Barriers
+
+- curb 2341, parapet 124, guardrail 38, median 24, soundwall 22
+
 ## Buildings
 
 - Footprints written: 10678; height from tag/levels/default: {'levels': 1691, 'default': 8966, 'tag': 18}

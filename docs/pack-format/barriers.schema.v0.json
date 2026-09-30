@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/barriers.schema.v0.json",
+  "title": "Code 430 barriers v0",
+  "description": "Optional file in a map pack. Wall base lines the game extrudes: bridge parapets, median barriers, guardrails, sound walls.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "barriers"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "barriers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "height_m", "edge_id", "points"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^b[0-9]+$"},
+          "kind": {"enum": ["parapet", "median", "guardrail", "soundwall", "curb"]},
+          "height_m": {"type": "number", "exclusiveMinimum": 0},
+          "edge_id": {"type": "string"},
+          "points": {"type": "array", "minItems": 2, "items": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}}
+        }
+      }
+    }
+  }
+}

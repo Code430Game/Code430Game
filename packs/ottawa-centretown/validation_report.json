@@ -3204,6 +3204,13 @@
  "one_way_traps": [],
  "ramps": [],
  "summary": {
+  "barriers": {
+   "curb": 2341,
+   "guardrail": 38,
+   "median": 24,
+   "parapet": 124,
+   "soundwall": 22
+  },
   "buildings": {
    "footprints": 10678,
    "height_sources": {
@@ -3249,7 +3256,7 @@
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 6732,
-   "cells_flattened": 346872,
+   "cells_flattened": 346783,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
    "chunks": 196
