@@ -73,6 +73,10 @@ Every *_link chain connects a major road at two or more points.
 
 No traps: every node inside the bbox can reach and be reached from the main network.
 
+## Water
+
+- Polygons written: 18; relations or ways skipped: 0
+
 ## Elevation
 
 - Road height range: 43.319 m to 80.488 m

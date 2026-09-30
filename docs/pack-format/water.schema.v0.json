@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/water.schema.v0.json",
+  "title": "Code 430 water polygons v0",
+  "description": "Optional file in a map pack. Flat water surfaces, pre-triangulated, in local metres (x east, z south) with a surface height y.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "polygons"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "polygons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "kind", "surface_y", "vertices", "triangles", "osm_id"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[wr][0-9]+\\.[0-9]+$"},
+          "name": {"type": ["string", "null"]},
+          "kind": {"type": "string"},
+          "surface_y": {"type": "number"},
+          "vertices": {"type": "array", "minItems": 3, "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}},
+          "triangles": {"type": "array", "minItems": 3, "items": {"type": "integer", "minimum": 0}},
+          "osm_id": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

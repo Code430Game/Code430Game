@@ -1,0 +1,38 @@
+class_name Minimap
+extends Control
+## Corner minimap: a crop of the map texture around the player, rotated so the
+## car's heading points up. One textured quad per frame, no extra rendering.
+
+const VIEW_RADIUS_M := 180.0
+const PLAYER_MARKER_PX := 8.0
+const BORDER := Color(0.85, 0.85, 0.85, 0.7)
+
+var renderer: MapRenderer
+var player: Node3D
+
+
+func _process(_delta: float) -> void:
+	queue_redraw()
+
+
+## Rotation to apply to the map so `heading` (world xz forward) points up on screen.
+static func map_rotation_for(heading: Vector3) -> float:
+	return -atan2(heading.x, -heading.z)
+
+
+func _draw() -> void:
+	if renderer == null or renderer.texture == null or player == null:
+		return
+	var centre := size * 0.5
+	var scale := (size.x * 0.5) / VIEW_RADIUS_M * renderer.metres_per_pixel
+	var rot := map_rotation_for(-player.global_basis.z)
+	var player_px := renderer.world_to_pixel(player.global_position.x, player.global_position.z)
+	draw_rect(Rect2(Vector2.ZERO, size), MapRenderer.BACKGROUND)
+	draw_set_transform(centre, rot, Vector2(scale, scale))
+	draw_texture(renderer.texture, -player_px)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var tip := centre + Vector2(0, -PLAYER_MARKER_PX)
+	var left := centre + Vector2(-PLAYER_MARKER_PX * 0.7, PLAYER_MARKER_PX * 0.7)
+	var right := centre + Vector2(PLAYER_MARKER_PX * 0.7, PLAYER_MARKER_PX * 0.7)
+	draw_colored_polygon(PackedVector2Array([tip, left, right]), Color(1.0, 0.3, 0.25))
+	draw_rect(Rect2(Vector2.ZERO, size), BORDER, false, 2.0)

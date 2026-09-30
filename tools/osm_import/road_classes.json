@@ -3,6 +3,7 @@
   "lane_width_m": 3.5,
   "bbox_edge_margin_m": 40.0,
   "bridge_clearance_m": 6.0,
+  "water_depth_m": 1.5,
   "drivable_classes": [
     "motorway", "motorway_link", "trunk", "trunk_link",
     "primary", "primary_link", "secondary", "secondary_link",

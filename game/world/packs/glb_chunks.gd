@@ -5,6 +5,28 @@ extends RefCounted
 ## restored after import; glTF itself has no LOD concept.
 
 
+const BUILD_MANIFEST := "build.json"
+const INPUT_FILES := ["road_graph.v0.json", "terrain.json", "water.v0.json"]
+
+
+## Hash of the pack files the chunks are generated from, so stale chunks can be detected.
+static func inputs_hash(pack_dir: String) -> String:
+	var parts := PackedStringArray()
+	for name in INPUT_FILES:
+		var path := pack_dir.path_join(name)
+		parts.append(FileAccess.get_md5(path) if FileAccess.file_exists(path) else "-")
+	return "|".join(parts).md5_text()
+
+
+## True when <pack>/chunks/build.json matches the current pack inputs.
+static func chunks_are_current(pack_dir: String) -> bool:
+	var path := pack_dir.path_join("chunks").path_join(BUILD_MANIFEST)
+	if not FileAccess.file_exists(path):
+		return false
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return typeof(parsed) == TYPE_DICTIONARY and parsed.get("inputs_hash", "") == inputs_hash(pack_dir)
+
+
 ## Exports every chunk of a loaded pack to <pack>/chunks/chunk_<cx>_<cz>.glb.
 static func export_all(pack: MapPack) -> int:
 	var out_dir := pack.pack_dir.path_join("chunks")
@@ -20,6 +42,9 @@ static func export_all(pack: MapPack) -> int:
 		if export_chunk(chunk, out_dir.path_join("chunk_%d_%d.glb" % [coord.x, coord.y])) == OK:
 			count += 1
 		chunk.free()
+	var manifest := FileAccess.open(out_dir.path_join(BUILD_MANIFEST), FileAccess.WRITE)
+	if manifest != null:
+		manifest.store_string(JSON.stringify({"inputs_hash": inputs_hash(pack.pack_dir), "chunks": count}, "  ") + "\n")
 	return count
 
 
@@ -38,7 +63,7 @@ static func export_chunk(chunk: Node3D, path: String) -> Error:
 
 
 ## Reads a chunk GLB back into a node tree with visibility ranges and collision restored.
-static func import_chunk(path: String, road_material: Material, terrain_material: Material, with_collision: bool) -> Node3D:
+static func import_chunk(path: String, road_material: Material, terrain_material: Material, with_collision: bool, water_material: Material = null) -> Node3D:
 	var doc := GLTFDocument.new()
 	var state := GLTFState.new()
 	if doc.append_from_file(path, state) != OK:
@@ -60,7 +85,10 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 			var ranges := _ranges_for(role)
 			mi.visibility_range_begin = ranges.x
 			mi.visibility_range_end = ranges.y
-			mi.material_override = terrain_material if role.begins_with("terrain") else road_material
+			if role == "water":
+				mi.material_override = water_material if water_material != null else WaterBuilder.material()
+			else:
+				mi.material_override = terrain_material if role.begins_with("terrain") else road_material
 			if role in ["roads_lod0", "junctions_lod0", "terrain_lod1"]:
 				collision_meshes.append(mi.mesh)
 	scene.free()
@@ -83,4 +111,6 @@ static func _ranges_for(role: String) -> Vector2:
 			return Vector2(MapPack.TERRAIN_LOD0_END_M, MapPack.TERRAIN_LOD1_END_M)
 		"terrain_lod2":
 			return Vector2(MapPack.TERRAIN_LOD1_END_M, MapPack.TERRAIN_LOD2_END_M)
+		"water":
+			return Vector2(0.0, MapPack.TERRAIN_LOD2_END_M)
 	return Vector2(0.0, MapPack.TERRAIN_LOD2_END_M)

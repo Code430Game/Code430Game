@@ -45,6 +45,15 @@ System packs ship as a `.pck` next to their `pack.json`, must set `"trusted": tr
 
 Fields for tone modes (`supported_modes`, `max_descriptors`) arrive with the `add-content-modes` change.
 
+## Map pack files
+| File | Required | Contents |
+|---|---|---|
+| `road_graph.v0.json` | yes | Nodes and edges with polylines; schema `road_graph.schema.v0.json`. |
+| `terrain.json` + `terrain/*.png` | yes | 256 m chunks of 65×65 height samples at 4 m, height in the R and G bytes, min/max per chunk. |
+| `water.v0.json` | no | Pre-triangulated water polygons with a surface height; schema `water.schema.v0.json`. |
+| `overrides.json` | no | Hand fixes applied on top of the generated data (empty for now). |
+| `chunks/*.glb` + `chunks/build.json` | no | Pre-built meshes from the Godot pack builder. `build.json` holds a hash of the inputs; the game ignores chunks whose hash no longer matches and generates meshes at load instead. |
+
 ## Validating locally
 ```
 cd tools

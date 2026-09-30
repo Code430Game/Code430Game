@@ -347,6 +347,16 @@ def render_markdown(report: ValidationReport, title: str) -> str:
             lines.append(
                 f"| {t.kind} | {t.nodes} | {classes} | {', '.join(t.sample_names) or '-'} | {', '.join(str(w) for w in t.sample_way_ids)} |"
             )
+    if "water" in s:
+        w = s["water"]
+        lines += [
+            "",
+            "## Water",
+            "",
+            f"- Polygons written: {w['polygons']}; relations or ways skipped: {len(w['skipped'])}",
+        ]
+        for sk in w["skipped"]:
+            lines.append(f"  - {sk['id']}: {sk['reason']}")
     lines += ["", "## Elevation", ""]
     if report.elevation is None:
         lines.append("No elevation applied: every y is 0.")

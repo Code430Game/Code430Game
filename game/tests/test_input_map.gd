@@ -5,7 +5,7 @@ const REQUIRED_ACTIONS: PackedStringArray = [
 	"move_forward", "move_back", "move_left", "move_right",
 	"look_up", "look_down", "look_left", "look_right",
 	"sprint", "jump", "interact", "accelerate", "brake", "handbrake", "pause",
-	"debug_modifier", "debug_toggle", "debug_graph", "reset_vehicle",
+	"debug_modifier", "debug_toggle", "debug_graph", "reset_vehicle", "map_toggle",
 ]
 
 

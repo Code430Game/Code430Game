@@ -3241,8 +3241,13 @@
   "terrain": {
    "cells_carved": 4238,
    "cells_flattened": 223647,
+   "cells_lowered_for_water": 58695,
    "chunks": 196
   },
-  "total_length_km": 193.405
+  "total_length_km": 193.405,
+  "water": {
+   "polygons": 18,
+   "skipped": []
+  }
  }
 }
