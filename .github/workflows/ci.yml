@@ -80,6 +80,7 @@ jobs:
           name: gdunit4-report
           path: game/reports
           if-no-files-found: ignore
+          retention-days: 3
 
   export-linux:
     name: Linux export
@@ -129,3 +130,4 @@ jobs:
           name: code430-linux-${{ github.sha }}
           path: build/linux
           if-no-files-found: error
+          retention-days: 7

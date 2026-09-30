@@ -67,4 +67,10 @@ openspec/             specs and changes
 ```
 
 ## Licensing
-Not decided yet. See `docs/licensing-options.md`. Map data derived from OpenStreetMap is ODbL and credited "© OpenStreetMap contributors".
+Three-way split, see `docs/licensing-options.md` for the reasoning:
+- Code, schemas, and tools: MIT (`LICENSE`).
+- First-party assets: CC BY-SA 4.0 (`LICENSE-ASSETS`).
+- Map data derived from OpenStreetMap: ODbL 1.0, credited "© OpenStreetMap contributors". Elevation from Natural Resources Canada under the Open Government Licence – Canada.
+
+## Run the CI checks locally
+`scripts/ci-local.sh` runs the same steps as `.github/workflows/ci.yml` on this machine: ruff, pytest, pack validation, gdUnit4, and optionally the Linux export (`--export`, needs the export templates installed).

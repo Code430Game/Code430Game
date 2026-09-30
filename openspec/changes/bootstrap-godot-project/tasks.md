@@ -2,7 +2,7 @@
 - [x] 1.1 Create folder layout from AGENTS.md
 - [x] 1.2 Add `.gitignore` (Godot `.godot/`, exports, Python caches, OSM/DEM download caches)
 - [x] 1.3 Add `.godot-version` with the exact pinned version
-- [ ] 1.4 Ask human about licenses; add LICENSE files once decided (asked 2026-09-30, summary in `docs/licensing-options.md`; waiting on the human)
+- [x] 1.4 Ask human about licenses; add LICENSE files once decided (decided 2026-09-30: MIT code, CC BY-SA 4.0 assets)
 
 ## 2. Godot project
 - [x] 2.1 Create project in `game/`, Forward+ renderer, Jolt physics

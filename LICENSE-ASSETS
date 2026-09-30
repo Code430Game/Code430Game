@@ -1,0 +1,22 @@
+Code 430 first-party assets license
+
+Unless a file or pack says otherwise, first-party assets in this repository
+(models, textures, audio, ad artwork, and other creative content that is not
+source code) are licensed under the Creative Commons Attribution-ShareAlike 4.0
+International License (CC BY-SA 4.0).
+
+Full text: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+SPDX identifier: CC-BY-SA-4.0
+
+Attribution: "Code 430 contributors".
+
+Exceptions
+- Source code, schemas, and tooling: MIT, see LICENSE.
+- Map data derived from OpenStreetMap (road graphs, generated city meshes in
+  map packs): Open Database License 1.0 (ODbL-1.0), © OpenStreetMap
+  contributors. https://www.openstreetmap.org/copyright
+- Elevation data from Natural Resources Canada: Open Government Licence –
+  Canada. https://open.canada.ca/en/open-government-licence-canada
+- Third-party addons keep their own licenses (for example
+  game/addons/gdUnit4, MIT).
+- Community packs choose their own license, declared in their pack.json.

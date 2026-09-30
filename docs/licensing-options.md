@@ -1,6 +1,8 @@
 # Licensing options for Code 430
 
-A short read to decide the code and asset licenses before the first public push. Nothing here is legal advice; it is the practical summary an open-source game usually needs. No LICENSE files exist yet.
+**Decided 2026-09-30:** MIT for code (`LICENSE`), CC BY-SA 4.0 for first-party assets (`LICENSE-ASSETS`), ODbL for OSM-derived map data. The human accepted the recommendation; this can be revisited before the first public release since nothing has been distributed yet.
+
+The rest of this page is the reasoning. Nothing here is legal advice; it is the practical summary an open-source game usually needs.
 
 ## What needs a license
 There are three different things in this repo, and they get different licenses:
