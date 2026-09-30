@@ -18,7 +18,7 @@
 - [x] 3.3 Ramp (`*_link`) connectivity checks
 - [x] 3.4 One-way trap detection (strongly connected components)
 - [x] 3.5 Markdown + JSON report output
-- [ ] 3.6 **Stop: run on the full starter district and show the human the report**
+- [x] 3.6 **Stop: run on the full starter district and show the human the report** (shown 2026-09-30; report ships in the pack as `validation_report.md`)
 
 ## 4. Elevation
 - [x] 4.1 DEM download + cache + sampling
