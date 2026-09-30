@@ -191,3 +191,52 @@ def test_bridge_parapet_moves_outside_a_walkway_and_leaves_a_curb():
     assert abs(parapets[1] - 9.25) < 0.3  # sidewalk outer edge (8 + 1.5) minus the inset
     curb = next(b for b in r.barriers if b.kind == "curb")
     assert abs(curb.points[0][2] - road_z - 6.0) < 0.3  # road edge on the walkway side
+
+
+def test_ramp_walls_stay_out_of_the_highway_ribbon():
+    # A bridge ramp peels off a bridge highway at a mid node: its parapet must not start
+    # inside the highway's 14 m carriageway.
+    g = graph_for(
+        [
+            (
+                1,
+                [(-300, 0), (0, 0), (300, 0)],
+                {
+                    "highway": "motorway",
+                    "oneway": "yes",
+                    "bridge": "yes",
+                    "layer": "1",
+                    "width": "14",
+                },
+            ),
+            (
+                2,
+                [(0, 0), (120, 25), (240, 60)],
+                {
+                    "highway": "motorway_link",
+                    "oneway": "yes",
+                    "bridge": "yes",
+                    "layer": "1",
+                    "width": "5",
+                },
+            ),
+        ],
+        FlatSource(10.0),
+    )
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    hw_segments = [
+        (e.polyline[i], e.polyline[i + 1])
+        for e in g.edges.values()
+        if e.osm_way_id == 1
+        for i in range(len(e.polyline) - 1)
+    ]
+    from osm_import.elevation import _seg_dist
+
+    ramp_walls = [b for b in r.barriers if b.edge_id.startswith("w2.")]
+    assert ramp_walls, "the ramp still gets walls where it is clear"
+    for b in ramp_walls:
+        for x, _y, z in b.points:
+            d = min(_seg_dist(x, z, a[0], a[2], c[0], c[2]) for a, c in hw_segments)
+            assert d >= 7.0 - 0.2 - 0.01, (
+                f"wall point {x:.1f},{z:.1f} is {d:.1f} m from the highway centreline"
+            )
