@@ -19,7 +19,7 @@
 ## 4. CI
 - [x] 4.1 GitHub Actions: pytest for `tools/`
 - [x] 4.2 GitHub Actions: gdUnit4 headless
-- [ ] 4.3 GitHub Actions: headless Linux export uploaded as artifact
+- [x] 4.3 GitHub Actions: headless Linux export uploaded as artifact (export verified locally 2026-09-30; CI itself runs on first push to GitHub)
 - [x] 4.4 GitHub Actions: pack manifest validation
 
 ## 5. Docs
