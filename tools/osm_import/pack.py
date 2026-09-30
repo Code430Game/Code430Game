@@ -17,6 +17,7 @@ from pathlib import Path
 
 import numpy as np
 
+from osm_import.buildings import BuildingsResult
 from osm_import.elevation import HRDEM_ATTRIBUTION, ElevationSource
 from osm_import.export import OSM_ATTRIBUTION, dump_json
 from osm_import.graph import RoadGraph
@@ -224,22 +225,60 @@ def _in_triangle(px: np.ndarray, pz: np.ndarray, a, b, c) -> np.ndarray:
     return ~(has_neg & has_pos)
 
 
+def flatten_buildings(chunk: ChunkTerrain, buildings: BuildingsResult | None) -> int:
+    """Set terrain cells inside a footprint to the building's ground height. Returns cells changed."""
+    if buildings is None or not buildings.buildings:
+        return 0
+    s = SAMPLES_PER_CHUNK
+    xs = chunk.min_x + np.arange(s) * TERRAIN_RES_M
+    zs = chunk.min_z + np.arange(s) * TERRAIN_RES_M
+    gx, gz = np.meshgrid(xs, zs)
+    h = chunk.heights.astype(np.float64)
+    changed = np.zeros((s, s), dtype=bool)
+    x0, z0, x1, z1 = (
+        chunk.min_x,
+        chunk.min_z,
+        chunk.min_x + CHUNK_SIZE_M,
+        chunk.min_z + CHUNK_SIZE_M,
+    )
+    for b in buildings.buildings:
+        v = np.array(b.roof_vertices, dtype=np.float64)
+        if v[:, 0].max() < x0 or v[:, 0].min() > x1 or v[:, 1].max() < z0 or v[:, 1].min() > z1:
+            continue
+        tri = np.array(b.roof_triangles, dtype=np.int64).reshape(-1, 3)
+        inside = np.zeros((s, s), dtype=bool)
+        for a, bb, c in tri:
+            inside |= _in_triangle(gx, gz, v[a], v[bb], v[c])
+        h = np.where(inside, b.ground_y, h)
+        changed |= inside
+    chunk.heights = h.astype(np.float32)
+    return int(changed.sum())
+
+
 def build_terrain(
     graph: RoadGraph,
     source: ElevationSource,
     bounds: tuple[float, float, float, float],
     water: WaterResult | None = None,
     water_depth_m: float = 0.0,
+    buildings: BuildingsResult | None = None,
 ) -> tuple[list[ChunkTerrain], dict]:
     ground, bridges = _road_footprints(graph)
     xr, zr = chunk_range(bounds)
     chunks: list[ChunkTerrain] = []
-    stats = {"chunks": 0, "cells_carved": 0, "cells_flattened": 0, "cells_lowered_for_water": 0}
+    stats = {
+        "chunks": 0,
+        "cells_carved": 0,
+        "cells_flattened": 0,
+        "cells_lowered_for_water": 0,
+        "cells_under_buildings": 0,
+    }
     for cz in zr:
         for cx in xr:
             chunk = sample_chunk(source, cx, cz)
             stats["cells_carved"] += carve_bridges(chunk, bridges)
             stats["cells_lowered_for_water"] += lower_water(chunk, water, water_depth_m)
+            stats["cells_under_buildings"] += flatten_buildings(chunk, buildings)
             stats["cells_flattened"] += flatten_roads(chunk, ground)
             chunks.append(chunk)
             stats["chunks"] += 1
@@ -259,6 +298,7 @@ def write_pack(
     bbox: BBox,
     elevation_attribution: str | None,
     water: WaterResult | None = None,
+    buildings: BuildingsResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -328,6 +368,9 @@ def write_pack(
     if water is not None:
         paths["water"] = out_dir / "water.v0.json"
         dump_json(water.to_dict(), paths["water"])
+    if buildings is not None:
+        paths["buildings"] = out_dir / "buildings.v0.json"
+        dump_json(buildings.to_dict(), paths["buildings"])
     return paths
 
 

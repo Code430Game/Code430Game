@@ -12,6 +12,7 @@ const ROAD_WIDTH_PX := {"motorway": 4.0, "trunk": 4.0, "primary": 3.0, "secondar
 const DEFAULT_ROAD_WIDTH_PX := 1.5
 const BACKGROUND := Color(0.09, 0.10, 0.12)
 const WATER := Color(0.16, 0.32, 0.45)
+const BUILDING := Color(0.20, 0.21, 0.24)
 
 var metres_per_pixel: float = DEFAULT_METRES_PER_PIXEL
 var min_x: float = 0.0
@@ -44,7 +45,7 @@ static func road_width_px(road_class: String) -> float:
 
 
 ## Draws the map into `texture`. Must be called from a node in the tree; awaits one frame.
-func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon]) -> void:
+func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = []) -> void:
 	var viewport := SubViewport.new()
 	viewport.size = size_px
 	viewport.transparent_bg = false
@@ -54,6 +55,7 @@ func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon
 	canvas.renderer = self
 	canvas.graph = graph
 	canvas.water = water
+	canvas.buildings = buildings
 	viewport.add_child(canvas)
 	host.add_child(viewport)
 	await RenderingServer.frame_post_draw
@@ -68,9 +70,21 @@ class MapCanvas:
 	var renderer: MapRenderer
 	var graph: RoadGraph
 	var water: Array[WaterBuilder.WaterPolygon]
+	var buildings: Array[BuildingBuilder.Building] = []
 
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(renderer.size_px)), BACKGROUND)
+		for b in buildings:
+			var pts := PackedVector2Array()
+			for v in b.roof_vertices:
+				pts.append(renderer.world_to_pixel(v.x, v.y))
+			for t in range(0, b.roof_triangles.size(), 3):
+				var a := pts[b.roof_triangles[t]]
+				var bb := pts[b.roof_triangles[t + 1]]
+				var c := pts[b.roof_triangles[t + 2]]
+				if absf((bb - a).cross(c - a)) < 0.5:
+					continue
+				draw_colored_polygon(PackedVector2Array([a, bb, c]), BUILDING)
 		for w in water:
 			var pts := PackedVector2Array()
 			for v in w.vertices:

@@ -24,6 +24,7 @@ class ImportConfig:
     bbox_edge_margin_m: float
     bridge_clearance_m: float
     water_depth_m: float
+    buildings: dict
     drivable_classes: tuple[str, ...]
     pedestrian_classes: tuple[str, ...]
     excluded_highway_values: frozenset[str]
@@ -49,6 +50,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> ImportConfig:
         bbox_edge_margin_m=float(raw["bbox_edge_margin_m"]),
         bridge_clearance_m=float(raw["bridge_clearance_m"]),
         water_depth_m=float(raw.get("water_depth_m", 1.5)),
+        buildings=dict(raw.get("buildings", {})),
         drivable_classes=tuple(raw["drivable_classes"]),
         pedestrian_classes=tuple(raw["pedestrian_classes"]),
         excluded_highway_values=frozenset(raw["excluded_highway_values"]),

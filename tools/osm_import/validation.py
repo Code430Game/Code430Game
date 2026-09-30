@@ -357,6 +357,16 @@ def render_markdown(report: ValidationReport, title: str) -> str:
         ]
         for sk in w["skipped"]:
             lines.append(f"  - {sk['id']}: {sk['reason']}")
+    if "buildings" in s:
+        b = s["buildings"]
+        lines += [
+            "",
+            "## Buildings",
+            "",
+            f"- Footprints written: {b['footprints']}; height from tag/levels/default: {b['height_sources']}",
+        ]
+        for sk in b["skipped"]:
+            lines.append(f"  - {sk['id']}: {sk['reason']}")
     lines += ["", "## Elevation", ""]
     if report.elevation is None:
         lines.append("No elevation applied: every y is 0.")

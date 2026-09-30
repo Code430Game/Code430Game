@@ -97,7 +97,7 @@ func _setup_maps() -> void:
 	_overview.graph = _pack.graph
 	_overview.player = _car
 	var t0 := Time.get_ticks_msec()
-	await _map_renderer.render(self, _pack.graph, _pack.water_polygons)
+	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings)
 	print("map texture %s rendered in %d ms" % [_map_renderer.size_px, Time.get_ticks_msec() - t0])
 	if _open_map_on_start:
 		_overview.open()

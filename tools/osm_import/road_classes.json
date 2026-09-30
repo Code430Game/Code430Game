@@ -4,6 +4,18 @@
   "bbox_edge_margin_m": 40.0,
   "bridge_clearance_m": 6.0,
   "water_depth_m": 1.5,
+  "buildings": {
+    "storey_height_m": 3.2,
+    "min_height_m": 3.0,
+    "wall_embed_m": 2.0,
+    "min_area_m2": 4.0,
+    "default_levels": {
+      "house": 2, "detached": 2, "semidetached_house": 2, "terrace": 2, "residential": 3, "apartments": 6,
+      "commercial": 3, "retail": 2, "office": 6, "industrial": 2, "warehouse": 2, "garage": 1, "garages": 1,
+      "shed": 1, "roof": 1, "church": 4, "cathedral": 6, "university": 4, "school": 3, "hospital": 5, "hotel": 8,
+      "government": 5, "public": 3, "yes": 2, "default": 2
+    }
+  },
   "drivable_classes": [
     "motorway", "motorway_link", "trunk", "trunk_link",
     "primary", "primary_link", "secondary", "secondary_link",

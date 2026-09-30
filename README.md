@@ -28,7 +28,7 @@ cd tools
 uv run python -m osm_import --bbox 45.405,-75.715,45.435,-75.675 --pack-out ../packs/ottawa-centretown \
   --pack-id code430.ottawa-centretown --pack-name "Ottawa Centretown" --title "Ottawa Centretown starter district"
 ```
-That fetches OpenStreetMap and NRCan elevation data (cached, gitignored), writes the road graph, terrain heightmaps, manifest, and validation report. Optionally pre-build the chunk meshes as GLB so the game loads faster:
+That fetches OpenStreetMap roads, water, and buildings plus NRCan elevation data (cached, gitignored), and writes the road graph, terrain heightmaps, water and building files, manifest, and validation report. Optionally pre-build the chunk meshes as GLB so the game loads faster:
 ```
 godot --headless --path game -s res://world/build/pack_builder.gd -- code430.ottawa-centretown
 ```

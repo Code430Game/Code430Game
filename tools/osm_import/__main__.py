@@ -12,6 +12,7 @@ import logging
 import sys
 from pathlib import Path
 
+from osm_import.buildings import build_buildings, buildings_query
 from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.osm_data import BBox, OsmData
@@ -54,8 +55,20 @@ def _import(args: argparse.Namespace) -> int:
                 "polygons": len(water.polygons),
                 "skipped": water.skipped,
             }
+        buildings = None
+        if args.buildings:
+            if args.buildings_json:
+                b_payload = json.loads(args.buildings_json.read_text(encoding="utf-8"))
+            else:
+                b_payload, _meta = fetch_query(buildings_query(bbox), bbox, args.cache_dir)
+            buildings = build_buildings(b_payload, bbox, proj, elevation, cfg.buildings)
+            result.report.summary["buildings"] = {
+                "footprints": len(buildings.buildings),
+                "skipped": buildings.skipped[:20],
+                "height_sources": buildings.height_sources,
+            }
         chunks, tstats = build_terrain(
-            result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m
+            result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m, buildings
         )
         result.report.summary["terrain"] = tstats
         paths = write_pack(
@@ -71,8 +84,13 @@ def _import(args: argparse.Namespace) -> int:
             bbox,
             elevation_attribution_for(elevation),
             water,
+            buildings,
         )
         print(f"terrain: {tstats}")
+        if buildings is not None:
+            print(
+                f"buildings: {len(buildings.buildings)} footprints, heights {buildings.height_sources}"
+            )
         if water is not None:
             print(f"water: {len(water.polygons)} polygons, {len(water.skipped)} skipped")
     else:
@@ -126,6 +144,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     imp.add_argument(
         "--water-json", type=Path, help="Read this Overpass water JSON instead of fetching"
+    )
+    imp.add_argument(
+        "--buildings",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Fetch and write building footprints with --pack-out",
+    )
+    imp.add_argument(
+        "--buildings-json", type=Path, help="Read this Overpass buildings JSON instead of fetching"
     )
     imp.add_argument(
         "--osm-json", type=Path, help="Read this Overpass JSON file instead of fetching"
