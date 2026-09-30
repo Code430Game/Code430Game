@@ -15,8 +15,10 @@ from pathlib import Path
 from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox
 from osm_import.osm_data import BBox, OsmData
+from osm_import.pack import build_terrain, elevation_attribution_for, write_pack
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
+from osm_import.validation import render_markdown
 
 
 def _import(args: argparse.Namespace) -> int:
@@ -35,7 +37,29 @@ def _import(args: argparse.Namespace) -> int:
     else:
         elevation = None
     result = run_pipeline(data, bbox, cfg, cfg_name, elevation)
-    paths = write_outputs(result, args.out, args.title or bbox.overpass())
+    title = args.title or bbox.overpass()
+    if args.pack_out:
+        if elevation is None:
+            parser_error("--pack-out needs an elevation source (use --dem flat for a test pack)")
+        proj = Projector.for_bbox(bbox)
+        chunks, tstats = build_terrain(result.graph, elevation, proj.bbox_local(bbox))
+        result.report.summary["terrain"] = tstats
+        paths = write_pack(
+            args.pack_out,
+            args.pack_id,
+            args.pack_name or title,
+            args.pack_version,
+            result.graph_dict,
+            result.report.to_dict(),
+            render_markdown(result.report, title),
+            chunks,
+            proj.frame,
+            bbox,
+            elevation_attribution_for(elevation),
+        )
+        print(f"terrain: {tstats}")
+    else:
+        paths = write_outputs(result, args.out, title)
     s = result.report.summary
     print(
         f"nodes {s['nodes']}  edges {s['edges']}  length {s['total_length_km']} km  components {s['components']}"
@@ -46,6 +70,10 @@ def _import(args: argparse.Namespace) -> int:
     for k, p in paths.items():
         print(f"{k}: {p}")
     return 0
+
+
+def parser_error(message: str) -> None:
+    raise SystemExit(f"error: {message}")
 
 
 def _crop(args: argparse.Namespace) -> int:
@@ -66,7 +94,13 @@ def main(argv: list[str] | None = None) -> int:
 
     imp = sub.add_parser("import", help="Import a bbox (default command).")
     imp.add_argument("--bbox", required=True, help="S,W,N,E in WGS84")
-    imp.add_argument("--out", required=True, type=Path, help="Output directory")
+    imp.add_argument("--out", type=Path, help="Output directory for graph and report")
+    imp.add_argument(
+        "--pack-out", type=Path, help="Write a complete map pack folder here instead of --out"
+    )
+    imp.add_argument("--pack-id", default="code430.map", help="Pack id for pack.json")
+    imp.add_argument("--pack-name", help="Pack display name (defaults to --title)")
+    imp.add_argument("--pack-version", default="0.1.0")
     imp.add_argument(
         "--osm-json", type=Path, help="Read this Overpass JSON file instead of fetching"
     )
@@ -98,6 +132,8 @@ def main(argv: list[str] | None = None) -> int:
     ):
         argv.insert(1, "import")
     args = parser.parse_args(argv)
+    if getattr(args, "command", None) == "import" and not (args.out or args.pack_out):
+        parser.error("one of --out or --pack-out is required")
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",
