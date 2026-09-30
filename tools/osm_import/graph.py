@@ -67,6 +67,7 @@ class PedestrianWay:
         "footway"  # sidewalk | crossing | footway | path | steps | cycleway | pedestrian | track
     )
     width_m: float = 1.5
+    covered: bool = False  # tunnel=* or covered=yes: passes under something, not drawn
 
 
 @dataclass
@@ -234,9 +235,19 @@ def build_graph(
         width = T.parse_width_m(way.tags.get("width"))
         if width is None:
             width = float(cfg.pedestrian.get("default_width_m", {}).get(kind, 1.5))
+        covered = (
+            T.is_truthy(way.tags.get("tunnel")) and way.tags.get("tunnel") != "building_passage"
+        ) or T.is_truthy(way.tags.get("covered"))
         peds.append(
             PedestrianWay(
-                f"p{way.id}", pl, way.tags["highway"], way.id, way.tags.get("name"), kind, width
+                f"p{way.id}",
+                pl,
+                way.tags["highway"],
+                way.id,
+                way.tags.get("name"),
+                kind,
+                width,
+                covered,
             )
         )
 

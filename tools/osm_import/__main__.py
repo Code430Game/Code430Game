@@ -12,8 +12,10 @@ import logging
 import sys
 from pathlib import Path
 
+from osm_import.barriers import build_barriers
 from osm_import.buildings import build_buildings, buildings_query
 from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
+from osm_import.export import pedestrian_to_list
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pack import build_terrain, elevation_attribution_for, write_pack
@@ -68,8 +70,13 @@ def _import(args: argparse.Namespace) -> int:
                 "height_sources": buildings.height_sources,
             }
         chunks, tstats = build_terrain(
-            result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m, buildings
+            result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m, buildings, cfg
         )
+        # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
+        result.graph_dict["pedestrian_ways"] = pedestrian_to_list(result.graph)
+        # Barriers use final pedestrian heights (curbs), so they come after the terrain.
+        barriers = build_barriers(result.graph, elevation, buildings, cfg)
+        result.report.summary["barriers"] = barriers.counts
         result.report.summary["terrain"] = tstats
         paths = write_pack(
             args.pack_out,
@@ -85,8 +92,10 @@ def _import(args: argparse.Namespace) -> int:
             elevation_attribution_for(elevation),
             water,
             buildings,
+            barriers,
         )
         print(f"terrain: {tstats}")
+        print(f"barriers: {barriers.counts}")
         if buildings is not None:
             print(
                 f"buildings: {len(buildings.buildings)} footprints, heights {buildings.height_sources}"

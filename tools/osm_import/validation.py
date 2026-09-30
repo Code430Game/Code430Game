@@ -357,6 +357,13 @@ def render_markdown(report: ValidationReport, title: str) -> str:
         ]
         for sk in w["skipped"]:
             lines.append(f"  - {sk['id']}: {sk['reason']}")
+    if "barriers" in s:
+        lines += [
+            "",
+            "## Barriers",
+            "",
+            "- " + (", ".join(f"{k} {v}" for k, v in s["barriers"].items()) or "none"),
+        ]
     if "buildings" in s:
         b = s["buildings"]
         lines += [

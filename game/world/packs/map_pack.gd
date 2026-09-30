@@ -35,6 +35,9 @@ var buildings: Array[BuildingBuilder.Building] = []
 var building_chunks: Dictionary = {"lod0": {}, "lod1": {}}
 var sidewalk_material: Material
 var sidewalk_chunks: Dictionary = {}
+var barrier_material: Material
+var barriers: Array[BarrierBuilder.Barrier] = []
+var barrier_chunks: Dictionary = {}
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
@@ -69,6 +72,9 @@ func load(dir: String) -> bool:
 	building_chunks = BuildingBuilder.build(buildings)
 	sidewalk_material = SidewalkBuilder.material()
 	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
+	barrier_material = BarrierBuilder.material()
+	barriers = BarrierBuilder.load_barriers(dir)
+	barrier_chunks = BarrierBuilder.build(barriers)
 	return terrain_index.size() > 0
 
 
@@ -102,7 +108,7 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 		var glb := pack_dir.path_join("chunks").path_join("chunk_%d_%d.glb" % [coord.x, coord.y])
 		var chunk: Node3D = null
 		if use_glb and FileAccess.file_exists(glb):
-			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material, building_material, sidewalk_material)
+			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material, building_material, sidewalk_material, barrier_material)
 			stats["chunks_from_glb"] = stats.get("chunks_from_glb", 0) + 1
 		if chunk == null:
 			var heights := TerrainBuilder.load_chunk(pack_dir, terrain_index, entry)
@@ -138,6 +144,10 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 		var markings_mi := _mesh_instance("markings_lod0", mm, marking_material, 0.0, marking_visible_to_m)
 		markings_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		chunk.add_child(markings_mi)
+	if barrier_chunks.has(coord):
+		var mbar: ArrayMesh = barrier_chunks[coord].to_mesh()
+		chunk.add_child(_mesh_instance("barriers_lod0", mbar, barrier_material, 0.0, ROAD_LOD0_END_M))
+		collision_meshes.append(mbar)
 	if sidewalk_chunks.has(coord):
 		var ms: ArrayMesh = sidewalk_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("sidewalks_lod0", ms, sidewalk_material, 0.0, SidewalkBuilder.VISIBLE_TO_M))

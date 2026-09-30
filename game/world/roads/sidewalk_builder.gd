@@ -22,7 +22,7 @@ const COLORS := {
 static func build(ways: Array[RoadGraph.PedestrianWay]) -> Dictionary:
 	var buckets := {}
 	for w in ways:
-		if w.polyline.size() < 2:
+		if w.polyline.size() < 2 or w.covered:
 			continue
 		var lift := SURFACE_LIFT_M - (CROSSING_DROP_M if w.kind == "crossing" else 0.0)
 		var color: Color = COLORS.get(w.kind, COLORS["footway"])

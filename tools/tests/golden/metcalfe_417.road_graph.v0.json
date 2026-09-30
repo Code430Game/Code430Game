@@ -8347,6 +8347,7 @@
  "pedestrian_ways": [
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p40047343",
    "kind": "cycleway",
    "name": "Rideau Canal Eastern Pathway",
@@ -9609,12 +9610,12 @@
     ],
     [
      282.713,
-     67.572,
+     66.034,
      50.437
     ],
     [
      271.676,
-     67.572,
+     66.359,
      26.79
     ],
     [
@@ -9629,17 +9630,17 @@
     ],
     [
      267.669,
-     74.23,
+     66.468,
      -19.23
     ],
     [
      267.398,
-     74.23,
+     66.396,
      -40.686
     ],
     [
      266.251,
-     74.183,
+     66.249,
      -67.816
     ],
     [
@@ -9692,6 +9693,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p40486742",
    "kind": "footway",
    "name": null,
@@ -9787,6 +9789,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p80789167",
    "kind": "footway",
    "name": null,
@@ -9794,7 +9797,7 @@
    "polyline": [
     [
      -46.234,
-     64.759,
+     64.905,
      -219.423
     ],
     [
@@ -9872,6 +9875,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p80789169",
    "kind": "footway",
    "name": null,
@@ -9879,7 +9883,7 @@
    "polyline": [
     [
      11.01,
-     69.469,
+     69.462,
      -124.352
     ],
     [
@@ -9889,7 +9893,7 @@
     ],
     [
      -43.97,
-     68.957,
+     68.857,
      -118.966
     ]
    ],
@@ -9897,6 +9901,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p85093125",
    "kind": "sidewalk",
    "name": null,
@@ -9932,6 +9937,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p85093130",
    "kind": "sidewalk",
    "name": null,
@@ -9957,6 +9963,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p85093141",
    "kind": "path",
    "name": null,
@@ -9964,62 +9971,62 @@
    "polyline": [
     [
      201.099,
-     67.838,
+     67.511,
      91.208
     ],
     [
      198.153,
-     67.707,
+     67.438,
      99.971
     ],
     [
      196.122,
-     67.541,
+     67.329,
      108.709
     ],
     [
      196.094,
-     67.267,
+     67.07,
      122.107
     ],
     [
      197.375,
-     67.082,
+     66.888,
      129.795
     ],
     [
      199.353,
-     66.813,
+     66.634,
      140.145
     ],
     [
      203.334,
-     66.444,
+     66.286,
      153.256
     ],
     [
      209.615,
-     66.028,
+     65.89,
      167.43
     ],
     [
      221.085,
-     65.51,
+     65.33,
      187.982
     ],
     [
      236.69,
-     64.852,
+     64.77,
      210.913
     ],
     [
      252.898,
-     64.463,
+     64.378,
      230.094
     ],
     [
      265.098,
-     64.275,
+     64.198,
      240.319
     ]
    ],
@@ -10027,6 +10034,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p85093148",
    "kind": "path",
    "name": null,
@@ -10034,57 +10042,57 @@
    "polyline": [
     [
      209.253,
-     67.362,
+     67.073,
      -105.72
     ],
     [
      207.309,
-     67.551,
+     67.277,
      -96.149
     ],
     [
      206.851,
-     67.751,
+     67.465,
      -84.598
     ],
     [
      206.017,
-     68.053,
+     67.793,
      -61.062
     ],
     [
      206.39,
-     68.158,
+     68.01,
      -35.894
     ],
     [
      208.064,
-     68.255,
+     68.08,
      6.462
     ],
     [
      208.588,
-     68.107,
+     67.844,
      48.841
     ],
     [
      209.244,
-     67.862,
+     67.753,
      56.379
     ],
     [
      210.908,
-     67.709,
+     67.684,
      58.604
     ],
     [
      213.369,
-     67.67,
+     67.602,
      59.925
     ],
     [
      216.677,
-     67.629,
+     67.509,
      60.22
     ]
    ],
@@ -10092,6 +10100,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p85093153",
    "kind": "path",
    "name": null,
@@ -10117,6 +10126,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p85103572",
    "kind": "sidewalk",
    "name": null,
@@ -10147,6 +10157,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p88161305",
    "kind": "path",
    "name": null,
@@ -10164,17 +10175,17 @@
     ],
     [
      266.886,
-     64.271,
+     64.209,
      238.945
     ],
     [
      265.098,
-     64.275,
+     64.198,
      240.319
     ],
     [
      259.914,
-     64.286,
+     64.186,
      244.319
     ]
    ],
@@ -10182,6 +10193,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p88431294",
    "kind": "path",
    "name": null,
@@ -10224,17 +10236,17 @@
     ],
     [
      272.495,
-     74.183,
+     66.081,
      -73.319
     ],
     [
      272.963,
-     74.183,
+     66.24,
      -48.194
     ],
     [
      276.47,
-     74.23,
+     66.263,
      -24.455
     ],
     [
@@ -10254,12 +10266,12 @@
     ],
     [
      282.206,
-     67.572,
+     66.15,
      22.602
     ],
     [
      280.281,
-     67.572,
+     66.18,
      26.318
     ]
    ],
@@ -10267,6 +10279,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p89794451",
    "kind": "sidewalk",
    "name": null,
@@ -10297,6 +10310,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p189168522",
    "kind": "footway",
    "name": null,
@@ -10339,17 +10353,17 @@
     ],
     [
      277.816,
-     63.341,
+     63.148,
      -374.652
     ],
     [
      277.654,
-     63.352,
+     63.179,
      -367.587
     ],
     [
      273.794,
-     63.359,
+     63.16,
      -366.376
     ],
     [
@@ -10359,17 +10373,17 @@
     ],
     [
      244.427,
-     63.985,
+     63.635,
      -290.908
     ],
     [
      234.734,
-     64.132,
+     63.97,
      -264.459
     ],
     [
      229.888,
-     64.132,
+     64.032,
      -262.29
     ]
    ],
@@ -10377,6 +10391,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p222839601",
    "kind": "footway",
    "name": null,
@@ -10384,27 +10399,27 @@
    "polyline": [
     [
      -88.028,
-     68.861,
+     68.521,
      -86.645
     ],
     [
      -88.422,
-     68.862,
+     68.488,
      -87.326
     ],
     [
      -91.321,
-     68.473,
+     68.248,
      -92.373
     ],
     [
      -107.529,
-     67.056,
+     66.829,
      -120.542
     ],
     [
      -121.269,
-     65.784,
+     65.581,
      -144.414
     ],
     [
@@ -10429,12 +10444,12 @@
     ],
     [
      -254.678,
-     61.03,
+     61.085,
      -99.16
     ],
     [
      -257.545,
-     61.033,
+     60.933,
      -104.35
     ]
    ],
@@ -10442,6 +10457,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p222839603",
    "kind": "footway",
    "name": null,
@@ -10552,6 +10568,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p222839604",
    "kind": "footway",
    "name": null,
@@ -10574,17 +10591,17 @@
     ],
     [
      -200.642,
-     64.649,
+     64.294,
      -3.559
     ],
     [
      -198.911,
-     64.655,
+     64.382,
      -0.988
     ],
     [
      -195.816,
-     64.658,
+     64.558,
      4.004
     ]
    ],
@@ -10592,6 +10609,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p222906129",
    "kind": "footway",
    "name": null,
@@ -10619,7 +10637,7 @@
     ],
     [
      -194.242,
-     62.854,
+     62.979,
      -134.073
     ]
    ],
@@ -10627,6 +10645,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p305186540",
    "kind": "footway",
    "name": null,
@@ -10639,7 +10658,7 @@
     ],
     [
      172.842,
-     68.275,
+     68.155,
      95.678
     ]
    ],
@@ -10647,6 +10666,7 @@
   },
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p305635225",
    "kind": "cycleway",
    "name": "Rideau Canal Western Pathway",
@@ -10654,22 +10674,22 @@
    "polyline": [
     [
      350.061,
-     63.649,
+     63.584,
      433.348
     ],
     [
      350.087,
-     63.652,
+     63.594,
      425.638
     ],
     [
      349.485,
-     63.663,
+     63.615,
      407.067
     ],
     [
      348.602,
-     63.668,
+     63.641,
      387.55
     ],
     [
@@ -10759,12 +10779,12 @@
     ],
     [
      228.595,
-     67.572,
+     67.019,
      76.753
     ],
     [
      218.525,
-     67.634,
+     67.498,
      56.347
     ],
     [
@@ -10779,12 +10799,12 @@
     ],
     [
      216.244,
-     74.23,
+     67.84,
      3.476
     ],
     [
      215.522,
-     74.183,
+     67.806,
      -24.906
     ],
     [
@@ -10794,37 +10814,37 @@
     ],
     [
      211.627,
-     67.549,
+     67.174,
      -96.012
     ],
     [
      209.253,
-     67.362,
+     67.073,
      -105.72
     ],
     [
      210.637,
-     67.044,
+     66.802,
      -119.474
     ],
     [
      221.987,
-     65.81,
+     65.628,
      -171.452
     ],
     [
      228.96,
-     65.253,
+     65.103,
      -195.513
     ],
     [
      231.746,
-     65.089,
+     64.932,
      -203.778
     ],
     [
      246.077,
-     64.494,
+     64.324,
      -236.365
     ],
     [
@@ -11007,6 +11027,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p312880301",
    "kind": "crossing",
    "name": null,
@@ -11042,6 +11063,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p313341266",
    "kind": "steps",
    "name": null,
@@ -11049,7 +11071,7 @@
    "polyline": [
     [
      231.746,
-     65.089,
+     64.932,
      -203.778
     ],
     [
@@ -11062,6 +11084,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p543656831",
    "kind": "path",
    "name": null,
@@ -11069,7 +11092,7 @@
    "polyline": [
     [
      -79.931,
-     64.754,
+     64.95,
      -198.99
     ],
     [
@@ -11084,12 +11107,12 @@
     ],
     [
      -71.67,
-     65.938,
+     65.848,
      -180.454
     ],
     [
      -78.127,
-     65.945,
+     65.845,
      -176.632
     ]
    ],
@@ -11097,6 +11120,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p582909794",
    "kind": "sidewalk",
    "name": null,
@@ -11117,6 +11141,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p582909795",
    "kind": "sidewalk",
    "name": null,
@@ -11137,6 +11162,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p582909796",
    "kind": "sidewalk",
    "name": null,
@@ -11157,6 +11183,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p582909797",
    "kind": "sidewalk",
    "name": null,
@@ -11177,6 +11204,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p584500160",
    "kind": "steps",
    "name": null,
@@ -11197,6 +11225,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p584500161",
    "kind": "steps",
    "name": null,
@@ -11204,7 +11233,7 @@
    "polyline": [
     [
      208.588,
-     68.107,
+     67.844,
      48.841
     ],
     [
@@ -11217,6 +11246,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p584500164",
    "kind": "path",
    "name": null,
@@ -11224,7 +11254,7 @@
    "polyline": [
     [
      132.17,
-     69.72,
+     69.617,
      74.889
     ],
     [
@@ -11234,12 +11264,12 @@
     ],
     [
      164.153,
-     67.552,
+     67.657,
      127.346
     ],
     [
      164.419,
-     67.559,
+     67.562,
      130.948
     ]
    ],
@@ -11247,6 +11277,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p584500165",
    "kind": "footway",
    "name": null,
@@ -11254,32 +11285,32 @@
    "polyline": [
     [
      233.385,
-     64.411,
+     64.311,
      246.171
     ],
     [
      239.89,
-     64.436,
+     64.336,
      242.271
     ],
     [
      244.938,
-     64.452,
+     64.259,
      241.37
     ],
     [
      250.692,
-     64.377,
+     64.215,
      242.885
     ],
     [
      254.13,
-     64.32,
+     64.159,
      246.258
     ],
     [
      259.914,
-     64.286,
+     64.186,
      244.319
     ]
    ],
@@ -11287,6 +11318,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p584793533",
    "kind": "sidewalk",
    "name": null,
@@ -11327,6 +11359,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p584793534",
    "kind": "footway",
    "name": null,
@@ -11334,12 +11367,12 @@
    "polyline": [
     [
      -88.028,
-     68.861,
+     68.521,
      -86.645
     ],
     [
      -78.929,
-     68.968,
+     68.868,
      -86.467
     ]
    ],
@@ -11347,6 +11380,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p584793535",
    "kind": "footway",
    "name": null,
@@ -11354,17 +11388,17 @@
    "polyline": [
     [
      -107.529,
-     67.056,
+     66.829,
      -120.542
     ],
     [
      -105.069,
-     67.069,
+     66.883,
      -121.732
     ],
     [
      -101.153,
-     67.076,
+     66.976,
      -123.943
     ],
     [
@@ -11377,6 +11411,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p584955023",
    "kind": "footway",
    "name": null,
@@ -11394,7 +11429,7 @@
     ],
     [
      -227.978,
-     63.186,
+     62.924,
      15.85
     ]
    ],
@@ -11402,6 +11437,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p585989861",
    "kind": "crossing",
    "name": null,
@@ -11427,6 +11463,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p585989862",
    "kind": "crossing",
    "name": null,
@@ -11452,6 +11489,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p585991390",
    "kind": "crossing",
    "name": null,
@@ -11542,6 +11580,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p585991392",
    "kind": "crossing",
    "name": null,
@@ -11577,6 +11616,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p585991394",
    "kind": "crossing",
    "name": null,
@@ -11612,6 +11652,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p586760671",
    "kind": "crossing",
    "name": null,
@@ -11657,6 +11698,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p586760673",
    "kind": "footway",
    "name": null,
@@ -11664,7 +11706,7 @@
    "polyline": [
     [
      -281.479,
-     60.62,
+     60.434,
      49.411
     ],
     [
@@ -11687,6 +11729,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p587330795",
    "kind": "crossing",
    "name": null,
@@ -11727,6 +11770,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p587330796",
    "kind": "crossing",
    "name": null,
@@ -11752,6 +11796,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p587333344",
    "kind": "crossing",
    "name": null,
@@ -11777,6 +11822,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p587333347",
    "kind": "crossing",
    "name": null,
@@ -11832,6 +11878,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p587335077",
    "kind": "crossing",
    "name": null,
@@ -11872,6 +11919,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p589111006",
    "kind": "crossing",
    "name": null,
@@ -11897,6 +11945,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p667314131",
    "kind": "footway",
    "name": null,
@@ -11909,7 +11958,7 @@
     ],
     [
      -248.811,
-     62.16,
+     61.913,
      27.96
     ]
    ],
@@ -11917,6 +11966,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p674353377",
    "kind": "steps",
    "name": null,
@@ -11937,6 +11987,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p674353378",
    "kind": "footway",
    "name": null,
@@ -11957,6 +12008,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p674353379",
    "kind": "footway",
    "name": null,
@@ -11964,12 +12016,12 @@
    "polyline": [
     [
      -113.429,
-     68.229,
+     67.837,
      -72.896
     ],
     [
      -88.028,
-     68.861,
+     68.521,
      -86.645
     ]
    ],
@@ -11977,6 +12029,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p674353380",
    "kind": "steps",
    "name": null,
@@ -11984,12 +12037,12 @@
    "polyline": [
     [
      -117.416,
-     68.229,
+     67.712,
      -70.619
     ],
     [
      -113.429,
-     68.229,
+     67.837,
      -72.896
     ]
    ],
@@ -11997,6 +12050,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p674353381",
    "kind": "footway",
    "name": null,
@@ -12034,12 +12088,12 @@
     ],
     [
      -120.2,
-     68.229,
+     67.604,
      -69.932
     ],
     [
      -117.416,
-     68.229,
+     67.712,
      -70.619
     ]
    ],
@@ -12047,6 +12101,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p674353382",
    "kind": "footway",
    "name": null,
@@ -12077,6 +12132,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p674353383",
    "kind": "footway",
    "name": null,
@@ -12084,7 +12140,7 @@
    "polyline": [
     [
      -120.2,
-     68.229,
+     67.604,
      -69.932
     ],
     [
@@ -12107,6 +12163,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p674353385",
    "kind": "sidewalk",
    "name": null,
@@ -12147,6 +12204,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p680472016",
    "kind": "path",
    "name": null,
@@ -12154,7 +12212,7 @@
    "polyline": [
     [
      197.375,
-     67.082,
+     66.888,
      129.795
     ],
     [
@@ -12187,6 +12245,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472019",
    "kind": "crossing",
    "name": null,
@@ -12212,6 +12271,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472020",
    "kind": "crossing",
    "name": null,
@@ -12237,6 +12297,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p680472034",
    "kind": "steps",
    "name": null,
@@ -12244,7 +12305,7 @@
    "polyline": [
     [
      201.099,
-     67.838,
+     67.511,
      91.208
     ],
     [
@@ -12257,6 +12318,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472076",
    "kind": "sidewalk",
    "name": null,
@@ -12292,6 +12354,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472090",
    "kind": "sidewalk",
    "name": null,
@@ -12322,6 +12385,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472099",
    "kind": "sidewalk",
    "name": null,
@@ -12352,6 +12416,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472102",
    "kind": "sidewalk",
    "name": null,
@@ -12472,6 +12537,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472110",
    "kind": "sidewalk",
    "name": null,
@@ -12532,6 +12598,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472128",
    "kind": "sidewalk",
    "name": null,
@@ -12572,6 +12639,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472129",
    "kind": "sidewalk",
    "name": null,
@@ -12672,6 +12740,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472139",
    "kind": "sidewalk",
    "name": null,
@@ -12712,6 +12781,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472141",
    "kind": "sidewalk",
    "name": null,
@@ -12762,6 +12832,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472163",
    "kind": "sidewalk",
    "name": null,
@@ -12802,6 +12873,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680472196",
    "kind": "sidewalk",
    "name": null,
@@ -12842,6 +12914,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619607",
    "kind": "crossing",
    "name": null,
@@ -12867,6 +12940,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619613",
    "kind": "crossing",
    "name": null,
@@ -12897,6 +12971,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619615",
    "kind": "crossing",
    "name": null,
@@ -12947,6 +13022,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619617",
    "kind": "sidewalk",
    "name": null,
@@ -12967,6 +13043,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619620",
    "kind": "crossing",
    "name": null,
@@ -12992,6 +13069,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619622",
    "kind": "crossing",
    "name": null,
@@ -13017,6 +13095,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619624",
    "kind": "crossing",
    "name": null,
@@ -13042,6 +13121,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619626",
    "kind": "crossing",
    "name": null,
@@ -13067,6 +13147,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619630",
    "kind": "crossing",
    "name": null,
@@ -13117,6 +13198,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619664",
    "kind": "crossing",
    "name": null,
@@ -13142,6 +13224,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619666",
    "kind": "crossing",
    "name": null,
@@ -13202,6 +13285,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619669",
    "kind": "crossing",
    "name": null,
@@ -13257,6 +13341,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619680",
    "kind": "sidewalk",
    "name": null,
@@ -13282,6 +13367,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619692",
    "kind": "sidewalk",
    "name": null,
@@ -13312,6 +13398,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619693",
    "kind": "sidewalk",
    "name": null,
@@ -13347,6 +13434,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619695",
    "kind": "sidewalk",
    "name": null,
@@ -13387,6 +13475,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619698",
    "kind": "sidewalk",
    "name": null,
@@ -13447,6 +13536,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619699",
    "kind": "sidewalk",
    "name": null,
@@ -13467,6 +13557,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619704",
    "kind": "sidewalk",
    "name": null,
@@ -13527,6 +13618,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619705",
    "kind": "sidewalk",
    "name": null,
@@ -13567,6 +13659,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619708",
    "kind": "sidewalk",
    "name": null,
@@ -13617,6 +13710,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619710",
    "kind": "sidewalk",
    "name": null,
@@ -13647,6 +13741,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619715",
    "kind": "sidewalk",
    "name": null,
@@ -13707,6 +13802,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619716",
    "kind": "sidewalk",
    "name": null,
@@ -13747,6 +13843,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619721",
    "kind": "sidewalk",
    "name": null,
@@ -13792,6 +13889,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619723",
    "kind": "sidewalk",
    "name": null,
@@ -13832,6 +13930,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619727",
    "kind": "sidewalk",
    "name": null,
@@ -13877,6 +13976,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619733",
    "kind": "sidewalk",
    "name": null,
@@ -13907,6 +14007,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619734",
    "kind": "sidewalk",
    "name": null,
@@ -13942,6 +14043,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619736",
    "kind": "sidewalk",
    "name": null,
@@ -13967,6 +14069,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619737",
    "kind": "sidewalk",
    "name": null,
@@ -14022,6 +14125,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619739",
    "kind": "sidewalk",
    "name": null,
@@ -14062,6 +14166,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619740",
    "kind": "sidewalk",
    "name": null,
@@ -14107,6 +14212,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619751",
    "kind": "sidewalk",
    "name": null,
@@ -14147,6 +14253,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619752",
    "kind": "sidewalk",
    "name": null,
@@ -14207,6 +14314,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619756",
    "kind": "sidewalk",
    "name": null,
@@ -14257,6 +14365,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619757",
    "kind": "sidewalk",
    "name": null,
@@ -14282,6 +14391,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619762",
    "kind": "sidewalk",
    "name": null,
@@ -14312,6 +14422,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619766",
    "kind": "sidewalk",
    "name": null,
@@ -14352,6 +14463,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619770",
    "kind": "sidewalk",
    "name": null,
@@ -14382,6 +14494,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619774",
    "kind": "sidewalk",
    "name": null,
@@ -14427,6 +14540,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619776",
    "kind": "sidewalk",
    "name": null,
@@ -14477,6 +14591,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619780",
    "kind": "sidewalk",
    "name": null,
@@ -14532,6 +14647,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619781",
    "kind": "sidewalk",
    "name": null,
@@ -14567,6 +14683,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619786",
    "kind": "sidewalk",
    "name": null,
@@ -14602,6 +14719,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619790",
    "kind": "sidewalk",
    "name": null,
@@ -14647,6 +14765,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619793",
    "kind": "sidewalk",
    "name": null,
@@ -14702,6 +14821,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619799",
    "kind": "sidewalk",
    "name": null,
@@ -14727,6 +14847,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619800",
    "kind": "sidewalk",
    "name": null,
@@ -14772,6 +14893,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619806",
    "kind": "sidewalk",
    "name": null,
@@ -14812,6 +14934,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619807",
    "kind": "sidewalk",
    "name": null,
@@ -14862,6 +14985,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619812",
    "kind": "sidewalk",
    "name": null,
@@ -14902,6 +15026,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619816",
    "kind": "sidewalk",
    "name": null,
@@ -14957,6 +15082,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619818",
    "kind": "sidewalk",
    "name": null,
@@ -15072,6 +15198,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619819",
    "kind": "sidewalk",
    "name": null,
@@ -15102,6 +15229,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619824",
    "kind": "sidewalk",
    "name": null,
@@ -15127,6 +15255,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619830",
    "kind": "sidewalk",
    "name": null,
@@ -15187,6 +15316,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619834",
    "kind": "sidewalk",
    "name": null,
@@ -15212,6 +15342,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619835",
    "kind": "sidewalk",
    "name": null,
@@ -15252,6 +15383,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619845",
    "kind": "sidewalk",
    "name": null,
@@ -15327,6 +15459,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619849",
    "kind": "sidewalk",
    "name": null,
@@ -15382,6 +15515,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619857",
    "kind": "sidewalk",
    "name": null,
@@ -15422,6 +15556,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619871",
    "kind": "sidewalk",
    "name": null,
@@ -15452,6 +15587,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619878",
    "kind": "sidewalk",
    "name": null,
@@ -15487,6 +15623,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619879",
    "kind": "sidewalk",
    "name": null,
@@ -15532,6 +15669,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680619889",
    "kind": "sidewalk",
    "name": null,
@@ -15557,6 +15695,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627073",
    "kind": "crossing",
    "name": null,
@@ -15582,6 +15721,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627087",
    "kind": "sidewalk",
    "name": null,
@@ -15612,6 +15752,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627090",
    "kind": "sidewalk",
    "name": null,
@@ -15652,6 +15793,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627094",
    "kind": "sidewalk",
    "name": null,
@@ -15677,6 +15819,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627111",
    "kind": "sidewalk",
    "name": null,
@@ -15727,6 +15870,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627134",
    "kind": "sidewalk",
    "name": null,
@@ -15752,6 +15896,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627137",
    "kind": "sidewalk",
    "name": null,
@@ -15792,6 +15937,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627141",
    "kind": "sidewalk",
    "name": null,
@@ -15817,6 +15963,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627217",
    "kind": "sidewalk",
    "name": null,
@@ -15837,6 +15984,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627230",
    "kind": "sidewalk",
    "name": null,
@@ -15862,6 +16010,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627246",
    "kind": "sidewalk",
    "name": null,
@@ -15902,6 +16051,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627251",
    "kind": "sidewalk",
    "name": null,
@@ -15967,6 +16117,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627268",
    "kind": "sidewalk",
    "name": null,
@@ -15997,6 +16148,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627286",
    "kind": "sidewalk",
    "name": null,
@@ -16022,6 +16174,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627288",
    "kind": "sidewalk",
    "name": null,
@@ -16057,6 +16210,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627292",
    "kind": "sidewalk",
    "name": null,
@@ -16087,6 +16241,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680627294",
    "kind": "sidewalk",
    "name": null,
@@ -16147,6 +16302,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633150",
    "kind": "footway",
    "name": null,
@@ -16154,12 +16310,12 @@
    "polyline": [
     [
      231.858,
-     64.15,
+     64.102,
      -255.684
     ],
     [
      234.734,
-     64.132,
+     63.97,
      -264.459
     ]
    ],
@@ -16167,6 +16323,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633151",
    "kind": "crossing",
    "name": null,
@@ -16192,6 +16349,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633154",
    "kind": "crossing",
    "name": null,
@@ -16217,6 +16375,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633210",
    "kind": "sidewalk",
    "name": null,
@@ -16237,6 +16396,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633251",
    "kind": "sidewalk",
    "name": null,
@@ -16262,6 +16422,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633261",
    "kind": "sidewalk",
    "name": null,
@@ -16297,6 +16458,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p680633272",
    "kind": "sidewalk",
    "name": null,
@@ -16327,6 +16489,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p690076436",
    "kind": "sidewalk",
    "name": null,
@@ -16382,6 +16545,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p690076437",
    "kind": "crossing",
    "name": null,
@@ -16407,6 +16571,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p698013427",
    "kind": "footway",
    "name": null,
@@ -16419,12 +16584,12 @@
     ],
     [
      31.891,
-     70.932,
+     71.078,
      -76.177
     ],
     [
      37.554,
-     70.934,
+     70.979,
      -79.506
     ]
    ],
@@ -16432,6 +16597,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p698013428",
    "kind": "footway",
    "name": null,
@@ -16479,7 +16645,7 @@
     ],
     [
      47.252,
-     71.266,
+     71.353,
      -62.358
     ]
    ],
@@ -16487,6 +16653,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p698013430",
    "kind": "footway",
    "name": null,
@@ -16494,7 +16661,7 @@
    "polyline": [
     [
      72.678,
-     71.408,
+     71.123,
      -60.697
     ],
     [
@@ -16512,6 +16679,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p698013434",
    "kind": "crossing",
    "name": null,
@@ -16537,6 +16705,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p698013435",
    "kind": "sidewalk",
    "name": null,
@@ -16557,6 +16726,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p698013437",
    "kind": "sidewalk",
    "name": null,
@@ -16592,6 +16762,7 @@
   },
   {
    "class": "path",
+   "covered": false,
    "id": "p739430568",
    "kind": "path",
    "name": null,
@@ -16617,6 +16788,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p743693708",
    "kind": "footway",
    "name": null,
@@ -16624,7 +16796,7 @@
    "polyline": [
     [
      233.385,
-     64.411,
+     64.311,
      246.171
     ],
     [
@@ -16647,6 +16819,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p743693709",
    "kind": "crossing",
    "name": null,
@@ -16672,6 +16845,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p750304572",
    "kind": "crossing",
    "name": null,
@@ -16697,6 +16871,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p762582503",
    "kind": "footway",
    "name": null,
@@ -16709,7 +16884,7 @@
     ],
     [
      -255.352,
-     61.123,
+     60.547,
      139.196
     ],
     [
@@ -16722,6 +16897,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p762582504",
    "kind": "footway",
    "name": null,
@@ -16729,12 +16905,12 @@
    "polyline": [
     [
      -251.503,
-     61.121,
+     60.722,
      136.507
     ],
     [
      -255.352,
-     61.123,
+     60.547,
      139.196
     ]
    ],
@@ -16742,6 +16918,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p764042080",
    "kind": "footway",
    "name": null,
@@ -16749,22 +16926,22 @@
    "polyline": [
     [
      -139.847,
-     67.331,
+     67.28,
      -26.359
     ],
     [
      -143.777,
-     67.116,
+     67.113,
      -22.482
     ],
     [
      -152.123,
-     66.686,
+     66.733,
      -15.542
     ],
     [
      -155.589,
-     66.455,
+     66.577,
      -10.161
     ]
    ],
@@ -16772,6 +16949,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p770704952",
    "kind": "footway",
    "name": null,
@@ -16779,12 +16957,12 @@
    "polyline": [
     [
      185.381,
-     66.401,
+     66.324,
      165.369
     ],
     [
      192.172,
-     66.433,
+     66.333,
      160.927
     ]
    ],
@@ -16792,6 +16970,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p775338984",
    "kind": "crossing",
    "name": null,
@@ -16817,6 +16996,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p776106192",
    "kind": "steps",
    "name": "Pretoria Stairs",
@@ -16837,6 +17017,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p776106193",
    "kind": "steps",
    "name": "Hawthorne Stairs",
@@ -16857,6 +17038,7 @@
   },
   {
    "class": "steps",
+   "covered": false,
    "id": "p776106200",
    "kind": "steps",
    "name": "Argyle Stairs",
@@ -16877,6 +17059,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p831441938",
    "kind": "footway",
    "name": null,
@@ -16884,7 +17067,7 @@
    "polyline": [
     [
      -91.321,
-     68.473,
+     68.248,
      -92.373
     ],
     [
@@ -16902,6 +17085,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p841407359",
    "kind": "sidewalk",
    "name": null,
@@ -16942,6 +17126,7 @@
   },
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p1272025977",
    "kind": "cycleway",
    "name": "O'Connor Bikeway",
@@ -16949,17 +17134,17 @@
    "polyline": [
     [
      -173.263,
-     61.186,
+     61.14,
      243.581
     ],
     [
      -140.806,
-     60.684,
+     60.666,
      299.788
     ],
     [
      -140.778,
-     60.637,
+     60.537,
      307.521
     ]
    ],
@@ -16967,6 +17152,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1272025978",
    "kind": "crossing",
    "name": null,
@@ -17012,6 +17198,7 @@
   },
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p1272025979",
    "kind": "cycleway",
    "name": "O'Connor Bikeway",
@@ -17019,27 +17206,27 @@
    "polyline": [
     [
      -182.142,
-     61.335,
+     61.235,
      223.017
     ],
     [
      -180.553,
-     61.365,
+     61.265,
      225.731
     ],
     [
      -178.042,
-     61.431,
+     61.331,
      230.385
     ],
     [
      -175.752,
-     61.343,
+     61.243,
      237.171
     ],
     [
      -173.263,
-     61.186,
+     61.14,
      243.581
     ]
    ],
@@ -17047,6 +17234,7 @@
   },
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p1272025980",
    "kind": "cycleway",
    "name": "O'Connor Bikeway",
@@ -17054,17 +17242,17 @@
    "polyline": [
     [
      -216.991,
-     61.44,
+     61.34,
      163.867
     ],
     [
      -203.436,
-     61.425,
+     61.325,
      186.571
     ],
     [
      -182.142,
-     61.335,
+     61.235,
      223.017
     ]
    ],
@@ -17072,6 +17260,7 @@
   },
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p1272025981",
    "kind": "cycleway",
    "name": "O'Connor Bikeway",
@@ -17079,27 +17268,27 @@
    "polyline": [
     [
      -233.937,
-     61.2,
+     61.306,
      140.513
     ],
     [
      -232.44,
-     61.218,
+     61.322,
      142.925
     ],
     [
      -226.565,
-     61.528,
+     61.428,
      150.52
     ],
     [
      -218.048,
-     61.438,
+     61.338,
      162.103
     ],
     [
      -216.991,
-     61.44,
+     61.34,
      163.867
     ]
    ],
@@ -17107,6 +17296,7 @@
   },
   {
    "class": "cycleway",
+   "covered": false,
    "id": "p1272025982",
    "kind": "cycleway",
    "name": "O'Connor Bikeway",
@@ -17114,27 +17304,27 @@
    "polyline": [
     [
      -279.484,
-     60.347,
+     60.419,
      65.039
     ],
     [
      -264.057,
-     60.727,
+     60.627,
      91.158
     ],
     [
      -251.692,
-     60.959,
+     61.057,
      111.151
     ],
     [
      -239.379,
-     61.135,
+     61.24,
      131.767
     ],
     [
      -233.937,
-     61.2,
+     61.306,
      140.513
     ]
    ],
@@ -17142,6 +17332,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1302640745",
    "kind": "sidewalk",
    "name": null,
@@ -17167,6 +17358,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1302640747",
    "kind": "crossing",
    "name": null,
@@ -17192,6 +17384,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1320786768",
    "kind": "crossing",
    "name": null,
@@ -17217,6 +17410,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1320786769",
    "kind": "sidewalk",
    "name": null,
@@ -17237,6 +17431,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341366434",
    "kind": "crossing",
    "name": null,
@@ -17262,6 +17457,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341366435",
    "kind": "sidewalk",
    "name": null,
@@ -17282,6 +17478,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341366436",
    "kind": "crossing",
    "name": null,
@@ -17312,6 +17509,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341366437",
    "kind": "sidewalk",
    "name": null,
@@ -17342,6 +17540,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341366438",
    "kind": "crossing",
    "name": null,
@@ -17367,6 +17566,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341366439",
    "kind": "footway",
    "name": null,
@@ -17374,12 +17574,12 @@
    "polyline": [
     [
      201.461,
-     68.115,
+     67.871,
      65.224
     ],
     [
      206.624,
-     67.72,
+     67.757,
      62.701
     ]
    ],
@@ -17387,6 +17587,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341424247",
    "kind": "sidewalk",
    "name": null,
@@ -17422,6 +17623,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341424248",
    "kind": "crossing",
    "name": null,
@@ -17452,6 +17654,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341424249",
    "kind": "sidewalk",
    "name": null,
@@ -17472,6 +17675,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341424250",
    "kind": "crossing",
    "name": null,
@@ -17502,6 +17706,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1341424251",
    "kind": "sidewalk",
    "name": null,
@@ -17522,6 +17727,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049031",
    "kind": "sidewalk",
    "name": null,
@@ -17542,6 +17748,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049032",
    "kind": "crossing",
    "name": null,
@@ -17567,6 +17774,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049033",
    "kind": "footway",
    "name": null,
@@ -17574,12 +17782,12 @@
    "polyline": [
     [
      179.89,
-     68.233,
+     68.071,
      90.505
     ],
     [
      181.673,
-     68.042,
+     68.022,
      90.642
     ]
    ],
@@ -17587,6 +17795,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049034",
    "kind": "footway",
    "name": null,
@@ -17594,12 +17803,12 @@
    "polyline": [
     [
      179.89,
-     68.233,
+     68.071,
      90.505
     ],
     [
      178.615,
-     68.233,
+     68.087,
      91.416
     ]
    ],
@@ -17607,6 +17816,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049035",
    "kind": "footway",
    "name": null,
@@ -17614,12 +17824,12 @@
    "polyline": [
     [
      180.286,
-     68.281,
+     68.104,
      88.086
     ],
     [
      179.89,
-     68.233,
+     68.071,
      90.505
     ]
    ],
@@ -17627,6 +17837,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049036",
    "kind": "crossing",
    "name": null,
@@ -17652,6 +17863,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049037",
    "kind": "footway",
    "name": null,
@@ -17659,12 +17871,12 @@
    "polyline": [
     [
      187.305,
-     68.047,
+     67.87,
      90.957
     ],
     [
      188.721,
-     68.049,
+     67.833,
      90.969
     ]
    ],
@@ -17672,6 +17884,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049038",
    "kind": "crossing",
    "name": null,
@@ -17697,6 +17910,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049039",
    "kind": "footway",
    "name": null,
@@ -17704,12 +17918,12 @@
    "polyline": [
     [
      200.647,
-     67.778,
+     67.735,
      77.205
     ],
     [
      200.666,
-     67.989,
+     67.753,
      75.861
     ]
    ],
@@ -17717,6 +17931,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049040",
    "kind": "crossing",
    "name": null,
@@ -17742,6 +17957,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049041",
    "kind": "footway",
    "name": null,
@@ -17749,17 +17965,17 @@
    "polyline": [
     [
      201.286,
-     67.872,
+     67.772,
      66.455
     ],
     [
      201.461,
-     68.115,
+     67.871,
      65.224
     ],
     [
      199.037,
-     68.109,
+     67.93,
      65.87
     ]
    ],
@@ -17767,6 +17983,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049042",
    "kind": "crossing",
    "name": null,
@@ -17792,6 +18009,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526049043",
    "kind": "footway",
    "name": null,
@@ -17799,12 +18017,12 @@
    "polyline": [
     [
      181.975,
-     68.412,
+     68.312,
      78.168
     ],
     [
      181.728,
-     68.226,
+     68.21,
      79.599
     ]
    ],
@@ -17812,6 +18030,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526054056",
    "kind": "crossing",
    "name": null,
@@ -17837,6 +18056,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526054057",
    "kind": "footway",
    "name": null,
@@ -17844,12 +18064,12 @@
    "polyline": [
     [
      -86.025,
-     69.092,
+     68.978,
      70.795
     ],
     [
      -83.391,
-     68.978,
+     68.916,
      77.617
     ]
    ],
@@ -17857,6 +18077,7 @@
   },
   {
    "class": "footway",
+   "covered": false,
    "id": "p1526054058",
    "kind": "crossing",
    "name": null,

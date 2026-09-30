@@ -720,26 +720,34 @@ def _smooth(
 
 
 def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig) -> int:
-    """Sets y on pedestrian polylines: nearest road surface plus the curb when within
-    follow_road_within_m of a road, else the DTM. Returns the vertex count set."""
+    """Sets y on pedestrian polylines. Sidewalks follow the nearest road plus the curb;
+    crossings and any vertex inside a road ribbon sit 2 cm above the road; other paths
+    take `source` (the carved terrain at pack build, the DTM otherwise). Returns the
+    vertex count set."""
     ped = cfg.pedestrian
     curb = float(ped.get("curb_height_m", 0.12))
     follow = float(ped.get("follow_road_within_m", 8.0))
+    min_widths = ped.get("sidewalk_min_width_by_road_m", {})
     idx = _SegmentIndex()
     for eid, e in graph.edges.items():
+        if e.tunnel:
+            continue
         for i in range(len(e.polyline) - 1):
             a, b = e.polyline[i], e.polyline[i + 1]
             idx.add((a[0], a[2]), (b[0], b[2]), (eid, i))
-    min_widths = ped.get("sidewalk_min_width_by_road_m", {})
     count = 0
     for w in graph.pedestrian:
         pts = []
         nearest_class = None
         for p in w.polyline:
             x, z = p[0], p[2]
-            best_d, best_y = math.inf, None
-            for a, b, (eid, i) in idx.near(x, z, follow + 20.0):
+            best_d, best_y, best_hw = math.inf, None, 0.0
+            for a, b, (eid, i) in (
+                () if w.covered else idx.near(x, z, follow + 20.0)
+            ):  # covered ways pass under roads: terrain only
                 e = graph.edges[eid]
+                if e.bridge and w.kind not in ("sidewalk", "crossing"):
+                    continue  # paths do not ride on decks; they pass under them
                 d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
                 if d < best_d and d <= e.width_m / 2.0 + follow:
                     dx, dz = b[0] - a[0], b[1] - a[1]
@@ -749,17 +757,95 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                         if l2 > 0
                         else 0.0
                     )
-                    best_d, best_y = (
-                        d,
-                        e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t,
-                    )
+                    best_d = d
+                    best_y = e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t
+                    best_hw = e.width_m / 2.0
                     nearest_class = e.road_class
-            offset = 0.02 if w.kind == "crossing" else curb  # crossings are flush with the road
-            y = best_y + offset if best_y is not None else source.sample(x, z)
+            inside_ribbon = best_y is not None and best_d <= best_hw
+            if w.kind == "sidewalk" and best_y is not None:
+                y = best_y + curb
+            elif w.kind == "crossing" and best_y is not None:
+                y = best_y + 0.02
+            elif inside_ribbon:
+                y = best_y + 0.02  # a path across a street: flush with it
+            else:
+                y = source.sample(x, z)
             pts.append((x, y, z))
             count += 1
         w.polyline = pts
-        # Downtown sidewalks are tagged narrow (1.5 m) in OSM; widen to a minimum by the road beside them.
         if w.kind == "sidewalk" and nearest_class is not None:
             w.width_m = max(w.width_m, float(min_widths.get(nearest_class, 0.0)))
     return count
+
+
+def split_pedestrian_under_bridges(graph: RoadGraph) -> int:
+    """Removes the parts of paths, footways and cycleways that lie inside a bridge deck's
+    footprint (they pass under it), splitting the way around the gap. Sidewalks and
+    crossings are kept: they ride on the deck. Returns the number of ways cut."""
+    from osm_import.graph import PedestrianWay
+
+    idx = _SegmentIndex()
+    for eid, e in graph.edges.items():
+        if not e.bridge:
+            continue
+        for i in range(len(e.polyline) - 1):
+            a, b = e.polyline[i], e.polyline[i + 1]
+            idx.add((a[0], a[2]), (b[0], b[2]), (eid, i))
+    if not idx.cells:
+        return 0
+    out: list = []
+    cut = 0
+    for w in graph.pedestrian:
+        if w.kind in ("sidewalk", "crossing") or w.covered:
+            out.append(w)  # covered ways are already known to pass under; not drawn
+            continue
+        keep = []
+        for p in w.polyline:
+            under = False
+            for a, b, (eid, _i) in idx.near(p[0], p[2], 30.0):
+                e = graph.edges[eid]
+                if _seg_dist(p[0], p[2], a[0], a[1], b[0], b[1]) <= e.width_m / 2.0 + 1.0:
+                    under = True
+                    break
+            keep.append(not under)
+        if all(keep):
+            out.append(w)
+            continue
+        cut += 1
+        piece: list = []
+        n = 0
+        for p, k in zip(w.polyline, keep, strict=True):
+            if k:
+                piece.append(p)
+            else:
+                if len(piece) >= 2:
+                    out.append(
+                        PedestrianWay(
+                            f"{w.id}.{n}",
+                            piece,
+                            w.road_class,
+                            w.osm_way_id,
+                            w.name,
+                            w.kind,
+                            w.width_m,
+                            w.covered,
+                        )
+                    )
+                    n += 1
+                piece = []
+        if len(piece) >= 2:
+            out.append(
+                PedestrianWay(
+                    f"{w.id}.{n}",
+                    piece,
+                    w.road_class,
+                    w.osm_way_id,
+                    w.name,
+                    w.kind,
+                    w.width_m,
+                    w.covered,
+                )
+            )
+    graph.pedestrian = out
+    log.info("pedestrian ways cut under bridges: %d", cut)
+    return cut

@@ -38,6 +38,7 @@ class PedestrianWay:
 	var polyline: PackedVector3Array
 	var road_class: String
 	var kind: String  # sidewalk | crossing | footway | path | steps | cycleway | pedestrian | track
+	var covered: bool = false  # passes under a road or building: not drawn as a ribbon
 	var width_m: float
 	var name: String
 
@@ -108,6 +109,7 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		pw.road_class = w["class"]
 		pw.kind = w.get("kind", "footway")
 		pw.width_m = float(w.get("width_m", 1.5))
+		pw.covered = bool(w.get("covered", false))
 		pw.name = str(w["name"]) if w.get("name") != null else ""
 		g.pedestrian.append(pw)
 	return g
