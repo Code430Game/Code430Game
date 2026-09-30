@@ -60,6 +60,7 @@ How it works, in short: every authored content item (ads, dialogue, NPC archetyp
 - **Phase 4 — Packs and tones.** Pack loader, pack format v1 with content descriptors and tone variants, the tone-mode switch, first character pack, first story pack with one complete mission. Billboards are the first tone-aware content.
 - **Phase 5 — Co-op.** Host/join for up to 4 players over LAN or direct IP, pack-set verification on join, replicated players, vehicles, traffic, and mission state. Internet relay (for example Steam networking) is decided when a distribution channel is chosen.
 - **Phase 6 — Registry.** In-game pack browser (works in Deck Game Mode), registry repo, creator docs.
+- **Later — Character creator.** One tool for the player's look that also generates the population (pedestrians, drivers) with the same parts, so character packs and NPCs share a pipeline. Deliberately after traffic and packs.
 
 ## Success at the end of Phase 1
 Someone who has driven in Ottawa can drive the Queensway, take a real exit, and get to the ByWard Market by a route that makes sense, on a Steam Deck, at a stable frame rate.
