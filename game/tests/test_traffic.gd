@@ -108,3 +108,97 @@ func test_spawning_respects_cap_and_distances() -> void:
 		var d := Vector2(a.position().x, a.position().z - 100.0).length()
 		assert_float(d).is_greater_equal(float(m.config["min_spawn_distance_m"]) - 0.01)
 		assert_float(d).is_less_equal(float(m.config["spawn_radius_m"]) + 300.0)
+
+
+func test_agent_stops_behind_a_person_in_its_lane() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 60}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var person: Node3D = auto_free(Node3D.new())
+	add_child(person)
+	person.global_position = m.lanes.paths[0].position_at(80.0)
+	m.obstacles = [person]
+	var a := _add_agent(m, 0, 10.0, 15.0)
+	for i in range(900):
+		m.step(1.0 / 60.0)
+	assert_float(a.speed).is_less(0.3)
+	var stop_before := 80.0 - float(m.config["person_radius_m"]) - float(m.config["car_length_m"]) * 0.5
+	assert_float(a.distance).is_less(stop_before)
+	assert_float(a.distance).is_greater(stop_before - float(m.config["min_gap_m"]) - 3.0)
+
+
+func test_agent_ignores_a_person_beside_the_lane() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 60}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var person: Node3D = auto_free(Node3D.new())
+	add_child(person)
+	person.global_position = m.lanes.paths[0].position_at(80.0) + Vector3(0, 0, 4.0)  # on the sidewalk
+	m.obstacles = [person]
+	var a := _add_agent(m, 0, 10.0, 15.0)
+	for i in range(600):
+		m.step(1.0 / 60.0)
+	assert_float(a.distance).is_greater(150.0)
+
+
+func test_followers_queue_behind_a_resting_hit_car() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 60}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var wreck := _add_agent(m, 0, 100.0, 0.0)
+	wreck.retired = true
+	wreck.resting = true
+	var follower := _add_agent(m, 0, 20.0, 15.0)
+	for i in range(900):
+		m.step(1.0 / 60.0)
+	assert_float(follower.speed).is_less(0.3)
+	assert_float(follower.distance).is_less(100.0 - float(m.config["car_length_m"]))
+	assert_float(follower.distance).is_greater(80.0)
+
+
+func test_hit_car_facing_its_lane_resumes_driving() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 60}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var a := _add_agent(m, 0, 100.0, 0.0)
+	# Knocked 1.5 m sideways but still facing along the lane; no physics body in the test.
+	var lane_dir := m.lanes.paths[0].direction_at(100.0)
+	a.transform = Transform3D(Basis.looking_at(lane_dir, Vector3.UP), m.lanes.paths[0].position_at(100.0) + Vector3(0, 0, 1.5))
+	a.retired = true
+	a.hit_timer = 0.5
+	for i in range(300):
+		m.step(1.0 / 60.0)
+	assert_bool(a.retired).is_false()
+	assert_float(a.speed).is_greater(1.0)
+	assert_float(a.distance).is_greater(100.0)
+
+
+func test_hit_car_facing_across_the_lane_rests_and_blocks() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 60}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var a := _add_agent(m, 0, 100.0, 0.0)
+	var lane_dir := m.lanes.paths[0].direction_at(100.0)
+	var across := lane_dir.cross(Vector3.UP)
+	a.transform = Transform3D(Basis.looking_at(across, Vector3.UP), m.lanes.paths[0].position_at(100.0))
+	a.retired = true
+	a.hit_timer = 0.2
+	for i in range(60):
+		m.step(1.0 / 60.0)
+	assert_bool(a.retired).is_true()
+	assert_bool(a.resting).is_true()
+	assert_float(a.distance).is_equal_approx(100.0, 0.5)
+
+
+func test_take_car_spawns_a_drivable_car_in_the_agent_colour() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 60}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var a := _add_agent(m, 0, 50.0, 0.0)
+	a.color = Color(0.2, 0.45, 0.25)
+	var body: TrafficCar = m._bodies[0]
+	a.body = body
+	body.agent = a
+	var car := m.take_car(body)
+	assert_object(car).is_not_null()
+	assert_bool(car.is_in_group("vehicles")).is_true()
+	assert_int(m.agents.size()).is_equal(0)
+	assert_object(body.agent).is_null()
+	assert_float(car.global_position.distance_to(m.lanes.paths[0].position_at(50.0))).is_less(1.0)
+	var mesh := car.get_node("Mesh") as MeshInstance3D
+	assert_object((mesh.material_override as StandardMaterial3D).albedo_color).is_equal(Color(0.2, 0.45, 0.25))
+	car.queue_free()

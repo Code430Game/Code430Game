@@ -11,6 +11,7 @@ extends Node3D
 ## frame with a larger delta. With co-op the host runs this and sends transforms.
 
 const CAR_SCENE := preload("res://world/traffic/traffic_car.tscn")
+const DRIVABLE_CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const CONFIG_PATH := "res://world/traffic/traffic_config.json"
 const BODY_POOL := 24
 const BODY_RADIUS_M := 70.0
@@ -23,6 +24,8 @@ var rng := RandomNumberGenerator.new()
 var enabled: bool = true
 ## Positions traffic is kept around (the players). Set each frame by the scene.
 var anchors: PackedVector3Array = PackedVector3Array()
+## Player bodies (vehicles or people) that traffic keeps headway from. Set each frame by the scene.
+var obstacles: Array[Node3D] = []
 var _agents_by_path: Dictionary = {}
 var _junction_occupants: Dictionary = {}
 var _spawn_timer: float = 0.0
@@ -121,12 +124,7 @@ func step(delta: float) -> void:
 	var distant := float(config["distant_rate_m"])
 	for a in agents:
 		if a.retired:
-			a.hit_timer -= delta
-			if a.body != null:
-				a.transform = a.body.global_transform
-				if a.hit_timer <= 0.0 and not a.body.freeze:
-					a.body.freeze = true
-					a.body.linear_velocity = Vector3.ZERO
+			_step_retired(a, delta)
 			continue
 		var d := _distance_to_anchors(a.position())
 		if d > distant:
@@ -137,11 +135,63 @@ func step(delta: float) -> void:
 			_step_agent(a, delta)
 
 
+## Hit cars run physics for the hit window, then either rejoin a lane or rest where they are.
+func _step_retired(a: TrafficAgent, delta: float) -> void:
+	if a.resting:
+		return
+	a.hit_timer -= delta
+	if a.body != null:
+		a.transform = a.body.global_transform
+	if a.hit_timer > 0.0:
+		return
+	if a.body != null and not a.body.freeze:
+		a.body.freeze = true
+		a.body.linear_velocity = Vector3.ZERO
+		a.body.angular_velocity = Vector3.ZERO
+	if not _try_recover(a):
+		a.resting = true
+		_leave_junction(a)
+		_project_onto_lane(a, float(config["parked_block_reach_m"]))
+
+
+## Puts a hit car back on the nearest lane when it is close and facing along it.
+func _try_recover(a: TrafficAgent) -> bool:
+	var reach := float(config["recover_reach_m"])
+	if not _project_onto_lane(a, reach):
+		return false
+	var path: LaneGraph.LanePath = lanes.paths[a.path_id]
+	var forward := -a.transform.basis.z
+	if forward.dot(path.direction_at(a.distance)) < float(config["recover_align_min"]):
+		return false
+	a.retired = false
+	a.resting = false
+	a.speed = 0.0
+	a.wait_time = 0.0
+	_leave_junction(a)
+	a.transform = Transform3D(Basis.looking_at(path.direction_at(a.distance), Vector3.UP), path.position_at(a.distance))
+	return true
+
+
+## Sets path_id and distance to the nearest lane within reach. False when none is that close.
+func _project_onto_lane(a: TrafficAgent, reach: float) -> bool:
+	var pos := a.position()
+	var best_d := reach
+	var found := false
+	for lp in lanes_near(pos, reach + 120.0):
+		var c := lp.closest(pos)
+		if c.y < best_d:
+			best_d = c.y
+			a.path_id = lp.id
+			a.distance = c.x
+			found = true
+	return found
+
+
 func _rebuild_lane_index() -> void:
 	_agents_by_path.clear()
 	for a in agents:
-		if a.retired:
-			continue
+		if a.retired and not a.resting:
+			continue  # still tumbling; nobody can plan around it yet
 		if not _agents_by_path.has(a.path_id):
 			_agents_by_path[a.path_id] = []
 		_agents_by_path[a.path_id].append(a)
@@ -226,7 +276,7 @@ func _junction_busy(node: String, me: TrafficAgent) -> bool:
 
 func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
 	var car_len := float(config["car_length_m"])
-	var best := INF
+	var best := _obstacle_gap(a, path)
 	for o in _agents_by_path.get(a.path_id, []):
 		if o != a and o.distance > a.distance:
 			best = minf(best, o.distance - a.distance - car_len)
@@ -239,6 +289,37 @@ func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
 					best = minf(best, remaining + o.distance - car_len)
 					break
 	return best
+
+
+## Gap to the nearest player body ahead in this lane's corridor, or INF.
+func _obstacle_gap(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
+	if obstacles.is_empty():
+		return INF
+	var car_len := float(config["car_length_m"])
+	var corridor := float(config["car_width_m"]) * 0.5
+	var lookahead := float(config["lookahead_m"])
+	var pos := a.position()
+	var best := INF
+	for o in obstacles:
+		if o == null or not is_instance_valid(o):
+			continue
+		var radius := _obstacle_radius(o)
+		var rel := o.global_position - pos
+		var flat := Vector2(rel.x, rel.z).length()
+		if flat > lookahead + radius or absf(rel.y) > 3.0:
+			continue
+		var c := path.closest(o.global_position)
+		var along := c.x - a.distance
+		if along <= 0.0 or c.y > corridor + radius:
+			continue
+		best = minf(best, along - car_len * 0.5 - radius)
+	return best
+
+
+func _obstacle_radius(o: Node3D) -> float:
+	if o is VehicleBody3D:
+		return float(config["car_length_m"]) * 0.5
+	return float(config["person_radius_m"])
 
 
 func _distance_to_anchors(p: Vector3) -> float:
@@ -322,7 +403,9 @@ func _assign_bodies() -> void:
 	var near: Array[TrafficAgent] = []
 	for a in agents:
 		if a.retired and a.body != null:
-			continue  # keeps its body until despawn
+			if a.resting and _distance_to_anchors(a.position()) > BODY_RADIUS_M:
+				_release_body(a)  # at rest and nobody near: the pool gets it back
+			continue  # otherwise a hit car keeps its body
 		if _distance_to_anchors(a.position()) <= BODY_RADIUS_M:
 			near.append(a)
 	near.sort_custom(func(x: TrafficAgent, y: TrafficAgent) -> bool: return _distance_to_anchors(x.position()) < _distance_to_anchors(y.position()))
@@ -364,11 +447,35 @@ func _release_body(a: TrafficAgent) -> void:
 	a.body = null
 
 
+## Replaces the agent behind `body` with a drivable car in its colour at its position.
+## Returns null when the body has no agent. The car is added under this manager's parent.
+func take_car(body: TrafficCar) -> VehicleBody3D:
+	var a := body.agent
+	if a == null:
+		return null
+	var car: VehicleBody3D = DRIVABLE_CAR_SCENE.instantiate()
+	var mesh := car.get_node_or_null("Mesh") as MeshInstance3D
+	if mesh != null and mesh.material_override is StandardMaterial3D:
+		var mat: StandardMaterial3D = (mesh.material_override as StandardMaterial3D).duplicate()
+		mat.albedo_color = a.color
+		mesh.material_override = mat
+	var holder: Node = get_parent() if get_parent() != null else self
+	holder.add_child(car)
+	car.global_transform = a.transform.translated_local(Vector3(0.0, 0.3, 0.0))
+	if car.has_method("set_spawn"):
+		car.set_spawn(car.global_transform)
+	_leave_junction(a)
+	_release_body(a)
+	agents.erase(a)
+	return car
+
+
 func _on_body_hit(car: TrafficCar) -> void:
 	var a := car.agent
 	if a == null or a.retired:
 		return
 	a.retired = true
+	a.resting = false
 	a.hit_timer = float(config["hit_physics_s"])
 	_leave_junction(a)
 	car.freeze = false

@@ -104,6 +104,7 @@ func _ready() -> void:
 	_player.global_position = spawn.origin - spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
 	_player.entered_vehicle.connect(_on_entered_vehicle)
 	_player.exited_vehicle.connect(_on_exited_vehicle)
+	_player.take_vehicle_requested.connect(_on_take_vehicle_requested)
 	if _start_in_car or _autodrive:
 		_player.enter_vehicle(_car)
 	else:
@@ -124,6 +125,14 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 	_camera.current = true
 	_minimap.player = car
 	_overview.player = car
+
+
+func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
+	if _traffic == null or not (traffic_body is TrafficCar):
+		return
+	var car := _traffic.take_car(traffic_body as TrafficCar)
+	if car != null:
+		_player.enter_vehicle(car)
 
 
 func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
@@ -253,6 +262,7 @@ func _process(delta: float) -> void:
 	if _traffic != null and _car != null:
 		var body: Node3D = Players.local_controlled_body()
 		_traffic.anchors = PackedVector3Array([body.global_position])
+		_traffic.obstacles = [body]
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:

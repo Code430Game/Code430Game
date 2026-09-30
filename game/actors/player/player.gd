@@ -6,6 +6,8 @@ extends CharacterBody3D
 
 signal entered_vehicle(vehicle: VehicleBody3D)
 signal exited_vehicle(vehicle: VehicleBody3D)
+## Interact next to a traffic car with no player vehicle nearer: the scene turns it into a vehicle.
+signal take_vehicle_requested(traffic_body: Node3D)
 
 @export var config: PlayerConfig
 @export var peer_id: int = 1
@@ -65,6 +67,10 @@ func _physics_process(delta: float) -> void:
 		var car := nearest_vehicle()
 		if car != null:
 			enter_vehicle(car)
+		else:
+			var traffic_body := nearest_traffic_car()
+			if traffic_body != null:
+				take_vehicle_requested.emit(traffic_body)
 
 
 func _orbit(delta: float) -> void:
@@ -127,6 +133,20 @@ func nearest_vehicle() -> VehicleBody3D:
 		var seat := node.get_node_or_null("Seat") as Node3D
 		var seat_pos := seat.global_position if seat != null else (node as Node3D).global_position
 		var d := seat_pos.distance_to(global_position)
+		if d < best_d:
+			best_d = d
+			best = node
+	return best
+
+
+## Closest traffic car body (group "traffic", with a live agent) within enter range, or null.
+func nearest_traffic_car() -> Node3D:
+	var best: Node3D = null
+	var best_d := config.enter_range_m + 1.0  # the body centre sits further in than a seat
+	for node in get_tree().get_nodes_in_group("traffic"):
+		if not (node is Node3D) or node.get("agent") == null:
+			continue
+		var d := (node as Node3D).global_position.distance_to(global_position)
 		if d < best_d:
 			best_d = d
 			best = node
