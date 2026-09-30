@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+
+# Kickoff archive (contents are unpacked into the repo)
+streetlevel-kickoff.zip
+
+# Godot
+game/.godot/
+game/export/
+game/*.import
+game/android/
+*.tmp
+
+# Exports / builds
+build/
+dist/
+*.pck
+!packs/**/*.pck
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OSM / DEM download caches (never commit raw extracts)
+tools/**/.cache/
+*.osm
+*.osm.pbf
+*.osm.bz2
+*.tif
+*.tiff
+*.hgt
+
+# Editors
+.idea/
+.vscode/
+*.swp
