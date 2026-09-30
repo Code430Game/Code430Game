@@ -1,22 +1,11 @@
 ## ADDED Requirements
 
-### Requirement: Road Name HUD
-While driving, the HUD SHALL show the name and class of the road the player is on and the name of the next cross street ahead, updated at least four times per second.
-
-#### Scenario: On a named road
-- **WHEN** the car is within 20 m of an edge named "Metcalfe Street"
-- **THEN** the HUD shows "Metcalfe Street"
-
-#### Scenario: Unnamed road
-- **WHEN** the nearest edge has no name
-- **THEN** the HUD shows the road class instead, for example "motorway link"
-
 ### Requirement: Overview Map
 The game SHALL provide a toggleable full-screen map rendered from the road graph and water polygons, centred on the player with a heading marker, zoomable with the triggers, usable with a controller alone.
 
 #### Scenario: Open the map
-- **WHEN** the player presses the map action while driving
-- **THEN** the game pauses and shows the map centred on the car, north up, with the car's heading
+- **WHEN** the player presses the map action while driving on Metcalfe Street
+- **THEN** the game pauses and shows the map centred on the car, north up, with the car's heading and "Metcalfe Street" beside the marker
 
 #### Scenario: Zoom
 - **WHEN** the player holds the right trigger on the map screen
@@ -27,7 +16,7 @@ The game SHALL provide a toggleable full-screen map rendered from the road graph
 - **THEN** no map rendering happens until it is opened again
 
 ### Requirement: Minimap
-While driving, the HUD SHALL show a minimap: a crop of the overview map texture around the player, rotated to the car's heading, with the road name beneath it, in both graphics presets.
+While driving, the HUD SHALL show a minimap: a crop of the overview map texture around the player, rotated to the car's heading, with no text, in both graphics presets.
 
 #### Scenario: Turning
 - **WHEN** the car turns 90 degrees to the right
