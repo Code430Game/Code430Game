@@ -240,3 +240,31 @@ def test_ramp_walls_stay_out_of_the_highway_ribbon():
             assert d >= 7.0 - 0.2 - 0.01, (
                 f"wall point {x:.1f},{z:.1f} is {d:.1f} m from the highway centreline"
             )
+
+
+def test_deck_over_a_road_keeps_its_parapet_and_walls_meet_at_edge_splits():
+    # Two bridge ways meeting at (0, 0) cross 6 m above a street that shares no node with them:
+    # the street is "inside" in 2D but not at the same level, so the parapets stay, and the
+    # runs of the two deck edges meet exactly at the split.
+    bridge = {"highway": "primary", "bridge": "yes", "layer": "1", "width": "12"}
+    g = graph_for(
+        [
+            (1, [(-200, 0), (0, 0)], bridge),
+            (3, [(0, 0), (200, 0)], bridge),
+            (2, [(0, -200), (0, 200)], {"highway": "residential", "width": "8"}),
+        ],
+        FlatSource(10.0),
+    )
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    parapets = [b for b in r.barriers if b.kind == "parapet"]
+    assert sorted(b.edge_id for b in parapets) == ["w1.0", "w1.0", "w3.0", "w3.0"]
+    for b in parapets:
+        assert abs(b.points[0][1] - b.points[-1][1]) < 0.5  # a flat deck: same height along the run
+    node = g.nodes[g.edges["w1.0"].to_node].position
+    for side in (-1.0, 1.0):
+        runs = [b for b in parapets if (b.points[0][2] - node[2]) * side > 0]
+        assert len(runs) == 2, side
+        end_of_first = next(b for b in runs if b.edge_id == "w1.0").points[-1]
+        start_of_second = next(b for b in runs if b.edge_id == "w3.0").points[0]
+        assert abs(end_of_first[0] - start_of_second[0]) < 0.05
+        assert abs(end_of_first[2] - start_of_second[2]) < 0.05

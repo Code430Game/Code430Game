@@ -3177,8 +3177,9 @@
  "elevation": {
   "anchorless_spans": 0,
   "bound_conflicts": 4,
-  "contaminated_vertices": 170,
+  "contaminated_vertices": 171,
   "edges_over_grade": [
+   "w107633331.0",
    "w137483257.0",
    "w399144346.0",
    "w432336467.5",
@@ -3194,22 +3195,22 @@
    "w895111373.1"
   ],
   "fixed_vertices": 191,
-  "free_vertices": 8714,
+  "free_vertices": 8740,
   "inferred_bridges": [],
   "max_residual_grade": 0.1202,
   "max_y": 80.488,
   "min_y": 43.319,
-  "vertices_clamped": 225
+  "vertices_clamped": 238
  },
  "one_way_traps": [],
  "ramps": [],
  "summary": {
   "barriers": {
-   "curb": 2368,
+   "curb": 2434,
    "guardrail": 37,
    "median": 24,
-   "parapet": 88,
-   "soundwall": 16
+   "parapet": 114,
+   "soundwall": 18
   },
   "buildings": {
    "footprints": 10678,
@@ -3255,8 +3256,8 @@
   "oneway_dead_ends": 26,
   "ramp_problems": 0,
   "terrain": {
-   "cells_carved": 6732,
-   "cells_flattened": 346783,
+   "cells_carved": 6737,
+   "cells_flattened": 346802,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
    "chunks": 196

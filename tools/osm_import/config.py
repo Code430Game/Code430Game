@@ -27,6 +27,7 @@ class ImportConfig:
     buildings: dict
     pedestrian: dict
     barriers: dict
+    forks: dict
     drivable_classes: tuple[str, ...]
     pedestrian_classes: tuple[str, ...]
     excluded_highway_values: frozenset[str]
@@ -55,6 +56,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> ImportConfig:
         buildings=dict(raw.get("buildings", {})),
         pedestrian=dict(raw.get("pedestrian", {})),
         barriers=dict(raw.get("barriers", {})),
+        forks=dict(raw.get("forks", {})),
         drivable_classes=tuple(raw["drivable_classes"]),
         pedestrian_classes=tuple(raw["pedestrian_classes"]),
         excluded_highway_values=frozenset(raw["excluded_highway_values"]),

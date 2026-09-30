@@ -558,7 +558,7 @@
    "cx": 2,
    "cz": -2,
    "file": "terrain/chunk_2_-2.png",
-   "max_y": 72.927,
+   "max_y": 72.925,
    "min_y": 64.012
   },
   {
@@ -909,7 +909,7 @@
    "cz": 2,
    "file": "terrain/chunk_-4_2.png",
    "max_y": 81.614,
-   "min_y": 73.184
+   "min_y": 73.166
   },
   {
    "cx": -3,
@@ -1216,7 +1216,7 @@
    "cx": -2,
    "cz": 5,
    "file": "terrain/chunk_-2_5.png",
-   "max_y": 72.763,
+   "max_y": 72.691,
    "min_y": 65.542
   },
   {

@@ -79,7 +79,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Barriers
 
-- curb 2368, parapet 88, guardrail 37, median 24, soundwall 16
+- curb 2434, parapet 114, guardrail 37, median 24, soundwall 18
 
 ## Buildings
 
@@ -88,9 +88,9 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 ## Elevation
 
 - Road height range: 43.319 m to 80.488 m
-- Bridge/tunnel (fixed) vertices: 191; approach vertices raised or lowered to meet them: 225
+- Bridge/tunnel (fixed) vertices: 191; approach vertices raised or lowered to meet them: 238
 - Conflicting bridge constraints: 4; bridge chains without a ground anchor: 0
-- Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 170
-- Worst residual grade: 0.1202; edges still over their class limit: 13
-  w137483257.0, w399144346.0, w432336467.5, w76419763.0, w76420697.0, w76421113.0, w76423269.0, w76423834.0, w76424318.0, w76726964.0, w895111372.0, w895111373.0, w895111373.1
+- Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 171
+- Worst residual grade: 0.1202; edges still over their class limit: 14
+  w107633331.0, w137483257.0, w399144346.0, w432336467.5, w76419763.0, w76420697.0, w76421113.0, w76423269.0, w76423834.0, w76424318.0, w76726964.0, w895111372.0, w895111373.0, w895111373.1
 - Bridges inferred from untagged crossings: 0

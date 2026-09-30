@@ -180,7 +180,7 @@ func _add_connector(a: LanePath, b: LanePath, centre: Vector3, nid: String, grap
 	c.edge_id = ""
 	c.road_class = a.road_class
 	c.is_connector = true
-	c.junction_node = nid if graph.degree(nid) >= 3 else ""
+	c.junction_node = nid if graph.degree(nid) >= 3 and not graph.is_fork(nid) else ""
 	c.straightness = dir_in.dot(dir_out)
 	c.speed_kph = mini(a.speed_kph, b.speed_kph)
 	_set_points(c, pts)
