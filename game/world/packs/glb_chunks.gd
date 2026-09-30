@@ -87,6 +87,9 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 			var ranges := _ranges_for(role)
 			mi.visibility_range_begin = ranges.x
 			mi.visibility_range_end = ranges.y
+			mi.visibility_range_begin_margin = MapPack.LOD_FADE_M if ranges.x > 0.0 else 0.0
+			mi.visibility_range_end_margin = MapPack.LOD_FADE_M if ranges.y < MapPack.TERRAIN_LOD2_END_M else 0.0
+			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			if role == "water":
 				mi.material_override = water_material if water_material != null else WaterBuilder.material()
 			elif role == "markings_lod0":

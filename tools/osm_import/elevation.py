@@ -730,9 +730,11 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
         for i in range(len(e.polyline) - 1):
             a, b = e.polyline[i], e.polyline[i + 1]
             idx.add((a[0], a[2]), (b[0], b[2]), (eid, i))
+    min_widths = ped.get("sidewalk_min_width_by_road_m", {})
     count = 0
     for w in graph.pedestrian:
         pts = []
+        nearest_class = None
         for p in w.polyline:
             x, z = p[0], p[2]
             best_d, best_y = math.inf, None
@@ -751,9 +753,13 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                         d,
                         e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t,
                     )
+                    nearest_class = e.road_class
             offset = 0.02 if w.kind == "crossing" else curb  # crossings are flush with the road
             y = best_y + offset if best_y is not None else source.sample(x, z)
             pts.append((x, y, z))
             count += 1
         w.polyline = pts
+        # Downtown sidewalks are tagged narrow (1.5 m) in OSM; widen to a minimum by the road beside them.
+        if w.kind == "sidewalk" and nearest_class is not None:
+            w.width_m = max(w.width_m, float(min_widths.get(nearest_class, 0.0)))
     return count

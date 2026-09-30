@@ -3249,7 +3249,7 @@
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 6732,
-   "cells_flattened": 342548,
+   "cells_flattened": 346872,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
    "chunks": 196
