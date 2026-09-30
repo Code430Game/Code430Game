@@ -25,6 +25,9 @@ var terrain_material: Material
 var water_material: Material
 var water_polygons: Array[WaterBuilder.WaterPolygon] = []
 var water_chunks: Dictionary = {}  # Vector2i -> RoadMeshBuilder.ChunkTriangles
+var marking_material: Material
+var marking_chunks: Dictionary = {}  # Vector2i -> RoadMeshBuilder.ChunkTriangles
+var marking_visible_to_m: float = 350.0
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
@@ -49,6 +52,11 @@ func load(dir: String) -> bool:
 	water_material = WaterBuilder.material()
 	water_polygons = WaterBuilder.load_polygons(dir)
 	water_chunks = WaterBuilder.build(water_polygons)
+	var markings := MarkingBuilder.new()
+	if markings.load_rules():
+		marking_chunks = markings.build(graph, junctions)
+		marking_visible_to_m = float(markings.rules["visible_to_m"])
+	marking_material = MarkingBuilder.material()
 	return terrain_index.size() > 0
 
 
@@ -81,7 +89,7 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 		var glb := pack_dir.path_join("chunks").path_join("chunk_%d_%d.glb" % [coord.x, coord.y])
 		var chunk: Node3D = null
 		if use_glb and FileAccess.file_exists(glb):
-			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material)
+			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material)
 			stats["chunks_from_glb"] = stats.get("chunks_from_glb", 0) + 1
 		if chunk == null:
 			var heights := TerrainBuilder.load_chunk(pack_dir, terrain_index, entry)
@@ -112,6 +120,11 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 		var mj: ArrayMesh = road_result.junctions[coord].to_mesh()
 		chunk.add_child(_mesh_instance("junctions_lod0", mj, road_material, 0.0, ROAD_LOD1_END_M))
 		collision_meshes.append(mj)
+	if marking_chunks.has(coord):
+		var mm: ArrayMesh = marking_chunks[coord].to_mesh()
+		var markings_mi := _mesh_instance("markings_lod0", mm, marking_material, 0.0, marking_visible_to_m)
+		markings_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		chunk.add_child(markings_mi)
 	if water_chunks.has(coord):
 		var mw: ArrayMesh = water_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))

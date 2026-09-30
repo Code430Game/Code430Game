@@ -1,0 +1,29 @@
+{
+  "_comment": "Lane marking rules (Canadian conventions). Widths and lengths in metres. centre_style: none | single_solid | single_dashed | double_solid. edge_lines: whether the class gets white edge lines.",
+  "line_width_m": 0.12,
+  "double_gap_m": 0.12,
+  "dash_on_m": 3.0,
+  "dash_off_m": 6.0,
+  "lift_above_road_m": 0.012,
+  "visible_to_m": 350.0,
+  "colors": {
+    "yellow": [0.95, 0.78, 0.2],
+    "white": [0.92, 0.92, 0.9]
+  },
+  "classes": {
+    "motorway":       {"centre_style": "double_solid", "edge_lines": true},
+    "motorway_link":  {"centre_style": "double_solid", "edge_lines": true},
+    "trunk":          {"centre_style": "double_solid", "edge_lines": true},
+    "trunk_link":     {"centre_style": "double_solid", "edge_lines": true},
+    "primary":        {"centre_style": "double_solid", "edge_lines": true},
+    "primary_link":   {"centre_style": "single_solid", "edge_lines": true},
+    "secondary":      {"centre_style": "double_solid", "edge_lines": true},
+    "secondary_link": {"centre_style": "single_solid", "edge_lines": true},
+    "tertiary":       {"centre_style": "single_solid", "edge_lines": true},
+    "tertiary_link":  {"centre_style": "single_solid", "edge_lines": false},
+    "unclassified":   {"centre_style": "single_dashed", "edge_lines": false},
+    "residential":    {"centre_style": "none", "edge_lines": false},
+    "living_street":  {"centre_style": "none", "edge_lines": false},
+    "service":        {"centre_style": "none", "edge_lines": false}
+  }
+}
