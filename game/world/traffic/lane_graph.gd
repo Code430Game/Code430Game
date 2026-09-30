@@ -40,6 +40,23 @@ class LanePath:
 		var t := (d - cumulative[i]) / seg if seg > 0.0 else 0.0
 		return points[i].lerp(points[i + 1], t)
 
+	## Distance along the path of the point nearest `pos` (x, z only) and how far off the path it is.
+	func closest(pos: Vector3) -> Vector2:
+		var best := Vector2(0.0, INF)
+		for i in range(points.size() - 1):
+			var a := points[i]
+			var b := points[i + 1]
+			var ab := Vector2(b.x - a.x, b.z - a.z)
+			var l2 := ab.length_squared()
+			var t := 0.0
+			if l2 > 0.0:
+				t = clampf(Vector2(pos.x - a.x, pos.z - a.z).dot(ab) / l2, 0.0, 1.0)
+			var q := Vector2(a.x, a.z) + ab * t
+			var d := Vector2(pos.x, pos.z).distance_to(q)
+			if d < best.y:
+				best = Vector2(cumulative[i] + (cumulative[i + 1] - cumulative[i]) * t, d)
+		return best
+
 	func direction_at(distance: float) -> Vector3:
 		var a := position_at(maxf(distance - 0.5, 0.0))
 		var b := position_at(minf(distance + 0.5, length))

@@ -5,10 +5,10 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-09-30
 
-- **Traffic cars are ghosts and pile up.** Player walks through traffic bodies, traffic drives
-  through the player, and stopped cars stack 6+ deep with no way out. Wanted: real collision
-  with the player (on foot and in the car), traffic that queues behind a stopped car instead
-  of piling into it, and the ability to take a traffic car. Next traffic round.
+- **Traffic cars are ghosts and pile up.** Addressed by `add-traffic-interaction` (traffic
+  keeps headway from player bodies, hit cars queue and recover, taking a traffic car with Y).
+  The ghosting came from the 24-body pool running dry: hit cars kept their bodies until the
+  player was 380 m away. Awaiting the Deck drive gate.
 - **Rideau Street by the Rideau Centre.** Bus-lane ways may be producing odd ribbons or lane
   counts; check `lanes:bus`, `busway=*` and `psv` tags in that stretch.
 - **Off-ramp at the default spawn.** Two-lane off-ramp leaves the 417 in front of the start
