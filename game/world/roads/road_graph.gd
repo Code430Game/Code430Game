@@ -32,9 +32,20 @@ class RoadEdge:
 	var length_m: float
 
 
+class PedestrianWay:
+	extends RefCounted
+	var id: String
+	var polyline: PackedVector3Array
+	var road_class: String
+	var kind: String  # sidewalk | crossing | footway | path | steps | cycleway | pedestrian | track
+	var width_m: float
+	var name: String
+
+
 var meta: Dictionary = {}
 var nodes: Dictionary = {}  # id -> RoadNode
 var edges: Dictionary = {}  # id -> RoadEdge
+var pedestrian: Array[PedestrianWay] = []
 var _incident: Dictionary = {}  # node id -> Array[String] of edge ids
 
 
@@ -87,6 +98,18 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		g._incident[edge.from_node].append(edge.id)
 		if edge.to_node != edge.from_node:
 			g._incident[edge.to_node].append(edge.id)
+	for w: Dictionary in data.get("pedestrian_ways", []):
+		var pw := PedestrianWay.new()
+		pw.id = w["id"]
+		var pl := PackedVector3Array()
+		for pt in w["polyline"]:
+			pl.append(_vec(pt))
+		pw.polyline = pl
+		pw.road_class = w["class"]
+		pw.kind = w.get("kind", "footway")
+		pw.width_m = float(w.get("width_m", 1.5))
+		pw.name = str(w["name"]) if w.get("name") != null else ""
+		g.pedestrian.append(pw)
 	return g
 
 

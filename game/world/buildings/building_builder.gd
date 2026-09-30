@@ -13,6 +13,18 @@ const LOD1_MIN_HEIGHT_M := 12.0
 const LOD1_MIN_AREA_M2 := 300.0
 const ROOF_DARKEN := 0.12
 const VARIATION := 0.08
+const FACADE_SHADER := preload("res://world/buildings/facade.gdshader")
+## Facade treatments (see facade.gdshader): 0 plain, 1 punched brick, 2 glass grid, 3 stone.
+const TREATMENT_PLAIN := 0
+const TREATMENT_PUNCHED := 1
+const TREATMENT_GLASS := 2
+const TREATMENT_STONE := 3
+const GLASS_MIN_HEIGHT_M := 15.0
+const TALL_GLASS_HEIGHT_M := 40.0
+const PLAIN_MAX_HEIGHT_M := 3.5
+const STONE_KINDS := ["church", "cathedral", "university", "school", "public", "government", "hospital"]
+const PLAIN_KINDS := ["garage", "garages", "shed", "roof", "industrial", "warehouse"]
+const GLASS_KINDS := ["office", "commercial", "retail", "hotel"]
 
 const KIND_COLORS := {
 	"house": Color(0.72, 0.62, 0.52),
@@ -102,6 +114,24 @@ static func load_buildings(pack_dir: String) -> Array[Building]:
 	return out
 
 
+## Facade treatment for a building type and height.
+static func treatment_for(kind: String, height_m: float) -> int:
+	if height_m <= PLAIN_MAX_HEIGHT_M or kind in PLAIN_KINDS:
+		return TREATMENT_PLAIN
+	if height_m >= TALL_GLASS_HEIGHT_M:
+		return TREATMENT_GLASS
+	if kind in STONE_KINDS:
+		return TREATMENT_STONE
+	if kind in GLASS_KINDS and height_m >= GLASS_MIN_HEIGHT_M:
+		return TREATMENT_GLASS
+	return TREATMENT_PUNCHED
+
+
+## Per-building seed in 0..1 from its id.
+static func seed_for(id: String) -> float:
+	return float(hash(id) % 10007) / 10007.0
+
+
 ## Colour for a building, with a small deterministic variation per id.
 static func color_for(b: Building) -> Color:
 	var base: Color = KIND_COLORS.get(b.kind, DEFAULT_COLOR)
@@ -130,7 +160,10 @@ static func _extrude(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
 	var roof := wall.darkened(ROOF_DARKEN)
 	var y0 := b.ground_y - WALL_EMBED_M
 	var y1 := b.ground_y + b.height_m
+	var uv2 := Vector2(float(treatment_for(b.kind, b.height_m)), seed_for(b.id))
+	var roof_uv2 := Vector2(-1.0, uv2.y)
 	for ring in b.rings:
+		var along := 0.0
 		for i in range(ring.size()):
 			var a := ring[i]
 			var c := ring[(i + 1) % ring.size()]
@@ -142,24 +175,30 @@ static func _extrude(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
 			var a_high := Vector3(a.x, y1, a.y)
 			var c_low := Vector3(c.x, y0, c.y)
 			var c_high := Vector3(c.x, y1, c.y)
+			var u0 := along
+			var u1 := along + d.length()
+			along = u1
+			# UV: u along the wall in metres, v metres above ground (negative below).
+			var ua_low := Vector2(u0, -WALL_EMBED_M)
+			var ua_high := Vector2(u0, b.height_m)
+			var uc_low := Vector2(u1, -WALL_EMBED_M)
+			var uc_high := Vector2(u1, b.height_m)
 			# Pick the winding whose front normal (Godot: clockwise front) points outward.
 			var n := (c_high - a_low).cross(c_low - a_low)
 			if n.dot(outward) >= 0.0:
-				out.add_triangle(a_low, c_low, c_high, wall)
-				out.add_triangle(a_low, c_high, a_high, wall)
+				out.add_triangle_uv(a_low, c_low, c_high, wall, ua_low, uc_low, uc_high, uv2)
+				out.add_triangle_uv(a_low, c_high, a_high, wall, ua_low, uc_high, ua_high, uv2)
 			else:
-				out.add_triangle(a_low, c_high, c_low, wall)
-				out.add_triangle(a_low, a_high, c_high, wall)
+				out.add_triangle_uv(a_low, c_high, c_low, wall, ua_low, uc_high, uc_low, uv2)
+				out.add_triangle_uv(a_low, a_high, c_high, wall, ua_low, ua_high, uc_high, uv2)
 	for t in range(0, b.roof_triangles.size(), 3):
 		var p := b.roof_vertices[b.roof_triangles[t]]
 		var q := b.roof_vertices[b.roof_triangles[t + 1]]
 		var r := b.roof_vertices[b.roof_triangles[t + 2]]
-		out.add_triangle(Vector3(p.x, y1, p.y), Vector3(q.x, y1, q.y), Vector3(r.x, y1, r.y), roof)
+		out.add_triangle_uv(Vector3(p.x, y1, p.y), Vector3(q.x, y1, q.y), Vector3(r.x, y1, r.y), roof, p, q, r, roof_uv2)
 
 
-static func material() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.vertex_color_is_srgb = true  # colours are authored in sRGB; without this they render washed out
-	m.roughness = 0.95
+static func material() -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = FACADE_SHADER
 	return m

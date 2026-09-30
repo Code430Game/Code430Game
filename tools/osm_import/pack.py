@@ -73,9 +73,17 @@ def sample_chunk(source: ElevationSource, cx: int, cz: int) -> ChunkTerrain:
 
 
 def _road_footprints(graph: RoadGraph) -> tuple[list[tuple], list[tuple]]:
-    """(ground segments, bridge segments): (ax, az, bx, bz, ay, by, half_width)."""
+    """(ground segments, bridge segments): (ax, az, bx, bz, ay, by, half_width).
+    Pedestrian ways count as ground segments so the terrain meets their surface."""
     ground: list[tuple] = []
     bridges: list[tuple] = []
+    for w in graph.pedestrian:
+        if w.kind == "steps":
+            continue
+        hw = w.width_m / 2.0
+        for i in range(len(w.polyline) - 1):
+            a, b = w.polyline[i], w.polyline[i + 1]
+            ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw))
     for eid in sorted(graph.edges):
         e = graph.edges[eid]
         hw = e.width_m / 2.0
@@ -133,7 +141,8 @@ def _distance_field(
         # underpass), the lower road must own the ground or a wall cuts across it.
         under = d <= hw + FLAT_MARGIN_M
         covered_y = np.where(under, np.minimum(covered_y, y_here), covered_y)
-    lower = covered_y < road_y - 0.5
+    # Any lower covering surface wins, including a road under a curb-height sidewalk.
+    lower = covered_y < road_y - 0.02
     road_y = np.where(lower, covered_y, road_y)
     return dist, road_y, half_w
 

@@ -92,11 +92,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "polyline", "class", "osm_way_id", "name"],
+        "required": ["id", "polyline", "class", "kind", "width_m", "osm_way_id", "name"],
         "properties": {
           "id": {"type": "string", "pattern": "^p[0-9]+$"},
           "polyline": {"$ref": "#/$defs/polyline"},
           "class": {"type": "string"},
+          "kind": {"enum": ["sidewalk", "crossing", "footway", "path", "steps", "cycleway", "pedestrian", "track", "living_street"]},
+          "width_m": {"type": "number", "exclusiveMinimum": 0},
           "osm_way_id": {"type": "integer"},
           "name": {"type": ["string", "null"]}
         }

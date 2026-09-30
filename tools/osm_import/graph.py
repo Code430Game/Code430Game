@@ -63,6 +63,10 @@ class PedestrianWay:
     road_class: str
     osm_way_id: int
     name: str | None
+    kind: str = (
+        "footway"  # sidewalk | crossing | footway | path | steps | cycleway | pedestrian | track
+    )
+    width_m: float = 1.5
 
 
 @dataclass
@@ -224,8 +228,16 @@ def build_graph(
             n = data.nodes[nid]
             x, z = proj.to_local(n.lat, n.lon)
             pl.append((x, 0.0, z))
+        kind = way.tags["highway"]
+        if kind == "footway" and way.tags.get("footway") in ("sidewalk", "crossing"):
+            kind = way.tags["footway"]
+        width = T.parse_width_m(way.tags.get("width"))
+        if width is None:
+            width = float(cfg.pedestrian.get("default_width_m", {}).get(kind, 1.5))
         peds.append(
-            PedestrianWay(f"p{way.id}", pl, way.tags["highway"], way.id, way.tags.get("name"))
+            PedestrianWay(
+                f"p{way.id}", pl, way.tags["highway"], way.id, way.tags.get("name"), kind, width
+            )
         )
 
     graph = RoadGraph(nodes, edges, peds)

@@ -717,3 +717,43 @@ def _smooth(
                 y[key] = new
         if moved < SMOOTHING_EPSILON:
             break
+
+
+def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig) -> int:
+    """Sets y on pedestrian polylines: nearest road surface plus the curb when within
+    follow_road_within_m of a road, else the DTM. Returns the vertex count set."""
+    ped = cfg.pedestrian
+    curb = float(ped.get("curb_height_m", 0.12))
+    follow = float(ped.get("follow_road_within_m", 8.0))
+    idx = _SegmentIndex()
+    for eid, e in graph.edges.items():
+        for i in range(len(e.polyline) - 1):
+            a, b = e.polyline[i], e.polyline[i + 1]
+            idx.add((a[0], a[2]), (b[0], b[2]), (eid, i))
+    count = 0
+    for w in graph.pedestrian:
+        pts = []
+        for p in w.polyline:
+            x, z = p[0], p[2]
+            best_d, best_y = math.inf, None
+            for a, b, (eid, i) in idx.near(x, z, follow + 20.0):
+                e = graph.edges[eid]
+                d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
+                if d < best_d and d <= e.width_m / 2.0 + follow:
+                    dx, dz = b[0] - a[0], b[1] - a[1]
+                    l2 = dx * dx + dz * dz
+                    t = (
+                        max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / l2))
+                        if l2 > 0
+                        else 0.0
+                    )
+                    best_d, best_y = (
+                        d,
+                        e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t,
+                    )
+            offset = 0.02 if w.kind == "crossing" else curb  # crossings are flush with the road
+            y = best_y + offset if best_y is not None else source.sample(x, z)
+            pts.append((x, y, z))
+            count += 1
+        w.polyline = pts
+    return count

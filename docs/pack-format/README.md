@@ -48,7 +48,7 @@ Fields for tone modes (`supported_modes`, `max_descriptors`) arrive with the `ad
 ## Map pack files
 | File | Required | Contents |
 |---|---|---|
-| `road_graph.v0.json` | yes | Nodes and edges with polylines; schema `road_graph.schema.v0.json`. |
+| `road_graph.v0.json` | yes | Nodes and edges with polylines, plus pedestrian ways with kind and width; schema `road_graph.schema.v0.json`. |
 | `terrain.json` + `terrain/*.png` | yes | 256 m chunks of 65×65 height samples at 4 m, height in the R and G bytes, min/max per chunk. |
 | `water.v0.json` | no | Pre-triangulated water polygons with a surface height; schema `water.schema.v0.json`. |
 | `buildings.v0.json` | no | Building footprints with height and ground height, roof pre-triangulated; schema `buildings.schema.v0.json`. |

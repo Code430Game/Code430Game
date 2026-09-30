@@ -4,6 +4,11 @@
   "bbox_edge_margin_m": 40.0,
   "bridge_clearance_m": 6.0,
   "water_depth_m": 1.5,
+  "pedestrian": {
+    "curb_height_m": 0.12,
+    "follow_road_within_m": 8.0,
+    "default_width_m": {"sidewalk": 1.8, "crossing": 3.0, "footway": 1.5, "path": 1.5, "steps": 1.5, "cycleway": 2.5, "pedestrian": 4.0, "track": 2.5}
+  },
   "buildings": {
     "storey_height_m": 3.2,
     "min_height_m": 3.0,
