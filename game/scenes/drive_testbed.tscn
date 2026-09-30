@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scenes/drive_testbed.gd" id="1"]
 [ext_resource type="PackedScene" path="res://ui/map/overview_map.tscn" id="5"]
 [ext_resource type="Script" path="res://ui/map/minimap.gd" id="6"]
+[ext_resource type="PackedScene" path="res://ui/pause/pause_menu.tscn" id="7"]
 [ext_resource type="Script" path="res://core/settings/preset_environment.gd" id="2"]
 [ext_resource type="Script" path="res://actors/vehicles/chase_camera.gd" id="3"]
 [ext_resource type="Script" path="res://world/roads/road_graph_debug_view.gd" id="4"]
@@ -57,6 +58,8 @@ clip_contents = true
 script = ExtResource("6")
 
 [node name="OverviewMap" parent="." instance=ExtResource("5")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("7")]
 
 [node name="Label" type="Label" parent="HUD"]
 anchors_preset = 2
