@@ -1,23 +1,23 @@
 ## 1. Pipeline skeleton
-- [ ] 1.1 Create `tools/osm_import/` package with CLI (`python -m osm_import --bbox ... --out ...`)
-- [ ] 1.2 Config file for class defaults (lanes, widths, speeds, clearance, max grades, cluster radii)
-- [ ] 1.3 Fetch + cache (Overpass bbox; optional local .osm.pbf); record source and timestamp
-- [ ] 1.4 Small fixture area (a few blocks + one ramp) committed as a test extract, under ODbL attribution
+- [x] 1.1 Create `tools/osm_import/` package with CLI (`python -m osm_import --bbox ... --out ...`)
+- [x] 1.2 Config file for class defaults (lanes, widths, speeds, clearance, max grades, cluster radii)
+- [x] 1.3 Fetch + cache (Overpass bbox; local Overpass-JSON file via `--osm-json`); record source and timestamp. `.osm.pbf` input not done: needs the osmium dependency, deferred until a reproducible build is needed
+- [x] 1.4 Small fixture area (a few blocks + one ramp) committed as a test extract, under ODbL attribution
 
 ## 2. Graph build
-- [ ] 2.1 Filter drivable and pedestrian ways
-- [ ] 2.2 Project to UTM 18N and local origin
-- [ ] 2.3 Build nodes/edges with polylines and OSM ids
-- [ ] 2.4 Fill defaults and record defaulted fields
-- [ ] 2.5 Junction clustering (never across layers)
-- [ ] 2.6 Golden-file tests on fixture
+- [x] 2.1 Filter drivable and pedestrian ways
+- [x] 2.2 Project to UTM 18N and local origin
+- [x] 2.3 Build nodes/edges with polylines and OSM ids
+- [x] 2.4 Fill defaults and record defaulted fields
+- [x] 2.5 Junction clustering (never across layers)
+- [x] 2.6 Golden-file tests on fixture
 
 ## 3. Validation report
-- [ ] 3.1 Connected components
-- [ ] 3.2 Dead-end classification (real vs. bbox-edge vs. suspicious)
-- [ ] 3.3 Ramp (`*_link`) connectivity checks
-- [ ] 3.4 One-way trap detection (strongly connected components)
-- [ ] 3.5 Markdown + JSON report output
+- [x] 3.1 Connected components
+- [x] 3.2 Dead-end classification (real vs. bbox-edge vs. suspicious)
+- [x] 3.3 Ramp (`*_link`) connectivity checks
+- [x] 3.4 One-way trap detection (strongly connected components)
+- [x] 3.5 Markdown + JSON report output
 - [ ] 3.6 **Stop: run on the full starter district and show the human the report**
 
 ## 4. Elevation
@@ -27,9 +27,9 @@
 - [ ] 4.4 Tests on fixture ramp
 
 ## 5. Export
-- [ ] 5.1 `road_graph.v0.json` writer
-- [ ] 5.2 JSON Schema in `docs/pack-format/road_graph.schema.v0.json`, validated in CI
-- [ ] 5.3 Determinism test (two runs → identical bytes)
+- [x] 5.1 `road_graph.v0.json` writer
+- [x] 5.2 JSON Schema in `docs/pack-format/road_graph.schema.v0.json`, validated in CI (pytest golden test validates the fixture output against it)
+- [x] 5.3 Determinism test (two runs → identical bytes)
 
 ## 6. Mesh generation (Godot)
 - [ ] 6.1 Graph reader in `game/world/roads/`

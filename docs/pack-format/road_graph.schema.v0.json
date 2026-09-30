@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/road_graph.schema.v0.json",
+  "title": "Code 430 road graph v0",
+  "description": "Output of tools/osm_import. Positions are local metres: x east, y up, z south, relative to meta.origin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "nodes", "edges", "pedestrian_ways"],
+  "$defs": {
+    "point": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+    "polyline": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 2},
+    "node_id": {"type": "string", "pattern": "^[nc][0-9]+$"},
+    "road_class": {
+      "enum": ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street", "service"]
+    }
+  },
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "generator", "config", "units", "origin", "bbox", "elevation", "sources", "attribution", "license", "notes"],
+      "properties": {
+        "schema_version": {"const": 0},
+        "generator": {"type": "string"},
+        "config": {"type": "string"},
+        "units": {"type": "string"},
+        "origin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["crs", "easting", "northing", "lat", "lon"],
+          "properties": {
+            "crs": {"type": "string"},
+            "easting": {"type": "number"},
+            "northing": {"type": "number"},
+            "lat": {"type": "number"},
+            "lon": {"type": "number"}
+          }
+        },
+        "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+        "elevation": {"type": ["object", "null"]},
+        "sources": {"type": "array", "items": {"type": "object"}, "minItems": 1},
+        "attribution": {"type": "array", "items": {"type": "string"}, "contains": {"const": "© OpenStreetMap contributors"}},
+        "license": {"const": "ODbL-1.0"},
+        "notes": {"type": "object"}
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "position", "osm_node_ids", "junction_type"],
+        "properties": {
+          "id": {"$ref": "#/$defs/node_id"},
+          "position": {"$ref": "#/$defs/point"},
+          "osm_node_ids": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+          "junction_type": {"enum": ["junction", "pass_through", "dead_end"]}
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "from", "to", "polyline", "class", "lanes_forward", "lanes_backward", "oneway", "speed_kph", "width_m", "layer", "bridge", "tunnel", "name", "osm_way_id", "defaulted_fields", "access", "length_m"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^w[0-9]+\\.[0-9]+$"},
+          "from": {"$ref": "#/$defs/node_id"},
+          "to": {"$ref": "#/$defs/node_id"},
+          "polyline": {"$ref": "#/$defs/polyline"},
+          "class": {"$ref": "#/$defs/road_class"},
+          "lanes_forward": {"type": "integer", "minimum": 1},
+          "lanes_backward": {"type": "integer", "minimum": 0},
+          "oneway": {"type": "boolean"},
+          "speed_kph": {"type": "integer", "minimum": 1},
+          "width_m": {"type": "number", "exclusiveMinimum": 0},
+          "layer": {"type": "integer"},
+          "bridge": {"type": "boolean"},
+          "tunnel": {"type": "boolean"},
+          "name": {"type": ["string", "null"]},
+          "osm_way_id": {"type": "integer"},
+          "defaulted_fields": {"type": "array", "items": {"enum": ["lanes", "width", "speed_kph", "oneway"]}},
+          "access": {"type": ["string", "null"]},
+          "length_m": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "pedestrian_ways": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "polyline", "class", "osm_way_id", "name"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^p[0-9]+$"},
+          "polyline": {"$ref": "#/$defs/polyline"},
+          "class": {"type": "string"},
+          "osm_way_id": {"type": "integer"},
+          "name": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "_comment": "Per-class defaults and tunables for the OSM import. Lanes are totals for two-way roads; lanes_oneway is the total for one-way roads. Speeds in km/h, distances in metres.",
+  "lane_width_m": 3.5,
+  "bbox_edge_margin_m": 40.0,
+  "bridge_clearance_m": 6.0,
+  "drivable_classes": [
+    "motorway", "motorway_link", "trunk", "trunk_link",
+    "primary", "primary_link", "secondary", "secondary_link",
+    "tertiary", "tertiary_link", "unclassified", "residential",
+    "living_street", "service"
+  ],
+  "pedestrian_classes": ["footway", "path", "pedestrian", "steps", "cycleway", "living_street", "track"],
+  "excluded_highway_values": ["construction", "proposed", "abandoned", "razed", "platform", "bus_stop", "elevator", "corridor"],
+  "excluded_service_values": ["parking_aisle", "driveway", "drive-through", "emergency_access"],
+  "excluded_access_values": ["no", "private"],
+  "implied_oneway_classes": ["motorway", "motorway_link"],
+  "major_classes": ["motorway", "trunk", "primary", "secondary", "tertiary"],
+  "likely_real_dead_end_classes": ["service", "residential", "living_street", "unclassified"],
+  "defaults": {
+    "motorway":       {"lanes": 4, "lanes_oneway": 2, "speed_kph": 100, "cluster_radius_m": 4.0,  "max_grade": 0.04},
+    "motorway_link":  {"lanes": 2, "lanes_oneway": 1, "speed_kph": 60,  "cluster_radius_m": 4.0,  "max_grade": 0.06},
+    "trunk":          {"lanes": 4, "lanes_oneway": 2, "speed_kph": 80,  "cluster_radius_m": 12.0, "max_grade": 0.05},
+    "trunk_link":     {"lanes": 2, "lanes_oneway": 1, "speed_kph": 60,  "cluster_radius_m": 6.0,  "max_grade": 0.06},
+    "primary":        {"lanes": 4, "lanes_oneway": 2, "speed_kph": 50,  "cluster_radius_m": 18.0, "max_grade": 0.06},
+    "primary_link":   {"lanes": 2, "lanes_oneway": 1, "speed_kph": 50,  "cluster_radius_m": 8.0,  "max_grade": 0.07},
+    "secondary":      {"lanes": 4, "lanes_oneway": 2, "speed_kph": 50,  "cluster_radius_m": 18.0, "max_grade": 0.06},
+    "secondary_link": {"lanes": 2, "lanes_oneway": 1, "speed_kph": 50,  "cluster_radius_m": 8.0,  "max_grade": 0.07},
+    "tertiary":       {"lanes": 2, "lanes_oneway": 1, "speed_kph": 50,  "cluster_radius_m": 12.0, "max_grade": 0.07},
+    "tertiary_link":  {"lanes": 2, "lanes_oneway": 1, "speed_kph": 40,  "cluster_radius_m": 8.0,  "max_grade": 0.08},
+    "unclassified":   {"lanes": 2, "lanes_oneway": 1, "speed_kph": 40,  "cluster_radius_m": 10.0, "max_grade": 0.08},
+    "residential":    {"lanes": 2, "lanes_oneway": 1, "speed_kph": 40,  "cluster_radius_m": 10.0, "max_grade": 0.08},
+    "living_street":  {"lanes": 2, "lanes_oneway": 1, "speed_kph": 20,  "cluster_radius_m": 8.0,  "max_grade": 0.10},
+    "service":        {"lanes": 2, "lanes_oneway": 1, "speed_kph": 20,  "cluster_radius_m": 4.0,  "max_grade": 0.12}
+  }
+}

@@ -1,0 +1,352 @@
+{
+ "components": [
+  {
+   "classes": {
+    "motorway": 17,
+    "motorway_link": 10,
+    "residential": 34,
+    "secondary": 53,
+    "secondary_link": 3,
+    "service": 14,
+    "tertiary": 10,
+    "tertiary_link": 3
+   },
+   "edges": 144,
+   "likely_cause": "main network",
+   "nodes": 120,
+   "sample_names": [
+    "Argyle Avenue",
+    "Cartier Street",
+    "Catherine Street",
+    "Elgin Street",
+    "Frank Street",
+    "Gladstone Avenue",
+    "Hawthorne Avenue",
+    "Highway 417"
+   ],
+   "sample_way_ids": [
+    76419495,
+    76419917,
+    76420027,
+    76420450,
+    76420729,
+    76420791,
+    76420835,
+    76421510
+   ],
+   "touches_bbox_edge": true
+  }
+ ],
+ "dead_ends": {
+  "bbox_edge": [
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76444221.0",
+    "name": "Park Avenue",
+    "node_id": "n248103183",
+    "osm_node_id": 248103183,
+    "osm_way_id": 76444221,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w318737541.0",
+    "name": "Hawthorne Avenue",
+    "node_id": "n3251083002",
+    "osm_node_id": 3251083002,
+    "osm_way_id": 318737541,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76443940.0",
+    "name": "Queen Elizabeth Driveway",
+    "node_id": "n5298088140",
+    "osm_node_id": 5298088140,
+    "osm_way_id": 76443940,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76420835.0",
+    "name": "Catherine Street",
+    "node_id": "n901044850",
+    "osm_node_id": 901044850,
+    "osm_way_id": 76420835,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76420027.0",
+    "name": "McLeod Street",
+    "node_id": "n901047488",
+    "osm_node_id": 901047488,
+    "osm_way_id": 76420027,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76419495.2",
+    "name": "Metcalfe Street",
+    "node_id": "n901050623",
+    "osm_node_id": 901050623,
+    "osm_way_id": 76419495,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76420791.0",
+    "name": "Frank Street",
+    "node_id": "n901053419",
+    "osm_node_id": 901053419,
+    "osm_way_id": 76420791,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76423531.0",
+    "name": "Frank Street",
+    "node_id": "n901059438",
+    "osm_node_id": 901059438,
+    "osm_way_id": 76423531,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76424082.0",
+    "name": "Argyle Avenue",
+    "node_id": "n901060317",
+    "osm_node_id": 901060317,
+    "osm_way_id": 76424082,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w463448330.0",
+    "name": "Isabella Street",
+    "node_id": "n901061897",
+    "osm_node_id": 901061897,
+    "osm_way_id": 463448330,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w360442402.0",
+    "name": "Gladstone Avenue",
+    "node_id": "n901065861",
+    "osm_node_id": 901065861,
+    "osm_way_id": 360442402,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76444274.0",
+    "name": "McLeod Street",
+    "node_id": "n901216051",
+    "osm_node_id": 901216051,
+    "osm_way_id": 76444274,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w435140468.2",
+    "name": "Cartier Street",
+    "node_id": "n901216348",
+    "osm_node_id": 901216348,
+    "osm_way_id": 435140468,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76444133.1",
+    "name": "Queen Elizabeth Driveway",
+    "node_id": "n901222645",
+    "osm_node_id": 901222645,
+    "osm_way_id": 76444133,
+    "road_class": "tertiary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w475878509.0",
+    "name": "Patterson Avenue",
+    "node_id": "n901223513",
+    "osm_node_id": 901223513,
+    "osm_way_id": 475878509,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76726676.0",
+    "name": "Highway 417",
+    "node_id": "n903982330",
+    "osm_node_id": 903982330,
+    "osm_way_id": 76726676,
+    "road_class": "motorway"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w76726989.0",
+    "name": "Highway 417",
+    "node_id": "n903983070",
+    "osm_node_id": 903983070,
+    "osm_way_id": 76726989,
+    "road_class": "motorway"
+   }
+  ],
+  "declared_noexit": [],
+  "likely_real": [
+   {
+    "category": "likely_real",
+    "edge_id": "w764042081.0",
+    "name": null,
+    "node_id": "n2178655064",
+    "osm_node_id": 2178655064,
+    "osm_way_id": 764042081,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w207614373.0",
+    "name": null,
+    "node_id": "n2178655069",
+    "osm_node_id": 2178655069,
+    "osm_way_id": 207614373,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w222906128.0",
+    "name": null,
+    "node_id": "n2318482871",
+    "osm_node_id": 2318482871,
+    "osm_way_id": 222906128,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w391440214.0",
+    "name": null,
+    "node_id": "n3192679444",
+    "osm_node_id": 3192679444,
+    "osm_way_id": 391440214,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w360442686.0",
+    "name": null,
+    "node_id": "n3649886580",
+    "osm_node_id": 3649886580,
+    "osm_way_id": 360442686,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w391385598.0",
+    "name": null,
+    "node_id": "n3946123295",
+    "osm_node_id": 3946123295,
+    "osm_way_id": 391385598,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w222906130.0",
+    "name": null,
+    "node_id": "n4588606588",
+    "osm_node_id": 4588606588,
+    "osm_way_id": 222906130,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w667314139.0",
+    "name": null,
+    "node_id": "n4686479968",
+    "osm_node_id": 4686479968,
+    "osm_way_id": 667314139,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w667314142.0",
+    "name": null,
+    "node_id": "n5587304701",
+    "osm_node_id": 5587304701,
+    "osm_way_id": 667314142,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w667314141.0",
+    "name": null,
+    "node_id": "n5587304703",
+    "osm_node_id": 5587304703,
+    "osm_way_id": 667314141,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w667314143.0",
+    "name": null,
+    "node_id": "n5587304706",
+    "osm_node_id": 5587304706,
+    "osm_way_id": 667314143,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w474768793.0",
+    "name": null,
+    "node_id": "n6248007630",
+    "osm_node_id": 6248007630,
+    "osm_way_id": 474768793,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w764042091.0",
+    "name": null,
+    "node_id": "n7137980808",
+    "osm_node_id": 7137980808,
+    "osm_way_id": 764042091,
+    "road_class": "service"
+   }
+  ],
+  "suspicious": []
+ },
+ "one_way_traps": [],
+ "ramps": [],
+ "summary": {
+  "classes": {
+   "motorway": 17,
+   "motorway_link": 10,
+   "residential": 34,
+   "secondary": 53,
+   "secondary_link": 3,
+   "service": 14,
+   "tertiary": 10,
+   "tertiary_link": 3
+  },
+  "components": 1,
+  "dead_ends": {
+   "bbox_edge": 17,
+   "declared_noexit": 0,
+   "likely_real": 13,
+   "suspicious": 0
+  },
+  "defaulted_fields": {
+   "lanes": 12,
+   "speed_kph": 41,
+   "width": 143
+  },
+  "edges": 144,
+  "largest_component_nodes": 120,
+  "largest_scc_nodes": 79,
+  "nodes": 120,
+  "one_way_traps": 0,
+  "oneway_dead_ends": 2,
+  "ramp_problems": 0,
+  "total_length_km": 11.244
+ }
+}
