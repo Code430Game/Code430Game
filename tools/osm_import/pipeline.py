@@ -9,7 +9,12 @@ from pathlib import Path
 from osm_import.cluster import ClusterStats, cluster_junctions
 from osm_import.config import DEFAULT_CONFIG_PATH, ImportConfig, load_config
 from osm_import.crossings import infer_bridges
-from osm_import.elevation import ElevationSource, ElevationStats, apply_elevation
+from osm_import.elevation import (
+    ElevationSource,
+    ElevationStats,
+    apply_elevation,
+    apply_pedestrian_elevation,
+)
 from osm_import.export import dump_json, graph_to_dict
 from osm_import.filter import FilterResult, filter_ways
 from osm_import.graph import RoadGraph, build_graph
@@ -67,6 +72,7 @@ def run_pipeline(
     if elevation is not None:
         crossings = infer_bridges(graph, elevation.sample)
         elev_stats = apply_elevation(graph, elevation, cfg)
+        apply_pedestrian_elevation(graph, elevation, cfg)
         elev_meta = dict(sorted(elevation.describe().items()))
         elev_meta["bridge_clearance_m"] = cfg.bridge_clearance_m
         log.info(

@@ -39,6 +39,8 @@ class ChunkTriangles:
 	extends RefCounted
 	var vertices := PackedVector3Array()
 	var colors := PackedColorArray()
+	var uvs := PackedVector2Array()  # optional, same length as vertices when used
+	var uv2s := PackedVector2Array()
 
 	func add_triangle(a: Vector3, b: Vector3, c: Vector3, color: Color) -> void:
 		vertices.append(a)
@@ -47,6 +49,27 @@ class ChunkTriangles:
 		colors.append(color)
 		colors.append(color)
 		colors.append(color)
+		if uvs.size() > 0:
+			_pad_uvs()
+
+	## Triangle with per-vertex UV (metres) and a shared UV2 (treatment, seed).
+	func add_triangle_uv(a: Vector3, b: Vector3, c: Vector3, color: Color, ua: Vector2, ub: Vector2, uc: Vector2, uv2: Vector2) -> void:
+		_pad_uvs()
+		vertices.append(a)
+		vertices.append(b)
+		vertices.append(c)
+		for i in range(3):
+			colors.append(color)
+			uv2s.append(uv2)
+		uvs.append(ua)
+		uvs.append(ub)
+		uvs.append(uc)
+
+	## Brings the UV arrays up to the vertex count with placeholders (plain triangles added earlier).
+	func _pad_uvs() -> void:
+		while uvs.size() < vertices.size():
+			uvs.append(Vector2.ZERO)
+			uv2s.append(Vector2(-1.0, 0.0))
 
 	func add_quad(a0: Vector3, a1: Vector3, b0: Vector3, b1: Vector3, color: Color) -> void:
 		add_triangle(a0, b0, a1, color)
@@ -59,8 +82,12 @@ class ChunkTriangles:
 	func to_mesh() -> ArrayMesh:
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var with_uv := uvs.size() == vertices.size()
 		for i in range(vertices.size()):
 			st.set_color(colors[i])
+			if with_uv:
+				st.set_uv(uvs[i])
+				st.set_uv2(uv2s[i])
 			st.add_vertex(vertices[i])
 		st.generate_normals()
 		return st.commit()

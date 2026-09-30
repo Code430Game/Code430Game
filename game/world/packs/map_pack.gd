@@ -33,6 +33,8 @@ var marking_visible_to_m: float = 350.0
 var building_material: Material
 var buildings: Array[BuildingBuilder.Building] = []
 var building_chunks: Dictionary = {"lod0": {}, "lod1": {}}
+var sidewalk_material: Material
+var sidewalk_chunks: Dictionary = {}
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
@@ -65,6 +67,8 @@ func load(dir: String) -> bool:
 	building_material = BuildingBuilder.material()
 	buildings = BuildingBuilder.load_buildings(dir)
 	building_chunks = BuildingBuilder.build(buildings)
+	sidewalk_material = SidewalkBuilder.material()
+	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
 	return terrain_index.size() > 0
 
 
@@ -98,7 +102,7 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 		var glb := pack_dir.path_join("chunks").path_join("chunk_%d_%d.glb" % [coord.x, coord.y])
 		var chunk: Node3D = null
 		if use_glb and FileAccess.file_exists(glb):
-			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material, building_material)
+			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material, building_material, sidewalk_material)
 			stats["chunks_from_glb"] = stats.get("chunks_from_glb", 0) + 1
 		if chunk == null:
 			var heights := TerrainBuilder.load_chunk(pack_dir, terrain_index, entry)
@@ -134,6 +138,10 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 		var markings_mi := _mesh_instance("markings_lod0", mm, marking_material, 0.0, marking_visible_to_m)
 		markings_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		chunk.add_child(markings_mi)
+	if sidewalk_chunks.has(coord):
+		var ms: ArrayMesh = sidewalk_chunks[coord].to_mesh()
+		chunk.add_child(_mesh_instance("sidewalks_lod0", ms, sidewalk_material, 0.0, SidewalkBuilder.VISIBLE_TO_M))
+		collision_meshes.append(ms)
 	if building_chunks["lod0"].has(coord):
 		var mb0: ArrayMesh = building_chunks["lod0"][coord].to_mesh()
 		chunk.add_child(_mesh_instance("buildings_lod0", mb0, building_material, 0.0, BUILDING_LOD0_END_M))
