@@ -65,10 +65,12 @@ class ValidationReport:
     dead_ends: dict[str, list[DeadEndEntry]] = field(default_factory=dict)
     ramps: list[RampEntry] = field(default_factory=list)
     traps: list[TrapEntry] = field(default_factory=list)
+    elevation: dict | None = None
 
     def to_dict(self) -> dict:
         return {
             "summary": self.summary,
+            "elevation": self.elevation,
             "components": [asdict(c) for c in self.components],
             "dead_ends": {k: [asdict(d) for d in v] for k, v in self.dead_ends.items()},
             "ramps": [asdict(r) for r in self.ramps],
@@ -345,5 +347,19 @@ def render_markdown(report: ValidationReport, title: str) -> str:
             lines.append(
                 f"| {t.kind} | {t.nodes} | {classes} | {', '.join(t.sample_names) or '-'} | {', '.join(str(w) for w in t.sample_way_ids)} |"
             )
+    lines += ["", "## Elevation", ""]
+    if report.elevation is None:
+        lines.append("No elevation applied: every y is 0.")
+    else:
+        el = report.elevation
+        lines += [
+            f"- Road height range: {el['min_y']} m to {el['max_y']} m",
+            f"- Bridge/tunnel (fixed) vertices: {el['fixed_vertices']}; approach vertices raised or lowered to meet them: {el['vertices_clamped']}",
+            f"- Conflicting bridge constraints: {el['bound_conflicts']}; bridge chains without a ground anchor: {el['anchorless_spans']}",
+            f"- Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): {el['contaminated_vertices']}",
+            f"- Worst residual grade: {el['max_residual_grade']}; edges still over their class limit: {len(el['edges_over_grade'])}",
+        ]
+        if el["edges_over_grade"]:
+            lines.append("  " + ", ".join(el["edges_over_grade"][:20]))
     lines.append("")
     return "\n".join(lines)

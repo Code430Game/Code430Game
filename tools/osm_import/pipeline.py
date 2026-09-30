@@ -8,6 +8,7 @@ from pathlib import Path
 
 from osm_import.cluster import ClusterStats, cluster_junctions
 from osm_import.config import DEFAULT_CONFIG_PATH, ImportConfig, load_config
+from osm_import.elevation import ElevationSource, ElevationStats, apply_elevation
 from osm_import.export import dump_json, graph_to_dict
 from osm_import.filter import FilterResult, filter_ways
 from osm_import.graph import RoadGraph, build_graph
@@ -25,12 +26,17 @@ class PipelineResult:
     filter_result: FilterResult
     cluster_stats: ClusterStats
     graph_dict: dict
+    elevation_stats: ElevationStats | None = None
 
 
 def run_pipeline(
-    data: OsmData, bbox: BBox, cfg: ImportConfig, config_name: str = "road_classes.json"
+    data: OsmData,
+    bbox: BBox,
+    cfg: ImportConfig,
+    config_name: str = "road_classes.json",
+    elevation: ElevationSource | None = None,
 ) -> PipelineResult:
-    """Filter, project, build, cluster, validate. Does not touch disk."""
+    """Filter, project, build, cluster, elevate, validate. Does not touch disk."""
     fr = filter_ways(data, cfg)
     log.info(
         "filter: %d drivable, %d pedestrian, dropped %s",
@@ -54,11 +60,28 @@ def run_pipeline(
         "nodes_merged": stats.nodes_merged,
         "edges_removed_in_clusters": stats.edges_removed,
     }
+    elev_stats: ElevationStats | None = None
+    elev_meta: dict | None = None
+    if elevation is not None:
+        elev_stats = apply_elevation(graph, elevation, cfg)
+        elev_meta = dict(sorted(elevation.describe().items()))
+        elev_meta["bridge_clearance_m"] = cfg.bridge_clearance_m
+        log.info(
+            "elevation: y %.1f..%.1f, %d fixed, %d clamped, %d conflicts, %d edges over grade",
+            elev_stats.min_y,
+            elev_stats.max_y,
+            elev_stats.fixed_vertices,
+            elev_stats.vertices_clamped,
+            elev_stats.bound_conflicts,
+            len(elev_stats.edges_over_grade),
+        )
     bounds = proj.bbox_local(bbox)
     report = validate(graph, cfg, bounds, fr.dropped_by_node())
+    if elev_stats is not None:
+        report.elevation = elev_stats.to_dict()
     sources = [dict(sorted(data.source.items()))]
-    gd = graph_to_dict(graph, bbox, proj.frame, sources, config_name)
-    return PipelineResult(graph, report, fr, stats, gd)
+    gd = graph_to_dict(graph, bbox, proj.frame, sources, config_name, elev_meta)
+    return PipelineResult(graph, report, fr, stats, gd, elev_stats)
 
 
 def write_outputs(result: PipelineResult, out_dir: Path, title: str) -> dict[str, Path]:

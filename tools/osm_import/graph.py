@@ -27,6 +27,7 @@ class RoadNode:
     osm_node_ids: list[int]
     tags: dict[str, str] = field(default_factory=dict)
     junction_type: str = "junction"
+    ground_y: float = 0.0
 
 
 @dataclass
@@ -164,7 +165,7 @@ def _edge_from_segment(
         width_m=width,
         layer=T.parse_layer(tags.get("layer")),
         bridge=T.is_truthy(tags.get("bridge")),
-        tunnel=T.is_truthy(tags.get("tunnel")),
+        tunnel=T.is_truthy(tags.get("tunnel")) and tags.get("tunnel") != "building_passage",
         name=tags.get("name"),
         osm_way_id=way.id,
         defaulted_fields=defaulted,

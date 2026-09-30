@@ -49,10 +49,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "position", "osm_node_ids", "junction_type"],
+        "required": ["id", "position", "ground_y", "osm_node_ids", "junction_type"],
         "properties": {
           "id": {"$ref": "#/$defs/node_id"},
           "position": {"$ref": "#/$defs/point"},
+          "ground_y": {"type": "number"},
           "osm_node_ids": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
           "junction_type": {"enum": ["junction", "pass_through", "dead_end"]}
         }

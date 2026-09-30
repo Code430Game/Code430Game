@@ -28,3 +28,8 @@ All in `road_classes.json`: lane width, bbox edge margin, bridge clearance, per-
 ## Known trade-offs
 - A driveway or service junction within the cluster radius of a big intersection gets pulled into it. Acceptable for v0; `overrides.json` in the map pack is the escape hatch later.
 - Parking aisles and driveways are dropped, so some private roads become islands. The report names the filtered connector for each.
+
+## Elevation
+`--dem hrdem` (default) reads NRCan's HRDEM 2 m bare-earth mosaic straight from its cloud-optimized GeoTIFF, reprojects the district onto a local 2 m grid, and caches it under `osm_import/.cache/` (gitignored, never committed). `--dem synthetic` is an analytic hill used by the golden tests, `--dem flat` and `--dem none` exist for debugging.
+
+What the elevation stage does, in order: sample ground at every vertex; refill vertices that sit inside a bridge footprint, because the DTM keeps bridge decks as terrain; build bridge and tunnel chains anchored where they meet ground roads, run each deck straight between its anchors, and raise or sink the chain only as far as roads crossing it require; then limit every profile to the class max grade, with bridges and tunnels fixed and everything else adjusting. The report lists the residuals: conflicting constraints, edges still over grade, and how many vertices were refilled.

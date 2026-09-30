@@ -19,7 +19,12 @@ def _pt(p: Point) -> list[float]:
 
 
 def graph_to_dict(
-    graph: RoadGraph, bbox: BBox, frame: LocalFrame, sources: list[dict], config_name: str
+    graph: RoadGraph,
+    bbox: BBox,
+    frame: LocalFrame,
+    sources: list[dict],
+    config_name: str,
+    elevation: dict | None,
 ) -> dict:
     """Serializable representation of the graph."""
     nodes = []
@@ -29,6 +34,7 @@ def graph_to_dict(
             {
                 "id": n.id,
                 "position": _pt(n.position),
+                "ground_y": round(n.ground_y, COORD_DECIMALS),
                 "osm_node_ids": n.osm_node_ids,
                 "junction_type": n.junction_type,
             }
@@ -76,7 +82,7 @@ def graph_to_dict(
             "units": "metres, x east, y up, z south",
             "origin": frame.to_dict(),
             "bbox": bbox.as_list(),
-            "elevation": None,
+            "elevation": elevation,
             "sources": sources,
             "attribution": [OSM_ATTRIBUTION],
             "license": "ODbL-1.0",

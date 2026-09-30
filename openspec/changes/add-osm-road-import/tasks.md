@@ -21,10 +21,10 @@
 - [ ] 3.6 **Stop: run on the full starter district and show the human the report**
 
 ## 4. Elevation
-- [ ] 4.1 DEM download + cache + sampling
-- [ ] 4.2 Bridge/tunnel elevation from layer tags with grade-limited ramps
-- [ ] 4.3 Road profile smoothing per class max grade
-- [ ] 4.4 Tests on fixture ramp
+- [x] 4.1 DEM download + cache + sampling
+- [x] 4.2 Bridge/tunnel elevation from layer tags with grade-limited ramps
+- [x] 4.3 Road profile smoothing per class max grade
+- [x] 4.4 Tests on fixture ramp
 
 ## 5. Export
 - [x] 5.1 `road_graph.v0.json` writer
@@ -35,7 +35,7 @@
 - [ ] 6.1 Graph reader in `game/world/roads/`
 - [ ] 6.2 Road segment extrusion
 - [ ] 6.3 Junction polygon construction + trimming + fallback
-- [ ] 6.4 Terrain heightmap with road flattening
+- [ ] 6.4 Terrain heightmap with road flattening (note: the HRDEM DTM keeps bridge decks as terrain; carve terrain under bridge footprints down to the surrounding ground or the road below)
 - [ ] 6.5 Chunking (256 m), LODs, collision
 - [ ] 6.6 Export chunks as GLB into the map pack
 - [ ] 6.7 gdUnit4 tests (chunk counts, no gaps at chunk seams, collision present)
@@ -47,3 +47,7 @@
 - [ ] 7.4 Debug view: toggle to draw the road graph (edges colored by class, junctions, one-way arrows)
 - [ ] 7.5 Profile on `deck` preset; record frame time in the PR
 - [ ] 7.6 **Stop: human drives it on the Steam Deck (Queensway → exit → ByWard Market)**
+
+## 8. Follow-ups (not part of this change)
+- [ ] 8.1 Bring back `service=parking_aisle` and `service=driveway` ways (decision 2026-09-30: dropped for now; needed later to drive into lots and to reconnect the private-road islands listed in the validation report)
+- [ ] 8.2 Local `.osm.pbf` input via osmium for reproducible builds

@@ -12,9 +12,11 @@ import logging
 import sys
 from pathlib import Path
 
+from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
+from osm_import.projection import Projector
 
 
 def _import(args: argparse.Namespace) -> int:
@@ -24,7 +26,15 @@ def _import(args: argparse.Namespace) -> int:
         data = OsmData.load(args.osm_json)
     else:
         data = fetch_bbox(bbox, cache_dir=args.cache_dir)
-    result = run_pipeline(data, bbox, cfg, cfg_name)
+    if args.dem == "hrdem":
+        elevation = hrdem_source(bbox, Projector.for_bbox(bbox), args.cache_dir)
+    elif args.dem == "synthetic":
+        elevation = SyntheticSource()
+    elif args.dem == "flat":
+        elevation = FlatSource()
+    else:
+        elevation = None
+    result = run_pipeline(data, bbox, cfg, cfg_name, elevation)
     paths = write_outputs(result, args.out, args.title or bbox.overpass())
     s = result.report.summary
     print(
@@ -63,6 +73,12 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--config", type=Path, help="Road class defaults JSON")
     imp.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
     imp.add_argument("--title", help="Title for the Markdown report")
+    imp.add_argument(
+        "--dem",
+        choices=["hrdem", "synthetic", "flat", "none"],
+        default="hrdem",
+        help="Elevation source (default hrdem)",
+    )
     imp.set_defaults(func=_import)
 
     crop = sub.add_parser("crop", help="Cut a fixture out of an Overpass JSON file.")

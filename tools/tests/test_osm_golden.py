@@ -6,6 +6,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from osm_import.config import load_config
+from osm_import.elevation import SyntheticSource
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pipeline import run_pipeline, write_outputs
 
@@ -21,7 +22,7 @@ SCHEMA = REPO / "docs" / "pack-format" / "road_graph.schema.v0.json"
 def run():
     data = OsmData.load(FIXTURE)
     data.source["path"] = "tests/fixtures/metcalfe_417.osm.json"  # stable regardless of cwd
-    return run_pipeline(data, FIXTURE_BBOX, load_config())
+    return run_pipeline(data, FIXTURE_BBOX, load_config(), elevation=SyntheticSource())
 
 
 def test_fixture_credits_osm():
@@ -86,6 +87,17 @@ def test_motorway_never_meets_local_streets_directly():
         for nid in (e.from_node, e.to_node):
             classes = {result.graph.edges[x].road_class for x in inc[nid]}
             assert classes <= {"motorway", "motorway_link"}, (e.id, classes)
+
+
+def test_elevation_applied_and_continuous():
+    result = run()
+    graph = result.graph
+    assert result.elevation_stats is not None
+    assert result.elevation_stats.min_y > 50.0  # synthetic base is 60 m
+    for e in graph.edges.values():
+        assert e.polyline[0][1] == graph.nodes[e.from_node].position[1]
+        assert e.polyline[-1][1] == graph.nodes[e.to_node].position[1]
+    assert result.graph_dict["meta"]["elevation"]["kind"] == "synthetic"
 
 
 def test_fixture_covers_the_interesting_cases():
