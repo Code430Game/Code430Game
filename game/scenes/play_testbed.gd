@@ -23,6 +23,8 @@ const BENCH_WARMUP_S := 3.0
 @onready var _overview: OverviewMap = $OverviewMap
 @onready var _pause_menu: PauseMenu = $PauseMenu
 var _map_renderer: MapRenderer
+var _traffic: TrafficManager
+var _traffic_cap: int = -1
 
 var _pack: MapPack
 var _car: VehicleBody3D
@@ -107,6 +109,7 @@ func _ready() -> void:
 	else:
 		_player.activate_camera()
 	_setup_maps()
+	_setup_traffic()
 	_autodrive_edge = spawn_edge
 	_autodrive_reverse = spawn_reverse
 	_autodrive_distance = spawn_distance
@@ -127,6 +130,20 @@ func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
 	_player.activate_camera()
 	_minimap.player = _player
 	_overview.player = _player
+
+
+func _setup_traffic() -> void:
+	var t0 := Time.get_ticks_msec()
+	var lane_graph := LaneGraph.build(_pack.graph, _pack.junctions)
+	_traffic = TrafficManager.new()
+	_traffic.name = "Traffic"
+	_traffic.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(_traffic)
+	_traffic.setup(lane_graph)
+	if _traffic_cap >= 0:
+		_traffic.max_agents = _traffic_cap
+	_traffic.enabled = _traffic_cap != 0
+	print("traffic: %d lane paths in %d ms, cap %d" % [lane_graph.paths.size(), Time.get_ticks_msec() - t0, _traffic.max_agents])
 
 
 func _setup_maps() -> void:
@@ -164,7 +181,14 @@ func _spawn_on_edge(hit: Dictionary) -> Transform3D:
 	forward.y = 0.0
 	if forward.length_squared() < 1e-6:
 		forward = Vector3.FORWARD
-	return Transform3D(Basis.looking_at(forward.normalized(), Vector3.UP), hit["point"] + Vector3.UP * 1.0)
+	forward = forward.normalized()
+	# Sit in the first forward lane (right of the divider), not on the centreline.
+	var lanes_total := e.lanes_forward + e.lanes_backward
+	var lane_w := e.width_m / maxf(lanes_total, 1)
+	var divider := e.width_m * 0.5 - e.lanes_forward * lane_w
+	var right := Vector3(-forward.z, 0.0, forward.x)
+	var offset := right * (divider + 0.5 * lane_w)
+	return Transform3D(Basis.looking_at(forward, Vector3.UP), hit["point"] + offset + Vector3.UP * 1.0)
 
 
 ## Puts a rolled or lost car back on the nearest road, or at the spawn if none is near.
@@ -217,6 +241,8 @@ func _parse_args() -> void:
 			_open_map_on_start = true
 		elif arg == "--drive":
 			_start_in_car = true
+		elif arg.begins_with("--traffic="):
+			_traffic_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--spawn="):
 			var parts := arg.get_slice("=", 1).split(",")
 			if parts.size() == 2:
@@ -224,6 +250,11 @@ func _parse_args() -> void:
 
 
 func _process(delta: float) -> void:
+	if _traffic != null and _car != null:
+		var body: Node3D = Players.local_controlled_body()
+		_traffic.anchors = PackedVector3Array([body.global_position])
+		if _graph_view.visible != (_traffic.get("_debug_mesh") != null and _traffic._debug_mesh.visible):
+			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:
 		_bench_elapsed_hud(delta)
 		var body: Node3D = Players.local_controlled_body()
@@ -241,10 +272,10 @@ func _process(delta: float) -> void:
 		_autodrive_step()
 	if _telemetry and _car != null and _bench_elapsed >= _telemetry_next:
 		_telemetry_next += 1.0
-		print("t=%.0f pos=(%.0f, %.1f, %.0f) speed=%.0f steer=%.2f edge=%s s=%.0f up=%.2f road=%s driving=%s driver=%d" % [
+		print("t=%.0f pos=(%.0f, %.1f, %.0f) speed=%.0f steer=%.2f edge=%s s=%.0f up=%.2f road=%s driving=%s driver=%d traffic=%d" % [
 			_bench_elapsed, _car.global_position.x, _car.global_position.y, _car.global_position.z,
 			_car.speed_kph(), _car.steering, _autodrive_edge.id if _autodrive_edge else "-", _autodrive_distance,
-			_car.global_basis.y.y, _road_label, _player.is_driving(), _car.driver_peer_id,
+			_car.global_basis.y.y, _road_label, _player.is_driving(), _car.driver_peer_id, _traffic.active_count() if _traffic else 0,
 		])
 	if _bumps and _car != null and _player != null and _player.is_driving() and delta > 0.0:
 		var vy := _car.linear_velocity.y
@@ -303,6 +334,8 @@ func _print_benchmark() -> void:
 		RenderingServer.get_video_adapter_name(),
 	])
 	print("benchmark: %s" % render_note)
+	if _traffic != null:
+		print("benchmark: traffic agents %d, physics process %.2f ms" % [_traffic.active_count(), Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0])
 
 
 const AUTODRIVE_LOOKAHEAD_M := 14.0
