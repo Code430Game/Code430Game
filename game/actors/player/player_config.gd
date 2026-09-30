@@ -10,6 +10,7 @@ extends Resource
 @export var jump_height_m: float = 1.2
 @export var turn_speed_rad_s: float = 10.0
 @export var floor_max_angle_deg: float = 50.0
+@export var wade_speed_factor: float = 0.45
 
 @export_group("Camera")
 @export var camera_distance_m: float = 3.5

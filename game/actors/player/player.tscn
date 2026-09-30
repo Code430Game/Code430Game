@@ -15,6 +15,7 @@ height = 1.8
 albedo_color = Color(0.2, 0.55, 0.85, 1)
 
 [node name="Player" type="CharacterBody3D"]
+collision_mask = 3
 floor_snap_length = 0.3
 script = ExtResource("1")
 config = ExtResource("2")

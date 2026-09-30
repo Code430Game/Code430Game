@@ -16,6 +16,8 @@ const TERRAIN_LOD2_END_M := 6000.0
 const BUILDING_LOD0_END_M := 600.0
 const BUILDING_LOD1_END_M := 2500.0
 const LOD_FADE_M := 40.0
+const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
+const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
 
 var pack_dir: String = ""
 var manifest: Dictionary = {}
@@ -162,6 +164,8 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 	if water_chunks.has(coord):
 		var mw: ArrayMesh = water_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))
+		if with_collision:
+			chunk.add_child(build_water_floor(mw))
 	var t0 := TerrainBuilder.build_mesh(heights, 0)
 	var t1 := TerrainBuilder.build_mesh(heights, 1)
 	var t2 := TerrainBuilder.build_mesh(heights, 2)
@@ -172,6 +176,23 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 	if with_collision:
 		chunk.add_child(build_collision(collision_meshes))
 	return chunk
+
+
+## Wading floor: the water surface sunk by WADE_DEPTH_M, on the water physics layer so only
+## people collide with it (cars and traffic keep their mask on the world layer).
+static func build_water_floor(water_mesh: Mesh) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = "water_floor"
+	body.collision_layer = WATER_LAYER_BIT
+	body.collision_mask = 0
+	body.add_to_group("water")
+	var shape := CollisionShape3D.new()
+	var trimesh: ConcavePolygonShape3D = water_mesh.create_trimesh_shape()
+	trimesh.backface_collision = true
+	shape.shape = trimesh
+	shape.position.y = -WADE_DEPTH_M
+	body.add_child(shape)
+	return body
 
 
 ## StaticBody3D with one trimesh shape per mesh.

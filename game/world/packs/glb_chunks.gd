@@ -77,6 +77,7 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 	var chunk := Node3D.new()
 	chunk.name = path.get_file().get_basename()
 	var collision_meshes: Array[Mesh] = []
+	var water_mesh: Mesh = null
 	for child in scene.get_children():
 		if child is MeshInstance3D:
 			var mi := child as MeshInstance3D
@@ -92,6 +93,7 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			if role == "water":
 				mi.material_override = water_material if water_material != null else WaterBuilder.material()
+				water_mesh = mi.mesh
 			elif role == "markings_lod0":
 				mi.material_override = marking_material if marking_material != null else MarkingBuilder.material()
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -108,6 +110,8 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 	scene.free()
 	if with_collision:
 		chunk.add_child(MapPack.build_collision(collision_meshes))
+		if water_mesh != null:
+			chunk.add_child(MapPack.build_water_floor(water_mesh))
 	return chunk
 
 

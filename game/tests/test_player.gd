@@ -79,3 +79,28 @@ func test_exit_refused_at_speed() -> void:
 	car.linear_velocity = Vector3(0, 0, -10)
 	assert_bool(player.try_exit_vehicle()).is_false()
 	assert_bool(player.is_driving()).is_true()
+
+
+func test_player_wades_on_a_water_floor_and_cars_do_not() -> void:
+	# A flat water surface at y = 0 as the mesh; its wading floor sits WADE_DEPTH_M below it.
+	var tris := RoadMeshBuilder.ChunkTriangles.new()
+	tris.add_quad(Vector3(-50, 0, -50), Vector3(50, 0, -50), Vector3(-50, 0, 50), Vector3(50, 0, 50), Color.BLUE)
+	var floor_body: StaticBody3D = auto_free(MapPack.build_water_floor(tris.to_mesh()))
+	add_child(floor_body)
+	assert_int(floor_body.collision_layer).is_equal(MapPack.WATER_LAYER_BIT)
+	assert_bool(floor_body.is_in_group("water")).is_true()
+	var player: Player = auto_free(PLAYER_SCENE.instantiate())
+	add_child(player)
+	player.global_position = Vector3(0, 0.5, 0)
+	for i in range(40):
+		await get_tree().physics_frame
+	assert_bool(player.is_on_floor()).is_true()
+	assert_float(player.global_position.y).is_equal_approx(-MapPack.WADE_DEPTH_M, 0.1)
+	assert_bool(player.is_wading()).is_true()
+	# The car's default mask is the world layer only, so it falls through water.
+	var car: VehicleBody3D = auto_free(CAR_SCENE.instantiate())
+	add_child(car)
+	car.global_position = Vector3(10, 0.5, 0)
+	for i in range(40):
+		await get_tree().physics_frame
+	assert_float(car.global_position.y).is_less(-MapPack.WADE_DEPTH_M - 0.5)
