@@ -13,6 +13,8 @@ const ROAD_LOD1_END_M := 3000.0
 const TERRAIN_LOD0_END_M := 400.0
 const TERRAIN_LOD1_END_M := 1200.0
 const TERRAIN_LOD2_END_M := 6000.0
+const BUILDING_LOD0_END_M := 600.0
+const BUILDING_LOD1_END_M := 2500.0
 const LOD_FADE_M := 40.0
 
 var pack_dir: String = ""
@@ -28,6 +30,9 @@ var water_chunks: Dictionary = {}  # Vector2i -> RoadMeshBuilder.ChunkTriangles
 var marking_material: Material
 var marking_chunks: Dictionary = {}  # Vector2i -> RoadMeshBuilder.ChunkTriangles
 var marking_visible_to_m: float = 350.0
+var building_material: Material
+var buildings: Array[BuildingBuilder.Building] = []
+var building_chunks: Dictionary = {"lod0": {}, "lod1": {}}
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
@@ -57,6 +62,9 @@ func load(dir: String) -> bool:
 		marking_chunks = markings.build(graph, junctions)
 		marking_visible_to_m = float(markings.rules["visible_to_m"])
 	marking_material = MarkingBuilder.material()
+	building_material = BuildingBuilder.material()
+	buildings = BuildingBuilder.load_buildings(dir)
+	building_chunks = BuildingBuilder.build(buildings)
 	return terrain_index.size() > 0
 
 
@@ -80,6 +88,7 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 		"road_triangles": 0,
 		"terrain_triangles_lod0": 0,
 		"water_polygons": water_polygons.size(),
+		"buildings": buildings.size(),
 	}
 	var use_glb := GlbChunks.chunks_are_current(pack_dir)
 	if not use_glb and DirAccess.dir_exists_absolute(pack_dir.path_join("chunks")):
@@ -89,7 +98,7 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 		var glb := pack_dir.path_join("chunks").path_join("chunk_%d_%d.glb" % [coord.x, coord.y])
 		var chunk: Node3D = null
 		if use_glb and FileAccess.file_exists(glb):
-			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material)
+			chunk = GlbChunks.import_chunk(glb, road_material, terrain_material, with_collision, water_material, marking_material, building_material)
 			stats["chunks_from_glb"] = stats.get("chunks_from_glb", 0) + 1
 		if chunk == null:
 			var heights := TerrainBuilder.load_chunk(pack_dir, terrain_index, entry)
@@ -125,6 +134,13 @@ func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_res
 		var markings_mi := _mesh_instance("markings_lod0", mm, marking_material, 0.0, marking_visible_to_m)
 		markings_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		chunk.add_child(markings_mi)
+	if building_chunks["lod0"].has(coord):
+		var mb0: ArrayMesh = building_chunks["lod0"][coord].to_mesh()
+		chunk.add_child(_mesh_instance("buildings_lod0", mb0, building_material, 0.0, BUILDING_LOD0_END_M))
+		collision_meshes.append(mb0)
+	if building_chunks["lod1"].has(coord):
+		var mb1: ArrayMesh = building_chunks["lod1"][coord].to_mesh()
+		chunk.add_child(_mesh_instance("buildings_lod1", mb1, building_material, BUILDING_LOD0_END_M, BUILDING_LOD1_END_M))
 	if water_chunks.has(coord):
 		var mw: ArrayMesh = water_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))
@@ -169,6 +185,7 @@ static func _mesh_instance(name: String, mesh: Mesh, material: Material, begin: 
 static func _road_material() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.vertex_color_use_as_albedo = true
+	m.vertex_color_is_srgb = true  # colours are authored in sRGB; without this they render washed out
 	m.roughness = 0.9
 	return m
 

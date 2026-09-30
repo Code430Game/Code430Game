@@ -3203,6 +3203,15 @@
  "one_way_traps": [],
  "ramps": [],
  "summary": {
+  "buildings": {
+   "footprints": 10678,
+   "height_sources": {
+    "default": 8966,
+    "levels": 1691,
+    "tag": 18
+   },
+   "skipped": []
+  },
   "classes": {
    "living_street": 2,
    "motorway": 47,
@@ -3241,6 +3250,7 @@
    "cells_carved": 6732,
    "cells_flattened": 223647,
    "cells_lowered_for_water": 58750,
+   "cells_under_buildings": 160487,
    "chunks": 196
   },
   "total_length_km": 193.405,

@@ -8,4 +8,4 @@
 
 ## 3. Tests and verification
 - [x] 3.1 gdUnit4: line counts per lane configuration, dash count for a known length, upward winding, trimmed ends, GLB round trip
-- [ ] 3.2 Screenshot on the 417 and on a residential street; Deck frame time
+- [x] 3.2 Screenshot on the 417 and on a residential street; Deck frame time (Steam Deck, deck preset, 30 s autodrive: avg 5.55 ms, p99 6.06 ms, unchanged from before markings)

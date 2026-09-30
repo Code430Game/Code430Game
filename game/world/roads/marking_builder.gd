@@ -127,6 +127,7 @@ static func _dashes(pl: PackedVector3Array, width: float, on: float, off: float,
 static func material() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.vertex_color_use_as_albedo = true
+	m.vertex_color_is_srgb = true  # colours are authored in sRGB; without this they render washed out
 	m.roughness = 0.8
 	m.emission_enabled = true
 	m.emission = Color(0.25, 0.25, 0.22)

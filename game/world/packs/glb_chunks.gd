@@ -6,9 +6,9 @@ extends RefCounted
 
 
 const BUILD_MANIFEST := "build.json"
-const INPUT_FILES := ["road_graph.v0.json", "terrain.json", "water.v0.json"]
+const INPUT_FILES := ["road_graph.v0.json", "terrain.json", "water.v0.json", "buildings.v0.json"]
 ## Bump whenever mesh generation changes, so chunks built by older code are rebuilt.
-const GENERATOR_VERSION := 2
+const GENERATOR_VERSION := 3
 
 
 ## Hash of the pack files the chunks are generated from, so stale chunks can be detected.
@@ -65,7 +65,7 @@ static func export_chunk(chunk: Node3D, path: String) -> Error:
 
 
 ## Reads a chunk GLB back into a node tree with visibility ranges and collision restored.
-static func import_chunk(path: String, road_material: Material, terrain_material: Material, with_collision: bool, water_material: Material = null, marking_material: Material = null) -> Node3D:
+static func import_chunk(path: String, road_material: Material, terrain_material: Material, with_collision: bool, water_material: Material = null, marking_material: Material = null, building_material: Material = null) -> Node3D:
 	var doc := GLTFDocument.new()
 	var state := GLTFState.new()
 	if doc.append_from_file(path, state) != OK:
@@ -92,9 +92,11 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 			elif role == "markings_lod0":
 				mi.material_override = marking_material if marking_material != null else MarkingBuilder.material()
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			elif role.begins_with("buildings"):
+				mi.material_override = building_material if building_material != null else BuildingBuilder.material()
 			else:
 				mi.material_override = terrain_material if role.begins_with("terrain") else road_material
-			if role in ["roads_lod0", "junctions_lod0", "terrain_lod1"]:
+			if role in ["roads_lod0", "junctions_lod0", "terrain_lod1", "buildings_lod0"]:
 				collision_meshes.append(mi.mesh)
 	scene.free()
 	if with_collision:
@@ -120,4 +122,8 @@ static func _ranges_for(role: String) -> Vector2:
 			return Vector2(0.0, MapPack.TERRAIN_LOD2_END_M)
 		"markings_lod0":
 			return Vector2(0.0, 350.0)
+		"buildings_lod0":
+			return Vector2(0.0, MapPack.BUILDING_LOD0_END_M)
+		"buildings_lod1":
+			return Vector2(MapPack.BUILDING_LOD0_END_M, MapPack.BUILDING_LOD1_END_M)
 	return Vector2(0.0, MapPack.TERRAIN_LOD2_END_M)

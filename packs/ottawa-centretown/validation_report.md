@@ -77,6 +77,10 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 - Polygons written: 18; relations or ways skipped: 0
 
+## Buildings
+
+- Footprints written: 10678; height from tag/levels/default: {'levels': 1691, 'default': 8966, 'tag': 18}
+
 ## Elevation
 
 - Road height range: 43.319 m to 80.488 m
