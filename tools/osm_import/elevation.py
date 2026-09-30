@@ -546,6 +546,10 @@ def _span_heights(
             need = _crossing_need(
                 graph, eids, vertex_keys, positions, heights, y, all_idx, clearance, sg
             )
+            if sg < 0 and need <= 0:
+                need = (
+                    clearance  # a tunnel with nothing crossing above still runs below the terrain
+                )
             if need > 0:
                 for k in chain_keys:
                     heights[k] += sg * need
