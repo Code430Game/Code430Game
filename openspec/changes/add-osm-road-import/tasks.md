@@ -35,13 +35,13 @@
 - [ ] 6.1 Graph reader in `game/world/roads/`
 - [ ] 6.2 Road segment extrusion
 - [ ] 6.3 Junction polygon construction + trimming + fallback
-- [ ] 6.4 Terrain heightmap with road flattening (note: the HRDEM DTM keeps bridge decks as terrain; carve terrain under bridge footprints down to the surrounding ground or the road below)
+- [x] 6.4 Terrain heightmap with road flattening (done in Python at pack build: `osm_import/pack.py` flattens under roads with a blended shoulder and carves the DTM's bridge decks; Godot only meshes the heightmap)
 - [ ] 6.5 Chunking (256 m), LODs, collision
 - [ ] 6.6 Export chunks as GLB into the map pack
 - [ ] 6.7 gdUnit4 tests (chunk counts, no gaps at chunk seams, collision present)
 
 ## 7. Map pack + testbed
-- [ ] 7.1 `packs/ottawa-centretown/` with `pack.json` (type: map, ODbL + DEM attribution), road graph, chunks, `overrides.json` (empty)
+- [x] 7.1 `packs/ottawa-centretown/` with `pack.json` (type: map, ODbL + DEM attribution), road graph, terrain heightmaps, `overrides.json` (empty). GLB chunks are a build product (see 6.6) and are gitignored
 - [ ] 7.2 Testbed scene loading the pack's chunks (static load is fine; streaming is later)
 - [ ] 7.3 Placeholder car (Jolt VehicleBody3D), chase camera, controller driving
 - [ ] 7.4 Debug view: toggle to draw the road graph (edges colored by class, junctions, one-way arrows)

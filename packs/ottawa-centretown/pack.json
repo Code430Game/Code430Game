@@ -1,0 +1,33 @@
+{
+ "attribution": [
+  "© OpenStreetMap contributors",
+  "Elevation: High Resolution Digital Elevation Model (HRDEM), Natural Resources Canada, Open Government Licence - Canada"
+ ],
+ "authors": [
+  "Code 430 contributors"
+ ],
+ "dependencies": [],
+ "description": "Generated from OpenStreetMap by tools/osm_import. Roads, junctions, and terrain for one district.",
+ "engine_api": 0,
+ "id": "code430.ottawa-centretown",
+ "license": "ODbL-1.0",
+ "map": {
+  "bbox": [
+   45.405,
+   -75.715,
+   45.435,
+   -75.675
+  ],
+  "crs": "EPSG:32618",
+  "origin": {
+   "easting": 445625.0,
+   "lat": 45.4200027,
+   "lon": -75.6950007,
+   "northing": 5029844.0
+  }
+ },
+ "name": "Ottawa Centretown",
+ "schema_version": 0,
+ "type": "map",
+ "version": "0.1.0"
+}
