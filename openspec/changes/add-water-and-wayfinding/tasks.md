@@ -17,7 +17,8 @@
 ## 3. Wayfinding (Godot)
 - [ ] 3.1 HUD scene with current road and next cross street
 - [ ] 3.2 Overview map: graph and water rendered once to a texture; map screen with player marker, heading, trigger zoom, Back to toggle
-- [ ] 3.3 Tests: nearest-road name lookup, next cross street on a synthetic grid, map texture generated once
+- [ ] 3.3 Minimap: corner crop of the map texture rotated to heading, road name beneath, hidden while the map is open
+- [ ] 3.4 Tests: nearest-road name lookup, next cross street on a synthetic grid, map texture generated once, minimap rotation
 
 ## 4. Verification
 - [ ] 4.1 Regenerate the Ottawa pack, drive to the river and open the map on the Deck; record frame time
