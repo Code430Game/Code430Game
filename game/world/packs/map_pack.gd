@@ -16,6 +16,7 @@ const TERRAIN_LOD2_END_M := 6000.0
 const BUILDING_LOD0_END_M := 600.0
 const BUILDING_LOD1_END_M := 2500.0
 const LOD_FADE_M := 40.0
+const SPAWN_MIN_EDGE_M := 150.0  # spawn edges shorter than this are usually bbox stubs
 const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
 const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
 
@@ -239,16 +240,22 @@ static func _terrain_material() -> StandardMaterial3D:
 
 
 ## The edge the spawn sits on: the westernmost eastbound motorway edge.
+## The eastbound motorway edge of at least SPAWN_MIN_EDGE_M whose start is nearest the map
+## origin, so the game starts mid-district rather than on a stub cut by the import bbox.
 func spawn_edge() -> RoadGraph.RoadEdge:
 	var best: RoadGraph.RoadEdge = null
+	var best_d := INF
 	for eid in graph.sorted_edge_ids():
 		var e: RoadGraph.RoadEdge = graph.edges[eid]
-		if e.road_class != "motorway" or e.polyline.size() < 2:
+		if e.road_class != "motorway" or e.polyline.size() < 2 or e.length_m < SPAWN_MIN_EDGE_M:
 			continue
 		var d := e.polyline[e.polyline.size() - 1] - e.polyline[0]
 		if d.x <= 0.0:
 			continue
-		if best == null or e.polyline[0].x < best.polyline[0].x:
+		var start := e.polyline[0]
+		var dist := Vector2(start.x, start.z).length()
+		if dist < best_d:
+			best_d = dist
 			best = e
 	return best
 
