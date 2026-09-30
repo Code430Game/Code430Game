@@ -27,14 +27,14 @@ func _manager(graph: RoadGraph) -> TrafficManager:
 	return m
 
 
-func _add_agent(m: TrafficManager, path_id: int, distance: float, speed: float) -> TrafficCar:
-	var car: TrafficCar = m.CAR_SCENE.instantiate()
-	car.path_id = path_id
-	car.distance = distance
-	car.speed = speed
-	m.add_child(car)
-	m.agents.append(car)
-	return car
+func _add_agent(m: TrafficManager, path_id: int, distance: float, speed: float) -> TrafficAgent:
+	var a := TrafficAgent.new()
+	a.path_id = path_id
+	a.distance = distance
+	a.speed = speed
+	a.transform = Transform3D(Basis(), m.lanes.paths[path_id].position_at(distance))
+	m.agents.append(a)
+	return a
 
 
 func test_follower_never_overlaps_leader() -> void:
@@ -105,6 +105,6 @@ func test_spawning_respects_cap_and_distances() -> void:
 		m._physics_process(1.0 / 60.0)
 	assert_int(m.active_count()).is_between(1, 20)
 	for a in m.agents:
-		var d := Vector2(a.global_position.x, a.global_position.z - 100.0).length()
+		var d := Vector2(a.position().x, a.position().z - 100.0).length()
 		assert_float(d).is_greater_equal(float(m.config["min_spawn_distance_m"]) - 0.01)
 		assert_float(d).is_less_equal(float(m.config["spawn_radius_m"]) + 300.0)

@@ -253,7 +253,7 @@ func _process(delta: float) -> void:
 	if _traffic != null and _car != null:
 		var body: Node3D = Players.local_controlled_body()
 		_traffic.anchors = PackedVector3Array([body.global_position])
-		if _graph_view.visible != (_traffic.get("_debug_mesh") != null and _traffic._debug_mesh.visible):
+		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:
 		_bench_elapsed_hud(delta)

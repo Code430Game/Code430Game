@@ -1,0 +1,19 @@
+class_name TrafficAgent
+extends RefCounted
+## Simulation state of one traffic car. Rendering is a MultiMesh instance; a
+## physics body is attached only while the car is near a player.
+
+var path_id: int = -1
+var distance: float = 0.0
+var speed: float = 0.0
+var wait_time: float = 0.0
+var occupies_junction: String = ""
+var retired: bool = false
+var hit_timer: float = 0.0
+var color: Color = Color.WHITE
+var transform: Transform3D = Transform3D.IDENTITY
+var body: TrafficCar = null  # pooled physics body while near a player, else null
+
+
+func position() -> Vector3:
+	return transform.origin
