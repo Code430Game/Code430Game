@@ -42,6 +42,8 @@ SHOULDER_M = 3.0
 FLAT_MARGIN_M = TERRAIN_RES_M
 ROAD_SURFACE_DROP_M = 0.03
 BRIDGE_CARVE_MARGIN_M = 10.0
+BRIDGE_UNDER_DECK_M = 0.7  # ground under a deck stays at least this far below it
+BRIDGE_UNDER_DECK_REACH_M = 2.0  # and that rule reaches this far outside the deck edge
 FILL_ITERATIONS = 60
 
 
@@ -181,8 +183,11 @@ def _distance_field(
 
 
 def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
-    """Refill cells under bridge decks from their surroundings. Returns cells changed."""
-    dist, _, half_w = _distance_field(chunk, bridge_segments, BRIDGE_CARVE_MARGIN_M)
+    """Refill cells under bridge decks from their surroundings, then keep the ground under
+    the deck itself below it wherever the refill came out above the deck: a deck is a
+    bridge because the ground is lower, and a refill seeded from a hillside must not bury
+    it. Returns cells changed."""
+    dist, road_y, half_w = _distance_field(chunk, bridge_segments, BRIDGE_CARVE_MARGIN_M)
     mask = dist <= half_w + BRIDGE_CARVE_MARGIN_M
     if not mask.any():
         return 0
@@ -208,6 +213,8 @@ def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
         padded = np.pad(filled, 1, mode="edge")
         mean = (padded[:-2, 1:-1] + padded[2:, 1:-1] + padded[1:-1, :-2] + padded[1:-1, 2:]) / 4.0
         filled = np.where(mask, mean, filled)
+    buried = (dist <= half_w + BRIDGE_UNDER_DECK_REACH_M) & (filled > road_y + 0.05)
+    filled = np.where(buried, road_y - BRIDGE_UNDER_DECK_M, filled)
     chunk.heights = filled.astype(np.float32)
     return int(mask.sum())
 

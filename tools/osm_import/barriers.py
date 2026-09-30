@@ -76,38 +76,59 @@ class BarriersResult:
 
 
 def _samples(pl: list, step: float):
-    """Yields (x, y, z, dir_x, dir_z) every `step` metres along a polyline."""
-    total = 0.0
-    segs = []
-    for i in range(len(pl) - 1):
+    """Yields (x, y, z, dir_x, dir_z) every `step` metres along a polyline, always ending on
+    the last vertex. The direction is the smoothed tangent (blended between the vertices'
+    averaged directions), so an offset wall bends at the corners instead of jumping."""
+    n = len(pl)
+    if n < 2:
+        return
+    seg_dirs = []
+    seg_lens = []
+    for i in range(n - 1):
         a, b = pl[i], pl[i + 1]
         length = math.hypot(b[0] - a[0], b[2] - a[2])
-        segs.append((a, b, length))
-        total += length
+        seg_lens.append(length)
+        seg_dirs.append(
+            ((b[0] - a[0]) / length, (b[2] - a[2]) / length) if length > 0 else (1.0, 0.0)
+        )
+    total = sum(seg_lens)
     if total <= 0:
         return
-    s = 0.0
+    # Vertex tangents: the normalised sum of the neighbouring segment directions.
+    vdirs = []
+    for i in range(n):
+        parts = [seg_dirs[j] for j in (i - 1, i) if 0 <= j < n - 1]
+        sx, sz = sum(d[0] for d in parts), sum(d[1] for d in parts)
+        norm = math.hypot(sx, sz)
+        vdirs.append((sx / norm, sz / norm) if norm > 1e-9 else parts[0])
     stations = []
+    s = 0.0
     while s < total - 1e-6:
         stations.append(s)
         s += step
-    stations.append(total)  # always end on the edge end so walls meet across edge splits
+    stations.append(total)
+    walked = 0.0
+    seg = 0
     for s in stations:
-        walked = 0.0
-        for a, b, length in segs:
-            if s <= walked + length or (a, b, length) is segs[-1]:
-                t = (s - walked) / length if length > 0 else 0.0
-                t = max(0.0, min(1.0, t))
-                dx, dz = (b[0] - a[0]) / length, (b[2] - a[2]) / length
-                yield (
-                    a[0] + (b[0] - a[0]) * t,
-                    a[1] + (b[1] - a[1]) * t,
-                    a[2] + (b[2] - a[2]) * t,
-                    dx,
-                    dz,
-                )
-                break
-            walked += length
+        while seg < n - 2 and s > walked + seg_lens[seg] + 1e-9:
+            walked += seg_lens[seg]
+            seg += 1
+        a, b, length = pl[seg], pl[seg + 1], seg_lens[seg]
+        t = max(0.0, min(1.0, (s - walked) / length)) if length > 0 else 0.0
+        da, db = vdirs[seg], vdirs[seg + 1]
+        dx, dz = da[0] + (db[0] - da[0]) * t, da[1] + (db[1] - da[1]) * t
+        norm = math.hypot(dx, dz)
+        if norm < 1e-9:
+            dx, dz = seg_dirs[seg]
+        else:
+            dx, dz = dx / norm, dz / norm
+        yield (
+            a[0] + (b[0] - a[0]) * t,
+            a[1] + (b[1] - a[1]) * t,
+            a[2] + (b[2] - a[2]) * t,
+            dx,
+            dz,
+        )
 
 
 def _runs(points: list, keep: list, min_run: float = 0.0) -> list[list]:

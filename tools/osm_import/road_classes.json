@@ -35,6 +35,7 @@
   "pedestrian": {
     "curb_height_m": 0.12,
     "follow_road_within_m": 8.0,
+    "sidepath_beside_road_m": 4.0,
     "default_width_m": {"sidewalk": 1.8, "crossing": 3.0, "footway": 1.5, "path": 1.5, "steps": 1.5, "cycleway": 2.5, "pedestrian": 4.0, "track": 2.5},
     "sidewalk_min_width_by_road_m": {"motorway": 2.0, "trunk": 3.5, "primary": 3.5, "secondary": 3.0, "tertiary": 2.5, "unclassified": 2.0, "residential": 2.0, "living_street": 2.0, "service": 1.5}
   },
