@@ -18,10 +18,12 @@ for pack in "$ROOT"/packs/*/; do
   mkdir -p "$OUT/packs/$name"
   for item in "$pack"*; do
     base="$(basename "$item")"
+    [ "$base" = ".DS_Store" ] && continue
     if [ "$base" = "chunks" ] && ! $WITH_CHUNKS; then continue; fi
     cp -R "$item" "$OUT/packs/$name/"
   done
 done
+find "$OUT" -name .DS_Store -delete
 chmod +x "$OUT/code430.x86_64"
 echo "packaged to $OUT:"
 du -sh "$OUT" "$OUT"/packs/* 2>/dev/null

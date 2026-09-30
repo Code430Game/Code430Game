@@ -60,6 +60,11 @@ godot --headless --path game --export-release "Linux" ../build/linux/code430.x86
 CI does the same on every push to `main` and uploads `build/linux` as an artifact named `code430-linux-<sha>`.
 
 ## Put a build on a Steam Deck
+With SSH enabled on the Deck and your key installed, `scripts/package-linux.sh && scripts/deploy-deck.sh` exports and syncs the build to `~/Games/code430` on the Deck in one go. A benchmark can then be run remotely while the Deck is in Game Mode:
+```
+ssh deck@steamdeck.local 'cd ~/Games/code430 && DISPLAY=:0 ./code430.x86_64 -- --benchmark=40 --autodrive --preset=deck'
+```
+Manual route:
 1. Run `scripts/package-linux.sh` (or download the `code430-linux-*` artifact from GitHub Actions). You get `build/linux/` with `code430.x86_64`, `code430.pck`, and a `packs/` folder. The game looks for packs next to the executable, in `~/.local/share/Code 430/packs`, or in the repo when run from the editor.
 2. On the Deck, switch to Desktop Mode (Power menu > Switch to Desktop).
 3. Copy both files to the Deck, for example with a USB stick, or from a Mac over the network:
