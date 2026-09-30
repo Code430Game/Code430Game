@@ -123,10 +123,11 @@ func _print_benchmark() -> void:
 		print("benchmark: no frames recorded")
 		return
 	var travelled := _car.global_position.distance_to(_start_position) if _car != null else 0.0
-	print("benchmark: %d frames, avg %.2f ms, p50 %.2f ms, p95 %.2f ms, p99 %.2f ms, max %.2f ms, preset %s, %s, travelled %.0f m, draw calls %d" % [
+	print("benchmark: %d frames, avg %.2f ms, p50 %.2f ms, p95 %.2f ms, p99 %.2f ms, max %.2f ms, preset %s, deck detected %s, %s, travelled %.0f m, draw calls %d, %s" % [
 		n, sum / n, sorted[n / 2], sorted[int(n * 0.95)], sorted[int(n * 0.99)], sorted[n - 1],
-		Settings.current_preset_name, "autodrive" if _autodrive else "static", travelled,
+		Settings.current_preset_name, Settings.is_steam_deck, "autodrive" if _autodrive else "static", travelled,
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+		RenderingServer.get_video_adapter_name(),
 	])
 
 

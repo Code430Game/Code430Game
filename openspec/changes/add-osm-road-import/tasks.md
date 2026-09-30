@@ -45,7 +45,7 @@
 - [x] 7.2 Testbed scene loading the pack's chunks (static load is fine; streaming is later) (`scenes/drive_testbed.tscn`)
 - [x] 7.3 Placeholder car (Jolt VehicleBody3D), chase camera, controller driving
 - [x] 7.4 Debug view: toggle to draw the road graph (edges colored by class, junctions, one-way arrows) (Back+B or F4)
-- [x] 7.5 Profile on `deck` preset; record frame time in the PR (Mac M4 Pro at 1280x800, deck preset, vsync off: avg 2.4 ms, p99 6.2 ms over a 60 s autodrive; Deck numbers pending the human's run)
+- [x] 7.5 Profile on `deck` preset; record frame time in the PR. **Steam Deck (LCD, Jupiter), 1280x800, deck preset, vsync off, 40 s autodrive on the Queensway: avg 5.48 ms, p99 5.56 ms, max 5.91 ms; chunk build at load 3.9 s without GLB chunks.** Mac M4 Pro for reference: avg 2.35 ms.
 - [ ] 7.6 **Stop: human drives it on the Steam Deck (Queensway → exit → ByWard Market)**
 
 ## 8. Follow-ups (not part of this change)

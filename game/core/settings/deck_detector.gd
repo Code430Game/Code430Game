@@ -19,7 +19,7 @@ static func collect_facts() -> Dictionary:
 	if FileAccess.file_exists(DMI_PRODUCT_PATH):
 		var f := FileAccess.open(DMI_PRODUCT_PATH, FileAccess.READ)
 		if f != null:
-			product = f.get_as_text().strip_edges()
+			product = f.get_line().strip_edges()  # sysfs reports a 4 KiB size; get_as_text would warn
 	var screen := Vector2i.ZERO
 	if DisplayServer.get_name() != "headless":
 		screen = DisplayServer.screen_get_size()
