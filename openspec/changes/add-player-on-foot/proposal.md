@@ -1,6 +1,6 @@
 # Change: Add the on-foot player and vehicle entry (Phase 2)
 
-**Status: PROPOSED 2026-09-30, awaiting the human's approval.** Next roadmap phase after roads. Written so the human can approve it while working on other things; nothing is implemented yet.
+**Status: APPROVED 2026-09-30** (the human ordered lane markings, buildings, then this). Open questions resolved as recommended: third-person only, an empty car keeps rolling.
 
 ## Why
 The city can be driven but not walked. Phase 2 in VISION.md is the player: on-foot movement, entering and leaving vehicles, a camera that works for both, controller-first. It is also the first gameplay system built under the co-op readiness rule, so its authority model sets the pattern for everything after it.

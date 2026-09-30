@@ -1,6 +1,7 @@
 extends Node3D
-## Drivable testbed: loads the Ottawa map pack, builds all chunks (static load,
-## streaming comes later), spawns the placeholder car on the Queensway.
+## Play testbed: loads the Ottawa map pack, builds all chunks (static load,
+## streaming comes later), and spawns the local player on foot beside the
+## placeholder car on the Queensway. Press Y (interact) to get in and out.
 ##
 ## Command line (after `--`): --benchmark=<seconds> records frame times with
 ## vsync off, prints a summary and quits; --autodrive holds the throttle;
@@ -9,11 +10,14 @@ extends Node3D
 
 const PACK_ID := "code430.ottawa-centretown"
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
+const PLAYER_SCENE := preload("res://actors/player/player.tscn")
+const ON_FOOT_OFFSET_M := 2.2
 const BENCH_WARMUP_S := 3.0
 
 @onready var _world: Node3D = $World
 @onready var _camera: ChaseCamera = $ChaseCamera
 @onready var _hud: Label = $HUD/Label
+@onready var _prompt: Label = $HUD/Prompt
 @onready var _graph_view: RoadGraphDebugView = $GraphView
 @onready var _minimap: Minimap = $HUD/Minimap
 @onready var _overview: OverviewMap = $OverviewMap
@@ -22,6 +26,8 @@ var _map_renderer: MapRenderer
 
 var _pack: MapPack
 var _car: VehicleBody3D
+var _player: Player
+var _start_in_car: bool = false
 var _bench_seconds: float = 0.0
 var _bench_elapsed: float = 0.0
 var _bench_frames: PackedFloat32Array = PackedFloat32Array()
@@ -80,6 +86,16 @@ func _ready() -> void:
 	_camera.target = _car
 	_camera.global_position = spawn.origin + spawn.basis.z * 8.0 + Vector3.UP * 3.0
 	_start_position = spawn.origin
+	_player = PLAYER_SCENE.instantiate()
+	_player.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(_player)
+	_player.global_position = spawn.origin - spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+	_player.entered_vehicle.connect(_on_entered_vehicle)
+	_player.exited_vehicle.connect(_on_exited_vehicle)
+	if _start_in_car or _autodrive:
+		_player.enter_vehicle(_car)
+	else:
+		_player.activate_camera()
 	_setup_maps()
 	_autodrive_edge = _pack.spawn_edge()
 	_autodrive_distance = 20.0
@@ -87,15 +103,29 @@ func _ready() -> void:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
 
+func _on_entered_vehicle(car: VehicleBody3D) -> void:
+	_camera.target = car
+	_camera.global_position = car.global_position + car.global_basis.z * 7.5 + Vector3.UP * 3.0
+	_camera.current = true
+	_minimap.player = car
+	_overview.player = car
+
+
+func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
+	_player.activate_camera()
+	_minimap.player = _player
+	_overview.player = _player
+
+
 func _setup_maps() -> void:
 	_map_renderer = MapRenderer.new()
 	var b := Projector_bounds()
 	_map_renderer.set_bounds(b)
 	_minimap.renderer = _map_renderer
-	_minimap.player = _car
+	_minimap.player = Players.local_controlled_body()
 	_overview.renderer = _map_renderer
 	_overview.graph = _pack.graph
-	_overview.player = _car
+	_overview.player = Players.local_controlled_body()
 	var t0 := Time.get_ticks_msec()
 	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings)
 	print("map texture %s rendered in %d ms" % [_map_renderer.size_px, Time.get_ticks_msec() - t0])
@@ -141,7 +171,8 @@ func _bench_elapsed_hud(delta: float) -> void:
 	if _road_label_next > 0.0:
 		return
 	_road_label_next = 0.25
-	var hit := _pack.graph.nearest_edge(_car.global_position, 40.0)
+	var body: Node3D = Players.local_controlled_body()
+	var hit := _pack.graph.nearest_edge(body.global_position, 40.0)
 	if hit.is_empty():
 		_road_label = "off road"
 		return
@@ -170,6 +201,8 @@ func _parse_args() -> void:
 			_graph_view.visible = true
 		elif arg == "--map":
 			_open_map_on_start = true
+		elif arg == "--drive":
+			_start_in_car = true
 		elif arg.begins_with("--spawn="):
 			var parts := arg.get_slice("=", 1).split(",")
 			if parts.size() == 2:
@@ -177,11 +210,19 @@ func _parse_args() -> void:
 
 
 func _process(delta: float) -> void:
-	if _car != null:
+	if _car != null and _player != null:
 		_bench_elapsed_hud(delta)
-		_hud.text = "%d km/h\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Back map, Menu pause, Back+Y reset, Back+B graph, Back+X stats" % [
-			int(_car.speed_kph()), _car.global_position.x, _car.global_position.y, _car.global_position.z,
-		]
+		var body: Node3D = Players.local_controlled_body()
+		if _player.is_driving():
+			_hud.text = "%d km/h\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Y get out, Back map, Menu pause" % [
+				int(_car.speed_kph()), body.global_position.x, body.global_position.y, body.global_position.z,
+			]
+			_prompt.text = ""
+		else:
+			_hud.text = "on foot\nx %.0f  y %.1f  z %.0f     left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause" % [
+				body.global_position.x, body.global_position.y, body.global_position.z,
+			]
+			_prompt.text = "Y  get in" if _player.nearest_vehicle() != null else ""
 	if _autodrive and _car != null:
 		_autodrive_step()
 	if _telemetry and _car != null and _bench_elapsed >= _telemetry_next:
@@ -219,7 +260,7 @@ func _print_benchmark() -> void:
 	if n == 0:
 		print("benchmark: no frames recorded")
 		return
-	var travelled := _car.global_position.distance_to(_start_position) if _car != null else 0.0
+	var travelled := Players.local_controlled_body().global_position.distance_to(_start_position) if _car != null else 0.0
 	print("benchmark: %d frames, avg %.2f ms, p50 %.2f ms, p95 %.2f ms, p99 %.2f ms, max %.2f ms, preset %s, deck detected %s, %s, travelled %.0f m, draw calls %d, %s" % [
 		n, sum / n, sorted[n / 2], sorted[int(n * 0.95)], sorted[int(n * 0.99)], sorted[n - 1],
 		Settings.current_preset_name, Settings.is_steam_deck, "autodrive" if _autodrive else "static", travelled,

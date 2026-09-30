@@ -28,6 +28,9 @@ var override_steer: float = 0.0
 ## Anything below this y is treated as having fallen out of the world.
 @export var world_floor_y: float = -20.0
 
+## Peer id of the player driving, 0 when empty. Only the driver's input reaches the car.
+var driver_peer_id: int = 0
+
 var _spawn: Transform3D
 var _recover_timer: float = 0.0
 ## Called with the car when it needs recovering; the testbed sets this to place it on the nearest road.
@@ -61,9 +64,10 @@ func reset_to_spawn() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	var accel := Input.get_action_strength("accelerate")
-	var brk := Input.get_action_strength("brake")
-	var steer_in := Input.get_axis("move_right", "move_left")
+	var driven := driver_peer_id == Players.LOCAL_PEER_ID
+	var accel := Input.get_action_strength("accelerate") if driven else 0.0
+	var brk := Input.get_action_strength("brake") if driven else 0.0
+	var steer_in := Input.get_axis("move_right", "move_left") if driven else 0.0
 	if override_throttle >= 0.0:
 		accel = override_throttle
 		steer_in = override_steer
@@ -79,9 +83,9 @@ func _physics_process(delta: float) -> void:
 		var headroom := clampf(1.0 - forward_speed() * 3.6 / top_speed_kph, 0.0, 1.0)
 		engine_force = -engine_force_max * accel * headroom  # negative force = -Z = forward
 		brake = brake_force_max * brk
-	if Input.is_action_pressed("handbrake"):
+	if driven and Input.is_action_pressed("handbrake"):
 		brake = handbrake_force
-	if Input.is_action_just_pressed("reset_vehicle"):
+	if driven and Input.is_action_just_pressed("reset_vehicle"):
 		_recover()
 	var upside_down := global_basis.y.y < 0.0
 	var fell_out := global_position.y < world_floor_y
