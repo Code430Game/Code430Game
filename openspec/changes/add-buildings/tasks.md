@@ -10,5 +10,5 @@
 
 ## 3. Verification
 - [x] 3.1 gdUnit4: count matches file, winding, chunk assignment, GLB round trip
-- [ ] 3.2 Deck frame time downtown; screenshots on Wellington and in the Market
+- [x] 3.2 Deck frame time downtown; screenshots on Wellington and in the Market (Steam Deck, deck preset: avg 5.3 ms downtown, 5.7 ms on the Queensway, p99 6.1 ms; city build at load 4.9 s plus 2.4 s map texture without pre-built chunks)
 - [ ] 3.3 **Stop: human drives downtown on the Deck**
