@@ -79,9 +79,10 @@ func _apply_camera_angles() -> void:
 
 
 func _move(delta: float) -> void:
+	var wading := is_wading()
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
-	elif Input.is_action_just_pressed("jump"):
+	elif Input.is_action_just_pressed("jump") and not wading:
 		velocity.y = config.jump_velocity(_gravity)
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var cam_forward := -_pivot.global_basis.z
@@ -90,6 +91,8 @@ func _move(delta: float) -> void:
 	var cam_right := Vector3(-cam_forward.z, 0.0, cam_forward.x)
 	var wish := (cam_right * input.x + cam_forward * -input.y)
 	var speed := config.run_speed_mps if Input.is_action_pressed("sprint") else config.walk_speed_mps
+	if wading:
+		speed *= config.wade_speed_factor
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	if wish.length_squared() > 0.0:
 		wish = wish.normalized()
@@ -101,6 +104,17 @@ func _move(delta: float) -> void:
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	move_and_slide()
+
+
+## True while standing on a wading floor (chest deep in water): slower, no jumping.
+func is_wading() -> bool:
+	if not is_on_floor():
+		return false
+	for i in range(get_slide_collision_count()):
+		var collider := get_slide_collision(i).get_collider()
+		if collider is Node and (collider as Node).is_in_group("water"):
+			return true
+	return false
 
 
 ## Closest vehicle with a seat within enter range, or null.

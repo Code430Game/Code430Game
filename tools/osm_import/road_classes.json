@@ -8,6 +8,8 @@
     "highway_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
     "parapet_height_m": 1.0,
     "parapet_inset_m": 0.25,
+    "parapet_walkway_range_m": 8.0,
+    "parapet_walkway_kinds": ["sidewalk", "cycleway"],
     "median_max_gap_m": 6.0,
     "median_height_m": 0.9,
     "guardrail_drop_m": 1.2,

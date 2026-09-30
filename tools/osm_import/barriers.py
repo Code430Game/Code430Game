@@ -1,7 +1,9 @@
 """Highway barriers: bridge parapets, median barriers, guardrails, sound walls.
 
 Approach: sample each highway edge every few metres and look sideways.
-- Parapet: every bridge edge, both deck edges, full length.
+- Parapet: every bridge edge, both deck edges, full length. Where a sidewalk or
+  cycleway runs beside the deck (within `parapet_walkway_range_m`) the parapet
+  moves to that walkway's outer edge and a curb marks the road edge instead.
 - Median: an opposing highway edge runs alongside within `median_max_gap_m`
   (gap between the two ribbon edges): a barrier on the mid-line of the gap.
 - Guardrail: the terrain `guardrail_probe_m` outside the ribbon edge drops more
@@ -168,14 +170,20 @@ def build_barriers(
                         return True
         return False
 
-    # Sidewalk segments for curb detection.
+    # Sidewalk segments for curb detection; walkways (sidewalks and cycleways) for bridge parapets.
     sw_index = _SegmentIndex()
+    walk_index = _SegmentIndex()
+    walkway_kinds = set(rules.get("parapet_walkway_kinds", ["sidewalk", "cycleway"]))
     for w in graph.pedestrian:
-        if w.kind != "sidewalk":
+        if w.covered:
             continue
         for i in range(len(w.polyline) - 1):
             a, b = w.polyline[i], w.polyline[i + 1]
-            sw_index.add((a[0], a[2]), (b[0], b[2]), (w.id, i))
+            if w.kind == "sidewalk":
+                sw_index.add((a[0], a[2]), (b[0], b[2]), (w.id, i))
+            if w.kind in walkway_kinds:
+                walk_index.add((a[0], a[2]), (b[0], b[2]), (w.id, i, w.width_m))
+    walk_range = float(rules.get("parapet_walkway_range_m", 8.0))
     curb_classes = set(rules.get("curb_classes", []))
     curb_range = float(rules.get("curb_sidewalk_range_m", 3.5))
 
@@ -198,16 +206,28 @@ def build_barriers(
                     keep.append(near)
                 for run in _runs(pts, keep):
                     add("curb", float(rules.get("curb_height_m", 0.12)), eid, run)
-        # Bridge parapets on every bridge edge.
+        # Bridge parapets on every bridge edge, outside any walkway that rides along the deck.
         if e.bridge:
             inset = float(rules.get("parapet_inset_m", 0.25))
             for side in (-1.0, 1.0):
-                pts = []
+                pts, curb_pts, curb_keep = [], [], []
                 for x, y, z, dx, dz in _samples(e.polyline, step):
                     nx, nz = -dz * side, dx * side
-                    pts.append((x + nx * (hw - inset), y, z + nz * (hw - inset)))
+                    ex, ez = x + nx * hw, z + nz * hw
+                    outer = hw  # deck edge measured from the centreline
+                    for a, b, (_wid, _i, ww) in walk_index.near(ex, ez, walk_range + 4.0):
+                        d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
+                        mx, mz = (a[0] + b[0]) / 2.0 - x, (a[1] + b[1]) / 2.0 - z
+                        if (mx * nx + mz * nz) <= 0 or d - hw > walk_range:
+                            continue  # other side, or too far out to be part of this deck
+                        outer = max(outer, d + ww / 2.0)
+                    pts.append((x + nx * (outer - inset), y, z + nz * (outer - inset)))
+                    curb_pts.append((ex, y, ez))
+                    curb_keep.append(outer > hw + 0.5)
                 if len(pts) >= 2:
                     add("parapet", float(rules.get("parapet_height_m", 1.0)), eid, pts)
+                for run in _runs(curb_pts, curb_keep):
+                    add("curb", float(rules.get("curb_height_m", 0.12)), eid, run)
         if e.road_class not in highway or e.bridge or e.tunnel:
             continue
         samples = list(_samples(e.polyline, step))

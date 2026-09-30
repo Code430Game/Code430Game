@@ -162,3 +162,32 @@ def test_street_with_sidewalk_gets_a_curb_on_that_side():
     assert len(curbs) == 1
     assert all(p[2] > 0 for p in curbs[0].points)  # only on the sidewalk side
     assert curbs[0].height_m == 0.12
+
+
+def test_bridge_parapet_moves_outside_a_walkway_and_leaves_a_curb():
+    from osm_import.graph import PedestrianWay
+
+    g = graph_for(
+        [
+            (
+                1,
+                [(-200, 0), (200, 0)],
+                {"highway": "primary", "bridge": "yes", "layer": "1", "width": "12"},
+            )
+        ],
+        FlatSource(10.0),
+    )
+    road = g.edges["w1.0"].polyline
+    # A 3 m sidewalk whose centre runs 8 m off the deck centreline on the +z side.
+    sw = PedestrianWay(
+        "p1", [(p[0], p[1] + 0.12, p[2] + 8.0) for p in road], "footway", 1, None, "sidewalk", 3.0
+    )
+    g.pedestrian.append(sw)
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    assert kinds(r) == ["curb", "parapet", "parapet"]
+    road_z = road[0][2]
+    parapets = sorted(b.points[0][2] - road_z for b in r.barriers if b.kind == "parapet")
+    assert abs(parapets[0] + 5.75) < 0.3  # plain deck edge on the -z side
+    assert abs(parapets[1] - 9.25) < 0.3  # sidewalk outer edge (8 + 1.5) minus the inset
+    curb = next(b for b in r.barriers if b.kind == "curb")
+    assert abs(curb.points[0][2] - road_z - 6.0) < 0.3  # road edge on the walkway side
