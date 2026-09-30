@@ -186,7 +186,9 @@ static func _mesh_instance(name: String, mesh: Mesh, material: Material, begin: 
 	mi.visibility_range_end = end
 	mi.visibility_range_begin_margin = LOD_FADE_M if begin > 0.0 else 0.0
 	mi.visibility_range_end_margin = LOD_FADE_M if end < TERRAIN_LOD2_END_M else 0.0
-	mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+	# Dithered cross-fade between LODs. A hard cut measured from each chunk's bounds could hide the
+	# near mesh before the far one appeared, which showed as roads blinking out for a moment.
+	mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	return mi
 
 
