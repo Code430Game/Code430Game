@@ -23,7 +23,15 @@ extends VehicleBody3D
 var override_throttle: float = -1.0
 var override_steer: float = 0.0
 
+## Seconds the car may stay upside down (or below the world floor) before it is put back on the road.
+@export var recover_after_s: float = 3.0
+## Anything below this y is treated as having fallen out of the world.
+@export var world_floor_y: float = -20.0
+
 var _spawn: Transform3D
+var _recover_timer: float = 0.0
+## Called with the car when it needs recovering; the testbed sets this to place it on the nearest road.
+var recover_callback: Callable
 
 
 func _ready() -> void:
@@ -74,4 +82,22 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed("handbrake"):
 		brake = handbrake_force
 	if Input.is_action_just_pressed("reset_vehicle"):
+		_recover()
+	var upside_down := global_basis.y.y < 0.0
+	var fell_out := global_position.y < world_floor_y
+	if fell_out:
+		_recover()
+	elif upside_down and linear_velocity.length() < 1.0:
+		_recover_timer += delta
+		if _recover_timer >= recover_after_s:
+			_recover()
+	else:
+		_recover_timer = 0.0
+
+
+func _recover() -> void:
+	_recover_timer = 0.0
+	if recover_callback.is_valid():
+		recover_callback.call(self)
+	else:
 		reset_to_spawn()

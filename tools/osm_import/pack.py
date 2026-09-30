@@ -28,6 +28,9 @@ CHUNK_SIZE_M = 256.0
 TERRAIN_RES_M = 4.0
 SAMPLES_PER_CHUNK = int(CHUNK_SIZE_M / TERRAIN_RES_M) + 1  # shared edges
 SHOULDER_M = 3.0
+# Cells within this extra distance of the road edge are flattened fully, so the
+# linear interpolation between 4 m cells never rises above the road surface.
+FLAT_MARGIN_M = TERRAIN_RES_M
 ROAD_SURFACE_DROP_M = 0.03
 BRIDGE_CARVE_MARGIN_M = 4.0
 FILL_ITERATIONS = 60
@@ -159,14 +162,15 @@ def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
 
 def flatten_roads(chunk: ChunkTerrain, ground_segments: list[tuple]) -> int:
     """Set terrain under roads to the road surface, blending over the shoulder. Returns cells changed."""
-    dist, road_y, half_w = _distance_field(chunk, ground_segments, SHOULDER_M)
-    under = dist <= half_w
-    shoulder = (dist > half_w) & (dist <= half_w + SHOULDER_M)
+    dist, road_y, half_w = _distance_field(chunk, ground_segments, FLAT_MARGIN_M + SHOULDER_M)
+    flat_edge = half_w + FLAT_MARGIN_M
+    under = dist <= flat_edge
+    shoulder = (dist > flat_edge) & (dist <= flat_edge + SHOULDER_M)
     h = chunk.heights.astype(np.float64)
     target = road_y - ROAD_SURFACE_DROP_M
     h = np.where(under, target, h)
     with np.errstate(invalid="ignore", divide="ignore"):
-        t = np.clip((dist - half_w) / SHOULDER_M, 0.0, 1.0)
+        t = np.clip((dist - flat_edge) / SHOULDER_M, 0.0, 1.0)
     h = np.where(shoulder, target * (1.0 - t) + h * t, h)
     changed = int((under | shoulder).sum())
     chunk.heights = h.astype(np.float32)

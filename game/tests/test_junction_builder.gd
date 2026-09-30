@@ -45,3 +45,27 @@ func test_trimmed_roads_do_not_reach_the_centre() -> void:
 	var chunk := Vector2i(0, 0)
 	for v in result.roads[chunk].vertices:
 		assert_bool(absf(v.x) >= WIDTH * 0.5 or absf(v.z) >= WIDTH * 0.5).override_failure_message("road vertex %s inside junction" % v).is_true()
+
+
+func test_shallow_ramp_merge_stays_compact() -> void:
+	# A ramp leaving a motorway at 8 degrees: side lines meet ~60 m away, the junction must not grow that far.
+	var nodes := [
+		{"id": "n_c", "position": [0, 0, 0], "ground_y": 0, "junction_type": "junction"},
+		{"id": "n_w", "position": [-200, 0, 0], "ground_y": 0, "junction_type": "dead_end"},
+		{"id": "n_e", "position": [200, 0, 0], "ground_y": 0, "junction_type": "dead_end"},
+		{"id": "n_r", "position": [198, 0, 28], "ground_y": 0, "junction_type": "dead_end"},
+	]
+	var edges := []
+	for arm in [["w", "n_w", [[0, 0, 0], [-200, 0, 0]], "motorway", 14.0], ["e", "n_e", [[0, 0, 0], [200, 0, 0]], "motorway", 14.0], ["r", "n_r", [[0, 0, 0], [198, 0, 28]], "motorway_link", 7.0]]:
+		edges.append({
+			"id": "w%s.0" % arm[0], "from": "n_c", "to": arm[1], "polyline": arm[2], "class": arm[3],
+			"lanes_forward": 2, "lanes_backward": 0, "oneway": true, "speed_kph": 100, "width_m": arm[4],
+			"layer": 0, "bridge": false, "tunnel": false, "name": arm[0], "osm_way_id": 1, "defaulted_fields": [],
+			"access": null, "length_m": 200.0,
+		})
+	var graph := RoadGraph.from_dict({"meta": {}, "nodes": nodes, "edges": edges, "pedestrian_ways": []})
+	var j: JunctionBuilder.Junction = JunctionBuilder.build_all(graph)["n_c"]
+	for eid in j.trims:
+		assert_float(j.trims[eid]).override_failure_message("trim for %s is %.1f m" % [eid, j.trims[eid]]).is_less(7.0 * JunctionBuilder.MAX_CORNER_HALF_WIDTHS + 2.0)
+	for p in j.polygon_xz:
+		assert_float(p.length()).is_less(30.0)

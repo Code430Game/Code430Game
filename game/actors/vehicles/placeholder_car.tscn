@@ -18,6 +18,7 @@ height = 0.25
 
 [node name="PlaceholderCar" type="VehicleBody3D"]
 mass = 1200.0
+continuous_cd = true
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 script = ExtResource("1")
