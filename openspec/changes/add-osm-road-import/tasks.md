@@ -32,20 +32,20 @@
 - [x] 5.3 Determinism test (two runs → identical bytes)
 
 ## 6. Mesh generation (Godot)
-- [ ] 6.1 Graph reader in `game/world/roads/`
-- [ ] 6.2 Road segment extrusion
-- [ ] 6.3 Junction polygon construction + trimming + fallback
+- [x] 6.1 Graph reader in `game/world/roads/` (`road_graph.gd`)
+- [x] 6.2 Road segment extrusion (`road_mesh_builder.gd`, mitered ribbons, LOD1 from simplified polylines)
+- [x] 6.3 Junction polygon construction + trimming + fallback (`junction_builder.gd`; 947 junctions in Ottawa, 0 fallbacks)
 - [x] 6.4 Terrain heightmap with road flattening (done in Python at pack build: `osm_import/pack.py` flattens under roads with a blended shoulder and carves the DTM's bridge decks; Godot only meshes the heightmap)
-- [ ] 6.5 Chunking (256 m), LODs, collision
-- [ ] 6.6 Export chunks as GLB into the map pack
-- [ ] 6.7 gdUnit4 tests (chunk counts, no gaps at chunk seams, collision present)
+- [x] 6.5 Chunking (256 m), LODs, collision (`map_pack.gd`: visibility-range LODs, trimesh collision from roads, junctions, terrain LOD1)
+- [x] 6.6 Export chunks as GLB into the map pack (`world/build/pack_builder.gd`; chunks are a gitignored build product, the loader generates at runtime when they are missing)
+- [x] 6.7 gdUnit4 tests (chunk counts, no gaps at chunk seams, collision present, GLB round trip, upward-facing winding)
 
 ## 7. Map pack + testbed
 - [x] 7.1 `packs/ottawa-centretown/` with `pack.json` (type: map, ODbL + DEM attribution), road graph, terrain heightmaps, `overrides.json` (empty). GLB chunks are a build product (see 6.6) and are gitignored
-- [ ] 7.2 Testbed scene loading the pack's chunks (static load is fine; streaming is later)
-- [ ] 7.3 Placeholder car (Jolt VehicleBody3D), chase camera, controller driving
-- [ ] 7.4 Debug view: toggle to draw the road graph (edges colored by class, junctions, one-way arrows)
-- [ ] 7.5 Profile on `deck` preset; record frame time in the PR
+- [x] 7.2 Testbed scene loading the pack's chunks (static load is fine; streaming is later) (`scenes/drive_testbed.tscn`)
+- [x] 7.3 Placeholder car (Jolt VehicleBody3D), chase camera, controller driving
+- [x] 7.4 Debug view: toggle to draw the road graph (edges colored by class, junctions, one-way arrows) (Back+B or F4)
+- [x] 7.5 Profile on `deck` preset; record frame time in the PR (Mac M4 Pro at 1280x800, deck preset, vsync off: avg 2.4 ms, p99 6.2 ms over a 60 s autodrive; Deck numbers pending the human's run)
 - [ ] 7.6 **Stop: human drives it on the Steam Deck (Queensway → exit → ByWard Market)**
 
 ## 8. Follow-ups (not part of this change)

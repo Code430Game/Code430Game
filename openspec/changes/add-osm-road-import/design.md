@@ -24,7 +24,9 @@ OSM describes roads as a navigation graph: ways (polylines) connected at shared 
 - `edges[]`: id, from, to, polyline [[x,y,z]…], class, lanes_forward, lanes_backward, oneway, speed_kph, width_m, layer, bridge, tunnel, name, osm_way_id, defaulted_fields[].
 
 ### Mesh generation (Godot)
-- An editor tool script reads the graph and writes chunk data for the map pack. Because map packs are data-only (AGENTS.md), meshes are exported as **GLB per chunk**, not `.tscn`/`.res`.
+- The runtime (`game/world/`) builds meshes from the graph and the terrain heightmaps directly, in under a second for the whole district on a desktop. A headless build script (`world/build/pack_builder.gd`) additionally writes the same chunks as **GLB per chunk** into `<pack>/chunks/`; the loader uses them when present and generates otherwise. GLB chunks are a build product (gitignored, ~70 MB for Ottawa), never `.tscn`/`.res`.
+- Terrain flattening under roads and carving of the DTM's bridge decks happen in Python at pack build time, so the heightmaps in the pack already conform to the roads and Godot only meshes them.
+- Convention found the hard way: Godot's `VehicleBody3D` pushes toward +Z for a positive engine force. The placeholder car negates the force so -Z stays forward like every other node.
 - Roads: extrude cross-section along the polyline, width from lanes × lane width.
 - Junctions: offset each incoming road's edges, intersect neighbors to find corner points, build a junction polygon, triangulate. Road ends are trimmed back to the junction boundary.
 - Terrain: heightmap from DEM per chunk, flattened under road footprints with blended shoulders.
