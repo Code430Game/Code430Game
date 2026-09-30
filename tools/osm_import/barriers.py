@@ -12,9 +12,11 @@ Approach: sample each highway edge every few metres and look sideways.
   median on that side: a wall on that edge, in runs of at least the minimum.
 - Curb: a sidewalk runs within `curb_sidewalk_range_m` of a street's ribbon
   edge: a low step along that edge (kind "curb").
-No wall stands inside another road's ribbon: samples that fall within a
-different way's carriageway (ramps peeling off a highway, decks meeting at a
-fork) are dropped, so runs break around the overlap.
+No wall stands inside another road's ribbon: samples more than
+`overlap_margin_m` inside a different way's carriageway at the same level
+(ramps peeling off a highway, decks meeting at a fork) are dropped, so runs
+break around the overlap. The margin exceeds the parapet inset so a deck
+continuing as another OSM way keeps its wall.
 Runs are strung from consecutive samples; each becomes a polyline with a kind
 and height for the game to extrude.
 """
@@ -85,7 +87,12 @@ def _samples(pl: list, step: float):
     if total <= 0:
         return
     s = 0.0
-    while s <= total + 1e-6:
+    stations = []
+    while s < total - 1e-6:
+        stations.append(s)
+        s += step
+    stations.append(total)  # always end on the edge end so walls meet across edge splits
+    for s in stations:
         walked = 0.0
         for a, b, length in segs:
             if s <= walked + length or (a, b, length) is segs[-1]:
@@ -101,7 +108,6 @@ def _samples(pl: list, step: float):
                 )
                 break
             walked += length
-        s += step
 
 
 def _runs(points: list, keep: list, min_run: float = 0.0) -> list[list]:
@@ -193,16 +199,23 @@ def build_barriers(
         e = graph.edges[eid]
         for i in range(len(e.polyline) - 1):
             a, b = e.polyline[i], e.polyline[i + 1]
-            road_index.add((a[0], a[2]), (b[0], b[2]), (eid, e.width_m / 2.0))
+            road_index.add((a[0], a[2]), (b[0], b[2]), (eid, e.width_m / 2.0, a[1], b[1]))
     overlap_margin = float(rules.get("overlap_margin_m", 0.2))
+    overlap_height = float(rules.get("overlap_height_m", 2.5))
 
-    def clear_of_roads(x: float, z: float, own: str) -> bool:
-        """False when (x, z) lies inside the ribbon of an edge from a different OSM way."""
+    def clear_of_roads(x: float, y: float, z: float, own: str) -> bool:
+        """False when (x, z) lies inside the ribbon of an edge from a different OSM way at
+        about the same level; a deck crossing well above or below another road is clear."""
         way = own.split(".")[0]
-        for a, b, (oid, ohw) in road_index.near(x, z, 12.0):
+        for a, b, (oid, ohw, ya, yb) in road_index.near(x, z, 12.0):
             if oid.split(".")[0] == way:
                 continue
-            if _seg_dist(x, z, a[0], a[1], b[0], b[1]) < ohw - overlap_margin:
+            if _seg_dist(x, z, a[0], a[1], b[0], b[1]) >= ohw - overlap_margin:
+                continue
+            dx, dz = b[0] - a[0], b[1] - a[1]
+            l2 = dx * dx + dz * dz
+            t = max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / l2)) if l2 else 0.0
+            if abs(y - (ya + (yb - ya) * t)) < overlap_height:
                 return False
         return True
 
@@ -225,7 +238,7 @@ def build_barriers(
                             near = True
                             break
                     pts.append((ex, y, ez))
-                    keep.append(near and clear_of_roads(ex, ez, eid))
+                    keep.append(near and clear_of_roads(ex, y, ez, eid))
                 for run in _runs(pts, keep):
                     add("curb", float(rules.get("curb_height_m", 0.12)), eid, run)
         # Bridge parapets on every bridge edge, outside any walkway that rides along the deck.
@@ -245,9 +258,9 @@ def build_barriers(
                         outer = max(outer, d + ww / 2.0)
                     px, pz = x + nx * (outer - inset), z + nz * (outer - inset)
                     pts.append((px, y, pz))
-                    keep.append(clear_of_roads(px, pz, eid))
+                    keep.append(clear_of_roads(px, y, pz, eid))
                     curb_pts.append((ex, y, ez))
-                    curb_keep.append(outer > hw + 0.5 and clear_of_roads(ex, ez, eid))
+                    curb_keep.append(outer > hw + 0.5 and clear_of_roads(ex, y, ez, eid))
                 for run in _runs(pts, keep):
                     add("parapet", float(rules.get("parapet_height_m", 1.0)), eid, run)
                 for run in _runs(curb_pts, curb_keep):
@@ -313,14 +326,14 @@ def build_barriers(
                 rail_keep.append(
                     (not has_median)
                     and drop > float(rules.get("guardrail_drop_m", 1.2))
-                    and clear_of_roads(edge_x + nx * 0.3, edge_z + nz * 0.3, eid)
+                    and clear_of_roads(edge_x + nx * 0.3, y, edge_z + nz * 0.3, eid)
                 )
                 at_grade = drop > -float(rules.get("soundwall_trench_depth_m", 2.0))
                 wall_pts.append((edge_x + nx * 2.0, y, edge_z + nz * 2.0))
                 wall_keep.append(
                     (not has_median)
                     and at_grade
-                    and clear_of_roads(edge_x + nx * 2.0, edge_z + nz * 2.0, eid)
+                    and clear_of_roads(edge_x + nx * 2.0, y, edge_z + nz * 2.0, eid)
                     and houses_near(
                         edge_x + nx * 20.0,
                         edge_z + nz * 20.0,

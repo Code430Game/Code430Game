@@ -31,11 +31,13 @@ class Junction:
 	var dominant_class: String = "residential"  # class of the widest road meeting here, for colouring
 
 
-## Computes junctions for every node with degree >= 3. Returns node id -> Junction.
+## Computes junctions for every node with degree >= 3, except forks and merges: there the
+## importer already peeled the ramp off the through road's edge, so the ribbons cover the node
+## and the through road simply tapers across it. Returns node id -> Junction.
 static func build_all(graph: RoadGraph) -> Dictionary:
 	var out := {}
 	for nid in graph.sorted_node_ids():
-		if graph.degree(nid) >= 3:
+		if graph.degree(nid) >= 3 and not graph.is_fork(nid):
 			out[nid] = build_one(graph, nid)
 	return out
 

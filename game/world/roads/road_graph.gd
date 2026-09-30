@@ -129,6 +129,39 @@ func degree(node_id: String) -> int:
 	return incident(node_id).size()
 
 
+## True at a node the importer tagged as a fork (ramp leaving) or merge (ramp arriving).
+func is_fork(node_id: String) -> bool:
+	var t: String = nodes[node_id].junction_type
+	return t == "fork" or t == "merge"
+
+
+## At a fork or merge, the edge that continues straight through from `edge`: the incident
+## edge whose direction is most opposite. Returns "" when `edge` is the ramp (its partner
+## would be a through edge, not a continuation) or the node is not a fork.
+func through_partner(edge: RoadEdge, node_id: String) -> String:
+	if not is_fork(node_id):
+		return ""
+	var mine := direction_from(edge, node_id)
+	var best := ""
+	var best_dot := 1.0
+	var ramp := ""
+	var narrowest := INF
+	for other_id in incident(node_id):
+		var other: RoadEdge = edges[other_id]
+		if other.width_m < narrowest:
+			narrowest = other.width_m
+			ramp = other_id
+		if other_id == edge.id:
+			continue
+		var d := mine.dot(direction_from(other, node_id))
+		if d < best_dot:
+			best_dot = d
+			best = other_id
+	if edge.id == ramp:
+		return ""
+	return best
+
+
 ## Unit direction (xz plane) of an edge leaving the given node, and the edge's
 ## first point away from the node. Returns {"dir": Vector2, "next": Vector3}.
 func direction_from(edge: RoadEdge, node_id: String) -> Vector2:

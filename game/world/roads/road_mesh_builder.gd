@@ -149,15 +149,26 @@ static func taper_for(graph: RoadGraph, edge: RoadGraph.RoadEdge, junctions: Dic
 	var out := {"start": -1.0, "end": -1.0}
 	for side in ["start", "end"]:
 		var node_id := edge.from_node if side == "start" else edge.to_node
-		if junctions.has(node_id) or graph.degree(node_id) != 2:
+		if junctions.has(node_id):
 			continue
-		for other_id in graph.incident(node_id):
-			if other_id == edge.id:
-				continue
-			var other: RoadGraph.RoadEdge = graph.edges[other_id]
-			if other.width_m < edge.width_m - 0.05:
-				out[side] = other.width_m * 0.5
+		var partner := _partner_across(graph, edge, node_id)
+		if partner == "":
+			continue
+		var other: RoadGraph.RoadEdge = graph.edges[partner]
+		if other.width_m < edge.width_m - 0.05:
+			out[side] = other.width_m * 0.5
 	return out
+
+
+## The edge continuing beyond `node_id`: the only other edge at a pass-through node, or the
+## through partner at a fork or merge. "" when there is none (junctions, dead ends, the ramp).
+static func _partner_across(graph: RoadGraph, edge: RoadGraph.RoadEdge, node_id: String) -> String:
+	if graph.degree(node_id) == 2:
+		for other_id in graph.incident(node_id):
+			if other_id != edge.id:
+				return other_id
+		return ""
+	return graph.through_partner(edge, node_id)
 
 
 ## Half width at `distance` metres from the start of a polyline of `total` length, with tapers.
@@ -175,18 +186,17 @@ static func half_width_at(base: float, distance: float, total: float, taper: Dic
 
 ## Direction of the road continuing beyond a pass-through node, pointing into this edge.
 static func _continuation_dir(graph: RoadGraph, edge: RoadGraph.RoadEdge, node_id: String, junctions: Dictionary) -> Vector2:
-	if junctions.has(node_id) or graph.degree(node_id) != 2:
+	if junctions.has(node_id):
 		return Vector2.ZERO
-	for other_id in graph.incident(node_id):
-		if other_id == edge.id:
-			continue
-		var other: RoadGraph.RoadEdge = graph.edges[other_id]
-		var away := graph.direction_from(other, node_id)  # points from node into the other edge
-		var into_this := -away  # travelling along the other edge toward this node
-		if edge.from_node == node_id:
-			return into_this
-		return -into_this  # at our end, the continuation leaves in the direction we arrive
-	return Vector2.ZERO
+	var partner := _partner_across(graph, edge, node_id)
+	if partner == "":
+		return Vector2.ZERO
+	var other: RoadGraph.RoadEdge = graph.edges[partner]
+	var away := graph.direction_from(other, node_id)  # points from node into the other edge
+	var into_this := -away  # travelling along the other edge toward this node
+	if edge.from_node == node_id:
+		return into_this
+	return -into_this  # at our end, the continuation leaves in the direction we arrive
 
 
 static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vector2, dir_end: Vector2, color: Color, lift: float, buckets: Dictionary, result: Result, taper: Dictionary = {}) -> void:

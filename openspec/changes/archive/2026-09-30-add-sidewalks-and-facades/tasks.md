@@ -11,4 +11,4 @@
 
 ## 3. Verification
 - [x] 3.1 Screenshots on Bank Street and Sparks Street; Deck render time (Steam Deck, deck preset, Bank Street: GPU 5.9 ms driving, 5.5 ms on foot, CPU 1.4 to 1.8 ms; load 6.1 s city build plus 4.5 s map texture without pre-built chunks)
-- [ ] 3.2 **Stop: human walks a downtown block on the Deck**
+- [x] 3.2 **Stop: human walks a downtown block on the Deck** (passed 2026-09-30, "a good phase 1")

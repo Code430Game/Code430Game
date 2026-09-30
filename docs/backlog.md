@@ -11,9 +11,9 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   player was 380 m away. Awaiting the Deck drive gate.
 - **Rideau Street by the Rideau Centre.** Bus-lane ways may be producing odd ribbons or lane
   counts; check `lanes:bus`, `busway=*` and `psv` tags in that stretch.
-- **Off-ramp at the default spawn.** Two-lane off-ramp leaves the 417 in front of the start
-  position without a merge taper; traffic behaves badly there. Consider a merge/taper rule
-  for `_link` edges joining wider roads (relates to the intersection taper follow-up).
+- **Off-ramp at the old default spawn.** That stub is the import bounding box cutting the 417
+  and the Bronson ramp (x -530, z 1666); the spawn moved mid-district. Ramp geometry itself
+  is handled by `add-fork-geometry`. Open: a clean map-edge treatment for cut roads.
 - **Rideau to Wellington past Sussex, turning south: one roadway over another, drivable
   into.** A scan of the whole district found no pair of non-bridge roads crossing in 2D
   without a shared junction, and the Colonel By / Mackenzie loop by the Chateau Laurier
