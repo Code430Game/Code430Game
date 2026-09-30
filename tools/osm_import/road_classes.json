@@ -21,6 +21,7 @@
     "soundwall_min_run_m": 60.0,
     "soundwall_kinds": ["house", "detached", "semidetached_house", "terrace", "residential", "apartments", "yes"],
     "sample_step_m": 8.0,
+    "overlap_margin_m": 0.2,
     "curb_height_m": 0.12,
     "curb_sidewalk_range_m": 3.5,
     "curb_classes": ["primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street"]

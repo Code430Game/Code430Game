@@ -3205,11 +3205,11 @@
  "ramps": [],
  "summary": {
   "barriers": {
-   "curb": 2416,
-   "guardrail": 38,
+   "curb": 2368,
+   "guardrail": 37,
    "median": 24,
-   "parapet": 124,
-   "soundwall": 22
+   "parapet": 88,
+   "soundwall": 16
   },
   "buildings": {
    "footprints": 10678,
