@@ -113,6 +113,33 @@ def test_carve_removes_bridge_deck_ridge():
     assert chunk.heights[row, 15] == pytest.approx(50.0, abs=0.5)
 
 
+def test_carve_never_leaves_a_hillside_above_a_deck():
+    # A deck at 50 m through a 70 m hill: the refill seeds from the hill, so the ground under
+    # the deck must be forced below the deck or the road is buried at the abutment.
+    g, _ = graph_for(
+        [
+            (1, [(-100, 20), (0, 20)], {"highway": "primary"}),
+            (
+                2,
+                [(0, 20), (120, 20)],
+                {"highway": "primary", "bridge": "yes", "layer": "1", "width": "10"},
+            ),
+            (3, [(120, 20), (250, 20)], {"highway": "primary"}),
+        ],
+        FlatSource(50.0),
+    )
+    from osm_import.pack import BRIDGE_UNDER_DECK_M, _road_footprints
+
+    _, bridges = _road_footprints(g)
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    chunk.heights[:, :] = 70.0
+    carve_bridges(chunk, bridges)
+    row = int(20 / TERRAIN_RES_M)
+    deck_y = g.edges["w2.0"].polyline[0][1]
+    assert chunk.heights[row, 15] <= deck_y - BRIDGE_UNDER_DECK_M + 0.01
+    assert chunk.heights[row, 60] == pytest.approx(70.0)  # well off the deck: untouched
+
+
 def test_write_pack_validates_and_round_trips(tmp_path: Path):
     ways = [
         (1, [(-300, 0), (0, 0), (300, 0)], {"highway": "secondary", "name": "Main"}),

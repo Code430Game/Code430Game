@@ -721,12 +721,14 @@ def _smooth(
 
 def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig) -> int:
     """Sets y on pedestrian polylines. Sidewalks follow the nearest road plus the curb;
-    crossings and any vertex inside a road ribbon sit 2 cm above the road; other paths
-    take `source` (the carved terrain at pack build, the DTM otherwise). Returns the
-    vertex count set."""
+    crossings and any vertex inside a road ribbon sit 2 cm above the road; any other way
+    within `sidepath_beside_road_m` of a ribbon edge also follows the road (a sidepath in a
+    cutting stays with the road, not the hillside); the rest take `source` (the carved
+    terrain at pack build, the DTM otherwise). Returns the vertex count set."""
     ped = cfg.pedestrian
     curb = float(ped.get("curb_height_m", 0.12))
     follow = float(ped.get("follow_road_within_m", 8.0))
+    beside = float(ped.get("sidepath_beside_road_m", 4.0))
     min_widths = ped.get("sidewalk_min_width_by_road_m", {})
     idx = _SegmentIndex()
     for eid, e in graph.edges.items():
@@ -762,12 +764,15 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                     best_hw = e.width_m / 2.0
                     nearest_class = e.road_class
             inside_ribbon = best_y is not None and best_d <= best_hw
+            beside_road = best_y is not None and best_d <= best_hw + beside
             if w.kind == "sidewalk" and best_y is not None:
                 y = best_y + curb
             elif w.kind == "crossing" and best_y is not None:
                 y = best_y + 0.02
             elif inside_ribbon:
                 y = best_y + 0.02  # a path across a street: flush with it
+            elif beside_road:
+                y = best_y + curb  # a sidepath hugging a road follows it, not the hillside
             else:
                 y = source.sample(x, z)
             pts.append((x, y, z))
