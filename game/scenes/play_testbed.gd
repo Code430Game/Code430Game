@@ -31,6 +31,8 @@ var _start_in_car: bool = false
 var _bench_seconds: float = 0.0
 var _bench_elapsed: float = 0.0
 var _bench_frames: PackedFloat32Array = PackedFloat32Array()
+var _bench_cpu: PackedFloat32Array = PackedFloat32Array()
+var _bench_gpu: PackedFloat32Array = PackedFloat32Array()
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _start_position: Vector3 = Vector3.ZERO
@@ -110,6 +112,7 @@ func _ready() -> void:
 	_autodrive_distance = spawn_distance
 	if _bench_seconds > 0.0:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 
 
 func _on_entered_vehicle(car: VehicleBody3D) -> void:
@@ -262,6 +265,9 @@ func _process(delta: float) -> void:
 		_bench_elapsed += delta
 		if _bench_elapsed > BENCH_WARMUP_S:
 			_bench_frames.append(delta * 1000.0)
+			var rid := get_viewport().get_viewport_rid()
+			_bench_cpu.append(RenderingServer.viewport_get_measured_render_time_cpu(rid))
+			_bench_gpu.append(RenderingServer.viewport_get_measured_render_time_gpu(rid))
 		if _bench_elapsed >= _bench_seconds + BENCH_WARMUP_S and not _bench_done:
 			_bench_done = true
 			_print_benchmark()
@@ -283,12 +289,20 @@ func _print_benchmark() -> void:
 		print("benchmark: no frames recorded")
 		return
 	var travelled := Players.local_controlled_body().global_position.distance_to(_start_position) if _car != null else 0.0
+	var cpu_sum := 0.0
+	var gpu_sum := 0.0
+	for v in _bench_cpu:
+		cpu_sum += v
+	for v in _bench_gpu:
+		gpu_sum += v
+	var render_note := "render cpu %.2f ms gpu %.2f ms (measured, pacing-independent)" % [cpu_sum / maxf(_bench_cpu.size(), 1), gpu_sum / maxf(_bench_gpu.size(), 1)]
 	print("benchmark: %d frames, avg %.2f ms, p50 %.2f ms, p95 %.2f ms, p99 %.2f ms, max %.2f ms, preset %s, deck detected %s, %s, travelled %.0f m, draw calls %d, %s" % [
 		n, sum / n, sorted[n / 2], sorted[int(n * 0.95)], sorted[int(n * 0.99)], sorted[n - 1],
 		Settings.current_preset_name, Settings.is_steam_deck, "autodrive" if _autodrive else "static", travelled,
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
 		RenderingServer.get_video_adapter_name(),
 	])
+	print("benchmark: %s" % render_note)
 
 
 const AUTODRIVE_LOOKAHEAD_M := 14.0
