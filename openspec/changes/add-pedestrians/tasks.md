@@ -10,5 +10,5 @@
 - [x] 3.1 Testbed `--peds=N`, anchors and obstacles from the players, benchmark line
 
 ## 4. Verification
-- [ ] 4.1 Deck: 120 pedestrians near the player, measured render and physics time recorded
+- [x] 4.1 Deck (2026-09-30, same run as streaming 3.1): 120 pedestrians plus 150 traffic agents, GPU 6.70 ms, render CPU 1.10 ms, physics process 7.71 ms (was 5.9 ms with traffic alone)
 - [ ] 4.2 **Stop: human walks and drives among pedestrians on the Deck**
