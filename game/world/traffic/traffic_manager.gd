@@ -47,6 +47,7 @@ var _debug_mesh: MeshInstance3D
 var _multimesh: MultiMeshInstance3D
 var _bodies: Array[TrafficCar] = []
 var _lane_cells: Dictionary = {}  # Vector2i (64 m cells) -> Array[int] lane path ids
+var _paths_by_edge: Dictionary = {}  # edge id -> Array[int] lane path ids (for sidesteps)
 const CELL_M := 64.0
 
 
@@ -78,9 +79,13 @@ func setup(lane_graph: LaneGraph, graph: RoadGraph = null, junctions: Dictionary
 			add_child(heads)
 			heads.setup(graph, junctions, signals)
 	_lane_cells.clear()
+	_paths_by_edge.clear()
 	for lp in lanes.paths:
 		if lp.is_connector or lp.points.is_empty():
 			continue
+		if not _paths_by_edge.has(lp.edge_id):
+			_paths_by_edge[lp.edge_id] = []
+		_paths_by_edge[lp.edge_id].append(lp.id)
 		var mid := lp.position_at(lp.length * 0.5)
 		var key := Vector2i(int(floor(mid.x / CELL_M)), int(floor(mid.z / CELL_M)))
 		if not _lane_cells.has(key):
@@ -340,8 +345,9 @@ func _sidestep(a: TrafficAgent, path: LaneGraph.LanePath) -> bool:
 	if path.is_connector or path.edge_id == "":
 		return false
 	var car_len := float(config["car_length_m"])
-	for other in lanes.paths:
-		if other.edge_id != path.edge_id or other.id == path.id or other.is_connector:
+	for pid in _paths_by_edge.get(path.edge_id, []):
+		var other: LaneGraph.LanePath = lanes.paths[pid]
+		if other.id == path.id:
 			continue
 		if other.direction_at(0.0).dot(path.direction_at(0.0)) < 0.5:
 			continue  # the opposite carriageway

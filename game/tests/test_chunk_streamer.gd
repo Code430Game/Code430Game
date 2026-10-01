@@ -95,10 +95,10 @@ func test_streamed_chunks_get_their_collision_over_frames() -> void:
 	assert_int(_streamer.tier_of(here)).is_equal(MapPack.Tier.NEAR)
 	var node: Node3D = _world.get_node("chunk_%d_%d" % [here.x, here.y])
 	var body: StaticBody3D = node.get_node("collision")
-	for i in range(60):
+	for i in range(600):
 		_streamer.update()
 		await get_tree().process_frame
-		if _streamer.collision_pending() == 0:
+		if _streamer.collision_pending() == 0 and body.get_child_count() > 0:
 			break
 	assert_int(_streamer.collision_pending()).is_equal(0)
 	assert_int(body.get_child_count()).is_greater(0)

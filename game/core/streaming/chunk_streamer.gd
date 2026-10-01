@@ -19,7 +19,7 @@ const BUILDS_IN_FLIGHT := 3
 const ADDS_PER_FRAME := 1
 ## Collision shapes are created on the main thread a few per frame: a chunk's trimeshes land
 ## over several frames instead of one, which is what the 50 to 100 ms spikes were.
-const SHAPES_PER_FRAME := 2
+const SHAPES_PER_FRAME := 1  # a terrain trimesh alone can take 10 ms on the Deck
 
 var pack: MapPack
 var world: Node3D
@@ -251,8 +251,10 @@ func _create_queued_shapes() -> void:
 		var body: StaticBody3D = item[0]
 		if not is_instance_valid(body) or not body.is_inside_tree():
 			continue  # the chunk was freed or downgraded before its shapes arrived
-		body.add_child(MapPack.trimesh_shape(item[1]))
-		made += 1
+		var shape := MapPack.trimesh_shape(item[1])
+		if shape != null:
+			body.add_child(shape)
+			made += 1
 
 
 ## True while collision shapes are still being created.

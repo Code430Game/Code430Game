@@ -26,11 +26,20 @@ step "Pack manifests"
 ( cd "$ROOT/tools" && uv run python -m pack_tools ../packs )
 
 step "gdUnit4 (headless)"
-( cd "$ROOT/game" \
-  && "$GODOT" --headless --path . --import --quit >/dev/null 2>&1 \
-  && "$GODOT" --headless --path . -s -d --remote-debug tcp://127.0.0.1:0 \
-       res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests 2>&1 \
-     | grep -vE "remote port number|Remote Debugger" | grep -E "Overall Summary|FAILED|ERROR|Executed test" )
+# gdUnit exits 0 on success, 101 when tests passed but left orphan nodes (a warning we
+# report and accept), and 100 or higher otherwise for failures.
+( cd "$ROOT/game" && "$GODOT" --headless --path . --import --quit >/dev/null 2>&1 )
+set +e
+GD_OUT="$(cd "$ROOT/game" && "$GODOT" --headless --path . -s -d --remote-debug tcp://127.0.0.1:0 \
+  res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests 2>&1)"
+GD_STATUS=$?
+set -e
+printf "%s\n" "$GD_OUT" | grep -vE "remote port number|Remote Debugger" | grep -E "Overall Summary|FAILED|ERROR|Executed test" || true
+case "$GD_STATUS" in
+  0) ;;
+  101) echo "gdUnit: tests passed with orphan nodes (warning)" ;;
+  *) echo "gdUnit failed with exit code $GD_STATUS"; exit "$GD_STATUS" ;;
+esac
 
 if $DO_EXPORT; then
   step "Linux export"

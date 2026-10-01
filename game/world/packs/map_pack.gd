@@ -281,14 +281,21 @@ static func build_collision(meshes: Array[Mesh]) -> StaticBody3D:
 	var body := StaticBody3D.new()
 	body.name = "collision"
 	for m in meshes:
-		body.add_child(trimesh_shape(m))
+		var shape := trimesh_shape(m)
+		if shape != null:
+			body.add_child(shape)
 	return body
 
 
-## One trimesh collision shape for a mesh (the expensive part of a chunk add).
+## One trimesh collision shape for a mesh (the expensive part of a chunk add), or null for
+## a mesh with no triangles.
 static func trimesh_shape(m: Mesh) -> CollisionShape3D:
-	var shape := CollisionShape3D.new()
+	if m == null or m.get_surface_count() == 0:
+		return null
 	var trimesh: ConcavePolygonShape3D = m.create_trimesh_shape()
+	if trimesh == null:
+		return null
+	var shape := CollisionShape3D.new()
 	trimesh.backface_collision = true  # a fast body that gets below a surface is pushed back, not lost
 	shape.shape = trimesh
 	return shape
