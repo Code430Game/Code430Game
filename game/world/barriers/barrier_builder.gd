@@ -9,6 +9,7 @@ const EMBED_M := 0.3
 const STYLE := {
 	"curb": {"thickness": 0.25, "color": Color(0.62, 0.62, 0.60)},
 	"parapet": {"thickness": 0.35, "color": Color(0.66, 0.66, 0.64)},
+	"roadblock": {"thickness": 0.7, "color": Color(0.82, 0.42, 0.12)},  # the district's edge: a road the bbox cut
 	"median": {"thickness": 0.55, "color": Color(0.64, 0.64, 0.62)},
 	"guardrail": {"thickness": 0.12, "color": Color(0.55, 0.57, 0.6)},
 	"soundwall": {"thickness": 0.3, "color": Color(0.7, 0.64, 0.55)},

@@ -17,7 +17,7 @@
         "required": ["id", "kind", "height_m", "edge_id", "points"],
         "properties": {
           "id": {"type": "string", "pattern": "^b[0-9]+$"},
-          "kind": {"enum": ["parapet", "median", "guardrail", "soundwall", "curb"]},
+          "kind": {"enum": ["parapet", "median", "guardrail", "soundwall", "curb", "roadblock"]},
           "height_m": {"type": "number", "exclusiveMinimum": 0},
           "edge_id": {"type": "string"},
           "points": {"type": "array", "minItems": 2, "items": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}}
