@@ -20,6 +20,11 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   (around x 185, z -505) looks sane from above. Needs the HUD x,z from the Deck to find
   the exact spot; suspect a steep grade difference between adjacent carriageways leaving
   a terrain step between them.
-- **Covered multi-use path under the Portage approaches** (about x -1430, z -195) now
-  imports as `covered` and is not drawn; a real tunnel portal and passage are future work.
+- **Pedestrian underpasses and tunnels.** 100 covered or tunnel pedestrian ways import as
+  `covered` and are not drawn: the multi-use path under the Portage approaches (x -1430,
+  z -195), the footway tunnel under Rideau Street beside the Chateau Laurier (OSM way
+  362678275, x 106..116, z -576..-561; the one people shelter in), Canal Lane under Plaza
+  Bridge, the Rideau LRT mezzanine. Future change: dig the passage (box through terrain or
+  road), portal and interior meshes, lighting, and a sheltering population for them
+  (homelessness is in scope for the base game; the sanitized tone mode would drop it).
 - Parking aisles and driveways are still dropped by the importer (earlier round).
