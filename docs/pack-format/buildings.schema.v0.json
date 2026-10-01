@@ -24,7 +24,13 @@
           "rings": {"type": "array", "minItems": 1, "items": {"type": "array", "minItems": 3, "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}}},
           "roof_vertices": {"description": "Empty when the footprint has one ring: the roof vertices are then rings[0].", "type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}},
           "roof_triangles": {"type": "array", "minItems": 3, "items": {"type": "integer", "minimum": 0}},
-          "osm_id": {"type": "integer"}
+          "osm_id": {"type": "integer"},
+          "material": {"type": "string"},
+          "colour": {"type": "string"},
+          "roof_shape": {"type": "string"},
+          "roof_levels": {"type": "number", "minimum": 0},
+          "levels": {"type": "number", "minimum": 0},
+          "shopfront": {"type": "boolean"}
         }
       }
     }

@@ -106,3 +106,42 @@ def test_flatten_buildings_sets_ground_inside_only():
     assert changed > 0
     assert chunk.heights[10, 10] == pytest.approx(42.0)  # (40, 40) inside
     assert chunk.heights[2, 2] == pytest.approx(50.0)  # outside
+
+
+def test_material_colour_roof_and_shopfront_come_through():
+    payload = {
+        "elements": [
+            _way(
+                1,
+                0,
+                0,
+                12,
+                {
+                    "building": "apartments",
+                    "building:material": "Brick",
+                    "building:colour": "#aabbcc",
+                    "roof:shape": "gabled",
+                    "building:levels": "5",
+                    "roof:levels": "1",
+                },
+            ),
+            _way(2, 100, 0, 12, {"building": "yes", "shop": "bakery"}),
+            _way(3, 200, 0, 12, {"building": "yes", "amenity": "cafe"}),
+            _way(4, 300, 0, 12, {"building": "retail"}),
+            _way(5, 400, 0, 12, {"building": "house"}),
+        ]
+    }
+    proj = Projector.for_bbox(BBOX)
+    result = build_buildings(payload, BBOX, proj, FlatSource(30.0), RULES)
+    by_id = {b.id: b for b in result.buildings}
+    a = by_id["w1.0"]
+    assert (a.material, a.colour, a.roof_shape, a.levels, a.roof_levels) == (
+        "brick",
+        "#aabbcc",
+        "gabled",
+        5.0,
+        1.0,
+    )
+    assert [by_id[f"w{i}.0"].shopfront for i in (1, 2, 3, 4, 5)] == [False, True, True, True, False]
+    d = result.to_dict()["buildings"][0]
+    assert d["material"] == "brick" and d["shopfront"] is False

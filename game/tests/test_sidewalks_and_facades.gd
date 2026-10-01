@@ -40,7 +40,7 @@ func test_treatment_rules() -> void:
 	assert_int(BuildingBuilder.treatment_for("office", 9.0)).is_equal(BuildingBuilder.TREATMENT_PUNCHED)
 	assert_int(BuildingBuilder.treatment_for("church", 12.8)).is_equal(BuildingBuilder.TREATMENT_STONE)
 	assert_int(BuildingBuilder.treatment_for("garage", 3.2)).is_equal(BuildingBuilder.TREATMENT_PLAIN)
-	assert_int(BuildingBuilder.treatment_for("apartments", 45.0)).is_equal(BuildingBuilder.TREATMENT_GLASS)
+	assert_int(BuildingBuilder.treatment_for("apartments", 45.0)).is_equal(BuildingBuilder.TREATMENT_CURTAIN)
 	assert_float(BuildingBuilder.seed_for("w1.0")).is_between(0.0, 1.0)
 	assert_float(BuildingBuilder.seed_for("w1.0")).is_not_equal(BuildingBuilder.seed_for("w2.0"))
 
@@ -49,6 +49,8 @@ func test_wall_uvs_are_metres() -> void:
 	var b := BuildingBuilder.Building.new()
 	b.id = "w9.0"
 	b.kind = "house"
+	b.material = "brick"  # pins the punched treatment whatever the seed says
+	b.roof_shape = "flat"
 	b.height_m = 8.0
 	b.ground_y = 50.0
 	var ring := PackedVector2Array([Vector2(0, 0), Vector2(12, 0), Vector2(12, 5), Vector2(0, 5)])
