@@ -32,6 +32,7 @@ var _world_sync: WorldSync
 var _host_port: int = -1  # --host[=port]
 var _join_address: String = ""  # --join=address[:port]
 var _spawn_transform: Transform3D
+var _keyboard: bool = false  # last input came from keyboard or mouse: show those hints
 
 var _pack: MapPack
 var _streamer: ChunkStreamer
@@ -384,7 +385,26 @@ func _parse_args() -> void:
 				_spawn_override = Vector3(float(parts[0]), 0.0, float(parts[1]))
 
 
+## Remembers which device the player last used so the hints match it; captures the mouse
+## for looking around on foot on the desktop, releasing it for menus.
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
+		if event is InputEventMouseMotion and not _keyboard:
+			return  # a resting mouse jitters; a key or click switches
+		_keyboard = true
+	elif event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) > 0.3):
+		_keyboard = false
+	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and _player != null and not _player.is_driving() and not get_tree().paused:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _hint(controller: String, keyboard: String) -> String:
+	return keyboard if _keyboard else controller
+
+
 func _process(delta: float) -> void:
+	if _player != null and (get_tree().paused or _player.is_driving() or not _keyboard) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if _car != null:
 		var body: Node3D = Players.local_controlled_body()
 		var anchors := PackedVector3Array([body.global_position])
@@ -410,15 +430,17 @@ func _process(delta: float) -> void:
 		if Session.is_online():
 			net = "  |  co-op %s %d/%d" % [Session.role, Session.peers.size(), Session.max_players]
 		if _player.is_driving():
-			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Y get out, Back map, Menu pause" % [
+			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
+				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, M map, Esc pause"),
 			]
 			_prompt.text = ""
 		else:
-			_hud.text = "on foot%s\nx %.0f  y %.1f  z %.0f     left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause" % [
+			_hud.text = "on foot%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				net, body.global_position.x, body.global_position.y, body.global_position.z,
+				_hint("left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause", "WASD walk, Shift run, Space jump, click then mouse to look, E get in, M map, Esc pause"),
 			]
-			_prompt.text = "Y  get in" if _player.nearest_vehicle() != null else ""
+			_prompt.text = _hint("Y  get in", "E  get in") if _player.nearest_vehicle() != null else ""
 	if _autodrive and _car != null:
 		_autodrive_step()
 	if _telemetry and _car != null and _bench_elapsed >= _telemetry_next:
