@@ -25,6 +25,8 @@ const BENCH_WARMUP_S := 3.0
 var _map_renderer: MapRenderer
 var _traffic: TrafficManager
 var _traffic_cap: int = -1
+var _peds: PedestrianManager
+var _peds_cap: int = -1
 
 var _pack: MapPack
 var _streamer: ChunkStreamer
@@ -121,6 +123,7 @@ func _ready() -> void:
 		_player.activate_camera()
 	_setup_maps()
 	_setup_traffic()
+	_setup_pedestrians()
 	_autodrive_edge = spawn_edge
 	_autodrive_reverse = spawn_reverse
 	_autodrive_distance = spawn_distance
@@ -149,6 +152,20 @@ func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
 	_player.activate_camera()
 	_minimap.player = _player
 	_overview.player = _player
+
+
+func _setup_pedestrians() -> void:
+	var t0 := Time.get_ticks_msec()
+	var walk := WalkGraph.build(_pack.graph.pedestrian)
+	_peds = PedestrianManager.new()
+	_peds.name = "Pedestrians"
+	_peds.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(_peds)
+	_peds.setup(walk)
+	if _peds_cap >= 0:
+		_peds.max_agents = _peds_cap
+	_peds.enabled = _peds_cap != 0
+	print("pedestrians: %d walk paths in %d ms, cap %d" % [walk.paths.size(), Time.get_ticks_msec() - t0, _peds.max_agents])
 
 
 func _setup_traffic() -> void:
@@ -262,6 +279,8 @@ func _parse_args() -> void:
 			_start_in_car = true
 		elif arg.begins_with("--traffic="):
 			_traffic_cap = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--peds="):
+			_peds_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--spawn="):
 			var parts := arg.get_slice("=", 1).split(",")
 			if parts.size() == 2:
@@ -275,6 +294,10 @@ func _process(delta: float) -> void:
 		var body: Node3D = Players.local_controlled_body()
 		_traffic.anchors = PackedVector3Array([body.global_position])
 		_traffic.obstacles = [body]
+	if _peds != null and _car != null:
+		var walker: Node3D = Players.local_controlled_body()
+		_peds.anchors = PackedVector3Array([walker.global_position])
+		_peds.obstacles = [walker]
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:
@@ -358,6 +381,8 @@ func _print_benchmark() -> void:
 	print("benchmark: %s" % render_note)
 	if _traffic != null:
 		print("benchmark: traffic agents %d, physics process %.2f ms" % [_traffic.active_count(), Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0])
+	if _peds != null:
+		print("benchmark: pedestrians %d" % _peds.active_count())
 	if _streamer != null:
 		print("benchmark: chunks in scene %d, built %d, downgraded %d, freed %d, failed %d, first playable %d ms" % [_streamer.chunk_count(), _streamer.stats["built"], _streamer.stats["downgraded"], _streamer.stats["freed"], _streamer.stats["failed"], _first_playable_ms])
 
