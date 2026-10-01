@@ -12,6 +12,10 @@ Approach: sample each highway edge every few metres and look sideways.
   median on that side: a wall on that edge, in runs of at least the minimum.
 - Curb: a sidewalk runs within `curb_sidewalk_range_m` of a street's ribbon
   edge: a low step along that edge (kind "curb").
+- Roadblock: a road that dead-ends within `bbox_edge_margin_m` of the import
+  bounds was cut by the bbox, not by the city: a block across its full width at
+  the end (kind "roadblock"), so the district has a visible edge instead of a
+  road that stops in mid-air.
 No wall stands inside another road's ribbon: samples more than
 `overlap_margin_m` inside a different way's carriageway at the same level
 (ramps peeling off a highway, decks meeting at a fork) are dropped, so runs
@@ -31,6 +35,7 @@ from osm_import.buildings import BuildingsResult
 from osm_import.config import ImportConfig
 from osm_import.elevation import ElevationSource, _seg_dist, _SegmentIndex
 from osm_import.graph import RoadGraph
+from osm_import.validation import _touches_edge
 
 log = logging.getLogger(__name__)
 
@@ -157,7 +162,11 @@ def _runs(points: list, keep: list, min_run: float = 0.0) -> list[list]:
 
 
 def build_barriers(
-    graph: RoadGraph, source: ElevationSource, buildings: BuildingsResult | None, cfg: ImportConfig
+    graph: RoadGraph,
+    source: ElevationSource,
+    buildings: BuildingsResult | None,
+    cfg: ImportConfig,
+    bounds: tuple[float, float, float, float] | None = None,
 ) -> BarriersResult:
     rules = cfg.barriers
     result = BarriersResult()
@@ -368,5 +377,30 @@ def build_barriers(
                 rail_pts, [rk and not wk for rk, wk in zip(rail_keep, wall_keep, strict=True)]
             ):
                 add("guardrail", float(rules.get("guardrail_height_m", 0.8)), eid, run)
+    # Roadblocks where the bbox cut a road: a dead end within the edge margin of the bounds.
+    if bounds is not None:
+        at_edge = _touches_edge(graph, bounds, cfg.bbox_edge_margin_m)
+        inc = graph.incident()
+        for nid in sorted(at_edge):
+            if len(inc[nid]) != 1 or graph.nodes[nid].junction_type != "dead_end":
+                continue
+            e = graph.edges[inc[nid][0]]
+            pl = e.polyline
+            end, prev = (pl[0], pl[1]) if e.from_node == nid else (pl[-1], pl[-2])
+            dx, dz = end[0] - prev[0], end[2] - prev[2]
+            length = math.hypot(dx, dz)
+            if length < 1e-6:
+                continue
+            dx, dz = dx / length, dz / length
+            nx, nz = -dz, dx
+            hw = e.width_m / 2.0 + 0.5
+            # Set back from the very end so the block sits on the ribbon, not past it.
+            bx, by, bz = end[0] - dx * 1.5, end[1], end[2] - dz * 1.5
+            add(
+                "roadblock",
+                float(rules.get("roadblock_height_m", 1.1)),
+                e.id,
+                [(bx - nx * hw, by, bz - nz * hw), (bx + nx * hw, by, bz + nz * hw)],
+            )
     log.info("barriers: %s", result.counts)
     return result

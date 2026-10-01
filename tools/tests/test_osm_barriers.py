@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -268,3 +269,34 @@ def test_deck_over_a_road_keeps_its_parapet_and_walls_meet_at_edge_splits():
         start_of_second = next(b for b in runs if b.edge_id == "w3.0").points[0]
         assert abs(end_of_first[0] - start_of_second[0]) < 0.05
         assert abs(end_of_first[2] - start_of_second[2]) < 0.05
+
+
+def test_roads_cut_by_the_bbox_get_a_roadblock_but_cul_de_sacs_do_not():
+    from osm_import.projection import Projector
+
+    proj = Projector.for_bbox(BBOX)
+    bounds = proj.bbox_local(BBOX)
+    min_x = bounds[0]
+    # A street running out through the west bound, and a short interior cul-de-sac.
+    g = graph_for(
+        [
+            (1, [(-900, 0), (0, 0)], {"highway": "residential", "width": "8"}),
+            (2, [(100, 100), (160, 100)], {"highway": "residential", "width": "6"}),
+        ],
+        FlatSource(10.0),
+    )
+    # Push the west end of way 1 inside the bbox margin by construction: find its dead end.
+    west = min(g.nodes.values(), key=lambda n: n.position[0])
+    assert west.position[0] - min_x < CFG.bbox_edge_margin_m, "fixture must reach the bound"
+    r = build_barriers(g, FlatSource(10.0), None, CFG, bounds)
+    blocks = [b for b in r.barriers if b.kind == "roadblock"]
+    assert len(blocks) == 1
+    b = blocks[0]
+    assert b.height_m == 1.1
+    span = math.dist(b.points[0][::2], b.points[1][::2])
+    assert abs(span - (8.0 + 1.0)) < 0.05  # the ribbon plus half a metre each side
+    assert abs(b.points[0][0] - west.position[0]) < 3.0  # at the cut end, set back 1.5 m
+    # Without bounds nothing is emitted; and the interior dead ends never get one.
+    assert not [
+        x for x in build_barriers(g, FlatSource(10.0), None, CFG).barriers if x.kind == "roadblock"
+    ]

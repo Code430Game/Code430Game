@@ -19,7 +19,8 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   counts; check `lanes:bus`, `busway=*` and `psv` tags in that stretch.
 - **Off-ramp at the old default spawn.** That stub is the import bounding box cutting the 417
   and the Bronson ramp (x -530, z 1666); the spawn moved mid-district. Ramp geometry itself
-  is handled by `add-fork-geometry`. Open: a clean map-edge treatment for cut roads.
+  is handled by `add-fork-geometry`. Cut roads now end in an orange roadblock across their
+  width (importer kind `roadblock`, 108 in Ottawa); a subtler end-of-district marker is future.
 - **Rideau to Wellington past Sussex, turning south: one roadway over another, drivable
   into.** A scan of the whole district found no pair of non-bridge roads crossing in 2D
   without a shared junction, and the Colonel By / Mackenzie loop by the Chateau Laurier

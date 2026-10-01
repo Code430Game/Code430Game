@@ -30,6 +30,7 @@
     "overlap_height_m": 2.5,
     "curb_height_m": 0.12,
     "curb_sidewalk_range_m": 3.5,
+    "roadblock_height_m": 1.1,
     "curb_classes": ["primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street"]
   },
   "pedestrian": {
