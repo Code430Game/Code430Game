@@ -14,7 +14,7 @@ const COLORS := {
 	"steps": Color(0.60, 0.59, 0.57),
 	"path": Color(0.55, 0.50, 0.40),
 	"track": Color(0.52, 0.47, 0.38),
-	"cycleway": Color(0.48, 0.36, 0.36),
+	"cycleway": Color(0.22, 0.5, 0.3),  # Ottawa paints bike lanes green
 }
 
 
