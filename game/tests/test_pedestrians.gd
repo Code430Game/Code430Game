@@ -207,3 +207,29 @@ func test_cars_yield_to_a_person_on_the_crossing() -> void:
 		tm.step(1.0 / 60.0)
 	assert_float(a.speed).is_less(0.5)
 	assert_float(a.distance).is_less(138.0 - 0.5 - float(tm.config["car_length_m"]) * 0.5 + 0.5)
+
+
+func test_walkers_keep_off_cycle_lanes() -> void:
+	# A sidewalk ends where a sidewalk and a cycleway both continue straight on.
+	var m := _manager(_ways([
+		{"id": "s1", "pl": [[0, 0, 0], [100, 0, 0]], "kind": "sidewalk"},
+		{"id": "s2", "pl": [[100, 0, 0], [200, 0, 0.5]], "kind": "sidewalk"},
+		{"id": "c1", "pl": [[100, 0, 0], [200, 0, -0.5]], "kind": "cycleway"},
+	]))
+	m.anchors = PackedVector3Array([Vector3.ZERO])
+	var onto_cycleway := 0
+	for trial in range(60):
+		var a := _add(m, 0, 99.5, true, 1.5)
+		m.step(1.0 / 60.0)
+		m.step(1.0 / 60.0)
+		if m.walk.paths[a.path_id].kind == "cycleway":
+			onto_cycleway += 1
+		m.agents.clear()
+	assert_int(onto_cycleway).is_less(4)
+	# And nobody spawns on one: a lone cycleway yields no pedestrians.
+	var lonely := _manager(_ways([{"id": "c2", "pl": [[-200, 0, 50], [200, 0, 50]], "kind": "cycleway"}]))
+	lonely.enabled = true
+	lonely.anchors = PackedVector3Array([Vector3(0, 0, 50)])
+	for i in range(60):
+		lonely._physics_process(1.0 / 60.0)
+	assert_int(lonely.active_count()).is_equal(0)
