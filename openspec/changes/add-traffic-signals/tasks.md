@@ -7,5 +7,5 @@
 - [x] 2.3 Signal poles and heads as MultiMeshes with instance colour; placed at approach corners
 
 ## 3. Verification
-- [ ] 3.1 Deck: measured cost recorded; downtown drive screenshots
+- [x] 3.1 Deck (2026-09-30, idle Deck, 150 cars, 97 people, 550 heads): GPU 6.45 ms, render CPU 1.04 ms, physics 6.86 ms (traffic step 1.52 ms), draw calls 334, first playable 392 ms; downtown screenshot shows heads at the Bank Street junctions
 - [ ] 3.2 **Stop: human drives downtown through lights on the Deck**
