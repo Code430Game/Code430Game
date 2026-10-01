@@ -10,6 +10,7 @@ const SIGNAL_SYNC_S := 5.0
 var traffic: TrafficManager
 var peds: PedestrianManager
 var player_sync: PlayerSync
+var day_night: DayNight
 var _accum: float = 0.0
 var _signal_accum: float = 0.0
 
@@ -31,7 +32,7 @@ func _process(delta: float) -> void:
 				_peds_snapshot.rpc_id(int(id), peds.snapshot(around, REPLICATE_RADIUS_M))
 	if _signal_accum >= SIGNAL_SYNC_S:
 		_signal_accum = 0.0
-		_signal_time.rpc(traffic.signals.time)
+		_signal_time.rpc(traffic.signals.time, day_night.hour if day_night != null else -1.0)
 
 
 @rpc("authority", "unreliable")
@@ -47,6 +48,8 @@ func _peds_snapshot(data: PackedFloat32Array) -> void:
 
 
 @rpc("authority", "reliable")
-func _signal_time(t: float) -> void:
+func _signal_time(t: float, hour: float) -> void:
 	if traffic != null:
 		traffic.signals.time = t
+	if day_night != null and hour >= 0.0:
+		day_night.hour = hour

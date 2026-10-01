@@ -98,13 +98,23 @@ static func _pole_mesh() -> Mesh:
 	return box
 
 
+static var _head_material: StandardMaterial3D = null
+const HEAD_NIGHT_ENERGY := 3.0
+
+
+## Shared head material; DayNight raises its emission after dusk.
+static func head_material() -> StandardMaterial3D:
+	if _head_material == null:
+		_head_material = StandardMaterial3D.new()
+		_head_material.vertex_color_use_as_albedo = true
+		_head_material.emission_enabled = true
+		_head_material.emission = Color(0.5, 0.5, 0.5)
+		_head_material.emission_energy_multiplier = 0.8
+	return _head_material
+
+
 static func _head_mesh() -> Mesh:
 	var box := BoxMesh.new()
 	box.size = Vector3(0.36, 0.9, 0.3)
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.emission_enabled = true
-	m.emission = Color(0.5, 0.5, 0.5)
-	m.emission_energy_multiplier = 0.8
-	box.material = m
+	box.material = head_material()
 	return box

@@ -33,6 +33,12 @@ var _host_port: int = -1  # --host[=port]
 var _join_address: String = ""  # --join=address[:port]
 var _spawn_transform: Transform3D
 var _keyboard: bool = false  # last input came from keyboard or mouse: show those hints
+var _day_night: DayNight
+var _vehicle_audio: VehicleAudio
+var _ambience: AmbienceAudio
+var _mute: bool = false
+var _start_hour: float = -1.0  # --time=HH
+var _day_minutes: float = -1.0  # --day-minutes=N
 
 var _pack: MapPack
 var _streamer: ChunkStreamer
@@ -138,6 +144,8 @@ func _ready() -> void:
 	_setup_maps()
 	_setup_traffic()
 	_setup_pedestrians()
+	_setup_day_night()
+	_setup_audio()
 	_setup_net()
 	_autodrive_edge = spawn_edge
 	_autodrive_reverse = spawn_reverse
@@ -169,6 +177,40 @@ func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
 	_overview.player = _player
 
 
+func _setup_day_night() -> void:
+	_day_night = DayNight.new()
+	_day_night.name = "DayNight"
+	_day_night.process_mode = Node.PROCESS_MODE_PAUSABLE
+	if _start_hour >= 0.0:
+		_day_night.load_config()
+		_day_night.config["start_hour"] = _start_hour
+	if _day_minutes > 0.0:
+		if _day_night.config.is_empty():
+			_day_night.load_config()
+		_day_night.config["day_minutes"] = _day_minutes
+	add_child(_day_night)
+	_day_night.setup($Sun as DirectionalLight3D, ($WorldEnvironment as WorldEnvironment).environment)
+	_day_night.register_shader(_pack.building_material as ShaderMaterial)
+	_day_night.register_emissive(CarMesh.light_material(), CarMesh.LIGHT_NIGHT_ENERGY)
+	_day_night.register_emissive(SignalHeads.head_material(), SignalHeads.HEAD_NIGHT_ENERGY)
+	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
+	_car.add_headlights(bool(preset.get("headlight_shadows", false)))
+
+
+func _setup_audio() -> void:
+	if _mute:
+		AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), true)
+	_vehicle_audio = VehicleAudio.new()
+	_vehicle_audio.name = "VehicleAudio"
+	_vehicle_audio.car = _car
+	_car.add_child(_vehicle_audio)
+	_car.impacted.connect(func(speed: float) -> void: _vehicle_audio.impact(speed))
+	_ambience = AmbienceAudio.new()
+	_ambience.name = "Ambience"
+	_ambience.traffic = _traffic
+	add_child(_ambience)
+
+
 func _setup_net() -> void:
 	Session.local_manifest = _pack.manifest_summary()
 	_player_sync = PlayerSync.new()
@@ -181,6 +223,7 @@ func _setup_net() -> void:
 	_world_sync.traffic = _traffic
 	_world_sync.peds = _peds
 	_world_sync.player_sync = _player_sync
+	_world_sync.day_night = _day_night
 	add_child(_world_sync)
 	if _host_port > 0:
 		_host_game(_host_port)
@@ -375,6 +418,12 @@ func _parse_args() -> void:
 			_traffic_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--peds="):
 			_peds_cap = int(arg.get_slice("=", 1))
+		elif arg == "--mute":
+			_mute = true
+		elif arg.begins_with("--time="):
+			_start_hour = float(arg.get_slice("=", 1))
+		elif arg.begins_with("--day-minutes="):
+			_day_minutes = float(arg.get_slice("=", 1))
 		elif arg.begins_with("--host"):
 			_host_port = int(arg.get_slice("=", 1)) if arg.contains("=") else Session.DEFAULT_PORT
 		elif arg.begins_with("--join="):
@@ -429,6 +478,9 @@ func _process(delta: float) -> void:
 		var net := ""
 		if Session.is_online():
 			net = "  |  co-op %s %d/%d" % [Session.role, Session.peers.size(), Session.max_players]
+		if _day_night != null:
+			net = "  |  %s" % _day_night.clock_text() + net
+			_car.set_headlights(_day_night.night_factor())
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
