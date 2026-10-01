@@ -18,6 +18,8 @@ class WalkPath:
 	var length: float = 0.0
 	var start_key: Vector2i
 	var end_key: Vector2i
+	var crossed_edge: String = ""  # crossings: the road edge they cross
+	var signal_node: String = ""  # crossings at a signalised junction: that node
 
 	func position_at(distance: float) -> Vector3:
 		if points.size() == 1:

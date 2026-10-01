@@ -298,7 +298,7 @@ func _setup_pedestrians() -> void:
 	_peds.name = "Pedestrians"
 	_peds.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_peds)
-	_peds.setup(walk)
+	_peds.setup(walk, _pack.graph, _traffic)
 	if _peds_cap >= 0:
 		_peds.max_agents = _peds_cap
 	_peds.enabled = _peds_cap != 0
@@ -470,6 +470,8 @@ func _process(delta: float) -> void:
 		if _peds != null:
 			_peds.anchors = anchors
 			_peds.obstacles = obstacles
+			if _traffic != null:
+				_traffic.obstacle_points = _peds.crossing_positions()
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:

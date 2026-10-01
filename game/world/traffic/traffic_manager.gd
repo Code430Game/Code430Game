@@ -32,6 +32,8 @@ var mirror: bool = false
 var anchors: PackedVector3Array = PackedVector3Array()
 ## Player bodies (vehicles or people) that traffic keeps headway from. Set each frame by the scene.
 var obstacles: Array[Node3D] = []
+## Extra points to keep headway from, person-sized: people on crossings. Set each frame.
+var obstacle_points: PackedVector3Array = PackedVector3Array()
 var _agents_by_path: Dictionary = {}
 var _junction_occupants: Dictionary = {}
 var _spawn_timer: float = 0.0
@@ -359,13 +361,23 @@ func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
 
 ## Gap to the nearest player body ahead in this lane's corridor, or INF.
 func _obstacle_gap(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
-	if obstacles.is_empty():
+	if obstacles.is_empty() and obstacle_points.is_empty():
 		return INF
 	var car_len := float(config["car_length_m"])
 	var corridor := float(config["car_width_m"]) * 0.5
 	var lookahead := float(config["lookahead_m"])
 	var pos := a.position()
 	var best := INF
+	var person := float(config["person_radius_m"])
+	for p in obstacle_points:
+		var rel_p := p - pos
+		if Vector2(rel_p.x, rel_p.z).length() > lookahead + person or absf(rel_p.y) > 3.0:
+			continue
+		var cp := path.closest(p)
+		var along_p := cp.x - a.distance
+		if along_p <= 0.0 or cp.y > corridor + person + 0.6:
+			continue
+		best = minf(best, along_p - car_len * 0.5 - person)
 	for o in obstacles:
 		if o == null or not is_instance_valid(o):
 			continue
