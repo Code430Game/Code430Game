@@ -1,0 +1,25 @@
+# Controls
+
+The on-screen hints switch to whichever device you touched last.
+
+| action | controller | keyboard and mouse |
+|---|---|---|
+| walk | left stick | W A S D |
+| run | L3 (click left stick) | Shift |
+| jump | A | Space |
+| look around | right stick | click once, then move the mouse (Esc releases it) |
+| get in or out of a car | Y | E |
+| take a traffic car | Y next to it (host only in co-op) | E next to it |
+| accelerate | RT | W |
+| brake or reverse | LT | S |
+| steer | left stick | A D |
+| handbrake | RB | Space |
+| reset a stuck car | Y while driving (hold) | R |
+| map | Back / View | M |
+| pause menu | Menu / Start | Esc |
+| debug overlay | X | F2 |
+| road graph overlay | B with the overlay | F3 |
+
+Co-op lives in the pause menu: **Host co-op game** shows the address friends join at;
+**Join game** uses the address field (right on the Join line focuses it for the Deck's
+on-screen keyboard). Command-line equivalents: `--host[=port]` and `--join=address[:port]`.
