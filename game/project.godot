@@ -25,6 +25,7 @@ buses/default_bus_layout="res://default_bus_layout.tres"
 Settings="*res://core/settings/settings.gd"
 Players="*res://core/players.gd"
 Session="*res://core/net/session.gd"
+ContentMode="*res://core/content/content_mode.gd"
 DebugOverlay="*res://core/debug/debug_overlay.tscn"
 
 [display]

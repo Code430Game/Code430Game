@@ -1,0 +1,8 @@
+{
+ "id": "gritty",
+ "name": "Gritty",
+ "about": "Street reality. The default: everything in the content policy except cyberpunk-only content.",
+ "max": {"violence": "strong", "gore": "strong", "drugs": "strong", "sex_work": "strong", "profanity": "strong", "crime": "strong", "horror": "strong", "dystopia_tech": "none"},
+ "flags": {"violence": true, "lethal_weapons": true, "drug_use": true, "sex_work_services": true},
+ "variant_key": "gritty"
+}

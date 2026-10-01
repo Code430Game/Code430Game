@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/ads.schema.v0.json",
+  "title": "Code 430 billboard ads v0",
+  "description": "Ads a map or story pack offers to billboards. Each ad declares descriptors and may carry variants keyed by tone mode plus a fallback. See content-descriptors.v0.json and the add-content-modes change.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ads"],
+  "properties": {
+    "ads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "variants"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_.-]+$"},
+          "descriptors": {"$ref": "#/$defs/descriptors"},
+          "variants": {
+            "description": "Keyed by tone mode id, plus 'fallback'. A variant has text, a background colour and its own descriptors (default: none).",
+            "type": "object",
+            "additionalProperties": {"$ref": "#/$defs/variant"},
+            "required": ["fallback"]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "descriptors": {
+      "type": "object",
+      "additionalProperties": {"enum": ["none", "mild", "strong", "stylized"]}
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": {"type": "string", "maxLength": 60},
+        "colour": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+        "descriptors": {"$ref": "#/$defs/descriptors"}
+      }
+    }
+  }
+}

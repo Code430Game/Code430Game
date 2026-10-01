@@ -10,7 +10,9 @@ signal character_requested
 signal host_requested
 signal join_requested(address: String)
 
-@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Character, $Panel/VBox/Host, $Panel/VBox/Join, $Panel/VBox/Quit]
+@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Character, $Panel/VBox/Tone, $Panel/VBox/Host, $Panel/VBox/Join, $Panel/VBox/Quit]
+const TONE_ROW := 2
+const JOIN_ROW := 4
 @onready var _address: LineEdit = $Panel/VBox/Address
 @onready var _players: Label = $Panel/VBox/Players
 
@@ -23,9 +25,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_buttons[0].pressed.connect(close)
 	_buttons[1].pressed.connect(func() -> void: character_requested.emit())
-	_buttons[2].pressed.connect(func() -> void: host_requested.emit())
-	_buttons[3].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
-	_buttons[4].pressed.connect(func() -> void: quit_requested.emit())
+	_buttons[TONE_ROW].pressed.connect(func() -> void: _cycle_tone(1))
+	_buttons[3].pressed.connect(func() -> void: host_requested.emit())
+	_buttons[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
+	_buttons[5].pressed.connect(func() -> void: quit_requested.emit())
 	_highlight()
 
 
@@ -47,8 +50,10 @@ func _input(event: InputEvent) -> void:
 		close()
 	elif event.is_action_pressed("ui_accept"):
 		_buttons[_selected].pressed.emit()
-	elif event.is_action_pressed("ui_right") and _selected == 3:
+	elif event.is_action_pressed("ui_right") and _selected == JOIN_ROW:
 		_address.grab_focus()  # edit the address with the on-screen keyboard
+	elif (event.is_action_pressed("ui_right") or event.is_action_pressed("ui_left")) and _selected == TONE_ROW:
+		_cycle_tone(1 if event.is_action_pressed("ui_right") else -1)
 	elif event.is_action_pressed("ui_down"):
 		_selected = (_selected + 1) % _buttons.size()
 		_highlight()
@@ -60,7 +65,21 @@ func _input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
+func _cycle_tone(delta: int) -> void:
+	if ContentMode.locked:
+		return
+	ContentMode.cycle(delta)
+	_highlight()
+
+
+func _tone_text() -> String:
+	if ContentMode.locked:
+		return "Tone: %s (the host's)" % ContentMode.mode_name()
+	return "Tone: <  %s  >" % ContentMode.mode_name()
+
+
 func _highlight() -> void:
+	_buttons[TONE_ROW].text = _tone_text()
 	for i in range(_buttons.size()):
 		_buttons[i].text = ("> " if i == _selected else "   ") + _buttons[i].text.trim_prefix("> ").trim_prefix("   ")
 	_buttons[_selected].grab_focus()

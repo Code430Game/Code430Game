@@ -23,6 +23,8 @@ const BENCH_WARMUP_S := 3.0
 @onready var _overview: OverviewMap = $OverviewMap
 @onready var _pause_menu: PauseMenu = $PauseMenu
 @onready var _creator: CharacterCreator = $CharacterCreator
+var _billboards: Billboards = null
+const SESSION_SEED := 430  # until sessions carry their own seed
 var _map_renderer: MapRenderer
 var _traffic: TrafficManager
 var _traffic_cap: int = -1
@@ -155,6 +157,8 @@ func _ready() -> void:
 	_setup_day_night()
 	_setup_audio()
 	_setup_net()
+	_setup_billboards()
+	ContentMode.mode_changed.connect(func(_id: String) -> void: _refresh_session_status())
 	if _open_creator_at_start:
 		get_tree().create_timer(1.5).timeout.connect(_open_creator)
 	if _free_camera.size() == 6:
@@ -267,6 +271,29 @@ func _setup_net() -> void:
 		_join_game(_join_address)
 
 
+func _setup_billboards() -> void:
+	if _pack.ads.is_empty():
+		return
+	_billboards = Billboards.new()
+	_billboards.name = "Billboards"
+	_billboards.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_world.add_child(_billboards)
+	_billboards.setup(_pack.graph.edges.values(), _pack.ads, SESSION_SEED)
+	var first: Vector3 = _billboards.sites[0]["transform"].origin if _billboards.count() > 0 else Vector3.ZERO
+	print("billboards: %d boards from %d ads, tone %s, first at (%.0f, %.1f, %.0f)" % [_billboards.count(), _pack.ads.size(), ContentMode.current, first.x, first.y, first.z])
+	var warning := _tone_warning()
+	if warning != "":
+		print("content: " + warning)
+
+
+## Empty when the pack lists the active tone (or lists nothing).
+func _tone_warning() -> String:
+	var supported: Array = _pack.manifest.get("supported_modes", [])
+	if supported.is_empty() or supported.has(ContentMode.current):
+		return ""
+	return "%s does not list tone %s; its content may be hidden" % [_pack.manifest.get("name", PACK_ID), ContentMode.mode_name()]
+
+
 func _open_creator() -> void:
 	_pause_menu.visible = false
 	_creator.open(_player.profile if _player != null else {})
@@ -338,8 +365,12 @@ func _set_mirror(on: bool) -> void:
 
 
 func _refresh_session_status() -> void:
+	var tone := "tone %s" % ContentMode.mode_name()
+	var tone_warning := _tone_warning()
+	if tone_warning != "":
+		tone += "\n" + tone_warning
 	if not Session.is_online():
-		_pause_menu.set_status("offline")
+		_pause_menu.set_status("offline, " + tone)
 		return
 	var names: Array = []
 	for id in Session.peers:
@@ -348,7 +379,7 @@ func _refresh_session_status() -> void:
 	var where := ""
 	if Session.is_host():
 		where = "\nfriends join at: %s  port %d" % [", ".join(Session.local_addresses()), Session.DEFAULT_PORT]
-	_pause_menu.set_status("%s: %d/%d players: %s%s%s" % [Session.role, Session.peers.size(), Session.max_players, ", ".join(names), warn, where])
+	_pause_menu.set_status("%s: %d/%d players: %s, %s%s%s" % [Session.role, Session.peers.size(), Session.max_players, ", ".join(names), tone, warn, where])
 
 
 func _setup_pedestrians() -> void:
@@ -462,6 +493,8 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--tone="):
+			ContentMode.set_mode(arg.get_slice("=", 1), false)
 		elif arg.begins_with("--camera="):
 			for v in arg.get_slice("=", 1).split(","):
 				_free_camera.append(float(v))

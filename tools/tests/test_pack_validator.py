@@ -125,3 +125,69 @@ def test_first_party_packs_are_valid() -> None:
     assert reports, "expected at least the example pack"
     for report in reports:
         assert report.ok, f"{report.path}: {report.errors}"
+
+
+def _ads(variants_by_item: dict) -> bytes:
+    return json.dumps(
+        {"ads": [{"id": k, "variants": v} for k, v in variants_by_item.items()]}
+    ).encode()
+
+
+def test_ads_unknown_descriptor_is_an_error(tmp_path: Path):
+    manifest = {**GOOD, "supported_modes": ["gritty"]}
+    write_pack(
+        tmp_path,
+        "p",
+        manifest,
+        {
+            "ads.v0.json": _ads(
+                {"ad.x": {"fallback": {"text": "hi", "descriptors": {"spiders": "mild"}}}}
+            )
+        },
+    )
+    (report,) = validate_root(tmp_path)
+    assert any("unknown descriptor 'spiders'" in e for e in report.errors)
+
+
+def test_ads_clean_variant_may_not_leak_strong_content(tmp_path: Path):
+    manifest = {**GOOD, "supported_modes": ["clean", "gritty"]}
+    write_pack(
+        tmp_path,
+        "p",
+        manifest,
+        {
+            "ads.v0.json": _ads(
+                {
+                    "ad.x": {
+                        "clean": {"text": "ouch", "descriptors": {"gore": "strong"}},
+                        "fallback": {"text": "ok"},
+                    }
+                }
+            )
+        },
+    )
+    (report,) = validate_root(tmp_path)
+    assert any("ad.x/clean" in e and "gore" in e for e in report.errors)
+
+
+def test_ads_item_hidden_in_a_supported_mode_is_a_warning(tmp_path: Path):
+    manifest = {**GOOD, "supported_modes": ["clean", "gritty"]}
+    write_pack(
+        tmp_path,
+        "p",
+        manifest,
+        {
+            "ads.v0.json": _ads(
+                {"ad.bail": {"fallback": {"text": "bail", "descriptors": {"crime": "strong"}}}}
+            )
+        },
+    )
+    (report,) = validate_root(tmp_path)
+    assert report.ok
+    assert any("ad.bail" in w and "'clean'" in w for w in report.warnings)
+
+
+def test_unknown_supported_mode_is_an_error(tmp_path: Path):
+    write_pack(tmp_path, "p", {**GOOD, "supported_modes": ["grimdark"]})
+    (report,) = validate_root(tmp_path)
+    assert any("unknown mode 'grimdark'" in e for e in report.errors)

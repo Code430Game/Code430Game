@@ -19,9 +19,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -190.0
-offset_top = -215.0
+offset_top = -240.0
 offset_right = 190.0
-offset_bottom = 215.0
+offset_bottom = 240.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -50,6 +50,11 @@ text = "Resume"
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Character"
+
+[node name="Tone" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Tone"
 
 [node name="Host" type="Button" parent="Panel/VBox"]
 layout_mode = 2
