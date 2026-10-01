@@ -18,6 +18,8 @@ const FILLET_STEPS := 4
 ## A corner may sit at most this many half-widths down the road. Beyond that the
 ## two roads are nearly parallel (a ramp merge) and their ribbons overlap anyway.
 const MAX_CORNER_HALF_WIDTHS := 3.0
+## Arms closer than this in angle are merged in the polygon walk (see build_one).
+const PARALLEL_ARMS_DEG := 12.0
 
 
 class Junction:
@@ -52,6 +54,22 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		var dir := graph.direction_from(edge, node_id)
 		arms.append({"edge": eid, "dir": dir, "angle": atan2(dir.y, dir.x), "hw": edge.width_m * 0.5})
 	arms.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["angle"] < b["angle"])
+	# Two arms leaving at nearly the same angle (a road and a ramp overlapping for a stretch, or
+	# two carriageways meeting) share one slot in the polygon walk: the corner between them would
+	# be a sliver spanning metres. The wider arm stays; the narrower one is trimmed like it.
+	var merged_into := {}  # dropped edge id -> kept edge id
+	var slot := 0
+	while arms.size() > 1 and slot < arms.size():
+		var a: Dictionary = arms[slot]
+		var b: Dictionary = arms[(slot + 1) % arms.size()]
+		var gap := fposmod(float(b["angle"]) - float(a["angle"]), TAU)
+		if gap < deg_to_rad(PARALLEL_ARMS_DEG) and arms.size() > 2:
+			var keep := a if float(a["hw"]) >= float(b["hw"]) else b
+			var drop := b if keep == a else a
+			merged_into[drop["edge"]] = keep["edge"]
+			arms.erase(drop)
+			continue  # re-check the same slot against its new neighbour
+		slot += 1
 	var count := arms.size()
 	var corners: Array[Vector2] = []
 	var corner_t: Array[Vector2] = []  # (t along arm i, t along arm i+1)
@@ -85,10 +103,12 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		corners.append(corner)
 		corner_t.append(Vector2(ta, tb))
 	var trims := {}
-	for i in range(count):
-		var prev := (i - 1 + count) % count
-		var t := maxf(corner_t[i].x, corner_t[prev].y) + TRIM_MARGIN_M
-		trims[arms[i]["edge"]] = minf(t, MAX_TRIM_M)
+	for k in range(count):
+		var prev := (k - 1 + count) % count
+		var t := maxf(corner_t[k].x, corner_t[prev].y) + TRIM_MARGIN_M
+		trims[arms[k]["edge"]] = minf(t, MAX_TRIM_M)
+	for dropped in merged_into:
+		trims[dropped] = trims[merged_into[dropped]]
 	var polygon := PackedVector2Array()
 	var heights := PackedFloat32Array()
 	for i in range(count):
@@ -126,7 +146,9 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		if float(arm["hw"]) > widest:
 			widest = float(arm["hw"])
 			j.dominant_class = graph.edges[arm["edge"]].road_class
-	if Geometry2D.triangulate_polygon(polygon).size() == 0:
+	# A walk that crosses itself (big clustered junctions with many arms) still triangulates,
+	# but its overlapping triangles carry different arm heights and show as tilted slivers.
+	if Geometry2D.triangulate_polygon(polygon).size() == 0 or not _is_simple(polygon):
 		var hull := Geometry2D.convex_hull(polygon)
 		if hull.size() > 1 and hull[0] == hull[hull.size() - 1]:
 			hull.remove_at(hull.size() - 1)
@@ -139,6 +161,22 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		j.polygon_xz = polygon
 		j.heights = heights
 	return j
+
+
+## True when no two non-adjacent edges of the polygon cross.
+static func _is_simple(poly: PackedVector2Array) -> bool:
+	var n := poly.size()
+	for i in range(n):
+		var a := poly[i]
+		var b := poly[(i + 1) % n]
+		for j in range(i + 2, n):
+			if i == 0 and j == n - 1:
+				continue  # adjacent through the wrap
+			var c := poly[j]
+			var d := poly[(j + 1) % n]
+			if Geometry2D.segment_intersects_segment(a, b, c, d) != null:
+				return false
+	return true
 
 
 ## Height of the road surface at `distance` metres along the edge from the node.
