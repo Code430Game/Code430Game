@@ -35,6 +35,40 @@ func _process(delta: float) -> void:
 		_signal_time.rpc(traffic.signals.time, day_night.hour if day_night != null else -1.0)
 
 
+## Guest: asks the host for the traffic car at `position`; the answer spawns a car via `take_granted`.
+signal take_granted(transform: Transform3D, color: Color)
+
+
+func request_take(position: Vector3) -> void:
+	_request_take.rpc_id(1, position)
+
+
+@rpc("any_peer", "reliable")
+func _request_take(position: Vector3) -> void:
+	if not Session.is_host() or traffic == null:
+		return
+	var got := traffic.release_near(position)
+	if got.is_empty():
+		return
+	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"])
+
+
+@rpc("authority", "reliable")
+func _grant_take(transform: Transform3D, color: Color) -> void:
+	take_granted.emit(transform, color)
+
+
+## Guest: tells the host one of its cars was hit here.
+func report_hit(position: Vector3, velocity: Vector3) -> void:
+	_report_hit.rpc_id(1, position, velocity)
+
+
+@rpc("any_peer", "unreliable")
+func _report_hit(position: Vector3, velocity: Vector3) -> void:
+	if Session.is_host() and traffic != null:
+		traffic.hit_near(position, velocity)
+
+
 @rpc("authority", "unreliable")
 func _traffic_snapshot(data: PackedFloat32Array) -> void:
 	if traffic != null:

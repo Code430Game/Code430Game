@@ -26,6 +26,15 @@ from osm_import.water import build_water, water_query
 
 
 def _import(args: argparse.Namespace) -> int:
+    if args.region is not None:
+        region = json.loads(args.region.read_text(encoding="utf-8"))
+        s, w, n, e = region["bbox"]
+        args.bbox = f"{s},{w},{n},{e}"
+        args.pack_id = region.get("pack_id", args.pack_id)
+        args.pack_name = args.pack_name or region.get("pack_name") or region.get("name")
+        args.title = args.title or region.get("pack_name") or region.get("name")
+        if args.dem == "hrdem" and region.get("dem"):
+            args.dem = region["dem"]
     bbox = BBox.parse(args.bbox)
     cfg, cfg_name = load_cfg(args.config)
     if args.osm_json:
@@ -137,7 +146,10 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command")
 
     imp = sub.add_parser("import", help="Import a bbox (default command).")
-    imp.add_argument("--bbox", required=True, help="S,W,N,E in WGS84")
+    imp.add_argument("--bbox", help="S,W,N,E in WGS84 (or use --region)")
+    imp.add_argument(
+        "--region", type=Path, help="regions/<name>.json from the region picker: bbox, pack id, dem"
+    )
     imp.add_argument("--out", type=Path, help="Output directory for graph and report")
     imp.add_argument(
         "--pack-out", type=Path, help="Write a complete map pack folder here instead of --out"
@@ -196,6 +208,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if getattr(args, "command", None) == "import" and not (args.out or args.pack_out):
         parser.error("one of --out or --pack-out is required")
+    if getattr(args, "command", None) == "import" and not (args.bbox or args.region):
+        parser.error("one of --bbox or --region is required")
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",

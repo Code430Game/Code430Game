@@ -12,8 +12,15 @@ from pyproj import Transformer
 
 from osm_import.osm_data import BBox
 
-TARGET_CRS = "EPSG:32618"
+TARGET_CRS = "EPSG:32618"  # Ottawa's zone; for_bbox picks the zone of any other region
 SOURCE_CRS = "EPSG:4326"
+
+
+def utm_crs_for(lat: float, lon: float) -> str:
+    """EPSG code of the UTM zone containing a point."""
+    zone = int((lon + 180.0) // 6.0) + 1
+    zone = max(1, min(60, zone))
+    return f"EPSG:{326 if lat >= 0 else 327}{zone:02d}"
 
 
 @dataclass(frozen=True)
@@ -39,19 +46,21 @@ class Projector:
 
     def __init__(self, frame: LocalFrame) -> None:
         self.frame = frame
-        self._fwd = Transformer.from_crs(SOURCE_CRS, TARGET_CRS, always_xy=True)
-        self._inv = Transformer.from_crs(TARGET_CRS, SOURCE_CRS, always_xy=True)
+        self._fwd = Transformer.from_crs(SOURCE_CRS, frame.crs, always_xy=True)
+        self._inv = Transformer.from_crs(frame.crs, SOURCE_CRS, always_xy=True)
 
     @classmethod
     def for_bbox(cls, bbox: BBox) -> Projector:
-        """Frame whose origin is the projected bbox centre, rounded to metres."""
-        fwd = Transformer.from_crs(SOURCE_CRS, TARGET_CRS, always_xy=True)
-        inv = Transformer.from_crs(TARGET_CRS, SOURCE_CRS, always_xy=True)
+        """Frame whose origin is the projected bbox centre, rounded to metres, in the UTM
+        zone of that centre (EPSG:326xx north, 327xx south)."""
         lat, lon = bbox.center
+        crs = utm_crs_for(lat, lon)
+        fwd = Transformer.from_crs(SOURCE_CRS, crs, always_xy=True)
+        inv = Transformer.from_crs(crs, SOURCE_CRS, always_xy=True)
         e, n = fwd.transform(lon, lat)
         e, n = float(round(e)), float(round(n))
         olon, olat = inv.transform(e, n)
-        return cls(LocalFrame(TARGET_CRS, e, n, round(olat, 7), round(olon, 7)))
+        return cls(LocalFrame(crs, e, n, round(olat, 7), round(olon, 7)))
 
     def to_local(self, lat: float, lon: float) -> tuple[float, float]:
         """Returns (x, z) in local metres; y (elevation) is added later."""

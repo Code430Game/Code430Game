@@ -169,7 +169,7 @@ def hrdem_source(
         from rasterio.windows import from_bounds
 
         b = transform_bounds(
-            "EPSG:32618",
+            frame.crs,
             src.crs,
             frame.origin_easting + min_x,
             frame.origin_northing - max_z,
@@ -187,7 +187,7 @@ def hrdem_source(
             src_crs=src.crs,
             src_nodata=src.nodata,
             dst_transform=dst_transform,
-            dst_crs="EPSG:32618",
+            dst_crs=frame.crs,
             dst_nodata=np.nan,
             resampling=Resampling.bilinear,
         )
@@ -198,6 +198,10 @@ def hrdem_source(
             "nodata": src.nodata,
         }
     nan_count = int(np.isnan(dst).sum())
+    if nan_count == dst.size:
+        raise RuntimeError(
+            "HRDEM has no data for this region (outside its coverage); import with --dem flat"
+        )
     if nan_count:
         log.warning("DEM grid has %d nodata cells; filling with nearest valid value", nan_count)
         dst = _fill_nan(dst)

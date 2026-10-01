@@ -11,7 +11,7 @@
 
 ## 2. Players and vehicles
 - [x] 2.1 Peer-owned character and car, broadcast at 20 Hz, RemotePlayer replicas interpolated 100 ms behind (no MultiplayerSpawner: manual RPC state)
-- [ ] 2.2 Vehicle ownership transfer on enter/exit, host arbitration on conflict (each peer drives its own car; taking traffic cars is host-only for now)
+- [x] 2.2 Each peer drives its own car; a guest takes a traffic car by asking the host, which removes the agent and grants the car's transform and colour; guest hits on the host's cars are reported and retire them on the host; guests spawn in the first clear slot (2026-10-01)
 - [x] 2.3 Disconnect handling: replica despawn on peer_left; session_ended returns a client to single-player simulation
 - [x] 2.4 Tests: remote interpolation, snapshot round trip (ownership transfer deferred with 2.2)
 

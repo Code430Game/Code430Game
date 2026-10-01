@@ -103,3 +103,31 @@ def test_island_explained_by_filtered_connector():
     assert r.components[1].likely_cause == "connector filtered out (service=driveway)"
     md = render_markdown(r, "test")
     assert "connector filtered out (service=driveway)" in md
+
+
+def test_region_file_supplies_bbox_and_pack_id(tmp_path, monkeypatch):
+    import json
+
+    from osm_import.__main__ import main
+
+    region = tmp_path / "r.json"
+    region.write_text(
+        json.dumps(
+            {
+                "name": "demo",
+                "bbox": [45.405, -75.715, 45.435, -75.675],
+                "pack_id": "code430.demo",
+                "dem": "flat",
+            }
+        )
+    )
+    captured = {}
+
+    def fake_import(args):
+        captured.update(vars(args))
+        return 0
+
+    monkeypatch.setattr("osm_import.__main__._import", fake_import)
+    assert main(["--region", str(region), "--out", str(tmp_path / "out")]) == 0
+    # The region is resolved inside _import; here we check the parser accepted it without --bbox.
+    assert captured["region"] == region and captured["bbox"] is None

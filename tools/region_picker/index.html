@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Code 430 region picker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root { --bg: #15171a; --panel: #1f2226; --ink: #e8e8e8; --dim: #9aa0a6; --accent: #5ac46a; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+  #map { position: absolute; inset: 0 340px 0 0; }
+  #panel { position: absolute; top: 0; right: 0; bottom: 0; width: 340px; background: var(--panel); padding: 16px; box-sizing: border-box; overflow: auto; }
+  h1 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 6px 0; color: var(--dim); }
+  label { display: block; margin-top: 10px; color: var(--dim); }
+  input[type=text] { width: 100%; box-sizing: border-box; background: #111; color: var(--ink); border: 1px solid #333; padding: 6px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  td { padding: 4px 0; border-bottom: 1px solid #2c3036; }
+  td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  button { margin-top: 12px; width: 100%; padding: 8px; background: var(--accent); color: #000; border: 0; font-weight: 600; cursor: pointer; }
+  button.quiet { background: #2c3036; color: var(--ink); }
+  pre { background: #111; padding: 8px; white-space: pre-wrap; word-break: break-all; font-size: 12px; }
+  .warn { color: #f0b35c; }
+  @media (max-width: 760px) { #map { inset: 0 0 46% 0; } #panel { top: 54%; width: 100%; } }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="panel">
+  <h1>Code 430 region picker</h1>
+  <p>Drag a rectangle (hold <b>Shift</b> and drag), or press <b>Fit here</b> to use the view. The importer takes the box as S,W,N,E.</p>
+  <label>Region name <input id="name" type="text" value="my-region" placeholder="e.g. ottawa-glebe"></label>
+  <table>
+    <tr><td>South, West</td><td id="sw">–</td></tr>
+    <tr><td>North, East</td><td id="ne">–</td></tr>
+    <tr><td>Size</td><td id="size">–</td></tr>
+    <tr><td>UTM zone</td><td id="utm">–</td></tr>
+    <tr><td>Elevation</td><td id="dem">–</td></tr>
+    <tr><td>Buildings (OSM)</td><td id="bld">–</td></tr>
+    <tr><td>Roads (OSM ways)</td><td id="roads">–</td></tr>
+  </table>
+  <button class="quiet" id="fit">Fit here (use the current view)</button>
+  <button id="count">Count buildings and roads</button>
+  <button id="copy">Copy import command</button>
+  <button class="quiet" id="save">Download regions/&lt;name&gt;.json</button>
+  <pre id="cmd">–</pre>
+  <p id="note"></p>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  const map = L.map('map', { boxZoom: false }).setView([45.42, -75.695], 13);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  let rect = L.rectangle([[45.405, -75.715], [45.435, -75.675]], { color: '#5ac46a', weight: 2 }).addTo(map);
+  let dragStart = null;
+
+  map.on('mousedown', e => { if (e.originalEvent.shiftKey) { dragStart = e.latlng; map.dragging.disable(); } });
+  map.on('mousemove', e => { if (dragStart) rect.setBounds(L.latLngBounds(dragStart, e.latlng)); });
+  map.on('mouseup', () => { if (dragStart) { dragStart = null; map.dragging.enable(); update(); } });
+  document.getElementById('fit').onclick = () => { rect.setBounds(map.getBounds().pad(-0.1)); update(); };
+
+  function bounds() {
+    const b = rect.getBounds();
+    return { s: b.getSouth(), w: b.getWest(), n: b.getNorth(), e: b.getEast() };
+  }
+  function fmt(x) { return x.toFixed(4); }
+  function utmZone(lon, lat) {
+    const zone = Math.floor((lon + 180) / 6) + 1;
+    return (lat >= 0 ? 'EPSG:326' : 'EPSG:327') + String(zone).padStart(2, '0') + ' (zone ' + zone + (lat >= 0 ? 'N' : 'S') + ')';
+  }
+  function inCanada(b) {
+    const lat = (b.s + b.n) / 2, lon = (b.w + b.e) / 2;
+    return lat > 41.5 && lat < 84 && lon > -141.1 && lon < -52.5;
+  }
+  function command(b) {
+    const name = document.getElementById('name').value.trim() || 'my-region';
+    const dem = inCanada(b) ? 'hrdem' : 'flat';
+    return 'cd tools && uv run python -m osm_import --bbox ' + [fmt(b.s), fmt(b.w), fmt(b.n), fmt(b.e)].join(',') +
+      ' --dem ' + dem + ' --pack-out ../packs/' + name + ' --pack-id code430.' + name + ' --pack-name "' + name + '" --title "' + name + '"';
+  }
+  function update() {
+    const b = bounds();
+    const kmNS = (b.n - b.s) * 111.2, kmEW = (b.e - b.w) * 111.2 * Math.cos((b.s + b.n) / 2 * Math.PI / 180);
+    document.getElementById('sw').textContent = fmt(b.s) + ', ' + fmt(b.w);
+    document.getElementById('ne').textContent = fmt(b.n) + ', ' + fmt(b.e);
+    document.getElementById('size').textContent = kmEW.toFixed(2) + ' × ' + kmNS.toFixed(2) + ' km = ' + (kmEW * kmNS).toFixed(1) + ' km²';
+    document.getElementById('utm').textContent = utmZone((b.w + b.e) / 2, (b.s + b.n) / 2);
+    document.getElementById('dem').textContent = inCanada(b) ? 'HRDEM (NRCan) if covered, else flat' : 'outside Canada: flat until a worldwide DEM is wired';
+    document.getElementById('cmd').textContent = command(b);
+    const note = document.getElementById('note');
+    note.textContent = kmEW * kmNS > 20 ? 'Over 20 km²: the import and the Deck will both feel it. Ottawa Centretown is about 10 km².' : '';
+    note.className = kmEW * kmNS > 20 ? 'warn' : '';
+  }
+  document.getElementById('name').oninput = update;
+  document.getElementById('count').onclick = async () => {
+    const b = bounds();
+    const bb = [b.s, b.w, b.n, b.e].join(',');
+    const q = '[out:json][timeout:60];(way["building"](' + bb + ');relation["building"](' + bb + '););out count;';
+    const q2 = '[out:json][timeout:60];way["highway"](' + bb + ');out count;';
+    document.getElementById('bld').textContent = '…';
+    document.getElementById('roads').textContent = '…';
+    try {
+      for (const [query, id] of [[q, 'bld'], [q2, 'roads']]) {
+        const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
+        const j = await r.json();
+        const c = j.elements && j.elements[0] && j.elements[0].tags ? j.elements[0].tags.total : '?';
+        document.getElementById(id).textContent = c;
+      }
+    } catch (err) {
+      document.getElementById('bld').textContent = 'Overpass busy, try again';
+    }
+  };
+  document.getElementById('copy').onclick = async () => {
+    await navigator.clipboard.writeText(command(bounds()));
+    document.getElementById('copy').textContent = 'Copied';
+    setTimeout(() => document.getElementById('copy').textContent = 'Copy import command', 1500);
+  };
+  document.getElementById('save').onclick = () => {
+    const b = bounds();
+    const name = document.getElementById('name').value.trim() || 'my-region';
+    const blob = new Blob([JSON.stringify({ name, bbox: [b.s, b.w, b.n, b.e], pack_id: 'code430.' + name, dem: inCanada(b) ? 'hrdem' : 'flat' }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '.json';
+    a.click();
+  };
+  update();
+})();
+</script>
+</body>
+</html>
