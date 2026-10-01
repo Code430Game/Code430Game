@@ -8,6 +8,7 @@ signal peer_left(peer_id: int)
 signal joined(info: Dictionary)
 signal refused(reason: String)
 signal session_ended
+signal peer_profile_changed(peer_id: int, profile: Dictionary)
 
 const DEFAULT_PORT := 43010
 const MAX_PLAYERS := 4
@@ -15,8 +16,10 @@ const MAX_PLAYERS := 4
 var max_players: int = MAX_PLAYERS
 ## This peer's pack summary: {"id", "version", "hash"}; set by the scene before hosting or joining.
 var local_manifest: Dictionary = {}
-## Peer id -> {"name", "color"} for every player in the session, including this one.
+## Peer id -> {"name", "color", "profile"} for every player in the session, including this one.
 var peers: Dictionary = {}
+## This player's CharacterProfile, sent with hello and welcome; set by the scene.
+var local_profile: Dictionary = {}
 var role: String = "offline"  # offline | host | client
 ## True once the transport is up: hosting, or connected to the host (before the welcome).
 var connected: bool = false
@@ -61,7 +64,7 @@ func host(port: int = DEFAULT_PORT, name: String = "host") -> Error:
 	multiplayer.multiplayer_peer = _peer
 	role = "host"
 	connected = true
-	peers = {1: {"name": name, "color": _color_for(1)}}
+	peers = {1: {"name": name, "color": _color_for(1), "profile": local_profile}}
 	print("net: hosting on port %d" % port)
 	peer_joined.emit(1, peers[1])
 	return OK
@@ -104,7 +107,7 @@ func _reset() -> void:
 func _on_connected_to_server() -> void:
 	connected = true
 	print("net: connected to host, sending hello")
-	_hello.rpc_id(1, local_manifest, _pending_name)
+	_hello.rpc_id(1, local_manifest, _pending_name, local_profile)
 
 
 func _on_peer_connected(id: int) -> void:
@@ -127,7 +130,7 @@ static func mismatch_reason(host_manifest: Dictionary, guest_manifest: Dictionar
 
 
 @rpc("any_peer", "reliable")
-func _hello(manifest: Dictionary, name: String) -> void:
+func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}) -> void:
 	if not is_host():
 		return
 	var id := multiplayer.get_remote_sender_id()
@@ -142,7 +145,7 @@ func _hello(manifest: Dictionary, name: String) -> void:
 		_kick_later(id)
 		return
 	print("net: peer %d joined as %s (%d players)" % [id, name, peers.size() + 1])
-	peers[id] = {"name": name, "color": _color_for(id)}
+	peers[id] = {"name": name, "color": _color_for(id), "profile": profile}
 	_welcome.rpc_id(id, peers, local_manifest, signal_time)
 	_peer_came.rpc(id, peers[id])
 	peer_joined.emit(id, peers[id])
@@ -183,6 +186,26 @@ func _peer_came(id: int, info: Dictionary) -> void:
 func _peer_gone(id: int) -> void:
 	if peers.erase(id):
 		peer_left.emit(id)
+
+
+## Changes this player's look; everyone in the session hears about it.
+func set_profile(profile: Dictionary) -> void:
+	local_profile = profile
+	if not is_online():
+		return
+	var me := multiplayer.get_unique_id()
+	if peers.has(me):
+		peers[me]["profile"] = profile
+	_profile_changed.rpc(profile)
+
+
+@rpc("any_peer", "reliable")
+func _profile_changed(profile: Dictionary) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	if not peers.has(id):
+		return
+	peers[id]["profile"] = profile
+	peer_profile_changed.emit(id, profile)
 
 
 ## Host: pushes its signal clock so clients run the same light phases.

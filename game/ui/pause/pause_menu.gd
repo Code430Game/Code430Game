@@ -6,10 +6,11 @@ extends CanvasLayer
 
 signal resumed
 signal quit_requested
+signal character_requested
 signal host_requested
 signal join_requested(address: String)
 
-@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Host, $Panel/VBox/Join, $Panel/VBox/Quit]
+@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Character, $Panel/VBox/Host, $Panel/VBox/Join, $Panel/VBox/Quit]
 @onready var _address: LineEdit = $Panel/VBox/Address
 @onready var _players: Label = $Panel/VBox/Players
 
@@ -21,9 +22,10 @@ func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_buttons[0].pressed.connect(close)
-	_buttons[1].pressed.connect(func() -> void: host_requested.emit())
-	_buttons[2].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
-	_buttons[3].pressed.connect(func() -> void: quit_requested.emit())
+	_buttons[1].pressed.connect(func() -> void: character_requested.emit())
+	_buttons[2].pressed.connect(func() -> void: host_requested.emit())
+	_buttons[3].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
+	_buttons[4].pressed.connect(func() -> void: quit_requested.emit())
 	_highlight()
 
 
@@ -45,7 +47,7 @@ func _input(event: InputEvent) -> void:
 		close()
 	elif event.is_action_pressed("ui_accept"):
 		_buttons[_selected].pressed.emit()
-	elif event.is_action_pressed("ui_right") and _selected == 2:
+	elif event.is_action_pressed("ui_right") and _selected == 3:
 		_address.grab_focus()  # edit the address with the on-screen keyboard
 	elif event.is_action_pressed("ui_down"):
 		_selected = (_selected + 1) % _buttons.size()
@@ -76,6 +78,13 @@ func open() -> void:
 		overview_map.close()
 	visible = true
 	_selected = 0
+	_highlight()
+	get_tree().paused = true
+
+
+## Shows the menu again over a screen it opened (the creator), keeping the tree paused.
+func reopen() -> void:
+	visible = true
 	_highlight()
 	get_tree().paused = true
 

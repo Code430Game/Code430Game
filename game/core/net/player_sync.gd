@@ -14,6 +14,7 @@ var _accum: float = 0.0
 func _ready() -> void:
 	Session.peer_joined.connect(_on_peer_joined)
 	Session.peer_left.connect(_on_peer_left)
+	Session.peer_profile_changed.connect(_on_peer_profile_changed)
 	Session.session_ended.connect(_clear)
 
 
@@ -23,8 +24,14 @@ func _on_peer_joined(id: int, info: Dictionary) -> void:
 	var r := RemotePlayer.new()
 	r.name = "peer_%d" % id
 	remote_parent.add_child(r)
-	r.setup(id, info.get("color", Color.WHITE))
+	r.setup(id, info.get("color", Color.WHITE), info.get("profile", {}))
 	remotes[id] = r
+
+
+func _on_peer_profile_changed(id: int, profile: Dictionary) -> void:
+	var r: RemotePlayer = remotes.get(id)
+	if r != null:
+		r.apply_profile(profile)
 
 
 func _on_peer_left(id: int) -> void:

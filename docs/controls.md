@@ -21,6 +21,10 @@ The on-screen hints switch to whichever device you touched last.
 | debug overlay | X | F2 |
 | road graph overlay | B with the overlay | F3 |
 
+**Character** in the pause menu opens the creator: up and down pick a row, left and right change
+it, A randomises, loads, saves or deletes a preset, B keeps the body and returns. The first start
+gives you a random body; the last one you made is loaded next time. Saved in `user://characters.json`.
+
 Co-op lives in the pause menu: **Host co-op game** shows the address friends join at;
 **Join game** uses the address field (right on the Join line focuses it for the Deck's
 on-screen keyboard). Command-line equivalents: `--host[=port]` and `--join=address[:port]`.

@@ -11,11 +11,15 @@ signal take_vehicle_requested(traffic_body: Node3D)
 
 @export var config: PlayerConfig
 @export var peer_id: int = 1
+## The look this body is built from (CharacterProfile); set before adding to the tree, or
+## call apply_profile. Empty: the default profile.
+var profile: Dictionary = {}
 
 @onready var _pivot: Node3D = $CameraPivot
 @onready var _arm: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 @onready var _body_mesh: Node3D = $Mesh
+@onready var _body: MeshInstance3D = $Mesh/Body
 @onready var _shape: CollisionShape3D = $Shape
 
 var vehicle: VehicleBody3D = null
@@ -34,7 +38,15 @@ func _ready() -> void:
 	_pivot.position.y = config.camera_height_m
 	_pitch = deg_to_rad(config.camera_default_pitch_deg)
 	_apply_camera_angles()
+	apply_profile(profile)
 	Players.register(peer_id, self)
+
+
+## Rebuilds the body from a CharacterProfile dictionary.
+func apply_profile(p: Dictionary) -> void:
+	profile = CharacterProfile.normalise(p)
+	if _body != null:
+		_body.mesh = CharacterMesh.build(profile)
 
 
 func _exit_tree() -> void:
