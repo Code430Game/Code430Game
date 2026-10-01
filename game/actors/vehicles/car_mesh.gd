@@ -92,8 +92,22 @@ static func build(with_wheels: bool) -> ArrayMesh:
 	mesh.surface_set_material(0, body_material(Color.WHITE))
 	mesh.surface_set_material(1, dark_material())
 	mesh.surface_set_material(2, light_material())
-	mesh.surface_set_material(3, light_material())
+	mesh.surface_set_material(3, tail_material())
 	return mesh
+
+
+## One shared tail-light material: red glow after dusk (DayNight raises its energy).
+static var _tails: StandardMaterial3D = null
+
+
+static func tail_material() -> StandardMaterial3D:
+	if _tails == null:
+		_tails = StandardMaterial3D.new()
+		_tails.vertex_color_use_as_albedo = true
+		_tails.emission_enabled = true
+		_tails.emission = Color(1.0, 0.12, 0.08)
+		_tails.emission_energy_multiplier = 0.0
+	return _tails
 
 
 ## Bright red for the player's tail lights while braking, day or night.

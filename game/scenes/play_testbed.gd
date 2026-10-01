@@ -192,6 +192,7 @@ func _setup_day_night() -> void:
 	_day_night.setup($Sun as DirectionalLight3D, ($WorldEnvironment as WorldEnvironment).environment)
 	_day_night.register_shader(_pack.building_material as ShaderMaterial)
 	_day_night.register_emissive(CarMesh.light_material(), CarMesh.LIGHT_NIGHT_ENERGY)
+	_day_night.register_emissive(CarMesh.tail_material(), CarMesh.LIGHT_NIGHT_ENERGY * 0.6)
 	_day_night.register_emissive(SignalHeads.head_material(), SignalHeads.HEAD_NIGHT_ENERGY)
 	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
 	_car.add_headlights(bool(preset.get("headlight_shadows", false)))
