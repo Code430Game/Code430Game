@@ -50,6 +50,40 @@ class Building:
     roof_triangles: list[int]
     osm_id: int
     height_source: str
+    material: str = ""  # building:material, lower-cased, or ""
+    colour: str = ""  # building:colour as tagged (hex or name), or ""
+    roof_shape: str = ""  # roof:shape, or ""
+    roof_levels: float = 0.0
+    levels: float = 0.0  # building:levels, 0 when untagged
+    shopfront: bool = False  # a shop or amenity at street level
+
+
+SHOPFRONT_AMENITIES = {
+    "restaurant",
+    "cafe",
+    "bar",
+    "pub",
+    "fast_food",
+    "bank",
+    "pharmacy",
+    "cinema",
+    "theatre",
+    "marketplace",
+    "ice_cream",
+    "nightclub",
+    "dentist",
+    "post_office",
+    "library",
+}
+
+
+def _has_shopfront(tags: dict) -> bool:
+    """A shop or street-level amenity, or a retail building: a glass ground floor."""
+    if tags.get("shop"):
+        return True
+    if tags.get("amenity") in SHOPFRONT_AMENITIES:
+        return True
+    return tags.get("building") in ("retail", "commercial")
 
 
 @dataclass
@@ -84,6 +118,12 @@ class BuildingsResult:
                     ),
                     "roof_triangles": b.roof_triangles,
                     "osm_id": b.osm_id,
+                    "material": b.material,
+                    "colour": b.colour,
+                    "roof_shape": b.roof_shape,
+                    "roof_levels": b.roof_levels,
+                    "levels": b.levels,
+                    "shopfront": b.shopfront,
                 }
                 for b in sorted(self.buildings, key=lambda b: b.id)
             ],
@@ -181,6 +221,12 @@ def build_buildings(
                     id=f"{bid}.{n}",
                     kind=tags.get("building", "yes"),
                     name=tags.get("name"),
+                    material=tags.get("building:material", "").lower(),
+                    colour=tags.get("building:colour", "").strip(),
+                    roof_shape=tags.get("roof:shape", "").lower(),
+                    roof_levels=T.parse_float(tags.get("roof:levels")) or 0.0,
+                    levels=T.parse_float(tags.get("building:levels")) or 0.0,
+                    shopfront=_has_shopfront(tags),
                     height_m=height,
                     ground_y=float(statistics.median(samples)),
                     rings=[[(float(x), float(z)) for x, z in r] for r in rings],
