@@ -20,7 +20,7 @@ const LOD_FADE_M := 40.0
 ## (terrain LOD1/LOD2, roads LOD1, buildings LOD1, water); NEAR adds LOD0 detail and collision.
 enum Tier { NONE = 0, FAR = 1, NEAR = 2 }
 ## Child names that only exist at the NEAR tier (dropped on a downgrade).
-const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "sidewalks_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor"]
+const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor"]
 const SPAWN_MIN_EDGE_M := 150.0  # spawn edges shorter than this are usually bbox stubs
 const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
 const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
@@ -43,6 +43,9 @@ var buildings: Array[BuildingBuilder.Building] = []
 var building_chunks: Dictionary = {"lod0": {}, "lod1": {}}
 var sidewalk_material: Material
 var sidewalk_chunks: Dictionary = {}
+var underpass_chunks: Dictionary = {}
+var terrain_holes: Dictionary = {}  # chunk -> strips cut from the terrain under tunnels
+var underpass_material: Material = UnderpassBuilder.material()
 var barrier_material: Material
 var barriers: Array[BarrierBuilder.Barrier] = []
 var barrier_chunks: Dictionary = {}
@@ -80,6 +83,8 @@ func load(dir: String) -> bool:
 	building_chunks = BuildingBuilder.build(buildings)
 	sidewalk_material = SidewalkBuilder.material()
 	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
+	underpass_chunks = UnderpassBuilder.build(graph.pedestrian)
+	terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
 	barrier_material = BarrierBuilder.material()
 	barriers = BarrierBuilder.load_barriers(dir)
 	barrier_chunks = BarrierBuilder.build(barriers)
@@ -212,6 +217,10 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 		var ms: ArrayMesh = sidewalk_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("sidewalks_lod0", ms, sidewalk_material, 0.0, SidewalkBuilder.VISIBLE_TO_M))
 		collision_meshes.append(ms)
+	if near and underpass_chunks.has(coord):
+		var mu: ArrayMesh = underpass_chunks[coord].to_mesh()
+		chunk.add_child(_mesh_instance("underpasses_lod0", mu, underpass_material, 0.0, SidewalkBuilder.VISIBLE_TO_M))
+		collision_meshes.append(mu)
 	if near and building_chunks["lod0"].has(coord):
 		var mb0: ArrayMesh = building_chunks["lod0"][coord].to_mesh()
 		chunk.add_child(_mesh_instance("buildings_lod0", mb0, building_material, 0.0, BUILDING_LOD0_END_M))
@@ -223,10 +232,11 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 		var mw: ArrayMesh = water_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))
 		water_mesh = mw
-	var t1 := TerrainBuilder.build_mesh(heights, 1)
-	var t2 := TerrainBuilder.build_mesh(heights, 2)
+	var holes: Array = terrain_holes.get(coord, [])
+	var t1 := TerrainBuilder.build_mesh(heights, 1, holes)
+	var t2 := TerrainBuilder.build_mesh(heights, 2, holes)
 	if near:
-		var t0 := TerrainBuilder.build_mesh(heights, 0)
+		var t0 := TerrainBuilder.build_mesh(heights, 0, holes)
 		chunk.add_child(_mesh_instance("terrain_lod0", t0, terrain_material, 0.0, TERRAIN_LOD0_END_M))
 	chunk.add_child(_mesh_instance("terrain_lod1", t1, terrain_material, TERRAIN_LOD0_END_M if near else 0.0, TERRAIN_LOD1_END_M))
 	chunk.add_child(_mesh_instance("terrain_lod2", t2, terrain_material, TERRAIN_LOD1_END_M, TERRAIN_LOD2_END_M))

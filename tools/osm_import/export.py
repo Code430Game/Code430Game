@@ -100,6 +100,8 @@ def pedestrian_to_list(graph: RoadGraph) -> list[dict]:
             "covered": p.covered,
             "osm_way_id": p.osm_way_id,
             "name": p.name,
+            **({"profile": p.profile} if p.profile else {}),
+            **({"top": [round(t, 2) for t in p.top]} if p.top else {}),
         }
         for p in sorted(graph.pedestrian, key=lambda p: (p.osm_way_id, p.id))
     ]

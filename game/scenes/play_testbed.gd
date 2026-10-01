@@ -55,6 +55,8 @@ var _bench_gpu: PackedFloat32Array = PackedFloat32Array()
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
+var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
+var _fixed_cam: Camera3D = null
 var _start_position: Vector3 = Vector3.ZERO
 var _bench_done: bool = false
 var _autodrive_edge: RoadGraph.RoadEdge
@@ -154,6 +156,14 @@ func _ready() -> void:
 	_setup_net()
 	if _open_creator_at_start:
 		get_tree().create_timer(1.5).timeout.connect(_open_creator)
+	if _free_camera.size() == 6:
+		var cam := Camera3D.new()
+		cam.far = 8000.0
+		add_child(cam)
+		cam.global_position = Vector3(_free_camera[0], _free_camera[1], _free_camera[2])
+		cam.look_at(Vector3(_free_camera[3], _free_camera[4], _free_camera[5]), Vector3.UP)
+		cam.current = true
+		_fixed_cam = cam
 	_autodrive_edge = spawn_edge
 	_autodrive_reverse = spawn_reverse
 	_autodrive_distance = spawn_distance
@@ -451,6 +461,9 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--camera="):
+			for v in arg.get_slice("=", 1).split(","):
+				_free_camera.append(float(v))
 		elif arg == "--telemetry":
 			_telemetry = true
 		elif arg == "--bumps":
@@ -566,6 +579,8 @@ func _process(delta: float) -> void:
 			print("BUMP t=%.1f accel_y=%.0f m/s2 vy=%.1f pos=(%.0f, %.1f, %.0f) speed=%.0f edge=%s %s" % [
 				_bench_elapsed, accel, vy, _car.global_position.x, _car.global_position.y, _car.global_position.z, _car.speed_kph(), eid, ename,
 			])
+	if _fixed_cam != null and not _fixed_cam.current:
+		_fixed_cam.current = true  # the player's cameras grab the viewport on enter/exit; the fixed view wins
 	if Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
 		_camera.cycle_mode()
 		_camera.look_at(_car.global_position, Vector3.UP)

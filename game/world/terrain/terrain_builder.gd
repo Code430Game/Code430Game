@@ -65,8 +65,11 @@ static func load_chunk(pack_dir: String, index: Dictionary, entry: Dictionary) -
 	return ch
 
 
-## Builds the grid mesh for a chunk at the given LOD (0, 1, 2).
-static func build_mesh(ch: ChunkHeights, lod: int) -> ArrayMesh:
+## Builds the grid mesh for a chunk at the given LOD (0, 1, 2). `holes` are strips to leave
+## out (tunnel passages): [{"a": Vector2, "b": Vector2, "half": float}] in xz; a quad is
+## skipped when its centre lies in the rectangle `half` either side of the segment a-b
+## (not beyond its ends: the approach cuttings keep their ground).
+static func build_mesh(ch: ChunkHeights, lod: int, holes: Array = []) -> ArrayMesh:
 	var step: int = LOD_STEPS[lod]
 	var n := (ch.samples - 1) / step + 1
 	var x0 := ch.cx * (ch.samples - 1) * ch.resolution_m
@@ -90,6 +93,8 @@ static func build_mesh(ch: ChunkHeights, lod: int) -> ArrayMesh:
 			var i1 := i0 + 1
 			var i2 := i0 + n
 			var i3 := i2 + 1
+			if not holes.is_empty() and _in_hole(holes, (verts[i0] + verts[i3]) * 0.5):
+				continue
 			# Godot front faces are clockwise seen from outside (here: from above, +y).
 			indices[k] = i0
 			indices[k + 1] = i1
@@ -98,6 +103,7 @@ static func build_mesh(ch: ChunkHeights, lod: int) -> ArrayMesh:
 			indices[k + 4] = i3
 			indices[k + 5] = i2
 			k += 6
+	indices.resize(k)
 	var normals := _normals(verts, indices)
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
@@ -108,6 +114,23 @@ static func build_mesh(ch: ChunkHeights, lod: int) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
+
+
+static func _in_hole(holes: Array, p: Vector3) -> bool:
+	var q := Vector2(p.x, p.z)
+	for h: Dictionary in holes:
+		var a: Vector2 = h["a"]
+		var b: Vector2 = h["b"]
+		var ab := b - a
+		var l2 := ab.length_squared()
+		if l2 == 0.0:
+			continue
+		var t := (q - a).dot(ab) / l2
+		if t < 0.0 or t > 1.0:
+			continue
+		if q.distance_to(a + ab * t) <= float(h["half"]):
+			return true
+	return false
 
 
 static func _normals(verts: PackedVector3Array, indices: PackedInt32Array) -> PackedVector3Array:

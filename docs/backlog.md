@@ -42,7 +42,8 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   (around x 185, z -505) looks sane from above. Needs the HUD x,z from the Deck to find
   the exact spot; suspect a steep grade difference between adjacent carriageways leaving
   a terrain step between them.
-- **Pedestrian underpasses and tunnels.** 100 covered or tunnel pedestrian ways import as
+- **Pedestrian underpasses and tunnels** (first pass built 2026-10-01, add-underpasses: 19 dug,
+  19 opened; lighting inside, trench retaining walls and the sheltering population remain). Original note: 100 covered or tunnel pedestrian ways import as
   `covered` and are not drawn: the multi-use path under the Portage approaches (x -1430,
   z -195), the footway tunnel under Rideau Street beside the Chateau Laurier (OSM way
   362678275, x 106..116, z -576..-561; the one people shelter in), Canal Lane under Plaza

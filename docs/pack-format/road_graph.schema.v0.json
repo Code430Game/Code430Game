@@ -103,6 +103,8 @@
           "kind": {"enum": ["sidewalk", "crossing", "footway", "path", "steps", "cycleway", "pedestrian", "track", "living_street"]},
           "width_m": {"type": "number", "exclusiveMinimum": 0},
           "covered": {"type": "boolean"},
+          "profile": {"enum": ["tunnel", "trench"]},
+          "top": {"type": "array", "items": {"type": "number"}},
           "osm_way_id": {"type": "integer"},
           "name": {"type": ["string", "null"]}
         }
