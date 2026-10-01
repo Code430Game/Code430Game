@@ -6,8 +6,12 @@ extends CanvasLayer
 
 signal resumed
 signal quit_requested
+signal host_requested
+signal join_requested(address: String)
 
-@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Quit]
+@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Host, $Panel/VBox/Join, $Panel/VBox/Quit]
+@onready var _address: LineEdit = $Panel/VBox/Address
+@onready var _players: Label = $Panel/VBox/Players
 
 var overview_map: OverviewMap
 var _selected: int = 0
@@ -17,11 +21,20 @@ func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_buttons[0].pressed.connect(close)
-	_buttons[1].pressed.connect(func() -> void: quit_requested.emit())
+	_buttons[1].pressed.connect(func() -> void: host_requested.emit())
+	_buttons[2].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
+	_buttons[3].pressed.connect(func() -> void: quit_requested.emit())
 	_highlight()
 
 
+## Status line under the buttons: who is in the session, or why a join failed.
+func set_status(text: String) -> void:
+	_players.text = text
+
+
 func _input(event: InputEvent) -> void:
+	if _address.has_focus() and visible and not event.is_action_pressed("pause"):
+		return  # typing an address: keys go to the field, B leaves it
 	if event.is_action_pressed("pause"):
 		toggle()
 		get_viewport().set_input_as_handled()
@@ -32,6 +45,8 @@ func _input(event: InputEvent) -> void:
 		close()
 	elif event.is_action_pressed("ui_accept"):
 		_buttons[_selected].pressed.emit()
+	elif event.is_action_pressed("ui_right") and _selected == 2:
+		_address.grab_focus()  # edit the address with the on-screen keyboard
 	elif event.is_action_pressed("ui_down"):
 		_selected = (_selected + 1) % _buttons.size()
 		_highlight()

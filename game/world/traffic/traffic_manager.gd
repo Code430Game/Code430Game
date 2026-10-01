@@ -26,6 +26,8 @@ var max_agents: int = 150
 var agents: Array[TrafficAgent] = []
 var rng := RandomNumberGenerator.new()
 var enabled: bool = true
+## Mirror mode (co-op clients): agents come from the host's snapshots; no spawning or stepping.
+var mirror: bool = false
 ## Positions traffic is kept around (the players). Set each frame by the scene.
 var anchors: PackedVector3Array = PackedVector3Array()
 ## Player bodies (vehicles or people) that traffic keeps headway from. Set each frame by the scene.
@@ -119,6 +121,11 @@ func profile_line() -> String:
 
 
 func _physics_process(delta: float) -> void:
+	if mirror:
+		signals.advance(delta)
+		_assign_bodies()
+		_render()
+		return
 	if lanes == null or not enabled or anchors.is_empty():
 		return
 	_frame += 1
@@ -503,6 +510,53 @@ func _release_body(a: TrafficAgent) -> void:
 	a.body.process_mode = Node.PROCESS_MODE_DISABLED
 	a.body.global_position = Vector3(0, -1000, 0)
 	a.body = null
+
+
+## Host: packs the agents within `radius` of `around` as x, y, z, yaw, colour index per agent.
+func snapshot(around: Vector3, radius: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var colors: Array = config["colors"]
+	for a in agents:
+		var p := a.position()
+		if Vector2(p.x - around.x, p.z - around.z).length() > radius:
+			continue
+		var fwd := -a.transform.basis.z
+		out.append(p.x)
+		out.append(p.y)
+		out.append(p.z)
+		out.append(atan2(fwd.x, fwd.z))
+		out.append(float(_color_index(colors, a.color)))
+	return out
+
+
+## Client: replaces the agents with the host's snapshot (see `snapshot`).
+func apply_snapshot(data: PackedFloat32Array) -> void:
+	var n := data.size() / 5
+	var colors: Array = config["colors"]
+	while agents.size() > n:
+		_release_body(agents[agents.size() - 1])
+		agents.pop_back()
+	while agents.size() < n:
+		agents.append(TrafficAgent.new())
+	for i in range(n):
+		var a := agents[i]
+		var k := i * 5
+		var yaw := data[k + 3]
+		var fwd := Vector3(sin(yaw), 0.0, cos(yaw))
+		a.transform = Transform3D(Basis.looking_at(fwd, Vector3.UP), Vector3(data[k], data[k + 1], data[k + 2]))
+		var ci := int(data[k + 4])
+		if ci >= 0 and ci < colors.size():
+			var c: Array = colors[ci]
+			a.color = Color(float(c[0]), float(c[1]), float(c[2]))
+		a.anchor_dist = _distance_to_anchors(a.transform.origin)
+
+
+static func _color_index(colors: Array, color: Color) -> int:
+	for i in range(colors.size()):
+		var c: Array = colors[i]
+		if absf(float(c[0]) - color.r) < 0.01 and absf(float(c[1]) - color.g) < 0.01 and absf(float(c[2]) - color.b) < 0.01:
+			return i
+	return 0
 
 
 ## Replaces the agent behind `body` with a drivable car in its colour at its position.
