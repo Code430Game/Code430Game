@@ -12,6 +12,9 @@ Approach: sample each highway edge every few metres and look sideways.
   median on that side: a wall on that edge, in runs of at least the minimum.
 - Curb: a sidewalk runs within `curb_sidewalk_range_m` of a street's ribbon
   edge: a low step along that edge (kind "curb").
+- Median curb: a one-way street in `median_curb_classes` with the opposing
+  carriageway running alongside across a gap of up to `median_curb_max_gap_m`
+  (a boulevard with a grass median): a curb along the inner ribbon edge.
 - Roadblock: a road that dead-ends within `bbox_edge_margin_m` of the import
   bounds was cut by the bbox, not by the city: a block across its full width at
   the end (kind "roadblock"), so the district has a visible edge instead of a
@@ -251,6 +254,16 @@ def build_barriers(
 
     curb_classes = set(rules.get("curb_classes", []))
     curb_range = float(rules.get("curb_sidewalk_range_m", 3.5))
+    # One-way carriageways of boulevard classes, for median curbs.
+    median_curb_classes = set(rules.get("median_curb_classes", []))
+    median_curb_gap = float(rules.get("median_curb_max_gap_m", 30.0))
+    dual_index = _SegmentIndex()
+    for eid in sorted(graph.edges):
+        e = graph.edges[eid]
+        if e.road_class in median_curb_classes and e.oneway:
+            for i in range(len(e.polyline) - 1):
+                a, b = e.polyline[i], e.polyline[i + 1]
+                dual_index.add((a[0], a[2]), (b[0], b[2]), (eid, i))
 
     for eid in sorted(graph.edges):
         e = graph.edges[eid]
@@ -270,6 +283,35 @@ def build_barriers(
                     pts.append((ex, y, ez))
                     keep.append(near and clear_of_roads(ex, y, ez, eid))
                 for run in _runs(pts, keep):
+                    add("curb", float(rules.get("curb_height_m", 0.12)), eid, run)
+        # Median curbs: the opposing carriageway runs alongside across a grass gap.
+        if e.road_class in median_curb_classes and e.oneway and not e.bridge and not e.tunnel:
+            for side in (-1.0, 1.0):
+                pts, keep = [], []
+                for x, y, z, dx, dz in _samples(e.polyline, step):
+                    nx, nz = -dz * side, dx * side
+                    ex, ez = x + nx * hw, z + nz * hw
+                    facing = False
+                    for a, b, (oid, _i) in dual_index.near(x, z, median_curb_gap + 30.0):
+                        if oid.split(".")[0] == eid.split(".")[0]:
+                            continue
+                        o = graph.edges[oid]
+                        odx, odz = b[0] - a[0], b[1] - a[1]
+                        ol = math.hypot(odx, odz)
+                        if ol < 1e-6 or (odx * dx + odz * dz) / ol > -0.7:
+                            continue  # not opposing traffic
+                        d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
+                        t = max(0.0, min(1.0, ((x - a[0]) * odx + (z - a[1]) * odz) / (ol * ol)))
+                        px, pz = a[0] + odx * t, a[1] + odz * t
+                        if (px - x) * nx + (pz - z) * nz <= 0:
+                            continue  # on the other side
+                        gap = d - hw - o.width_m / 2.0
+                        if 0.3 <= gap <= median_curb_gap:
+                            facing = True
+                            break
+                    pts.append((ex, y, ez))
+                    keep.append(facing and clear_of_roads(ex, y, ez, eid))
+                for run in _runs(pts, keep, 10.0):
                     add("curb", float(rules.get("curb_height_m", 0.12)), eid, run)
         # Bridge parapets on every bridge edge, outside any walkway that rides along the deck.
         if e.bridge:

@@ -300,3 +300,36 @@ def test_roads_cut_by_the_bbox_get_a_roadblock_but_cul_de_sacs_do_not():
     assert not [
         x for x in build_barriers(g, FlatSource(10.0), None, CFG).barriers if x.kind == "roadblock"
     ]
+
+
+def test_boulevard_median_gets_curbs_on_both_inner_edges():
+    ways = [
+        (1, [(-300, 0), (300, 0)], {"highway": "primary", "oneway": "yes", "width": "7"}),
+        (
+            2,
+            [(300, 15), (-300, 15)],
+            {"highway": "primary", "oneway": "yes", "width": "7"},
+        ),  # 8 m grass gap
+        (
+            3,
+            [(-300, 200), (300, 200)],
+            {"highway": "primary", "oneway": "yes", "width": "7"},
+        ),  # alone
+    ]
+    g = graph_for(ways, FlatSource(10.0))
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    curbs = [b for b in r.barriers if b.kind == "curb"]
+    assert sorted(b.edge_id for b in curbs) == ["w1.0", "w2.0"]
+    for b in curbs:
+        a, c = g.edges[b.edge_id].polyline[0], g.edges[b.edge_id].polyline[-1]
+        dx, dz = c[0] - a[0], c[2] - a[2]
+        length = math.hypot(dx, dz)
+        # Signed lateral offset of each curb point from the edge's own centreline, left-positive.
+        lateral = [((p[0] - a[0]) * dz - (p[2] - a[2]) * dx) / length for p in b.points]
+        assert all(abs(abs(v) - 3.5) < 0.3 for v in lateral)
+        # Both curbs face the median between them: on the +z side for edge 1, -z for edge 2.
+        toward = [(p[2] - a[2]) for p in b.points]
+        if b.edge_id == "w1.0":
+            assert all(v > 0 for v in toward)
+        else:
+            assert all(v < 0 for v in toward)

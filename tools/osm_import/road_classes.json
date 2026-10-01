@@ -31,6 +31,8 @@
     "curb_height_m": 0.12,
     "curb_sidewalk_range_m": 3.5,
     "roadblock_height_m": 1.1,
+    "median_curb_classes": ["primary", "secondary", "tertiary"],
+    "median_curb_max_gap_m": 30.0,
     "curb_classes": ["primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street"]
   },
   "pedestrian": {
