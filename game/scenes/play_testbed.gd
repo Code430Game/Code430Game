@@ -52,6 +52,7 @@ var _bench_elapsed: float = 0.0
 var _bench_frames: PackedFloat32Array = PackedFloat32Array()
 var _bench_cpu: PackedFloat32Array = PackedFloat32Array()
 var _bench_gpu: PackedFloat32Array = PackedFloat32Array()
+var _bench_physics: PackedFloat32Array = PackedFloat32Array()  # physics process ms per frame after warm-up
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
@@ -591,6 +592,7 @@ func _process(delta: float) -> void:
 			var rid := get_viewport().get_viewport_rid()
 			_bench_cpu.append(RenderingServer.viewport_get_measured_render_time_cpu(rid))
 			_bench_gpu.append(RenderingServer.viewport_get_measured_render_time_gpu(rid))
+			_bench_physics.append(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0)
 		if _bench_elapsed >= _bench_seconds + BENCH_WARMUP_S and not _bench_done:
 			_bench_done = true
 			_print_benchmark()
@@ -627,7 +629,13 @@ func _print_benchmark() -> void:
 	])
 	print("benchmark: %s" % render_note)
 	if _traffic != null:
-		print("benchmark: traffic agents %d, physics process %.2f ms" % [_traffic.active_count(), Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0])
+		var phys_sum := 0.0
+		var phys_max := 0.0
+		for v in _bench_physics:
+			phys_sum += v
+			phys_max = maxf(phys_max, v)
+		var phys_mean := phys_sum / maxi(_bench_physics.size(), 1)
+		print("benchmark: traffic agents %d, physics process mean %.2f ms max %.2f ms" % [_traffic.active_count(), phys_mean, phys_max])
 	if _traffic != null:
 		print("benchmark: traffic cost %s" % _traffic.profile_line())
 	if _peds != null:
