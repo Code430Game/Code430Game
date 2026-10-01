@@ -29,6 +29,18 @@ class RoadNode:
     junction_type: str = "junction"
     ground_y: float = 0.0
 
+    @property
+    def control(self) -> str:
+        """Traffic control at this node from its OSM tags: signals, stop, give_way or none."""
+        hw = self.tags.get("highway", "")
+        if hw == "traffic_signals":
+            return "signals"
+        if hw == "stop":
+            return "stop"
+        if hw == "give_way":
+            return "give_way"
+        return "none"
+
 
 @dataclass
 class RoadEdge:

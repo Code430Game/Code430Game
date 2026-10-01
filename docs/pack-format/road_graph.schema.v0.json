@@ -55,7 +55,8 @@
           "position": {"$ref": "#/$defs/point"},
           "ground_y": {"type": "number"},
           "osm_node_ids": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
-          "junction_type": {"enum": ["junction", "pass_through", "dead_end", "fork", "merge"]}
+          "junction_type": {"enum": ["junction", "pass_through", "dead_end", "fork", "merge"]},
+          "control": {"enum": ["none", "signals", "stop", "give_way"]}
         }
       }
     },

@@ -175,11 +175,11 @@ func _setup_traffic() -> void:
 	_traffic.name = "Traffic"
 	_traffic.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_traffic)
-	_traffic.setup(lane_graph)
+	_traffic.setup(lane_graph, _pack.graph, _pack.junctions)
 	if _traffic_cap >= 0:
 		_traffic.max_agents = _traffic_cap
 	_traffic.enabled = _traffic_cap != 0
-	print("traffic: %d lane paths in %d ms, cap %d" % [lane_graph.paths.size(), Time.get_ticks_msec() - t0, _traffic.max_agents])
+	print("traffic: %d lane paths, %d signal heads in %d ms, cap %d" % [lane_graph.paths.size(), _traffic.heads.count() if _traffic.heads != null else 0, Time.get_ticks_msec() - t0, _traffic.max_agents])
 
 
 func _setup_maps() -> void:

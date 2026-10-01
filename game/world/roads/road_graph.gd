@@ -10,6 +10,7 @@ class RoadNode:
 	var position: Vector3
 	var ground_y: float
 	var junction_type: String
+	var control: String = "none"  # signals | stop | give_way | none
 
 
 class RoadEdge:
@@ -72,6 +73,7 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		node.position = _vec(n["position"])
 		node.ground_y = float(n.get("ground_y", 0.0))
 		node.junction_type = n.get("junction_type", "junction")
+		node.control = str(n.get("control", "none"))
 		g.nodes[node.id] = node
 		g._incident[node.id] = []
 	for e: Dictionary in data.get("edges", []):

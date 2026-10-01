@@ -143,3 +143,30 @@ def test_covered_and_tunnel_paths_are_flagged():
     )
     flags = {p.osm_way_id: p.covered for p in g.pedestrian}
     assert flags == {2: True, 3: True, 4: False, 5: False}
+
+
+def test_node_control_comes_from_node_tags_and_survives_clustering():
+    from osm_import.cluster import cluster_junctions
+    from osm_import.osm_data import OsmNode
+
+    data = make_data(
+        [
+            (1, [(0, 0), (100, 0)], {"highway": "residential"}),
+            (2, [(100, 0), (200, 0)], {"highway": "residential"}),
+            (3, [(100, -100), (100, 0), (100, 100)], {"highway": "residential"}),
+        ]
+    )
+    # Tag the node shared by all three ways as signalised.
+    from collections import Counter
+
+    counts = Counter(n for w in data.ways.values() for n in w.nodes)
+    shared_id = counts.most_common(1)[0][0]
+    assert counts[shared_id] == 3
+    node: OsmNode = data.nodes[shared_id]
+    node.tags["highway"] = "traffic_signals"
+    fr = filter_ways(data, CFG)
+    g = build_graph(data, fr.drivable, fr.pedestrian, Projector.for_bbox(BBOX), CFG)
+    cluster_junctions(g, CFG)
+    controls = sorted(n.control for n in g.nodes.values())
+    assert controls.count("signals") == 1
+    assert all(c in ("none", "signals") for c in controls)

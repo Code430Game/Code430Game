@@ -37,6 +37,7 @@ def graph_to_dict(
                 "ground_y": round(n.ground_y, COORD_DECIMALS),
                 "osm_node_ids": n.osm_node_ids,
                 "junction_type": n.junction_type,
+                "control": n.control,
             }
         )
     edges = []
