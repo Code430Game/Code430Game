@@ -4,5 +4,5 @@
 - [x] 1.3 Co-op: host clock replicated with the signal clock
 
 ## 2. Verification
-- [ ] 2.1 Deck: night drive measured, screenshots at noon, dusk and midnight
+- [x] 2.1 Deck (2026-10-01, idle, 23:00, 150 cars, 120 people, headlights on): GPU 7.16 ms against 6.45 ms by day, render CPU 0.85 ms, physics 5.72 ms, p99 11.1 ms; Mac screenshots at 12:07, 18:25 and 23:07 checked
 - [ ] 2.2 **Stop: human drives through a full day on the Deck**
