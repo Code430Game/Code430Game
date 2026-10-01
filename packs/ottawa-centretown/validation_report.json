@@ -3435,10 +3435,14 @@
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 6737,
-   "cells_flattened": 348236,
+   "cells_flattened": 347730,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
-   "chunks": 196
+   "chunks": 196,
+   "underpasses": {
+    "tunnels": 19,
+    "uncovered": 19
+   }
   },
   "total_length_km": 193.824,
   "water": {

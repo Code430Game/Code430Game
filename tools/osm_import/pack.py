@@ -31,6 +31,7 @@ from osm_import.graph import RoadGraph
 from osm_import.osm_data import BBox
 from osm_import.png import encode_heights, write_rgb8
 from osm_import.projection import LocalFrame
+from osm_import.underpasses import dig_underpasses
 from osm_import.water import WaterResult
 
 CHUNK_SIZE_M = 256.0
@@ -113,12 +114,14 @@ def _road_footprints(
     ground: list[tuple] = []
     bridges: list[tuple] = []
     for w in graph.pedestrian if include_pedestrian else []:
-        if w.kind == "steps":
+        if w.kind == "steps" and w.profile != "trench":
             continue
         hw = w.width_m / 2.0
+        margin = FLAT_MARGIN_M if w.margin_m is None else w.margin_m
+        shoulder = SHOULDER_M if w.shoulder_m is None else w.shoulder_m
         for i in range(len(w.polyline) - 1):
             a, b = w.polyline[i], w.polyline[i + 1]
-            ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw))
+            ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, margin, shoulder))
     for eid in sorted(graph.edges):
         e = graph.edges[eid]
         hw = e.width_m / 2.0
@@ -127,7 +130,7 @@ def _road_footprints(
             continue
         for i in range(len(e.polyline) - 1):
             a, b = e.polyline[i], e.polyline[i + 1]
-            target.append((a[0], a[2], b[0], b[2], a[1], b[1], hw))
+            target.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, FLAT_MARGIN_M))
     return ground, bridges
 
 
@@ -136,7 +139,7 @@ def _segments_near(
 ) -> list[tuple]:
     out = []
     for seg in segments:
-        ax, az, bx, bz, _, _, hw = seg
+        ax, az, bx, bz, _, _, hw = seg[:7]
         r = hw + reach
         if max(ax, bx) + r < min_x or min(ax, bx) - r > min_x + size:
             continue
@@ -149,18 +152,21 @@ def _segments_near(
 def _distance_field(
     chunk: ChunkTerrain, segments: list[tuple], reach: float
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Per cell: distance to the nearest segment centreline, the road height there, and that segment's half width."""
+    """Per cell: distance to the nearest segment centreline, the road height there, and that
+    segment's half width plus its flat margin."""
     s = SAMPLES_PER_CHUNK
     dist = np.full((s, s), np.inf, dtype=np.float64)
     road_y = np.zeros((s, s), dtype=np.float64)
     half_w = np.zeros((s, s), dtype=np.float64)
+    shoulder = np.full((s, s), SHOULDER_M, dtype=np.float64)
     xs = chunk.min_x + np.arange(s) * TERRAIN_RES_M
     zs = chunk.min_z + np.arange(s) * TERRAIN_RES_M
     gx, gz = np.meshgrid(xs, zs)
     covered_y = np.full((s, s), np.inf, dtype=np.float64)  # lowest road surface covering the cell
-    for ax, az, bx, bz, ay, by, hw in _segments_near(
-        segments, chunk.min_x, chunk.min_z, CHUNK_SIZE_M, reach
-    ):
+    for seg in _segments_near(segments, chunk.min_x, chunk.min_z, CHUNK_SIZE_M, reach):
+        ax, az, bx, bz, ay, by, hw = seg[:7]
+        margin = seg[7] if len(seg) > 7 else FLAT_MARGIN_M
+        sh = seg[8] if len(seg) > 8 else SHOULDER_M
         dx, dz = bx - ax, bz - az
         l2 = dx * dx + dz * dz
         if l2 < 1e-9:
@@ -171,15 +177,16 @@ def _distance_field(
         closer = d < dist
         dist = np.where(closer, d, dist)
         road_y = np.where(closer, y_here, road_y)
-        half_w = np.where(closer, hw, half_w)
+        half_w = np.where(closer, hw + margin, half_w)
+        shoulder = np.where(closer, sh, shoulder)
         # Where two roads cross without sharing a node (an untagged embankment over an
         # underpass), the lower road must own the ground or a wall cuts across it.
-        under = d <= hw + FLAT_MARGIN_M
+        under = d <= hw + margin
         covered_y = np.where(under, np.minimum(covered_y, y_here), covered_y)
     # Any lower covering surface wins, including a road under a curb-height sidewalk.
     lower = covered_y < road_y - 0.02
     road_y = np.where(lower, covered_y, road_y)
-    return dist, road_y, half_w
+    return dist, road_y, half_w, shoulder
 
 
 def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
@@ -187,7 +194,8 @@ def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
     the deck itself below it wherever the refill came out above the deck: a deck is a
     bridge because the ground is lower, and a refill seeded from a hillside must not bury
     it. Returns cells changed."""
-    dist, road_y, half_w = _distance_field(chunk, bridge_segments, BRIDGE_CARVE_MARGIN_M)
+    dist, road_y, half_w, _sh = _distance_field(chunk, bridge_segments, BRIDGE_CARVE_MARGIN_M)
+    half_w = half_w - FLAT_MARGIN_M  # bridge tuples carry the road margin; carving has its own
     mask = dist <= half_w + BRIDGE_CARVE_MARGIN_M
     if not mask.any():
         return 0
@@ -221,15 +229,17 @@ def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
 
 def flatten_roads(chunk: ChunkTerrain, ground_segments: list[tuple]) -> int:
     """Set terrain under roads to the road surface, blending over the shoulder. Returns cells changed."""
-    dist, road_y, half_w = _distance_field(chunk, ground_segments, FLAT_MARGIN_M + SHOULDER_M)
-    flat_edge = half_w + FLAT_MARGIN_M
+    dist, road_y, half_w, shoulder_w = _distance_field(
+        chunk, ground_segments, FLAT_MARGIN_M + SHOULDER_M
+    )
+    flat_edge = half_w  # half width plus the segment's own margin
     under = dist <= flat_edge
-    shoulder = (dist > flat_edge) & (dist <= flat_edge + SHOULDER_M)
+    shoulder = (dist > flat_edge) & (dist <= flat_edge + shoulder_w)
     h = chunk.heights.astype(np.float64)
     target = road_y - ROAD_SURFACE_DROP_M
     h = np.where(under, target, h)
     with np.errstate(invalid="ignore", divide="ignore"):
-        t = np.clip((dist - flat_edge) / SHOULDER_M, 0.0, 1.0)
+        t = np.clip((dist - flat_edge) / np.maximum(shoulder_w, 1e-6), 0.0, 1.0)
     h = np.where(shoulder, target * (1.0 - t) + h * t, h)
     changed = int((under | shoulder).sum())
     chunk.heights = h.astype(np.float32)
@@ -342,8 +352,10 @@ def build_terrain(
     # Pedestrian heights come from the carved terrain (paths under bridges stay on the ground),
     # then roads and sidewalks flatten the terrain to meet them.
     if cfg is not None:
-        apply_pedestrian_elevation(graph, ChunkSampler(chunks), cfg)
+        sampler = ChunkSampler(chunks)
+        apply_pedestrian_elevation(graph, sampler, cfg)
         split_pedestrian_under_bridges(graph)
+        stats["underpasses"] = dig_underpasses(graph, sampler.sample)
     ground, _bridges = _road_footprints(graph)
     for chunk in chunks:
         stats["cells_flattened"] += flatten_roads(chunk, ground)

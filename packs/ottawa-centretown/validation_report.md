@@ -1,4 +1,4 @@
-# Road network validation: Ottawa Centretown starter district
+# Road network validation: Ottawa Centretown
 
 - Nodes: 1823, edges: 2391, total length: 193.824 km
 - Connected components: 16 (largest has 1787 nodes)

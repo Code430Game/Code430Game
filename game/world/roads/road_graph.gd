@@ -42,6 +42,8 @@ class PedestrianWay:
 	var road_class: String
 	var kind: String  # sidewalk | crossing | footway | path | steps | cycleway | pedestrian | track
 	var covered: bool = false  # passes under a road or building: not drawn as a ribbon
+	var profile: String = ""  # "tunnel": a dug passage (UnderpassBuilder); "trench": ramps down to one
+	var top: PackedFloat32Array = PackedFloat32Array()  # tunnel ceiling height per point
 	var width_m: float
 	var name: String
 
@@ -116,6 +118,9 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		pw.kind = w.get("kind", "footway")
 		pw.width_m = float(w.get("width_m", 1.5))
 		pw.covered = bool(w.get("covered", false))
+		pw.profile = str(w.get("profile", ""))
+		for t in w.get("top", []):
+			pw.top.append(float(t))
 		pw.name = str(w["name"]) if w.get("name") != null else ""
 		g.pedestrian.append(pw)
 	return g

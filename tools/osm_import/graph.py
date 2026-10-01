@@ -82,6 +82,12 @@ class PedestrianWay:
     )
     width_m: float = 1.5
     covered: bool = False  # tunnel=* or covered=yes: passes under something, not drawn
+    profile: str = ""  # "tunnel" (dug passage) | "trench" (ramps down to one) | ""
+    top: list[float] = field(default_factory=list)  # tunnel ceiling height per point
+    shoulder_m: float | None = None  # terrain blends back over this beyond the margin
+    margin_m: float | None = (
+        None  # terrain follows the way within half width + this (None: road margin)
+    )
 
 
 @dataclass
