@@ -1,54 +1,42 @@
-## Context
-Godot 4 ships a high-level multiplayer API (`MultiplayerAPI`, ENet transport, `MultiplayerSpawner`, `MultiplayerSynchronizer`, RPCs). Small co-op (2–4 peers, one of them hosting) is the case it handles best. The game has no networking today; the player controller (Phase 2) and city life (Phase 3) do not exist yet either, which is exactly why the decision matters now.
+# Design: drop-in co-op
 
-## Goals / Non-Goals
-- Goals: 4-player drop-in co-op with friends; works on a Deck as client and, at reduced scale, as host; no rewrite of Phase 2–4 systems when networking lands.
-- Non-Goals: competitive play, anti-cheat, dedicated servers, more than 4 players, deterministic lockstep, cross-version sessions.
+## Transport and roles
+- Godot high-level multiplayer over ENet. The host is peer 1 and runs the world; clients own
+  only their character and the car they drive. Default port 43010. LAN and direct IP; an
+  internet relay is a later decision.
+- `Session` autoload (`core/net/session.gd`): `host(port)`, `join(address, port)`, `leave()`.
+  On connect the client sends `hello(manifest)` with its pack id, version and content hash; the
+  host answers `welcome(peers, pack, signal_time)` or `refuse(reason)` and drops the peer.
+  Capacity is `max_players` (4). Signals: `peer_joined`, `peer_left`, `joined`, `refused`.
+- The pack content hash is SHA-256 over `pack.json` plus the names and sizes of every file in
+  the pack, computed by `MapPack.content_hash()` on both sides. Mismatch refuses the join with
+  the differing field named.
 
-## How big is this, honestly
-Rough addon on top of the single-player plan:
+## Players and vehicles
+- Each peer simulates its own character and car locally and broadcasts state at 20 Hz with an
+  unreliable RPC: on foot or driving, character position and yaw, car transform and velocity.
+- Every other peer shows a `RemotePlayer`: a capsule and a car replica built from `CarMesh`
+  in that peer's colour, interpolated 100 ms behind the newest state. The car replica is an
+  `AnimatableBody3D` so local physics bumps against it. The owner does not feel the bump; good
+  enough for a first pass.
+- Vehicle ownership is implicit: whoever drives a car simulates it. Taking a traffic car is
+  host-only in this pass (a client asks the host, which is deferred).
 
-| Area | Single-player work | Co-op addon | Notes |
-|---|---|---|---|
-| Phase 0–1 (bootstrap, roads) | as planned | none | Pure data; unaffected. |
-| Phase 2 player and vehicles | as planned | small | Peer-owned bodies plus a synchronizer each. Cheap if built with the authority rule from the start. |
-| Phase 3 traffic and pedestrians | as planned | medium | Host simulates; clients receive interpolated state for nearby agents. Relevance filtering and per-player simulation bubbles are the real work. |
-| Phase 4 missions and packs | as planned | medium | Missions need co-op semantics (who can trigger, shared or per-player objectives). Pack format v1 must include content hashes. |
-| Phase 5 co-op itself | n/a | one dedicated change | Session, lobby, join verification, spawning, disconnect handling, tests. |
+## World replication
+- Host simulates traffic, pedestrians and signals with anchors at every player. Clients run
+  their managers in mirror mode: no spawning or stepping; `apply_snapshot` fills the agents
+  from the host's packet and renders them. Clients still assign pooled bodies to nearby
+  mirrored agents so cars feel solid; a client-side hit does not retire the host's agent.
+- Snapshots: 15 Hz unreliable, `PackedFloat32Array` of x, y, z, yaw and colour index per agent,
+  only agents within `replicate_radius_m` (350) of that client. Pedestrians the same.
+- Signals are deterministic from a clock; the host sends its clock in `welcome` and every 5 s.
+- Streaming: the host's streamer anchors at every player; clients anchor on themselves.
 
-Ballpark: about a quarter more work across Phases 2–4, plus one dedicated change. A retrofit after Phase 3 without the authority rule would cost several times that.
+## Lobby
+- Pause menu gains Host, Join (address field; the Deck's on-screen keyboard fills it) and a
+  player list. Testbed flags `--host[=port]` and `--join=address[:port]` for automation.
+- Joining players spawn at the host's spawn point, staggered 8 m apart along the road.
 
-## Decisions
-- **Transport:** ENet via Godot's built-in `MultiplayerAPI`. LAN and direct IP first. No third-party networking addon.
-- **Topology:** listen server. One player hosts; there is no dedicated server. The host's machine should be the strongest one; the Deck can host small sessions (target: Deck hosting 2 players within budget).
-- **Authority model:**
-  - A peer owns its own character and the vehicle it is driving. Other peers see interpolated state. This is the trusting model used by most indie co-op games; it avoids client prediction and feels responsive for driving, at the cost of no cheat resistance (acceptable for friends-only co-op).
-  - The host owns everything else: traffic, pedestrians, mission and story state, world time, weather, tone mode, and vehicle ownership handoff when a player enters a vehicle.
-  - Ownership of a vehicle transfers to the peer who enters the driver's seat; the host arbitrates conflicts.
-- **Relevance:** the host replicates a world entity to a peer only if it is within that peer's interest radius (config, per entity class). Entities outside every peer's radius are simulated at low fidelity or despawned, as in single-player.
-- **Streaming on the host:** chunks stay loaded around every connected player. The per-player bubble radius shrinks as player count grows, driven by a tunable so the Deck budget holds.
-- **Pack verification:** on join, the client sends its pack manifest list (id, version, content hash). The host compares to its own and refuses with a message naming the mismatching pack. Pack format v1 must therefore define a content hash.
-- **Drop-in and drop-out:** a joining peer spawns near the host or a chosen player. When a peer leaves, its vehicle is handed to the host and its character despawns. Mission state does not roll back.
-- **Tone mode:** host-selected for the session and sent on join; clients cannot override it, because billboards, NPCs, and dialogue are shared world state.
-- **Saves:** single-player saves only in this change. The host's world state is the session's truth; a persistent co-op save is a later change.
-
-## Alternatives considered
-- Host-authoritative everything with client prediction: better cheat resistance, much more work, and driving feels worse on Wi-Fi. Rejected for a friends-only game.
-- Deterministic lockstep: Jolt is not deterministic across machines and the sim is large. Rejected.
-- Third-party networking addons: adds a dependency and versioning risk on top of a pinned Godot. Rejected unless the built-in API proves insufficient.
-
-## Risks / Trade-offs
-- **Deck as host.** Four simulation bubbles may exceed the frame budget. Mitigation: bubble radius and agent caps scale with player count; the lobby shows a warning when a Deck hosts more than 2.
-- **Internet play.** Direct IP needs port forwarding. Free options later: Steam networking sockets (if distributed on Steam), or a community relay. Both are separate decisions with the human.
-- **Pack mismatch friction.** Strict hashing means everyone needs identical packs. Mitigation: the refusal message says what to install; the registry (Phase 6) can offer one-click install.
-- **Testing.** Multiplayer bugs are hard to reproduce. Mitigation: gdUnit4 tests run two `MultiplayerAPI` instances in one process (Godot supports this via `SceneMultiplayer` per branch) for spawn, ownership, and disconnect cases.
-
-## Migration Plan
-- No data migration. The AGENTS.md co-op readiness rule applies to every gameplay change from Phase 2 on.
-- This change is implemented after Phase 4 so missions and packs have the fields it needs.
-
-## Open Questions
-- Approve the trusting peer-owned model for player bodies? (Recommended yes for friends-only co-op.)
-- Should a Deck be allowed to host 4? (Recommended: allow with a warning, verify with profiling.)
-- Distribution channel: if Steam is the plan, Steam networking gives free relay and invites, which shapes the lobby design. Decide before Phase 5.
-- Friendly fire and shared money: gameplay rules for co-op, to decide alongside the Phase 2 player design.
+## Budget
+- Host: one bubble of traffic per player. The Deck host target is two players; the lobby
+  shows a warning above that.

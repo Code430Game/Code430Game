@@ -27,6 +27,11 @@ var _traffic: TrafficManager
 var _traffic_cap: int = -1
 var _peds: PedestrianManager
 var _peds_cap: int = -1
+var _player_sync: PlayerSync
+var _world_sync: WorldSync
+var _host_port: int = -1  # --host[=port]
+var _join_address: String = ""  # --join=address[:port]
+var _spawn_transform: Transform3D
 
 var _pack: MapPack
 var _streamer: ChunkStreamer
@@ -70,6 +75,13 @@ func _ready() -> void:
 	_parse_args()
 	_pause_menu.overview_map = _overview
 	_pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
+	_pause_menu.host_requested.connect(_host_game)
+	_pause_menu.join_requested.connect(_join_game)
+	Session.peer_joined.connect(func(_id: int, _info: Dictionary) -> void: _refresh_session_status())
+	Session.peer_left.connect(func(_id: int) -> void: _refresh_session_status())
+	Session.joined.connect(_on_joined)
+	Session.refused.connect(func(reason: String) -> void: _pause_menu.set_status("join refused: " + reason); _set_mirror(false))
+	Session.session_ended.connect(func() -> void: _pause_menu.set_status("offline"); _set_mirror(false))
 	var dir := PackLocator.find_pack(PACK_ID)
 	if dir == "":
 		_hud.text = "Map pack %s not found.\nSearched: %s" % [PACK_ID, "\n".join(PackLocator.search_dirs())]
@@ -104,6 +116,7 @@ func _ready() -> void:
 	var ring := _streamer.build_now(spawn.origin)
 	_first_playable_ms = Time.get_ticks_msec() - t0
 	print("testbed: spawn ring %d chunks in %d ms; first playable at %d ms" % [ring, Time.get_ticks_msec() - t_ring, _first_playable_ms])
+	_spawn_transform = spawn
 	_car.recover_callback = _recover_car
 	_car.global_transform = spawn
 	_car.set_spawn(spawn)
@@ -124,6 +137,7 @@ func _ready() -> void:
 	_setup_maps()
 	_setup_traffic()
 	_setup_pedestrians()
+	_setup_net()
 	_autodrive_edge = spawn_edge
 	_autodrive_reverse = spawn_reverse
 	_autodrive_distance = spawn_distance
@@ -152,6 +166,82 @@ func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
 	_player.activate_camera()
 	_minimap.player = _player
 	_overview.player = _player
+
+
+func _setup_net() -> void:
+	Session.local_manifest = _pack.manifest_summary()
+	_player_sync = PlayerSync.new()
+	_player_sync.name = "PlayerSync"
+	_player_sync.player = _player
+	_player_sync.remote_parent = _world
+	add_child(_player_sync)
+	_world_sync = WorldSync.new()
+	_world_sync.name = "WorldSync"
+	_world_sync.traffic = _traffic
+	_world_sync.peds = _peds
+	_world_sync.player_sync = _player_sync
+	add_child(_world_sync)
+	if _host_port > 0:
+		_host_game(_host_port)
+	elif _join_address != "":
+		_join_game(_join_address)
+
+
+func _host_game(port: int = Session.DEFAULT_PORT) -> void:
+	if Session.is_online():
+		return
+	if Session.host(port) == OK:
+		_set_mirror(false)
+		_refresh_session_status()
+
+
+func _join_game(address: String) -> void:
+	if Session.is_online() or address == "":
+		return
+	var port := Session.DEFAULT_PORT
+	var host := address
+	if address.contains(":"):
+		host = address.get_slice(":", 0)
+		port = int(address.get_slice(":", 1))
+	if Session.join(host, port) == OK:
+		_pause_menu.set_status("joining %s:%d..." % [host, port])
+		print("net: joining %s:%d" % [host, port])
+
+
+func _on_joined(_info: Dictionary) -> void:
+	_set_mirror(true)
+	# Guests spawn staggered along the road from the host's spawn so they do not stack.
+	var slot := 1 + (multiplayer.get_unique_id() % 7)  # never the host's own spot
+	var t := _spawn_transform.translated_local(Vector3(0.0, 0.0, 8.0 * slot))
+	_car.global_transform = t
+	_car.linear_velocity = Vector3.ZERO
+	_car.set_spawn(t)
+	if not _player.is_driving():
+		_player.global_position = t.origin - t.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+	_refresh_session_status()
+
+
+## Clients mirror the host's traffic and people instead of simulating their own.
+func _set_mirror(on: bool) -> void:
+	if _traffic != null:
+		_traffic.mirror = on
+		if on:
+			_traffic.agents.clear()
+	if _peds != null:
+		_peds.mirror = on
+		if on:
+			_peds.agents.clear()
+
+
+func _refresh_session_status() -> void:
+	if not Session.is_online():
+		_pause_menu.set_status("offline")
+		return
+	var names: Array = []
+	for id in Session.peers:
+		names.append(str(Session.peers[id].get("name", id)))
+	var warn := "   (Deck host: 2 players is the comfortable limit)" if Session.is_host() and Session.peers.size() > 2 else ""
+	_pause_menu.set_status("%s: %d/%d players: %s%s" % [Session.role, Session.peers.size(), Session.max_players, ", ".join(names), warn])
 
 
 func _setup_pedestrians() -> void:
@@ -281,6 +371,10 @@ func _parse_args() -> void:
 			_traffic_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--peds="):
 			_peds_cap = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--host"):
+			_host_port = int(arg.get_slice("=", 1)) if arg.contains("=") else Session.DEFAULT_PORT
+		elif arg.begins_with("--join="):
+			_join_address = arg.get_slice("=", 1)
 		elif arg.begins_with("--spawn="):
 			var parts := arg.get_slice("=", 1).split(",")
 			if parts.size() == 2:
@@ -288,16 +382,22 @@ func _parse_args() -> void:
 
 
 func _process(delta: float) -> void:
-	if _streamer != null and _car != null:
-		_streamer.anchors = PackedVector3Array([Players.local_controlled_body().global_position])
-	if _traffic != null and _car != null:
+	if _car != null:
 		var body: Node3D = Players.local_controlled_body()
-		_traffic.anchors = PackedVector3Array([body.global_position])
-		_traffic.obstacles = [body]
-	if _peds != null and _car != null:
-		var walker: Node3D = Players.local_controlled_body()
-		_peds.anchors = PackedVector3Array([walker.global_position])
-		_peds.obstacles = [walker]
+		var anchors := PackedVector3Array([body.global_position])
+		var obstacles: Array[Node3D] = [body]
+		if Session.is_host() and _player_sync != null:
+			anchors.append_array(_player_sync.remote_positions())
+			for id in _player_sync.remotes:
+				obstacles.append(_player_sync.remotes[id])
+		if _streamer != null:
+			_streamer.anchors = anchors
+		if _traffic != null:
+			_traffic.anchors = anchors
+			_traffic.obstacles = obstacles
+		if _peds != null:
+			_peds.anchors = anchors
+			_peds.obstacles = obstacles
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:

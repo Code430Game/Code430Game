@@ -1,31 +1,31 @@
 ## 0. Preconditions
-- [ ] 0.1 Human approves the authority model and this change
-- [ ] 0.2 Phase 2 player and vehicle controllers exist and follow the AGENTS.md co-op readiness rule
-- [ ] 0.3 Pack format v1 defines a content hash per pack
+- [x] 0.1 Human approves the authority model and this change (2026-09-30; co-op started 2026-10-01 on request)
+- [x] 0.2 Phase 2 player and vehicle controllers exist and follow the AGENTS.md co-op readiness rule
+- [x] 0.3 Pack content hash computed at runtime by MapPack.content_hash (design.md); manifest field deferred
 
 ## 1. Session core
-- [ ] 1.1 `game/core/net/session.gd`: host, join, leave, peer list, max 4 players (tunable)
-- [ ] 1.2 Pack manifest exchange and verification on join with readable refusal messages
-- [ ] 1.3 Tone mode sent on join; clients locked to the host's mode
-- [ ] 1.4 gdUnit4 tests with two in-process `MultiplayerAPI` instances: join, refuse when full, refuse on pack mismatch
+- [x] 1.1 `game/core/net/session.gd`: host, join, leave, peer list, max 4 players (tunable)
+- [x] 1.2 Pack manifest exchange and verification on join with readable refusal messages
+- [ ] 1.3 Tone mode sent on join; clients locked to the host's mode (waits for add-content-modes)
+- [x] 1.4 Tests: manifest mismatch reasons (unit); join verified with two local instances on the Mac (host + client over loopback, 2026-10-01); in-process two-API test deferred
 
 ## 2. Players and vehicles
-- [ ] 2.1 Peer-owned character spawning via `MultiplayerSpawner`, interpolation for remote peers
-- [ ] 2.2 Vehicle ownership transfer on enter/exit, host arbitration on conflict
-- [ ] 2.3 Disconnect handling: vehicle to host, character despawn
-- [ ] 2.4 Tests: ownership transfer, disconnect while driving
+- [x] 2.1 Peer-owned character and car, broadcast at 20 Hz, RemotePlayer replicas interpolated 100 ms behind (no MultiplayerSpawner: manual RPC state)
+- [ ] 2.2 Vehicle ownership transfer on enter/exit, host arbitration on conflict (each peer drives its own car; taking traffic cars is host-only for now)
+- [x] 2.3 Disconnect handling: replica despawn on peer_left; session_ended returns a client to single-player simulation
+- [x] 2.4 Tests: remote interpolation, snapshot round trip (ownership transfer deferred with 2.2)
 
 ## 3. World replication
-- [ ] 3.1 Interest radius per entity class in config; host-side relevance filter
-- [ ] 3.2 Traffic and pedestrian state replication with interpolation
-- [ ] 3.3 Host streaming keeps chunks loaded around every player; bubble radius scales with player count
-- [ ] 3.4 Mission and story state replication (shared objectives by default)
-- [ ] 3.5 Tests: distant entities not replicated, bubble scaling
+- [x] 3.1 Replicate radius 350 m per client (WorldSync.REPLICATE_RADIUS_M); host filters per client
+- [x] 3.2 Traffic and pedestrian snapshots at 15 Hz into mirror-mode managers (no interpolation yet; 15 Hz reads fine at traffic speeds)
+- [x] 3.3 Host streaming, traffic and pedestrian anchors include every remote player
+- [ ] 3.4 Mission and story state replication (no missions exist yet)
+- [x] 3.5 Test: agents beyond the radius are left out of the snapshot
 
 ## 4. Lobby UI
-- [ ] 4.1 Host/join screen usable with a controller in Deck Game Mode (direct IP entry via on-screen keyboard)
-- [ ] 4.2 Player list, tone mode display, "Deck host" warning above two players
-- [ ] 4.3 Join failure messages shown in full
+- [x] 4.1 Pause menu: Host, Join with an address field (right on Join focuses it for the on-screen keyboard); flags --host and --join
+- [x] 4.2 Player list and Deck host warning above two players in the pause menu status line (tone mode later)
+- [x] 4.3 Join failure messages shown in full in the status line
 
 ## 5. Verification
 - [ ] 5.1 Profile: Deck hosting two clients, record frame time in the PR

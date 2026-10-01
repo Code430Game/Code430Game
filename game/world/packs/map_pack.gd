@@ -86,6 +86,46 @@ func load(dir: String) -> bool:
 	return terrain_index.size() > 0
 
 
+## SHA-256 over pack.json plus every file's relative path and size, for co-op pack checks.
+static func content_hash(dir: String) -> String:
+	var ctx := HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA256)
+	ctx.update(FileAccess.get_file_as_bytes(dir.path_join("pack.json")))
+	var entries: Array[String] = []
+	_collect_files(dir, "", entries)
+	entries.sort()
+	for rel in entries:
+		if rel.begins_with("chunks/"):
+			continue  # the GLB cache is generated locally and differs per machine
+		var size := FileAccess.get_file_as_bytes(dir.path_join(rel)).size()
+		ctx.update(("%s:%d\n" % [rel, size]).to_utf8_buffer())
+	return ctx.finish().hex_encode()
+
+
+static func _collect_files(root: String, rel_dir: String, out: Array[String]) -> void:
+	var da := DirAccess.open(root.path_join(rel_dir) if rel_dir != "" else root)
+	if da == null:
+		return
+	da.list_dir_begin()
+	var name := da.get_next()
+	while name != "":
+		if name.begins_with("."):
+			name = da.get_next()
+			continue
+		var rel := rel_dir.path_join(name) if rel_dir != "" else name
+		if da.current_is_dir():
+			_collect_files(root, rel, out)
+		else:
+			out.append(rel)
+		name = da.get_next()
+	da.list_dir_end()
+
+
+## Manifest summary for co-op pack checks: id, version and content hash.
+func manifest_summary() -> Dictionary:
+	return {"id": str(manifest.get("id", "")), "version": str(manifest.get("version", "")), "hash": content_hash(pack_dir)}
+
+
 ## Chunk coordinates present in the terrain index.
 func chunk_coords() -> Array[Vector2i]:
 	var out: Array[Vector2i] = []

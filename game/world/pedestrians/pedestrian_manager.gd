@@ -19,6 +19,8 @@ var max_agents: int = 120
 var agents: Array[Pedestrian] = []
 var rng := RandomNumberGenerator.new()
 var enabled: bool = true
+## Mirror mode (co-op clients): agents come from the host's snapshots; no spawning or stepping.
+var mirror: bool = false
 ## Positions pedestrians are kept around (the players). Set each frame by the scene.
 var anchors: PackedVector3Array = PackedVector3Array()
 ## Player bodies pedestrians stop for. Set each frame by the scene.
@@ -97,6 +99,10 @@ func profile_line() -> String:
 
 
 func _physics_process(delta: float) -> void:
+	if mirror:
+		_assign_bodies()
+		_render()
+		return
 	if walk == null or not enabled or anchors.is_empty():
 		return
 	_frame += 1
@@ -283,6 +289,44 @@ func _spawn_one() -> void:
 	a.lateral = rng.randf_range(-1.0, 1.0) * chosen.width_m * 0.5
 	_place(a, chosen, chosen.direction_at(d) * (1.0 if a.forward else -1.0))
 	agents.append(a)
+
+
+## Host: packs the people within `radius` of `around` as x, y, z, yaw, colour index per agent.
+func snapshot(around: Vector3, radius: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var colors: Array = config["colors"]
+	for a in agents:
+		var p := a.position()
+		if Vector2(p.x - around.x, p.z - around.z).length() > radius:
+			continue
+		var fwd := -a.transform.basis.z
+		out.append(p.x)
+		out.append(p.y)
+		out.append(p.z)
+		out.append(atan2(fwd.x, fwd.z))
+		out.append(float(TrafficManager._color_index(colors, a.color)))
+	return out
+
+
+## Client: replaces the people with the host's snapshot (see `snapshot`).
+func apply_snapshot(data: PackedFloat32Array) -> void:
+	var n := data.size() / 5
+	var colors: Array = config["colors"]
+	while agents.size() > n:
+		_release_body(agents[agents.size() - 1])
+		agents.pop_back()
+	while agents.size() < n:
+		agents.append(Pedestrian.new())
+	for i in range(n):
+		var a := agents[i]
+		var k := i * 5
+		var yaw := data[k + 3]
+		var fwd := Vector3(sin(yaw), 0.0, cos(yaw))
+		a.transform = Transform3D(Basis.looking_at(fwd, Vector3.UP), Vector3(data[k], data[k + 1], data[k + 2]))
+		var ci := int(data[k + 4])
+		if ci >= 0 and ci < colors.size():
+			var c: Array = colors[ci]
+			a.color = Color(float(c[0]), float(c[1]), float(c[2]))
 
 
 ## Gives physics bodies to the agents nearest the anchors, takes them from the rest.

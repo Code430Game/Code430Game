@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 Settings="*res://core/settings/settings.gd"
 Players="*res://core/players.gd"
+Session="*res://core/net/session.gd"
 DebugOverlay="*res://core/debug/debug_overlay.tscn"
 
 [display]

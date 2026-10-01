@@ -3,6 +3,14 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-01
+
+- **Region picker.** The Ottawa bbox is not quite the area wanted. Before importing a
+  friend's region, build a small visual picker (a local HTML page over OpenStreetMap tiles,
+  or Overpass Turbo's bbox export) that shows the exact rectangle and prints the import
+  command; also pick the UTM zone from the bbox centre and a DEM source outside HRDEM cover
+  (Copernicus GLO-30, else flat). Importer pieces: `--place`, `--radius-km`, `--dem auto`.
+
 ## 2026-09-30
 
 - **Physics budget.** After the profiling pass the Deck physics tick is about 6.4 ms with 150
