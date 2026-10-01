@@ -270,6 +270,7 @@ func _turn_at_end(a: Pedestrian, path: WalkGraph.WalkPath) -> void:
 		var starts := walk.enters_at_start(other, key)
 		var out_dir := other.direction_at(0.0) if starts else -other.direction_at(other.length)
 		var w := 0.2 + maxf(heading.dot(out_dir), 0.0) * 2.0
+		w *= float((config.get("turn_bias", {}) as Dictionary).get(other.kind, 1.0))  # cycle lanes are for bikes
 		weights.append(w)
 		total += w
 	var r := rng.randf() * total
@@ -337,6 +338,8 @@ func _spawn_one() -> void:
 	var total := 0.0
 	for p in candidates:
 		total += float(weights.get(p.kind, 0.3))
+	if total <= 0.0:
+		return
 	var r := rng.randf() * total
 	var chosen: WalkGraph.WalkPath = candidates[candidates.size() - 1]
 	for p in candidates:
