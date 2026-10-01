@@ -51,6 +51,9 @@ func player_count() -> int:
 ## Starts hosting on `port`. Returns an Error.
 func host(port: int = DEFAULT_PORT, name: String = "host") -> Error:
 	_peer = ENetMultiplayerPeer.new()
+	# Bind IPv4 explicitly: the default wildcard is an IPv6 socket, and on hosts where
+	# IPv6 sockets do not accept IPv4 (SteamOS as shipped) nobody could ever connect.
+	_peer.set_bind_ip("0.0.0.0")
 	var err := _peer.create_server(port, max_players - 1)
 	if err != OK:
 		push_error("Session: cannot host on port %d: %s" % [port, error_string(err)])
@@ -186,6 +189,15 @@ func _peer_gone(id: int) -> void:
 @rpc("authority", "unreliable")
 func sync_signal_time(t: float) -> void:
 	signal_time = t
+
+
+## This machine's LAN addresses (IPv4, not loopback), for the host to read out to friends.
+static func local_addresses() -> PackedStringArray:
+	var out := PackedStringArray()
+	for a in IP.get_local_addresses():
+		if a.contains(".") and not a.begins_with("127.") and not a.begins_with("169.254."):
+			out.append(a)
+	return out
 
 
 static func _color_for(peer_id: int) -> Color:
