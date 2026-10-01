@@ -58,6 +58,15 @@ func test_map_renderer_pixel_mapping_round_trips() -> void:
 	assert_float(MapRenderer.road_width_px("service")).is_equal(MapRenderer.DEFAULT_ROAD_WIDTH_PX)
 
 
+func test_minimap_compass_north_follows_the_rotation() -> void:
+	# Facing north: north is straight up. Facing east: north is to the left of the screen.
+	var up := Minimap.north_on_screen(Minimap.map_rotation_for(Vector3(0, 0, -1)))
+	assert_float(up.y).is_less(-0.99)
+	var facing_east := Minimap.north_on_screen(Minimap.map_rotation_for(Vector3(1, 0, 0)))
+	assert_float(facing_east.x).is_less(-0.99)
+	assert_float(absf(facing_east.y)).is_less(0.01)
+
+
 func test_minimap_rotation_points_heading_up() -> void:
 	# Heading north (-z) needs no rotation; heading east (+x) rotates the map a quarter turn counter-clockwise.
 	assert_float(Minimap.map_rotation_for(Vector3(0, 0, -1))).is_equal_approx(0.0, 1e-6)
