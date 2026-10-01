@@ -200,5 +200,6 @@ func test_take_car_spawns_a_drivable_car_in_the_agent_colour() -> void:
 	assert_object(body.agent).is_null()
 	assert_float(car.global_position.distance_to(m.lanes.paths[0].position_at(50.0))).is_less(1.0)
 	var mesh := car.get_node("Mesh") as MeshInstance3D
-	assert_object((mesh.material_override as StandardMaterial3D).albedo_color).is_equal(Color(0.2, 0.45, 0.25))
+	assert_object(car.get("body_color")).is_equal(Color(0.2, 0.45, 0.25))
+	assert_object((mesh.get_surface_override_material(0) as StandardMaterial3D).albedo_color).is_equal(Color(0.2, 0.45, 0.25))
 	car.queue_free()

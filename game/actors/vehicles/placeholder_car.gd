@@ -37,8 +37,25 @@ var _recover_timer: float = 0.0
 var recover_callback: Callable
 
 
+## Body tint for surface 0 of the generated mesh; set before _ready or call set_body_color.
+@export var body_color: Color = Color(0.85, 0.25, 0.2)
+
+
 func _ready() -> void:
 	_spawn = global_transform
+	var mesh_node := $Mesh as MeshInstance3D
+	mesh_node.mesh = CarMesh.build(false)
+	mesh_node.material_override = null
+	mesh_node.position = Vector3(0.0, -0.12, 0.0)  # underside about 0.4 m over the road, like the old box
+	set_body_color(body_color)
+
+
+## Paints the body (surface 0) with `color`; glass, trim and lights keep theirs.
+func set_body_color(color: Color) -> void:
+	body_color = color
+	var mesh_node := $Mesh as MeshInstance3D
+	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0:
+		mesh_node.set_surface_override_material(0, CarMesh.body_material(color))
 
 
 ## Speed along the car's forward axis in m/s (positive = forward).
