@@ -147,8 +147,10 @@ static func _polygon_side(st: SurfaceTool, poly: PackedVector2Array, x: float, c
 		var pts: Array[Vector3] = []
 		for k: int in tri:
 			pts.append(Vector3(x, poly[k].y, poly[k].x))
+		# Front faces are clockwise seen from outside: the cross product of the emitted
+		# order must point inward, the opposite of the outward side.
 		var n := (pts[1] - pts[0]).cross(pts[2] - pts[0])
-		if n.x * side < 0.0:
+		if n.x * side > 0.0:
 			pts.reverse()
 		for p: Vector3 in pts:
 			st.set_color(color)
@@ -172,8 +174,8 @@ static func _wheel(st: SurfaceTool, centre: Vector3) -> void:
 			var c := centre + Vector3(x, 0, 0)
 			var pts: Array[Vector3] = [c, p0 + Vector3(x, 0, 0), p1 + Vector3(x, 0, 0)]
 			var n: Vector3 = (pts[1] - pts[0]).cross(pts[2] - pts[0])
-			if n.x * x < 0.0:
-				pts.reverse()
+			if n.x * x > 0.0:
+				pts.reverse()  # clockwise from outside, like the body
 			for p: Vector3 in pts:
 				st.set_color(DARK_COLOR)
 				st.add_vertex(p)
