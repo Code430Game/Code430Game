@@ -17,9 +17,11 @@ const FAR_RELEASE_M := 7000.0
 const SPAWN_RING_M := 300.0
 const BUILDS_IN_FLIGHT := 3
 const ADDS_PER_FRAME := 1
-## Collision shapes are created on the main thread a few per frame: a chunk's trimeshes land
-## over several frames instead of one, which is what the 50 to 100 ms spikes were.
-const SHAPES_PER_FRAME := 1  # a terrain trimesh alone can take 10 ms on the Deck
+## A streamed chunk lands in pieces: its node arrives empty, then its mesh instances a few
+## per frame and its collision shapes (built on the worker) one per frame, so no single frame
+## carries a whole chunk's GPU upload or shape attach.
+const MESHES_PER_FRAME := 2
+const SHAPES_PER_FRAME := 1
 
 var pack: MapPack
 var world: Node3D
@@ -28,6 +30,9 @@ var road_result: RoadMeshBuilder.Result
 var anchors: PackedVector3Array = PackedVector3Array()
 var use_glb: bool = false
 var stats: Dictionary = {"built": 0, "freed": 0, "downgraded": 0, "failed": 0}
+## Worst and smoothed main-thread costs per frame, in ms: adding a chunk node and creating
+## collision shapes. Printed by the benchmark to tell streaming hitches from the rest.
+var profile: Dictionary = {"add_max_ms": 0.0, "add_ema_ms": 0.0, "shape_max_ms": 0.0, "shape_ema_ms": 0.0, "slow_frames": 0}
 
 var _entries: Dictionary = {}  # Vector2i -> terrain index entry
 var _chunks: Dictionary = {}  # Vector2i -> {"node": Node3D, "tier": int}
@@ -35,7 +40,8 @@ var _pending: Dictionary = {}  # Vector2i -> {"task": int, "tier": int}
 var _ready: Dictionary = {}  # Vector2i -> parts, built and waiting for the per-frame add cap
 var _failed: Dictionary = {}  # Vector2i -> true
 var _results: Dictionary = {}  # written by worker threads under _mutex
-var _shape_queue: Array = []  # [[StaticBody3D, Mesh], ...] collision shapes still to create
+var _shape_queue: Array = []  # [[StaticBody3D, CollisionShape3D], ...] shapes still to attach
+var _mesh_queue: Array = []  # [[Node3D, Node], ...] mesh instances still to add to their chunk
 var _mutex := Mutex.new()
 
 
@@ -64,6 +70,14 @@ func _exit_tree() -> void:
 	for coord in _ready.keys():
 		_ready[coord]["node"].free()
 	_ready.clear()
+	for item in _mesh_queue:
+		if is_instance_valid(item[1]) and not (item[1] as Node).is_inside_tree():
+			(item[1] as Node).free()
+	_mesh_queue.clear()
+	for item in _shape_queue:
+		if is_instance_valid(item[1]) and not (item[1] as Node).is_inside_tree():
+			(item[1] as Node).free()
+	_shape_queue.clear()
 
 
 ## Builds every chunk within `radius` of `position` at the NEAR tier right now, blocking.
@@ -95,10 +109,21 @@ func update() -> void:
 	if pack == null or anchors.is_empty():
 		return
 	_collect_finished()
+	var t0 := Time.get_ticks_usec()
 	_add_ready()
+	var t1 := Time.get_ticks_usec()
 	_create_queued_shapes()
+	var t2 := Time.get_ticks_usec()
 	_retire_and_downgrade()
 	_schedule_builds()
+	var add_ms := float(t1 - t0) / 1000.0
+	var shape_ms := float(t2 - t1) / 1000.0
+	profile["add_max_ms"] = maxf(float(profile["add_max_ms"]), add_ms)
+	profile["shape_max_ms"] = maxf(float(profile["shape_max_ms"]), shape_ms)
+	profile["add_ema_ms"] = float(profile["add_ema_ms"]) * 0.98 + add_ms * 0.02
+	profile["shape_ema_ms"] = float(profile["shape_ema_ms"]) * 0.98 + shape_ms * 0.02
+	if add_ms + shape_ms > 8.0:
+		profile["slow_frames"] = int(profile["slow_frames"]) + 1
 
 
 ## Number of chunks in the scene.
@@ -177,11 +202,16 @@ func _build_parts(coord: Vector2i, tier: int) -> Dictionary:
 		if FileAccess.file_exists(glb):
 			var parts := GlbChunks.import_chunk_parts(glb, pack.materials(), tier)
 			if not parts.is_empty():
+				if tier >= MapPack.Tier.NEAR:
+					MapPack.prepare_shapes(parts)
 				return parts
 	var heights := TerrainBuilder.load_chunk(pack.pack_dir, pack.terrain_index, entry)
 	if heights == null:
 		return {}
-	return pack.build_chunk_meshes(coord, heights, road_result, tier)
+	var parts := pack.build_chunk_meshes(coord, heights, road_result, tier)
+	if tier >= MapPack.Tier.NEAR:
+		MapPack.prepare_shapes(parts)
+	return parts
 
 
 func _collect_finished() -> void:
@@ -222,44 +252,69 @@ func _add_parts(coord: Vector2i, parts: Dictionary) -> void:
 		world.remove_child(old["node"])
 		old["node"].queue_free()
 	var node: Node3D = parts["node"]
-	if int(parts["tier"]) >= MapPack.Tier.NEAR:
-		if parts.get("immediate", false):
+	if parts.get("immediate", false):
+		if int(parts["tier"]) >= MapPack.Tier.NEAR:
 			MapPack.attach_collision(parts)
-		else:
+	else:
+		# Land in pieces: detach the meshes and queue them, then the shapes.
+		for child in node.get_children():
+			node.remove_child(child)
+			_mesh_queue.append([node, child])
+		if int(parts["tier"]) >= MapPack.Tier.NEAR:
 			_queue_collision(parts)
 	world.add_child(node)
 	_chunks[coord] = {"node": node, "tier": int(parts["tier"])}
 	stats["built"] += 1
 
 
-## Adds an empty collision body now and queues its shapes for the coming frames.
+## Adds an empty collision body now and queues its prepared shapes for the coming frames.
 func _queue_collision(parts: Dictionary) -> void:
 	var node: Node3D = parts["node"]
 	var body := StaticBody3D.new()
 	body.name = "collision"
 	node.add_child(body)
-	for m in parts["collision_meshes"]:
-		_shape_queue.append([body, m])
+	var shapes: Array = parts.get("shapes", [])
+	if shapes.is_empty():
+		for m in parts["collision_meshes"]:
+			var s := MapPack.trimesh_shape(m)
+			if s != null:
+				shapes.append(s)
+	for shape in shapes:
+		_shape_queue.append([body, shape])
 	if parts.get("water_mesh") != null:
 		node.add_child(MapPack.build_water_floor(parts["water_mesh"]))
 
 
 func _create_queued_shapes() -> void:
+	var added := 0
+	while added < MESHES_PER_FRAME and not _mesh_queue.is_empty():
+		var item: Array = _mesh_queue.pop_front()
+		var parent: Node3D = item[0]
+		var child: Node = item[1]
+		if not is_instance_valid(parent) or not parent.is_inside_tree():
+			if is_instance_valid(child):
+				child.free()
+			continue
+		parent.add_child(child)
+		added += 1
+	if not _mesh_queue.is_empty():
+		return  # meshes first, then collision
 	var made := 0
 	while made < SHAPES_PER_FRAME and not _shape_queue.is_empty():
 		var item: Array = _shape_queue.pop_front()
 		var body: StaticBody3D = item[0]
+		var shape: CollisionShape3D = item[1]
 		if not is_instance_valid(body) or not body.is_inside_tree():
+			if is_instance_valid(shape):
+				shape.free()
 			continue  # the chunk was freed or downgraded before its shapes arrived
-		var shape := MapPack.trimesh_shape(item[1])
-		if shape != null:
-			body.add_child(shape)
-			made += 1
+		body.add_child(shape)
+		made += 1
 
 
-## True while collision shapes are still being created.
+## Shapes and meshes still waiting to be attached.
 func collision_pending() -> int:
-	return _shape_queue.size()
+	return _shape_queue.size() + _mesh_queue.size()
 
 
 func _retire_and_downgrade() -> void:

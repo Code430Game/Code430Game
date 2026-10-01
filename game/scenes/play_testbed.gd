@@ -599,6 +599,7 @@ func _print_benchmark() -> void:
 		print("benchmark: pedestrians %d, cost %s" % [_peds.active_count(), _peds.profile_line()])
 	if _streamer != null:
 		print("benchmark: chunks in scene %d, built %d, downgraded %d, freed %d, failed %d, first playable %d ms" % [_streamer.chunk_count(), _streamer.stats["built"], _streamer.stats["downgraded"], _streamer.stats["freed"], _streamer.stats["failed"], _first_playable_ms])
+		print("benchmark: streamer cost add max %.1f ms (ema %.2f), shapes max %.1f ms (ema %.2f), frames over 8 ms %d" % [_streamer.profile["add_max_ms"], _streamer.profile["add_ema_ms"], _streamer.profile["shape_max_ms"], _streamer.profile["shape_ema_ms"], _streamer.profile["slow_frames"]])
 
 
 const AUTODRIVE_LOOKAHEAD_M := 14.0

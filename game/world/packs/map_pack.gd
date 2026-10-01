@@ -236,11 +236,30 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 
 
 ## Main thread only: adds the collision body and wading floor described by build_chunk_meshes.
+## Uses shapes prepared by prepare_shapes when present.
 static func attach_collision(parts: Dictionary) -> void:
 	var node: Node3D = parts["node"]
-	node.add_child(build_collision(parts["collision_meshes"]))
+	if parts.has("shapes"):
+		var body := StaticBody3D.new()
+		body.name = "collision"
+		for shape in parts["shapes"]:
+			body.add_child(shape)
+		node.add_child(body)
+	else:
+		node.add_child(build_collision(parts["collision_meshes"]))
 	if parts.get("water_mesh") != null:
 		node.add_child(build_water_floor(parts["water_mesh"]))
+
+
+## Worker-thread step: builds the collision shapes for a chunk's meshes into parts["shapes"],
+## so the main thread only has to attach them. Resources may be created off the main thread.
+static func prepare_shapes(parts: Dictionary) -> void:
+	var shapes: Array[CollisionShape3D] = []
+	for m in parts["collision_meshes"]:
+		var shape := trimesh_shape(m)
+		if shape != null:
+			shapes.append(shape)
+	parts["shapes"] = shapes
 
 
 ## Drops the NEAR-only children (LOD0 meshes, collision, wading floor) from a built chunk.
