@@ -85,3 +85,28 @@ func test_corners_are_rounded() -> void:
 			assert_float(d).is_greater(1e-3)
 			curve_points += 1
 	assert_int(curve_points).is_equal(4 * JunctionBuilder.FILLET_STEPS)
+
+
+func test_near_parallel_arms_share_a_slot_and_leave_no_sliver() -> void:
+	# A wide road and a narrow one leave the node 3 degrees apart; a third arm goes the other way.
+	var nodes := [
+		{"id": "n_c", "position": [0, 0, 0], "ground_y": 0, "junction_type": "junction"},
+		{"id": "n_w", "position": [-100, 0, 0], "ground_y": 0, "junction_type": "dead_end"},
+		{"id": "n_a", "position": [100, 0, 0], "ground_y": 0, "junction_type": "dead_end"},
+		{"id": "n_b", "position": [100, 0, 5], "ground_y": 0, "junction_type": "dead_end"},
+	]
+	var edges := [
+		{"id": "ww.0", "from": "n_c", "to": "n_w", "polyline": [[0, 0, 0], [-100, 0, 0]], "width_m": 14.0, "lanes_forward": 2, "lanes_backward": 2},
+		{"id": "wa.0", "from": "n_c", "to": "n_a", "polyline": [[0, 0, 0], [100, 0, 0]], "width_m": 14.0, "lanes_forward": 2, "lanes_backward": 2},
+		{"id": "wb.0", "from": "n_c", "to": "n_b", "polyline": [[0, 0, 0], [100, 0, 5]], "width_m": 7.0, "lanes_forward": 1, "lanes_backward": 1},
+	]
+	for e in edges:
+		e.merge({"class": "primary", "oneway": false, "speed_kph": 50, "layer": 0, "bridge": false, "tunnel": false, "name": e["id"], "osm_way_id": 1, "defaulted_fields": [], "access": null, "length_m": 100.0})
+	var graph := RoadGraph.from_dict({"meta": {}, "nodes": nodes, "edges": edges, "pedestrian_ways": []})
+	var j: JunctionBuilder.Junction = JunctionBuilder.build_one(graph, "n_c")
+	assert_bool(j.fallback_hull).is_false()
+	# Two slots in the walk: 2 caps + fillet per slot.
+	assert_int(j.polygon_xz.size()).is_equal(2 * (2 + JunctionBuilder.FILLET_STEPS))
+	for p in j.polygon_xz:
+		assert_float(p.length()).override_failure_message("vertex %s is far from the node" % p).is_less(20.0)
+	assert_float(j.trims["wb.0"]).is_equal_approx(j.trims["wa.0"], 1e-4)
