@@ -116,6 +116,13 @@ def cluster_junctions(graph: RoadGraph, cfg: ImportConfig) -> ClusterStats:
         if a == b and a in remap.values():
             radius = cfg.for_class(e.road_class).cluster_radius_m
             if e.length_m <= 2.0 * radius:
+                # A stop or signal on the removed stub belongs to the cluster now.
+                node = graph.nodes[a]
+                for ctrl in (e.control_to, e.control_from):
+                    if ctrl == "signals":
+                        node.tags["highway"] = "traffic_signals"
+                    elif ctrl == "stop" and node.tags.get("highway") != "traffic_signals":
+                        node.tags["highway"] = "stop"
                 del graph.edges[eid]
                 stats.edges_removed += 1
                 stats.removed_edge_ids.append(eid)

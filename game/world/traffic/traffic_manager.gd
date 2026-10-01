@@ -255,7 +255,7 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 	if not path.is_connector and remaining < stop_dist and not path.next.is_empty():
 		var nxt: LaneGraph.LanePath = lanes.paths[path.next[0]]
 		if nxt.junction_node != "" and a.occupies_junction != nxt.junction_node:
-			var control := _control_at(nxt.junction_node)
+			var control := _control_for(nxt.junction_node, path.edge_id)
 			if control == "signals":
 				var l: int = signals.light(nxt.junction_node, path.edge_id)
 				# Amber: stop if we can do so comfortably, else carry on through.
@@ -309,10 +309,11 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 	a.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), pos)
 
 
-func _control_at(node_id: String) -> String:
-	if road_graph == null or not road_graph.nodes.has(node_id):
+## Control for a car on `edge_id` reaching `node_id`: per approach, not just per junction.
+func _control_for(node_id: String, edge_id: String) -> String:
+	if road_graph == null or not road_graph.nodes.has(node_id) or not road_graph.edges.has(edge_id):
 		return "none"
-	return road_graph.nodes[node_id].control
+	return road_graph.approach_control(road_graph.edges[edge_id], node_id)
 
 
 func _claim_junction(a: TrafficAgent, node: String) -> void:

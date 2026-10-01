@@ -62,6 +62,8 @@ class RoadEdge:
     defaulted_fields: list[str]
     access: str | None = None
     length_m: float = 0.0
+    control_to: str = "none"  # stop | signals | none for traffic arriving at to_node
+    control_from: str = "none"  # the same for traffic arriving at from_node
 
     @property
     def is_link(self) -> bool:
@@ -160,6 +162,33 @@ def _edge_from_segment(
         n = data.nodes[nid]
         x, z = proj.to_local(n.lat, n.lon)
         polyline.append((x, 0.0, z))
+    # Stop signs and signals tagged on the approach (interior vertices) apply to one end:
+    # direction=forward follows the way, backward opposes it; otherwise the nearer end.
+    control_to, control_from = "none", "none"
+    for i, nid in enumerate(points_ids[1:-1], start=1):
+        ntags = data.nodes[nid].tags
+        kind = {"stop": "stop", "traffic_signals": "signals"}.get(ntags.get("highway", ""))
+        if kind is None:
+            continue
+        direction = ntags.get("direction", "")
+        if ow == "reverse" and direction in ("forward", "backward"):
+            direction = "backward" if direction == "forward" else "forward"
+        if direction == "forward":
+            ends = ["to"]
+        elif direction == "backward":
+            ends = ["from"]
+        elif direction == "both":
+            ends = ["to", "from"]
+        else:
+            ends = ["to" if i >= len(points_ids) / 2 else "from"]
+        for end in ends:
+            current = control_to if end == "to" else control_from
+            if current == "signals":
+                continue  # signals outrank a stop
+            if end == "to":
+                control_to = kind
+            else:
+                control_from = kind
     lanes_f, lanes_b = _lanes(way, road_class, oneway, cfg, defaulted)
     width = T.parse_width_m(tags.get("width"))
     if width is None:
@@ -188,6 +217,8 @@ def _edge_from_segment(
         defaulted_fields=defaulted,
         access=tags.get("motor_vehicle", tags.get("access")),
         length_m=polyline_length(polyline),
+        control_to=control_to,
+        control_from=control_from,
     )
 
 

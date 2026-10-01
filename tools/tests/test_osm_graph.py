@@ -170,3 +170,28 @@ def test_node_control_comes_from_node_tags_and_survives_clustering():
     controls = sorted(n.control for n in g.nodes.values())
     assert controls.count("signals") == 1
     assert all(c in ("none", "signals") for c in controls)
+
+
+def test_stop_on_the_approach_applies_to_that_end_only():
+    from collections import Counter
+
+    from osm_import.osm_data import OsmNode
+
+    data = make_data(
+        [
+            (1, [(0, 0), (60, 0), (100, 0)], {"highway": "residential"}),
+            (2, [(100, -100), (100, 0), (100, 100)], {"highway": "secondary"}),
+        ]
+    )
+    # The middle vertex of way 1 (at 60 m, before the crossing) carries a forward stop.
+    counts = Counter(n for w in data.ways.values() for n in w.nodes)
+    way1 = data.ways[1]
+    interior = way1.nodes[1]
+    assert counts[interior] == 1
+    node: OsmNode = data.nodes[interior]
+    node.tags.update({"highway": "stop", "direction": "forward"})
+    fr = filter_ways(data, CFG)
+    g = build_graph(data, fr.drivable, fr.pedestrian, Projector.for_bbox(BBOX), CFG)
+    e = next(x for x in g.edges.values() if x.osm_way_id == 1)
+    assert (e.control_to, e.control_from) == ("stop", "none")
+    assert all(x.control_to == "none" for x in g.edges.values() if x.osm_way_id == 2)

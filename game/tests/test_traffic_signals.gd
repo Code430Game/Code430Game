@@ -107,3 +107,39 @@ func test_car_comes_to_a_full_stop_at_a_stop_sign_then_proceeds() -> void:
 			break
 	assert_bool(stopped).is_true()
 	assert_bool(crossed).is_true()
+
+
+func test_stop_on_the_side_street_only_stops_the_side_street() -> void:
+	var graph := _cross("none")
+	# The north-south pair carries stops on the approaches; east-west is free.
+	graph.edges["w3.0"].control_to = "stop"
+	assert_str(graph.approach_control(graph.edges["w3.0"], "n_0_0")).is_equal("stop")
+	assert_str(graph.approach_control(graph.edges["w1.0"], "n_0_0")).is_equal("none")
+	var m := _manager(graph)
+	var east := _agent_on(m, "w1.0", 100.0, 12.0)
+	var south := _agent_on(m, "w3.0", 100.0, 12.0)
+	var east_stopped := false
+	var south_stopped := false
+	for i in range(900):
+		m.step(1.0 / 60.0)
+		if east.speed < 0.2 and m.lanes.paths[east.path_id].edge_id == "w1.0":
+			east_stopped = true
+		if south.speed < 0.2 and m.lanes.paths[south.path_id].edge_id == "w3.0":
+			south_stopped = true
+	assert_bool(south_stopped).is_true()
+	assert_bool(east_stopped).is_false()
+
+
+func test_a_signal_on_an_approach_makes_the_junction_signalised() -> void:
+	var graph := _cross("none")
+	graph.edges["w1.0"].control_to = "signals"
+	assert_bool(graph.is_signalised("n_0_0")).is_true()
+	assert_str(graph.approach_control(graph.edges["w3.0"], "n_0_0")).is_equal("signals")
+	var m := _manager(graph)
+	assert_bool(m.signals.is_signalised("n_0_0")).is_true()
+	var heads := SignalHeads.new()
+	add_child(heads)
+	heads.setup(graph, JunctionBuilder.build_all(graph), m.signals)
+	assert_int(heads.count()).is_equal(2)  # the two arriving approaches
+	assert_int(heads.sign_count()).is_equal(0)
+	heads.queue_free()

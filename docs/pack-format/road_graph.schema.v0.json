@@ -84,7 +84,9 @@
           "osm_way_id": {"type": "integer"},
           "defaulted_fields": {"type": "array", "items": {"enum": ["lanes", "width", "speed_kph", "oneway", "bridge"]}},
           "access": {"type": ["string", "null"]},
-          "length_m": {"type": "number", "minimum": 0}
+          "length_m": {"type": "number", "minimum": 0},
+          "control_to": {"enum": ["none", "signals", "stop"]},
+          "control_from": {"enum": ["none", "signals", "stop"]}
         }
       }
     },

@@ -28,6 +28,8 @@ class RoadEdge:
 	var layer: int
 	var bridge: bool
 	var tunnel: bool
+	var control_to: String = "none"  # stop | signals | none for traffic arriving at to_node
+	var control_from: String = "none"
 	var name: String
 	var osm_way_id: int
 	var length_m: float
@@ -94,6 +96,8 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		edge.layer = int(e["layer"])
 		edge.bridge = bool(e["bridge"])
 		edge.tunnel = bool(e["tunnel"])
+		edge.control_to = str(e.get("control_to", "none"))
+		edge.control_from = str(e.get("control_from", "none"))
 		edge.name = str(e["name"]) if e["name"] != null else ""
 		edge.osm_way_id = int(e["osm_way_id"])
 		edge.length_m = float(e["length_m"])
@@ -129,6 +133,29 @@ func incident(node_id: String) -> Array:
 ## Number of edges touching a node.
 func degree(node_id: String) -> int:
 	return incident(node_id).size()
+
+
+## Control a car meets when it reaches `node_id` along `edge`: signals if the junction has
+## signals on the node or any approach, else the approach's own stop (or an all-way stop on
+## the node), else none.
+func approach_control(edge: RoadEdge, node_id: String) -> String:
+	if is_signalised(node_id):
+		return "signals"
+	var own := edge.control_to if edge.to_node == node_id else edge.control_from
+	if own == "stop" or nodes[node_id].control == "stop":
+		return "stop"
+	return "none"
+
+
+## True when the node or any approach into it carries traffic signals.
+func is_signalised(node_id: String) -> bool:
+	if nodes[node_id].control == "signals":
+		return true
+	for eid in incident(node_id):
+		var e: RoadEdge = edges[eid]
+		if (e.to_node == node_id and e.control_to == "signals") or (e.from_node == node_id and e.control_from == "signals"):
+			return true
+	return false
 
 
 ## True at a node the importer tagged as a fork (ramp leaving) or merge (ramp arriving).

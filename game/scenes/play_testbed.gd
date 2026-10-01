@@ -316,7 +316,7 @@ func _setup_traffic() -> void:
 	if _traffic_cap >= 0:
 		_traffic.max_agents = _traffic_cap
 	_traffic.enabled = _traffic_cap != 0
-	print("traffic: %d lane paths, %d signal heads in %d ms, cap %d" % [lane_graph.paths.size(), _traffic.heads.count() if _traffic.heads != null else 0, Time.get_ticks_msec() - t0, _traffic.max_agents])
+	print("traffic: %d lane paths, %d signal heads, %d stop signs in %d ms, cap %d" % [lane_graph.paths.size(), _traffic.heads.count() if _traffic.heads != null else 0, _traffic.heads.sign_count() if _traffic.heads != null else 0, Time.get_ticks_msec() - t0, _traffic.max_agents])
 
 
 func _setup_maps() -> void:
