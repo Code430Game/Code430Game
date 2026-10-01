@@ -3,5 +3,5 @@
 - [x] 1.2 Engine, tyre, ambience and impact voices on the player's car and the scene; buses and `--mute`
 
 ## 2. Verification
-- [ ] 2.1 Deck: audio thread cost measured; no dropouts in a benchmark drive
+- [x] 2.1 Deck (2026-10-01): the same night run with all four voices filling: frame avg 7.97 ms, p99 11.1 ms, no errors; the generator fill shows up inside render CPU 0.85 ms and process time, well inside budget
 - [ ] 2.2 **Stop: human drives with sound on the Deck**
