@@ -7,6 +7,7 @@ extends RigidBody3D
 signal hit(car: TrafficCar)
 
 var agent: TrafficAgent = null
+var last_hitter_velocity: Vector3 = Vector3.ZERO
 
 
 func _ready() -> void:
@@ -21,4 +22,5 @@ func _on_body_entered(body: Node) -> void:
 	if agent == null or agent.retired or body is TrafficCar:
 		return
 	if body is VehicleBody3D or body is CharacterBody3D:
+		last_hitter_velocity = body.get("linear_velocity") if body is VehicleBody3D else (body as CharacterBody3D).velocity
 		hit.emit(self)

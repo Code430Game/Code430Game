@@ -203,3 +203,27 @@ func test_take_car_spawns_a_drivable_car_in_the_agent_colour() -> void:
 	assert_object(car.get("body_color")).is_equal(Color(0.2, 0.45, 0.25))
 	assert_object((mesh.get_surface_override_material(0) as StandardMaterial3D).albedo_color).is_equal(Color(0.2, 0.45, 0.25))
 	car.queue_free()
+
+
+func test_blocked_car_sidesteps_to_the_free_lane_after_a_while() -> void:
+	# Two forward lanes; a parked player blocks the right lane.
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 50, "lf": 2, "w": 7.0}]))
+	m.anchors = PackedVector3Array([Vector3.ZERO])
+	var right := -1
+	for p in m.lanes.paths:
+		if p.edge_id == "w1.0" and p.lane_index == 0:
+			right = p.id
+	var parked: Node3D = auto_free(Node3D.new())
+	add_child(parked)
+	parked.global_position = m.lanes.paths[right].position_at(120.0)
+	m.obstacles = [parked]
+	var a := _add_agent(m, right, 60.0, 12.0)
+	var waited := false
+	for i in range(60 * 22):  # about 4 s to stop, 8 s blocked, then time to pull away
+		m.step(1.0 / 60.0)
+		if a.speed < 0.3 and a.path_id == right:
+			waited = true
+	assert_bool(waited).is_true()
+	assert_int(a.path_id).is_not_equal(right)
+	assert_float(a.distance).is_greater(130.0)
+	assert_bool(a.braking).is_false()

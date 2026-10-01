@@ -16,7 +16,10 @@ const FAR_RADIUS_M := 6500.0
 const FAR_RELEASE_M := 7000.0
 const SPAWN_RING_M := 300.0
 const BUILDS_IN_FLIGHT := 3
-const ADDS_PER_FRAME := 1  # each add creates collision on the main thread; one keeps the frame smooth
+const ADDS_PER_FRAME := 1
+## Collision shapes are created on the main thread a few per frame: a chunk's trimeshes land
+## over several frames instead of one, which is what the 50 to 100 ms spikes were.
+const SHAPES_PER_FRAME := 2
 
 var pack: MapPack
 var world: Node3D
@@ -32,6 +35,7 @@ var _pending: Dictionary = {}  # Vector2i -> {"task": int, "tier": int}
 var _ready: Dictionary = {}  # Vector2i -> parts, built and waiting for the per-frame add cap
 var _failed: Dictionary = {}  # Vector2i -> true
 var _results: Dictionary = {}  # written by worker threads under _mutex
+var _shape_queue: Array = []  # [[StaticBody3D, Mesh], ...] collision shapes still to create
 var _mutex := Mutex.new()
 
 
@@ -76,6 +80,7 @@ func build_now(position: Vector3, radius: float = SPAWN_RING_M) -> int:
 		if parts.is_empty():
 			_failed[coord] = true
 			continue
+		parts["immediate"] = true  # the spawn ring needs ground under the car this frame
 		_add_parts(coord, parts)
 		built += 1
 	return built
@@ -91,6 +96,7 @@ func update() -> void:
 		return
 	_collect_finished()
 	_add_ready()
+	_create_queued_shapes()
 	_retire_and_downgrade()
 	_schedule_builds()
 
@@ -217,10 +223,41 @@ func _add_parts(coord: Vector2i, parts: Dictionary) -> void:
 		old["node"].queue_free()
 	var node: Node3D = parts["node"]
 	if int(parts["tier"]) >= MapPack.Tier.NEAR:
-		MapPack.attach_collision(parts)
+		if parts.get("immediate", false):
+			MapPack.attach_collision(parts)
+		else:
+			_queue_collision(parts)
 	world.add_child(node)
 	_chunks[coord] = {"node": node, "tier": int(parts["tier"])}
 	stats["built"] += 1
+
+
+## Adds an empty collision body now and queues its shapes for the coming frames.
+func _queue_collision(parts: Dictionary) -> void:
+	var node: Node3D = parts["node"]
+	var body := StaticBody3D.new()
+	body.name = "collision"
+	node.add_child(body)
+	for m in parts["collision_meshes"]:
+		_shape_queue.append([body, m])
+	if parts.get("water_mesh") != null:
+		node.add_child(MapPack.build_water_floor(parts["water_mesh"]))
+
+
+func _create_queued_shapes() -> void:
+	var made := 0
+	while made < SHAPES_PER_FRAME and not _shape_queue.is_empty():
+		var item: Array = _shape_queue.pop_front()
+		var body: StaticBody3D = item[0]
+		if not is_instance_valid(body) or not body.is_inside_tree():
+			continue  # the chunk was freed or downgraded before its shapes arrived
+		body.add_child(MapPack.trimesh_shape(item[1]))
+		made += 1
+
+
+## True while collision shapes are still being created.
+func collision_pending() -> int:
+	return _shape_queue.size()
 
 
 func _retire_and_downgrade() -> void:

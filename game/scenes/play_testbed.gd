@@ -166,9 +166,21 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
 	if _traffic == null or not (traffic_body is TrafficCar):
 		return
+	if Session.is_client():
+		_world_sync.request_take(traffic_body.global_position)  # the host owns the car; answer in _on_take_granted
+		return
 	var car := _traffic.take_car(traffic_body as TrafficCar)
 	if car != null:
 		_player.enter_vehicle(car)
+
+
+func _on_take_granted(t: Transform3D, color: Color) -> void:
+	var car: VehicleBody3D = TrafficManager.DRIVABLE_CAR_SCENE.instantiate()
+	car.set("body_color", color)
+	add_child(car)
+	car.global_transform = t.translated_local(Vector3(0.0, 0.3, 0.0))
+	car.set_spawn(car.global_transform)
+	_player.enter_vehicle(car)
 
 
 func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
@@ -193,6 +205,8 @@ func _setup_day_night() -> void:
 	_day_night.register_shader(_pack.building_material as ShaderMaterial)
 	_day_night.register_emissive(CarMesh.light_material(), CarMesh.LIGHT_NIGHT_ENERGY)
 	_day_night.register_emissive(CarMesh.tail_material(), CarMesh.LIGHT_NIGHT_ENERGY * 0.6)
+	if _traffic != null and _traffic.tail_material != null:
+		_day_night.register_shader(_traffic.tail_material)
 	_day_night.register_emissive(SignalHeads.head_material(), SignalHeads.HEAD_NIGHT_ENERGY)
 	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
 	_car.add_headlights(bool(preset.get("headlight_shadows", false)))
@@ -225,6 +239,9 @@ func _setup_net() -> void:
 	_world_sync.peds = _peds
 	_world_sync.player_sync = _player_sync
 	_world_sync.day_night = _day_night
+	_world_sync.take_granted.connect(_on_take_granted)
+	if _traffic != null:
+		_traffic.mirror_hit.connect(func(p: Vector3, v: Vector3) -> void: _world_sync.report_hit(p, v))
 	add_child(_world_sync)
 	if _host_port > 0:
 		_host_game(_host_port)
@@ -255,8 +272,20 @@ func _join_game(address: String) -> void:
 
 func _on_joined(_info: Dictionary) -> void:
 	_set_mirror(true)
-	# Guests spawn staggered along the road from the host's spawn so they do not stack.
-	var slot := 1 + (multiplayer.get_unique_id() % 7)  # never the host's own spot
+	# Wait a moment for the other players' positions, then take the first slot along the road
+	# from the host's spawn that nobody is standing in.
+	await get_tree().create_timer(1.0).timeout
+	var taken := _player_sync.remote_positions() if _player_sync != null else PackedVector3Array()
+	var slot := 1
+	for k in range(1, 12):
+		var candidate := _spawn_transform.translated_local(Vector3(0.0, 0.0, 8.0 * k)).origin
+		var clear := true
+		for p in taken:
+			if p.distance_to(candidate) < 6.0:
+				clear = false
+		if clear:
+			slot = k
+			break
 	var t := _spawn_transform.translated_local(Vector3(0.0, 0.0, 8.0 * slot))
 	_car.global_transform = t
 	_car.linear_velocity = Vector3.ZERO
