@@ -63,8 +63,6 @@ var _telemetry_next: float = 0.0
 var _bumps: bool = false
 var _last_vy: float = 0.0
 const BUMP_THRESHOLD_MPS2 := 90.0
-var _topdown: bool = false
-var _topdown_height: float = 160.0
 var _spawn_override: Vector3 = Vector3.INF
 var _road_label: String = ""
 var _road_label_next: float = 0.0
@@ -435,9 +433,9 @@ func _parse_args() -> void:
 		elif arg == "--bumps":
 			_bumps = true
 		elif arg.begins_with("--topdown"):
-			_topdown = true
+			_camera.mode = ChaseCamera.Mode.HIGH
 			if arg.contains("="):
-				_topdown_height = float(arg.get_slice("=", 1))
+				_camera.height_override = float(arg.get_slice("=", 1))
 		elif arg == "--graph":
 			_graph_view.visible = true
 		elif arg == "--map":
@@ -516,7 +514,7 @@ func _process(delta: float) -> void:
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, M map, Esc pause"),
+				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, M map, Esc pause"),
 			]
 			_prompt.text = ""
 		else:
@@ -545,9 +543,8 @@ func _process(delta: float) -> void:
 			print("BUMP t=%.1f accel_y=%.0f m/s2 vy=%.1f pos=(%.0f, %.1f, %.0f) speed=%.0f edge=%s %s" % [
 				_bench_elapsed, accel, vy, _car.global_position.x, _car.global_position.y, _car.global_position.z, _car.speed_kph(), eid, ename,
 			])
-	if _topdown and _car != null:
-		_camera.set_process(false)
-		_camera.global_position = _car.global_position + Vector3(0, _topdown_height, 0.01)
+	if Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
+		_camera.cycle_mode()
 		_camera.look_at(_car.global_position, Vector3.UP)
 	if _bench_seconds > 0.0:
 		_bench_elapsed += delta

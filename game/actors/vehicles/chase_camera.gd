@@ -1,6 +1,11 @@
 class_name ChaseCamera
 extends Camera3D
 ## Follows a target from behind with smoothing. Right stick orbits temporarily.
+## `mode` cycles chase, top-down (follows and turns with the car) and high top-down.
+
+enum Mode { CHASE, TOPDOWN, HIGH }
+const TOPDOWN_HEIGHT_M := 45.0
+const HIGH_HEIGHT_M := 160.0
 
 @export var target: Node3D
 @export var distance_m: float = 7.5
@@ -11,10 +16,41 @@ extends Camera3D
 @export var orbit_return_speed: float = 3.0
 
 var _orbit: float = 0.0
+var mode: int = Mode.CHASE
+## When positive, top-down modes use this height (the testbed's --topdown=<m> for screenshots).
+var height_override: float = -1.0
+
+
+## Next camera mode in the cycle.
+func cycle_mode() -> void:
+	mode = (mode + 1) % 3
+
+
+## Human-readable mode name for the HUD.
+func mode_name() -> String:
+	match mode:
+		Mode.TOPDOWN:
+			return "top-down"
+		Mode.HIGH:
+			return "high"
+	return "chase"
 
 
 func _process(delta: float) -> void:
 	if target == null:
+		return
+	if mode != Mode.CHASE:
+		var h := TOPDOWN_HEIGHT_M if mode == Mode.TOPDOWN else HIGH_HEIGHT_M
+		if height_override > 0.0:
+			h = height_override
+		var desired_top := target.global_position + Vector3(0.0, h, 0.0)
+		global_position = global_position.lerp(desired_top, clampf(position_smoothing * delta, 0.0, 1.0))
+		# Look straight down with the car's heading up the screen (nudged so look_at has a direction).
+		var forward := -target.global_basis.z
+		forward.y = 0.0
+		if forward.length_squared() < 1e-6:
+			forward = Vector3.FORWARD
+		look_at(target.global_position, forward.normalized())
 		return
 	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
 	if absf(look.x) > 0.0:

@@ -15,6 +15,7 @@ The on-screen hints switch to whichever device you touched last.
 | steer | left stick | A D |
 | handbrake | RB | Space |
 | reset a stuck car | Y while driving (hold) | R |
+| camera: chase, top-down, high | D-pad down (while driving) | V |
 | map | Back / View | M |
 | pause menu | Menu / Start | Esc |
 | debug overlay | X | F2 |
