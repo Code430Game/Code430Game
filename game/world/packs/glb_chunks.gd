@@ -66,14 +66,28 @@ static func export_chunk(chunk: Node3D, path: String) -> Error:
 
 ## Reads a chunk GLB back into a node tree with visibility ranges and collision restored.
 static func import_chunk(path: String, road_material: Material, terrain_material: Material, with_collision: bool, water_material: Material = null, marking_material: Material = null, building_material: Material = null, sidewalk_material: Material = null, barrier_material: Material = null) -> Node3D:
+	var materials := {"road": road_material, "terrain": terrain_material, "water": water_material, "marking": marking_material, "building": building_material, "sidewalk": sidewalk_material, "barrier": barrier_material}
+	var parts := import_chunk_parts(path, materials, MapPack.Tier.NEAR)
+	if parts.is_empty():
+		return null
+	if with_collision:
+		MapPack.attach_collision(parts)
+	return parts["node"]
+
+
+## Reads a cached chunk and builds its mesh instances at `tier`, off the scene tree and the
+## physics server (safe on a worker thread). Same result shape as MapPack.build_chunk_meshes;
+## empty when the file cannot be read.
+static func import_chunk_parts(path: String, materials: Dictionary, tier: int) -> Dictionary:
 	var doc := GLTFDocument.new()
 	var state := GLTFState.new()
 	if doc.append_from_file(path, state) != OK:
 		push_error("GlbChunks: cannot read %s" % path)
-		return null
+		return {}
 	var scene := doc.generate_scene(state)
 	if scene == null:
-		return null
+		return {}
+	var near := tier >= MapPack.Tier.NEAR
 	var chunk := Node3D.new()
 	chunk.name = path.get_file().get_basename()
 	var collision_meshes: Array[Mesh] = []
@@ -82,37 +96,37 @@ static func import_chunk(path: String, road_material: Material, terrain_material
 		if child is MeshInstance3D:
 			var mi := child as MeshInstance3D
 			var role := mi.name
+			if not near and role in MapPack.NEAR_ROLES:
+				continue
 			scene.remove_child(mi)
 			mi.owner = null
 			chunk.add_child(mi)
 			var ranges := _ranges_for(role)
+			if not near and ranges.x > 0.0 and ranges.x < MapPack.TERRAIN_LOD1_END_M:
+				ranges.x = 0.0  # the far mesh stands in for LOD0 at this tier
 			mi.visibility_range_begin = ranges.x
 			mi.visibility_range_end = ranges.y
 			mi.visibility_range_begin_margin = MapPack.LOD_FADE_M if ranges.x > 0.0 else 0.0
 			mi.visibility_range_end_margin = MapPack.LOD_FADE_M if ranges.y < MapPack.TERRAIN_LOD2_END_M else 0.0
 			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			if role == "water":
-				mi.material_override = water_material if water_material != null else WaterBuilder.material()
+				mi.material_override = materials.get("water") if materials.get("water") != null else WaterBuilder.material()
 				water_mesh = mi.mesh
 			elif role == "markings_lod0":
-				mi.material_override = marking_material if marking_material != null else MarkingBuilder.material()
+				mi.material_override = materials.get("marking") if materials.get("marking") != null else MarkingBuilder.material()
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			elif role.begins_with("buildings"):
-				mi.material_override = building_material if building_material != null else BuildingBuilder.material()
+				mi.material_override = materials.get("building") if materials.get("building") != null else BuildingBuilder.material()
 			elif role == "sidewalks_lod0":
-				mi.material_override = sidewalk_material if sidewalk_material != null else SidewalkBuilder.material()
+				mi.material_override = materials.get("sidewalk") if materials.get("sidewalk") != null else SidewalkBuilder.material()
 			elif role == "barriers_lod0":
-				mi.material_override = barrier_material if barrier_material != null else BarrierBuilder.material()
+				mi.material_override = materials.get("barrier") if materials.get("barrier") != null else BarrierBuilder.material()
 			else:
-				mi.material_override = terrain_material if role.begins_with("terrain") else road_material
-			if role in ["roads_lod0", "junctions_lod0", "terrain_lod1", "buildings_lod0", "sidewalks_lod0", "barriers_lod0"]:
+				mi.material_override = materials.get("terrain") if role.begins_with("terrain") else materials.get("road")
+			if near and role in ["roads_lod0", "junctions_lod0", "terrain_lod1", "buildings_lod0", "sidewalks_lod0", "barriers_lod0"]:
 				collision_meshes.append(mi.mesh)
 	scene.free()
-	if with_collision:
-		chunk.add_child(MapPack.build_collision(collision_meshes))
-		if water_mesh != null:
-			chunk.add_child(MapPack.build_water_floor(water_mesh))
-	return chunk
+	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier}
 
 
 static func _ranges_for(role: String) -> Vector2:

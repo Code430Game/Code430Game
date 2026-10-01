@@ -27,6 +27,8 @@ var _traffic: TrafficManager
 var _traffic_cap: int = -1
 
 var _pack: MapPack
+var _streamer: ChunkStreamer
+var _first_playable_ms: int = -1
 var _car: VehicleBody3D
 var _player: Player
 var _start_in_car: bool = false
@@ -76,8 +78,12 @@ func _ready() -> void:
 		_hud.text = "Failed to load pack at %s" % dir
 		return
 	var t0 := Time.get_ticks_msec()
-	var stats := _pack.build_all_chunks(_world, true)
-	print("testbed: built %s in %d ms" % [stats, Time.get_ticks_msec() - t0])
+	_streamer = ChunkStreamer.new()
+	_streamer.name = "Streamer"
+	_streamer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_streamer)
+	_streamer.setup(_pack, _world)
+	print("testbed: streamer ready (%d chunks indexed, glb cache %s) in %d ms" % [_pack.chunk_coords().size(), _streamer.use_glb, Time.get_ticks_msec() - t0])
 	_graph_view.set_graph(_pack.graph)
 	_car = CAR_SCENE.instantiate()
 	_car.process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -92,6 +98,10 @@ func _ready() -> void:
 			spawn = _spawn_on_edge(hit)
 			spawn_edge = hit["edge"]
 			spawn_distance = RoadGeometry.length_xz(spawn_edge.polyline.slice(0, int(hit["segment"]) + 1)) + float(hit["t"]) if hit.has("t") else 0.0
+	var t_ring := Time.get_ticks_msec()
+	var ring := _streamer.build_now(spawn.origin)
+	_first_playable_ms = Time.get_ticks_msec() - t0
+	print("testbed: spawn ring %d chunks in %d ms; first playable at %d ms" % [ring, Time.get_ticks_msec() - t_ring, _first_playable_ms])
 	_car.recover_callback = _recover_car
 	_car.global_transform = spawn
 	_car.set_spawn(spawn)
@@ -259,6 +269,8 @@ func _parse_args() -> void:
 
 
 func _process(delta: float) -> void:
+	if _streamer != null and _car != null:
+		_streamer.anchors = PackedVector3Array([Players.local_controlled_body().global_position])
 	if _traffic != null and _car != null:
 		var body: Node3D = Players.local_controlled_body()
 		_traffic.anchors = PackedVector3Array([body.global_position])
@@ -346,6 +358,8 @@ func _print_benchmark() -> void:
 	print("benchmark: %s" % render_note)
 	if _traffic != null:
 		print("benchmark: traffic agents %d, physics process %.2f ms" % [_traffic.active_count(), Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0])
+	if _streamer != null:
+		print("benchmark: chunks in scene %d, built %d, downgraded %d, freed %d, failed %d, first playable %d ms" % [_streamer.chunk_count(), _streamer.stats["built"], _streamer.stats["downgraded"], _streamer.stats["freed"], _streamer.stats["failed"], _first_playable_ms])
 
 
 const AUTODRIVE_LOOKAHEAD_M := 14.0

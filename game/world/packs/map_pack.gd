@@ -16,6 +16,11 @@ const TERRAIN_LOD2_END_M := 6000.0
 const BUILDING_LOD0_END_M := 600.0
 const BUILDING_LOD1_END_M := 2500.0
 const LOD_FADE_M := 40.0
+## Detail tiers a chunk can be built at. FAR carries only the meshes visible from a distance
+## (terrain LOD1/LOD2, roads LOD1, buildings LOD1, water); NEAR adds LOD0 detail and collision.
+enum Tier { NONE = 0, FAR = 1, NEAR = 2 }
+## Child names that only exist at the NEAR tier (dropped on a downgrade).
+const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "sidewalks_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor"]
 const SPAWN_MIN_EDGE_M := 150.0  # spawn edges shorter than this are usually bbox stubs
 const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
 const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
@@ -126,57 +131,92 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 	return stats
 
 
-## Builds one chunk node (meshes plus optional collision).
+## Builds one chunk node (meshes plus optional collision) at the NEAR tier.
 func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_result: RoadMeshBuilder.Result, with_collision: bool) -> Node3D:
+	var parts := build_chunk_meshes(coord, heights, road_result, Tier.NEAR)
+	if with_collision:
+		attach_collision(parts)
+	return parts["node"]
+
+
+## Builds a chunk's mesh instances at `tier` without touching the scene tree or the physics
+## server, so it may run on a worker thread. Returns {"node", "collision_meshes",
+## "water_mesh", "tier"}; attach_collision adds the bodies on the main thread.
+func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_result: RoadMeshBuilder.Result, tier: int) -> Dictionary:
+	var near := tier >= Tier.NEAR
 	var chunk := Node3D.new()
 	chunk.name = "chunk_%d_%d" % [coord.x, coord.y]
 	var collision_meshes: Array[Mesh] = []
-	if road_result.roads.has(coord):
+	var water_mesh: Mesh = null
+	if near and road_result.roads.has(coord):
 		var m0: ArrayMesh = road_result.roads[coord].to_mesh()
 		chunk.add_child(_mesh_instance("roads_lod0", m0, road_material, 0.0, ROAD_LOD0_END_M))
 		collision_meshes.append(m0)
 	if road_result.roads_lod1.has(coord):
 		var m1: ArrayMesh = road_result.roads_lod1[coord].to_mesh()
-		chunk.add_child(_mesh_instance("roads_lod1", m1, road_material, ROAD_LOD0_END_M, ROAD_LOD1_END_M))
-	if road_result.junctions.has(coord):
+		chunk.add_child(_mesh_instance("roads_lod1", m1, road_material, ROAD_LOD0_END_M if near else 0.0, ROAD_LOD1_END_M))
+	if near and road_result.junctions.has(coord):
 		var mj: ArrayMesh = road_result.junctions[coord].to_mesh()
 		chunk.add_child(_mesh_instance("junctions_lod0", mj, road_material, 0.0, ROAD_LOD1_END_M))
 		collision_meshes.append(mj)
-	if marking_chunks.has(coord):
+	if near and marking_chunks.has(coord):
 		var mm: ArrayMesh = marking_chunks[coord].to_mesh()
 		var markings_mi := _mesh_instance("markings_lod0", mm, marking_material, 0.0, marking_visible_to_m)
 		markings_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		chunk.add_child(markings_mi)
-	if barrier_chunks.has(coord):
+	if near and barrier_chunks.has(coord):
 		var mbar: ArrayMesh = barrier_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("barriers_lod0", mbar, barrier_material, 0.0, ROAD_LOD0_END_M))
 		collision_meshes.append(mbar)
-	if sidewalk_chunks.has(coord):
+	if near and sidewalk_chunks.has(coord):
 		var ms: ArrayMesh = sidewalk_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("sidewalks_lod0", ms, sidewalk_material, 0.0, SidewalkBuilder.VISIBLE_TO_M))
 		collision_meshes.append(ms)
-	if building_chunks["lod0"].has(coord):
+	if near and building_chunks["lod0"].has(coord):
 		var mb0: ArrayMesh = building_chunks["lod0"][coord].to_mesh()
 		chunk.add_child(_mesh_instance("buildings_lod0", mb0, building_material, 0.0, BUILDING_LOD0_END_M))
 		collision_meshes.append(mb0)
 	if building_chunks["lod1"].has(coord):
 		var mb1: ArrayMesh = building_chunks["lod1"][coord].to_mesh()
-		chunk.add_child(_mesh_instance("buildings_lod1", mb1, building_material, BUILDING_LOD0_END_M, BUILDING_LOD1_END_M))
+		chunk.add_child(_mesh_instance("buildings_lod1", mb1, building_material, BUILDING_LOD0_END_M if near else 0.0, BUILDING_LOD1_END_M))
 	if water_chunks.has(coord):
 		var mw: ArrayMesh = water_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))
-		if with_collision:
-			chunk.add_child(build_water_floor(mw))
-	var t0 := TerrainBuilder.build_mesh(heights, 0)
+		water_mesh = mw
 	var t1 := TerrainBuilder.build_mesh(heights, 1)
 	var t2 := TerrainBuilder.build_mesh(heights, 2)
-	chunk.add_child(_mesh_instance("terrain_lod0", t0, terrain_material, 0.0, TERRAIN_LOD0_END_M))
-	chunk.add_child(_mesh_instance("terrain_lod1", t1, terrain_material, TERRAIN_LOD0_END_M, TERRAIN_LOD1_END_M))
+	if near:
+		var t0 := TerrainBuilder.build_mesh(heights, 0)
+		chunk.add_child(_mesh_instance("terrain_lod0", t0, terrain_material, 0.0, TERRAIN_LOD0_END_M))
+	chunk.add_child(_mesh_instance("terrain_lod1", t1, terrain_material, TERRAIN_LOD0_END_M if near else 0.0, TERRAIN_LOD1_END_M))
 	chunk.add_child(_mesh_instance("terrain_lod2", t2, terrain_material, TERRAIN_LOD1_END_M, TERRAIN_LOD2_END_M))
-	collision_meshes.append(t1)
-	if with_collision:
-		chunk.add_child(build_collision(collision_meshes))
-	return chunk
+	if near:
+		collision_meshes.append(t1)
+	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier}
+
+
+## Main thread only: adds the collision body and wading floor described by build_chunk_meshes.
+static func attach_collision(parts: Dictionary) -> void:
+	var node: Node3D = parts["node"]
+	node.add_child(build_collision(parts["collision_meshes"]))
+	if parts.get("water_mesh") != null:
+		node.add_child(build_water_floor(parts["water_mesh"]))
+
+
+## Drops the NEAR-only children (LOD0 meshes, collision, wading floor) from a built chunk.
+static func downgrade_chunk(node: Node3D) -> void:
+	for child in node.get_children():
+		if child.name in NEAR_ROLES:
+			node.remove_child(child)
+			child.queue_free()
+		elif child is MeshInstance3D and (child as MeshInstance3D).visibility_range_begin > 0.0 and (child as MeshInstance3D).visibility_range_begin < TERRAIN_LOD1_END_M:
+			(child as MeshInstance3D).visibility_range_begin = 0.0  # the far mesh now stands in for LOD0
+			(child as MeshInstance3D).visibility_range_begin_margin = 0.0
+
+
+## Materials keyed by role family, for chunk importers running off the main thread.
+func materials() -> Dictionary:
+	return {"road": road_material, "terrain": terrain_material, "water": water_material, "marking": marking_material, "building": building_material, "sidewalk": sidewalk_material, "barrier": barrier_material}
 
 
 ## Wading floor: the water surface sunk by WADE_DEPTH_M, on the water physics layer so only
