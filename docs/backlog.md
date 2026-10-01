@@ -5,6 +5,12 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-09-30
 
+- **Physics budget.** After the profiling pass the Deck physics tick is about 6.4 ms with 150
+  cars and 75 to 115 people: traffic scripts 2 ms, pedestrians 0.7 ms, the rest is the Jolt step
+  (24 pooled car bodies, 16 people bodies, chunk collision). Next levers if it creeps again:
+  smaller body pools, let far kinematic bodies sleep, and collision shapes spread over frames
+  on chunk adds (the remaining 25 ms spikes).
+
 - **Traffic cars are ghosts and pile up.** Addressed by `add-traffic-interaction` (traffic
   keeps headway from player bodies, hit cars queue and recover, taking a traffic car with Y).
   The ghosting came from the 24-body pool running dry: hit cars kept their bodies until the

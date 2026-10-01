@@ -16,7 +16,7 @@ const FAR_RADIUS_M := 6500.0
 const FAR_RELEASE_M := 7000.0
 const SPAWN_RING_M := 300.0
 const BUILDS_IN_FLIGHT := 3
-const ADDS_PER_FRAME := 2
+const ADDS_PER_FRAME := 1  # each add creates collision on the main thread; one keeps the frame smooth
 
 var pack: MapPack
 var world: Node3D
