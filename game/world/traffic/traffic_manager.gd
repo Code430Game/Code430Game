@@ -75,14 +75,7 @@ func _setup_rendering() -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
-	var box := BoxMesh.new()
-	box.size = Vector3(float(config["car_width_m"]), 1.3, float(config["car_length_m"]))
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 0.45
-	mat.metallic = 0.3
-	box.material = mat
-	mm.mesh = box
+	mm.mesh = CarMesh.build(true)  # white body takes the instance colour; glass and lights keep theirs
 	mm.instance_count = max_agents
 	mm.visible_instance_count = 0
 	_multimesh.multimesh = mm
@@ -477,11 +470,7 @@ func take_car(body: TrafficCar) -> VehicleBody3D:
 	if a == null:
 		return null
 	var car: VehicleBody3D = DRIVABLE_CAR_SCENE.instantiate()
-	var mesh := car.get_node_or_null("Mesh") as MeshInstance3D
-	if mesh != null and mesh.material_override is StandardMaterial3D:
-		var mat: StandardMaterial3D = (mesh.material_override as StandardMaterial3D).duplicate()
-		mat.albedo_color = a.color
-		mesh.material_override = mat
+	car.set("body_color", a.color)
 	var holder: Node = get_parent() if get_parent() != null else self
 	holder.add_child(car)
 	car.global_transform = a.transform.translated_local(Vector3(0.0, 0.3, 0.0))
@@ -512,7 +501,7 @@ func _render() -> void:
 	mm.visible_instance_count = n
 	for i in range(n):
 		var a := agents[i]
-		mm.set_instance_transform(i, a.transform.translated_local(Vector3(0.0, 0.65, 0.0)))
+		mm.set_instance_transform(i, a.transform.translated_local(Vector3(0.0, CarMesh.GROUND_LIFT_M, 0.0)))
 		mm.set_instance_color(i, a.color)
 
 
