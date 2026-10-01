@@ -241,7 +241,10 @@ func _refresh_session_status() -> void:
 	for id in Session.peers:
 		names.append(str(Session.peers[id].get("name", id)))
 	var warn := "   (Deck host: 2 players is the comfortable limit)" if Session.is_host() and Session.peers.size() > 2 else ""
-	_pause_menu.set_status("%s: %d/%d players: %s%s" % [Session.role, Session.peers.size(), Session.max_players, ", ".join(names), warn])
+	var where := ""
+	if Session.is_host():
+		where = "\nfriends join at: %s  port %d" % [", ".join(Session.local_addresses()), Session.DEFAULT_PORT]
+	_pause_menu.set_status("%s: %d/%d players: %s%s%s" % [Session.role, Session.peers.size(), Session.max_players, ", ".join(names), warn, where])
 
 
 func _setup_pedestrians() -> void:
@@ -403,14 +406,17 @@ func _process(delta: float) -> void:
 	if _car != null and _player != null:
 		_bench_elapsed_hud(delta)
 		var body: Node3D = Players.local_controlled_body()
+		var net := ""
+		if Session.is_online():
+			net = "  |  co-op %s %d/%d" % [Session.role, Session.peers.size(), Session.max_players]
 		if _player.is_driving():
-			_hud.text = "%d km/h\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Y get out, Back map, Menu pause" % [
-				int(_car.speed_kph()), body.global_position.x, body.global_position.y, body.global_position.z,
+			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     RT accelerate, LT brake/reverse, RB handbrake, Y get out, Back map, Menu pause" % [
+				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
 			]
 			_prompt.text = ""
 		else:
-			_hud.text = "on foot\nx %.0f  y %.1f  z %.0f     left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause" % [
-				body.global_position.x, body.global_position.y, body.global_position.z,
+			_hud.text = "on foot%s\nx %.0f  y %.1f  z %.0f     left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause" % [
+				net, body.global_position.x, body.global_position.y, body.global_position.z,
 			]
 			_prompt.text = "Y  get in" if _player.nearest_vehicle() != null else ""
 	if _autodrive and _car != null:
