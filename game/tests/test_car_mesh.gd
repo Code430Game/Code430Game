@@ -22,3 +22,28 @@ func test_wheels_only_when_asked() -> void:
 	var without := CarMesh.build(false)
 	assert_int(with_wheels.surface_get_array_len(1)).is_greater(without.surface_get_array_len(1))
 	assert_int(with_wheels.surface_get_array_len(0)).is_equal(without.surface_get_array_len(0))
+
+
+func test_every_triangle_faces_outward() -> void:
+	# Godot front faces are clockwise seen from outside, so the cross product of each emitted
+	# triangle points inward: toward the body's centre line, or toward a wheel's own axle.
+	var mesh := CarMesh.build(true)
+	var centre := Vector3(0.0, 0.6, 0.0)
+	for s in range(mesh.get_surface_count()):
+		var arrays := mesh.surface_get_arrays(s)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var wrong := 0
+		for t in range(0, verts.size(), 3):
+			var a := verts[t]
+			var b := verts[t + 1]
+			var c := verts[t + 2]
+			var n := (b - a).cross(c - a)
+			var centroid := (a + b + c) / 3.0
+			var reference := centre
+			var on_wheel := centroid.y < 0.6 and absf(absf(centroid.x) - CarMesh.WHEEL_X_M) <= CarMesh.WHEEL_WIDTH_M
+			if on_wheel:
+				var wz := CarMesh.WHEEL_Z_M if centroid.z > 0.0 else -CarMesh.WHEEL_Z_M
+				reference = Vector3(signf(centroid.x) * CarMesh.WHEEL_X_M, CarMesh.WHEEL_RADIUS_M - 0.14, wz)
+			if n.dot(centroid - reference) > 1e-6:
+				wrong += 1
+		assert_int(wrong).override_failure_message("surface %d has %d triangles facing inward" % [s, wrong]).is_equal(0)
