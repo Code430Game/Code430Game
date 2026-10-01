@@ -21,6 +21,10 @@ The on-screen hints switch to whichever device you touched last.
 | debug overlay | X | F2 |
 | road graph overlay | B with the overlay | F3 |
 
+**Tone** in the pause menu picks the tone mode with left and right: Clean, Gritty (default) or
+Dystopia. Billboards along the big roads change their ads with it; in co-op the host's tone is
+the session's. `--tone=clean` starts in a mode for the session only.
+
 **Character** in the pause menu opens the creator: up and down pick a row, left and right change
 it, A randomises, loads, saves or deletes a preset, B keeps the body and returns. The first start
 gives you a random body; the last one you made is loaded next time. Saved in `user://characters.json`.

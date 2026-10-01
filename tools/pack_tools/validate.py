@@ -18,6 +18,12 @@ from jsonschema import Draft202012Validator
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "pack.schema.v0.json"
+ADS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "ads.schema.v0.json"
+CONTENT_DIR = REPO_ROOT / "game" / "core" / "content"
+DESCRIPTORS_PATH = CONTENT_DIR / "content-descriptors.v0.json"
+MODES_DIR = CONTENT_DIR / "modes"
+ADS_NAME = "ads.v0.json"
+LEVELS = ["none", "mild", "strong"]
 MANIFEST_NAME = "pack.json"
 
 DATA_ONLY_TYPES = {"map", "character", "story"}
@@ -49,6 +55,7 @@ class PackReport:
 
     path: Path
     errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -94,6 +101,78 @@ def validate_files(pack_dir: Path, pack_type: str) -> list[str]:
     return errors
 
 
+def load_content_rules(
+    descriptors_path: Path = DESCRIPTORS_PATH, modes_dir: Path = MODES_DIR
+) -> tuple[dict, dict]:
+    """(descriptors, modes by id) from the game's content data."""
+    desc = json.loads(descriptors_path.read_text(encoding="utf-8"))
+    modes = {}
+    for f in sorted(modes_dir.glob("*.json")):
+        mode = json.loads(f.read_text(encoding="utf-8"))
+        modes[mode["id"]] = mode
+    return desc, modes
+
+
+def _level(value: str, descriptor: str, desc: dict) -> int | None:
+    aliases = desc["descriptors"].get(descriptor, {}).get("aliases", {})
+    value = aliases.get(value, value)
+    return LEVELS.index(value) if value in LEVELS else None
+
+
+def _descriptor_errors(where: str, declared: dict, desc: dict) -> list[str]:
+    errors = []
+    for name, level in declared.items():
+        if name not in desc["descriptors"]:
+            errors.append(f"{where}: unknown descriptor '{name}'")
+        elif _level(level, name, desc) is None:
+            errors.append(f"{where}: descriptor '{name}' has unknown level '{level}'")
+    return errors
+
+
+def _allowed(declared: dict, mode: dict, desc: dict) -> bool:
+    for name, level in declared.items():
+        lv = _level(level, name, desc)
+        mx = _level(mode["max"].get(name, "none"), name, desc)
+        if lv is None or mx is None or lv > mx:
+            return False
+    return True
+
+
+def validate_ads(
+    ads: dict, manifest: dict, desc: dict, modes: dict, ads_validator: Draft202012Validator
+) -> tuple[list[str], list[str]]:
+    """Descriptor, leak and support checks for an ads file. Returns (errors, warnings)."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    for err in sorted(ads_validator.iter_errors(ads), key=lambda e: list(e.path)):
+        where = "/".join(str(p) for p in err.path) or "(root)"
+        errors.append(f"{ADS_NAME}/{where}: {err.message}")
+    if errors:
+        return errors, warnings
+    supported = [m for m in manifest.get("supported_modes", []) if m in modes]
+    for item in ads.get("ads", []):
+        iid = item["id"]
+        errors.extend(_descriptor_errors(f"{ADS_NAME} {iid}", item.get("descriptors", {}), desc))
+        for key, variant in item["variants"].items():
+            declared = variant.get("descriptors", {})
+            errors.extend(_descriptor_errors(f"{ADS_NAME} {iid}/{key}", declared, desc))
+            if key in modes and not _allowed(declared, modes[key], desc):
+                over = [n for n in declared if not _allowed({n: declared[n]}, modes[key], desc)]
+                errors.append(
+                    f"{ADS_NAME} {iid}/{key}: descriptors {over} exceed what mode '{key}' allows"
+                )
+        for mode_id in supported:
+            mode = modes[mode_id]
+            shown = any(
+                key in (mode["variant_key"], "fallback")
+                and _allowed(variant.get("descriptors", {}), mode, desc)
+                for key, variant in item["variants"].items()
+            )
+            if not shown:
+                warnings.append(f"{ADS_NAME} {iid}: nothing allowed in supported mode '{mode_id}'")
+    return errors, warnings
+
+
 def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport:
     """Validate one pack folder."""
     report = PackReport(path=pack_dir)
@@ -110,6 +189,20 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
     pack_type = manifest.get("type")
     if isinstance(pack_type, str):
         report.errors.extend(validate_files(pack_dir, pack_type))
+    desc, modes = load_content_rules()
+    for mode_id in manifest.get("supported_modes", []):
+        if mode_id not in modes:
+            report.errors.append(f"supported_modes: unknown mode '{mode_id}'")
+    ads_path = pack_dir / ADS_NAME
+    if ads_path.is_file():
+        try:
+            ads = json.loads(ads_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{ADS_NAME}: invalid JSON: {exc}")
+            return report
+        errors, warnings = validate_ads(ads, manifest, desc, modes, load_schema(ADS_SCHEMA_PATH))
+        report.errors.extend(errors)
+        report.warnings.extend(warnings)
     return report
 
 
@@ -140,11 +233,15 @@ def main(argv: list[str] | None = None) -> int:
     for report in reports:
         if report.ok:
             print(f"OK    {report.path}")
+            for warn in report.warnings:
+                print(f"      - warning: {warn}")
         else:
             failed += 1
             print(f"FAIL  {report.path}")
             for err in report.errors:
                 print(f"      - {err}")
+            for warn in report.warnings:
+                print(f"      - warning: {warn}")
     print(f"{len(reports) - failed} passed, {failed} failed")
     return 1 if failed else 0
 

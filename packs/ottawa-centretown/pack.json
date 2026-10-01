@@ -28,6 +28,11 @@
  },
  "name": "Ottawa Centretown",
  "schema_version": 0,
+ "supported_modes": [
+  "clean",
+  "gritty",
+  "dystopia"
+ ],
  "type": "map",
  "version": "0.1.0"
 }

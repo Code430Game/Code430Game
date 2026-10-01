@@ -5,6 +5,8 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-01
 
+- **Testbed sometimes starts on foot despite `--drive`** on Mac screenshot runs (seen 2026-10-01, roughly one run in three; the Deck build is unaffected). Suspect a race between the spawn-in-car and the first collision frame. Unfixed.
+- **Visibility ranges on city-wide MultiMeshes** are measured to the bounding box centre; removed from signal heads and billboards. Any future city-wide MultiMesh must be chunked or range-free.
 - **Character creator plan (from the human).** First start spawns a randomised character so
   nothing blocks play; the creator then tweaks that body's features; presets are saved,
   including "last created". The creator is a later change; this is its brief.

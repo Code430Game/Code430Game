@@ -76,6 +76,17 @@
       "default": false
     },
     "homepage": {"type": "string", "format": "uri"},
+    "supported_modes": {
+      "description": "Tone modes this pack's content supports (ids of mode files). The game warns when the active mode is missing.",
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+      "uniqueItems": true
+    },
+    "max_descriptors": {
+      "description": "The strongest level of each content descriptor anywhere in the pack, for registry filtering.",
+      "type": "object",
+      "additionalProperties": {"enum": ["none", "mild", "strong"]}
+    },
     "map": {
       "description": "Map packs only: local origin and bounds.",
       "type": "object",

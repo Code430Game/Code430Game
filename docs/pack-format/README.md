@@ -43,7 +43,23 @@ System packs ship as a `.pck` next to their `pack.json`, must set `"trusted": tr
 | `homepage` | no | URL. |
 | `map` | map only | `crs` (for example `EPSG:32618`), `origin` (`easting`, `northing`, `lat`, `lon`), optional `bbox`. |
 
-Fields for tone modes (`supported_modes`, `max_descriptors`) arrive with the `add-content-modes` change.
+| `supported_modes` | no | Tone modes the pack's content supports, for example `["clean", "gritty", "dystopia"]`. The game warns when the active mode is missing. |
+| `max_descriptors` | no | Strongest level per content descriptor anywhere in the pack, for registry filtering. |
+
+## Tone modes and content descriptors
+The same world plays in different tones. Modes are data (`game/core/content/modes/*.json`,
+schema `tone-mode.schema.v0.json`): each lists the maximum level per descriptor, mechanic
+flags, and the variant key items use. Descriptors are the closed list in
+`game/core/content/content-descriptors.v0.json`; every level is `none`, `mild` or `strong`
+(`stylized` is an alias of `mild` for violence). Content never leaks upward: a `clean`
+session never shows anything above the `clean` maximums. The validator rejects unknown
+descriptors and any variant whose descriptors exceed the mode it is keyed to, and warns
+when a supported mode would hide an item entirely.
+
+Items carry `variants` keyed by mode plus a required `fallback`. The game picks the active
+mode's variant when it exists and is allowed, else the fallback when allowed, else hides the
+item (a billboard goes blank). First item type: billboard ads in `ads.v0.json`
+(schema `ads.schema.v0.json`): text, a background colour and descriptors per variant.
 
 ## Map pack files
 | File | Required | Contents |
@@ -52,6 +68,7 @@ Fields for tone modes (`supported_modes`, `max_descriptors`) arrive with the `ad
 | `terrain.json` + `terrain/*.png` | yes | 256 m chunks of 65×65 height samples at 4 m, height in the R and G bytes, min/max per chunk. |
 | `water.v0.json` | no | Pre-triangulated water polygons with a surface height; schema `water.schema.v0.json`. |
 | `buildings.v0.json` | no | Building footprints with height and ground height, roof pre-triangulated; schema `buildings.schema.v0.json`. |
+| `ads.v0.json` | no | Billboard ads with per-mode variants; schema `ads.schema.v0.json`. |
 | `overrides.json` | no | Hand fixes applied on top of the generated data (empty for now). |
 | `chunks/*.glb` + `chunks/build.json` | no | Pre-built meshes from the Godot pack builder. `build.json` holds a hash of the inputs; the game ignores chunks whose hash no longer matches and generates meshes at load instead. |
 

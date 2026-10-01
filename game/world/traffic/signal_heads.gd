@@ -110,8 +110,8 @@ static func _make_multimesh(mesh: Mesh, transforms: Array[Transform3D], lift: Ve
 		if colors:
 			mm.set_instance_color(i, Color.RED)
 	mmi.multimesh = mm
-	mmi.visibility_range_end = 400.0
-	mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	# No visibility range: the range is measured to the centre of the whole multimesh's
+	# bounding box, so heads vanished more than 400 m from the middle of the city.
 	return mmi
 
 

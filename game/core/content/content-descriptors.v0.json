@@ -1,0 +1,14 @@
+{
+ "_comment": "Closed list of content descriptors with levels. A mode allows a maximum level per descriptor; content whose level exceeds it is never shown. Add a descriptor only with a pack-format change and a migration note.",
+ "levels": ["none", "mild", "strong"],
+ "descriptors": {
+  "violence": {"about": "fights, shootings, car hits", "aliases": {"stylized": "mild"}},
+  "gore": {"about": "blood and injury detail"},
+  "drugs": {"about": "drug use and dealing"},
+  "sex_work": {"about": "sex work and solicitation"},
+  "profanity": {"about": "swearing in text and dialogue"},
+  "crime": {"about": "theft, carjacking, organised crime"},
+  "horror": {"about": "frightening imagery"},
+  "dystopia_tech": {"about": "implants, corporate surveillance, cyberpunk-only content"}
+ }
+}

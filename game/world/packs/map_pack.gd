@@ -27,6 +27,7 @@ const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
 
 var pack_dir: String = ""
 var manifest: Dictionary = {}
+var ads: Array = []  # billboard ads from ads.v0.json, if the pack has any
 var graph: RoadGraph
 var terrain_index: Dictionary = {}
 var junctions: Dictionary = {}
@@ -60,6 +61,12 @@ func load(dir: String) -> bool:
 		push_error("MapPack: cannot read %s" % manifest_path)
 		return false
 	manifest = parsed
+	ads = []
+	var ads_path := dir.path_join("ads.v0.json")
+	if FileAccess.file_exists(ads_path):
+		var ads_parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ads_path))
+		if ads_parsed is Dictionary:
+			ads = ads_parsed.get("ads", [])
 	if manifest.get("type", "") != "map":
 		push_error("MapPack: %s is not a map pack" % manifest.get("id", dir))
 		return false

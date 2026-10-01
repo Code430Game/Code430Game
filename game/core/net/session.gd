@@ -28,6 +28,7 @@ var _peer: ENetMultiplayerPeer
 
 
 func _ready() -> void:
+	ContentMode.mode_changed.connect(_on_mode_changed)
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -95,6 +96,9 @@ func leave() -> void:
 
 
 func _reset() -> void:
+	if ContentMode.locked:
+		ContentMode.locked = false
+		ContentMode.load_saved()
 	if _peer != null:
 		_peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
@@ -107,7 +111,7 @@ func _reset() -> void:
 func _on_connected_to_server() -> void:
 	connected = true
 	print("net: connected to host, sending hello")
-	_hello.rpc_id(1, local_manifest, _pending_name, local_profile)
+	_hello.rpc_id(1, local_manifest, _pending_name, local_profile, ContentMode.current)
 
 
 func _on_peer_connected(id: int) -> void:
@@ -130,7 +134,7 @@ static func mismatch_reason(host_manifest: Dictionary, guest_manifest: Dictionar
 
 
 @rpc("any_peer", "reliable")
-func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}) -> void:
+func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}, _mode: String = "") -> void:
 	if not is_host():
 		return
 	var id := multiplayer.get_remote_sender_id()
@@ -146,7 +150,7 @@ func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}) -> voi
 		return
 	print("net: peer %d joined as %s (%d players)" % [id, name, peers.size() + 1])
 	peers[id] = {"name": name, "color": _color_for(id), "profile": profile}
-	_welcome.rpc_id(id, peers, local_manifest, signal_time)
+	_welcome.rpc_id(id, peers, local_manifest, signal_time, ContentMode.current)
 	_peer_came.rpc(id, peers[id])
 	peer_joined.emit(id, peers[id])
 
@@ -165,9 +169,12 @@ func _refuse(reason: String) -> void:
 
 
 @rpc("authority", "reliable")
-func _welcome(all_peers: Dictionary, host_manifest: Dictionary, host_signal_time: float) -> void:
+func _welcome(all_peers: Dictionary, host_manifest: Dictionary, host_signal_time: float, mode: String = "") -> void:
 	peers = all_peers
 	signal_time = host_signal_time
+	if mode != "":
+		ContentMode.set_mode(mode, false)  # the host's tone is the session's
+		ContentMode.locked = true
 	print("net: welcomed as peer %d with %d players" % [multiplayer.get_unique_id(), peers.size()])
 	joined.emit({"peers": peers, "pack": host_manifest})
 	for id in peers:
@@ -186,6 +193,18 @@ func _peer_came(id: int, info: Dictionary) -> void:
 func _peer_gone(id: int) -> void:
 	if peers.erase(id):
 		peer_left.emit(id)
+
+
+## Host: a tone change mid-session reaches every client.
+func _on_mode_changed(id: String) -> void:
+	if is_host():
+		_mode_changed.rpc(id)
+
+
+@rpc("authority", "reliable")
+func _mode_changed(id: String) -> void:
+	ContentMode.set_mode(id, false)
+	ContentMode.locked = true
 
 
 ## Changes this player's look; everyone in the session hears about it.

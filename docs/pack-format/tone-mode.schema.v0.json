@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/tone-mode.schema.v0.json",
+  "title": "Code 430 tone mode v0",
+  "description": "One tone mode: the maximum level per content descriptor, mechanic flags and the variant key content items use. Base modes live in game/core/content/modes/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "max", "flags", "variant_key"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "name": {"type": "string", "minLength": 1},
+    "about": {"type": "string"},
+    "max": {
+      "type": "object",
+      "additionalProperties": {"enum": ["none", "mild", "strong"]}
+    },
+    "flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["violence", "lethal_weapons", "drug_use", "sex_work_services"],
+      "properties": {
+        "violence": {"type": "boolean"},
+        "lethal_weapons": {"type": "boolean"},
+        "drug_use": {"type": "boolean"},
+        "sex_work_services": {"type": "boolean"}
+      }
+    },
+    "variant_key": {"type": "string", "minLength": 1}
+  }
+}
