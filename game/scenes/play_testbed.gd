@@ -22,6 +22,7 @@ const BENCH_WARMUP_S := 3.0
 @onready var _minimap: Minimap = $HUD/Minimap
 @onready var _overview: OverviewMap = $OverviewMap
 @onready var _pause_menu: PauseMenu = $PauseMenu
+@onready var _creator: CharacterCreator = $CharacterCreator
 var _map_renderer: MapRenderer
 var _traffic: TrafficManager
 var _traffic_cap: int = -1
@@ -53,6 +54,7 @@ var _bench_cpu: PackedFloat32Array = PackedFloat32Array()
 var _bench_gpu: PackedFloat32Array = PackedFloat32Array()
 var _autodrive: bool = false
 var _screenshot_path: String = ""
+var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
 var _start_position: Vector3 = Vector3.ZERO
 var _bench_done: bool = false
 var _autodrive_edge: RoadGraph.RoadEdge
@@ -80,6 +82,9 @@ func _ready() -> void:
 	_parse_args()
 	_pause_menu.overview_map = _overview
 	_pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
+	_pause_menu.character_requested.connect(_open_creator)
+	_creator.profile_changed.connect(func(p: Dictionary) -> void: if _player != null: _player.apply_profile(p))
+	_creator.closed.connect(_on_creator_closed)
 	_pause_menu.host_requested.connect(_host_game)
 	_pause_menu.join_requested.connect(_join_game)
 	Session.peer_joined.connect(func(_id: int, _info: Dictionary) -> void: _refresh_session_status())
@@ -130,6 +135,8 @@ func _ready() -> void:
 	_start_position = spawn.origin
 	_player = PLAYER_SCENE.instantiate()
 	_player.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_player.profile = CharacterStore.last_or_random()
+	Session.local_profile = _player.profile
 	add_child(_player)
 	_player.global_position = spawn.origin - spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
 	_player.entered_vehicle.connect(_on_entered_vehicle)
@@ -145,6 +152,8 @@ func _ready() -> void:
 	_setup_day_night()
 	_setup_audio()
 	_setup_net()
+	if _open_creator_at_start:
+		get_tree().create_timer(1.5).timeout.connect(_open_creator)
 	_autodrive_edge = spawn_edge
 	_autodrive_reverse = spawn_reverse
 	_autodrive_distance = spawn_distance
@@ -245,6 +254,18 @@ func _setup_net() -> void:
 		_host_game(_host_port)
 	elif _join_address != "":
 		_join_game(_join_address)
+
+
+func _open_creator() -> void:
+	_pause_menu.visible = false
+	_creator.open(_player.profile if _player != null else {})
+
+
+func _on_creator_closed(p: Dictionary) -> void:
+	if _player != null:
+		_player.apply_profile(p)
+	Session.set_profile(p)
+	_pause_menu.reopen()
 
 
 func _host_game(port: int = Session.DEFAULT_PORT) -> void:
@@ -428,6 +449,8 @@ func _parse_args() -> void:
 			Settings.apply_preset(arg.get_slice("=", 1))
 		elif arg.begins_with("--screenshot="):
 			_screenshot_path = arg.get_slice("=", 1)
+		elif arg == "--creator":
+			_open_creator_at_start = true
 		elif arg == "--telemetry":
 			_telemetry = true
 		elif arg == "--bumps":

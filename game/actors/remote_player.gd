@@ -19,19 +19,12 @@ var _samples: Array = []  # [{"t": float, "driving": bool, "body": Transform3D, 
 var _clock: float = 0.0
 
 
-func setup(id: int, tint: Color) -> void:
+func setup(id: int, tint: Color, profile: Dictionary = {}) -> void:
 	peer_id = id
 	color = tint
 	_body = MeshInstance3D.new()
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.35
-	capsule.height = 1.8
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = tint
-	capsule.material = mat
-	_body.mesh = capsule
-	_body.position.y = 0.9
 	add_child(_body)
+	apply_profile(profile)
 	_car = AnimatableBody3D.new()
 	_car.sync_to_physics = true
 	var shape := CollisionShape3D.new()
@@ -48,6 +41,22 @@ func setup(id: int, tint: Color) -> void:
 	_car.top_level = true
 	add_child(_car)
 	_car.visible = false
+
+
+## Wears the peer's character; an empty profile keeps the tinted capsule stand-in.
+func apply_profile(profile: Dictionary) -> void:
+	if profile.is_empty():
+		var capsule := CapsuleMesh.new()
+		capsule.radius = 0.35
+		capsule.height = 1.8
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = color
+		capsule.material = mat
+		_body.mesh = capsule
+		_body.position.y = 0.9
+	else:
+		_body.mesh = CharacterMesh.build(profile)
+		_body.position.y = 0.0
 
 
 ## Position of whatever this peer controls, for streaming and traffic anchors.
