@@ -381,8 +381,10 @@ func _print_benchmark() -> void:
 	print("benchmark: %s" % render_note)
 	if _traffic != null:
 		print("benchmark: traffic agents %d, physics process %.2f ms" % [_traffic.active_count(), Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0])
+	if _traffic != null:
+		print("benchmark: traffic cost %s" % _traffic.profile_line())
 	if _peds != null:
-		print("benchmark: pedestrians %d" % _peds.active_count())
+		print("benchmark: pedestrians %d, cost %s" % [_peds.active_count(), _peds.profile_line()])
 	if _streamer != null:
 		print("benchmark: chunks in scene %d, built %d, downgraded %d, freed %d, failed %d, first playable %d ms" % [_streamer.chunk_count(), _streamer.stats["built"], _streamer.stats["downgraded"], _streamer.stats["freed"], _streamer.stats["failed"], _first_playable_ms])
 

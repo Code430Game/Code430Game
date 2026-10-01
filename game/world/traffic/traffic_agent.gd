@@ -14,6 +14,7 @@ var hit_timer: float = 0.0
 var color: Color = Color.WHITE
 var transform: Transform3D = Transform3D.IDENTITY
 var body: TrafficCar = null  # pooled physics body while near a player, else null
+var anchor_dist: float = INF  # distance to the nearest player, refreshed once per tick
 
 
 func position() -> Vector3:

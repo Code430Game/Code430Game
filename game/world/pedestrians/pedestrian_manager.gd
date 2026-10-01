@@ -83,11 +83,25 @@ func active_count() -> int:
 	return agents.size()
 
 
+## Exponential moving averages of this manager's per-tick costs, in milliseconds.
+var profile: Dictionary = {"spawn_ms": 0.0, "step_ms": 0.0, "bodies_ms": 0.0, "render_ms": 0.0}
+
+
+func _profile_add(key: String, usec: int) -> void:
+	profile[key] = float(profile[key]) * 0.97 + float(usec) / 1000.0 * 0.03
+
+
+## One-line summary of the profile for the benchmark.
+func profile_line() -> String:
+	return "spawn %.2f step %.2f bodies %.2f render %.2f ms" % [profile["spawn_ms"], profile["step_ms"], profile["bodies_ms"], profile["render_ms"]]
+
+
 func _physics_process(delta: float) -> void:
 	if walk == null or not enabled or anchors.is_empty():
 		return
 	_frame += 1
 	_spawn_timer -= delta
+	var t0 := Time.get_ticks_usec()
 	if _spawn_timer <= 0.0:
 		_spawn_timer = float(config["spawn_interval_s"])
 		_despawn_far()
@@ -95,9 +109,17 @@ func _physics_process(delta: float) -> void:
 			if agents.size() >= max_agents:
 				break
 			_spawn_one()
+	var t1 := Time.get_ticks_usec()
 	step(delta)
+	var t2 := Time.get_ticks_usec()
 	_assign_bodies()
+	var t3 := Time.get_ticks_usec()
 	_render()
+	var t4 := Time.get_ticks_usec()
+	_profile_add("spawn_ms", t1 - t0)
+	_profile_add("step_ms", t2 - t1)
+	_profile_add("bodies_ms", t3 - t2)
+	_profile_add("render_ms", t4 - t3)
 
 
 ## Advances every agent. Pure of spawning and rendering so tests can drive it directly.
