@@ -22,6 +22,7 @@ var vehicle: VehicleBody3D = null
 ## Called with this player when it wants to enter a vehicle; the scene decides which camera to use.
 var _yaw: float = 0.0
 var _pitch: float = 0.0
+var _mouse_look: Vector2 = Vector2.ZERO  # accumulated mouse motion this frame, radians
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
 
@@ -75,9 +76,17 @@ func _physics_process(delta: float) -> void:
 
 func _orbit(delta: float) -> void:
 	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
-	_yaw -= look.x * config.camera_orbit_speed_rad_s * delta
-	_pitch = clampf(_pitch + look.y * config.camera_orbit_speed_rad_s * delta, deg_to_rad(config.camera_pitch_min_deg), deg_to_rad(config.camera_pitch_max_deg))
+	_yaw -= look.x * config.camera_orbit_speed_rad_s * delta + _mouse_look.x
+	_pitch = clampf(_pitch + look.y * config.camera_orbit_speed_rad_s * delta + _mouse_look.y, deg_to_rad(config.camera_pitch_min_deg), deg_to_rad(config.camera_pitch_max_deg))
+	_mouse_look = Vector2.ZERO
 	_apply_camera_angles()
+
+
+## Mouse look while the mouse is captured (the scene captures it on the desktop when on foot).
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and peer_id == Players.LOCAL_PEER_ID:
+		var m := event as InputEventMouseMotion
+		_mouse_look += m.relative * config.mouse_look_rad_per_px
 
 
 func _apply_camera_angles() -> void:

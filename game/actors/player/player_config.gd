@@ -19,6 +19,7 @@ extends Resource
 @export var camera_pitch_min_deg: float = -35.0
 @export var camera_pitch_max_deg: float = 60.0
 @export var camera_default_pitch_deg: float = 12.0
+@export var mouse_look_rad_per_px: float = 0.0025
 
 @export_group("Vehicles")
 @export var enter_range_m: float = 2.5
