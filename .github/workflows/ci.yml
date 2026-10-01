@@ -70,9 +70,14 @@ jobs:
       - name: Import project
         run: ~/godot/godot --headless --path game --import --quit
       - name: Run tests
+        # gdUnit exits 101 when every test passed but some left orphan nodes: a warning, not a failure.
         run: |
+          set +e
           ~/godot/godot --headless --path game -s -d --remote-debug tcp://127.0.0.1:0 \
             res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
+          status=$?
+          if [ "$status" -eq 101 ]; then echo "gdUnit: passed with orphan nodes (warning)"; exit 0; fi
+          exit "$status"
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
