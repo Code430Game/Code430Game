@@ -195,3 +195,17 @@ def test_stop_on_the_approach_applies_to_that_end_only():
     e = next(x for x in g.edges.values() if x.osm_way_id == 1)
     assert (e.control_to, e.control_from) == ("stop", "none")
     assert all(x.control_to == "none" for x in g.edges.values() if x.osm_way_id == 2)
+
+
+def test_projector_picks_the_utm_zone_of_the_region():
+    from osm_import.projection import Projector, utm_crs_for
+
+    assert utm_crs_for(45.42, -75.69) == "EPSG:32618"  # Ottawa
+    assert utm_crs_for(49.28, -123.12) == "EPSG:32610"  # Vancouver
+    assert utm_crs_for(-33.87, 151.21) == "EPSG:32756"  # Sydney, southern hemisphere
+    from osm_import.osm_data import BBox
+
+    van = Projector.for_bbox(BBox(49.26, -123.14, 49.30, -123.10))
+    assert van.frame.crs == "EPSG:32610"
+    x, z = van.to_local(49.28, -123.12)
+    assert abs(x) < 5.0 and abs(z) < 5.0  # the centre is the origin

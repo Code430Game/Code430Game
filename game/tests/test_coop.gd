@@ -51,3 +51,21 @@ func test_remote_player_interpolates_toward_the_newest_sample() -> void:
 	assert_float(r.global_position.x).is_equal_approx(20.0, 0.01)
 	assert_bool(r.driving).is_true()
 	assert_float(r.car_target.origin.z).is_equal_approx(5.0, 0.01)
+
+
+func test_host_releases_and_retires_agents_near_a_point() -> void:
+	var m: TrafficManager = auto_free(TrafficManager.new())
+	add_child(m)
+	var a := TrafficAgent.new()
+	a.transform = Transform3D(Basis(), Vector3(50, 0, 0))
+	a.color = Color.GREEN
+	var b := TrafficAgent.new()
+	b.transform = Transform3D(Basis(), Vector3(300, 0, 0))
+	m.agents = [a, b]
+	assert_dict(m.release_near(Vector3(400, 0, 0))).is_empty()  # nothing within reach
+	var got := m.release_near(Vector3(52, 0, 0))
+	assert_object(got["color"]).is_equal(Color.GREEN)
+	assert_int(m.agents.size()).is_equal(1)
+	assert_bool(m.hit_near(Vector3(301, 0, 0), Vector3(10, 0, 0))).is_true()
+	assert_bool(b.retired).is_true()
+	assert_bool(m.hit_near(Vector3(301, 0, 0), Vector3.ZERO)).is_false()  # already retired

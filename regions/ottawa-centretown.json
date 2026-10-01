@@ -1,0 +1,7 @@
+{
+  "name": "ottawa-centretown",
+  "bbox": [45.405, -75.715, 45.435, -75.675],
+  "pack_id": "code430.ottawa-centretown",
+  "pack_name": "Ottawa Centretown",
+  "dem": "hrdem"
+}

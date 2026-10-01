@@ -5,6 +5,13 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-01
 
+- **Character creator plan (from the human).** First start spawns a randomised character so
+  nothing blocks play; the creator then tweaks that body's features; presets are saved,
+  including "last created". The creator is a later change; this is its brief.
+- **Region picker plan.** A local Leaflet page under `tools/region_picker/` (no server): drag a
+  rectangle, see km², UTM zone, elevation coverage (HRDEM or worldwide fallback) and a live
+  Overpass building count; copy the import command or save `regions/<name>.json` for `--region`.
+
 - **Region picker.** The Ottawa bbox is not quite the area wanted. Before importing a
   friend's region, build a small visual picker (a local HTML page over OpenStreetMap tiles,
   or Overpass Turbo's bbox export) that shows the exact rectangle and prints the import
