@@ -79,3 +79,29 @@ func test_leaving_downgrades_and_going_far_frees() -> void:
 	while _streamer.is_busy():
 		_streamer.update()
 		await get_tree().process_frame
+
+
+func test_streamed_chunks_get_their_collision_over_frames() -> void:
+	var spawn := _pack.spawn_transform().origin
+	_streamer.anchors = PackedVector3Array([spawn])
+	# No spawn ring: everything streams, so collision arrives through the queue.
+	var frames := 0
+	while _streamer.chunk_count() < 3 and frames < 600:
+		_streamer.update()
+		await get_tree().process_frame
+		frames += 1
+	assert_int(_streamer.chunk_count()).is_greater_equal(3)
+	var here := _coord_at(spawn)
+	assert_int(_streamer.tier_of(here)).is_equal(MapPack.Tier.NEAR)
+	var node: Node3D = _world.get_node("chunk_%d_%d" % [here.x, here.y])
+	var body: StaticBody3D = node.get_node("collision")
+	for i in range(60):
+		_streamer.update()
+		await get_tree().process_frame
+		if _streamer.collision_pending() == 0:
+			break
+	assert_int(_streamer.collision_pending()).is_equal(0)
+	assert_int(body.get_child_count()).is_greater(0)
+	while _streamer.is_busy():
+		_streamer.update()
+		await get_tree().process_frame

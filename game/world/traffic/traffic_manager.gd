@@ -13,6 +13,7 @@ extends Node3D
 const CAR_SCENE := preload("res://world/traffic/traffic_car.tscn")
 const Signals := preload("res://world/traffic/signal_controller.gd")
 const DRIVABLE_CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
+const TAIL_SHADER := preload("res://actors/vehicles/car_tail.gdshader")
 const CONFIG_PATH := "res://world/traffic/traffic_config.json"
 const BODY_POOL := 24
 const BODY_RADIUS_M := 70.0
@@ -22,12 +23,16 @@ var lanes: LaneGraph
 var signals := Signals.new()
 var road_graph: RoadGraph
 var heads: SignalHeads
+## Tail-light material of the traffic MultiMesh; DayNight drives its `night` uniform.
+var tail_material: ShaderMaterial
 var max_agents: int = 150
 var agents: Array[TrafficAgent] = []
 var rng := RandomNumberGenerator.new()
 var enabled: bool = true
 ## Mirror mode (co-op clients): agents come from the host's snapshots; no spawning or stepping.
 var mirror: bool = false
+## Mirror mode: a client's car hit one of the host's cars here (position, car velocity).
+signal mirror_hit(position: Vector3, velocity: Vector3)
 ## Positions traffic is kept around (the players). Set each frame by the scene.
 var anchors: PackedVector3Array = PackedVector3Array()
 ## Player bodies (vehicles or people) that traffic keeps headway from. Set each frame by the scene.
@@ -91,7 +96,12 @@ func _setup_rendering() -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
-	mm.mesh = CarMesh.build(true)  # white body takes the instance colour; glass and lights keep theirs
+	mm.use_custom_data = true  # r = brake 0..1 per car
+	var car_mesh := CarMesh.build(true)  # white body takes the instance colour; glass and lights keep theirs
+	tail_material = ShaderMaterial.new()
+	tail_material.shader = TAIL_SHADER
+	car_mesh.surface_set_material(3, tail_material)
+	mm.mesh = car_mesh
 	mm.instance_count = max_agents
 	mm.visible_instance_count = 0
 	_multimesh.multimesh = mm
@@ -250,6 +260,17 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 	var desired := min_gap + a.speed * float(config["time_headway_s"])
 	if gap < desired:
 		target = minf(target, maxf(0.0, a.speed * (gap - min_gap) / maxf(desired - min_gap, 0.1)))
+	# Stuck behind something that is not moving (a parked player): after a while, move to the
+	# next lane over when the road has one, like a driver pulling around.
+	if gap < min_gap + 1.0 and a.speed < 0.3:
+		a.blocked_time += delta
+		if a.blocked_time >= float(config.get("blocked_sidestep_s", 8.0)) and _sidestep(a, path):
+			a.blocked_time = 0.0
+			path = lanes.paths[a.path_id]
+			gap = _gap_ahead(a, path)
+			target = limit if gap >= desired else target
+	else:
+		a.blocked_time = 0.0
 	var remaining := path.length - a.distance
 	var decel := float(config["decel_mps2"])
 	var stop_dist := a.speed * a.speed / (2.0 * decel) + 3.0
@@ -285,7 +306,9 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 				_claim_junction(a, nxt.junction_node)
 	if target > a.speed:
 		a.speed = minf(a.speed + float(config["accel_mps2"]) * delta, target)
+		a.braking = false
 	else:
+		a.braking = a.speed - target > 0.5 or held_at_line
 		a.speed = maxf(a.speed - decel * delta, target)
 	a.distance += a.speed * delta
 	if held_at_line and a.distance > path.length - 0.5:
@@ -312,6 +335,32 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 
 
 ## Control for a car on `edge_id` reaching `node_id`: per approach, not just per junction.
+## Moves the agent to a parallel lane of the same edge that is clear ahead. False when there is none.
+func _sidestep(a: TrafficAgent, path: LaneGraph.LanePath) -> bool:
+	if path.is_connector or path.edge_id == "":
+		return false
+	var car_len := float(config["car_length_m"])
+	for other in lanes.paths:
+		if other.edge_id != path.edge_id or other.id == path.id or other.is_connector:
+			continue
+		if other.direction_at(0.0).dot(path.direction_at(0.0)) < 0.5:
+			continue  # the opposite carriageway
+		var d := clampf(a.distance, 0.0, other.length)
+		var clear := true
+		for o in _agents_by_path.get(other.id, []):
+			if absf(o.distance - d) < car_len + 1.0:
+				clear = false
+				break
+		if not clear:
+			continue
+		a.path_id = other.id
+		a.distance = d
+		var pos := other.position_at(d)
+		a.transform = Transform3D(Basis.looking_at(other.direction_at(d), Vector3.UP), pos)
+		return true
+	return false
+
+
 func _control_for(node_id: String, edge_id: String) -> String:
 	if road_graph == null or not road_graph.nodes.has(node_id) or not road_graph.edges.has(edge_id):
 		return "none"
@@ -591,9 +640,55 @@ func take_car(body: TrafficCar) -> VehicleBody3D:
 	return car
 
 
+## Host: retires the nearest live agent within `reach` of `position`, giving its body the
+## hitter's velocity so it tumbles the way it would have locally. False when none is near.
+func hit_near(position: Vector3, velocity: Vector3, reach: float = 4.0) -> bool:
+	var best: TrafficAgent = null
+	var best_d := reach
+	for a in agents:
+		if a.retired:
+			continue
+		var d := a.position().distance_to(position)
+		if d < best_d:
+			best_d = d
+			best = a
+	if best == null:
+		return false
+	best.retired = true
+	best.resting = false
+	best.hit_timer = float(config["hit_physics_s"])
+	_leave_junction(best)
+	if best.body != null:
+		best.body.freeze = false
+		best.body.linear_velocity = velocity * 0.5
+	return true
+
+
+## Host: removes the nearest live agent within `reach` of `position` for a guest to take.
+## Returns {"transform", "color"} or an empty Dictionary.
+func release_near(position: Vector3, reach: float = 4.0) -> Dictionary:
+	var best: TrafficAgent = null
+	var best_d := reach
+	for a in agents:
+		var d := a.position().distance_to(position)
+		if d < best_d:
+			best_d = d
+			best = a
+	if best == null:
+		return {}
+	var out := {"transform": best.transform, "color": best.color}
+	_leave_junction(best)
+	_release_body(best)
+	agents.erase(best)
+	return out
+
+
 func _on_body_hit(car: TrafficCar) -> void:
 	var a := car.agent
 	if a == null or a.retired:
+		return
+	if mirror:
+		mirror_hit.emit(a.position(), car.linear_velocity)
 		return
 	a.retired = true
 	a.resting = false
@@ -612,6 +707,7 @@ func _render() -> void:
 		var a := agents[i]
 		mm.set_instance_transform(i, a.transform.translated_local(Vector3(0.0, CarMesh.GROUND_LIFT_M, 0.0)))
 		mm.set_instance_color(i, a.color)
+		mm.set_instance_custom_data(i, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
 
 
 ## Draws lane paths (green) and connectors (orange) as lines; toggled by the scene's graph view.
