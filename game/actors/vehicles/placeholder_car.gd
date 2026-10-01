@@ -76,6 +76,19 @@ func add_headlights(shadows: bool) -> void:
 		_headlights.append(l)
 
 
+var _braking: bool = false
+
+
+## Swaps the tail-light surface to the bright brake material while braking.
+func set_braking(on: bool) -> void:
+	if on == _braking:
+		return
+	_braking = on
+	var mesh_node := $Mesh as MeshInstance3D
+	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 3:
+		mesh_node.set_surface_override_material(3, CarMesh.brake_material() if on else null)
+
+
 ## Brightness of the headlights, 0 off to 1 full; follows the night factor.
 func set_headlights(amount: float) -> void:
 	for l in _headlights:
@@ -142,6 +155,7 @@ func _physics_process(delta: float) -> void:
 		brake = brake_force_max * brk
 	if driven and Input.is_action_pressed("handbrake"):
 		brake = handbrake_force
+	set_braking(brake > 0.0 and forward_speed() > -reverse_threshold_mps)
 	if driven and Input.is_action_just_pressed("reset_vehicle"):
 		_recover()
 	var upside_down := global_basis.y.y < 0.0

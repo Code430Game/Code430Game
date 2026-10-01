@@ -110,3 +110,36 @@ func test_near_parallel_arms_share_a_slot_and_leave_no_sliver() -> void:
 	for p in j.polygon_xz:
 		assert_float(p.length()).override_failure_message("vertex %s is far from the node" % p).is_less(20.0)
 	assert_float(j.trims["wb.0"]).is_equal_approx(j.trims["wa.0"], 1e-4)
+
+
+func test_hull_junction_on_a_slope_follows_its_arms() -> void:
+	# Eight arms (a hull fallback) on a hillside: the east arms climb 2 m over 50 m, the west
+	# arms drop; hull vertices must sit on their arm's grade, not flat at the node's height.
+	var nodes := [{"id": "n_c", "position": [0, 10, 0], "ground_y": 10, "junction_type": "junction"}]
+	var edges := []
+	for k in range(8):
+		var ang := TAU * k / 8.0
+		var ex := cos(ang) * 50.0
+		var ez := sin(ang) * 50.0
+		var ey := 10.0 + 2.0 * cos(ang)  # east high, west low
+		var nid := "n_%d" % k
+		nodes.append({"id": nid, "position": [ex, ey, ez], "ground_y": ey, "junction_type": "dead_end"})
+		edges.append({
+			"id": "w%d.0" % k, "from": "n_c", "to": nid, "polyline": [[0, 10, 0], [ex, ey, ez]], "class": "residential",
+			"lanes_forward": 1, "lanes_backward": 1, "oneway": false, "speed_kph": 40, "width_m": 7.0, "layer": 0, "bridge": false,
+			"tunnel": false, "name": "w%d" % k, "osm_way_id": k, "defaulted_fields": [], "access": null, "length_m": 50.0,
+		})
+	var graph := RoadGraph.from_dict({"meta": {}, "nodes": nodes, "edges": edges, "pedestrian_ways": []})
+	# The hull height rule itself, as the hull fallback applies it to each vertex.
+	var node: RoadGraph.RoadNode = graph.nodes["n_c"]
+	var arms: Array[Dictionary] = []
+	for eid in graph.incident("n_c"):
+		var e: RoadGraph.RoadEdge = graph.edges[eid]
+		var dir := graph.direction_from(e, "n_c")
+		arms.append({"edge": eid, "dir": dir, "angle": atan2(dir.y, dir.x), "hw": e.width_m * 0.5})
+	var east := JunctionBuilder._hull_height(graph, node, arms, Vector2(20.0, 0.0))
+	var west := JunctionBuilder._hull_height(graph, node, arms, Vector2(-20.0, 0.0))
+	var centre := JunctionBuilder._hull_height(graph, node, arms, Vector2(0.0, 0.0))
+	assert_float(east).is_equal_approx(10.8, 0.05)  # 20 m up a 2 m per 50 m climb
+	assert_float(west).is_equal_approx(9.2, 0.05)
+	assert_float(centre).is_equal_approx(10.0, 1e-4)

@@ -155,7 +155,7 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		j.polygon_xz = hull
 		j.heights = PackedFloat32Array()
 		for p in hull:
-			j.heights.append(node.position.y)
+			j.heights.append(_hull_height(graph, node, arms, p))
 		j.fallback_hull = true
 	else:
 		j.polygon_xz = polygon
@@ -177,6 +177,26 @@ static func _is_simple(poly: PackedVector2Array) -> bool:
 			if Geometry2D.segment_intersects_segment(a, b, c, d) != null:
 				return false
 	return true
+
+
+## Height for a hull vertex: the road surface of the arm it lies along, at its distance out,
+## so a junction on a slope follows the slope instead of sitting flat at the node's height
+## (a flat hull stood a step above the downhill arms).
+static func _hull_height(graph: RoadGraph, node: RoadGraph.RoadNode, arms: Array[Dictionary], p: Vector2) -> float:
+	var offset := p - Vector2(node.position.x, node.position.z)
+	var dist := offset.length()
+	if dist < 1e-3 or arms.is_empty():
+		return node.position.y
+	var dir := offset / dist
+	var best: Dictionary = arms[0]
+	var best_dot := -INF
+	for arm in arms:
+		var d: float = (arm["dir"] as Vector2).dot(dir)
+		if d > best_dot:
+			best_dot = d
+			best = arm
+	var edge: RoadGraph.RoadEdge = graph.edges[best["edge"]]
+	return _height_along(graph, edge, node.id, dist * maxf(best_dot, 0.0))
 
 
 ## Height of the road surface at `distance` metres along the edge from the node.
