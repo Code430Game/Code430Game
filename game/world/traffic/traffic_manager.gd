@@ -11,6 +11,7 @@ extends Node3D
 ## frame with a larger delta. With co-op the host runs this and sends transforms.
 
 const CAR_SCENE := preload("res://world/traffic/traffic_car.tscn")
+const Signals := preload("res://world/traffic/signal_controller.gd")
 const DRIVABLE_CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const CONFIG_PATH := "res://world/traffic/traffic_config.json"
 const BODY_POOL := 24
@@ -18,6 +19,9 @@ const BODY_RADIUS_M := 70.0
 
 var config: Dictionary = {}
 var lanes: LaneGraph
+var signals := Signals.new()
+var road_graph: RoadGraph
+var heads: SignalHeads
 var max_agents: int = 150
 var agents: Array[TrafficAgent] = []
 var rng := RandomNumberGenerator.new()
@@ -54,8 +58,16 @@ func load_config(path: String = CONFIG_PATH) -> bool:
 	return true
 
 
-func setup(lane_graph: LaneGraph) -> void:
+func setup(lane_graph: LaneGraph, graph: RoadGraph = null, junctions: Dictionary = {}) -> void:
 	lanes = lane_graph
+	road_graph = graph
+	if graph != null:
+		signals.setup(graph, config)
+		if heads == null and not junctions.is_empty():
+			heads = SignalHeads.new()
+			heads.name = "SignalHeads"
+			add_child(heads)
+			heads.setup(graph, junctions, signals)
 	_lane_cells.clear()
 	for lp in lanes.paths:
 		if lp.is_connector or lp.points.is_empty():
@@ -111,6 +123,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_frame += 1
 	_spawn_timer -= delta
+	signals.advance(delta)
 	var t0 := Time.get_ticks_usec()
 	if _spawn_timer <= 0.0:
 		_spawn_timer = float(config["spawn_interval_s"])
@@ -231,10 +244,29 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 	var remaining := path.length - a.distance
 	var decel := float(config["decel_mps2"])
 	var stop_dist := a.speed * a.speed / (2.0 * decel) + 3.0
+	var held_at_line := false
 	if not path.is_connector and remaining < stop_dist and not path.next.is_empty():
 		var nxt: LaneGraph.LanePath = lanes.paths[path.next[0]]
 		if nxt.junction_node != "" and a.occupies_junction != nxt.junction_node:
-			if _junction_busy(nxt.junction_node, a):
+			var control := _control_at(nxt.junction_node)
+			if control == "signals":
+				var l: int = signals.light(nxt.junction_node, path.edge_id)
+				# Amber: stop if we can do so comfortably, else carry on through.
+				var can_stop := remaining > a.speed * 1.0
+				if l == Signals.Light.RED or (l == Signals.Light.AMBER and can_stop):
+					target = 0.0
+					held_at_line = true
+				else:
+					_claim_junction(a, nxt.junction_node)
+			elif control == "stop" and not a.stopped_at_sign:
+				target = 0.0
+				held_at_line = true
+				if a.speed < 0.2:
+					a.wait_time += delta
+					if a.wait_time >= float(config["stop_sign_hold_s"]):
+						a.stopped_at_sign = true
+						a.wait_time = 0.0
+			elif _junction_busy(nxt.junction_node, a):
 				a.wait_time += delta
 				if a.wait_time < float(config["yield_wait_max_s"]):
 					target = 0.0
@@ -247,6 +279,9 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 	else:
 		a.speed = maxf(a.speed - decel * delta, target)
 	a.distance += a.speed * delta
+	if held_at_line and a.distance > path.length - 0.5:
+		a.distance = path.length - 0.5  # the stop line: never roll into the junction on red
+		a.speed = 0.0
 	while a.distance >= path.length:
 		var next_id := lanes.choose_next(path, rng)
 		if next_id < 0:
@@ -261,9 +296,16 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 		if path.junction_node != "":
 			_claim_junction(a, path.junction_node)
 			a.wait_time = 0.0
+			a.stopped_at_sign = false
 	var pos := path.position_at(a.distance)
 	var dir := path.direction_at(a.distance)
 	a.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), pos)
+
+
+func _control_at(node_id: String) -> String:
+	if road_graph == null or not road_graph.nodes.has(node_id):
+		return "none"
+	return road_graph.nodes[node_id].control
 
 
 func _claim_junction(a: TrafficAgent, node: String) -> void:

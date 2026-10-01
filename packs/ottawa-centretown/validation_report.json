@@ -4,21 +4,21 @@
    "classes": {
     "living_street": 2,
     "motorway": 47,
-    "motorway_link": 34,
-    "primary": 271,
+    "motorway_link": 35,
+    "primary": 276,
     "primary_link": 23,
-    "residential": 836,
-    "secondary": 601,
+    "residential": 839,
+    "secondary": 602,
     "secondary_link": 14,
-    "service": 289,
+    "service": 306,
     "tertiary": 137,
     "tertiary_link": 3,
     "trunk": 3,
-    "unclassified": 81
+    "unclassified": 80
    },
-   "edges": 2341,
+   "edges": 2367,
    "likely_cause": "main network",
-   "nodes": 1762,
+   "nodes": 1787,
    "sample_names": [
     "1 Nelson Street",
     "2nd Avenue",
@@ -40,6 +40,20 @@
     10228741
    ],
    "touches_bbox_edge": true
+  },
+  {
+   "classes": {
+    "service": 4
+   },
+   "edges": 4,
+   "likely_cause": "connector filtered out (service=parking_aisle)",
+   "nodes": 4,
+   "sample_names": [],
+   "sample_way_ids": [
+    128401786,
+    1549498626
+   ],
+   "touches_bbox_edge": false
   },
   {
    "classes": {
@@ -157,32 +171,6 @@
     "service": 1
    },
    "edges": 1,
-   "likely_cause": "connector filtered out (service=driveway)",
-   "nodes": 2,
-   "sample_names": [],
-   "sample_way_ids": [
-    128400695
-   ],
-   "touches_bbox_edge": false
-  },
-  {
-   "classes": {
-    "service": 1
-   },
-   "edges": 1,
-   "likely_cause": "connector filtered out (service=parking_aisle)",
-   "nodes": 2,
-   "sample_names": [],
-   "sample_way_ids": [
-    128401786
-   ],
-   "touches_bbox_edge": false
-  },
-  {
-   "classes": {
-    "service": 1
-   },
-   "edges": 1,
    "likely_cause": "connector filtered out (service=parking_aisle)",
    "nodes": 2,
    "sample_names": [],
@@ -214,6 +202,32 @@
    "sample_names": [],
    "sample_way_ids": [
     549844121
+   ],
+   "touches_bbox_edge": false
+  },
+  {
+   "classes": {
+    "service": 1
+   },
+   "edges": 1,
+   "likely_cause": "connector filtered out (service=parking_aisle)",
+   "nodes": 2,
+   "sample_names": [],
+   "sample_way_ids": [
+    732464448
+   ],
+   "touches_bbox_edge": false
+  },
+  {
+   "classes": {
+    "service": 1
+   },
+   "edges": 1,
+   "likely_cause": "connector filtered out (service=parking_aisle)",
+   "nodes": 2,
+   "sample_names": [],
+   "sample_way_ids": [
+    732464449
    ],
    "touches_bbox_edge": false
   },
@@ -367,6 +381,15 @@
     "osm_node_id": 13911407649,
     "osm_way_id": 1526314866,
     "road_class": "service"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w490237095.1",
+    "name": "O'Connor Street",
+    "node_id": "n14029317844",
+    "osm_node_id": 14029317844,
+    "osm_way_id": 490237095,
+    "road_class": "residential"
    },
    {
     "category": "bbox_edge",
@@ -750,8 +773,8 @@
     "category": "bbox_edge",
     "edge_id": "w76441669.1",
     "name": "Stewart Street",
-    "node_id": "n6374148810",
-    "osm_node_id": 6374148810,
+    "node_id": "n6374148813",
+    "osm_node_id": 6374148813,
     "osm_way_id": 76441669,
     "road_class": "residential"
    },
@@ -1180,15 +1203,6 @@
    },
    {
     "category": "bbox_edge",
-    "edge_id": "w490237095.2",
-    "name": "O'Connor Street",
-    "node_id": "n903991615",
-    "osm_node_id": 903991615,
-    "osm_way_id": 490237095,
-    "road_class": "residential"
-   },
-   {
-    "category": "bbox_edge",
     "edge_id": "w76730219.0",
     "name": "McGillivray Street",
     "node_id": "n903992544",
@@ -1206,7 +1220,80 @@
     "road_class": "residential"
    }
   ],
-  "declared_noexit": [],
+  "declared_noexit": [
+   {
+    "category": "declared_noexit",
+    "edge_id": "w76422485.0",
+    "name": "Charisma Private",
+    "node_id": "n901045662",
+    "osm_node_id": 901045662,
+    "osm_way_id": 76422485,
+    "road_class": "service"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w76423932.0",
+    "name": "Academy Private",
+    "node_id": "n901048877",
+    "osm_node_id": 901048877,
+    "osm_way_id": 76423932,
+    "road_class": "residential"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w76419338.2",
+    "name": "Larch Street",
+    "node_id": "n901056038",
+    "osm_node_id": 901056038,
+    "osm_way_id": 76419338,
+    "road_class": "residential"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w76422434.0",
+    "name": "Laurel Street East",
+    "node_id": "n901056235",
+    "osm_node_id": 901056235,
+    "osm_way_id": 76422434,
+    "road_class": "residential"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w76422838.0",
+    "name": "Ron Kolbus Private",
+    "node_id": "n901059044",
+    "osm_node_id": 901059044,
+    "osm_way_id": 76422838,
+    "road_class": "service"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w76423020.0",
+    "name": "Perkins Street",
+    "node_id": "n901059299",
+    "osm_node_id": 901059299,
+    "osm_way_id": 76423020,
+    "road_class": "residential"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w461153741.0",
+    "name": "Concord Street South",
+    "node_id": "n901216399",
+    "osm_node_id": 901216399,
+    "osm_way_id": 461153741,
+    "road_class": "residential"
+   },
+   {
+    "category": "declared_noexit",
+    "edge_id": "w362343327.0",
+    "name": "Hawthorne Avenue",
+    "node_id": "n901218320",
+    "osm_node_id": 901218320,
+    "osm_way_id": 362343327,
+    "road_class": "residential"
+   }
+  ],
   "likely_real": [
    {
     "category": "likely_real",
@@ -1417,15 +1504,6 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w1453268624.0",
-    "name": null,
-    "node_id": "n13327606991",
-    "osm_node_id": 13327606991,
-    "osm_way_id": 1453268624,
-    "road_class": "service"
-   },
-   {
-    "category": "likely_real",
     "edge_id": "w1458899984.0",
     "name": null,
     "node_id": "n13379810705",
@@ -1476,6 +1554,15 @@
     "node_id": "n13571450808",
     "osm_node_id": 13571450808,
     "osm_way_id": 1479454737,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w128398610.0",
+    "name": null,
+    "node_id": "n1357279374",
+    "osm_node_id": 1357279374,
+    "osm_way_id": 128398610,
     "road_class": "service"
    },
    {
@@ -1570,6 +1657,132 @@
    },
    {
     "category": "likely_real",
+    "edge_id": "w1551032214.3",
+    "name": null,
+    "node_id": "n14107281119",
+    "osm_node_id": 14107281119,
+    "osm_way_id": 1551032214,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1551032215.0",
+    "name": null,
+    "node_id": "n14107281121",
+    "osm_node_id": 14107281121,
+    "osm_way_id": 1551032215,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1551032216.2",
+    "name": null,
+    "node_id": "n14107281122",
+    "osm_node_id": 14107281122,
+    "osm_way_id": 1551032216,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1551032217.0",
+    "name": null,
+    "node_id": "n14107281123",
+    "osm_node_id": 14107281123,
+    "osm_way_id": 1551032217,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1551032219.1",
+    "name": null,
+    "node_id": "n14107281130",
+    "osm_node_id": 14107281130,
+    "osm_way_id": 1551032219,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1551032221.0",
+    "name": null,
+    "node_id": "n14107281131",
+    "osm_node_id": 14107281131,
+    "osm_way_id": 1551032221,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1551032223.0",
+    "name": null,
+    "node_id": "n14107281138",
+    "osm_node_id": 14107281138,
+    "osm_way_id": 1551032223,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387285.0",
+    "name": null,
+    "node_id": "n14141327480",
+    "osm_node_id": 14141327480,
+    "osm_way_id": 1554387285,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387287.0",
+    "name": null,
+    "node_id": "n14141327487",
+    "osm_node_id": 14141327487,
+    "osm_way_id": 1554387287,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387288.0",
+    "name": null,
+    "node_id": "n14141327491",
+    "osm_node_id": 14141327491,
+    "osm_way_id": 1554387288,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387289.0",
+    "name": null,
+    "node_id": "n14141327492",
+    "osm_node_id": 14141327492,
+    "osm_way_id": 1554387289,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387290.0",
+    "name": null,
+    "node_id": "n14141327495",
+    "osm_node_id": 14141327495,
+    "osm_way_id": 1554387290,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387291.0",
+    "name": null,
+    "node_id": "n14141327500",
+    "osm_node_id": 14141327500,
+    "osm_way_id": 1554387291,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w1554387292.0",
+    "name": null,
+    "node_id": "n14141384001",
+    "osm_node_id": 14141384001,
+    "osm_way_id": 1554387292,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
     "edge_id": "w128191521.0",
     "name": null,
     "node_id": "n1417117488",
@@ -1624,15 +1837,6 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w128400695.0",
-    "name": null,
-    "node_id": "n1419404587",
-    "osm_node_id": 1419404587,
-    "osm_way_id": 128400695,
-    "road_class": "service"
-   },
-   {
-    "category": "likely_real",
     "edge_id": "w128443375.0",
     "name": "Rue Jacques-Cartier",
     "node_id": "n1419472365",
@@ -1660,11 +1864,29 @@
    },
    {
     "category": "likely_real",
+    "edge_id": "w1561761237.0",
+    "name": null,
+    "node_id": "n14209760351",
+    "osm_node_id": 14209760351,
+    "osm_way_id": 1561761237,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
     "edge_id": "w532951338.0",
     "name": "Upper Lorne Place",
     "node_id": "n1461210973",
     "osm_node_id": 1461210973,
     "osm_way_id": 532951338,
+    "road_class": "residential"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w466337763.0",
+    "name": "Rue de Notre-Dame-de-I'Île",
+    "node_id": "n1529859686",
+    "osm_node_id": 1529859686,
+    "osm_way_id": 466337763,
     "road_class": "residential"
    },
    {
@@ -2526,6 +2748,15 @@
     "category": "likely_real",
     "edge_id": "w732464448.0",
     "name": null,
+    "node_id": "n6858994558",
+    "osm_node_id": 6858994558,
+    "osm_way_id": 732464448,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w732464448.0",
+    "name": null,
     "node_id": "n6858994559",
     "osm_node_id": 6858994559,
     "osm_way_id": 732464448,
@@ -2535,9 +2766,27 @@
     "category": "likely_real",
     "edge_id": "w732464449.0",
     "name": null,
+    "node_id": "n6858994560",
+    "osm_node_id": 6858994560,
+    "osm_way_id": 732464449,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w732464449.0",
+    "name": null,
     "node_id": "n6858994561",
     "osm_node_id": 6858994561,
     "osm_way_id": 732464449,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w10228426.0",
+    "name": null,
+    "node_id": "n6858994562",
+    "osm_node_id": 6858994562,
+    "osm_way_id": 10228426,
     "road_class": "service"
    },
    {
@@ -2614,7 +2863,7 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w977393927.0",
+    "edge_id": "w977393927.1",
     "name": "Frank Street",
     "node_id": "n6961266854",
     "osm_node_id": 6961266854,
@@ -2731,7 +2980,7 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w128401786.0",
+    "edge_id": "w128401786.2",
     "name": null,
     "node_id": "n7294974019",
     "osm_node_id": 7294974019,
@@ -2794,15 +3043,6 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w76422485.0",
-    "name": "Charisma Private",
-    "node_id": "n901045662",
-    "osm_node_id": 901045662,
-    "osm_way_id": 76422485,
-    "road_class": "service"
-   },
-   {
-    "category": "likely_real",
     "edge_id": "w76441694.0",
     "name": "Murray Street",
     "node_id": "n901046507",
@@ -2830,15 +3070,6 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w76423932.0",
-    "name": "Academy Private",
-    "node_id": "n901048877",
-    "osm_node_id": 901048877,
-    "osm_way_id": 76423932,
-    "road_class": "residential"
-   },
-   {
-    "category": "likely_real",
     "edge_id": "w76424413.0",
     "name": "Empress Avenue",
     "node_id": "n901052471",
@@ -2853,42 +3084,6 @@
     "node_id": "n901054451",
     "osm_node_id": 901054451,
     "osm_way_id": 76422456,
-    "road_class": "residential"
-   },
-   {
-    "category": "likely_real",
-    "edge_id": "w76419338.2",
-    "name": "Larch Street",
-    "node_id": "n901056038",
-    "osm_node_id": 901056038,
-    "osm_way_id": 76419338,
-    "road_class": "residential"
-   },
-   {
-    "category": "likely_real",
-    "edge_id": "w76422434.0",
-    "name": "Laurel Street East",
-    "node_id": "n901056235",
-    "osm_node_id": 901056235,
-    "osm_way_id": 76422434,
-    "road_class": "residential"
-   },
-   {
-    "category": "likely_real",
-    "edge_id": "w76422838.0",
-    "name": "Ron Kolbus Private",
-    "node_id": "n901059044",
-    "osm_node_id": 901059044,
-    "osm_way_id": 76422838,
-    "road_class": "service"
-   },
-   {
-    "category": "likely_real",
-    "edge_id": "w76423020.0",
-    "name": "Perkins Street",
-    "node_id": "n901059299",
-    "osm_node_id": 901059299,
-    "osm_way_id": 76423020,
     "road_class": "residential"
    },
    {
@@ -3046,29 +3241,11 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w461153741.0",
-    "name": "Concord Street South",
-    "node_id": "n901216399",
-    "osm_node_id": 901216399,
-    "osm_way_id": 461153741,
-    "road_class": "residential"
-   },
-   {
-    "category": "likely_real",
     "edge_id": "w76444586.2",
     "name": "Drummond Street",
     "node_id": "n901216764",
     "osm_node_id": 901216764,
     "osm_way_id": 76444586,
-    "road_class": "residential"
-   },
-   {
-    "category": "likely_real",
-    "edge_id": "w362343327.0",
-    "name": "Hawthorne Avenue",
-    "node_id": "n901218320",
-    "osm_node_id": 901218320,
-    "osm_way_id": 362343327,
     "road_class": "residential"
    },
    {
@@ -3175,7 +3352,7 @@
   ]
  },
  "elevation": {
-  "anchorless_spans": 0,
+  "anchorless_spans": 2,
   "bound_conflicts": 4,
   "contaminated_vertices": 171,
   "edges_over_grade": [
@@ -3194,20 +3371,20 @@
    "w895111373.0",
    "w895111373.1"
   ],
-  "fixed_vertices": 191,
-  "free_vertices": 8740,
+  "fixed_vertices": 190,
+  "free_vertices": 8804,
   "inferred_bridges": [],
   "max_residual_grade": 0.1202,
   "max_y": 80.488,
   "min_y": 43.319,
-  "vertices_clamped": 238
+  "vertices_clamped": 224
  },
  "one_way_traps": [],
  "ramps": [],
  "summary": {
   "barriers": {
-   "curb": 2716,
-   "guardrail": 37,
+   "curb": 2733,
+   "guardrail": 38,
    "median": 24,
    "parapet": 114,
    "roadblock": 108,
@@ -3225,45 +3402,45 @@
   "classes": {
    "living_street": 2,
    "motorway": 47,
-   "motorway_link": 34,
-   "primary": 271,
+   "motorway_link": 35,
+   "primary": 276,
    "primary_link": 23,
-   "residential": 839,
-   "secondary": 601,
+   "residential": 842,
+   "secondary": 602,
    "secondary_link": 14,
-   "service": 306,
+   "service": 327,
    "tertiary": 137,
    "tertiary_link": 3,
    "trunk": 3,
-   "unclassified": 81
+   "unclassified": 80
   },
-  "components": 15,
+  "components": 16,
   "dead_ends": {
    "bbox_edge": 108,
-   "declared_noexit": 0,
-   "likely_real": 217,
+   "declared_noexit": 8,
+   "likely_real": 227,
    "suspicious": 1
   },
   "defaulted_fields": {
-   "lanes": 269,
-   "speed_kph": 590,
-   "width": 2358
+   "lanes": 293,
+   "speed_kph": 611,
+   "width": 2388
   },
-  "edges": 2361,
-  "largest_component_nodes": 1762,
-  "largest_scc_nodes": 1673,
-  "nodes": 1794,
+  "edges": 2391,
+  "largest_component_nodes": 1787,
+  "largest_scc_nodes": 1691,
+  "nodes": 1823,
   "one_way_traps": 0,
-  "oneway_dead_ends": 26,
+  "oneway_dead_ends": 31,
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 6737,
-   "cells_flattened": 346802,
+   "cells_flattened": 348236,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
    "chunks": 196
   },
-  "total_length_km": 193.405,
+  "total_length_km": 193.824,
   "water": {
    "polygons": 18,
    "skipped": []

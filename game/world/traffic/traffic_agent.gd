@@ -15,6 +15,7 @@ var color: Color = Color.WHITE
 var transform: Transform3D = Transform3D.IDENTITY
 var body: TrafficCar = null  # pooled physics body while near a player, else null
 var anchor_dist: float = INF  # distance to the nearest player, refreshed once per tick
+var stopped_at_sign: bool = false  # came to a full stop at the stop sign ahead
 
 
 func position() -> Vector3:

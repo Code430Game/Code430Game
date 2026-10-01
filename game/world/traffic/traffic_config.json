@@ -22,6 +22,10 @@
   "recover_reach_m": 4.0,
   "recover_align_min": 0.5,
   "parked_block_reach_m": 6.0,
+  "signal_green_s": 14.0,
+  "signal_amber_s": 3.0,
+  "signal_all_red_s": 1.5,
+  "stop_sign_hold_s": 0.8,
   "car_length_m": 4.3,
   "car_width_m": 1.8,
   "colors": [[0.85, 0.85, 0.87], [0.25, 0.27, 0.3], [0.55, 0.58, 0.62], [0.7, 0.15, 0.12], [0.15, 0.3, 0.6], [0.2, 0.45, 0.25], [0.8, 0.65, 0.2], [0.35, 0.2, 0.15]]

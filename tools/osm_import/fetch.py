@@ -33,7 +33,8 @@ TIMEOUT_S = 240
 
 def overpass_query(bbox: BBox) -> str:
     """All highway ways in the bbox with their nodes."""
-    return f'[out:json][timeout:180];(way["highway"]({bbox.overpass()}););out body;>;out skel qt;'
+    # Node tags are needed too: traffic_signals, stop and crossing live on nodes.
+    return f'[out:json][timeout:180];(way["highway"]({bbox.overpass()}););out body;>;out body qt;'
 
 
 def _cache_paths(cache_dir: Path, query: str) -> tuple[Path, Path]:
