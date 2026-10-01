@@ -15,7 +15,8 @@
     "directional_shadow_size": 2048,
     "positional_shadow_size": 2048,
     "shadow_quality": "soft_low",
-    "max_fps": 0
+    "max_fps": 0,
+    "headlight_shadows": false
   },
   "high": {
     "label": "High (desktop)",
@@ -32,6 +33,7 @@
     "directional_shadow_size": 4096,
     "positional_shadow_size": 4096,
     "shadow_quality": "soft_high",
-    "max_fps": 0
+    "max_fps": 0,
+    "headlight_shadows": true
   }
 }

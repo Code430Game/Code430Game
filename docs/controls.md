@@ -23,3 +23,6 @@ The on-screen hints switch to whichever device you touched last.
 Co-op lives in the pause menu: **Host co-op game** shows the address friends join at;
 **Join game** uses the address field (right on the Join line focuses it for the Deck's
 on-screen keyboard). Command-line equivalents: `--host[=port]` and `--join=address[:port]`.
+
+Testbed flags worth knowing: `--time=HH` starts the clock at that hour (`--time=23` for night),
+`--day-minutes=N` sets how many real minutes a day lasts (default 24), `--mute` silences audio.

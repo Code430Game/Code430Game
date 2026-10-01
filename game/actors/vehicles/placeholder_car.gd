@@ -41,13 +41,46 @@ var recover_callback: Callable
 @export var body_color: Color = Color(0.85, 0.25, 0.2)
 
 
+## Emitted when the car hits something at `speed_mps` (closing speed estimate).
+signal impacted(speed_mps: float)
+var _last_velocity: Vector3 = Vector3.ZERO
+
+
 func _ready() -> void:
 	_spawn = global_transform
+	contact_monitor = true
+	max_contacts_reported = 4
+	body_entered.connect(_on_body_entered)
 	var mesh_node := $Mesh as MeshInstance3D
 	mesh_node.mesh = CarMesh.build(false)
 	mesh_node.material_override = null
 	mesh_node.position = Vector3(0.0, -0.12, 0.0)  # underside about 0.4 m over the road, like the old box
 	set_body_color(body_color)
+
+
+var _headlights: Array[SpotLight3D] = []
+
+
+## Adds two spot headlights (off until set_headlights). `shadows` costs a shadow map each.
+func add_headlights(shadows: bool) -> void:
+	for x in [-0.6, 0.6]:
+		var l := SpotLight3D.new()
+		l.position = Vector3(x, 0.45, -2.1)
+		l.rotation_degrees = Vector3(-6.0, 0.0, 0.0)
+		l.spot_range = 45.0
+		l.spot_angle = 28.0
+		l.light_energy = 0.0
+		l.light_color = Color(1.0, 0.95, 0.85)
+		l.shadow_enabled = shadows
+		add_child(l)
+		_headlights.append(l)
+
+
+## Brightness of the headlights, 0 off to 1 full; follows the night factor.
+func set_headlights(amount: float) -> void:
+	for l in _headlights:
+		l.light_energy = 6.0 * amount
+		l.visible = amount > 0.02
 
 
 ## Paints the body (surface 0) with `color`; glass, trim and lights keep theirs.
@@ -80,7 +113,14 @@ func reset_to_spawn() -> void:
 	angular_velocity = Vector3.ZERO
 
 
+func _on_body_entered(_body: Node) -> void:
+	# The velocity before the contact resolved tells how hard we arrived.
+	var closing := (_last_velocity - linear_velocity).length()
+	impacted.emit(maxf(closing, _last_velocity.length() * 0.3))
+
+
 func _physics_process(delta: float) -> void:
+	_last_velocity = linear_velocity
 	var driven := driver_peer_id == Players.LOCAL_PEER_ID
 	var accel := Input.get_action_strength("accelerate") if driven else 0.0
 	var brk := Input.get_action_strength("brake") if driven else 0.0

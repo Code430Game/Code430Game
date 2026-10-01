@@ -111,13 +111,19 @@ static func dark_material() -> StandardMaterial3D:
 	return m
 
 
+## One shared lights material for every car, so DayNight can brighten them all at once.
+static var _lights: StandardMaterial3D = null
+const LIGHT_NIGHT_ENERGY := 4.0
+
+
 static func light_material() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.emission_enabled = true
-	m.emission = Color(0.6, 0.55, 0.45)
-	m.emission_energy_multiplier = 0.6
-	return m
+	if _lights == null:
+		_lights = StandardMaterial3D.new()
+		_lights.vertex_color_use_as_albedo = true
+		_lights.emission_enabled = true
+		_lights.emission = Color(1.0, 0.9, 0.7)
+		_lights.emission_energy_multiplier = 0.0  # DayNight raises this after dusk
+	return _lights
 
 
 ## Quad with its front face outward: the vertex order is flipped if the normal points toward

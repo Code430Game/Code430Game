@@ -1,0 +1,110 @@
+class_name VehicleAudio
+extends Node
+## Engine, tyre and impact voices for one car, fed each frame from its speed and throttle.
+## Attach under the car; call `impact(speed)` from a collision.
+
+var car: VehicleBody3D
+var _engine: AudioStreamPlayer
+var _tyres: AudioStreamPlayer
+var _impact: AudioStreamPlayer
+var _phase: float = 0.0
+var _phase2: float = 0.0
+var _noise_state: Array = [0x9E3779B9]
+var _tyre_lp: float = 0.0
+var _impact_left: float = 0.0  # seconds of thump remaining
+var _impact_gain: float = 0.0
+var muted: bool = false
+
+
+func _ready() -> void:
+	_engine = Synth.make_player("SFX", -10.0)
+	_tyres = Synth.make_player("SFX", -14.0)
+	_impact = Synth.make_player("SFX", -2.0)
+	for p in [_engine, _tyres, _impact]:
+		add_child(p)
+		p.play()
+
+
+## Starts a thump whose loudness follows the collision speed.
+func impact(speed_mps: float) -> void:
+	var g := Synth.impact_gain(speed_mps)
+	if g <= 0.0:
+		return
+	_impact_gain = maxf(_impact_gain, g)
+	_impact_left = 0.25 + 0.2 * g
+
+
+func _process(delta: float) -> void:
+	if car == null or muted:
+		return
+	var speed := absf(car.forward_speed())
+	var throttle := clampf(absf(car.engine_force) / maxf(car.engine_force_max, 1.0), 0.0, 1.0)
+	_fill_engine(speed, throttle)
+	_fill_tyres(speed)
+	_fill_impact(delta)
+
+
+func _fill_engine(speed: float, throttle: float) -> void:
+	var pb: AudioStreamGeneratorPlayback = _engine.get_stream_playback()
+	if pb == null:
+		return
+	var hz := Synth.engine_hz(speed, throttle)
+	var step := TAU * hz / Synth.MIX_RATE
+	var amp := 0.25 + 0.45 * throttle + 0.1 * clampf(speed / 30.0, 0.0, 1.0)
+	var frames := pb.get_frames_available()
+	var buf := PackedVector2Array()
+	buf.resize(frames)
+	for i in range(frames):
+		_phase += step
+		_phase2 += step * 0.5
+		# A reedy pulse: saw plus half-rate square, a dash of noise for grit.
+		var saw := fmod(_phase / TAU, 1.0) * 2.0 - 1.0
+		var sq := 1.0 if fmod(_phase2 / TAU, 1.0) < 0.5 else -1.0
+		var s := (saw * 0.6 + sq * 0.3 + Synth.noise(_noise_state) * 0.1) * amp
+		buf[i] = Vector2(s, s)
+	pb.push_buffer(buf)
+	if _phase > 1000.0 * TAU:
+		_phase = fmod(_phase, TAU)
+	if _phase2 > 1000.0 * TAU:
+		_phase2 = fmod(_phase2, TAU)
+
+
+func _fill_tyres(speed: float) -> void:
+	var pb: AudioStreamGeneratorPlayback = _tyres.get_stream_playback()
+	if pb == null:
+		return
+	var gain := Synth.tyre_gain(speed)
+	var frames := pb.get_frames_available()
+	var buf := PackedVector2Array()
+	buf.resize(frames)
+	var cutoff := 0.04 + 0.2 * gain  # brighter hiss at speed
+	for i in range(frames):
+		_tyre_lp += (Synth.noise(_noise_state) - _tyre_lp) * cutoff
+		var s := _tyre_lp * gain * 1.5
+		buf[i] = Vector2(s, s)
+	pb.push_buffer(buf)
+
+
+func _fill_impact(delta: float) -> void:
+	var pb: AudioStreamGeneratorPlayback = _impact.get_stream_playback()
+	if pb == null:
+		return
+	var frames := pb.get_frames_available()
+	var buf := PackedVector2Array()
+	buf.resize(frames)
+	var dt := 1.0 / Synth.MIX_RATE
+	var lp := 0.0
+	for i in range(frames):
+		var s := 0.0
+		if _impact_left > 0.0:
+			lp += (Synth.noise(_noise_state) - lp) * 0.12  # low thud
+			var env := clampf(_impact_left / 0.3, 0.0, 1.0)
+			s = lp * env * env * _impact_gain * 3.0
+			_impact_left -= dt
+		else:
+			_impact_gain = 0.0
+		buf[i] = Vector2(s, s)
+	pb.push_buffer(buf)
+	if _impact_left <= 0.0:
+		_impact_left = 0.0
+	delta = delta  # unused beyond keeping the signature uniform
