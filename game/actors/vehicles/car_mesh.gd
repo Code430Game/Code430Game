@@ -3,10 +3,11 @@ extends RefCounted
 ## Procedural low-poly car body shared by the player car and traffic.
 ##
 ## Approach: a side profile (z along the car, y up; -Z is the front) is extruded across the
-## width into a closed hull, with the cabin a little narrower than the body. Three surfaces:
+## width into a closed hull, with the cabin a little narrower than the body. Four surfaces:
 ## 0 body (white vertex colour, so a material tint or a MultiMesh instance colour paints it),
-## 1 dark parts (glass, trim, wheels), 2 lights (head and tail). The origin is the chassis
-## underside at the car's centre.
+## 1 dark parts (glass, trim, wheels), 2 headlights, 3 tail lights (their own surface so the
+## player's car can swap in a brake-light material). The origin is the chassis underside at
+## the car's centre.
 
 const LENGTH_M := 4.3
 const WIDTH_M := 1.8
@@ -38,7 +39,8 @@ static func build(with_wheels: bool) -> ArrayMesh:
 	var body := SurfaceTool.new()
 	var dark := SurfaceTool.new()
 	var lights := SurfaceTool.new()
-	for st: SurfaceTool in [body, dark, lights]:
+	var tails := SurfaceTool.new()
+	for st: SurfaceTool in [body, dark, lights, tails]:
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var hw := WIDTH_M * 0.5
 	var hull: Array[Vector2] = []  # the profile closed along the underside
@@ -78,19 +80,34 @@ static func build(with_wheels: bool) -> ArrayMesh:
 		var x0 := side * 0.35
 		var x1 := side * 0.78
 		_quad(lights, Vector3(x0, 0.34, -2.151), Vector3(x1, 0.34, -2.151), Vector3(x1, 0.48, -2.151), Vector3(x0, 0.48, -2.151), HEADLIGHT_COLOR)
-		_quad(lights, Vector3(x1, 0.34, 2.151), Vector3(x0, 0.34, 2.151), Vector3(x0, 0.5, 2.151), Vector3(x1, 0.5, 2.151), TAILLIGHT_COLOR)
+		_quad(tails, Vector3(x1, 0.34, 2.151), Vector3(x0, 0.34, 2.151), Vector3(x0, 0.5, 2.151), Vector3(x1, 0.5, 2.151), TAILLIGHT_COLOR)
 	if with_wheels:
 		for x: float in [-WHEEL_X_M, WHEEL_X_M]:
 			for z: float in [-WHEEL_Z_M, WHEEL_Z_M]:
 				_wheel(dark, Vector3(x, WHEEL_RADIUS_M - 0.14, z))
 	var mesh := ArrayMesh.new()
-	for st: SurfaceTool in [body, dark, lights]:
+	for st: SurfaceTool in [body, dark, lights, tails]:
 		st.generate_normals()
 		st.commit(mesh)
 	mesh.surface_set_material(0, body_material(Color.WHITE))
 	mesh.surface_set_material(1, dark_material())
 	mesh.surface_set_material(2, light_material())
+	mesh.surface_set_material(3, light_material())
 	return mesh
+
+
+## Bright red for the player's tail lights while braking, day or night.
+static var _brake: StandardMaterial3D = null
+
+
+static func brake_material() -> StandardMaterial3D:
+	if _brake == null:
+		_brake = StandardMaterial3D.new()
+		_brake.vertex_color_use_as_albedo = true
+		_brake.emission_enabled = true
+		_brake.emission = Color(1.0, 0.1, 0.05)
+		_brake.emission_energy_multiplier = 5.0
+	return _brake
 
 
 ## Tintable body material: vertex colour (white) times the tint, or the MultiMesh instance colour.
