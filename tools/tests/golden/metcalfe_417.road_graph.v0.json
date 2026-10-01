@@ -4,6 +4,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -57,6 +59,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -100,6 +104,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -143,6 +149,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -182,6 +190,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -235,6 +245,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -273,6 +285,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -312,6 +326,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -355,6 +371,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -404,6 +422,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -442,6 +462,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -480,6 +502,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -524,6 +548,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -572,6 +598,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -610,6 +638,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -664,6 +694,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -698,6 +730,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -737,6 +771,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -775,6 +811,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -824,6 +862,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -872,6 +912,8 @@
    "access": null,
    "bridge": true,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -905,6 +947,8 @@
    "access": null,
    "bridge": true,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -938,6 +982,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1016,6 +1062,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -1066,6 +1114,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1114,6 +1164,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1157,6 +1209,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1205,6 +1259,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1263,6 +1319,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1311,6 +1369,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -1351,6 +1411,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -1396,6 +1458,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -1436,6 +1500,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -1471,6 +1537,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -1536,6 +1604,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1589,6 +1659,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1627,6 +1699,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1670,6 +1744,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1703,6 +1779,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1736,6 +1814,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1774,6 +1854,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1812,6 +1894,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1880,6 +1964,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -1919,6 +2005,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -1957,6 +2045,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2000,6 +2090,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -2040,6 +2132,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -2084,6 +2178,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2117,6 +2213,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2155,6 +2253,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2193,6 +2293,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2241,6 +2343,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2274,6 +2378,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2312,6 +2418,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2350,6 +2458,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -2394,6 +2504,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2432,6 +2544,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2465,6 +2579,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2503,6 +2619,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -2543,6 +2661,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -2583,6 +2703,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -2623,6 +2745,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -2668,6 +2792,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2701,6 +2827,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2739,6 +2867,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2782,6 +2912,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2825,6 +2957,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -2864,6 +2998,8 @@
    "access": null,
    "bridge": false,
    "class": "service",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "lanes",
     "speed_kph",
@@ -2909,6 +3045,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -2952,6 +3090,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3060,6 +3200,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3108,6 +3250,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3211,6 +3355,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3249,6 +3395,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3297,6 +3445,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3330,6 +3480,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [],
    "from": "c901047389",
    "id": "w76420791.0",
@@ -3386,6 +3538,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3454,6 +3608,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3512,6 +3668,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3570,6 +3728,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3603,6 +3763,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3641,6 +3803,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -3705,6 +3869,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -3769,6 +3935,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3832,6 +4000,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3900,6 +4070,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3958,6 +4130,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -3996,6 +4170,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4034,6 +4210,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4087,6 +4265,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -4121,6 +4301,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -4155,6 +4337,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -4194,6 +4378,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -4238,6 +4424,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -4302,6 +4490,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4345,6 +4535,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4418,6 +4610,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4546,6 +4740,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4634,6 +4830,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4682,6 +4880,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4750,6 +4950,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4798,6 +5000,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4851,6 +5055,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4924,6 +5130,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -4977,6 +5185,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5040,6 +5250,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5083,6 +5295,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5121,6 +5335,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -5170,6 +5386,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -5224,6 +5442,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5267,6 +5487,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5320,6 +5542,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5378,6 +5602,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5436,6 +5662,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5469,6 +5697,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5512,6 +5742,8 @@
    "access": null,
    "bridge": true,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5545,6 +5777,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5578,6 +5812,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5626,6 +5862,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -5685,6 +5923,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -5729,6 +5969,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5787,6 +6029,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5835,6 +6079,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5903,6 +6149,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -5941,6 +6189,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -5975,6 +6225,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6013,6 +6265,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -6047,6 +6301,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6080,6 +6336,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6118,6 +6376,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -6192,6 +6452,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6225,6 +6487,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6258,6 +6522,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6291,6 +6557,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6324,6 +6592,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6357,6 +6627,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6390,6 +6662,8 @@
    "access": null,
    "bridge": true,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6423,6 +6697,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -6467,6 +6743,8 @@
    "access": null,
    "bridge": false,
    "class": "tertiary_link",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -6521,6 +6799,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6554,6 +6834,8 @@
    "access": null,
    "bridge": false,
    "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6592,6 +6874,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "speed_kph",
     "width"
@@ -6631,6 +6915,8 @@
    "access": null,
    "bridge": false,
    "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],
@@ -6674,6 +6960,8 @@
    "access": null,
    "bridge": false,
    "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
    "defaulted_fields": [
     "width"
    ],

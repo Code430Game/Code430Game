@@ -63,6 +63,8 @@ def graph_to_dict(
                 "defaulted_fields": sorted(e.defaulted_fields),
                 "access": e.access,
                 "length_m": round(e.length_m, COORD_DECIMALS),
+                "control_to": e.control_to,
+                "control_from": e.control_from,
             }
         )
     pedestrian = pedestrian_to_list(graph)

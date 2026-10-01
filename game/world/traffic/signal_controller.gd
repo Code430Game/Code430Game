@@ -26,7 +26,7 @@ func setup(graph: RoadGraph, config: Dictionary) -> void:
 	_offset.clear()
 	for nid in graph.sorted_node_ids():
 		var node: RoadGraph.RoadNode = graph.nodes[nid]
-		if node.control != "signals" or graph.degree(nid) < 3:
+		if not graph.is_signalised(nid) or graph.degree(nid) < 3:
 			continue
 		var arms: Array = graph.incident(nid)
 		var first: Vector2 = graph.direction_from(graph.edges[arms[0]], nid)
