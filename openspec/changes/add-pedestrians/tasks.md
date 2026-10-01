@@ -9,6 +9,9 @@
 ## 3. Integration
 - [x] 3.1 Testbed `--peds=N`, anchors and obstacles from the players, benchmark line
 
+## 3b. Crossings (2026-10-01)
+- [x] 3.2 Crossings link to the road they span and the signalised junction they belong to; people wait at the kerb until that road's red, or for a 25 m gap at an uncontrolled crossing (30 s cap), and traffic keeps headway from anyone on a crossing; tests
+
 ## 4. Verification
 - [x] 4.1 Deck (2026-09-30, same run as streaming 3.1): 120 pedestrians plus 150 traffic agents, GPU 6.70 ms, render CPU 1.10 ms, physics process 7.71 ms (was 5.9 ms with traffic alone)
 - [ ] 4.2 **Stop: human walks and drives among pedestrians on the Deck**

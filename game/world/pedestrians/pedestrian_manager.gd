@@ -15,6 +15,10 @@ const CONFIG_PATH := "res://world/pedestrians/pedestrian_config.json"
 
 var config: Dictionary = {}
 var walk: WalkGraph
+## The road graph and traffic, for crossings: which road a crossing spans, its signal, and
+## the cars approaching it. Optional; without them crossings are just paths.
+var road_graph: RoadGraph
+var traffic: TrafficManager
 var max_agents: int = 120
 var agents: Array[Pedestrian] = []
 var rng := RandomNumberGenerator.new()
@@ -48,9 +52,65 @@ func load_config(path: String = CONFIG_PATH) -> bool:
 	return true
 
 
-func setup(walk_graph: WalkGraph) -> void:
+func setup(walk_graph: WalkGraph, graph: RoadGraph = null, traffic_manager: TrafficManager = null) -> void:
 	walk = walk_graph
+	road_graph = graph
+	traffic = traffic_manager
+	if graph != null:
+		_link_crossings()
 	_setup_rendering()
+
+
+## Finds, for every crossing path, the road it crosses and the signalised junction it belongs to.
+func _link_crossings() -> void:
+	var linked := 0
+	for p in walk.paths:
+		if p.kind != "crossing":
+			continue
+		var mid := p.position_at(p.length * 0.5)
+		var hit := road_graph.nearest_edge(mid, float(config.get("crossing_road_reach_m", 15.0)))
+		if hit.is_empty():
+			continue
+		var e: RoadGraph.RoadEdge = hit["edge"]
+		p.crossed_edge = e.id
+		var reach := float(config.get("crossing_signal_reach_m", 35.0))
+		for nid in [e.from_node, e.to_node]:
+			if road_graph.is_signalised(nid) and road_graph.nodes[nid].position.distance_to(mid) <= reach:
+				p.signal_node = nid
+		linked += 1
+	print("pedestrians: %d crossings linked to roads" % linked)
+
+
+## True when a pedestrian may step onto `path` now: on the crossed road's red at a
+## signalised junction, or when no car is bearing down on an uncontrolled crossing.
+func crossing_open(path: WalkGraph.WalkPath) -> bool:
+	if path.kind != "crossing" or path.crossed_edge == "":
+		return true
+	if path.signal_node != "" and traffic != null:
+		return traffic.signals.light(path.signal_node, path.crossed_edge) == TrafficManager.Signals.Light.RED
+	if traffic == null:
+		return true
+	var mid := path.position_at(path.length * 0.5)
+	var gap := float(config.get("crossing_gap_m", 25.0))
+	for a in traffic.agents:
+		if a.retired or a.speed < 1.0:
+			continue
+		var lane: LaneGraph.LanePath = traffic.lanes.paths[a.path_id]
+		if lane.edge_id != path.crossed_edge:
+			continue
+		var rel := mid - a.position()
+		if rel.length() < gap and rel.dot(-a.transform.basis.z) > 0.0:
+			return false  # a car on this road, heading for the crossing, too close
+	return true
+
+
+## Positions of people currently on a crossing, for traffic to yield to.
+func crossing_positions() -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for a in agents:
+		if a.state == Pedestrian.State.WALKING and walk.paths[a.path_id].kind == "crossing":
+			out.append(a.position())
+	return out
 
 
 func _setup_rendering() -> void:
@@ -220,6 +280,16 @@ func _turn_at_end(a: Pedestrian, path: WalkGraph.WalkPath) -> void:
 			chosen = options[i]
 			break
 	var next: WalkGraph.WalkPath = walk.paths[chosen]
+	if next.kind == "crossing" and not crossing_open(next):
+		# Wait at the kerb: stay on this path's end and try again next tick (after a long wait,
+		# cross anyway: a stuck light or an endless stream of cars should not strand anyone).
+		a.kerb_wait += 1.0 / 60.0
+		if a.kerb_wait < float(config.get("kerb_wait_max_s", 30.0)):
+			a.distance = clampf(a.distance, 0.0, path.length)
+			a.waiting_to_cross = true
+			return
+	a.kerb_wait = 0.0
+	a.waiting_to_cross = false
 	a.path_id = chosen
 	a.forward = walk.enters_at_start(next, key)
 	a.distance = 0.0 if a.forward else next.length
