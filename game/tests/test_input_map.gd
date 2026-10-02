@@ -29,3 +29,19 @@ func test_every_action_has_a_gamepad_binding() -> void:
 			if event is InputEventJoypadButton or event is InputEventJoypadMotion:
 				has_joypad = true
 		assert_bool(has_joypad).override_failure_message("action %s has no gamepad binding" % action).is_true()
+
+
+## Actions that are live at the same time while driving must not share a gamepad button;
+## the handbrake and the car reset once both sat on RB and every handbrake pull teleported the car.
+func test_driving_actions_use_distinct_buttons() -> void:
+	const DRIVING_ACTIONS: PackedStringArray = [
+		"accelerate", "brake", "handbrake", "reset_vehicle", "camera_cycle", "headlights_cycle", "interact", "pause", "map_toggle",
+	]
+	var owner_by_button: Dictionary = {}
+	for action in DRIVING_ACTIONS:
+		for event in InputMap.action_get_events(action):
+			if event is InputEventJoypadButton:
+				var button: int = (event as InputEventJoypadButton).button_index
+				assert_bool(owner_by_button.has(button)).override_failure_message(
+					"%s and %s share gamepad button %d" % [owner_by_button.get(button, ""), action, button]).is_false()
+				owner_by_button[button] = action
