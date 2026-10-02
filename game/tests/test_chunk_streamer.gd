@@ -47,6 +47,12 @@ func test_far_chunks_stream_in_over_frames_without_collision() -> void:
 		await get_tree().process_frame
 		frames += 1
 	assert_int(_streamer.chunk_count()).is_greater_equal(40)
+	# Chunks land in pieces over frames; wait for the queued meshes before looking inside one.
+	while _streamer.collision_pending() > 0 and frames < 900:
+		_streamer.update()
+		await get_tree().process_frame
+		frames += 1
+	assert_int(_streamer.collision_pending()).is_equal(0)
 	# Something far from the spawn is FAR tier: no LOD0 terrain, no collision, but LOD1/LOD2 terrain.
 	var far_found := false
 	for child in _world.get_children():
