@@ -15,6 +15,11 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   touching the same files: rail / district edge / underpass interiors; combat / radio / bus
   routes; pack loader then story pack / character features. Rail and bus routes both add
   importer stages; land one before the other.
+- **Controls (human, 2026-10-02: "make R1 handbrake so I don't keep blipping to nowhere").**
+  The blip was the car reset sharing RB with the handbrake; reset now sits on R3 as the doc
+  said, with a test that driving actions never share a button. `update-controls-layout` holds
+  the GTA V / IV / III and Cyberpunk 2077 reference table and the proposed layout (horn L3,
+  look behind R3, hold R3 to reset, radio D-left, headlights D-right, remapping page).
 - **Region picker** is built (`tools/region_picker/index.html`, importer `--region`); the two
   older region picker notes below are done except `--place` and `--radius-km`.
 
