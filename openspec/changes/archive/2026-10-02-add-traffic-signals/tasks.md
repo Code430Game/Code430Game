@@ -11,4 +11,4 @@
 
 ## 3. Verification
 - [x] 3.1 Deck (2026-09-30, idle Deck, 150 cars, 97 people, 550 heads): GPU 6.45 ms, render CPU 1.04 ms, physics 6.86 ms (traffic step 1.52 ms), draw calls 334, first playable 392 ms; downtown screenshot shows heads at the Bank Street junctions
-- [ ] 3.2 **Stop: human drives downtown through lights on the Deck**
+- [x] 3.2 Human drove through the lights on the Deck (2026-10-02): "the lights look good, they're back to colours" after the lamp shader fix
