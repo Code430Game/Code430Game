@@ -50,3 +50,4 @@ packs/*/chunks/
 # secrets
 .env
 **/.env
+game/log/
