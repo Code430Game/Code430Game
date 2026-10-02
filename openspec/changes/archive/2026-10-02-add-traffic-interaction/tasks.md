@@ -12,4 +12,4 @@
 
 ## 4. Verification
 - [x] 4.1 Deck: measured render and physics time with 150 agents recorded (2026-09-30, deck preset, autodrive from the old bbox-edge spawn, 145 agents: GPU 5.69 ms, render CPU 1.56 ms, physics process 5.68 ms vs 5.08 ms before the obstacle checks; frame p99 6.94 ms)
-- [ ] 4.2 **Stop: human drives, walks in traffic and takes a car on the Deck**
+- [x] 4.2 Human: "traffic interaction is good" (Deck, 2026-10-02); an old build turned a taken bus into a car, buses are no longer takeable

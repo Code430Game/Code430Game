@@ -34,6 +34,12 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Walk cycle knees bent backwards (human, Deck 2026-10-02: "walks a bit like a bird").**
+  Fixed: shin and forearm rotation signs flipped in `walk_pose`; test pins heel behind the
+  knee and hand in front of the elbow.
+- **Engine idle audible on foot anywhere (human: "sound has a bit of a fart to it in the open
+  world").** Fixed: engine and tyre voices only fill while the local player drives; impacts
+  still sound. Character creator and traffic interaction archived on the human's verdict.
 - **Portage underpass approach fights a garage ramp (human, Deck 2026-10-02, standing at
   x -1208, z 142: "the tunnel works, ish; bent; through the first half then can get up but
   it's work; or maybe that's parking lot related").** The Ottawa River Pathway tunnel

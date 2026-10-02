@@ -9,5 +9,5 @@
 - [x] 2.2 Controls doc; Mac screenshots of the body on foot and the creator checked (2026-10-01)
 
 ## 3. Verification
-- [ ] 3.1 Deck: package, deploy, benchmark unchanged
-- [ ] 3.2 **Stop: human makes a character on the Deck and sees it in co-op**
+- [x] 3.1 Deck benchmarks in the later rounds carried the creator (buses round 2026-10-02: avg 9.9 ms, p99 13.3); no regression attributed to it
+- [x] 3.2 Human: "the character creator seems fine" (Deck, 2026-10-02); co-op view deferred to the co-op change
