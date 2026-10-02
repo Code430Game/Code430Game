@@ -8,4 +8,4 @@
 
 ## 3. Verification
 - [x] 3.1 Deck (2026-10-02): avg 9.9 ms, p99 13.3, GPU 8.9, draw calls 413; no regression
-- [ ] 3.2 **Stop: human follows a bus down a bus lane on the Deck**
+- [x] 3.2 Human followed a bus on the Deck (2026-10-02); asked for route numbers on the back and number plus route name on the front, taken into add-bus-routes
