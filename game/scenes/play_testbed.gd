@@ -60,6 +60,8 @@ var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
 var _fixed_cam: Camera3D = null
+enum Headlights { AUTO, ON, OFF }
+var _headlights: int = Headlights.AUTO  # D-pad up / H cycles auto (dusk to dawn), on, off
 var _start_position: Vector3 = Vector3.ZERO
 var _bench_done: bool = false
 var _autodrive_edge: RoadGraph.RoadEdge
@@ -580,11 +582,18 @@ func _process(delta: float) -> void:
 			net = "  |  co-op %s %d/%d" % [Session.role, Session.peers.size(), Session.max_players]
 		if _day_night != null:
 			net = "  |  %s" % _day_night.clock_text() + net
-			_car.set_headlights(_day_night.night_factor())
+			var amount := _day_night.night_factor()
+			if _headlights == Headlights.ON:
+				amount = 1.0
+			elif _headlights == Headlights.OFF:
+				amount = 0.0
+			_car.set_headlights(amount)
+			if _headlights != Headlights.AUTO:
+				net += "  |  lights %s" % ("on" if _headlights == Headlights.ON else "off")
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, M map, Esc pause"),
+				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, D-pad up lights, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, H lights, M map, Esc pause"),
 			]
 			_prompt.text = ""
 		else:
@@ -615,6 +624,8 @@ func _process(delta: float) -> void:
 			])
 	if _fixed_cam != null and not _fixed_cam.current:
 		_fixed_cam.current = true  # the player's cameras grab the viewport on enter/exit; the fixed view wins
+	if Input.is_action_just_pressed("headlights_cycle") and _player != null and _player.is_driving():
+		_headlights = (_headlights + 1) % 3
 	if Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
 		_camera.cycle_mode()
 		_camera.look_at(_car.global_position, Vector3.UP)

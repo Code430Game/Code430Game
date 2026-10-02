@@ -26,4 +26,4 @@
 - [x] 4.4 gdUnit4 tests: determinism, mode switch changes ads
 
 ## 5. Verification
-- [ ] 5.1 **Stop: human drives past the same billboards in all three modes on the Deck**
+- [x] 5.1 Human drove past billboards in the modes on the Deck (2026-10-01: "the tone and grit were cool")
