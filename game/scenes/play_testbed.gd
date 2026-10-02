@@ -232,7 +232,7 @@ func _setup_day_night() -> void:
 	_day_night.register_emissive(CarMesh.tail_material(), CarMesh.LIGHT_NIGHT_ENERGY * 0.6)
 	if _traffic != null and _traffic.tail_material != null:
 		_day_night.register_shader(_traffic.tail_material)
-	_day_night.register_emissive(SignalHeads.head_material(), SignalHeads.HEAD_NIGHT_ENERGY)
+	_day_night.register_shader(SignalHeads.head_material())
 	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
 	_car.add_headlights(bool(preset.get("headlight_shadows", false)))
 

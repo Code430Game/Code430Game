@@ -143,3 +143,12 @@ func test_a_signal_on_an_approach_makes_the_junction_signalised() -> void:
 	assert_int(heads.count()).is_equal(2)  # the two arriving approaches
 	assert_int(heads.sign_count()).is_equal(0)
 	heads.queue_free()
+
+
+func test_head_lamps_glow_in_their_own_colour_at_night() -> void:
+	# The lamp material emits the instance colour scaled by the night factor, never a flat tint.
+	var m := SignalHeads.head_material()
+	assert_object(m).is_instanceof(ShaderMaterial)
+	assert_float(float(m.get_shader_parameter("night_energy"))).is_equal_approx(SignalHeads.HEAD_NIGHT_ENERGY, 1e-6)
+	var src: String = (m.shader as Shader).code
+	assert_bool(src.contains("EMISSION = COLOR.rgb")).is_true()
