@@ -130,3 +130,16 @@ func test_creator_changes_the_profile_live_and_saves_last_on_done() -> void:
 	assert_bool(creator.visible).is_false()
 	assert_int(done.size()).is_equal(1)
 	assert_bool(CharacterProfile.equals(CharacterStore.load_file(_path)["last"], creator.profile)).is_true()
+
+
+func test_knees_bend_backward_and_elbows_forward() -> void:
+	# The character faces -Z. Mid-swing the bent knee must put the heel behind the knee (+Z),
+	# and the elbow must put the hand in front of the elbow (-Z); the old signs gave bird knees.
+	var profile := CharacterProfile.normalise({})
+	var pose := CharacterMesh.walk_pose(PI, 1.0)  # left leg mid-swing, shin_l at its peak
+	var knee := CharacterMesh.bone_global(CharacterMesh.bone_index("shin_l"), profile, pose)
+	var heel := knee * Vector3(0.0, -0.4, 0.0)
+	assert_float(heel.z - knee.origin.z).is_greater(0.05)
+	var elbow := CharacterMesh.bone_global(CharacterMesh.bone_index("forearm_l"), profile, pose)
+	var hand := elbow * Vector3(0.0, -0.25, 0.0)
+	assert_float(hand.z - elbow.origin.z).is_less(-0.02)
