@@ -34,6 +34,12 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Surface detail (human, Deck drive 2026-10-02: "add textures and sidewalk line breaks;
+  the cross walks should be striped like Abbey Road").** Proposal `add-surface-detail`:
+  generated world-space detail textures, slab joints on sidewalks, zebra stripes on every
+  crossing. Open: zebra everywhere or only at signals; slab length.
+- **Bus signs (human, 2026-10-02).** Number on the back, number plus route name on the front
+  like modern transit; folded into `add-bus-routes`. Buses and day-night stop gates ticked.
 - **Two-wheelers (human asked 2026-10-02 whether to add motorcycles and bicycles).** Own
   change after `add-vehicle-variety`: bicycles on the imported cycleways, a motorcycle class
   with lane filtering, rider bodies from the character pipeline, a lean model on a capsule

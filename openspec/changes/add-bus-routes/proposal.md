@@ -25,9 +25,14 @@ which is the next layer of street texture on the big streets.
   loops). Route buses are placed by time: a route's buses sit at positions given by the host
   clock modulo the headway, so a route looks served the moment a player arrives and in co-op all
   peers agree. The free-roaming share from `add-buses` remains for streets without routes.
-- **Destination sign.** The bus mesh gains an emissive sign strip over the windscreen that shows
-  the route number from a digit atlas driven by per-instance custom data (three digits), amber
-  on black, readable from 40 m.
+- **Destination signs** (human, 2026-10-02, after following a bus: numbers on the back and the
+  front, and the front like modern transit with the number and the route name). The bus mesh
+  gains an emissive sign strip over the windscreen showing the route number and the route name
+  (the terminus or the street the route is named for in the pack data), and a smaller rear
+  sign with the number only, amber on black, readable from 40 m. The number comes from a digit
+  atlas driven by per-instance custom data (three digits); the name is a short glyph atlas
+  string, at most 14 characters, from a per-route texture row baked at load so the MultiMesh
+  stays one draw call.
 - **Shelters and flags.** At stops with `shelter=yes` a glass shelter with a roof and a bench
   on the sidewalk side; elsewhere a pole with a flag sign. Both carry a placard listing route
   numbers from a digit atlas. Built in `game/world/dressing/bus_stop_builder.gd` into the
