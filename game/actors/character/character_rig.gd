@@ -37,6 +37,7 @@ func apply_profile(p: Dictionary) -> void:
 	mesh_instance.skin = CharacterMesh.skin_for(profile)
 	skeleton.add_child(mesh_instance)
 	add_child(skeleton)
+	mesh_instance.skeleton = mesh_instance.get_path_to(skeleton)  # the default path is empty: no skin without it
 	_pose()
 
 

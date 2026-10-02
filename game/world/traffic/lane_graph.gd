@@ -22,6 +22,7 @@ class LanePath:
 	var lane_index: int = 0
 	var is_connector: bool = false
 	var bus_only: bool = false  # reserved for buses: cars never enter it
+	var tunnel: bool = false  # underground road: traffic keeps out unless nothing else continues
 	var straightness: float = 1.0  # connectors: cos of the turn angle, for straight-preferring choice
 	var points: PackedVector3Array
 	var cumulative: PackedFloat32Array  # distance at each point
@@ -105,6 +106,7 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> LaneGraph:
 	for lp in lg.paths:
 		if lp.is_connector and lp.next.size() == 1:
 			lp.bus_only = lg.paths[lp.next[0]].bus_only
+			lp.tunnel = lg.paths[lp.next[0]].tunnel
 	return lg
 
 
@@ -123,6 +125,7 @@ func _add_lane(edge: RoadGraph.RoadEdge, lane_index: int, points: PackedVector3A
 	lp.road_class = edge.road_class
 	lp.lane_index = lane_index
 	lp.speed_kph = edge.speed_kph
+	lp.tunnel = edge.tunnel
 	_set_points(lp, points)
 	paths.append(lp)
 	if not _by_edge_start.has(start_node):

@@ -221,7 +221,10 @@ def _edge_from_segment(
         width_m=width,
         layer=T.parse_layer(tags.get("layer")),
         bridge=T.is_truthy(tags.get("bridge")),
-        tunnel=T.is_truthy(tags.get("tunnel")) and tags.get("tunnel") != "building_passage",
+        # layer below ground without a bridge is underground too (garage ramps mapped
+        # with layer=-2 and no tunnel tag), else the terrain gets flattened down to them.
+        tunnel=(T.is_truthy(tags.get("tunnel")) and tags.get("tunnel") != "building_passage")
+        or (T.parse_layer(tags.get("layer")) < 0 and not T.is_truthy(tags.get("bridge"))),
         name=tags.get("name"),
         osm_way_id=way.id,
         defaulted_fields=defaulted,

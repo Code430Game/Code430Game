@@ -13,7 +13,7 @@ func _graph(specs: Array) -> RoadGraph:
 		edges.append({
 			"id": spec["id"], "from": "n_%d_%d" % [int(pl[0][0]), int(pl[0][2])], "to": "n_%d_%d" % [int(pl[pl.size() - 1][0]), int(pl[pl.size() - 1][2])],
 			"polyline": pl, "class": spec.get("class", "secondary"), "lanes_forward": spec.get("lf", 1), "lanes_backward": spec.get("lb", 0),
-			"oneway": spec.get("lb", 0) == 0, "speed_kph": spec.get("kph", 50), "width_m": spec.get("w", 7.0), "layer": 0, "bridge": false, "tunnel": false,
+			"oneway": spec.get("lb", 0) == 0, "speed_kph": spec.get("kph", 50), "width_m": spec.get("w", 7.0), "layer": 0, "bridge": false, "tunnel": spec.get("tunnel", false),
 			"name": spec["id"], "osm_way_id": 1, "defaulted_fields": [], "access": null, "length_m": 100.0,
 			"bus": spec.get("bus", ""), "bus_lane": spec.get("bus_lane", -1),
 		})
@@ -289,3 +289,23 @@ func test_bus_dwells_at_a_stop_then_carries_on() -> void:
 	assert_float(stood_at).is_equal_approx(200.0, 2.0)
 	assert_float(bus.distance).is_greater(250.0)
 	assert_bool(bus.next_stop_d == INF).is_true()
+
+
+func test_cars_avoid_tunnel_roads_when_another_way_continues() -> void:
+	var g := _graph([
+		{"id": "w1.0", "pl": [[-100, 0, 0], [0, 0, 0]]},
+		{"id": "w2.0", "pl": [[0, 0, 0], [100, 0, 0]], "tunnel": true},
+		{"id": "w3.0", "pl": [[0, 0, 0], [100, 0, 2]]},
+	])
+	var m := _manager(g)
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var feeder := -1
+	for p in m.lanes.paths:
+		if p.edge_id == "w1.0":
+			feeder = p.id
+	for trial in range(10):
+		m.agents.clear()
+		var car := _add_agent(m, feeder, 95.0, 10.0)
+		for i in range(300):
+			m.step(1.0 / 60.0)
+		assert_str(m.lanes.paths[car.path_id].edge_id).is_equal("w3.0")

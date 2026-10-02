@@ -3361,13 +3361,13 @@
    "w895111373.0",
    "w895111373.1"
   ],
-  "fixed_vertices": 192,
-  "free_vertices": 8832,
+  "fixed_vertices": 200,
+  "free_vertices": 8824,
   "inferred_bridges": [],
   "max_residual_grade": 0.1202,
   "max_y": 80.488,
   "min_y": 43.319,
-  "vertices_clamped": 236
+  "vertices_clamped": 289
  },
  "one_way_traps": [],
  "ramps": [],
@@ -3425,7 +3425,7 @@
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 6737,
-   "cells_flattened": 347727,
+   "cells_flattened": 347719,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
    "chunks": 196,

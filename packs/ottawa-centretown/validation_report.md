@@ -96,7 +96,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 ## Elevation
 
 - Road height range: 43.319 m to 80.488 m
-- Bridge/tunnel (fixed) vertices: 192; approach vertices raised or lowered to meet them: 236
+- Bridge/tunnel (fixed) vertices: 200; approach vertices raised or lowered to meet them: 289
 - Conflicting bridge constraints: 4; bridge chains without a ground anchor: 2
 - Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 171
 - Worst residual grade: 0.1202; edges still over their class limit: 14

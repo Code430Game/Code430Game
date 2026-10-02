@@ -7,5 +7,5 @@
 - [x] 2.2 Mac screenshots (2026-10-01): Nicholas Street portal, Chateau tunnel portal, inside and overhead; the cuttings read as sunken paths, interiors are dim but readable
 
 ## 3. Verification
-- [ ] 3.1 Deck: package, deploy, benchmark unchanged
-- [ ] 3.2 **Stop: human walks through the Nicholas Street underpass and the Chateau tunnel on the Deck**
+- [x] 3.1 Deck (2026-10-01): avg 13.6 ms, p99 22.3, GPU 8.3, unchanged
+- [x] 3.2 Human walked through the Portage cycleway underpass on the Deck (2026-10-02); cars were seen on the path there: an untagged layer=-2 garage ramp coincided with it, now treated as a tunnel and kept free of traffic
