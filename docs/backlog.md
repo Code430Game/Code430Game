@@ -34,6 +34,12 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Two-wheelers (human asked 2026-10-02 whether to add motorcycles and bicycles).** Own
+  change after `add-vehicle-variety`: bicycles on the imported cycleways, a motorcycle class
+  with lane filtering, rider bodies from the character pipeline, a lean model on a capsule
+  rather than four-wheel physics, both takeable. Design note from the human: they enjoy using
+  the bike lane as a free passing lane, so cyclists must populate it without fencing it off
+  from cars; squeezing between cars is hard, which is correct for OSM lane widths.
 - **Clouds and weather (human, 2026-10-02).** Proposal `add-weather`: clear, overcast, rain,
   snow, fog as data with a seeded next-state table; scrolled noise clouds on a sky shader
   (deck one layer, high two plus cloud shadows), camera-following rain and snow particles,
