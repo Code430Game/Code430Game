@@ -34,6 +34,12 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Parking lots (human, 2026-10-02: "add parking lots to the specs").** Proposal
+  `add-parking-lots`, after `add-vehicle-variety`: 695 lots, 650 aisles and 595 driveways in
+  the bbox come back as class `parking` with parking-only lanes, stall markings, kerb bays,
+  seeded parked cars by hour. Reverses the 2026-09-30 "aisles stay out" decision; needs a yes.
+- **Traffic lights white at night** fixed 2026-10-02 (flat grey emission on the lamp material;
+  now a shader glowing in the instance colour, night energy 2.2).
 - **Surface detail (human, Deck drive 2026-10-02: "add textures and sidewalk line breaks;
   the cross walks should be striped like Abbey Road").** Proposal `add-surface-detail`:
   generated world-space detail textures, slab joints on sidewalks, zebra stripes on every
