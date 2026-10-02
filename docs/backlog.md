@@ -34,6 +34,10 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Trees and bushes (human, 2026-10-02).** Proposal `add-vegetation`: OSM trees, tree rows
+  and wood/park/grass polygons scattered deterministically, per-chunk MultiMeshes with LODs
+  driven by the streamer tier, deck cap 400 trees and 600 bushes per chunk, trunk collision
+  only near roads. Open: collision on every tree, autumn palette.
 - **Region picker** is built (`tools/region_picker/index.html`, importer `--region`); the two
   older region picker notes below are done except `--place` and `--radius-km`.
 
