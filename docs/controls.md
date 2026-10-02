@@ -14,7 +14,7 @@ The on-screen hints switch to whichever device you touched last.
 | brake or reverse | LT | S |
 | steer | left stick | A D |
 | handbrake | RB | Space |
-| reset a stuck car | Y while driving (hold) | R |
+| reset a stuck car | R3 (click the right stick) while driving | R |
 | camera: chase, top-down, high | D-pad down (while driving) | V |
 | headlights: auto (dusk to dawn), on, off | D-pad up (while driving) | H |
 | map | Back / View | M |

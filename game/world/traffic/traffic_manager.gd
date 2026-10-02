@@ -459,8 +459,8 @@ func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
 func _allowed_for(a: TrafficAgent) -> Callable:
 	if a.kind == Kind.BUS:
 		var classes: Array = config.get("bus_classes", [])
-		return func(lp: LaneGraph.LanePath) -> bool: return lp.is_connector or lp.bus_only or classes.has(lp.road_class)
-	return func(lp: LaneGraph.LanePath) -> bool: return not lp.bus_only
+		return func(lp: LaneGraph.LanePath) -> bool: return not lp.tunnel and (lp.is_connector or lp.bus_only or classes.has(lp.road_class))
+	return func(lp: LaneGraph.LanePath) -> bool: return not lp.bus_only and not lp.tunnel
 
 
 func _preferred_for(a: TrafficAgent) -> Callable:
@@ -560,6 +560,8 @@ func _spawn_one() -> void:
 	var bus_classes: Array = config.get("bus_classes", [])
 	var pool: Array[LaneGraph.LanePath] = []
 	for lp in candidates:
+		if lp.tunnel:
+			continue  # underground roads are not drawn; nothing should appear from inside them
 		if kind == Kind.BUS:
 			if lp.bus_only or bus_classes.has(lp.road_class):
 				pool.append(lp)
