@@ -20,6 +20,14 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   said, with a test that driving actions never share a button. `update-controls-layout` holds
   the GTA V / IV / III and Cyberpunk 2077 reference table and the proposed layout (horn L3,
   look behind R3, hold R3 to reset, radio D-left, headlights D-right, remapping page).
+- **Clustered junctions bend every arm to the centroid (human, Deck shot 2026-10-02 at x 237,
+  z 18, Elgin at Nepean).** Both Elgin carriageways and Nepean meet at one point: X-shaped
+  ribbons and lines, the same X on the minimap, traffic aiming at the centre. 76 clusters in
+  Ottawa. Proposal `update-cluster-junction-arms` (straight arms past the centroid, junction
+  builder on real edge ends). Earlier "wonky junctions" reports are probably this.
+- **Portage underpass walk (Deck shots 2026-10-02 morning, x -1208 z 141 to x -1176 z 83):**
+  a large flat slab and bare headwalls read as floating geometry at the approach; the
+  retaining walls and lighting in `add-underpass-interiors` should cover it, worth a look there.
 - **Region picker** is built (`tools/region_picker/index.html`, importer `--region`); the two
   older region picker notes below are done except `--place` and `--radius-km`.
 
