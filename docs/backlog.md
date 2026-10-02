@@ -34,6 +34,17 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Portage underpass approach fights a garage ramp (human, Deck 2026-10-02, standing at
+  x -1208, z 142: "the tunnel works, ish; bent; through the first half then can get up but
+  it's work; or maybe that's parking lot related").** The Ottawa River Pathway tunnel
+  (`p39635225`, floor 46.2, top 49.3) is straight with 15 % approach trenches, so the climb
+  itself is within the character's limit. Service road `w107633329.0` (layer 0, y 47 to 58,
+  the ramp into the garage whose layer -2 stub `w39674788.0` is already treated as a tunnel)
+  descends through the west portal area at x -1197, z 136, and its road cut crosses the
+  pathway trench: slabs and walls in the trench, a step mid-climb. Fix belongs with
+  `add-underpass-interiors` (trench retaining walls) or a small importer rule: a service
+  ramp into a tunnel stub is itself a tunnel approach and should not flatten terrain across
+  a pedestrian trench.
 - **Crossings and cycle tracks across roads were curb-high steps** (human, Deck shot 2026-10-02
   at x 930, z 932: "I drove straight into the bike lane"). Fixed in the importer: a pedestrian
   segment crossing a road ribbon gets vertices just inside each edge (flush) and a curb ramp
