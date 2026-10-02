@@ -741,8 +741,11 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
         for i in range(len(e.polyline) - 1):
             a, b = e.polyline[i], e.polyline[i + 1]
             idx.add((a[0], a[2]), (b[0], b[2]), (eid, i))
+    ramp = float(ped.get("curb_ramp_m", 0.4))
     count = 0
     for w in graph.pedestrian:
+        if not w.covered:
+            w.polyline = _split_at_ribbon_edges(w, graph, idx, ramp)
         pts = []
         nearest_class = None
         for p in w.polyline:
@@ -785,6 +788,54 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
         if w.kind == "sidewalk" and nearest_class is not None:
             w.width_m = max(w.width_m, float(min_widths.get(nearest_class, 0.0)))
     return count
+
+
+def _split_at_ribbon_edges(
+    w, graph: RoadGraph, idx, ramp: float
+) -> list[tuple[float, float, float]]:
+    """Inserts vertices where a pedestrian segment enters or leaves a road ribbon: one just
+    inside each edge (so the stretch across the road is flush with it) and one a curb ramp
+    outside (so the step up to the curb happens at the road edge, not somewhere along the
+    sidewalk). Without these a cycleway whose vertices sit on both sidewalks crossed the
+    road as a curb-high step."""
+    out: list[tuple[float, float, float]] = []
+    pl = w.polyline
+    for i in range(len(pl) - 1):
+        p, q = pl[i], pl[i + 1]
+        out.append(p)
+        seg_len = math.dist((p[0], p[2]), (q[0], q[2]))
+        if seg_len < 1e-6:
+            continue
+        mx, mz = (p[0] + q[0]) / 2.0, (p[2] + q[2]) / 2.0
+        cuts: list[float] = []
+        for a, b, (eid, _k) in idx.near(mx, mz, seg_len / 2.0 + 40.0):
+            e = graph.edges[eid]
+            if e.bridge and w.kind not in ("sidewalk", "crossing"):
+                continue
+            dx, dz = b[0] - a[0], b[1] - a[1]
+            length = math.hypot(dx, dz)
+            if length < 1e-6:
+                continue
+            nx, nz = -dz / length, dx / length
+            hw = e.width_m / 2.0
+            for side in (1.0, -1.0):
+                c = (a[0] + nx * hw * side, a[1] + nz * hw * side)
+                d = (b[0] + nx * hw * side, b[1] + nz * hw * side)
+                hit = _seg_intersect((p[0], p[2]), (q[0], q[2]), c, d)
+                if hit is None:
+                    continue
+                t = hit[0]
+                # Which way along the segment is "into" the road: against this edge's normal.
+                toward = ((q[0] - p[0]) * nx + (q[2] - p[2]) * nz) * side < 0.0
+                inward = (0.05 / seg_len) * (1.0 if toward else -1.0)
+                outward = (ramp / seg_len) * (-1.0 if toward else 1.0)
+                for tt in (t + inward, t + outward):
+                    if 1e-4 < tt < 1.0 - 1e-4:
+                        cuts.append(tt)
+        for t in sorted({round(c, 6) for c in cuts}):
+            out.append((p[0] + (q[0] - p[0]) * t, p[1], p[2] + (q[2] - p[2]) * t))
+    out.append(pl[-1])
+    return out
 
 
 def split_pedestrian_under_bridges(graph: RoadGraph) -> int:

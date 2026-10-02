@@ -169,3 +169,26 @@ def test_path_under_a_bridge_is_cut_but_deck_sidewalk_kept():
     assert split_pedestrian_under_bridges(g) == 1
     ids = sorted(w.id for w in g.pedestrian)
     assert ids == ["p2"]  # the path had no piece with two vertices left outside the deck
+
+
+def test_cycleway_across_a_street_is_flush_with_it_and_ramps_at_the_curb():
+    from osm_import.elevation import apply_pedestrian_elevation
+    from osm_import.graph import PedestrianWay
+
+    g, _ = build(
+        [(1, [(-100, 0), (100, 0)], {"highway": "residential", "width": "8"})], FlatSource(10.0)
+    )
+    track = PedestrianWay(
+        "p1", [(0.0, 0.0, -20.0), (0.0, 0.0, 20.0)], "cycleway", 1, None, "cycleway", 2.0
+    )
+    g.pedestrian = [track]
+    apply_pedestrian_elevation(g, FlatSource(10.0), CFG)
+    pts = track.polyline
+    curb = float(CFG.pedestrian.get("curb_height_m", 0.12))
+    # terrain, curb ramp, flush, flush, curb ramp, terrain: the step sits at the road edge.
+    ys = [round(p[1], 3) for p in pts]
+    assert ys == [10.0, round(10.0 + curb, 3), 10.02, 10.02, round(10.0 + curb, 3), 10.0], pts
+    zs = [p[2] for p in pts]
+    assert zs == sorted(zs)
+    assert 0.3 < zs[2] - zs[1] < 0.5 and 0.3 < zs[4] - zs[3] < 0.5, zs
+    assert pts[0][2] == -20.0 and pts[-1][2] == 20.0

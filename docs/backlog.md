@@ -34,6 +34,11 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Crossings and cycle tracks across roads were curb-high steps** (human, Deck shot 2026-10-02
+  at x 930, z 932: "I drove straight into the bike lane"). Fixed in the importer: a pedestrian
+  segment crossing a road ribbon gets vertices just inside each edge (flush) and a curb ramp
+  just outside; Ottawa pack re-exported. Buses are all red now (OC Transpo). Day-night and
+  buses archived after the human's Deck verdict.
 - **Parking lots (human, 2026-10-02: "add parking lots to the specs").** Proposal
   `add-parking-lots`, after `add-vehicle-variety`: 695 lots, 650 aisles and 595 driveways in
   the bbox come back as class `parking` with parking-only lanes, stall markings, kerb bays,
