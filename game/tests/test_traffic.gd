@@ -230,6 +230,42 @@ func test_blocked_car_sidesteps_to_the_free_lane_after_a_while() -> void:
 	assert_bool(a.braking).is_false()
 
 
+func test_sidestep_slides_over_with_the_heading_held_straight() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 50, "lf": 2, "w": 7.0}]))
+	m.anchors = PackedVector3Array([Vector3.ZERO])
+	var right := -1
+	for p in m.lanes.paths:
+		if p.edge_id == "w1.0" and p.lane_index == 0:
+			right = p.id
+	var parked: Node3D = auto_free(Node3D.new())
+	add_child(parked)
+	parked.global_position = m.lanes.paths[right].position_at(120.0)
+	m.obstacles = [parked]
+	var a := _add_agent(m, right, 60.0, 12.0)
+	var old_z := m.lanes.paths[right].position_at(100.0).z
+	var frames := 0
+	while a.path_id == right and frames < 60 * 20:
+		m.step(1.0 / 60.0)
+		frames += 1
+	assert_int(a.path_id).is_not_equal(right)
+	var new_z := m.lanes.paths[a.path_id].position_at(a.distance).z
+	# Just after the sidestep the car is still on its old line, pointing down the road.
+	assert_float(a.transform.origin.z).is_equal_approx(old_z, 0.2)
+	assert_float((-a.transform.basis.z).dot(Vector3(1, 0, 0))).is_greater(0.99)
+	var start_d := a.distance
+	while a.distance - start_d < float(m.config["car_length_m"]) and frames < 60 * 40:
+		m.step(1.0 / 60.0)
+		frames += 1
+	# One car length on: between the lanes, still pointing straight.
+	assert_float(a.transform.origin.z).is_between(minf(old_z, new_z) + 0.3, maxf(old_z, new_z) - 0.3)
+	assert_float((-a.transform.basis.z).dot(Vector3(1, 0, 0))).is_greater(0.99)
+	while a.distance - start_d < 3.0 * float(m.config["car_length_m"]) and frames < 60 * 60:
+		m.step(1.0 / 60.0)
+		frames += 1
+	# Three car lengths on: centred in the new lane.
+	assert_float(a.transform.origin.z).is_equal_approx(new_z, 0.05)
+
+
 func _bus(m: TrafficManager, path_id: int, distance: float) -> TrafficAgent:
 	var a := _add_agent(m, path_id, distance, 5.0)
 	a.kind = TrafficManager.Kind.BUS
