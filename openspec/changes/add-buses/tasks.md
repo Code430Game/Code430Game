@@ -7,5 +7,5 @@
 - [x] 2.3 Mac screenshots (2026-10-02): Lyon Street North painted red with a bus coming down it; Transitway with buses at a high debug share (`--bus-share=`)
 
 ## 3. Verification
-- [ ] 3.1 Deck: package, deploy, benchmark
+- [x] 3.1 Deck (2026-10-02): avg 9.9 ms, p99 13.3, GPU 8.9, draw calls 413; no regression
 - [ ] 3.2 **Stop: human follows a bus down a bus lane on the Deck**
