@@ -5,6 +5,9 @@ extends RefCounted
 ## `build` with a pose bakes the bones in instead, for static bodies (pedestrian pools).
 ## Stands on y = 0, faces -Z. Height scales everything vertically; build scales widths.
 
+## Hair cap thresholds on the unit head sphere: front above the brows, back down to the nape.
+const HAIRLINE_FRONT := 0.42
+const HAIRLINE_BACK := 0.05
 const BASE_HEIGHT_M := 1.8
 
 ## Bone name -> [parent name, pivot in model space at scale 1].
@@ -114,10 +117,18 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 		b.capsule(Vector3(side * 0.11, 0.68, 0.0), 0.085, 0.27, bottom, thigh)
 		b.capsule(Vector3(side * 0.11, 0.27, 0.0), 0.07, 0.28, bottom, shin)
 		b.box(Vector3(side * 0.11, 0.045, -0.03), Vector3(0.17, 0.09, 0.27), shoes, shin)
-	# Torso, neck, jacket front
-	b.capsule(Vector3(0.0, 1.13, 0.0), 0.17, 0.34, sleeve if jacket else top, "spine", Vector3(1.3, 1.0, 0.75))
+	# Torso in the shirt colour up to the neck; an open jacket sits outside it as panels with a
+	# gap down the front and a collar, so the shirt shows through rather than reading as a tie.
+	# The shirt ends at the natural waist (about 1.0 m on the unscaled body) and the trousers
+	# own the pelvis below it; a shirt that ran down over the hips read as a onesie.
+	b.capsule(Vector3(0.0, 1.21, 0.0), 0.17, 0.18, top, "spine", Vector3(1.3, 1.0, 0.75))
+	b.capsule(Vector3(0.0, 0.92, 0.0), 0.15, 0.12, bottom, "hips", Vector3(1.3, 1.0, 0.75))
 	if jacket:
-		b.box(Vector3(0.0, 1.10, -0.125), Vector3(0.12, 0.52, 0.03), top, "spine")
+		b.box(Vector3(0.0, 1.17, 0.115), Vector3(0.44, 0.44, 0.05), sleeve, "spine")  # back
+		for side: float in [-1.0, 1.0]:
+			b.box(Vector3(side * 0.215, 1.17, 0.0), Vector3(0.05, 0.44, 0.24), sleeve, "spine")  # sides
+			b.box(Vector3(side * 0.125, 1.17, -0.115), Vector3(0.17, 0.44, 0.05), sleeve, "spine")  # fronts
+		b.box(Vector3(0.0, 1.41, 0.0), Vector3(0.30, 0.04, 0.26), sleeve, "spine")  # collar
 	b.cylinder(Vector3(0.0, 1.47, 0.0), 0.06, 0.10, skin, "spine")
 	# Arms and hands
 	for side: float in [-1.0, 1.0]:
@@ -145,17 +156,17 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 	# Hair
 	match int(p["hair"]):
 		1:
-			b.sphere_part(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0), 0.05, 1.0, false)
+			b.hair_cap(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0))
 		2:
-			b.sphere_part(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0), 0.05, 1.0, false)
+			b.hair_cap(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0))
 			b.box(Vector3(0.0, 1.50, 0.11), Vector3(0.26, 0.42, 0.09), hair, "head")
 		3:
-			b.sphere_part(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0), 0.05, 1.0, false)
+			b.hair_cap(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0))
 			b.sphere(Vector3(0.0, 1.78, 0.08), 0.06, hair, "head")
 		4:
 			b.box(Vector3(0.0, 1.80, 0.0), Vector3(0.05, 0.12, 0.26), hair, "head")
 		5:
-			b.sphere_part(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0), 0.05, 1.0, false)
+			b.hair_cap(Vector3(0.0, 1.655, 0.0), 0.145, hair, "head", Vector3(1.0, 1.1, 1.0))
 			b.capsule(Vector3(0.0, 1.50, 0.14), 0.035, 0.27, hair, "head")
 	match int(p["hat"]):
 		1:
@@ -262,6 +273,12 @@ class _Builder:
 
 	func sphere(centre: Vector3, radius: float, color: Color, bone: String, shape: Vector3 = Vector3.ONE) -> void:
 		_primitive_part("sphere", Transform3D(Basis().scaled(shape * radius), centre), color, bone, Callable())
+
+	## A cap of hair: the front stops at the hairline above the brows, the back and sides hang
+	## lower. Unit-sphere y thresholds; the old single threshold dropped a fringe over the eyes.
+	func hair_cap(centre: Vector3, radius: float, color: Color, bone: String, shape: Vector3) -> void:
+		var keep := func(c: Vector3) -> bool: return c.y >= (HAIRLINE_FRONT if c.z < 0.0 else HAIRLINE_BACK)
+		_primitive_part("sphere", Transform3D(Basis().scaled(shape * radius), centre), color, bone, keep)
 
 	## Part of a sphere: local y between `y_min` and `y_max` (unit sphere), and the front half only when `front`.
 	func sphere_part(centre: Vector3, radius: float, color: Color, bone: String, shape: Vector3, y_min: float, y_max: float, front: bool) -> void:

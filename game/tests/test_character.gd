@@ -143,3 +143,71 @@ func test_knees_bend_backward_and_elbows_forward() -> void:
 	var elbow := CharacterMesh.bone_global(CharacterMesh.bone_index("forearm_l"), profile, pose)
 	var hand := elbow * Vector3(0.0, -0.25, 0.0)
 	assert_float(hand.z - elbow.origin.z).is_less(-0.02)
+
+
+func test_jacket_is_open_over_the_shirt() -> void:
+	# In the chest band, down the front centre line only the shirt colour shows, and the
+	# jacket colour sits further forward than the shirt does: an open coat over a full shirt.
+	var profile := {"hair": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 1, "top": 0, "bottom": 5, "jacket_colour": 3, "height": 1.0, "build": 1.0}
+	var mesh := CharacterMesh.build(profile)
+	var arrays := mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var cols: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var shirt: Color = CharacterProfile.CLOTH[0]
+	var coat: Color = CharacterProfile.CLOTH[3]
+	assert_bool(shirt.is_equal_approx(coat)).is_false()
+	var aabb := mesh.get_aabb()
+	var y0 := aabb.position.y + aabb.size.y * 0.52
+	var y1 := aabb.position.y + aabb.size.y * 0.72
+	var shirt_front := 0
+	var coat_front_centre := 0
+	var coat_outer := 0.0
+	var shirt_outer := 0.0
+	for i in range(verts.size()):
+		var v := verts[i]
+		if v.y < y0 or v.y > y1:
+			continue
+		var centre := absf(v.x) < aabb.size.x * 0.04
+		if _same_colour(cols[i], shirt):
+			shirt_outer = maxf(shirt_outer, -v.z)
+			if centre and v.z < 0.0:
+				shirt_front += 1
+		elif _same_colour(cols[i], coat):
+			coat_outer = maxf(coat_outer, -v.z)
+			if centre and v.z < 0.0:
+				coat_front_centre += 1
+	assert_int(shirt_front).is_greater(0)
+	assert_int(coat_front_centre).is_equal(0)
+	assert_float(coat_outer).is_greater(shirt_outer)
+
+
+## Vertex colours come back quantised to 8 bits, so compare loosely.
+static func _same_colour(a: Color, b: Color) -> bool:
+	return absf(a.r - b.r) < 0.02 and absf(a.g - b.g) < 0.02 and absf(a.b - b.b) < 0.02
+
+
+func test_hair_stops_above_the_eyes_and_shirt_stops_at_the_waist() -> void:
+	var profile := {"hair": 2, "hair_colour": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 0, "top": 0, "bottom": 2, "height": 1.0, "build": 1.0}
+	var mesh := CharacterMesh.build(profile)
+	var arrays := mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var cols: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var hair: Color = CharacterProfile.HAIR_COLOUR[0]
+	var shirt: Color = CharacterProfile.CLOTH[0]
+	var trousers: Color = CharacterProfile.CLOTH[2]
+	var hair_front_low := 10.0
+	var shirt_low := 10.0
+	var trousers_high := 0.0
+	for i in range(verts.size()):
+		var v := verts[i]
+		var torso := absf(v.x) < 0.15  # sleeves are shirt-coloured too; measure the body only
+		if _same_colour(cols[i], hair) and v.z < -0.08 and v.y > 1.4:
+			hair_front_low = minf(hair_front_low, v.y)
+		elif _same_colour(cols[i], shirt) and torso:
+			shirt_low = minf(shirt_low, v.y)
+		elif _same_colour(cols[i], trousers) and torso:
+			trousers_high = maxf(trousers_high, v.y)
+	# The brows (hair-coloured) sit at 1.70 and the eyes at 1.665; the cap must start above both.
+	assert_float(hair_front_low).is_greater(1.69)
+	assert_float(shirt_low).is_greater(0.93)
+	assert_float(trousers_high).is_greater(1.0)

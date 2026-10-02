@@ -34,6 +34,11 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Character body fixes (human, Deck 2026-10-02: jacket looked under the shirt with a tie-like
+  strip; shirt stopped short of the neck; long hair covered the eyes; waist too low, "diaper or
+  onesie").** Fixed: shirt capsule to the neck ending at the natural waist, trouser pelvis
+  below it, open jacket as panels with a collar, hair caps with a hairline above the brows.
+  Beard still jagged ("fine for now"); a nicer beard belongs in `add-character-features`.
 - **Walk cycle knees bent backwards (human, Deck 2026-10-02: "walks a bit like a bird").**
   Fixed: shin and forearm rotation signs flipped in `walk_pose`; test pins heel behind the
   knee and hand in front of the elbow.
