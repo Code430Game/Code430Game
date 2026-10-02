@@ -55,6 +55,30 @@ func test_mesh_scales_with_height_and_build() -> void:
 	assert_float(b.size.x / a.size.x).is_equal_approx(1.2, 0.01)
 
 
+func test_posed_mesh_moves_the_feet_and_skinned_mesh_carries_bones() -> void:
+	var rest := CharacterMesh.build({"hair": 0, "hat": 0})
+	var stride := CharacterMesh.build({"hair": 0, "hat": 0}, CharacterMesh.walk_pose(PI * 0.5, 1.0))
+	assert_float(stride.get_aabb().size.z).is_greater(rest.get_aabb().size.z + 0.2)
+	var skinned := CharacterMesh.build({"hair": 0, "hat": 0}, {}, true)
+	var arrays := skinned.surface_get_arrays(0)
+	assert_int((arrays[Mesh.ARRAY_BONES] as PackedInt32Array).size()).is_equal((arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() * 4)
+	var full := CharacterMesh.build({"hair": 5, "hat": 1, "beard": 2, "glasses": 1, "jacket": 1})
+	assert_int(full.get_surface_count()).is_equal(1)
+
+
+func test_rig_walks_when_moving_and_rests_when_still() -> void:
+	var rig: CharacterRig = auto_free(CharacterRig.new())
+	add_child(rig)
+	assert_int(rig.skeleton.get_bone_count()).is_equal(CharacterMesh.BONES.size())
+	rig.set_walk(PI * 0.5, 1.0)
+	var thigh := CharacterMesh.bone_index("thigh_l")
+	assert_float(rig.skeleton.get_bone_pose_rotation(thigh).get_angle()).is_greater(0.3)
+	for i in range(60):
+		rig.advance(1.0 / 60.0, 0.0)
+	assert_float(rig.amount).is_equal_approx(0.0, 0.001)
+	assert_float(rig.skeleton.get_bone_pose_rotation(thigh).get_angle()).is_less(0.01)
+
+
 func test_store_round_trips_last_and_presets() -> void:
 	var first := CharacterStore.last_or_random(_path)
 	assert_bool(FileAccess.file_exists(_path)).is_true()
@@ -75,9 +99,10 @@ func test_remote_player_wears_a_profile() -> void:
 	var r: RemotePlayer = auto_free(RemotePlayer.new())
 	add_child(r)
 	r.setup(2, Color.BLUE, {"top": 3})
-	assert_object(r._body.mesh).is_instanceof(ArrayMesh)
-	assert_float(r._body.position.y).is_equal_approx(0.0, 0.001)
+	assert_object(r._rig).is_not_null()
+	assert_object(r._body.mesh).is_null()
 	r.apply_profile({})
+	assert_object(r._rig).is_null()
 	assert_object(r._body.mesh).is_instanceof(CapsuleMesh)
 
 

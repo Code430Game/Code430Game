@@ -3,7 +3,7 @@ extends RefCounted
 ## A player's look as a plain dictionary so it travels over the network and into JSON as is.
 ## Colour fields are palette indices; height and build are scales about 1.0.
 
-const FIELDS: PackedStringArray = ["skin", "hair", "hair_colour", "top", "bottom", "shoes", "hat", "height", "build"]
+const FIELDS: PackedStringArray = ["skin", "hair", "hair_colour", "top", "bottom", "shoes", "hat", "height", "build", "beard", "glasses", "jacket", "jacket_colour"]
 
 const SKIN: Array[Color] = [
 	Color(0.96, 0.82, 0.70), Color(0.88, 0.70, 0.55), Color(0.78, 0.58, 0.42),
@@ -19,7 +19,10 @@ const CLOTH: Array[Color] = [
 	Color(0.45, 0.45, 0.48), Color(0.95, 0.50, 0.15), Color(0.55, 0.30, 0.75), Color(0.20, 0.65, 0.65),
 ]
 const CLOTH_NAMES: PackedStringArray = ["red", "blue", "green", "yellow", "white", "black", "grey", "orange", "purple", "teal"]
-const HAIR_NAMES: PackedStringArray = ["bald", "short", "long"]
+const HAIR_NAMES: PackedStringArray = ["bald", "short", "long", "bun", "mohawk", "ponytail"]
+const BEARD_NAMES: PackedStringArray = ["none", "stubble", "full"]
+const GLASSES_NAMES: PackedStringArray = ["none", "glasses"]
+const JACKET_NAMES: PackedStringArray = ["none", "jacket"]
 const HAIR_COLOUR_NAMES: PackedStringArray = ["black", "brown", "chestnut", "blonde", "red", "silver"]
 const HAT_NAMES: PackedStringArray = ["none", "cap", "beanie"]
 const SHOE_COLOURS: Array[Color] = [Color(0.12, 0.10, 0.09), Color(0.92, 0.92, 0.90), Color(0.45, 0.28, 0.16), Color(0.80, 0.20, 0.18)]
@@ -45,6 +48,10 @@ static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 		"bottom": rng.randi_range(0, CLOTH.size() - 1),
 		"shoes": rng.randi_range(0, SHOE_COLOURS.size() - 1),
 		"hat": 0 if rng.randf() < 0.7 else rng.randi_range(1, HAT_NAMES.size() - 1),
+		"beard": 0 if rng.randf() < 0.55 else rng.randi_range(1, BEARD_NAMES.size() - 1),
+		"glasses": 1 if rng.randf() < 0.2 else 0,
+		"jacket": 1 if rng.randf() < 0.4 else 0,
+		"jacket_colour": rng.randi_range(0, CLOTH.size() - 1),
 		"height": HEIGHT_MIN + HEIGHT_STEP * rng.randi_range(0, _steps("height")),
 		"build": BUILD_MIN + BUILD_STEP * rng.randi_range(0, _steps("build")),
 	})
@@ -89,8 +96,14 @@ static func label(p: Dictionary, key: String) -> String:
 			return HAIR_NAMES[clampi(int(v), 0, HAIR_NAMES.size() - 1)]
 		"hair_colour":
 			return HAIR_COLOUR_NAMES[clampi(int(v), 0, HAIR_COLOUR_NAMES.size() - 1)]
-		"top", "bottom":
+		"top", "bottom", "jacket_colour":
 			return CLOTH_NAMES[clampi(int(v), 0, CLOTH_NAMES.size() - 1)]
+		"beard":
+			return BEARD_NAMES[clampi(int(v), 0, BEARD_NAMES.size() - 1)]
+		"glasses":
+			return GLASSES_NAMES[clampi(int(v), 0, GLASSES_NAMES.size() - 1)]
+		"jacket":
+			return JACKET_NAMES[clampi(int(v), 0, JACKET_NAMES.size() - 1)]
 		"shoes":
 			return SHOE_NAMES[clampi(int(v), 0, SHOE_NAMES.size() - 1)]
 		"hat":
@@ -122,8 +135,14 @@ static func _count(key: String) -> int:
 			return HAIR_NAMES.size()
 		"hair_colour":
 			return HAIR_COLOUR.size()
-		"top", "bottom":
+		"top", "bottom", "jacket_colour":
 			return CLOTH.size()
+		"beard":
+			return BEARD_NAMES.size()
+		"glasses":
+			return GLASSES_NAMES.size()
+		"jacket":
+			return JACKET_NAMES.size()
 		"shoes":
 			return SHOE_COLOURS.size()
 		"hat":

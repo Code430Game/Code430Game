@@ -19,7 +19,6 @@ shape = SubResource("shape")
 
 [node name="Mesh" type="Node3D" parent="."]
 
-[node name="Body" type="MeshInstance3D" parent="Mesh"]
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

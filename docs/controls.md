@@ -27,7 +27,8 @@ Dystopia. Billboards along the big roads change their ads with it; in co-op the 
 the session's. `--tone=clean` starts in a mode for the session only.
 
 **Character** in the pause menu opens the creator: up and down pick a row, left and right change
-it, A randomises, loads, saves or deletes a preset, B keeps the body and returns. The first start
+it, A randomises, loads, saves or deletes a preset, B keeps the body and returns. Rows: skin, hair style
+and colour, top, jacket and its colour, trousers, shoes, hat, beard, glasses, height, build. The first start
 gives you a random body; the last one you made is loaded next time. Saved in `user://characters.json`.
 
 Co-op lives in the pause menu: **Host co-op game** shows the address friends join at;
