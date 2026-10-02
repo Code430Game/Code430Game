@@ -1,0 +1,19 @@
+## 1. Catalogue
+- [ ] 1.1 `vehicles.schema.v0.json`, base `vehicles.v0.json` with nine entries, `VehicleCatalogue` autoload with merge and `pick_for_spawn`; `pack_tools` validates pack copies; tests
+
+## 2. Generator
+- [ ] 2.1 `trim_sheet.gd`: generated atlas; test on determinism and cell colours
+- [ ] 2.2 `vehicle_mesh.gd`: parametric profile per class, LOD0 details, LOD1; tests on triangle budgets per class, outward faces, surface colour split, bounds matching `dims`
+- [ ] 2.3 Mac screenshots: a lineup of all nine classes at LOD0 and LOD1 side by side, day and night
+
+## 3. Traffic
+- [ ] 3.1 Per-class, per-LOD MultiMeshes, LOD pick by distance, spawn weights by road group and hour, pooled body box and mass from the class; tests on class mix at noon and at 22:00 and on LOD assignment
+- [ ] 3.2 Snapshot stride 7 with class index; mirror client rebuilds classes; sync tests
+
+## 4. Player car
+- [ ] 4.1 `apply_entry` on the placeholder car (wheels, mass, tunables, mesh); taking a traffic car keeps its class; `--car=<id>`; remote replicas build the class; tests
+- [ ] 4.2 Mac drive: hatchback, SUV and box truck feel different on the Queensway ramp
+
+## 5. Verification
+- [ ] 5.1 Deck benchmark on the usual route with 150 agents: frame avg and p99, GPU, draw calls quoted against the bus round's 413; no regression past budget
+- [ ] 5.2 **Stop: human drives a few classes on the Deck and watches the traffic mix downtown and on the 417**

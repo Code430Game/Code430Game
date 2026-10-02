@@ -34,6 +34,17 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Clouds and weather (human, 2026-10-02).** Proposal `add-weather`: clear, overcast, rain,
+  snow, fog as data with a seeded next-state table; scrolled noise clouds on a sky shader
+  (deck one layer, high two plus cloud shadows), camera-following rain and snow particles,
+  wetness and snow uniforms on the shared materials, traffic slowdown and grip per state,
+  host-owned and sent with the clock. Open: snow before a season table, headlights auto in
+  heavy weather, snow grip 0.55.
+- **Vehicle variety (human, 2026-10-02).** Proposal `add-vehicle-variety`: a vehicle catalogue
+  (`vehicles.v0.json`, packs may add) driving one parametric generator for eight classes with
+  two LODs (LOD0 under 900 to 1300 tris, LOD1 under 260), a generated trim atlas, spawn weights
+  by road and hour, player car from the catalogue with `--car=`. Open: eight classes or five
+  first (draw calls 8 to 72), livery naming.
 - **Trees and bushes (human, 2026-10-02).** Proposal `add-vegetation`: OSM trees, tree rows
   and wood/park/grass polygons scattered deterministically, per-chunk MultiMeshes with LODs
   driven by the streamer tier, deck cap 400 trees and 600 bushes per chunk, trunk collision
