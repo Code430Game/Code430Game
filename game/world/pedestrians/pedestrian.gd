@@ -16,6 +16,7 @@ var waiting_to_cross: bool = false
 var state: int = State.WALKING
 var timer: float = 0.0  # HIT: physics window left; DOWN: time until removal
 var color: Color = Color.WHITE
+var pool: int = -1  # body pool (PedestrianManager.POOLS), chosen from the colour when unset
 var transform: Transform3D = Transform3D.IDENTITY
 var body: PedestrianBody = null
 

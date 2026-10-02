@@ -31,7 +31,8 @@ var anchors: PackedVector3Array = PackedVector3Array()
 var obstacles: Array[Node3D] = []
 var _spawn_timer: float = 0.0
 var _frame: int = 0
-var _multimesh: MultiMeshInstance3D
+const POOLS := 8  # distinct pre-posed bodies; agents are spread across them
+var _pools: Array[MultiMeshInstance3D] = []
 var _bodies: Array[PedestrianBody] = []
 
 
@@ -114,24 +115,20 @@ func crossing_positions() -> PackedVector3Array:
 
 
 func _setup_rendering() -> void:
-	if _multimesh != null:
+	if not _pools.is_empty():
 		return
-	_multimesh = MultiMeshInstance3D.new()
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	var capsule := CapsuleMesh.new()
-	capsule.radius = float(config["radius_m"])
-	capsule.height = float(config["height_m"])
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 0.7
-	capsule.material = mat
-	mm.mesh = capsule
-	mm.instance_count = max_agents
-	mm.visible_instance_count = 0
-	_multimesh.multimesh = mm
-	add_child(_multimesh)
+	for i in range(POOLS):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 7919 * (i + 1)
+		var mmi := MultiMeshInstance3D.new()
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = CharacterMesh.build(CharacterProfile.random(rng), CharacterMesh.walk_pose(TAU * i / POOLS, 0.7))
+		mm.instance_count = max_agents
+		mm.visible_instance_count = 0
+		mmi.multimesh = mm
+		add_child(mmi)
+		_pools.append(mmi)
 	for i in range(int(config["body_pool"])):
 		var body: PedestrianBody = BODY_SCENE.instantiate()
 		body.hit.connect(_on_body_hit)
@@ -464,13 +461,18 @@ func _on_body_hit(body: PedestrianBody) -> void:
 
 
 func _render() -> void:
-	if _multimesh == null:
+	if _pools.is_empty():
 		return
-	var mm := _multimesh.multimesh
-	var n := mini(agents.size(), mm.instance_count)
-	mm.visible_instance_count = n
-	var lift := float(config["height_m"]) * 0.5
-	for i in range(n):
-		var a := agents[i]
-		mm.set_instance_transform(i, a.transform.translated_local(Vector3(0.0, lift, 0.0)))
-		mm.set_instance_color(i, a.color)
+	var counts := PackedInt32Array()
+	counts.resize(POOLS)
+	for a in agents:
+		if a.pool < 0:
+			a.pool = int(a.color.r * 255.0 + a.color.g * 255.0 * 3.0 + a.color.b * 255.0 * 7.0) % POOLS
+		var mm := _pools[a.pool].multimesh
+		var k := counts[a.pool]
+		if k >= mm.instance_count:
+			continue
+		mm.set_instance_transform(k, a.transform)
+		counts[a.pool] = k + 1
+	for i in range(POOLS):
+		_pools[i].multimesh.visible_instance_count = counts[i]

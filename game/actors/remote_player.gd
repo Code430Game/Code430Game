@@ -12,7 +12,9 @@ var driving: bool = false
 ## Latest interpolated car transform; the replica body follows it on the next physics tick.
 var car_target: Transform3D = Transform3D.IDENTITY
 
-var _body: MeshInstance3D
+var _body: MeshInstance3D  # capsule stand-in until a profile arrives
+var _rig: CharacterRig = null
+var _last_pos: Vector3 = Vector3.INF
 var _car: AnimatableBody3D
 var _car_mesh: MeshInstance3D
 var _samples: Array = []  # [{"t": float, "driving": bool, "body": Transform3D, "car": Transform3D}]
@@ -54,9 +56,19 @@ func apply_profile(profile: Dictionary) -> void:
 		capsule.material = mat
 		_body.mesh = capsule
 		_body.position.y = 0.9
+		_body.visible = not driving
+		if _rig != null:
+			_rig.queue_free()
+			_rig = null
 	else:
-		_body.mesh = CharacterMesh.build(profile)
-		_body.position.y = 0.0
+		_body.mesh = null
+		if _rig == null:
+			_rig = CharacterRig.new()
+			_rig.profile = profile
+			add_child(_rig)
+		else:
+			_rig.apply_profile(profile)
+		_rig.visible = not driving
 
 
 ## Position of whatever this peer controls, for streaming and traffic anchors.
@@ -90,6 +102,11 @@ func _process(delta: float) -> void:
 	var car_t: Transform3D = (a["car"] as Transform3D).interpolate_with(b["car"], u)
 	global_transform = body_t
 	_body.visible = not driving
+	if _rig != null:
+		_rig.visible = not driving
+		var speed: float = 0.0 if _last_pos == Vector3.INF or delta <= 0.0 else global_position.distance_to(_last_pos) / delta
+		_rig.advance(delta, speed)
+		_last_pos = global_position
 	_car.visible = driving
 	car_target = car_t if driving else Transform3D(Basis(), Vector3(0, -1000, 0))
 	_car.global_transform = car_target

@@ -19,9 +19,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -370.0
-offset_top = -250.0
+offset_top = -300.0
 offset_right = 370.0
-offset_bottom = 250.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -54,14 +54,14 @@ theme_override_font_sizes/font_size = 13
 text = ""
 
 [node name="ViewportContainer" type="SubViewportContainer" parent="Panel/HBox"]
-custom_minimum_size = Vector2(300, 440)
+custom_minimum_size = Vector2(300, 540)
 layout_mode = 2
 stretch = true
 
 [node name="Viewport" type="SubViewport" parent="Panel/HBox/ViewportContainer"]
 own_world_3d = true
 handle_input_locally = false
-size = Vector2i(300, 440)
+size = Vector2i(300, 540)
 render_target_update_mode = 4
 
 [node name="Camera" type="Camera3D" parent="Panel/HBox/ViewportContainer/Viewport"]
@@ -71,4 +71,4 @@ fov = 40.0
 [node name="Light" type="DirectionalLight3D" parent="Panel/HBox/ViewportContainer/Viewport"]
 transform = Transform3D(0.866, -0.321, 0.383, 0, 0.766, 0.643, -0.5, -0.557, 0.663, 0, 3, 0)
 
-[node name="Body" type="MeshInstance3D" parent="Panel/HBox/ViewportContainer/Viewport"]
+[node name="Body" type="Node3D" parent="Panel/HBox/ViewportContainer/Viewport"]

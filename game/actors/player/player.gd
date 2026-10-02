@@ -19,7 +19,7 @@ var profile: Dictionary = {}
 @onready var _arm: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 @onready var _body_mesh: Node3D = $Mesh
-@onready var _body: MeshInstance3D = $Mesh/Body
+var _rig: CharacterRig = null
 @onready var _shape: CollisionShape3D = $Shape
 
 var vehicle: VehicleBody3D = null
@@ -45,8 +45,14 @@ func _ready() -> void:
 ## Rebuilds the body from a CharacterProfile dictionary.
 func apply_profile(p: Dictionary) -> void:
 	profile = CharacterProfile.normalise(p)
-	if _body != null:
-		_body.mesh = CharacterMesh.build(profile)
+	if _body_mesh == null:
+		return
+	if _rig == null:
+		_rig = CharacterRig.new()
+		_rig.profile = profile
+		_body_mesh.add_child(_rig)
+	else:
+		_rig.apply_profile(profile)
 
 
 func _exit_tree() -> void:
@@ -76,6 +82,8 @@ func _physics_process(delta: float) -> void:
 		return
 	_orbit(delta)
 	_move(delta)
+	if _rig != null:
+		_rig.advance(delta, Vector3(velocity.x, 0.0, velocity.z).length())
 	if Input.is_action_just_pressed("interact") and peer_id == Players.LOCAL_PEER_ID:
 		var car := nearest_vehicle()
 		if car != null:

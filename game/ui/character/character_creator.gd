@@ -9,7 +9,8 @@ signal closed(profile: Dictionary)
 
 const FIELD_ROWS: Array = [
 	["skin", "Skin"], ["hair", "Hair"], ["hair_colour", "Hair colour"], ["top", "Top"],
-	["bottom", "Trousers"], ["shoes", "Shoes"], ["hat", "Hat"], ["height", "Height"], ["build", "Build"],
+	["jacket", "Jacket"], ["jacket_colour", "Jacket colour"], ["bottom", "Trousers"], ["shoes", "Shoes"],
+	["hat", "Hat"], ["beard", "Beard"], ["glasses", "Glasses"], ["height", "Height"], ["build", "Build"],
 ]
 const ACTION_ROWS: Array = [
 	["randomise", "Randomise"], ["preset", "Preset"], ["save", "Save as a new preset"],
@@ -23,7 +24,8 @@ var profile: Dictionary = {}
 
 @onready var _rows_box: VBoxContainer = $Panel/HBox/Left/Rows
 @onready var _status: Label = $Panel/HBox/Left/Status
-@onready var _preview: MeshInstance3D = $Panel/HBox/ViewportContainer/Viewport/Body
+@onready var _preview: Node3D = $Panel/HBox/ViewportContainer/Viewport/Body
+var _rig: CharacterRig = null
 @onready var _camera: Camera3D = $Panel/HBox/ViewportContainer/Viewport/Camera
 
 var _rows: Array[Label] = []  # value column
@@ -39,10 +41,10 @@ func _ready() -> void:
 	for row: Array in FIELD_ROWS + ACTION_ROWS:
 		var line := HBoxContainer.new()
 		var n := Label.new()
-		n.add_theme_font_size_override("font_size", 18)
+		n.add_theme_font_size_override("font_size", 17)
 		n.custom_minimum_size.x = 150.0
 		var l := Label.new()
-		l.add_theme_font_size_override("font_size", 18)
+		l.add_theme_font_size_override("font_size", 17)
 		line.add_child(n)
 		line.add_child(l)
 		_rows_box.add_child(line)
@@ -69,7 +71,12 @@ func open(start: Dictionary) -> void:
 
 
 func _apply() -> void:
-	_preview.mesh = CharacterMesh.build(profile)
+	if _rig == null:
+		_rig = CharacterRig.new()
+		_rig.profile = profile
+		_preview.add_child(_rig)
+	else:
+		_rig.apply_profile(profile)
 	_refresh()
 	profile_changed.emit(profile)
 
@@ -163,3 +170,5 @@ func _done() -> void:
 func _process(delta: float) -> void:
 	if visible:
 		_preview.rotation.y += PREVIEW_TURN_RAD_S * delta
+		if _rig != null:
+			_rig.advance(delta, 1.0)  # walks on the spot
