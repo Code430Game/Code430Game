@@ -37,11 +37,24 @@ func impact(speed_mps: float) -> void:
 func _process(delta: float) -> void:
 	if car == null or muted:
 		return
-	var speed := absf(car.forward_speed())
-	var throttle := clampf(absf(car.engine_force) / maxf(car.engine_force_max, 1.0), 0.0, 1.0)
-	_fill_engine(speed, throttle)
-	_fill_tyres(speed)
+	# The engine and tyres are the driver's voices: silent while nobody is in the car, or the
+	# idle note followed the player on foot across the whole city (the generator players are
+	# not positional). Impacts still sound when something hits the parked car.
+	if _driven():
+		var speed := absf(car.forward_speed())
+		var throttle := clampf(absf(car.engine_force) / maxf(car.engine_force_max, 1.0), 0.0, 1.0)
+		_fill_engine(speed, throttle)
+		_fill_tyres(speed)
 	_fill_impact(delta)
+
+
+## True when the engine voice is producing sound this frame (tests).
+func engine_running() -> bool:
+	return car != null and not muted and _driven()
+
+
+func _driven() -> bool:
+	return car.driver_peer_id == Players.LOCAL_PEER_ID
 
 
 func _fill_engine(speed: float, throttle: float) -> void:

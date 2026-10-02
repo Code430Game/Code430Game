@@ -64,12 +64,14 @@ static func walk_pose(phase: float, amount: float) -> Dictionary:
 	return {
 		"thigh_l": leg_l,
 		"thigh_r": leg_r,
-		"shin_l": 0.9 * amount * maxf(0.0, sin(phase - PI * 0.5)),
-		"shin_r": 0.9 * amount * maxf(0.0, sin(phase + PI * 0.5)),
+		# Rotation about +X swings a hanging bone's lower end toward -Z, the facing direction.
+		# Knees and elbows bend the other way: the heel lifts behind, the hand comes forward.
+		"shin_l": -0.9 * amount * maxf(0.0, sin(phase - PI * 0.5)),
+		"shin_r": -0.9 * amount * maxf(0.0, sin(phase + PI * 0.5)),
 		"upper_arm_l": 0.8 * swing * sin(phase),
 		"upper_arm_r": -0.8 * swing * sin(phase),
-		"forearm_l": -0.35 * amount,
-		"forearm_r": -0.35 * amount,
+		"forearm_l": 0.35 * amount,
+		"forearm_r": 0.35 * amount,
 		"hips_bob": 0.025 * amount * absf(sin(phase)),
 	}
 

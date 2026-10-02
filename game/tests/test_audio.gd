@@ -40,3 +40,16 @@ func test_ambience_voice_fills_its_buffer() -> void:
 	var pb: AudioStreamGeneratorPlayback = amb._player.get_stream_playback()
 	assert_object(pb).is_not_null()
 	assert_int(pb.get_frames_available()).is_less(int(Synth.MIX_RATE * Synth.BUFFER_S))
+
+
+func test_engine_voice_is_silent_when_nobody_drives() -> void:
+	# The idle note used to follow the player on foot across the city.
+	var car: VehicleBody3D = auto_free(load("res://actors/vehicles/placeholder_car.tscn").instantiate())
+	add_child(car)
+	var va := VehicleAudio.new()
+	va.car = car
+	car.add_child(va)
+	car.driver_peer_id = 0
+	assert_bool(va.engine_running()).is_false()
+	car.driver_peer_id = Players.LOCAL_PEER_ID
+	assert_bool(va.engine_running()).is_true()
