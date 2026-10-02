@@ -378,6 +378,11 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 			a.stopped_at_sign = false
 	var pos := path.position_at(a.distance)
 	var dir := path.direction_at(a.distance)
+	if a.lane_shift_left_m > 0.0:
+		# Sliding over from the old lane: keep the heading, ease the offset out with distance.
+		a.lane_shift_left_m = maxf(a.lane_shift_left_m - a.speed * delta, 0.0)
+		var t := a.lane_shift_left_m / maxf(a.lane_shift_m, 0.01)
+		pos += a.lane_shift * (t * t * (3.0 - 2.0 * t))
 	a.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), pos)
 
 
@@ -401,10 +406,17 @@ func _sidestep(a: TrafficAgent, path: LaneGraph.LanePath) -> bool:
 				break
 		if not clear:
 			continue
+		# Slide over like a driver would: heading stays with the lane, the car creeps across
+		# over a couple of car lengths instead of appearing in the next lane.
+		var from_pos := path.position_at(a.distance)
 		a.path_id = other.id
 		a.distance = d
 		var pos := other.position_at(d)
-		a.transform = Transform3D(Basis.looking_at(other.direction_at(d), Vector3.UP), pos)
+		a.lane_shift = from_pos - pos
+		a.lane_shift.y = 0.0
+		a.lane_shift_m = car_len * float(config.get("sidestep_blend_lengths", 2.0))
+		a.lane_shift_left_m = a.lane_shift_m
+		a.transform = Transform3D(Basis.looking_at(other.direction_at(d), Vector3.UP), pos + a.lane_shift)
 		return true
 	return false
 

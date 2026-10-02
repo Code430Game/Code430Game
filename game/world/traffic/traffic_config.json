@@ -27,6 +27,7 @@
   "signal_all_red_s": 1.5,
   "stop_sign_hold_s": 0.8,
   "blocked_sidestep_s": 8.0,
+  "sidestep_blend_lengths": 2.0,
   "car_length_m": 4.3,
   "car_width_m": 1.8,
   "bus_share": 0.08,

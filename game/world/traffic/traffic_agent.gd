@@ -22,6 +22,9 @@ var anchor_dist: float = INF  # distance to the nearest player, refreshed once p
 var stopped_at_sign: bool = false  # came to a full stop at the stop sign ahead
 var braking: bool = false  # slowing or held: tail lights flash
 var blocked_time: float = 0.0  # seconds stuck behind something that is not moving
+var lane_shift: Vector3 = Vector3.ZERO  # sidestep: world offset from the old lane, blended out over lane_shift_m
+var lane_shift_left_m: float = 0.0  # metres of travel left in the blend
+var lane_shift_m: float = 0.0  # metres of travel the blend covers
 
 
 func position() -> Vector3:
