@@ -5,20 +5,20 @@
     "living_street": 2,
     "motorway": 47,
     "motorway_link": 35,
-    "primary": 276,
+    "primary": 275,
     "primary_link": 23,
     "residential": 839,
     "secondary": 602,
     "secondary_link": 14,
-    "service": 306,
-    "tertiary": 137,
+    "service": 312,
+    "tertiary": 138,
     "tertiary_link": 3,
     "trunk": 3,
     "unclassified": 80
    },
-   "edges": 2367,
+   "edges": 2373,
    "likely_cause": "main network",
-   "nodes": 1787,
+   "nodes": 1790,
    "sample_names": [
     "1 Nelson Street",
     "2nd Avenue",
@@ -1558,15 +1558,6 @@
    },
    {
     "category": "likely_real",
-    "edge_id": "w128398610.0",
-    "name": null,
-    "node_id": "n1357279374",
-    "osm_node_id": 1357279374,
-    "osm_way_id": 128398610,
-    "road_class": "service"
-   },
-   {
-    "category": "likely_real",
     "edge_id": "w128400709.0",
     "name": null,
     "node_id": "n1357279377",
@@ -1815,6 +1806,15 @@
     "node_id": "n1419159157",
     "osm_node_id": 1419159157,
     "osm_way_id": 128400702,
+    "road_class": "service"
+   },
+   {
+    "category": "likely_real",
+    "edge_id": "w128400708.0",
+    "name": null,
+    "node_id": "n1419159200",
+    "osm_node_id": 1419159200,
+    "osm_way_id": 128400708,
     "road_class": "service"
    },
    {
@@ -3339,17 +3339,7 @@
     "road_class": "service"
    }
   ],
-  "suspicious": [
-   {
-    "category": "suspicious",
-    "edge_id": "w732949596.0",
-    "name": "Lyon Street North",
-    "node_id": "n1236381993",
-    "osm_node_id": 1236381993,
-    "osm_way_id": 732949596,
-    "road_class": "tertiary"
-   }
-  ]
+  "suspicious": []
  },
  "elevation": {
   "anchorless_spans": 2,
@@ -3371,19 +3361,19 @@
    "w895111373.0",
    "w895111373.1"
   ],
-  "fixed_vertices": 190,
-  "free_vertices": 8804,
+  "fixed_vertices": 192,
+  "free_vertices": 8832,
   "inferred_bridges": [],
   "max_residual_grade": 0.1202,
   "max_y": 80.488,
   "min_y": 43.319,
-  "vertices_clamped": 224
+  "vertices_clamped": 236
  },
  "one_way_traps": [],
  "ramps": [],
  "summary": {
   "barriers": {
-   "curb": 2733,
+   "curb": 2739,
    "guardrail": 38,
    "median": 24,
    "parapet": 114,
@@ -3403,13 +3393,13 @@
    "living_street": 2,
    "motorway": 47,
    "motorway_link": 35,
-   "primary": 276,
+   "primary": 275,
    "primary_link": 23,
    "residential": 842,
    "secondary": 602,
    "secondary_link": 14,
-   "service": 327,
-   "tertiary": 137,
+   "service": 333,
+   "tertiary": 138,
    "tertiary_link": 3,
    "trunk": 3,
    "unclassified": 80
@@ -3419,23 +3409,23 @@
    "bbox_edge": 108,
    "declared_noexit": 8,
    "likely_real": 227,
-   "suspicious": 1
+   "suspicious": 0
   },
   "defaulted_fields": {
-   "lanes": 293,
-   "speed_kph": 611,
-   "width": 2388
+   "lanes": 299,
+   "speed_kph": 617,
+   "width": 2394
   },
-  "edges": 2391,
-  "largest_component_nodes": 1787,
-  "largest_scc_nodes": 1691,
-  "nodes": 1823,
+  "edges": 2397,
+  "largest_component_nodes": 1790,
+  "largest_scc_nodes": 1694,
+  "nodes": 1826,
   "one_way_traps": 0,
   "oneway_dead_ends": 31,
   "ramp_problems": 0,
   "terrain": {
    "cells_carved": 6737,
-   "cells_flattened": 347730,
+   "cells_flattened": 347727,
    "cells_lowered_for_water": 58750,
    "cells_under_buildings": 160487,
    "chunks": 196,
@@ -3444,7 +3434,7 @@
     "uncovered": 19
    }
   },
-  "total_length_km": 193.824,
+  "total_length_km": 194.138,
   "water": {
    "polygons": 18,
    "skipped": []

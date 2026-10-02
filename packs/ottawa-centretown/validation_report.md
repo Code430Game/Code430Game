@@ -1,11 +1,11 @@
 # Road network validation: Ottawa Centretown
 
-- Nodes: 1823, edges: 2391, total length: 193.824 km
-- Connected components: 16 (largest has 1787 nodes)
-- Largest strongly connected component: 1691 nodes
-- Dead ends: bbox_edge 108, declared_noexit 8, likely_real 227, suspicious 1
+- Nodes: 1826, edges: 2397, total length: 194.138 km
+- Connected components: 16 (largest has 1790 nodes)
+- Largest strongly connected component: 1694 nodes
+- Dead ends: bbox_edge 108, declared_noexit 8, likely_real 227, suspicious 0
 - Ramp problems: 0; one-way traps: 0 (plus 31 one-way stubs that simply dead-end, counted under dead ends)
-- Defaulted fields: lanes 293, speed_kph 611, width 2388
+- Defaulted fields: lanes 299, speed_kph 617, width 2394
 
 ## Edge classes
 
@@ -14,13 +14,13 @@
 | living_street | 2 |
 | motorway | 47 |
 | motorway_link | 35 |
-| primary | 276 |
+| primary | 275 |
 | primary_link | 23 |
 | residential | 842 |
 | secondary | 602 |
 | secondary_link | 14 |
-| service | 327 |
-| tertiary | 137 |
+| service | 333 |
+| tertiary | 138 |
 | tertiary_link | 3 |
 | trunk | 3 |
 | unclassified | 80 |
@@ -29,7 +29,7 @@
 
 | Nodes | Edges | Likely cause | Classes | Sample names | Sample way ids |
 |---|---|---|---|---|---|
-| 1787 | 2367 | main network | living_street 2, motorway 47, motorway_link 35, primary 276, primary_link 23, residential 839, secondary 602, secondary_link 14, service 306, tertiary 137, tertiary_link 3, trunk 3, unclassified 80 | 1 Nelson Street, 2nd Avenue, 3rd Avenue, Academy Private, Albert Street, Alexandra Bridge, Allan Place, Allendale Private | 4651824, 4970097, 5023388, 9897059, 10227956, 10228426, 10228514, 10228741 |
+| 1790 | 2373 | main network | living_street 2, motorway 47, motorway_link 35, primary 275, primary_link 23, residential 839, secondary 602, secondary_link 14, service 312, tertiary 138, tertiary_link 3, trunk 3, unclassified 80 | 1 Nelson Street, 2nd Avenue, 3rd Avenue, Academy Private, Albert Street, Alexandra Bridge, Allan Place, Allendale Private | 4651824, 4970097, 5023388, 9897059, 10227956, 10228426, 10228514, 10228741 |
 | 4 | 4 | connector filtered out (service=parking_aisle) | service 4 | - | 128401786, 1549498626 |
 | 4 | 3 | isolated island | residential 3 | Jemruss Private | 510049468, 510049469, 510049470 |
 | 3 | 2 | connector filtered out (service=driveway) | service 2 | - | 128400701, 128400709 |
@@ -69,11 +69,9 @@
 
 227 entries; listed in the JSON report only.
 
-### suspicious (1)
+### suspicious (0)
 
-| Node | Way | Class | Name |
-|---|---|---|---|
-| 1236381993 | 732949596 | tertiary | Lyon Street North |
+none
 
 ## Ramp connectivity
 
@@ -89,7 +87,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Barriers
 
-- curb 2733, parapet 114, guardrail 38, median 24, soundwall 18, roadblock 108
+- curb 2739, parapet 114, guardrail 38, median 24, soundwall 18, roadblock 108
 
 ## Buildings
 
@@ -98,7 +96,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 ## Elevation
 
 - Road height range: 43.319 m to 80.488 m
-- Bridge/tunnel (fixed) vertices: 190; approach vertices raised or lowered to meet them: 224
+- Bridge/tunnel (fixed) vertices: 192; approach vertices raised or lowered to meet them: 236
 - Conflicting bridge constraints: 4; bridge chains without a ground anchor: 2
 - Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 171
 - Worst residual grade: 0.1202; edges still over their class limit: 14

@@ -26,6 +26,8 @@ class RoadEdge:
 	var speed_kph: int
 	var width_m: float
 	var layer: int
+	var bus: String = ""  # "only": buses only; "lane": forward lane bus_lane is reserved
+	var bus_lane: int = -1
 	var bridge: bool
 	var tunnel: bool
 	var control_to: String = "none"  # stop | signals | none for traffic arriving at to_node
@@ -52,6 +54,7 @@ var meta: Dictionary = {}
 var nodes: Dictionary = {}  # id -> RoadNode
 var edges: Dictionary = {}  # id -> RoadEdge
 var pedestrian: Array[PedestrianWay] = []
+var bus_stops: Array = []  # [{"id", "position": Vector3, "edge"}]
 var _incident: Dictionary = {}  # node id -> Array[String] of edge ids
 
 
@@ -95,6 +98,8 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		edge.oneway = bool(e["oneway"])
 		edge.speed_kph = int(e["speed_kph"])
 		edge.width_m = float(e["width_m"])
+		edge.bus = str(e.get("bus", ""))
+		edge.bus_lane = int(e.get("bus_lane", -1))
 		edge.layer = int(e["layer"])
 		edge.bridge = bool(e["bridge"])
 		edge.tunnel = bool(e["tunnel"])
@@ -123,6 +128,9 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 			pw.top.append(float(t))
 		pw.name = str(w["name"]) if w.get("name") != null else ""
 		g.pedestrian.append(pw)
+	for st in data.get("bus_stops", []):
+		var pos: Array = st["position"]
+		g.bus_stops.append({"id": str(st["id"]), "position": Vector3(float(pos[0]), float(pos[1]), float(pos[2])), "edge": str(st["edge"])})
 	return g
 
 

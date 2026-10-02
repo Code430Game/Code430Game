@@ -10,6 +10,18 @@ var agent: TrafficAgent = null
 var last_hitter_velocity: Vector3 = Vector3.ZERO
 
 
+## Resizes the box to a vehicle kind (cars by default, buses when `size` is bigger).
+func set_box(size: Vector3) -> void:
+	var shape := $Shape as CollisionShape3D
+	var box := shape.shape as BoxShape3D
+	if box.size != size:
+		box = BoxShape3D.new()
+		box.size = size
+		shape.shape = box
+	shape.position.y = size.y * 0.5 + 0.1
+	mass = 1100.0 if size.z < 6.0 else 12000.0
+
+
 func _ready() -> void:
 	freeze = true
 	freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC

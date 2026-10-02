@@ -36,6 +36,7 @@ Co-op lives in the pause menu: **Host co-op game** shows the address friends joi
 on-screen keyboard). Command-line equivalents: `--host[=port]` and `--join=address[:port]`.
 
 Testbed flags worth knowing: `--time=HH` starts the clock at that hour (`--time=23` for night),
-`--day-minutes=N` sets how many real minutes a day lasts (default 24), `--mute` silences audio.
+`--day-minutes=N` sets how many real minutes a day lasts (default 24), `--mute` silences audio,
+`--bus-share=0.5` makes half of the spawned traffic buses (default 8 %).
 For screenshots: `--camera=px,py,pz,tx,ty,tz` fixes the view, `--creator` opens the character
 creator once the world is up, `--screenshot=path` saves a PNG when the benchmark ends.

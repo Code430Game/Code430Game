@@ -65,6 +65,8 @@ def graph_to_dict(
                 "length_m": round(e.length_m, COORD_DECIMALS),
                 "control_to": e.control_to,
                 "control_from": e.control_from,
+                "bus": e.bus,
+                "bus_lane": e.bus_lane,
             }
         )
     pedestrian = pedestrian_to_list(graph)
@@ -85,6 +87,10 @@ def graph_to_dict(
         "nodes": nodes,
         "edges": edges,
         "pedestrian_ways": pedestrian,
+        "bus_stops": [
+            {"id": s["id"], "position": _pt(s["position"]), "edge": s["edge"]}
+            for s in graph.bus_stops
+        ],
     }
 
 
