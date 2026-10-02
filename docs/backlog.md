@@ -5,6 +5,19 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-02
 
+- **Proposal slate (human asked 2026-10-02: write proposals so other agents can work in parallel).**
+  Nine changes scaffolded and validated, none approved yet: `add-rail`, `add-district-edge`,
+  `add-underpass-interiors`, `add-weapons-and-combat` (paintball in clean, bullets in gritty),
+  `add-car-radio` (chip music synthesised in-engine, stations as tagged pack data),
+  `add-bus-routes`, `add-pack-loader` (pack format v1, needs the human's yes), `add-story-pack`
+  (depends on the loader), `add-character-features`. Decisions each proposal leaves to the
+  human are listed in its proposal or design. Groups that can run at the same time without
+  touching the same files: rail / district edge / underpass interiors; combat / radio / bus
+  routes; pack loader then story pack / character features. Rail and bus routes both add
+  importer stages; land one before the other.
+- **Region picker** is built (`tools/region_picker/index.html`, importer `--region`); the two
+  older region picker notes below are done except `--place` and `--radius-km`.
+
 - **Rail (human asked 2026-10-02).** OSM maps rail as `railway=*` ways (light_rail, subway, rail, tram) with stations; the importer only queries `highway=*`. The Confederation Line runs in a tunnel under Queen Street downtown (Lyon, Parliament, Rideau stations) and surfaces east of uOttawa and west of Pimisi. A rail round would fetch railway ways, build track ribbons and the surface stations, and run trains on a timetable. Albert and Slater lost their bus lanes when the line opened in 2019, which is why OSM has them plain.
 - **Buses** built (add-buses): bus-only streets kept, reserved lanes painted red, buses with stops. Routes, timetables and shelters remain. Only Lyon Street North, the Transitway and one Waller Street lane are tagged in OSM; Albert and Slater have no bus-lane tags in the extract.
 
