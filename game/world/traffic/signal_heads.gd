@@ -125,18 +125,20 @@ static func _pole_mesh() -> Mesh:
 	return box
 
 
-static var _head_material: StandardMaterial3D = null
-const HEAD_NIGHT_ENERGY := 3.0
+static var _head_material: ShaderMaterial = null
+const HEAD_DAY_ENERGY := 0.8
+const HEAD_NIGHT_ENERGY := 2.2
 
 
-## Shared head material; DayNight raises its emission after dusk.
-static func head_material() -> StandardMaterial3D:
+## Shared head material: the instance colour is the glow too, so lamps keep their colour at
+## night (a flat emission colour made every lamp white after dusk). DayNight drives `night`.
+static func head_material() -> ShaderMaterial:
 	if _head_material == null:
-		_head_material = StandardMaterial3D.new()
-		_head_material.vertex_color_use_as_albedo = true
-		_head_material.emission_enabled = true
-		_head_material.emission = Color(0.5, 0.5, 0.5)
-		_head_material.emission_energy_multiplier = 0.8
+		_head_material = ShaderMaterial.new()
+		_head_material.shader = load("res://world/traffic/signal_head.gdshader")
+		_head_material.set_shader_parameter("day_energy", HEAD_DAY_ENERGY)
+		_head_material.set_shader_parameter("night_energy", HEAD_NIGHT_ENERGY)
+		_head_material.set_shader_parameter("night", 0.0)
 	return _head_material
 
 
