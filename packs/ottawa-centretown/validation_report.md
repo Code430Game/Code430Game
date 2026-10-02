@@ -1,4 +1,4 @@
-# Road network validation: Ottawa Centretown
+# Road network validation: Ottawa Centretown starter district
 
 - Nodes: 1826, edges: 2397, total length: 194.138 km
 - Connected components: 16 (largest has 1790 nodes)
@@ -87,7 +87,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Barriers
 
-- curb 2739, parapet 114, guardrail 38, median 24, soundwall 18, roadblock 108
+- curb 2749, parapet 105, guardrail 38, median 24, soundwall 18, roadblock 108
 
 ## Buildings
 

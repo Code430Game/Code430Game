@@ -124,7 +124,7 @@
    "cx": -4,
    "cz": -6,
    "file": "terrain/chunk_-4_-6.png",
-   "max_y": 51.609,
+   "max_y": 49.52,
    "min_y": 40.202
   },
   {
@@ -558,7 +558,7 @@
    "cx": 2,
    "cz": -2,
    "file": "terrain/chunk_2_-2.png",
-   "max_y": 72.925,
+   "max_y": 73.165,
    "min_y": 64.012
   },
   {
@@ -649,7 +649,7 @@
    "cx": 1,
    "cz": -1,
    "file": "terrain/chunk_1_-1.png",
-   "max_y": 72.572,
+   "max_y": 72.539,
    "min_y": 61.88
   },
   {
@@ -1174,7 +1174,7 @@
    "cx": 6,
    "cz": 4,
    "file": "terrain/chunk_6_4.png",
-   "max_y": 64.856,
+   "max_y": 64.855,
    "min_y": 55.296
   },
   {
@@ -1356,7 +1356,7 @@
    "cx": 4,
    "cz": 6,
    "file": "terrain/chunk_4_6.png",
-   "max_y": 67.728,
+   "max_y": 67.602,
    "min_y": 50.06
   },
   {

@@ -3373,10 +3373,10 @@
  "ramps": [],
  "summary": {
   "barriers": {
-   "curb": 2739,
+   "curb": 2749,
    "guardrail": 38,
    "median": 24,
-   "parapet": 114,
+   "parapet": 105,
    "roadblock": 108,
    "soundwall": 18
   },
