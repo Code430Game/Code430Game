@@ -44,7 +44,10 @@ var _junction_occupants: Dictionary = {}
 var _spawn_timer: float = 0.0
 var _frame: int = 0
 var _debug_mesh: MeshInstance3D
+enum Kind { CAR, BUS }
 var _multimesh: MultiMeshInstance3D
+var _bus_multimesh: MultiMeshInstance3D
+var _stops_by_path: Dictionary = {}  # lane path id -> Array of stop distances (floats), sorted
 var _bodies: Array[TrafficCar] = []
 var _lane_cells: Dictionary = {}  # Vector2i (64 m cells) -> Array[int] lane path ids
 var _paths_by_edge: Dictionary = {}  # edge id -> Array[int] lane path ids (for sidesteps)
@@ -80,6 +83,7 @@ func setup(lane_graph: LaneGraph, graph: RoadGraph = null, junctions: Dictionary
 			heads.setup(graph, junctions, signals)
 	_lane_cells.clear()
 	_paths_by_edge.clear()
+	_stops_by_path.clear()
 	for lp in lanes.paths:
 		if lp.is_connector or lp.points.is_empty():
 			continue
@@ -92,6 +96,19 @@ func setup(lane_graph: LaneGraph, graph: RoadGraph = null, junctions: Dictionary
 			_lane_cells[key] = []
 		_lane_cells[key].append(lp.id)
 	_setup_rendering()
+	if graph != null:
+		for st in graph.bus_stops:
+			for pid in _paths_by_edge.get(st["edge"], []):
+				var lp: LaneGraph.LanePath = lanes.paths[pid]
+				var c := lp.closest(st["position"])
+				if c.y > 6.0:
+					continue
+				if not _stops_by_path.has(pid):
+					_stops_by_path[pid] = []
+				(_stops_by_path[pid] as Array).append(c.x)
+		for pid in _stops_by_path:
+			(_stops_by_path[pid] as Array).sort()
+
 
 
 func _setup_rendering() -> void:
@@ -111,6 +128,18 @@ func _setup_rendering() -> void:
 	mm.visible_instance_count = 0
 	_multimesh.multimesh = mm
 	add_child(_multimesh)
+	_bus_multimesh = MultiMeshInstance3D.new()
+	var bmm := MultiMesh.new()
+	bmm.transform_format = MultiMesh.TRANSFORM_3D
+	bmm.use_colors = true
+	bmm.use_custom_data = true
+	var bus_mesh := BusMesh.build()
+	bus_mesh.surface_set_material(3, tail_material)
+	bmm.mesh = bus_mesh
+	bmm.instance_count = maxi(int(max_agents * float(config.get("bus_share", 0.08)) * 3.0), 8)
+	bmm.visible_instance_count = 0
+	_bus_multimesh.multimesh = bmm
+	add_child(_bus_multimesh)
 	for i in range(BODY_POOL):
 		var body: TrafficCar = CAR_SCENE.instantiate()
 		body.hit.connect(_on_body_hit)
@@ -260,6 +289,18 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 	if path.is_connector:
 		limit = minf(limit, float(config["connector_speed_kph"]) / 3.6)
 	var target := limit
+	if a.kind == Kind.BUS:
+		if a.dwell > 0.0:
+			a.dwell -= delta
+			target = 0.0
+		elif a.next_stop_d < INF:
+			var to_stop := a.next_stop_d - a.distance
+			if to_stop <= 0.5:
+				a.dwell = float(config["bus_dwell_s"])
+				a.next_stop_d = _next_stop(a.path_id, a.distance + 1.0)
+				target = 0.0
+			else:
+				target = minf(target, sqrt(2.0 * float(config["decel_mps2"]) * 0.5 * to_stop))
 	var gap := _gap_ahead(a, path)
 	var min_gap := float(config["min_gap_m"])
 	var desired := min_gap + a.speed * float(config["time_headway_s"])
@@ -320,7 +361,7 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 		a.distance = path.length - 0.5  # the stop line: never roll into the junction on red
 		a.speed = 0.0
 	while a.distance >= path.length:
-		var next_id := lanes.choose_next(path, rng)
+		var next_id := lanes.choose_next(path, rng, _allowed_for(a), _preferred_for(a))
 		if next_id < 0:
 			a.distance = path.length
 			a.speed = 0.0
@@ -330,6 +371,7 @@ func _step_agent(a: TrafficAgent, delta: float) -> void:
 			_leave_junction(a)
 		path = lanes.paths[next_id]
 		a.path_id = next_id
+		a.next_stop_d = _next_stop(next_id, 0.0) if a.kind == Kind.BUS else INF
 		if path.junction_node != "":
 			_claim_junction(a, path.junction_node)
 			a.wait_time = 0.0
@@ -398,27 +440,48 @@ func _junction_busy(node: String, me: TrafficAgent) -> bool:
 
 
 func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
-	var car_len := float(config["car_length_m"])
 	var best := _obstacle_gap(a, path)
 	for o in _agents_by_path.get(a.path_id, []):
 		if o != a and o.distance > a.distance:
-			best = minf(best, o.distance - a.distance - car_len)
+			best = minf(best, o.distance - a.distance - (o.length_m + a.length_m) * 0.5)
 			break
 	if best == INF and not path.next.is_empty():
 		var remaining := path.length - a.distance
 		if remaining < float(config["lookahead_m"]):
 			for nid in path.next:
 				for o in _agents_by_path.get(nid, []):
-					best = minf(best, remaining + o.distance - car_len)
+					best = minf(best, remaining + o.distance - (o.length_m + a.length_m) * 0.5)
 					break
 	return best
+
+
+## Cars keep out of bus lanes; buses go anywhere a bus may (bus lanes, the bigger roads).
+func _allowed_for(a: TrafficAgent) -> Callable:
+	if a.kind == Kind.BUS:
+		var classes: Array = config.get("bus_classes", [])
+		return func(lp: LaneGraph.LanePath) -> bool: return lp.is_connector or lp.bus_only or classes.has(lp.road_class)
+	return func(lp: LaneGraph.LanePath) -> bool: return not lp.bus_only
+
+
+func _preferred_for(a: TrafficAgent) -> Callable:
+	if a.kind == Kind.BUS:
+		return func(lp: LaneGraph.LanePath) -> bool: return lp.bus_only
+	return Callable()
+
+
+## Distance along `path_id` of the first bus stop at or past `from_d`, else INF.
+func _next_stop(path_id: int, from_d: float) -> float:
+	for d: float in _stops_by_path.get(path_id, []):
+		if d >= from_d:
+			return d
+	return INF
 
 
 ## Gap to the nearest player body ahead in this lane's corridor, or INF.
 func _obstacle_gap(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
 	if obstacles.is_empty() and obstacle_points.is_empty():
 		return INF
-	var car_len := float(config["car_length_m"])
+	var car_len := a.length_m
 	var corridor := float(config["car_width_m"]) * 0.5
 	var lookahead := float(config["lookahead_m"])
 	var pos := a.position()
@@ -493,14 +556,25 @@ func _spawn_one() -> void:
 	var candidates := lanes_near(anchor, float(config["spawn_radius_m"]))
 	if candidates.is_empty():
 		return
+	var kind := Kind.BUS if rng.randf() < float(config.get("bus_share", 0.0)) else Kind.CAR
+	var bus_classes: Array = config.get("bus_classes", [])
+	var pool: Array[LaneGraph.LanePath] = []
+	for lp in candidates:
+		if kind == Kind.BUS:
+			if lp.bus_only or bus_classes.has(lp.road_class):
+				pool.append(lp)
+		elif not lp.bus_only:
+			pool.append(lp)
+	if pool.is_empty():
+		return
 	var weights: Dictionary = config["class_weights"]
 	var total := 0.0
-	for lp in candidates:
-		total += float(weights.get(lp.road_class, 0.5))
+	for lp in pool:
+		total += float(weights.get(lp.road_class, 0.5)) * (3.0 if lp.bus_only and kind == Kind.BUS else 1.0)
 	var r := rng.randf() * total
-	var chosen: LaneGraph.LanePath = candidates[candidates.size() - 1]
-	for lp in candidates:
-		r -= float(weights.get(lp.road_class, 0.5))
+	var chosen: LaneGraph.LanePath = pool[pool.size() - 1]
+	for lp in pool:
+		r -= float(weights.get(lp.road_class, 0.5)) * (3.0 if lp.bus_only and kind == Kind.BUS else 1.0)
 		if r <= 0.0:
 			chosen = lp
 			break
@@ -508,21 +582,25 @@ func _spawn_one() -> void:
 	var pos := chosen.position_at(d)
 	if _distance_to_anchors(pos) < float(config["min_spawn_distance_m"]):
 		return
-	if not _lane_gap_clear(chosen.id, d):
+	var length := float(config["bus_length_m"]) if kind == Kind.BUS else float(config["car_length_m"])
+	if not _lane_gap_clear(chosen.id, d, length):
 		return
 	var a := TrafficAgent.new()
-	var colors: Array = config["colors"]
+	a.kind = kind
+	a.length_m = length
+	var colors: Array = config["bus_colors"] if kind == Kind.BUS else config["colors"]
 	var c: Array = colors[rng.randi_range(0, colors.size() - 1)]
 	a.color = Color(float(c[0]), float(c[1]), float(c[2]))
 	a.path_id = chosen.id
+	a.next_stop_d = _next_stop(chosen.id, d) if kind == Kind.BUS else INF
 	a.distance = d
 	a.speed = float(chosen.speed_kph) / 3.6 * 0.5
 	a.transform = Transform3D(Basis.looking_at(chosen.direction_at(d), Vector3.UP), pos)
 	agents.append(a)
 
 
-func _lane_gap_clear(path_id: int, d: float) -> bool:
-	var need := float(config["car_length_m"]) + float(config["min_gap_m"])
+func _lane_gap_clear(path_id: int, d: float, length: float = -1.0) -> bool:
+	var need := (float(config["car_length_m"]) if length < 0.0 else length) + float(config["min_gap_m"])
 	for a in agents:
 		if a.path_id == path_id and absf(a.distance - d) < need * 2.0:
 			return false
@@ -555,6 +633,10 @@ func _assign_bodies() -> void:
 				break
 			a.body = body
 			body.agent = a
+			if a.kind == Kind.BUS:
+				body.set_box(Vector3(float(config["bus_width_m"]), float(config["bus_height_m"]), float(config["bus_length_m"])))
+			else:
+				body.set_box(Vector3(float(config["car_width_m"]), 1.3, float(config["car_length_m"])))
 			body.process_mode = Node.PROCESS_MODE_INHERIT
 			body.freeze = true
 	for a in agents:
@@ -593,13 +675,14 @@ func snapshot(around: Vector3, radius: float) -> PackedFloat32Array:
 		out.append(p.y)
 		out.append(p.z)
 		out.append(atan2(fwd.x, fwd.z))
-		out.append(float(_color_index(colors, a.color)))
+		out.append(float(_color_index(config["bus_colors"] if a.kind == Kind.BUS else colors, a.color)))
+		out.append(float(a.kind))
 	return out
 
 
 ## Client: replaces the agents with the host's snapshot (see `snapshot`).
 func apply_snapshot(data: PackedFloat32Array) -> void:
-	var n := data.size() / 5
+	var n := data.size() / 6
 	var colors: Array = config["colors"]
 	while agents.size() > n:
 		_release_body(agents[agents.size() - 1])
@@ -608,13 +691,16 @@ func apply_snapshot(data: PackedFloat32Array) -> void:
 		agents.append(TrafficAgent.new())
 	for i in range(n):
 		var a := agents[i]
-		var k := i * 5
+		var k := i * 6
 		var yaw := data[k + 3]
 		var fwd := Vector3(sin(yaw), 0.0, cos(yaw))
 		a.transform = Transform3D(Basis.looking_at(fwd, Vector3.UP), Vector3(data[k], data[k + 1], data[k + 2]))
+		a.kind = int(data[k + 5])
+		a.length_m = float(config["bus_length_m"]) if a.kind == Kind.BUS else float(config["car_length_m"])
+		var palette: Array = config["bus_colors"] if a.kind == Kind.BUS else colors
 		var ci := int(data[k + 4])
-		if ci >= 0 and ci < colors.size():
-			var c: Array = colors[ci]
+		if ci >= 0 and ci < palette.size():
+			var c: Array = palette[ci]
 			a.color = Color(float(c[0]), float(c[1]), float(c[2]))
 		a.anchor_dist = _distance_to_anchors(a.transform.origin)
 
@@ -676,6 +762,8 @@ func release_near(position: Vector3, reach: float = 4.0) -> Dictionary:
 	var best: TrafficAgent = null
 	var best_d := reach
 	for a in agents:
+		if a.kind == Kind.BUS:
+			continue  # the player's vehicle is a car; buses stay in service
 		var d := a.position().distance_to(position)
 		if d < best_d:
 			best_d = d
@@ -707,13 +795,26 @@ func _render() -> void:
 	if _multimesh == null:
 		return
 	var mm := _multimesh.multimesh
-	var n := mini(agents.size(), mm.instance_count)
-	mm.visible_instance_count = n
-	for i in range(n):
-		var a := agents[i]
-		mm.set_instance_transform(i, a.transform.translated_local(Vector3(0.0, CarMesh.GROUND_LIFT_M, 0.0)))
-		mm.set_instance_color(i, a.color)
-		mm.set_instance_custom_data(i, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
+	var bmm := _bus_multimesh.multimesh
+	var cars := 0
+	var buses := 0
+	for a in agents:
+		if a.kind == Kind.BUS:
+			if buses >= bmm.instance_count:
+				continue
+			bmm.set_instance_transform(buses, a.transform.translated_local(Vector3(0.0, BusMesh.GROUND_LIFT_M, 0.0)))
+			bmm.set_instance_color(buses, a.color)
+			bmm.set_instance_custom_data(buses, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
+			buses += 1
+		else:
+			if cars >= mm.instance_count:
+				continue
+			mm.set_instance_transform(cars, a.transform.translated_local(Vector3(0.0, CarMesh.GROUND_LIFT_M, 0.0)))
+			mm.set_instance_color(cars, a.color)
+			mm.set_instance_custom_data(cars, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
+			cars += 1
+	mm.visible_instance_count = cars
+	bmm.visible_instance_count = buses
 
 
 ## Draws lane paths (green) and connectors (orange) as lines; toggled by the scene's graph view.

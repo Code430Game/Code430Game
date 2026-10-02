@@ -22,7 +22,7 @@ func test_traffic_snapshot_round_trips_positions_headings_and_colours() -> void:
 	far.transform = Transform3D(Basis(), Vector3(900, 0, 0))
 	m.agents = [a, far]
 	var data := m.snapshot(Vector3.ZERO, 350.0)
-	assert_int(data.size()).is_equal(5)
+	assert_int(data.size()).is_equal(6)
 	var mirror: TrafficManager = auto_free(TrafficManager.new())
 	add_child(mirror)
 	mirror.mirror = true

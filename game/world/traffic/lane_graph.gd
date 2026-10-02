@@ -21,6 +21,7 @@ class LanePath:
 	var road_class: String
 	var lane_index: int = 0
 	var is_connector: bool = false
+	var bus_only: bool = false  # reserved for buses: cars never enter it
 	var straightness: float = 1.0  # connectors: cos of the turn angle, for straight-preferring choice
 	var points: PackedVector3Array
 	var cumulative: PackedFloat32Array  # distance at each point
@@ -90,14 +91,20 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> LaneGraph:
 		var divider := edge.width_m * 0.5 - edge.lanes_forward * lane_w
 		for k in range(edge.lanes_forward):
 			var offset := divider + (k + 0.5) * lane_w
-			lg._add_lane(edge, k, _offset_polyline(pl, normals, offset), edge.from_node, edge.to_node)
+			var lp := lg._add_lane(edge, k, _offset_polyline(pl, normals, offset), edge.from_node, edge.to_node)
+			lp.bus_only = edge.bus == "only" or (edge.bus == "lane" and k == edge.bus_lane)
 		for k in range(edge.lanes_backward):
 			var offset := divider - (k + 0.5) * lane_w
 			var back := _offset_polyline(pl, normals, offset)
 			back.reverse()
-			lg._add_lane(edge, edge.lanes_forward + k, back, edge.to_node, edge.from_node)
+			var lp := lg._add_lane(edge, edge.lanes_forward + k, back, edge.to_node, edge.from_node)
+			lp.bus_only = edge.bus == "only"
 	for nid in graph.sorted_node_ids():
 		lg._connect_node(graph, nid)
+	# A connector into a reserved lane is reserved too, so lane choice sees it one step early.
+	for lp in lg.paths:
+		if lp.is_connector and lp.next.size() == 1:
+			lp.bus_only = lg.paths[lp.next[0]].bus_only
 	return lg
 
 
@@ -202,18 +209,32 @@ func lanes_near(position: Vector3, radius: float) -> Array[LanePath]:
 
 
 ## Picks a following path, preferring straighter turns. Returns -1 at a true dead end.
-func choose_next(lp: LanePath, rng: RandomNumberGenerator) -> int:
+## Picks a following path, preferring straight ones. `preferred` narrows the candidates
+## when any pass it (a bus heads for a bus lane), else `allowed` does (a car keeps out of bus
+## lanes); when nothing passes either, any candidate will do.
+func choose_next(lp: LanePath, rng: RandomNumberGenerator, allowed: Callable = Callable(), preferred: Callable = Callable()) -> int:
 	if lp.next.is_empty():
 		return -1
+	var options: PackedInt32Array = lp.next
+	for test: Callable in [preferred, allowed]:
+		if not test.is_valid():
+			continue
+		var filtered := PackedInt32Array()
+		for n in lp.next:
+			if test.call(paths[n]):
+				filtered.append(n)
+		if not filtered.is_empty():
+			options = filtered
+			break
 	var total := 0.0
 	var weights := PackedFloat32Array()
-	for n in lp.next:
+	for n in options:
 		var w := 0.15 + maxf(paths[n].straightness, 0.0) * 1.0
 		weights.append(w)
 		total += w
 	var r := rng.randf() * total
-	for i in range(lp.next.size()):
+	for i in range(options.size()):
 		r -= weights[i]
 		if r <= 0.0:
-			return lp.next[i]
-	return lp.next[lp.next.size() - 1]
+			return options[i]
+	return options[options.size() - 1]

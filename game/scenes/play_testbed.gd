@@ -60,6 +60,7 @@ var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
 var _fixed_cam: Camera3D = null
+var _bus_share_override: float = -1.0  # --bus-share=0..1: fraction of traffic spawned as buses (screenshots)
 enum Headlights { AUTO, ON, OFF }
 var _headlights: int = Headlights.AUTO  # D-pad up / H cycles auto (dusk to dawn), on, off
 var _start_position: Vector3 = Vector3.ZERO
@@ -405,6 +406,8 @@ func _setup_traffic() -> void:
 	_traffic.name = "Traffic"
 	_traffic.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_traffic)
+	if _bus_share_override >= 0.0:
+		_traffic.config["bus_share"] = _bus_share_override
 	_traffic.setup(lane_graph, _pack.graph, _pack.junctions)
 	if _traffic_cap >= 0:
 		_traffic.max_agents = _traffic_cap
@@ -497,6 +500,8 @@ func _parse_args() -> void:
 			_open_creator_at_start = true
 		elif arg.begins_with("--tone="):
 			ContentMode.set_mode(arg.get_slice("=", 1), false)
+		elif arg.begins_with("--bus-share="):
+			_bus_share_override = float(arg.get_slice("=", 1))
 		elif arg.begins_with("--camera="):
 			for v in arg.get_slice("=", 1).split(","):
 				_free_camera.append(float(v))

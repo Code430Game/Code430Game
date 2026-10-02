@@ -15,8 +15,9 @@ func _graph(specs: Array) -> RoadGraph:
 			"polyline": pl, "class": spec.get("class", "secondary"), "lanes_forward": spec.get("lf", 1), "lanes_backward": spec.get("lb", 0),
 			"oneway": spec.get("lb", 0) == 0, "speed_kph": spec.get("kph", 50), "width_m": spec.get("w", 7.0), "layer": 0, "bridge": false, "tunnel": false,
 			"name": spec["id"], "osm_way_id": 1, "defaulted_fields": [], "access": null, "length_m": 100.0,
+			"bus": spec.get("bus", ""), "bus_lane": spec.get("bus_lane", -1),
 		})
-	return RoadGraph.from_dict({"meta": {}, "nodes": nodes.values(), "edges": edges, "pedestrian_ways": []})
+	return RoadGraph.from_dict({"meta": {}, "nodes": nodes.values(), "edges": edges, "pedestrian_ways": [], "bus_stops": []})
 
 
 func _manager(graph: RoadGraph) -> TrafficManager:
@@ -227,3 +228,64 @@ func test_blocked_car_sidesteps_to_the_free_lane_after_a_while() -> void:
 	assert_int(a.path_id).is_not_equal(right)
 	assert_float(a.distance).is_greater(130.0)
 	assert_bool(a.braking).is_false()
+
+
+func _bus(m: TrafficManager, path_id: int, distance: float) -> TrafficAgent:
+	var a := _add_agent(m, path_id, distance, 5.0)
+	a.kind = TrafficManager.Kind.BUS
+	a.length_m = float(m.config["bus_length_m"])
+	a.next_stop_d = m._next_stop(path_id, distance)
+	return a
+
+
+func test_cars_keep_out_of_bus_lanes_and_buses_head_for_them() -> void:
+	# A feeder splits into a bus-only street (straight on) and an ordinary one (also straight on).
+	var g := _graph([
+		{"id": "w1.0", "pl": [[-100, 0, 0], [0, 0, 0]]},
+		{"id": "w2.0", "pl": [[0, 0, 0], [100, 0, 0]], "bus": "only"},
+		{"id": "w3.0", "pl": [[0, 0, 0], [100, 0, 2]]},
+	])
+	var m := _manager(g)
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var feeder := -1
+	for p in m.lanes.paths:
+		if p.edge_id == "w1.0":
+			feeder = p.id
+	var car_lanes := {}
+	var bus_lanes := {}
+	for trial in range(12):
+		m.agents.clear()
+		var car := _add_agent(m, feeder, 95.0, 10.0)
+		var bus := _bus(m, feeder, 95.0)
+		bus.path_id = feeder
+		for i in range(300):
+			m.step(1.0 / 60.0)
+		car_lanes[m.lanes.paths[car.path_id].edge_id] = true
+		bus_lanes[m.lanes.paths[bus.path_id].edge_id] = true
+	assert_bool(car_lanes.has("w3.0")).override_failure_message("cars never reached the open street: %s" % [car_lanes.keys()]).is_true()
+	assert_bool(car_lanes.has("w2.0")).override_failure_message("a car entered the bus lane").is_false()
+	assert_bool(bus_lanes.has("w2.0")).override_failure_message("buses never took the bus lane").is_true()
+	assert_bool(bus_lanes.has("w3.0")).override_failure_message("a bus left the bus lane for the car lane").is_false()
+
+
+func test_bus_dwells_at_a_stop_then_carries_on() -> void:
+	var g := _graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 50}])
+	g.bus_stops.append({"id": "s1", "position": Vector3(200, 0, 0), "edge": "w1.0"})
+	var m: TrafficManager = auto_free(TrafficManager.new())
+	add_child(m)
+	m.setup(LaneGraph.build(g, JunctionBuilder.build_all(g)), g)
+	m.enabled = false
+	m.anchors = PackedVector3Array([Vector3(200, 0, 0)])  # near: full-rate stepping
+	var bus := _bus(m, 0, 150.0)
+	assert_float(bus.next_stop_d).is_equal_approx(200.0, 1.0)
+	var stood_still := 0.0
+	var stood_at := -1.0
+	for i in range(60 * 25):
+		m.step(1.0 / 60.0)
+		if bus.speed < 0.05 and bus.dwell > 0.0:
+			stood_still += 1.0 / 60.0
+			stood_at = bus.distance
+	assert_float(stood_still).is_between(float(m.config["bus_dwell_s"]) - 1.0, float(m.config["bus_dwell_s"]) + 1.0)
+	assert_float(stood_at).is_equal_approx(200.0, 2.0)
+	assert_float(bus.distance).is_greater(250.0)
+	assert_bool(bus.next_stop_d == INF).is_true()

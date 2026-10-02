@@ -30,6 +30,18 @@ def _drop(result: FilterResult, reason: str, way: OsmWay | None = None) -> None:
         result.dropped_ways.append((way, reason))
 
 
+BUS_VALUES = ("yes", "designated")
+
+
+def is_bus_way(tags: dict) -> bool:
+    """A way closed to general traffic but open to buses (bus lanes, the Transitway)."""
+    return (
+        tags.get("highway") == "busway"
+        or tags.get("bus") in BUS_VALUES
+        or tags.get("psv") in BUS_VALUES
+    )
+
+
 def filter_ways(data: OsmData, cfg: ImportConfig) -> FilterResult:
     """Classify every way. Ways with fewer than two known nodes are dropped."""
     result = FilterResult([], [])
@@ -52,7 +64,7 @@ def filter_ways(data: OsmData, cfg: ImportConfig) -> FilterResult:
                 _drop(result, f"service={tags.get('service')}", way)
                 continue
             access = tags.get("motor_vehicle", tags.get("access"))
-            if access in cfg.excluded_access_values:
+            if access in cfg.excluded_access_values and not is_bus_way(tags):
                 _drop(result, f"access={access}", way)
                 continue
             result.drivable.append(way)

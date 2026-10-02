@@ -64,6 +64,8 @@ class RoadEdge:
     length_m: float = 0.0
     control_to: str = "none"  # stop | signals | none for traffic arriving at to_node
     control_from: str = "none"  # the same for traffic arriving at from_node
+    bus: str = ""  # "only": the whole edge is for buses; "lane": one forward lane is (bus_lane)
+    bus_lane: int = -1  # forward lane index reserved for buses (0 = nearest the centre line)
 
     @property
     def is_link(self) -> bool:
@@ -96,6 +98,7 @@ class RoadGraph:
     edges: dict[str, RoadEdge]
     pedestrian: list[PedestrianWay]
     notes: dict = field(default_factory=dict)
+    bus_stops: list[dict] = field(default_factory=list)  # {"id", "position", "edge"}
 
     def incident(self) -> dict[str, list[str]]:
         """Node id -> ids of edges touching it."""
@@ -196,6 +199,7 @@ def _edge_from_segment(
             else:
                 control_from = kind
     lanes_f, lanes_b = _lanes(way, road_class, oneway, cfg, defaulted)
+    bus, bus_lane = _bus_lanes(tags, lanes_f, ow == "reverse")
     width = T.parse_width_m(tags.get("width"))
     if width is None:
         width = (lanes_f + lanes_b) * cfg.lane_width_m
@@ -225,7 +229,38 @@ def _edge_from_segment(
         length_m=polyline_length(polyline),
         control_to=control_to,
         control_from=control_from,
+        bus=bus,
+        bus_lane=bus_lane,
     )
+
+
+def _bus_lanes(tags: dict, lanes_f: int, reversed_way: bool) -> tuple[str, int]:
+    """("only", -1) for a bus-only way, ("lane", index) when one forward lane is reserved."""
+    access = tags.get("motor_vehicle", tags.get("access"))
+    bus_values = ("yes", "designated")
+    if tags.get("highway") == "busway" or (
+        access in ("no", "private")
+        and (tags.get("bus") in bus_values or tags.get("psv") in bus_values)
+    ):
+        return "only", -1
+    direction = "backward" if reversed_way else "forward"
+    for key in (f"bus:lanes:{direction}", f"psv:lanes:{direction}", "bus:lanes", "psv:lanes"):
+        if key in tags and (
+            key.count(":") == 1
+            and tags.get("oneway") not in ("yes", "-1")
+            and direction == "backward"
+        ):
+            continue
+        if key in tags:
+            lanes = tags[key].split("|")
+            for i, value in enumerate(lanes):
+                if value == "designated":
+                    return "lane", min(i, max(lanes_f - 1, 0))
+            return "", -1
+    busway = tags.get("busway:right", tags.get("busway"))
+    if busway == "lane" or tags.get("lanes:bus") or tags.get("lanes:psv"):
+        return "lane", max(lanes_f - 1, 0)
+    return "", -1
 
 
 def build_graph(
@@ -257,6 +292,7 @@ def build_graph(
         nodes[f"n{nid}"] = RoadNode(f"n{nid}", (x, 0.0, z), [nid], dict(n.tags))
 
     edges: dict[str, RoadEdge] = {}
+    edge_of_node: dict[int, str] = {}  # OSM node -> an edge passing through it (bus stops)
     for way in sorted(drivable, key=lambda w: w.id):
         known = [n for n in way.nodes if n in data.nodes]
         seg: list[int] = [known[0]]
@@ -267,8 +303,18 @@ def build_graph(
                 if len(seg) >= 2 and (seg[0] != seg[-1] or len(seg) > 2):
                     edge = _edge_from_segment(way, seg_index, seg, data, proj, cfg)
                     edges[edge.id] = edge
+                    for sn in seg:
+                        edge_of_node.setdefault(sn, edge.id)
                     seg_index += 1
                 seg = [nid]
+    bus_stops: list[dict] = []
+    for nid, eid in sorted(edge_of_node.items()):
+        t = data.nodes[nid].tags
+        if t.get("highway") == "bus_stop" or (
+            t.get("public_transport") == "stop_position" and t.get("bus") == "yes"
+        ):
+            x, z = proj.to_local(data.nodes[nid].lat, data.nodes[nid].lon)
+            bus_stops.append({"id": f"s{nid}", "position": (x, 0.0, z), "edge": eid})
 
     peds: list[PedestrianWay] = []
     for way in sorted(pedestrian, key=lambda w: w.id):
@@ -300,7 +346,7 @@ def build_graph(
             )
         )
 
-    graph = RoadGraph(nodes, edges, peds)
+    graph = RoadGraph(nodes, edges, peds, bus_stops=bus_stops)
     _classify_nodes(graph)
     return graph
 

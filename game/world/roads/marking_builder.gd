@@ -11,6 +11,7 @@ extends RefCounted
 ## polyline in metres. Rules come from marking_rules.json.
 
 const RULES_PATH := "res://world/roads/marking_rules.json"
+const BUS_LANE_COLOR := Color(0.46, 0.13, 0.11)
 
 var rules: Dictionary = {}
 
@@ -88,7 +89,19 @@ func build(graph: RoadGraph, junctions: Dictionary) -> Dictionary:
 		var normals := RoadGeometry.miter_normals(pl)
 		var total := RoadGeometry.length_xz(pl)
 		var base_hw := edge.width_m * 0.5
-		for line in lines_for(edge):
+		var lines := lines_for(edge)
+		if edge.bus != "":
+			# Bus lanes get a red tint ribbon down the middle of each reserved lane.
+			var lanes_total := edge.lanes_forward + edge.lanes_backward
+			var lane_w := edge.width_m / maxf(lanes_total, 1)
+			var div := base_hw - edge.lanes_forward * lane_w
+			for k in range(edge.lanes_forward):
+				if edge.bus == "only" or k == edge.bus_lane:
+					lines.append({"offset": div + (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})
+			if edge.bus == "only":
+				for k in range(edge.lanes_backward):
+					lines.append({"offset": div - (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})
+		for line in lines:
 			var offset_pl := PackedVector3Array()
 			var walked := 0.0
 			for i in range(pl.size()):
@@ -100,7 +113,9 @@ func build(graph: RoadGraph, junctions: Dictionary) -> Dictionary:
 				var n := normals[i] * float(line["offset"]) * scale
 				offset_pl.append(pl[i] + Vector3(n.x, lift, n.y))
 			var c := color(line["color"])
-			if line["style"] == "solid":
+			if line["style"] == "bus":
+				_ribbon(offset_pl, float(line["width"]), BUS_LANE_COLOR, buckets)
+			elif line["style"] == "solid":
 				_ribbon(offset_pl, float(rules["line_width_m"]), c, buckets)
 			else:
 				_dashes(offset_pl, float(rules["line_width_m"]), float(rules["dash_on_m"]), float(rules["dash_off_m"]), c, buckets)
