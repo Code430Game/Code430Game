@@ -28,6 +28,12 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 - **Portage underpass walk (Deck shots 2026-10-02 morning, x -1208 z 141 to x -1176 z 83):**
   a large flat slab and bare headwalls read as floating geometry at the approach; the
   retaining walls and lighting in `add-underpass-interiors` should cover it, worth a look there.
+- **Skywalks and raised building parts (human, 2026-10-02: "a connector between buildings,
+  more than a car height above the roadway").** Pedestrian ways drop `bridge`/`layer` (about
+  60 footbridges drawn at grade); buildings ignore `min_height`/`building:min_level` (about 90
+  raised parts become ground blocks); a footprint spanning a sunken road floats on its median
+  ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
+  Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
 - **Region picker** is built (`tools/region_picker/index.html`, importer `--region`); the two
   older region picker notes below are done except `--place` and `--radius-km`.
 
