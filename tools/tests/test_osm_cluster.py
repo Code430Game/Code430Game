@@ -1,3 +1,5 @@
+import math
+
 from osm_import.cluster import cluster_junctions
 from osm_import.config import load_config
 from osm_import.filter import filter_ways
@@ -45,9 +47,48 @@ def test_dual_carriageway_crossing_merges_into_one_junction():
     assert cluster[0].junction_type == "junction"
     touching = [e for e in g.edges.values() if cluster[0].id in (e.from_node, e.to_node)]
     assert len(touching) == 6
+
+
+def _end(e, nid):
+    return e.polyline[-1] if e.to_node == nid else e.polyline[0]
+
+
+def _off_line(p, a, b) -> float:
+    """Perpendicular distance in xz from p to the line through a and b."""
+    dx, dz = b[0] - a[0], b[2] - a[2]
+    return abs((p[0] - a[0]) * dz - (p[2] - a[2]) * dx) / math.hypot(dx, dz)
+
+
+def test_divided_road_carriageways_stay_parallel_through_merged_node():
+    g, stats = build(dual_carriageway({}))
+    c = next(n for n in g.nodes.values() if n.id.startswith("c"))
+    touching = [e for e in g.edges.values() if c.id in (e.from_node, e.to_node)]
+    by_name: dict[str, list] = {}
     for e in touching:
-        end = e.polyline[-1] if e.to_node == cluster[0].id else e.polyline[0]
-        assert end == cluster[0].position
+        by_name.setdefault(e.name, []).append(e)
+    east = [p for e in by_name["Main East"] for p in e.polyline]
+    west = [p for e in by_name["Main West"] for p in e.polyline]
+    a, b = east[0], east[-1]
+    # Each carriageway stays one straight line through the junction instead of bending to
+    # the centroid, and the two stay parallel at their 12 m spacing.
+    assert all(_off_line(p, a, b) < 0.01 for p in east)
+    assert all(abs(_off_line(p, a, b) - 12.0) < 0.05 for p in west)
+    for e in by_name["Main East"] + by_name["Main West"]:
+        assert abs(math.dist(_end(e, c.id)[::2], c.position[::2]) - 6.0) < 0.05
+    # The cross street already passes through the centroid, so its ends land on it.
+    for e in by_name["Cross"]:
+        assert math.dist(_end(e, c.id)[::2], c.position[::2]) < 0.01
+    [row] = stats.to_list()
+    assert row["node_id"] == c.id and row["osm_node_ids"] == c.osm_node_ids
+    assert abs(row["max_arm_offset_m"] - 6.0) < 0.05
+
+
+def test_arm_end_within_snap_tolerance_goes_to_centroid():
+    g, _stats = build(dual_carriageway({}, gap_m=1.5))
+    c = next(n for n in g.nodes.values() if n.id.startswith("c"))
+    for e in g.edges.values():
+        if c.id in (e.from_node, e.to_node):
+            assert _end(e, c.id) == c.position
 
 
 def test_wide_median_is_not_merged():
