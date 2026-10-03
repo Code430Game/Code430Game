@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import json
 import re
-from pathlib import Path
 from typing import Any
 
-SCHEMA_PATH = Path(__file__).with_name("report.schema.v1.json")
+from report_relay.schema_v1 import SCHEMA_JSON
+
 _TYPES = {
     "object": dict,
     "array": list,
@@ -22,7 +22,7 @@ _TYPES = {
 
 
 def load_schema() -> dict:
-    return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    return json.loads(SCHEMA_JSON)
 
 
 SCHEMA = load_schema()
