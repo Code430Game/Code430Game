@@ -1,6 +1,6 @@
 # Change: In-game issue reporter that files GitHub issues
 
-**Status: proposed 2026-10-03 (human: "Can we add an open spec to create an issue form in the game itself? That could post direct to github issues? XD (That might be the hard part) I would think it would need a screenshot feature and a couple drop downs to sort the issue, and then contain the diagnostic information like build and machine data.").**
+**Status: approved 2026-10-03 (human: "Lets handle that PR that way I can more easily submit issues"; relay on Cloudflare at a workers.dev URL, no domain; defaults taken for the open questions). Proposed 2026-10-03 (human: "Can we add an open spec to create an issue form in the game itself? That could post direct to github issues? XD (That might be the hard part) I would think it would need a screenshot feature and a couple drop downs to sort the issue, and then contain the diagnostic information like build and machine data.").**
 
 ## Why
 Field reports come from Deck drives and reach an agent as a chat message: "a curb on the
@@ -29,7 +29,7 @@ build and the machine automatically, so a fresh session can go straight to it.
 - **Posting without an account** (see `design.md` for the options). Players do not sign in
   anywhere. The game sends the report over HTTPS to a small relay service,
   `tools/report_relay/` (Python, like every tool here), deployed to Cloudflare's Python Workers
-  on the free tier (pending the human's yes). The relay holds a GitHub App's private key as a deployment secret, files the issue as
+  on the free tier at a `workers.dev` URL, so no domain is needed. The relay holds a GitHub App's private key as a deployment secret, files the issue as
   the App's bot in the configured repo (labels `in-game-report`, `needs-triage`, `area:<area>`
   and `severity:<severity>`, diagnostics in a collapsed section), and commits the screenshot as a
   JPEG to an `issue-attachments` branch that is never merged, linked from the issue. Nothing
