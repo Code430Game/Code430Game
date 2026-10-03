@@ -143,3 +143,74 @@ func test_hull_junction_on_a_slope_follows_its_arms() -> void:
 	assert_float(east).is_equal_approx(10.8, 0.05)  # 20 m up a 2 m per 50 m climb
 	assert_float(west).is_equal_approx(9.2, 0.05)
 	assert_float(centre).is_equal_approx(10.0, 1e-4)
+
+
+func _divided_graph() -> RoadGraph:
+	# A merged junction at the origin: two one-way carriageways 12 m apart (z = -6 eastbound,
+	# z = +6 westbound) end on their own lines beside the node, as the importer leaves them, and a
+	# two-way cross street ends at the node itself.
+	var nodes := [{"id": "c1", "position": [0, 0, 0], "ground_y": 0, "junction_type": "junction"}]
+	var edges := []
+	var arms := [
+		["e_in", "n_ew", "c1", [[-100, 0, -6], [0, 0, -6]], 7.0, true],
+		["e_out", "c1", "n_ee", [[0, 0, -6], [100, 0, -6]], 7.0, true],
+		["w_in", "n_we", "c1", [[100, 0, 6], [0, 0, 6]], 7.0, true],
+		["w_out", "c1", "n_ww", [[0, 0, 6], [-100, 0, 6]], 7.0, true],
+		["x_s", "c1", "n_s", [[0, 0, 0], [0, 0, -100]], 8.0, false],
+		["x_n", "c1", "n_n", [[0, 0, 0], [0, 0, 100]], 8.0, false],
+	]
+	for arm in arms:
+		var far: Array = arm[3][0] if arm[2] == "c1" else arm[3][1]
+		var far_id: String = arm[1] if arm[2] == "c1" else arm[2]
+		nodes.append({"id": far_id, "position": far, "ground_y": 0, "junction_type": "dead_end"})
+		edges.append({
+			"id": arm[0], "from": arm[1], "to": arm[2], "polyline": arm[3], "class": "primary",
+			"lanes_forward": 2 if arm[5] else 1, "lanes_backward": 0 if arm[5] else 1, "oneway": arm[5], "speed_kph": 50,
+			"width_m": arm[4], "layer": 0, "bridge": false, "tunnel": false, "name": arm[0], "osm_way_id": 1,
+			"defaulted_fields": [], "access": null, "length_m": 100.0,
+		})
+	return RoadGraph.from_dict({"meta": {}, "nodes": nodes, "edges": edges, "pedestrian_ways": []})
+
+
+func test_offset_arms_keep_each_carriageway_on_its_own_line() -> void:
+	var graph := _divided_graph()
+	var j: JunctionBuilder.Junction = JunctionBuilder.build_one(graph, "c1")
+	assert_bool(j.fallback_hull).is_false()
+	assert_bool(JunctionBuilder._is_simple(j.polygon_xz)).is_true()
+	assert_int(Geometry2D.triangulate_polygon(j.polygon_xz).size()).is_greater(0)
+	# Carriageways are trimmed at the cross street's side plus the margin; the cross street runs
+	# out past the far side of each carriageway.
+	for eid in ["e_in", "e_out", "w_in", "w_out"]:
+		assert_float(j.trims[eid]).is_equal_approx(4.0 + JunctionBuilder.TRIM_MARGIN_M, 1e-3)
+	for eid in ["x_s", "x_n"]:
+		assert_float(j.trims[eid]).is_equal_approx(6.0 + 3.5 + JunctionBuilder.TRIM_MARGIN_M, 1e-3)
+	# Each carriageway's cap sits across its own line, not across the node.
+	for cap in [Vector2(7, -9.5), Vector2(7, -2.5), Vector2(-7, 2.5), Vector2(-7, 9.5), Vector2(-7, -2.5), Vector2(7, 2.5)]:
+		var found := false
+		for p in j.polygon_xz:
+			found = found or p.distance_to(cap) < 1e-3
+		assert_bool(found).override_failure_message("no cap vertex at %s" % cap).is_true()
+	# The cross street is paved through the median; the median beyond the junction is not.
+	assert_bool(Geometry2D.is_point_in_polygon(Vector2(3.9, 0.0), j.polygon_xz)).is_true()
+	assert_bool(Geometry2D.is_point_in_polygon(Vector2(-3.9, 0.0), j.polygon_xz)).is_true()
+	assert_bool(Geometry2D.is_point_in_polygon(Vector2(9.0, 0.0), j.polygon_xz)).is_false()
+	assert_bool(Geometry2D.is_point_in_polygon(Vector2(-9.0, 0.0), j.polygon_xz)).is_false()
+
+
+func test_offset_arms_build_straight_ribbons_and_lanes() -> void:
+	var graph := _divided_graph()
+	var junctions := JunctionBuilder.build_all(graph)
+	var result := RoadMeshBuilder.build(graph, junctions)
+	assert_int(result.junctions_built).is_equal(1)
+	# Through traffic on each carriageway holds its own carriageway (|z| between 2.5 and 9.5 m)
+	# all the way through instead of steering toward the node at z = 0.
+	var lanes := LaneGraph.build(graph, junctions)
+	var through := 0
+	for lp in lanes.paths:
+		var run := lp.points[lp.points.size() - 1] - lp.points[0]
+		if not lp.is_connector or lp.straightness < 0.99 or absf(run.x) < absf(run.z):
+			continue  # turns and the cross street
+		through += 1
+		for p in lp.points:
+			assert_float(absf(p.z)).override_failure_message("connector leaves its carriageway at %s" % p).is_between(2.5, 9.5)
+	assert_int(through).is_greater(0)

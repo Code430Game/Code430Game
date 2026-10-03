@@ -67,7 +67,8 @@ static func _approach_transform(graph: RoadGraph, node: RoadGraph.RoadNode, j: J
 	var travel := -out_dir  # how traffic approaches the node
 	var right := Vector2(-travel.y, travel.x)
 	var trim: float = j.trims.get(e.id, 6.0) if j != null else 6.0
-	var base2 := Vector2(node.position.x, node.position.z) + out_dir * trim + right * (e.width_m * 0.5 + CORNER_OUT_M)
+	var end := graph.end_point(e, node.id)  # beside the node on an offset arm of a merged junction
+	var base2 := Vector2(end.x, end.z) + out_dir * trim + right * (e.width_m * 0.5 + CORNER_OUT_M)
 	var base := Vector3(base2.x, node.position.y, base2.y)
 	var facing := Basis.looking_at(Vector3(out_dir.x, 0.0, out_dir.y), Vector3.UP)
 	return Transform3D(facing, base)
