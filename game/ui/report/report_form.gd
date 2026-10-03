@@ -7,8 +7,9 @@ extends CanvasLayer
 ## Opened from the pause menu (any input device) or with F8, while the tree is paused. Handles its
 ## own navigation in _input like the pause menu: up/down move, left/right change a choice, A
 ## activates or starts typing (the Deck shows its on-screen keyboard), B leaves a page, then the
-## form. Typing ends with Enter (Shift+Enter is a new line on a keyboard), Escape, or any controller
-## button: on the Deck the keyboard's own B is backspace, so Enter is the way out. Sending goes through `sender` (RelayClient) when there is one; the
+## form. Typing ends with B or Menu on a controller, or Enter (Shift+Enter is a new line) or Escape
+## on a keyboard. The D-pad and A are left alone: the Deck's on-screen keyboard is driven with them,
+## and the game sees those presses too. Sending goes through `sender` (RelayClient) when there is one; the
 ## report is always saved first.
 
 signal closed
@@ -256,7 +257,7 @@ func _refresh() -> void:
 	}
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity",
-		"description": "What happened (A to type, Enter when done)", "reporter": "Reporter id", "review": "Review what will be sent",
+		"description": "What happened (A to type, B when done)", "reporter": "Reporter id", "review": "Review what will be sent",
 		"send": "Send report", "queue": "Saved reports", "cancel": "Cancel",
 	}
 	for i in range(ROWS.size()):
@@ -302,13 +303,13 @@ func _text_focused() -> bool:
 	return _description.has_focus()
 
 
-## Typing ends with Enter (not Shift+Enter), Escape, or any controller button. Typing itself
-## arrives as keys even on the Deck, so a controller button always means "done".
+## Typing ends with B or Menu, or Enter (not Shift+Enter) or Escape. The D-pad and A drive the
+## Deck's on-screen keyboard, which the game also hears, so they must not end typing.
 func _leaves_text(event: InputEvent) -> bool:
 	if not event.is_pressed() or event.is_echo():
 		return false
 	if event is InputEventJoypadButton:
-		return true
+		return (event as InputEventJoypadButton).button_index in [JOY_BUTTON_B, JOY_BUTTON_START]
 	if event is InputEventKey:
 		var k := event as InputEventKey
 		return k.keycode == KEY_ESCAPE or (k.keycode in [KEY_ENTER, KEY_KP_ENTER] and not k.shift_pressed)
@@ -345,7 +346,7 @@ func _build() -> void:
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(heading)
 	var hint := Label.new()
-	hint.text = "Up/down move    left/right change    A select or type    Enter done typing    B back"
+	hint.text = "Up/down move    left/right change    A select or type    B done typing, then back"
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(hint)
