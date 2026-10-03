@@ -8,6 +8,9 @@ The logic is the `report_relay` package (`src/report_relay/`), tested by the too
 (`cd tools && uv run pytest`). `src/worker.py` is the Cloudflare glue.
 
 ## One-time setup
+Wrangler needs Node 22 or newer (`.nvmrc` here says 22). With nvm, prefix the commands below
+with `nvm exec 22`, for example `nvm exec 22 uv run pywrangler deploy`.
+
 1. **GitHub App.** github.com → Settings → Developer settings → GitHub Apps → New GitHub App.
    - Name: for example "Code 430 Reporter". Homepage: the repo URL. Webhook: off.
    - Repository permissions: Issues read and write, Contents read and write, Metadata read.
@@ -19,7 +22,8 @@ The logic is the `report_relay` package (`src/report_relay/`), tested by the too
    uv run pywrangler login                      # opens the browser once
    uv run pywrangler kv namespace create REPORT_LIMITS
    ```
-   Put the namespace id into `wrangler.toml` (`[[kv_namespaces]] id`) and the App id into
+   Put the namespace id into `wrangler.toml` (`[[kv_namespaces]] id`; wrangler will not run
+   while that id is empty, so leave the block commented out until then) and the App id into
    `[vars] APP_ID`.
 4. **Secrets**, in the Cloudflare dashboard (Workers → code430-report-relay → Settings →
    Variables and Secrets) or with `uv run pywrangler secret put NAME`:
