@@ -629,9 +629,12 @@ func _process(delta: float) -> void:
 			])
 	if _fixed_cam != null and not _fixed_cam.current:
 		_fixed_cam.current = true  # the player's cameras grab the viewport on enter/exit; the fixed view wins
-	if Input.is_action_just_pressed("headlights_cycle") and _player != null and _player.is_driving():
+	# This node runs while paused so menus work; D-pad up and down navigate those menus (pause,
+	# map, character creator), so the driving hotkeys on the same buttons only fire in play.
+	var in_play := not get_tree().paused
+	if in_play and Input.is_action_just_pressed("headlights_cycle") and _player != null and _player.is_driving():
 		_headlights = (_headlights + 1) % 3
-	if Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
+	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
 		_camera.cycle_mode()
 		_camera.look_at(_car.global_position, Vector3.UP)
 	if _bench_seconds > 0.0:
