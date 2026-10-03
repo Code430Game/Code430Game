@@ -214,3 +214,23 @@ func test_offset_arms_build_straight_ribbons_and_lanes() -> void:
 		for p in lp.points:
 			assert_float(absf(p.z)).override_failure_message("connector leaves its carriageway at %s" % p).is_between(2.5, 9.5)
 	assert_int(through).is_greater(0)
+
+
+func test_big_junction_on_a_crest_does_not_sag_below_its_node() -> void:
+	# The divided crossing on a crest: every arm drops 1 m over its 100 m. The junction surface
+	# must reach the node's height in the middle, not sag to its boundary heights.
+	var graph := _divided_graph()
+	for e in graph.edges.values():
+		var pl: PackedVector3Array = e.polyline
+		for k in range(pl.size()):
+			var p := pl[k]
+			pl[k] = Vector3(p.x, 10.0 - Vector2(p.x, p.z).length() / 100.0, p.z)
+		e.polyline = pl
+	graph.nodes["c1"].position = Vector3(0, 10, 0)
+	var junctions := JunctionBuilder.build_all(graph)
+	var result := RoadMeshBuilder.build(graph, junctions)
+	var top := -INF
+	for v in result.junctions[Vector2i(0, 0)].vertices:
+		if Vector2(v.x, v.z).length() < 0.5:
+			top = maxf(top, v.y)
+	assert_float(top).is_equal_approx(10.0 + RoadMeshBuilder.SURFACE_LIFT_M, 1e-3)
