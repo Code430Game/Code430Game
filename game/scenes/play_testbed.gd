@@ -99,6 +99,17 @@ func _ready() -> void:
 	_report_form.store = ReportStore.new()
 	_report_form.repo = report_config["repo"]
 	_report_form.store.prune()
+	# Reports go to the relay once one is configured; until then they are saved (and can be filed
+	# in the browser on desktop).
+	var relay := RelayClient.new()
+	relay.name = "RelayClient"
+	relay.store = _report_form.store
+	relay.relay_url = report_config["relay_url"]
+	add_child(relay)
+	if relay.configured():
+		_report_form.sender = relay
+		relay.report_state_changed.connect(_report_form.on_report_state)
+		relay.send_due()
 	_pause_menu.report_requested.connect(func() -> void: _open_report(true))
 	_report_form.closed.connect(_on_report_closed)
 	_pause_menu.host_requested.connect(_host_game)
