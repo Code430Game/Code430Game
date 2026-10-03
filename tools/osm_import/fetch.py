@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import time
 import urllib.error
 import urllib.parse
@@ -26,7 +27,9 @@ DEFAULT_ENDPOINTS = (
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
 )
-DEFAULT_CACHE_DIR = Path(__file__).with_name(".cache")
+# Download cache: CODE430_OSM_CACHE points it at a shared or external volume so several
+# machines reuse the same extracts and DEM tiles; otherwise it sits beside the package.
+DEFAULT_CACHE_DIR = Path(os.environ.get("CODE430_OSM_CACHE") or Path(__file__).with_name(".cache"))
 RETRY_DELAY_S = 5.0
 TIMEOUT_S = 240
 
