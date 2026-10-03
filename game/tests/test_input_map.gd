@@ -22,8 +22,16 @@ func test_required_actions_exist() -> void:
 		assert_bool(InputMap.has_action(action)).override_failure_message("missing action %s" % action).is_true()
 
 
+## Keyboard shortcuts for things a controller reaches another way (named, with the way).
+const KEYBOARD_SHORTCUTS: PackedStringArray = [
+	"report_open",  # F8; controllers use the pause menu's "Report a problem" or hold Menu
+]
+
+
 func test_every_action_has_a_gamepad_binding() -> void:
 	for action in _game_actions():
+		if String(action) in KEYBOARD_SHORTCUTS:
+			continue
 		var has_joypad := false
 		for event in InputMap.action_get_events(action):
 			if event is InputEventJoypadButton or event is InputEventJoypadMotion:

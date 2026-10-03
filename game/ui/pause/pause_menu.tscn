@@ -19,9 +19,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -190.0
-offset_top = -240.0
+offset_top = -262.0
 offset_right = 190.0
-offset_bottom = 240.0
+offset_bottom = 262.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -77,6 +77,11 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "offline"
 horizontal_alignment = 1
+
+[node name="Report" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Report a problem (hold Menu)"
 
 [node name="Quit" type="Button" parent="Panel/VBox"]
 layout_mode = 2

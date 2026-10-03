@@ -10,7 +10,9 @@ game, at the moment the problem is on screen, can carry the screenshot, the exac
 build and the machine automatically, so a fresh session can go straight to it.
 
 ## What Changes
-- **Report form.** "Report a problem" in the pause menu, and F8 on the keyboard. The frame
+- **Report form.** "Report a problem" in the pause menu, holding Menu (Start) for a second
+  (human, 2026-10-03: "What about a long press of the select / menu button?"), and F8 on the
+  keyboard. The frame
   under the menu is captured as the screenshot when the menu opens, with a thumbnail and an
   include toggle. Two drop-downs sort the report: **area** (Roads and junctions, Traffic,
   Pedestrians, Vehicles and handling, Buildings and world, Visuals, Performance, Controls and
