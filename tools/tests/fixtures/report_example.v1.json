@@ -2,11 +2,11 @@
   "version": 1,
   "id": "20261003T101500Z-3fa9c2d1",
   "created_at": "2026-10-03T10:15:00Z",
-  "title": "Roads and junctions: Elgin Street at x 237, z 18",
+  "title": "Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18)",
   "description": "A curb stands inside the junction where the curved road joins.",
   "area": "roads",
   "severity": "annoying",
-  "credit_name": "",
+  "reporter_id": "",
   "has_screenshot": true,
   "log_tail": ["testbed: spawn ring 5 chunks in 259 ms; first playable at 497 ms", "pack loaded from ~/Games/code430/packs/ottawa-centretown"],
   "diagnostics": {

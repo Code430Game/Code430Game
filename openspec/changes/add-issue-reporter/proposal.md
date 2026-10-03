@@ -17,9 +17,13 @@ build and the machine automatically, so a fresh session can go straight to it.
   include toggle. Two drop-downs sort the report: **area** (Roads and junctions, Traffic,
   Pedestrians, Vehicles and handling, Buildings and world, Visuals, Performance, Controls and
   menus, Audio, Crash or freeze, Other) and **severity** (Cosmetic, Annoying, Blocks play,
-  Crash). A one-line title, optional, filled from the area and the nearest road when left empty
-  ("Roads and junctions: Elgin Street at x 237, z 18"), and an optional description; both use the
-  Deck's on-screen keyboard like the Join address field. Fully driven by controller.
+  Crash). The title is always generated from them and the place ("Report: Roads and
+  junctions · Annoying · Elgin Street (x 237, z 18)"); one optional text area says what happened,
+  typed with the Deck's on-screen keyboard and left with its Enter key or any controller button.
+  An optional **reporter id**, a random id made once per install and off by default, lets reports
+  from one install be grouped without a name that could impersonate someone (human, 2026-10-03,
+  after the first Deck try: titles generated, one text area, no name field). Fully driven by
+  controller.
 - **Diagnostics, shown before sending.** Build (commit, branch, build date, dirty flag),
   stamped into `build_info.json` by `package-linux.sh` and CI at export; `dev` plus the local
   commit when run from source. Godot version, OS and distribution, CPU, GPU and driver, memory,
@@ -35,8 +39,8 @@ build and the machine automatically, so a fresh session can go straight to it.
   the App's bot in the configured repo (labels `in-game-report`, `needs-triage`, `area:<area>`
   and `severity:<severity>`, diagnostics in a collapsed section), and commits the screenshot as a
   JPEG to an `issue-attachments` branch that is never merged, linked from the issue. Nothing
-  secret ships in the game: it knows only the relay URL. An optional "name to credit" field
-  goes in the issue; no email or account is ever asked for.
+  secret ships in the game: it knows only the relay URL. No name, email or account is ever asked
+  for; the optional reporter id is the only thing that ties reports together.
 - **Abuse and privacy at the relay.** Per-IP rate limit (5 reports an hour, 20 a day), a 2 MB
   request cap, JPEG and schema validation, text length limits, `@` mentions and HTML defused,
   and a kill switch that turns the relay off without a game update. The relay does not store IP

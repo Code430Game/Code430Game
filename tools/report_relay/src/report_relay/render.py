@@ -148,8 +148,11 @@ def body(report: dict, screenshot_url: str | None) -> str:
         head += [defuse(report["description"]), ""]
     if screenshot_url:
         head += [f"![screenshot]({screenshot_url})", ""]
-    if report["credit_name"].strip():
-        head += [f"Reported by {defuse(report['credit_name'])}.", ""]
+    if report["reporter_id"]:
+        head += [
+            f"Reporter id `{report['reporter_id']}` (chosen by the player; random per install).",
+            "",
+        ]
     head += ["<details><summary>Diagnostics</summary>", ""] + _table(report) + [""]
     tail = [
         "</details>",
