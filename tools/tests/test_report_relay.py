@@ -79,7 +79,9 @@ def test_packaged_schema_is_the_documented_one():
     docs = (REPO_ROOT / "docs" / "report-format" / "report.schema.v1.json").read_text(
         encoding="utf-8"
     )
-    assert json.loads(docs) == validate.load_schema()
+    assert json.loads(docs) == validate.load_schema(), (
+        "report_relay/schema_v1.py is out of date: paste docs/report-format/report.schema.v1.json into it"
+    )
 
 
 MUTATIONS = [

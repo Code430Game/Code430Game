@@ -8,10 +8,11 @@ compatibility_flags = ["python_workers"]
 workers_dev = true
 
 [vars]
-APP_ID = ""            # the GitHub App's id, from its settings page
+APP_ID = "5176749"            # the GitHub App's id, from its settings page
 REPO = "rjksn/Code430"
 RELAY_ENABLED = "true" # the kill switch: "false" refuses every report with 503
 
+# Created with `uv run pywrangler kv namespace create REPORT_LIMITS` (not secret).
 [[kv_namespaces]]
 binding = "REPORT_LIMITS"
-id = ""                # from `uv run pywrangler kv namespace create REPORT_LIMITS`
+id = "a85edf237a0e44d8ae5be0e91d82bb9a"

@@ -1,3 +1,10 @@
+"""The report schema, docs/report-format/report.schema.v1.json, as a module.
+
+Workers upload only Python modules, so the schema travels as text here. The tools tests fail
+if it drifts from the documented file; refresh it by pasting that file's contents below.
+"""
+
+SCHEMA_JSON = r"""
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://code430.invalid/report.schema.v1.json",
@@ -119,3 +126,4 @@
     }
   }
 }
+"""

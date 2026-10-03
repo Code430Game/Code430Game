@@ -1,5 +1,5 @@
 {
   "_comment": "Issue reporting. relay_url is the deployed report relay (empty: reports are saved and can be filed in the browser on desktop). repo is owner/name on GitHub for the browser hand-off.",
-  "relay_url": "",
+  "relay_url": "https://code430-report-relay.report-relay.workers.dev",
   "repo": "rjksn/Code430"
 }
