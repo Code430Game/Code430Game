@@ -72,6 +72,11 @@ def _cell(value: object) -> str:
     return defuse(str(value)).replace("|", "\\|").replace("\n", " ")
 
 
+def _n(value: object) -> object:
+    """8.0 as 8: the game reloads saved reports, and Godot reads every JSON number as a float."""
+    return int(value) if isinstance(value, float) and value.is_integer() else value
+
+
 def _os_name(m: dict) -> str:
     """'SteamOS (Linux)', or just 'macOS' when the distribution is the OS's own name."""
     if m["distribution"] in ("", m["os"]):
@@ -90,15 +95,15 @@ def _table(report: dict) -> list[str]:
         ("Godot", d["engine"]["godot"]),
         (
             "Machine",
-            f"{_os_name(m)} {m['os_version']}, {m['cpu']} ×{m['cpu_count']}, "
-            f"{m['gpu']} ({m['graphics_api']}), {m['memory_mb']} MB"
+            f"{_os_name(m)} {m['os_version']}, {m['cpu']} ×{_n(m['cpu_count'])}, "
+            f"{m['gpu']} ({m['graphics_api']}), {_n(m['memory_mb'])} MB"
             + (", Steam Deck" if m["deck"] else ""),
         ),
         (
             "Settings",
             (
                 f"preset {s['preset']}, tone {s['tone_mode']}, "
-                f"{m['resolution'][0]}×{m['resolution'][1]}"
+                f"{_n(m['resolution'][0])}×{_n(m['resolution'][1])}"
             ),
         ),
         ("Packs", packs),
@@ -106,7 +111,7 @@ def _table(report: dict) -> list[str]:
             "Session",
             session["role"]
             if session["role"] == "single"
-            else f"{session['role']}, {session['peers']} players",
+            else f"{session['role']}, {_n(session['peers'])} players",
         ),
         (
             "Place",
