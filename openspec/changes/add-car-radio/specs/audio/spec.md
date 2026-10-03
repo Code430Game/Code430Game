@@ -1,24 +1,37 @@
 ## ADDED Requirements
 
 ### Requirement: Car Radio
-The game SHALL play chip-style music synthesised at runtime from note data on a radio that runs while a player drives, with stations defined as tone-tagged content that packs can extend, a station cycle control, a remembered station, and a Music bus volume.
+The game SHALL play chip-style music synthesised at runtime from note data on a radio that runs while a player drives. It SHALL have stations, each a single seamless loop of 30 to 60 seconds composed for the game: a bright platformer piece, an overworld adventure piece, a dungeon piece and a talk-radio piece of chip babble, plus Off. Players SHALL cycle stations while driving, the last station SHALL be remembered, and the radio SHALL have its own Music volume. No station reuses another game's melodies, names or sounds.
 
 #### Scenario: Enter a car
-- **WHEN** a player enters a car with a station remembered
+- **WHEN** a player gets into a car with a station remembered
 - **THEN** that station plays, its name and tagline show briefly, and it pauses when the player gets out
 
 #### Scenario: Cycle stations
 - **WHEN** the player presses the radio control while driving
 - **THEN** the next station in the cycle plays, Off being one entry, and the choice is saved
 
-#### Scenario: Pack station
-- **WHEN** a loaded pack ships a station file
-- **THEN** its stations join the cycle after the base ones and its tracks play from their note data
-
-#### Scenario: Tone variant
-- **WHEN** the active mode is `dystopia` and a station has a dystopia variant
-- **THEN** that variant's name, tagline and track list are used, and in `clean` the fallback is used
+#### Scenario: Seamless loop
+- **WHEN** a station's loop reaches its end
+- **THEN** it continues from its start without a gap or click, and the loop is at least 30 seconds long
 
 #### Scenario: Deck budget
 - **WHEN** the radio plays on the Steam Deck
 - **THEN** its generator fill stays within the existing audio cost and the frame average is unchanged within noise
+
+## MODIFIED Requirements
+
+### Requirement: Synthesised Vehicle And City Sound
+The game SHALL synthesise an engine voice whose pitch rises with speed and throttle, tyre roll that grows with speed, a city ambience scaled by nearby traffic, and an impact sound scaled by collision speed, without audio assets. The engine and tyre voices SHALL sound whenever a player drives, including after getting out and back in.
+
+#### Scenario: Accelerating
+- **WHEN** the player accelerates from rest
+- **THEN** the engine pitch and tyre noise rise with speed
+
+#### Scenario: Collision
+- **WHEN** the player's car hits a wall at speed
+- **THEN** an impact sound plays whose loudness grows with the impact speed
+
+#### Scenario: Getting back in
+- **WHEN** the player gets out of the car, walks away, and gets back in
+- **THEN** the engine is audible again as soon as they are driving

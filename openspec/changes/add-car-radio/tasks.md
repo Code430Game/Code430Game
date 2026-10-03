@@ -1,13 +1,14 @@
-## 1. Synth and data
-- [ ] 1.1 `ChipPlayer`: four-channel tracker voice on one generator stream, envelopes, vibrato, note parsing; tests on note frequencies, step timing from the sample clock, and a rendered loop's RMS staying under the clip ceiling
-- [ ] 1.2 `music.schema.v0.json` and `radio.schema.v0.json`; `pack_tools` validates both and station variants against the modes; tests
-- [ ] 1.3 First-party content: eight loops and three stations with fallback and dystopia variants in `game/core/audio/radio/`; names checked against the no-real-stations rule
+## 1. Engine fix and synth
+- [ ] 1.1 Engine sound after getting back in: a test drives in, out and back in and finds the engine voice silent (reproducing the human's report), then `VehicleAudio` restarts its voices on entry and the test passes
+- [ ] 1.2 `ChipPlayer`: four-channel tracker voice on one generator stream, envelopes, vibrato, note parsing, sample-clock timing; tests on note frequencies, step timing, a rendered loop's RMS under the clip ceiling, and no click at the loop point
+- [ ] 1.3 `music.schema.v0.json` (with the talk syllable channel) and `radio.schema.v0.json`; `pack_tools` validates both; tests
 
-## 2. Game
-- [ ] 2.1 `Radio`: station cycle from base and packs, `pick_variant` on mode change, Off, remembered station, Music bus and volume setting; `radio_cycle` action and input-map test; tests in `test_audio.gd`
-- [ ] 2.2 Start on entering a car, pause on exit, tune-in toast with name and tagline; `--radio=<station>` testbed flag; leak voice on `high` only
-- [ ] 2.3 Mac run with the radio on through a car swap, confirming the track resumes
+## 2. Stations
+- [ ] 2.1 Three music loops, 30 to 60 s each: bright platformer, overworld adventure, dungeon. Original melodies; checked by ear on the Mac and against the no-reuse rule
+- [ ] 2.2 Talk radio (trial): syllable synthesis with speech-like pitch contours, two hosts taking turns, a jingle between segments, as a loop
+- [ ] 2.3 `Radio`: stations and Off, cycle on D-pad left or R while driving, remembered station, Music bus and volume, start on entry and pause on exit, tune-in toast; `radio_cycle` action and input-map test; `--radio=<station>` testbed flag; tests in `test_audio.gd`
+- [ ] 2.4 Mac run: each station recorded for a minute through a car swap; the station resumes after getting back in, and so does the engine
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark: the bus-round night run with the radio playing; generator fill time inside render CPU and frame avg against 9.9 ms / p99 13.3
-- [ ] 3.2 **Stop: human drives with the radio on the Deck and cycles the stations**
+- [ ] 3.1 Deck benchmark on the usual autodrive route with the radio playing: generator fill inside render CPU and no frame regression
+- [ ] 3.2 **Stop: human drives on the Deck, cycles the stations, and decides whether talk radio stays**
