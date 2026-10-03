@@ -13,4 +13,5 @@
 ## 3. Verification
 - [x] 3.1 Deck benchmark on the usual autodrive route, no regression
   - Steam Deck (2026-10-03, deck preset, 40 s autodrive, 150 traffic + 120 pedestrians). The build already on the Deck (2026-10-02 19:35): avg 9.56 ms, p99 14.21, max 39.2, GPU 8.71, physics 9.54. This branch, two runs: avg 9.85 / 9.73 ms, p99 14.90 / 15.28, max 26.0 / 29.1, GPU 8.88 / 8.72, physics 10.01 / 10.04, first playable about 500 ms. Within the 33.3 ms budget; avg and physics up about 0.2–0.5 ms against one baseline run.
-- [ ] 3.2 **Stop: human drives Elgin through Nepean on the Deck (x 237, z 18) and watches the traffic there**
+- [x] 3.2 **Stop: human drives Elgin through Nepean on the Deck (x 237, z 18) and watches the traffic there**
+  - 2026-10-03, human on the Deck: "These intersections are way better!!" One curb inside a junction at a curved road join, judged a separate issue (`docs/backlog.md`).
