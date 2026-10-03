@@ -12,9 +12,11 @@
 ## 3. Relay
 - [x] 3.1 `tools/report_relay/` package (Python, pure-Python dependencies): issue body rendering under GitHub's length limit (log tail cut first) with the trailing report JSON, schema validation, size and image checks, defusing, rate limits, kill switch, App installation token, attachments branch, issue creation, idempotency by report id; pytest with GitHub mocked, running in the existing tools suite (CI and `scripts/ci-local.sh`); `worker.py` adapter and `wrangler.toml`; `pywrangler` as a tools dev dependency
 - [x] 3.2 `scripts/setup-report-labels.sh`; README section for registering the App, setting the secrets in the dashboard and deploying with `uv run pywrangler deploy`
-- [ ] 3.3 **Stop: human decides on the relay (design.md open questions 1–3), registers the App, and deploys or approves deploying the relay; the relay URL goes into `report_config.json`**
+- [x] 3.3 **Stop: human decides on the relay (design.md open questions 1–3), registers the App, and deploys or approves deploying the relay; the relay URL goes into `report_config.json`**
+  - 2026-10-03: human registered the GitHub App "Code 430 Reporter" (id 5176749, installed only on rjksn/Code430), logged in to Cloudflare and uploaded the private key; the relay runs at `https://code430-report-relay.report-relay.workers.dev` (`/health` ok), with labels made by `scripts/setup-report-labels.sh`. Deploying surfaced three adapter fixes (schema as a module, lazy settings, the SDK's request wrapper).
 
 ## 4. Verification
 - [ ] 4.1 Mac: one real report filed through the deployed relay into the repo, its screenshot rendering in the issue; a retried send returns the same issue; a sixth report in an hour is refused and stays queued
+  - 2026-10-03, Mac: `--report-send` filed issue #7 with labels, place ids, diagnostics and the screenshot committed to `issue-attachments`; on start the game also sent its two queued reports from before the relay existed (#5, #6). One send got a 502 when three reports raced to commit screenshots (now retried on 409, and failures are logged with their GitHub step). Resending #7's report returned #7 with HTTP 200 and filed nothing new. Not yet done live: the sixth-report refusal (covered by the relay tests; trying it live files five more issues), and a look at the screenshot rendering in the issue.
 - [ ] 4.2 Deck benchmark on the usual autodrive route: no regression from the frame-time ring buffer
 - [ ] 4.3 **Stop: human files a report from the Deck in Gaming Mode, including one made offline that is sent after reconnecting**

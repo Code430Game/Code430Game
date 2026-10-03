@@ -7,6 +7,7 @@ expires.
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 from collections.abc import Awaitable, Callable
@@ -19,6 +20,7 @@ from report_relay.render import marker
 Http = Callable[[str, str, dict[str, str], bytes | None], Awaitable[tuple[int, bytes]]]
 API = "https://api.github.com"
 RECENT_ISSUES_CHECKED = 50
+SCREENSHOT_TRIES = 4
 
 
 class GitHubError(RuntimeError):
@@ -39,6 +41,7 @@ class GitHub:
     _token_expires: float = 0.0
     _branch_ready: bool = False
     _installation_id: int = 0
+    retry_delay_s: float = 0.4
     calls: list[str] = field(
         default_factory=list
     )  # method and path of each call, for logs and tests
@@ -153,16 +156,19 @@ class GitHub:
         """Commits the screenshot to the attachments branch; returns a URL that renders it."""
         await self._ensure_branch(now)
         path = f"reports/{report_id}.jpg"
-        status, _ = await self._request(
-            "PUT",
-            f"/repos/{self.repo}/contents/{path}",
-            await self.token(now),
-            {
-                "message": f"Screenshot for report {report_id}",
-                "content": base64.b64encode(jpeg).decode("ascii"),
-                "branch": self.attachments_branch,
-            },
-        )
+        payload = {
+            "message": f"Screenshot for report {report_id}",
+            "content": base64.b64encode(jpeg).decode("ascii"),
+            "branch": self.attachments_branch,
+        }
+        for attempt in range(SCREENSHOT_TRIES):
+            status, _ = await self._request(
+                "PUT", f"/repos/{self.repo}/contents/{path}", await self.token(now), payload
+            )
+            # 409: another report committed to the branch at the same moment; try again.
+            if status != 409:
+                break
+            await asyncio.sleep(self.retry_delay_s * (attempt + 1))
         if status not in (200, 201, 422):  # 422: already there from an earlier try
             raise GitHubError("upload screenshot", status)
         return f"https://github.com/{self.repo}/blob/{self.attachments_branch}/{path}?raw=true"

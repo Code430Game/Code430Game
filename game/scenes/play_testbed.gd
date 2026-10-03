@@ -61,6 +61,7 @@ var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
+var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
 var _fixed_cam: Camera3D = null
 var _bus_share_override: float = -1.0  # --bus-share=0..1: fraction of traffic spawned as buses (screenshots)
@@ -188,6 +189,8 @@ func _ready() -> void:
 		get_tree().create_timer(2.0).timeout.connect(func() -> void:
 			_pause_menu.capture()
 			_open_report(false)
+			if _report_title != "":
+				_report_form._title.text = _report_title
 			if _report_at_start == "send":
 				print("report: saved %s" % _report_form.send()))
 	if _free_camera.size() == 6:
@@ -557,6 +560,8 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--report-title="):
+			_report_title = arg.get_slice("=", 1)
 		elif arg == "--report" or arg == "--report-send":
 			_report_at_start = "send" if arg == "--report-send" else "open"
 		elif arg.begins_with("--tone="):
