@@ -119,10 +119,13 @@ func test_prune_deletes_only_old_sent_reports() -> void:
 func test_handoff_url_is_prefilled_and_short() -> void:
 	var report := _report({"description": "x".repeat(4000)})
 	var url := ReportStore.handoff_url("rjksn/Code430", report)
-	assert_str(url).starts_with("https://github.com/rjksn/Code430/issues/new?labels=in-game-report%2Carea%3Aroads%2Cseverity%3Aannoying&title=Report%3A%20Roads%20and%20junctions")
+	assert_str(url).starts_with("https://github.com/rjksn/Code430/issues/new?labels=in-game-report%2Cneeds-triage%2Carea%3Aroads%2Cseverity%3Aannoying&title=Report%3A%20Roads%20and%20junctions")
 	assert_int(url.length()).is_less_equal(ReportStore.HANDOFF_URL_MAX)
 	var short := ReportStore.handoff_url("rjksn/Code430", _report({"description": "Curb inside."}))
 	assert_str(short.uri_decode()).contains("Curb inside.")
 	assert_str(short.uri_decode()).contains("c901050337")
 	# A dev build has no date: the build row has no empty gap.
 	assert_str(short.uri_decode()).not_contains(", ,")
+	# No description: no blank gap where it would go.
+	var empty := ReportStore.handoff_url("rjksn/Code430", _report()).uri_decode()
+	assert_str(empty).not_contains("\n\n\n")
