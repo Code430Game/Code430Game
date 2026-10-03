@@ -34,6 +34,14 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
+- **Audio polish is a later focused project (human, 2026-10-02: "I'd rather leave this until we
+  want to improve the audio across the board").** Sound archived as good. When that project
+  comes: engine character per vehicle class, positional traffic audio, horns and sirens,
+  pedestrian voices, reverb in underpasses, radio from `add-car-radio`.
+- **Junctions that extend out awkwardly (human, Deck 2026-10-02, after fork geometry: "some
+  intersections are still odd ... there are some odd ones where it extends out awkwardly").**
+  Fork geometry archived; the remaining cases are the merged-junction arms, see
+  `update-cluster-junction-arms`. Chunk streaming and car model archived on the same drive.
 - **Character body fixes (human, Deck 2026-10-02: jacket looked under the shirt with a tie-like
   strip; shirt stopped short of the neck; long hair covered the eyes; waist too low, "diaper or
   onesie").** Fixed: shirt capsule to the neck ending at the natural waist, trouser pelvis

@@ -6,4 +6,4 @@
 
 ## 3. Verification
 - [x] 3.1 Deck (2026-09-30, deck preset, 150 traffic cars, idle Deck): GPU 6.50 ms with the car body against 6.31 ms with boxes; render CPU 1.04 ms; draw calls 276; physics 7.35 ms
-- [ ] 3.2 **Stop: human looks at the cars on the Deck**
+- [x] 3.2 Human (Deck, 2026-10-02): "car is still the one car"; accepted as the single model, variety is `add-vehicle-variety`

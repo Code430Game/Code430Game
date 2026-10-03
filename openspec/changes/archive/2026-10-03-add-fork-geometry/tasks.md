@@ -8,4 +8,4 @@
 
 ## 3. Verification
 - [x] 3.1 Ottawa rebuilt (2026-09-30): 24 forks, 16 merges shaped; barriers now curb 2434, parapet 114, guardrail 37, median 24, soundwall 18; Bronson interchange ramp parapets continuous on both sides, no walls across the 417
-- [ ] 3.2 **Stop: human drives the 417 exits and the Bronson interchange on the Deck**
+- [x] 3.2 Human (Deck, 2026-10-02): "the main issue with the off ramps is gone, and the side walls is gone"; some junctions still extend out awkwardly, tracked in `update-cluster-junction-arms`
