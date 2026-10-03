@@ -37,6 +37,10 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	# Typing in a text field (the report form, the join address): M is a letter, not the map.
+	var focus := get_viewport().gui_get_focus_owner()
+	if event is InputEventKey and (focus is LineEdit or focus is TextEdit):
+		return
 	# Back alone toggles the map; Back held with a debug button is a debug combo, not a toggle.
 	if event.is_action_pressed("debug_modifier"):
 		_back_armed = true

@@ -33,25 +33,38 @@ func _report(fields: Dictionary = {}, has_shot: bool = false, t: float = T0) -> 
 
 
 func test_built_report_fits_the_schema() -> void:
-	var report := _report({"description": "Curb inside the junction.", "credit_name": "Ryan"})
+	var report := _report({"description": "Curb inside the junction.", "reporter_id": "3fa9c2d1"})
 	assert_array(ReportSchema.check(report, ReportSchema.schema())).is_empty()
 	assert_str(report["created_at"]).is_equal("2026-10-03T10:35:00Z")
 	assert_bool(RegEx.create_from_string("^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}$").search(report["id"]) != null).is_true()
 
 
-func test_empty_title_is_generated_from_area_and_place() -> void:
-	assert_str(_report()["title"]).is_equal("Roads and junctions: Elgin Street at x 237, z 18")
+func test_title_is_generated_from_area_severity_and_place() -> void:
+	assert_str(_report()["title"]).is_equal("Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18)")
 	var off_road := _place()
 	off_road["road"] = ""
-	assert_str(ReportStore.auto_title("traffic", off_road)).is_equal("Traffic at x 237, z 18")
-	assert_str(ReportStore.auto_title("audio", Diagnostics.empty_place())).is_equal("Audio")
+	assert_str(ReportStore.auto_title("traffic", "cosmetic", off_road)).is_equal("Report: Traffic · Cosmetic (x 237, z 18)")
+	assert_str(ReportStore.auto_title("audio", "crash", Diagnostics.empty_place())).is_equal("Report: Audio · Crash")
+	# A typed title is not a thing any more: the generated one always wins.
+	assert_str(_report({"title": "typed"})["title"]).starts_with("Report: ")
+
+
+func test_reporter_id_is_random_stable_and_never_sent_unless_chosen() -> void:
+	var path := _base + "_reporter_id.txt"
+	var first := ReportStore.reporter_id(path)
+	assert_bool(RegEx.create_from_string("^[0-9a-f]{8}$").search(first) != null).is_true()
+	assert_str(ReportStore.reporter_id(path)).is_equal(first)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	assert_str(_report()["reporter_id"]).is_equal("")
 
 
 func test_typed_fields_are_trimmed_and_capped() -> void:
-	var report := _report({"title": "  " + "t".repeat(300), "description": "d".repeat(5000), "credit_name": "c".repeat(100)})
+	var long_road := _place()
+	long_road["road"] = "r".repeat(300)
+	var diag := Diagnostics.collect(long_road, [], {"avg_ms": 0.0, "p99_ms": 0.0, "seconds": 0.0})
+	var report := ReportStore.build({"area": "roads", "severity": "annoying", "description": "d".repeat(5000)}, diag, [], false, T0)
 	assert_int(str(report["title"]).length()).is_equal(ReportStore.TITLE_MAX)
 	assert_int(str(report["description"]).length()).is_equal(ReportStore.DESCRIPTION_MAX)
-	assert_int(str(report["credit_name"]).length()).is_equal(ReportStore.CREDIT_MAX)
 
 
 func test_save_load_round_trip_with_downscaled_screenshot() -> void:
@@ -106,7 +119,7 @@ func test_prune_deletes_only_old_sent_reports() -> void:
 func test_handoff_url_is_prefilled_and_short() -> void:
 	var report := _report({"description": "x".repeat(4000)})
 	var url := ReportStore.handoff_url("rjksn/Code430", report)
-	assert_str(url).starts_with("https://github.com/rjksn/Code430/issues/new?labels=in-game-report%2Carea%3Aroads%2Cseverity%3Aannoying&title=Roads%20and%20junctions")
+	assert_str(url).starts_with("https://github.com/rjksn/Code430/issues/new?labels=in-game-report%2Carea%3Aroads%2Cseverity%3Aannoying&title=Report%3A%20Roads%20and%20junctions")
 	assert_int(url.length()).is_less_equal(ReportStore.HANDOFF_URL_MAX)
 	var short := ReportStore.handoff_url("rjksn/Code430", _report({"description": "Curb inside."}))
 	assert_str(short.uri_decode()).contains("Curb inside.")

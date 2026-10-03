@@ -98,6 +98,7 @@ MUTATIONS = [
     (("diagnostics", "machine", "resolution"), [1280]),
     (("diagnostics", "place", "x"), "237"),
     (("diagnostics", "frame_time", "avg_ms"), -1),
+    (("reporter_id",), "Ryan"),
 ]
 
 
@@ -221,7 +222,7 @@ def test_defuse_breaks_mentions_html_and_links():
 
 def test_body_has_screenshot_ids_diagnostics_and_marker():
     report = copy.deepcopy(EXAMPLE)
-    report["credit_name"] = "Ryan"
+    report["reporter_id"] = "3fa9c2d1"
     text = render.body(
         report, "https://github.com/rjksn/Code430/blob/issue-attachments/reports/x.jpg?raw=true"
     )
@@ -230,7 +231,7 @@ def test_body_has_screenshot_ids_diagnostics_and_marker():
         in text
     )
     assert "junction `c901050337`" in text and "edge `w435115744.0`" in text
-    assert "Reported by Ryan." in text
+    assert "Reporter id `3fa9c2d1`" in text
     assert "<details><summary>Diagnostics</summary>" in text
     assert render.marker(report["id"]) in text
     comment = text.split("<!-- code430-report ", 1)[1].rsplit(" -->", 1)[0]
