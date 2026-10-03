@@ -66,6 +66,7 @@ class ValidationReport:
     ramps: list[RampEntry] = field(default_factory=list)
     traps: list[TrapEntry] = field(default_factory=list)
     elevation: dict | None = None
+    junction_clusters: list[dict] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -75,6 +76,7 @@ class ValidationReport:
             "dead_ends": {k: [asdict(d) for d in v] for k, v in self.dead_ends.items()},
             "ramps": [asdict(r) for r in self.ramps],
             "one_way_traps": [asdict(t) for t in self.traps],
+            "junction_clusters": self.junction_clusters,
         }
 
 
@@ -347,6 +349,19 @@ def render_markdown(report: ValidationReport, title: str) -> str:
             lines.append(
                 f"| {t.kind} | {t.nodes} | {classes} | {', '.join(t.sample_names) or '-'} | {', '.join(str(w) for w in t.sample_way_ids)} |"
             )
+    lines += ["", "## Junction clusters", ""]
+    if not report.junction_clusters:
+        lines.append("No junction nodes were merged.")
+    else:
+        lines.append(
+            f"- {len(report.junction_clusters)} merged junctions; each road keeps its own line "
+            "through them. Largest arm offsets from the centroid:"
+        )
+        lines += [
+            f"  - {c['node_id']} (OSM {', '.join(str(i) for i in c['osm_node_ids'])}): "
+            f"{c['max_arm_offset_m']} m"
+            for c in report.junction_clusters[:10]
+        ]
     if "water" in s:
         w = s["water"]
         lines += [

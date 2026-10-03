@@ -336,6 +336,67 @@
   "min_y": 54.89,
   "vertices_clamped": 11
  },
+ "junction_clusters": [
+  {
+   "max_arm_offset_m": 8.36,
+   "node_id": "c3946608912",
+   "osm_node_ids": [
+    3946608912,
+    7137980810
+   ]
+  },
+  {
+   "max_arm_offset_m": 7.843,
+   "node_id": "c901047389",
+   "osm_node_ids": [
+    901047389,
+    901047891
+   ]
+  },
+  {
+   "max_arm_offset_m": 6.676,
+   "node_id": "c901214381",
+   "osm_node_ids": [
+    901214381,
+    901216446,
+    901218427,
+    901219466
+   ]
+  },
+  {
+   "max_arm_offset_m": 3.674,
+   "node_id": "c901222765",
+   "osm_node_ids": [
+    901222765,
+    905117689
+   ]
+  },
+  {
+   "max_arm_offset_m": 3.353,
+   "node_id": "c901215807",
+   "osm_node_ids": [
+    901215807,
+    901216843
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.353,
+   "node_id": "c901215745",
+   "osm_node_ids": [
+    901215745,
+    901219245
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.081,
+   "node_id": "c10199439704",
+   "osm_node_ids": [
+    3671168709,
+    4824077738,
+    10199439704
+   ]
+  }
+ ],
  "one_way_traps": [],
  "ramps": [],
  "summary": {
@@ -368,6 +429,6 @@
   "one_way_traps": 0,
   "oneway_dead_ends": 2,
   "ramp_problems": 0,
-  "total_length_km": 11.244
+  "total_length_km": 11.219
  }
 }
