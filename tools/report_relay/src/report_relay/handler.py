@@ -99,5 +99,7 @@ async def handle(req: Request, cfg: Config, github: GitHub, store: Store, now: f
             render.title(report), render.body(report, shot_url), render.labels(report), now
         )
     except GitHubError as e:
+        # The step and GitHub's status only; never the report's content.
+        print(f"relay: {e} ({e.body[:200]!r})")
         return _refuse(502, "GitHub refused the report", step=str(e))
     return Response(201, {"issue_url": url, "report_id": report["id"]})

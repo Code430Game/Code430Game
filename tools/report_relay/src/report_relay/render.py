@@ -72,6 +72,13 @@ def _cell(value: object) -> str:
     return defuse(str(value)).replace("|", "\\|").replace("\n", " ")
 
 
+def _os_name(m: dict) -> str:
+    """'SteamOS (Linux)', or just 'macOS' when the distribution is the OS's own name."""
+    if m["distribution"] in ("", m["os"]):
+        return m["os"]
+    return f"{m['distribution']} ({m['os']})"
+
+
 def _table(report: dict) -> list[str]:
     d = report["diagnostics"]
     b, m, s, place, ft = d["build"], d["machine"], d["settings"], d["place"], d["frame_time"]
@@ -83,7 +90,7 @@ def _table(report: dict) -> list[str]:
         ("Godot", d["engine"]["godot"]),
         (
             "Machine",
-            f"{m['os']} {m['distribution']} {m['os_version']}, {m['cpu']} ×{m['cpu_count']}, "
+            f"{_os_name(m)} {m['os_version']}, {m['cpu']} ×{m['cpu_count']}, "
             f"{m['gpu']} ({m['graphics_api']}), {m['memory_mb']} MB"
             + (", Steam Deck" if m["deck"] else ""),
         ),
