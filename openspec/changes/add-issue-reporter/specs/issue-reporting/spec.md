@@ -24,7 +24,7 @@ Each report SHALL carry diagnostics without the player typing them:
 - frame time over the last 30 seconds;
 - the last 200 lines of the game log.
 
-The home directory and OS user name SHALL be redacted everywhere in the report. Before anything is sent, the form SHALL show every field that will be sent.
+The home directory and the OS account name SHALL be redacted from the diagnostics and the log tail. Generic account names such as the Steam Deck's `deck` identify nobody, so they are kept; the home directory is still redacted. What the player types is sent as typed. Before anything is sent, the form SHALL show every field that will be sent.
 
 #### Scenario: Exported build identifies itself
 - **WHEN** a report is made from a build packaged by `scripts/package-linux.sh`
@@ -32,7 +32,7 @@ The home directory and OS user name SHALL be redacted everywhere in the report. 
 
 #### Scenario: Paths are redacted
 - **WHEN** the log tail contains a path under the player's home directory
-- **THEN** the saved and sent report shows that path starting with `~`, and neither the home directory nor the user name appears anywhere in the report
+- **THEN** the saved and sent report shows that path starting with `~`, and neither the home directory nor a personal account name appears in its diagnostics or log tail
 
 ### Requirement: Reports Filed Without an Account
 The game SHALL file reports as GitHub issues without the player having or signing in to any account. It SHALL send them to a relay service that holds the repository credentials. The game SHALL contain no credential: only the relay's URL. The relay SHALL:

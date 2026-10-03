@@ -104,8 +104,11 @@ is cut first if it would not fit.
 
 ## Redaction
 Before anything is saved or sent, `diagnostics.gd` replaces the user's home directory with `~`
-and the OS user name with `<user>` in every string, including the log tail, and drops
-environment variables and command-line arguments other than the testbed flags it recognises.
+and the OS account name with `<user>` (whole words) in every diagnostics string and the log tail.
+Generic account names (`deck`, `root`, `user` and the like) identify nobody and appear as ordinary
+words ("preset deck"), so for those only the home directory is replaced. The title, description
+and credit name are sent as the player typed them. Diagnostics never include environment
+variables or command-line arguments.
 Positions, road names and ids are kept: they are what the report is for.
 
 ## Local store and queue
