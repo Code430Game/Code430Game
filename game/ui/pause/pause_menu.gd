@@ -133,7 +133,8 @@ func open() -> void:
 ## Grabs the last drawn frame (the menu is not drawn yet) and the frame-time snapshot.
 func capture() -> void:
 	captured_frame = null
-	var tex := get_viewport().get_texture()
+	# Headless runs (tests, CI) draw nothing: there is no frame, and asking for one only logs an error.
+	var tex := get_viewport().get_texture() if DisplayServer.get_name() != "headless" else null
 	if tex != null:
 		captured_frame = tex.get_image()
 	var overlay := get_node_or_null("/root/DebugOverlay")
