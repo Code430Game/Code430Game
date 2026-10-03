@@ -1,6 +1,6 @@
 ## 1. Importer
 - [x] 1.1 `cluster.py`: straight-arm end placement with a snap tolerance; report field; `test_osm_cluster.py` divided-road parallel case; golden files re-baked with the diff reviewed
-- [ ] 1.2 Ottawa pack re-exported; `road_graph.v0.json` at `c901050337` shows both Elgin carriageways passing the centroid at their own offset
+- [x] 1.2 Ottawa pack re-exported; `road_graph.v0.json` at `c901050337` shows both Elgin carriageways passing the centroid at their own offset
 
 ## 2. Game
 - [x] 2.1 `junction_builder.gd`: arms from actual edge ends; offset-arm test; no non-simple polygon regressions in the Ottawa junction count (log the flagged count before and after)
