@@ -57,3 +57,6 @@ game/log/
 # Report relay: pywrangler vendoring and wrangler state
 tools/report_relay/src/vendor/
 tools/report_relay/.wrangler/
+tools/report_relay/python_modules/
+tools/report_relay/pylock.toml
+tools/report_relay/.venv-workers/
