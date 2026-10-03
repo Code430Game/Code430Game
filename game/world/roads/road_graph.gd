@@ -204,6 +204,12 @@ func through_partner(edge: RoadEdge, node_id: String) -> String:
 	return best
 
 
+## The edge's end point at the given node. At a merged junction this can sit beside the node
+## position: each carriageway keeps its own straight line through the junction.
+func end_point(edge: RoadEdge, node_id: String) -> Vector3:
+	return edge.polyline[0] if edge.from_node == node_id else edge.polyline[edge.polyline.size() - 1]
+
+
 ## Unit direction (xz plane) of an edge leaving the given node, and the edge's
 ## first point away from the node. Returns {"dir": Vector2, "next": Vector3}.
 func direction_from(edge: RoadEdge, node_id: String) -> Vector2:
