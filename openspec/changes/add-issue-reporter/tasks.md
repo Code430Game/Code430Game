@@ -4,7 +4,7 @@
 - [x] 1.3 `report_store.gd`: save to `user://reports/<id>/` (`report.json` exactly the schema, queue state in `state.json`), queue and retry times, 30-day pruning, auto title, the browser hand-off URL under 7,500 characters; tests. The full issue body is rendered by the relay (3.1), the one place that defuses untrusted text
 
 ## 2. Game
-- [ ] 2.1 Frame capture when the pause menu opens and on F8 (`report_open` action, input-map conflict test); the form scene with thumbnail and toggle, area and severity drop-downs, title and description using the on-screen keyboard, the "what will be sent" page, and the queue list; controller navigation tests
+- [x] 2.1 Frame capture when the pause menu opens and on F8 (`report_open` action, named as a keyboard shortcut in the input-map test); holding Menu for a second opens the form; the form scene with thumbnail and toggle, area and severity drop-downs, title and description using the on-screen keyboard, the "what will be sent" page, and the queue list; controller navigation tests
 - [ ] 2.2 `relay_client.gd`: post, `Retry-After`, timeout and backoff, retry while paused, idempotent resend; the browser hand-off fallback on desktop; tests against a fake HTTP transport, with no live network in tests
 - [ ] 2.3 Mac run: a report from Elgin and Nepean saved and listed; the hand-off page opens prefilled with the screenshot folder revealed
 
