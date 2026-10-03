@@ -12,6 +12,8 @@ WITH_CHUNKS=false
 rm -rf "$OUT"
 mkdir -p "$OUT/packs"
 "$ROOT/scripts/stamp-build.sh"
+# The stamp is for the export only; runs from source must keep reporting themselves as dev builds.
+trap 'rm -f "$ROOT/game/build_info.json"' EXIT
 ( cd "$ROOT/game" && "$GODOT" --headless --path . --export-release "Linux" "$OUT/code430.x86_64" 2>&1 | tail -1 )
 for pack in "$ROOT"/packs/*/; do
   name="$(basename "$pack")"
