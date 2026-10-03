@@ -1,6 +1,6 @@
 ## 1. Report data
 - [x] 1.1 `docs/report-format/report.schema.v1.json`; `build_info.json` stamped by `package-linux.sh` and the CI export, gitignored, with a `dev` fallback; tests on the stamp and on a dev run
-- [ ] 1.2 `diagnostics.gd`: build, machine, settings, place, and the frame-time ring buffer shared with the debug overlay; log tail; redaction of the home directory and user name; tests on every field and on redaction with a fake home directory
+- [x] 1.2 `diagnostics.gd`: build, machine, settings, place, and the frame-time ring buffer shared with the debug overlay; log tail; redaction of the home directory and user name; tests on every field and on redaction with a fake home directory
 - [ ] 1.3 `report_store.gd`: save to `user://reports/<id>/`, queue states, 30-day pruning, issue body rendering under GitHub's length limit (log tail cut first) with the trailing report JSON; tests
 
 ## 2. Game
