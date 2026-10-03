@@ -1,0 +1,17 @@
+# Cloudflare Worker for the in-game report relay. Deploy from this folder with
+#   uv run pywrangler deploy
+# Secrets (set once, in the dashboard or with `uv run pywrangler secret put NAME`): PRIVATE_KEY, RATE_SALT.
+name = "code430-report-relay"
+main = "src/worker.py"
+compatibility_date = "2026-10-02"
+compatibility_flags = ["python_workers"]
+workers_dev = true
+
+[vars]
+APP_ID = ""            # the GitHub App's id, from its settings page
+REPO = "rjksn/Code430"
+RELAY_ENABLED = "true" # the kill switch: "false" refuses every report with 503
+
+[[kv_namespaces]]
+binding = "REPORT_LIMITS"
+id = ""                # from `uv run pywrangler kv namespace create REPORT_LIMITS`
