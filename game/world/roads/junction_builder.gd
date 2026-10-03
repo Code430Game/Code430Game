@@ -8,6 +8,11 @@ extends RefCounted
 ## corner on its sides (plus a margin) and capped there. The polygon walks
 ## cap, cap, corner around the node. If the walk is not a simple polygon, the
 ## convex hull of the same points is used and flagged.
+##
+## Each arm starts at its edge's actual end point, not at the node. At a merged
+## junction the importer leaves each carriageway of a divided road on its own
+## straight line beside the node, so side lines, corners and caps are all taken
+## from the real ribbons; trims stay distances along the edge from its end.
 
 ## Roads stop this far back from the corner intersection so the rounded corner has a curb-like radius.
 const TRIM_MARGIN_M := 3.0
@@ -20,6 +25,9 @@ const FILLET_STEPS := 4
 const MAX_CORNER_HALF_WIDTHS := 3.0
 ## Arms closer than this in angle are merged in the polygon walk (see build_one).
 const PARALLEL_ARMS_DEG := 12.0
+## Arms are ordered by the bearing of a point this many metres down each arm, seen from the
+## node, so two carriageways leaving in the same direction side by side keep their real order.
+const SORT_PROBE_M := 20.0
 
 
 class Junction:
@@ -52,18 +60,22 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 	for eid in graph.incident(node_id):
 		var edge: RoadGraph.RoadEdge = graph.edges[eid]
 		var dir := graph.direction_from(edge, node_id)
-		arms.append({"edge": eid, "dir": dir, "angle": atan2(dir.y, dir.x), "hw": edge.width_m * 0.5})
-	arms.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["angle"] < b["angle"])
-	# Two arms leaving at nearly the same angle (a road and a ramp overlapping for a stretch, or
-	# two carriageways meeting) share one slot in the polygon walk: the corner between them would
-	# be a sliver spanning metres. The wider arm stays; the narrower one is trimmed like it.
+		var end := graph.end_point(edge, node_id)
+		var origin := Vector2(end.x, end.z)
+		var probe := origin + dir * SORT_PROBE_M - centre
+		arms.append({"edge": eid, "dir": dir, "origin": origin, "angle": atan2(dir.y, dir.x), "bearing": atan2(probe.y, probe.x), "hw": edge.width_m * 0.5})
+	arms.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["bearing"] < b["bearing"])
+	# Two arms leaving at nearly the same angle and overlapping (a road and a ramp sharing a
+	# stretch) share one slot in the polygon walk: the corner between them would be a sliver
+	# spanning metres. The wider arm stays; the narrower one is trimmed like it. Side-by-side
+	# carriageways that do not overlap keep their own slots.
 	var merged_into := {}  # dropped edge id -> kept edge id
 	var slot := 0
 	while arms.size() > 1 and slot < arms.size():
 		var a: Dictionary = arms[slot]
 		var b: Dictionary = arms[(slot + 1) % arms.size()]
 		var gap := fposmod(float(b["angle"]) - float(a["angle"]), TAU)
-		if gap < deg_to_rad(PARALLEL_ARMS_DEG) and arms.size() > 2:
+		if gap < deg_to_rad(PARALLEL_ARMS_DEG) and arms.size() > 2 and _overlap(a, b):
 			var keep := a if float(a["hw"]) >= float(b["hw"]) else b
 			var drop := b if keep == a else a
 			merged_into[drop["edge"]] = keep["edge"]
@@ -73,6 +85,7 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 	var count := arms.size()
 	var corners: Array[Vector2] = []
 	var corner_t: Array[Vector2] = []  # (t along arm i, t along arm i+1)
+	var straight: Array[bool] = []  # corner i closes a median between side-by-side carriageways
 	for i in range(count):
 		var a: Dictionary = arms[i]
 		var b: Dictionary = arms[(i + 1) % count]
@@ -80,8 +93,8 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		var db: Vector2 = b["dir"]
 		var na := Vector2(-da.y, da.x)  # CCW normal of a
 		var nb := Vector2(-db.y, db.x)
-		var pa := centre + na * float(a["hw"])  # a's CCW side line
-		var pb := centre - nb * float(b["hw"])  # b's CW side line
+		var pa: Vector2 = a["origin"] + na * float(a["hw"])  # a's CCW side line
+		var pb: Vector2 = b["origin"] - nb * float(b["hw"])  # b's CW side line
 		var hit: Variant = Geometry2D.line_intersects_line(pa, da, pb, db)
 		var corner: Vector2
 		var ta := 0.0
@@ -92,23 +105,35 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 			corner = hit
 			ta = (corner - pa).dot(da)
 			tb = (corner - pb).dot(db)
-		if hit == null or ta < 0.0 or tb < 0.0 or ta > cap or tb > cap:
+		var gap := fposmod(float(b["angle"]) - float(a["angle"]), TAU)
+		var side_by_side := gap < deg_to_rad(PARALLEL_ARMS_DEG) or gap > TAU - deg_to_rad(PARALLEL_ARMS_DEG)
+		if side_by_side:
+			# Carriageways leaving the same way beside each other: the walk closes the median with a
+			# straight edge from one cap to the next, and the pair grows neither trim.
+			corner = (pa + pb) * 0.5
+			ta = 0.0
+			tb = 0.0
+		elif hit == null or ta < 0.0 or tb < 0.0 or ta > cap or tb > cap:
 			# Parallel-ish arms (ramp merges) or a corner behind the node: place the corner a
 			# capped distance along the bisector, between the two side offsets.
 			var bisector := (da + db)
 			bisector = bisector.normalized() if bisector.length_squared() > 1e-9 else da
-			corner = centre + (na * float(a["hw"]) - nb * float(b["hw"])) * 0.5 + bisector * minf(cap, widest * 1.5)
+			corner = (pa + pb) * 0.5 + bisector * minf(cap, widest * 1.5)
 			ta = maxf((corner - pa).dot(da), 0.0)
 			tb = maxf((corner - pb).dot(db), 0.0)
 		corners.append(corner)
 		corner_t.append(Vector2(ta, tb))
+		straight.append(side_by_side)
 	var trims := {}
 	for k in range(count):
 		var prev := (k - 1 + count) % count
 		var t := maxf(corner_t[k].x, corner_t[prev].y) + TRIM_MARGIN_M
 		trims[arms[k]["edge"]] = minf(t, MAX_TRIM_M)
 	for dropped in merged_into:
-		trims[dropped] = trims[merged_into[dropped]]
+		var kept: String = merged_into[dropped]
+		while merged_into.has(kept):
+			kept = merged_into[kept]  # merged into an arm that was itself merged later
+		trims[dropped] = trims[kept]
 	var polygon := PackedVector2Array()
 	var heights := PackedFloat32Array()
 	for i in range(count):
@@ -118,8 +143,9 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		var t: float = trims[a["edge"]]
 		var edge: RoadGraph.RoadEdge = graph.edges[a["edge"]]
 		var h := _height_along(graph, edge, node_id, t)
-		var cap_minus := centre + d * t - n * float(a["hw"])
-		var cap_plus := centre + d * t + n * float(a["hw"])
+		var o: Vector2 = a["origin"]
+		var cap_minus := o + d * t - n * float(a["hw"])
+		var cap_plus := o + d * t + n * float(a["hw"])
 		polygon.append(cap_minus)
 		heights.append(h)
 		polygon.append(cap_plus)
@@ -130,7 +156,9 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		var h_next := _height_along(graph, next_edge, node_id, t_next)
 		var db: Vector2 = b["dir"]
 		var nb := Vector2(-db.y, db.x)
-		var next_cap_minus := centre + db * t_next - nb * float(b["hw"])
+		var next_cap_minus: Vector2 = b["origin"] + db * t_next - nb * float(b["hw"])
+		if straight[i]:
+			continue
 		# Rounded corner: quadratic curve from this cap to the next road's cap through the sharp corner.
 		for k in range(1, FILLET_STEPS + 1):
 			var u := float(k) / float(FILLET_STEPS + 1)
@@ -161,6 +189,15 @@ static func build_one(graph: RoadGraph, node_id: String) -> Junction:
 		j.polygon_xz = polygon
 		j.heights = heights
 	return j
+
+
+## True when two arms' ribbons overlap side to side, measured across the wider one.
+static func _overlap(a: Dictionary, b: Dictionary) -> bool:
+	var wide: Dictionary = a if float(a["hw"]) >= float(b["hw"]) else b
+	var other: Dictionary = b if wide == a else a
+	var d: Vector2 = wide["dir"]
+	var lateral := absf((other["origin"] - wide["origin"] as Vector2).dot(Vector2(-d.y, d.x)))
+	return lateral < float(a["hw"]) + float(b["hw"])
 
 
 ## True when no two non-adjacent edges of the polygon cross.
