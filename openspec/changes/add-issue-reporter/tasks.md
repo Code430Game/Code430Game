@@ -9,8 +9,8 @@
 - [ ] 2.3 Mac run: a report from Elgin and Nepean saved and listed; the hand-off page opens prefilled with the screenshot folder revealed
 
 ## 3. Relay
-- [ ] 3.1 `tools/report_relay/` package (Python, pure-Python dependencies): schema validation, size and image checks, defusing, rate limits, kill switch, App installation token, attachments branch, issue creation, idempotency by report id; pytest with GitHub mocked, running in the existing tools suite (CI and `scripts/ci-local.sh`); `worker.py` adapter and `wrangler.toml`
-- [ ] 3.2 `scripts/setup-report-labels.sh`; README section for registering the App and deploying with `wrangler`
+- [ ] 3.1 `tools/report_relay/` package (Python, pure-Python dependencies): schema validation, size and image checks, defusing, rate limits, kill switch, App installation token, attachments branch, issue creation, idempotency by report id; pytest with GitHub mocked, running in the existing tools suite (CI and `scripts/ci-local.sh`); `worker.py` adapter and `wrangler.toml`; `pywrangler` as a tools dev dependency
+- [ ] 3.2 `scripts/setup-report-labels.sh`; README section for registering the App, setting the secrets in the dashboard and deploying with `uv run pywrangler deploy`
 - [ ] 3.3 **Stop: human decides on the relay (design.md open questions 1–3), registers the App, and deploys or approves deploying the relay; the relay URL goes into `report_config.json`**
 
 ## 4. Verification

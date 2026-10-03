@@ -57,9 +57,12 @@ host-specific.
 - **Privacy.** The relay never stores reports or IP addresses (the rate limiter keys on a
   salted hash that expires with its window). The optional "name to credit" is the only personal
   field, and it is free text.
-- **Deploy.** `wrangler deploy` from `tools/report_relay/`, with secrets set once through
-  `wrangler secret put`. `wrangler` is a deploy-time tool on the human's machine, not a build
-  dependency. CI runs the relay tests but does not deploy.
+- **Deploy.** `uv run pywrangler deploy` from `tools/report_relay/` (pywrangler is Cloudflare's
+  CLI for Python Workers and is a dev dependency of the tools, so nothing is installed
+  globally; the first run logs in through the browser). The Worker is served at
+  `https://code430-report-relay.<account>.workers.dev`. The App id and private key are set as
+  secrets in the Cloudflare dashboard (Worker settings, Variables and Secrets) and never touch
+  the repo. CI runs the relay tests but does not deploy.
 
 ## Game side
 `relay_client.gd` posts with `HTTPRequest` (TLS) using `PROCESS_MODE_ALWAYS`, with a 20 s
