@@ -8,6 +8,8 @@ const SMOOTHING := 0.1
 
 @onready var _label: Label = $Label
 var _smoothed_frame_ms: float = 0.0
+## Recent frame times for issue reports; fed every frame even while the overlay is hidden.
+var frame_times := FrameTimes.new()
 
 
 func _ready() -> void:
@@ -25,6 +27,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	frame_times.push(delta)
 	if not visible:
 		return
 	_smoothed_frame_ms = lerpf(_smoothed_frame_ms, delta * 1000.0, SMOOTHING)
