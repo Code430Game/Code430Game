@@ -89,7 +89,7 @@ func _key(keycode: Key, shift: bool = false) -> void:
 		await get_tree().process_frame
 
 
-func test_typing_ends_with_enter_or_any_controller_button_then_b_closes() -> void:
+func test_typing_ends_with_enter_or_b_and_survives_dpad_and_a() -> void:
 	var closed := [false]
 	_form.closed.connect(func() -> void: closed[0] = true)
 	await _go_to("description")
@@ -101,8 +101,13 @@ func test_typing_ends_with_enter_or_any_controller_button_then_b_closes() -> voi
 	assert_str(_form._description.text).is_equal("m")
 	await _press(JOY_BUTTON_A)
 	assert_bool(_form._description.has_focus()).is_true()
+	# The D-pad and A drive the Deck's on-screen keyboard: they must not end typing.
 	await _press(JOY_BUTTON_DPAD_DOWN)
-	assert_bool(_form._description.has_focus()).override_failure_message("a controller button did not end typing").is_false()
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	await _press(JOY_BUTTON_A)
+	assert_bool(_form._description.has_focus()).override_failure_message("D-pad or A ended typing").is_true()
+	await _press(JOY_BUTTON_B)
+	assert_bool(_form._description.has_focus()).override_failure_message("B did not end typing").is_false()
 	assert_bool(_form.visible).is_true()
 	await _press(JOY_BUTTON_B)
 	assert_bool(_form.visible).is_false()
