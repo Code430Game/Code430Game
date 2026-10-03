@@ -496,3 +496,12 @@ def test_machine_row_names_the_os_once():
     mac = copy.deepcopy(EXAMPLE)
     mac["diagnostics"]["machine"].update(os="macOS", distribution="macOS", os_version="14.5.0")
     assert "| Machine | macOS 14.5.0," in render.body(mac, None)
+
+
+def test_whole_numbers_read_back_as_floats_print_as_integers():
+    report = copy.deepcopy(EXAMPLE)
+    m = report["diagnostics"]["machine"]
+    m.update(cpu_count=8.0, memory_mb=14809.0, resolution=[1280.0, 800.0])
+    text = render.body(report, None)
+    assert "×8," in text and "14809 MB" in text and "1280×800" in text
+    assert validate.errors(report) == []
