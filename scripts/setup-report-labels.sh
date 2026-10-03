@@ -4,7 +4,7 @@
 set -euo pipefail
 REPO_ARGS=()
 [ -n "${1:-}" ] && REPO_ARGS=(--repo "$1")
-label() { gh label create "$1" --color "$2" --description "$3" --force "${REPO_ARGS[@]}" >/dev/null && echo "label $1"; }
+label() { gh label create "$1" --color "$2" --description "$3" --force ${REPO_ARGS[@]+"${REPO_ARGS[@]}"} >/dev/null && echo "label $1"; }
 label in-game-report 1d76db "Filed from the game's Report a problem form"
 label needs-triage fbca04 "Not looked at yet"
 for area in roads traffic pedestrians vehicles world visuals performance controls audio crash other; do

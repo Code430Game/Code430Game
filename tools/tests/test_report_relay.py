@@ -279,6 +279,7 @@ class FakeGitHub:
         self.branch_exists = False
         self.tokens_minted = 0
         self.fail_create = False
+        self.conflicts = 0  # how many screenshot commits answer 409 before one lands
 
     async def __call__(self, method, url, headers, body):
         path = url.removeprefix("https://api.github.com")
@@ -318,6 +319,9 @@ class FakeGitHub:
             return ok(201, {})
         if path.startswith("/repos/rjksn/Code430/contents/reports/") and method == "PUT":
             assert self.branch_exists and payload["branch"] == "issue-attachments"
+            if self.conflicts:
+                self.conflicts -= 1
+                return ok(409, {"message": "is at abc but expected def"})
             name = path.rsplit("/", 1)[1]
             if name in self.files:
                 return ok(422, {})
@@ -334,7 +338,9 @@ class Relay:
         async def signer(data: bytes) -> bytes:
             return b"sig"
 
-        self.github = GitHub(http=self.gh_fake, app_id="1", signer=signer, repo="rjksn/Code430")
+        self.github = GitHub(
+            http=self.gh_fake, app_id="1", signer=signer, repo="rjksn/Code430", retry_delay_s=0.0
+        )
         self.store = MemoryStore(lambda: self.now)
         self.cfg = Config(enabled=enabled, salt="pepper", limits=limits or Limits())
 
@@ -464,3 +470,28 @@ def test_github_failure_is_502_so_the_game_backs_off():
     relay.gh_fake.fail_create = True
     resp = relay.post(EXAMPLE)
     assert resp.status == 502 and "create issue" in resp.payload["step"]
+
+
+def test_screenshot_commit_retries_when_reports_race_on_the_branch():
+    relay = Relay()
+    relay.gh_fake.conflicts = 2
+    assert relay.post(EXAMPLE, tiny_jpeg(64, 40)).status == 201
+    assert (
+        relay.github.calls.count(f"PUT /repos/rjksn/Code430/contents/reports/{EXAMPLE['id']}.jpg")
+        == 3
+    )
+
+
+def test_persistent_conflict_is_a_502():
+    relay = Relay()
+    relay.gh_fake.conflicts = 10
+    resp = relay.post(EXAMPLE, tiny_jpeg(64, 40))
+    assert resp.status == 502 and "upload screenshot" in resp.payload["step"]
+
+
+def test_machine_row_names_the_os_once():
+    text = render.body(EXAMPLE, None)
+    assert "SteamOS (Linux) 3.7" in text
+    mac = copy.deepcopy(EXAMPLE)
+    mac["diagnostics"]["machine"].update(os="macOS", distribution="macOS", os_version="14.5.0")
+    assert "| Machine | macOS 14.5.0," in render.body(mac, None)
