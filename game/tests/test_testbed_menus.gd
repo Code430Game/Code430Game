@@ -20,8 +20,28 @@ func before() -> void:
 
 func after() -> void:
 	get_tree().paused = false
-	if _bed != null:
-		_bed.queue_free()
+	if _bed == null:
+		return
+	# Freeing the testbed makes the chunk streamer block the main thread until its background
+	# builds finish; on a two-core CI runner that wait never ended. Stop new work and let the
+	# builds in flight finish over frames first.
+	var streamer: Node = _bed.get("_streamer")
+	if streamer != null:
+		streamer.process_mode = Node.PROCESS_MODE_DISABLED
+		var pending: Dictionary = streamer.get("_pending")
+		for i in range(1200):
+			if pending.is_empty() or _all_done(pending):
+				break
+			await get_tree().process_frame
+	_bed.queue_free()
+	await get_tree().process_frame
+
+
+func _all_done(pending: Dictionary) -> bool:
+	for coord in pending:
+		if not WorkerThreadPool.is_task_completed(pending[coord]["task"]):
+			return false
+	return true
 
 
 func _press(button: int) -> void:

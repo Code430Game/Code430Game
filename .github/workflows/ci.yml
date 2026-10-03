@@ -12,6 +12,7 @@ env:
 jobs:
   tools:
     name: Python tools (pytest, ruff)
+    timeout-minutes: 10  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -29,6 +30,7 @@ jobs:
 
   packs:
     name: Pack manifests
+    timeout-minutes: 10  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,6 +47,7 @@ jobs:
 
   gdunit:
     name: gdUnit4 (headless)
+    timeout-minutes: 20  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -89,6 +92,7 @@ jobs:
 
   export-linux:
     name: Linux export
+    timeout-minutes: 30  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     needs: [tools, packs, gdunit]
