@@ -134,8 +134,12 @@ reporter reads `res://build_info.json`. Run from source, it falls back to `dev` 
 of `git rev-parse --short HEAD`, if git is available.
 
 ## Screen capture
-When the pause menu opens, it awaits `RenderingServer.frame_post_draw` before showing itself
-and keeps that frame's image. The capture includes the HUD on purpose: the HUD shows x, z and
+Holding the pause button opens the report form after one second: the press opens the pause
+menu at once, as now, and if the button is still down a second later the menu hands over to the
+form. Pausing never waits for the release. Holding View was the alternative, but View opens the
+map on press, so the map would have had to wait for the release.
+When the pause menu opens, it reads the viewport's last drawn frame before showing itself (the
+menu has not been drawn yet) and keeps that image, with a frame-time snapshot. The capture includes the HUD on purpose: the HUD shows x, z and
 the minimap. F8 does the same and opens the form directly. When the form opens with a thumbnail,
 the image is downscaled to at most 1280×800 and encoded once.
 
