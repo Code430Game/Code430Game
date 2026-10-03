@@ -126,6 +126,7 @@ jobs:
         run: ~/godot/godot --headless --path game --import --quit
       - name: Export
         run: |
+          scripts/stamp-build.sh
           mkdir -p build/linux
           ~/godot/godot --headless --path game --export-release "Linux" ../build/linux/code430.x86_64
           ls -la build/linux

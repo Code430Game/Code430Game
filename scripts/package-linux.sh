@@ -11,6 +11,7 @@ WITH_CHUNKS=false
 
 rm -rf "$OUT"
 mkdir -p "$OUT/packs"
+"$ROOT/scripts/stamp-build.sh"
 ( cd "$ROOT/game" && "$GODOT" --headless --path . --export-release "Linux" "$OUT/code430.x86_64" 2>&1 | tail -1 )
 for pack in "$ROOT"/packs/*/; do
   name="$(basename "$pack")"

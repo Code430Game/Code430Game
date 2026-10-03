@@ -6,6 +6,8 @@ streetlevel-kickoff.zip
 
 # Godot
 game/.godot/
+# Build stamp written by scripts/stamp-build.sh before an export
+game/build_info.json
 game/export/
 game/android/
 *.tmp
