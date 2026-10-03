@@ -19,7 +19,7 @@ build and the machine automatically, so a fresh session can go straight to it.
   menus, Audio, Crash or freeze, Other) and **severity** (Cosmetic, Annoying, Blocks play,
   Crash). The title is always generated from them and the place ("Report: Roads and
   junctions · Annoying · Elgin Street (x 237, z 18)"); one optional text area says what happened,
-  typed with the Deck's on-screen keyboard and left with its Enter key or any controller button.
+  typed with the Deck's on-screen keyboard (D-pad and A, or touch) and left with B.
   An optional **reporter id**, a random id made once per install and off by default, lets reports
   from one install be grouped without a name that could impersonate someone (human, 2026-10-03,
   after the first Deck try: titles generated, one text area, no name field). Fully driven by

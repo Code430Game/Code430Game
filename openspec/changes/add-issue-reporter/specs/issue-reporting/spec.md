@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: In-Game Issue Report Form
-The game SHALL let a player report a problem from inside the game: from the pause menu on any input device, by holding the pause button for a second, and with F8 on the keyboard. The form SHALL capture the frame that was on screen when it was opened as the screenshot, with a preview and a toggle to leave it out. It SHALL sort the report by an area drop-down and a severity drop-down and offer one optional text area for what happened. The title SHALL always be generated from the area, the severity and the place. The player MAY include this install's reporter id, a random id made once per install and never derived from the hardware; it is left out unless the player turns it on. Every control SHALL work with a controller. The text area SHALL use the Steam Deck's on-screen keyboard and SHALL be left with Enter, Escape or any controller button. While the player types, keys SHALL reach only the text area.
+The game SHALL let a player report a problem from inside the game: from the pause menu on any input device, by holding the pause button for a second, and with F8 on the keyboard. The form SHALL capture the frame that was on screen when it was opened as the screenshot, with a preview and a toggle to leave it out. It SHALL sort the report by an area drop-down and a severity drop-down and offer one optional text area for what happened. The title SHALL always be generated from the area, the severity and the place. The player MAY include this install's reporter id, a random id made once per install and never derived from the hardware; it is left out unless the player turns it on. Every control SHALL work with a controller. The text area SHALL use the Steam Deck's on-screen keyboard and SHALL be left with B or Menu on a controller, or Enter or Escape on a keyboard; the D-pad and A, which drive the on-screen keyboard, SHALL NOT end typing. While the player types, keys SHALL reach only the text area.
 
 #### Scenario: Report from the pause menu on the Deck
 - **WHEN** a player driving on the Deck opens the pause menu and chooses "Report a problem"
@@ -16,8 +16,8 @@ The game SHALL let a player report a problem from inside the game: from the paus
 - **THEN** the report's title is "Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18)"
 
 #### Scenario: Typing on the Deck
-- **WHEN** a player types in the text area with the Deck's keyboard, including the letter m, and presses its Enter key
-- **THEN** the m is typed and the map does not open, and typing ends with the form still open
+- **WHEN** a player types in the text area with the Deck's on-screen keyboard, moving over its keys with the D-pad and typing them with A, including the letter m, then presses B
+- **THEN** every letter is typed, the map does not open, and B ends typing with the form still open
 
 #### Scenario: Screenshot left out
 - **WHEN** the player turns the screenshot toggle off before sending
