@@ -1,6 +1,6 @@
 # Road network validation: Ottawa Centretown starter district
 
-- Nodes: 1826, edges: 2397, total length: 194.138 km
+- Nodes: 1826, edges: 2397, total length: 193.719 km
 - Connected components: 16 (largest has 1790 nodes)
 - Largest strongly connected component: 1694 nodes
 - Dead ends: bbox_edge 108, declared_noexit 8, likely_real 227, suspicious 0
@@ -81,13 +81,27 @@ Every *_link chain connects a major road at two or more points.
 
 No traps: every node inside the bbox can reach and be reached from the main network.
 
+## Junction clusters
+
+- 76 merged junctions; each road keeps its own line through them. Largest arm offsets from the centroid:
+  - c1524769727 (OSM 901223209, 1524769727, 1524769824, 1524769872): 13.174 m
+  - c13694840539 (OSM 901053884, 13694840539, 13694840544): 11.063 m
+  - c165097856 (OSM 165097856, 165097863): 8.997 m
+  - c901044959 (OSM 901044959, 901053247): 8.949 m
+  - c6446607672 (OSM 901051050, 6446607672): 8.89 m
+  - c13511703722 (OSM 901046911, 13511703722): 8.742 m
+  - c1236845823 (OSM 901056304, 961984782, 1236845823): 8.509 m
+  - c1417117544 (OSM 901064498, 901065123, 1417117544): 8.437 m
+  - c3946608912 (OSM 3946608912, 7137980810): 8.36 m
+  - c288064221 (OSM 74386273, 74389223, 74392301, 288064221): 8.21 m
+
 ## Water
 
 - Polygons written: 18; relations or ways skipped: 0
 
 ## Barriers
 
-- curb 2749, parapet 105, guardrail 38, median 24, soundwall 18, roadblock 108
+- curb 2747, parapet 105, guardrail 38, median 24, soundwall 18, roadblock 108
 
 ## Buildings
 
@@ -96,8 +110,8 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 ## Elevation
 
 - Road height range: 43.319 m to 80.488 m
-- Bridge/tunnel (fixed) vertices: 200; approach vertices raised or lowered to meet them: 289
-- Conflicting bridge constraints: 4; bridge chains without a ground anchor: 2
+- Bridge/tunnel (fixed) vertices: 200; approach vertices raised or lowered to meet them: 285
+- Conflicting bridge constraints: 11; bridge chains without a ground anchor: 2
 - Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 171
 - Worst residual grade: 0.1202; edges still over their class limit: 14
   w107633331.0, w137483257.0, w399144346.0, w432336467.5, w76419763.0, w76420697.0, w76421113.0, w76423269.0, w76423834.0, w76424318.0, w76726964.0, w895111372.0, w895111373.0, w895111373.1
