@@ -4,4 +4,4 @@
 
 ## 2. Verification
 - [x] 2.1 Deck (2026-10-01): the same night run with all four voices filling: frame avg 7.97 ms, p99 11.1 ms, no errors; the generator fill shows up inside render CPU 0.85 ms and process time, well inside budget
-- [ ] 2.2 **Stop: human drives with sound on the Deck**
+- [x] 2.2 Human (Deck, 2026-10-02): "sound is good"; polish deferred to a focused audio project
