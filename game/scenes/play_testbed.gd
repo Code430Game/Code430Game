@@ -23,6 +23,8 @@ const BENCH_WARMUP_S := 3.0
 @onready var _overview: OverviewMap = $OverviewMap
 @onready var _pause_menu: PauseMenu = $PauseMenu
 @onready var _creator: CharacterCreator = $CharacterCreator
+@onready var _report_form: ReportForm = $ReportForm
+var _report_from_pause: bool = false  # where the report form returns to
 var _billboards: Billboards = null
 const SESSION_SEED := 430  # until sessions carry their own seed
 var _map_renderer: MapRenderer
@@ -93,6 +95,12 @@ func _ready() -> void:
 	_pause_menu.character_requested.connect(_open_creator)
 	_creator.profile_changed.connect(func(p: Dictionary) -> void: if _player != null: _player.apply_profile(p))
 	_creator.closed.connect(_on_creator_closed)
+	var report_config := ReportConfig.read()
+	_report_form.store = ReportStore.new()
+	_report_form.repo = report_config["repo"]
+	_report_form.store.prune()
+	_pause_menu.report_requested.connect(func() -> void: _open_report(true))
+	_report_form.closed.connect(_on_report_closed)
 	_pause_menu.host_requested.connect(_host_game)
 	_pause_menu.join_requested.connect(_join_game)
 	Session.peer_joined.connect(func(_id: int, _info: Dictionary) -> void: _refresh_session_status())
@@ -300,6 +308,39 @@ func _tone_warning() -> String:
 func _open_creator() -> void:
 	_pause_menu.visible = false
 	_creator.open(_player.profile if _player != null else {})
+
+
+## F8 opens the report form straight from play (controllers hold Menu instead).
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("report_open") and not get_tree().paused and _pack != null:
+		_pause_menu.capture()
+		_open_report(false)
+		get_viewport().set_input_as_handled()
+
+
+## Opens "Report a problem" with the frame and frame times the pause menu captured, the place,
+## the loaded pack and the log tail.
+func _open_report(from_pause: bool) -> void:
+	_report_from_pause = from_pause
+	_pause_menu.visible = false
+	var body: Node3D = Players.local_controlled_body()
+	var driving := _player != null and _player.is_driving()
+	var clock := _day_night.clock_text() if _day_night != null else ""
+	var place := Diagnostics.place_for(_pack.graph if _pack != null else null, body, driving, clock)
+	var packs := []
+	if _pack != null:
+		var summary := _pack.manifest_summary()
+		packs.append({"id": summary["id"], "version": summary["version"]})
+	var redactor := Diagnostics.local_redactor()
+	var diag := Diagnostics.collect(place, packs, _pause_menu.captured_frame_stats, redactor)
+	_report_form.open(_pause_menu.captured_frame, diag, Diagnostics.log_tail(redactor))
+
+
+func _on_report_closed() -> void:
+	if _report_from_pause:
+		_pause_menu.reopen()
+	else:
+		get_tree().paused = false
 
 
 func _on_creator_closed(p: Dictionary) -> void:

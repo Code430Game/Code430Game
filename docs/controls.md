@@ -19,6 +19,7 @@ The on-screen hints switch to whichever device you touched last.
 | headlights: auto (dusk to dawn), on, off | D-pad up (while driving) | H |
 | map | Back / View | M |
 | pause menu | Menu / Start | Esc |
+| report a problem | hold Menu / Start for 1 s, or "Report a problem" in the pause menu | F8 (or hold Esc) |
 | debug overlay | X | F2 |
 | road graph overlay | B with the overlay | F3 |
 
