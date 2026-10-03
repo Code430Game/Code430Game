@@ -222,12 +222,48 @@ static func _extrude(pl: PackedVector3Array, half_width: float, dir_start: Vecto
 
 
 static func _add_junction(j: JunctionBuilder.Junction, result: Result) -> void:
-	var indices := Geometry2D.triangulate_polygon(j.polygon_xz)
-	if indices.size() == 0:
-		return
 	var chunk := RoadGeometry.chunk_of(j.centre)
 	var bucket := result.get_bucket(result.junctions, chunk)
 	var color: Color = CLASS_COLORS.get(j.dominant_class, JUNCTION_COLOR)
+	if _fans_from_centre(j):
+		# A fan from the node at the node's height. Triangles spanning only the boundary sag
+		# across a big junction on a crest (a divided crossing is 30 m wide) and the terrain
+		# flattened under the roads shows through the middle.
+		var centre := j.centre + Vector3(0.0, SURFACE_LIFT_M, 0.0)
+		var n := j.polygon_xz.size()
+		for i in range(n):
+			bucket.add_triangle(centre, _lift(j, i), _lift(j, (i + 1) % n), color)
+	else:
+		var indices := Geometry2D.triangulate_polygon(j.polygon_xz)
+		if indices.size() == 0:
+			return
+		_add_triangles(j, indices, bucket, color)
+	result.junctions_built += 1
+	if j.fallback_hull:
+		result.junctions_fallback += 1
+
+
+## True when every fan triangle from the node centre winds like the polygon itself, so the
+## fan covers the polygon exactly once (the polygon is star-shaped seen from the node).
+static func _fans_from_centre(j: JunctionBuilder.Junction) -> bool:
+	var poly := j.polygon_xz
+	var n := poly.size()
+	if n < 3:
+		return false
+	var c := Vector2(j.centre.x, j.centre.z)
+	var area := 0.0
+	for i in range(n):
+		area += poly[i].cross(poly[(i + 1) % n])
+	if absf(area) < 1e-6:
+		return false
+	for i in range(n):
+		var tri := (poly[i] - c).cross(poly[(i + 1) % n] - c)
+		if tri * signf(area) <= 0.0:
+			return false
+	return true
+
+
+static func _add_triangles(j: JunctionBuilder.Junction, indices: PackedInt32Array, bucket: ChunkTriangles, color: Color) -> void:
 	for t in range(0, indices.size(), 3):
 		var a := _lift(j, indices[t])
 		var b := _lift(j, indices[t + 1])
@@ -235,9 +271,6 @@ static func _add_junction(j: JunctionBuilder.Junction, result: Result) -> void:
 		# The polygon walks the node clockwise seen from above, and triangulate_polygon keeps
 		# that winding, which is Godot's front face.
 		bucket.add_triangle(a, b, c, color)
-	result.junctions_built += 1
-	if j.fallback_hull:
-		result.junctions_fallback += 1
 
 
 static func _lift(j: JunctionBuilder.Junction, i: int) -> Vector3:
