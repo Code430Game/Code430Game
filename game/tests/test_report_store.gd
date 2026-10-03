@@ -111,3 +111,5 @@ func test_handoff_url_is_prefilled_and_short() -> void:
 	var short := ReportStore.handoff_url("rjksn/Code430", _report({"description": "Curb inside."}))
 	assert_str(short.uri_decode()).contains("Curb inside.")
 	assert_str(short.uri_decode()).contains("c901050337")
+	# A dev build has no date: the build row has no empty gap.
+	assert_str(short.uri_decode()).not_contains(", ,")

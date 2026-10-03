@@ -41,3 +41,5 @@ Testbed flags worth knowing: `--time=HH` starts the clock at that hour (`--time=
 `--bus-share=0.5` makes half of the spawned traffic buses (default 8 %).
 For screenshots: `--camera=px,py,pz,tx,ty,tz` fixes the view, `--creator` opens the character
 creator once the world is up, `--screenshot=path` saves a PNG when the benchmark ends.
+`--report` opens "Report a problem" once the world is up, and `--report-send` also saves (and,
+with a relay configured, sends) the report.

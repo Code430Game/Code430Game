@@ -14,8 +14,8 @@ signal closed
 enum Page { MAIN, REVIEW, QUEUE }
 const ROWS := ["shot", "area", "severity", "title", "description", "credit", "review", "send", "queue", "cancel"]
 const TEXT_ROWS := ["title", "description", "credit"]
-const THUMB_SIZE := Vector2(320, 200)
-const FONT := 18
+const THUMB_SIZE := Vector2(224, 140)
+const FONT := 17
 
 var store: ReportStore
 ## Sends saved reports: `send(id)` and `send_due()`, signal `report_state_changed(id, state)`. Optional.
@@ -126,6 +126,7 @@ func on_report_state(id: String, state: Dictionary) -> void:
 				_status.text = "Filed: %s" % state.get("issue_url", "")
 			"failed", "queued":
 				_status.text = "Saved; not sent yet (%s). It will retry." % state.get("error", "offline")
+	_refresh()
 	if _page == Page.QUEUE:
 		_refresh_queue()
 
@@ -251,7 +252,7 @@ func _refresh() -> void:
 		"area": "<  %s  >" % ReportStore.AREAS[_area][1],
 		"severity": "<  %s  >" % ReportStore.SEVERITIES[_severity][1],
 		"title": "", "description": "", "credit": "",
-		"review": "", "send": "sent" if _sent_id != "" else "", "queue": "%d saved" % (store.list().size() if store != null else 0), "cancel": "",
+		"review": "", "send": _send_state(), "queue": "%d saved" % (store.list().size() if store != null else 0), "cancel": "",
 	}
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity", "title": "Title (optional)",
@@ -265,6 +266,13 @@ func _refresh() -> void:
 		label.text = ("> " if i == _selected else "   ") + captions[row] + ("    " + value if value != "" else "")
 	_thumb.modulate = Color(1, 1, 1, 1.0 if _include_shot else 0.25)
 	_title.placeholder_text = ReportStore.auto_title(ReportStore.AREAS[_area][0], _diagnostics.get("place", {}))
+
+
+## "sent" once the relay confirmed, "saved" while it waits, nothing before Send.
+func _send_state() -> String:
+	if _sent_id == "" or store == null:
+		return ""
+	return "sent" if store.state_of(_sent_id).get("state", "") == "sent" else "saved"
 
 
 func _refresh_queue() -> void:
@@ -329,11 +337,11 @@ func _build() -> void:
 	_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	add_child(_panel)
 	var outer := VBoxContainer.new()
-	outer.add_theme_constant_override("separation", 8)
+	outer.add_theme_constant_override("separation", 4)
 	_panel.add_child(outer)
 	var heading := Label.new()
 	heading.text = "Report a problem"
-	heading.add_theme_font_size_override("font_size", 24)
+	heading.add_theme_font_size_override("font_size", 22)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(heading)
 	var hint := Label.new()
@@ -343,7 +351,7 @@ func _build() -> void:
 	outer.add_child(hint)
 
 	_main = VBoxContainer.new()
-	_main.add_theme_constant_override("separation", 6)
+	_main.add_theme_constant_override("separation", 2)
 	outer.add_child(_main)
 	_thumb = TextureRect.new()
 	_thumb.custom_minimum_size = THUMB_SIZE
@@ -361,7 +369,7 @@ func _build() -> void:
 				_main.add_child(_title)
 			"description":
 				_description = TextEdit.new()
-				_description.custom_minimum_size = Vector2(0, 84)
+				_description.custom_minimum_size = Vector2(0, 60)
 				_description.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 				_description.add_theme_font_size_override("font_size", 16)
 				_description.placeholder_text = "What did you see, and what did you expect?"
@@ -377,7 +385,7 @@ func _build() -> void:
 	outer.add_child(_status)
 
 	_review = ScrollContainer.new()
-	_review.custom_minimum_size = Vector2(0, 560)
+	_review.custom_minimum_size = Vector2(0, 600)
 	_review_text = Label.new()
 	_review_text.add_theme_font_size_override("font_size", 13)
 	_review_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

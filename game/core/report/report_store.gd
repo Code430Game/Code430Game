@@ -196,7 +196,7 @@ static func handoff_url(repo: String, report: Dictionary) -> String:
 		"_Attach screenshot.jpg from the report folder here._",
 		"",
 		"| | |", "|---|---|",
-		"| Build | %s (%s, %s%s) |" % [build.get("commit", ""), build.get("branch", ""), build.get("date", ""), ", dirty" if build.get("dirty", false) else ""],
+		"| Build | %s (%s) |" % [build.get("commit", ""), ", ".join(_present([build.get("branch", ""), build.get("date", ""), "dirty" if build.get("dirty", false) else ""]))],
 		"| Machine | %s %s, %s, %s |" % [machine.get("os", ""), machine.get("os_version", ""), machine.get("cpu", ""), machine.get("gpu", "")],
 		"| Settings | preset %s, tone %s |" % [d.get("settings", {}).get("preset", ""), d.get("settings", {}).get("tone_mode", "")],
 		"| Frame time | avg %s ms, p99 %s ms |" % [d.get("frame_time", {}).get("avg_ms", 0), d.get("frame_time", {}).get("p99_ms", 0)],
@@ -209,6 +209,14 @@ static func handoff_url(repo: String, report: Dictionary) -> String:
 	while body.length() > 0 and (head + body.uri_encode()).length() > HANDOFF_URL_MAX:
 		body = body.substr(0, body.length() - 200)
 	return head + body.uri_encode()
+
+
+static func _present(parts: Array) -> PackedStringArray:
+	var out := PackedStringArray()
+	for p in parts:
+		if str(p) != "":
+			out.append(str(p))
+	return out
 
 
 func _dir(id: String) -> String:
