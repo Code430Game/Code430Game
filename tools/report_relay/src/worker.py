@@ -35,12 +35,18 @@ async def _http(method: str, url: str, headers: dict, body: bytes | None) -> tup
     return int(resp.status), bytes(Uint8Array.new(raw).to_py())
 
 
-def _signer(pem: str):
+def _setting(env, name: str) -> str:
+    """A var or secret as a string; empty when it is not set."""
+    value = getattr(env, name, None)
+    return "" if value is None else str(value)
+
+
+def _signer(pem_of):
     key_holder = {}
 
     async def sign(data: bytes) -> bytes:
         if "key" not in key_holder:
-            der = Uint8Array.new(to_js(pkcs8_der(pem)))
+            der = Uint8Array.new(to_js(pkcs8_der(pem_of())))
             key_holder["key"] = await crypto.subtle.importKey(
                 "pkcs8",
                 der.buffer,
@@ -73,23 +79,31 @@ class Default(WorkerEntrypoint):
         global _github
         env = self.env
         if _github is None:
+            # Settings are read lazily: /health answers even before the secrets are set.
             _github = GitHub(
                 http=_http,
-                app_id=str(env.APP_ID),
-                signer=_signer(str(env.PRIVATE_KEY)),
-                repo=str(env.REPO),
+                app_id=_setting(env, "APP_ID"),
+                signer=_signer(lambda: _setting(env, "PRIVATE_KEY")),
+                repo=_setting(env, "REPO"),
             )
-        body = bytes(Uint8Array.new(await request.arrayBuffer()).to_py())
-        headers = {"content-type": str(request.headers.get("content-type") or "")}
+        # The SDK wraps the request; the JavaScript object underneath has the raw body.
+        js_req = getattr(request, "js_object", request)
+        body = bytes(Uint8Array.new(await js_req.arrayBuffer()).to_py())
+        headers = {"content-type": str(js_req.headers.get("content-type") or "")}
         req = Request(
-            method=str(request.method),
-            path=urlparse(str(request.url)).path,
+            method=str(js_req.method),
+            path=urlparse(str(js_req.url)).path,
             headers=headers,
             body=body,
-            client_ip=str(request.headers.get("cf-connecting-ip") or ""),
+            client_ip=str(js_req.headers.get("cf-connecting-ip") or ""),
         )
-        cfg = Config(enabled=str(env.RELAY_ENABLED).lower() == "true", salt=str(env.RATE_SALT))
-        resp = await handle(req, cfg, _github, _KV(env.REPORT_LIMITS), time.time())
+        cfg = Config(
+            enabled=_setting(env, "RELAY_ENABLED").lower() == "true",
+            salt=_setting(env, "RATE_SALT"),
+        )
+        resp = await handle(
+            req, cfg, _github, _KV(getattr(env, "REPORT_LIMITS", None)), time.time()
+        )
         return Response(
             resp.json(),
             status=resp.status,
