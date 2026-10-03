@@ -62,8 +62,8 @@ host-specific.
   - Every issue gets `needs-triage`.
   - A `RELAY_ENABLED` variable switches the relay off at once, without a game update.
 - **Privacy.** The relay never stores reports or IP addresses (the rate limiter keys on a
-  salted hash that expires with its window). The optional "name to credit" is the only personal
-  field, and it is free text.
+  salted hash that expires with its window). The only player-controlled identity is the optional
+  reporter id: random per install, never derived from the hardware, off by default.
 - **Deploy.** `uv run pywrangler deploy` from `tools/report_relay/` (pywrangler is Cloudflare's
   CLI for Python Workers and is a dev dependency of the tools, so nothing is installed
   globally; the first run logs in through the browser). The Worker is served at
@@ -118,8 +118,8 @@ is cut first if it would not fit.
 Before anything is saved or sent, `diagnostics.gd` replaces the user's home directory with `~`
 and the OS account name with `<user>` (whole words) in every diagnostics string and the log tail.
 Generic account names (`deck`, `root`, `user` and the like) identify nobody and appear as ordinary
-words ("preset deck"), so for those only the home directory is replaced. The title, description
-and credit name are sent as the player typed them. Diagnostics never include environment
+words ("preset deck"), so for those only the home directory is replaced. The description is sent
+as the player typed it. Diagnostics never include environment
 variables or command-line arguments.
 Positions, road names and ids are kept: they are what the report is for.
 

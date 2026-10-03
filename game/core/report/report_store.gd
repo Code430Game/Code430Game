@@ -13,7 +13,9 @@ const SCREENSHOT_MAX := Vector2i(1280, 800)
 const SCREENSHOT_QUALITY := 0.8
 const TITLE_MAX := 120
 const DESCRIPTION_MAX := 4000
-const CREDIT_MAX := 60
+## A random id made once per install (never derived from the hardware), included only when the
+## player chooses, so reports from one install can be told apart without naming anyone.
+const REPORTER_ID_PATH := "user://reporter_id.txt"
 ## GitHub's new-issue page takes the body in the URL; keep the encoded URL under about 8 KB.
 const HANDOFF_URL_MAX := 7500
 
@@ -41,15 +43,30 @@ static func label_of(table: Array, id: String) -> String:
 	return id
 
 
-## "Roads and junctions: Elgin Street at x 237, z 18", for reports sent without a title.
-static func auto_title(area: String, place: Dictionary) -> String:
-	var label := label_of(AREAS, area)
-	if str(place.get("mode", "none")) == "none":
-		return label
-	var at := "x %d, z %d" % [roundi(float(place["x"])), roundi(float(place["z"]))]
-	var road := str(place.get("road", ""))
-	var title := "%s: %s at %s" % [label, road, at] if road != "" else "%s at %s" % [label, at]
+## "Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18)": every report's title,
+## made from what the player chose and where they were.
+static func auto_title(area: String, severity: String, place: Dictionary) -> String:
+	var title := "Report: %s · %s" % [label_of(AREAS, area), label_of(SEVERITIES, severity)]
+	if str(place.get("mode", "none")) != "none":
+		var at := "x %d, z %d" % [roundi(float(place["x"])), roundi(float(place["z"]))]
+		var road := str(place.get("road", ""))
+		title += " · %s (%s)" % [road, at] if road != "" else " (%s)" % at
 	return title.substr(0, TITLE_MAX)
+
+
+## This install's reporter id, made on first use: eight random hex digits.
+static func reporter_id(path: String = REPORTER_ID_PATH) -> String:
+	if FileAccess.file_exists(path):
+		var saved := FileAccess.get_file_as_string(path).strip_edges()
+		if RegEx.create_from_string("^[0-9a-f]{8}$").search(saved) != null:
+			return saved
+	var made := "%08x" % randi()
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f != null:
+		f.store_string(made)
+		f.close()
+	return made
 
 
 ## A new report id: UTC timestamp plus eight random hex digits.
@@ -61,9 +78,8 @@ static func new_id(unix_time: float = Time.get_unix_time_from_system()) -> Strin
 ## Builds the report dictionary (schema version 1) from what the player chose and the diagnostics.
 static func build(fields: Dictionary, diagnostics: Dictionary, log_tail: Array, has_screenshot: bool, unix_time: float = Time.get_unix_time_from_system()) -> Dictionary:
 	var area := str(fields.get("area", "other"))
-	var title := str(fields.get("title", "")).strip_edges()
-	if title == "":
-		title = auto_title(area, diagnostics.get("place", {}))
+	var severity := str(fields.get("severity", "annoying"))
+	var title := auto_title(area, severity, diagnostics.get("place", {}))
 	var t := Time.get_datetime_dict_from_unix_time(int(unix_time))
 	return {
 		"version": 1,
@@ -72,8 +88,8 @@ static func build(fields: Dictionary, diagnostics: Dictionary, log_tail: Array, 
 		"title": title.substr(0, TITLE_MAX),
 		"description": str(fields.get("description", "")).strip_edges().substr(0, DESCRIPTION_MAX),
 		"area": area,
-		"severity": str(fields.get("severity", "annoying")),
-		"credit_name": str(fields.get("credit_name", "")).strip_edges().substr(0, CREDIT_MAX),
+		"severity": severity,
+		"reporter_id": str(fields.get("reporter_id", "")),
 		"has_screenshot": has_screenshot,
 		"diagnostics": diagnostics,
 		"log_tail": log_tail,
