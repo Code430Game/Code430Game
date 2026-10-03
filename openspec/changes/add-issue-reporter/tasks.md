@@ -10,8 +10,8 @@
   - 2026-10-03, Mac: `--report-send` at Elgin and Nepean saved `20261003T152150Z-8b4d373f` (report.json valid against the schema, 98 KB screenshot, place Elgin Street / `w435115732.0` / `c901050337`, no home path) and the form listed it ("2 saved"); the form fits 1280x800 with its status line. The hand-off URL is built (962 characters, labels, title and body prefilled) but not yet opened in a browser: open it from Saved reports on desktop to finish this task.
 
 ## 3. Relay
-- [ ] 3.1 `tools/report_relay/` package (Python, pure-Python dependencies): issue body rendering under GitHub's length limit (log tail cut first) with the trailing report JSON, schema validation, size and image checks, defusing, rate limits, kill switch, App installation token, attachments branch, issue creation, idempotency by report id; pytest with GitHub mocked, running in the existing tools suite (CI and `scripts/ci-local.sh`); `worker.py` adapter and `wrangler.toml`; `pywrangler` as a tools dev dependency
-- [ ] 3.2 `scripts/setup-report-labels.sh`; README section for registering the App, setting the secrets in the dashboard and deploying with `uv run pywrangler deploy`
+- [x] 3.1 `tools/report_relay/` package (Python, pure-Python dependencies): issue body rendering under GitHub's length limit (log tail cut first) with the trailing report JSON, schema validation, size and image checks, defusing, rate limits, kill switch, App installation token, attachments branch, issue creation, idempotency by report id; pytest with GitHub mocked, running in the existing tools suite (CI and `scripts/ci-local.sh`); `worker.py` adapter and `wrangler.toml`; `pywrangler` as a tools dev dependency
+- [x] 3.2 `scripts/setup-report-labels.sh`; README section for registering the App, setting the secrets in the dashboard and deploying with `uv run pywrangler deploy`
 - [ ] 3.3 **Stop: human decides on the relay (design.md open questions 1–3), registers the App, and deploys or approves deploying the relay; the relay URL goes into `report_config.json`**
 
 ## 4. Verification
