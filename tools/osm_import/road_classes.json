@@ -4,6 +4,9 @@
   "bbox_edge_margin_m": 40.0,
   "bridge_clearance_m": 6.0,
   "water_depth_m": 1.5,
+  "clusters": {
+    "arm_snap_m": 1.0
+  },
   "forks": {
     "max_link_angle_deg": 40.0,
     "min_through_angle_deg": 140.0,

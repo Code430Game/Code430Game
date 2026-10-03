@@ -90,6 +90,7 @@ def run_pipeline(
         )
     bounds = proj.bbox_local(bbox)
     report = validate(graph, cfg, bounds, fr.dropped_by_node())
+    report.junction_clusters = stats.to_list()
     if elev_stats is not None:
         report.elevation = elev_stats.to_dict()
         report.elevation["inferred_bridges"] = crossings.to_list() if crossings else []
