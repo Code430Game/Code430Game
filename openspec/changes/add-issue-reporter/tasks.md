@@ -5,7 +5,7 @@
 
 ## 2. Game
 - [x] 2.1 Frame capture when the pause menu opens and on F8 (`report_open` action, named as a keyboard shortcut in the input-map test); holding Menu for a second opens the form; the form scene with thumbnail and toggle, area and severity drop-downs, title and description using the on-screen keyboard, the "what will be sent" page, and the queue list; controller navigation tests
-- [ ] 2.2 `relay_client.gd`: post, `Retry-After`, timeout and backoff, retry while paused, idempotent resend; the browser hand-off fallback on desktop; tests against a fake HTTP transport, with no live network in tests
+- [x] 2.2 `relay_client.gd`: post, `Retry-After`, timeout and backoff, retry while paused, idempotent resend; the browser hand-off fallback on desktop; tests against a fake HTTP transport, with no live network in tests
 - [ ] 2.3 Mac run: a report from Elgin and Nepean saved and listed; the hand-off page opens prefilled with the screenshot folder revealed
 
 ## 3. Relay
