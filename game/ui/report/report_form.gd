@@ -1,19 +1,20 @@
 class_name ReportForm
 extends CanvasLayer
-## "Report a problem": screenshot, area and severity, optional title, description and name to
-## credit, a review page listing everything that will be sent, and the saved-reports queue.
+## "Report a problem": screenshot, area and severity, what happened, whether to include this
+## install's reporter id, a review page listing everything that will be sent, and the queue. The
+## title is generated from the area, severity and place.
 ##
 ## Opened from the pause menu (any input device) or with F8, while the tree is paused. Handles its
 ## own navigation in _input like the pause menu: up/down move, left/right change a choice, A
-## activates or starts typing (the Deck shows its on-screen keyboard), B leaves a text field, then
-## a page, then the form. Sending goes through `sender` (RelayClient) when there is one; the
+## activates or starts typing (the Deck shows its on-screen keyboard), B leaves a page, then the
+## form. Typing ends with Enter (Shift+Enter is a new line on a keyboard), Escape, or any controller
+## button: on the Deck the keyboard's own B is backspace, so Enter is the way out. Sending goes through `sender` (RelayClient) when there is one; the
 ## report is always saved first.
 
 signal closed
 
 enum Page { MAIN, REVIEW, QUEUE }
-const ROWS := ["shot", "area", "severity", "title", "description", "credit", "review", "send", "queue", "cancel"]
-const TEXT_ROWS := ["title", "description", "credit"]
+const ROWS := ["shot", "area", "severity", "description", "reporter", "review", "send", "queue", "cancel"]
 const THUMB_SIZE := Vector2(224, 140)
 const FONT := 17
 
@@ -32,6 +33,8 @@ var _include_shot: bool = true
 var _area: int = 0
 var _severity: int = 1
 var _sent_id: String = ""
+var _include_reporter: bool = false
+var _reporter_id: String = ""
 var _queue_selected: int = 0
 var _queue_action: int = 0
 
@@ -39,9 +42,8 @@ var _panel: PanelContainer
 var _main: VBoxContainer
 var _thumb: TextureRect
 var _labels: Dictionary = {}  # row -> Label (caption and value)
-var _title: LineEdit
+var _title: Label
 var _description: TextEdit
-var _credit: LineEdit
 var _status: Label
 var _review: ScrollContainer
 var _review_text: Label
@@ -66,9 +68,9 @@ func open(screenshot: Image, diagnostics: Dictionary, log_tail: Array) -> void:
 	_area = 0
 	_severity = 1
 	_sent_id = ""
-	_title.text = ""
+	_include_reporter = false
+	_reporter_id = ReportStore.reporter_id()
 	_description.text = ""
-	_credit.text = ""
 	_status.text = ""
 	_thumb.texture = ImageTexture.create_from_image(screenshot) if screenshot != null else null
 	_show_page(Page.MAIN)
@@ -91,7 +93,7 @@ func close() -> void:
 func fields() -> Dictionary:
 	return {
 		"area": ReportStore.AREAS[_area][0], "severity": ReportStore.SEVERITIES[_severity][0],
-		"title": _title.text, "description": _description.text, "credit_name": _credit.text,
+		"description": _description.text, "reporter_id": _reporter_id if _include_reporter else "",
 	}
 
 
@@ -208,19 +210,17 @@ func _change(row: String, delta: int) -> void:
 			_area = posmod(_area + delta, ReportStore.AREAS.size())
 		"severity":
 			_severity = posmod(_severity + delta, ReportStore.SEVERITIES.size())
+		"reporter":
+			_include_reporter = not _include_reporter
 	_refresh()
 
 
 func _activate(row: String) -> void:
 	match row:
-		"shot", "area", "severity":
+		"shot", "area", "severity", "reporter":
 			_change(row, 1)
-		"title":
-			_title.grab_focus()
 		"description":
 			_description.grab_focus()
-		"credit":
-			_credit.grab_focus()
 		"review":
 			_review_text.text = _review_body()
 			_show_page(Page.REVIEW)
@@ -251,12 +251,12 @@ func _refresh() -> void:
 		"shot": ("<  included  >" if _include_shot else "<  left out  >") if _screenshot != null else "none captured",
 		"area": "<  %s  >" % ReportStore.AREAS[_area][1],
 		"severity": "<  %s  >" % ReportStore.SEVERITIES[_severity][1],
-		"title": "", "description": "", "credit": "",
+		"description": "", "reporter": ("<  included: %s  >" % _reporter_id) if _include_reporter else "<  not included  >",
 		"review": "", "send": _send_state(), "queue": "%d saved" % (store.list().size() if store != null else 0), "cancel": "",
 	}
 	var captions := {
-		"shot": "Screenshot", "area": "Area", "severity": "Severity", "title": "Title (optional)",
-		"description": "What happened (optional)", "credit": "Name to credit (optional)", "review": "Review what will be sent",
+		"shot": "Screenshot", "area": "Area", "severity": "Severity",
+		"description": "What happened (A to type, Enter when done)", "reporter": "Reporter id", "review": "Review what will be sent",
 		"send": "Send report", "queue": "Saved reports", "cancel": "Cancel",
 	}
 	for i in range(ROWS.size()):
@@ -265,7 +265,7 @@ func _refresh() -> void:
 		var value: String = values[row]
 		label.text = ("> " if i == _selected else "   ") + captions[row] + ("    " + value if value != "" else "")
 	_thumb.modulate = Color(1, 1, 1, 1.0 if _include_shot else 0.25)
-	_title.placeholder_text = ReportStore.auto_title(ReportStore.AREAS[_area][0], _diagnostics.get("place", {}))
+	_title.text = ReportStore.auto_title(ReportStore.AREAS[_area][0], ReportStore.SEVERITIES[_severity][0], _diagnostics.get("place", {}))
 
 
 ## "sent" once the relay confirmed, "saved" while it waits, nothing before Send.
@@ -299,25 +299,25 @@ func _show_page(page: int) -> void:
 
 
 func _text_focused() -> bool:
-	return _title.has_focus() or _description.has_focus() or _credit.has_focus()
+	return _description.has_focus()
 
 
-## B on a controller, or Escape, leaves a text field; Enter leaves the one-line fields.
+## Typing ends with Enter (not Shift+Enter), Escape, or any controller button. Typing itself
+## arrives as keys even on the Deck, so a controller button always means "done".
 func _leaves_text(event: InputEvent) -> bool:
 	if not event.is_pressed() or event.is_echo():
 		return false
 	if event is InputEventJoypadButton:
-		return (event as InputEventJoypadButton).button_index == JOY_BUTTON_B
+		return true
 	if event is InputEventKey:
-		var key := (event as InputEventKey).keycode
-		return key == KEY_ESCAPE or (key in [KEY_ENTER, KEY_KP_ENTER] and not _description.has_focus())
+		var k := event as InputEventKey
+		return k.keycode == KEY_ESCAPE or (k.keycode in [KEY_ENTER, KEY_KP_ENTER] and not k.shift_pressed)
 	return false
 
 
 func _release_text() -> void:
-	for c: Control in [_title, _description, _credit]:
-		if c.has_focus():
-			c.release_focus()
+	if _description.has_focus():
+		_description.release_focus()
 	_refresh()
 
 
@@ -345,11 +345,16 @@ func _build() -> void:
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(heading)
 	var hint := Label.new()
-	hint.text = "Up/down move    left/right change    A select or type    B back"
+	hint.text = "Up/down move    left/right change    A select or type    Enter done typing    B back"
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(hint)
 
+	_title = Label.new()
+	_title.add_theme_font_size_override("font_size", 15)
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	outer.add_child(_title)
 	_main = VBoxContainer.new()
 	_main.add_theme_constant_override("separation", 2)
 	outer.add_child(_main)
@@ -364,21 +369,14 @@ func _build() -> void:
 		_labels[row] = label
 		_main.add_child(label)
 		match row:
-			"title":
-				_title = _line_edit(ReportStore.TITLE_MAX)
-				_main.add_child(_title)
 			"description":
 				_description = TextEdit.new()
-				_description.custom_minimum_size = Vector2(0, 60)
+				_description.custom_minimum_size = Vector2(0, 96)
 				_description.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 				_description.add_theme_font_size_override("font_size", 16)
 				_description.placeholder_text = "What did you see, and what did you expect?"
 				_description.focus_mode = Control.FOCUS_CLICK
 				_main.add_child(_description)
-			"credit":
-				_credit = _line_edit(ReportStore.CREDIT_MAX)
-				_credit.placeholder_text = "leave empty to stay anonymous"
-				_main.add_child(_credit)
 	_status = Label.new()
 	_status.add_theme_font_size_override("font_size", 15)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -404,11 +402,3 @@ func _build() -> void:
 	_queue.add_child(_queue_action_label)
 	outer.add_child(_queue)
 	_show_page(Page.MAIN)
-
-
-func _line_edit(max_len: int) -> LineEdit:
-	var e := LineEdit.new()
-	e.max_length = max_len
-	e.add_theme_font_size_override("font_size", 16)
-	e.focus_mode = Control.FOCUS_CLICK
-	return e

@@ -58,7 +58,8 @@ func test_controller_sets_area_and_sends() -> void:
 	var report := _form.store.load_report(rows[0]["id"])
 	assert_str(report["area"]).is_equal("traffic")
 	assert_str(report["severity"]).is_equal("blocks_play")
-	assert_str(report["title"]).is_equal("Traffic: Elgin Street at x 237, z 18")
+	assert_str(report["title"]).is_equal("Report: Traffic · Blocks play · Elgin Street (x 237, z 18)")
+	assert_str(report["reporter_id"]).is_equal("")
 	assert_bool(report["has_screenshot"]).is_true()
 	assert_str(_form.store.screenshot_path(rows[0]["id"])).is_not_empty()
 	# Sending twice does not save a second copy.
@@ -75,18 +76,46 @@ func test_screenshot_can_be_left_out() -> void:
 	assert_str(_form.store.screenshot_path(id)).is_empty()
 
 
-func test_b_leaves_a_text_field_then_closes_the_form() -> void:
+func _key(keycode: Key, shift: bool = false) -> void:
+	for pressed in [true, false]:
+		var ev := InputEventKey.new()
+		ev.keycode = keycode
+		ev.physical_keycode = keycode
+		ev.shift_pressed = shift
+		ev.pressed = pressed
+		if pressed and keycode >= KEY_A and keycode <= KEY_Z:
+			ev.unicode = keycode + 32  # lower case letter
+		Input.parse_input_event(ev)
+		await get_tree().process_frame
+
+
+func test_typing_ends_with_enter_or_any_controller_button_then_b_closes() -> void:
 	var closed := [false]
 	_form.closed.connect(func() -> void: closed[0] = true)
-	await _go_to("title")
+	await _go_to("description")
 	await _press(JOY_BUTTON_A)
-	assert_bool(_form._title.has_focus()).is_true()
-	await _press(JOY_BUTTON_B)
-	assert_bool(_form._title.has_focus()).is_false()
+	assert_bool(_form._description.has_focus()).is_true()
+	await _key(KEY_M)  # the map key types an m, nothing else happens
+	await _key(KEY_ENTER)
+	assert_bool(_form._description.has_focus()).override_failure_message("Enter did not end typing").is_false()
+	assert_str(_form._description.text).is_equal("m")
+	await _press(JOY_BUTTON_A)
+	assert_bool(_form._description.has_focus()).is_true()
+	await _press(JOY_BUTTON_DPAD_DOWN)
+	assert_bool(_form._description.has_focus()).override_failure_message("a controller button did not end typing").is_false()
 	assert_bool(_form.visible).is_true()
 	await _press(JOY_BUTTON_B)
 	assert_bool(_form.visible).is_false()
 	assert_bool(closed[0]).is_true()
+
+
+func test_reporter_id_is_only_sent_when_chosen() -> void:
+	await _go_to("reporter")
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	await _go_to("send")
+	await _press(JOY_BUTTON_A)
+	var report := _form.store.load_report(_form.store.list()[0]["id"])
+	assert_str(report["reporter_id"]).is_equal(ReportStore.reporter_id())
 
 
 func test_review_page_lists_what_will_be_sent() -> void:
