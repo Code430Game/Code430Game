@@ -3,6 +3,19 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-03
+
+- **Curb inside a junction at a curved road join (human, 2026-10-03, Deck drive for
+  `update-cluster-junction-arms`).** A curb stands on the interior of the junction where a
+  curved road joins; not the clustered-X issue, which the drive confirmed fixed. Location not
+  recorded yet; get x,z from the HUD next time. Likely the barrier importer's curb lines
+  (`barriers.py`, `curb_classes`) not being cut back to the junction polygon at curved arms.
+- **Grass through road surfaces (human, 2026-10-03).** `update-cluster-junction-arms` fans
+  junction surfaces from their node (167 junctions sagging > 5 cm on main, 14 after), but
+  terrain can still show through ribbons and the remaining ear-clipped junctions. Fold into a
+  small proposal with road surface textures: flatten terrain under junction polygons in the
+  importer, not just under edge ribbons.
+
 ## 2026-10-02
 
 - **Proposal slate (human asked 2026-10-02: write proposals so other agents can work in parallel).**
