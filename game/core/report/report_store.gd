@@ -207,8 +207,6 @@ static func handoff_url(repo: String, report: Dictionary) -> String:
 		"**Area:** %s · **Severity:** %s" % [label_of(AREAS, report["area"]), label_of(SEVERITIES, report["severity"])],
 		"**Place:** x %.1f, z %.1f (%s, edge %s, junction %s)" % [float(place.get("x", 0)), float(place.get("z", 0)), place.get("road", ""), place.get("edge_id", ""), place.get("node_id", "")],
 		"",
-		str(report.get("description", "")),
-		"",
 		"_Attach screenshot.jpg from the report folder here._",
 		"",
 		"| | |", "|---|---|",
@@ -219,7 +217,11 @@ static func handoff_url(repo: String, report: Dictionary) -> String:
 		"",
 		"Report id `%s`; full diagnostics and log in the saved report.json." % report["id"],
 	])
-	var labels := "in-game-report,area:%s,severity:%s" % [report["area"], report["severity"]]
+	var description := str(report.get("description", ""))
+	if description != "":
+		lines.insert(3, description)
+		lines.insert(4, "")
+	var labels := "in-game-report,needs-triage,area:%s,severity:%s" % [report["area"], report["severity"]]
 	var head := "https://github.com/%s/issues/new?labels=%s&title=%s&body=" % [repo, labels.uri_encode(), str(report["title"]).uri_encode()]
 	var body := "\n".join(lines)
 	while body.length() > 0 and (head + body.uri_encode()).length() > HANDOFF_URL_MAX:
