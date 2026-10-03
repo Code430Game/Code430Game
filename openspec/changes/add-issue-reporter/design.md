@@ -71,6 +71,11 @@ timeout and backoff when queued reports are retried. The relay URL comes from
 report stays queued until the `Retry-After` time has passed.
 
 ## Report body
+The relay renders the issue from the report JSON: it is the one place that must defuse
+untrusted text, and GitHub's 65,536-character limit applies there. The game renders only a
+short body for the browser hand-off (`ReportStore.handoff_url`), cut to keep the URL under about
+7,500 characters, which points at the saved folder for the screenshot and the full log.
+
 ```markdown
 **Area:** Roads and junctions · **Severity:** Annoying · **Place:** x 237.0, z 18.0 (Elgin Street, edge w435115744.0, junction c901050337)
 
@@ -112,11 +117,15 @@ variables or command-line arguments.
 Positions, road names and ids are kept: they are what the report is for.
 
 ## Local store and queue
-`user://reports/<id>/` holds `report.json` (fields, diagnostics, state: `queued`, `sent` with
-the issue URL, or `failed` with the last error), `screenshot.jpg` and `log_tail.txt`. The id is
-the UTC timestamp plus eight random hex digits. The form lists queued reports with Send and
-Delete. The reporter retries the queue when the form opens and once a minute while anything is
-queued and the game is running. Sent reports are kept for 30 days, then deleted.
+`user://reports/<id>/` holds:
+- `report.json`: exactly the schema, the same document the relay receives;
+- `state.json`: `queued`, `sent` with the issue URL and time, or `failed` with the last error and the time to retry;
+- `screenshot.jpg`;
+- `log_tail.txt`.
+
+The id is the UTC timestamp plus eight random hex digits. The form lists queued reports with
+Send and Delete. The reporter retries due reports when the form opens, and once a minute while
+anything is queued and the game is running. Sent reports are kept for 30 days, then deleted.
 
 ## Build stamp
 `scripts/package-linux.sh` and the CI export step write `game/build_info.json` before
