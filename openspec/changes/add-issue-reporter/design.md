@@ -34,7 +34,10 @@ host-specific.
   already filed, `400` with the failed check, `413`, `429` with `Retry-After`, or `503` when
   switched off.
 - **Credentials.** A GitHub App (Issues read/write, Contents read/write, Metadata read,
-  installed only on the target repo). Its private key and App id are Worker secrets. The relay
+  installed only on the target repo). Its private key is a Worker secret and its App id a
+  variable. The relay signs the App's JWT with Web Crypto (`crypto.subtle`), since compiled
+  crypto libraries are not available to Python Workers. GitHub's PKCS#1 key is wrapped as
+  PKCS#8 in Python first, because Web Crypto imports only PKCS#8. The relay
   mints a one-hour installation token per request burst (cached in memory) and files issues as
   `code430-reporter[bot]`.
 - **Screenshot.** GitHub has no public API for issue attachments, so the relay commits the
@@ -42,11 +45,15 @@ host-specific.
   `issue-attachments` branch (an orphan branch created on first use, never merged) and embeds
   `https://github.com/{owner}/{repo}/blob/issue-attachments/reports/{report_id}.jpg?raw=true`.
   That link renders for anyone who can see the issue.
-- **Idempotent.** Before filing, the relay searches `in-game-report` issues for the report id
-  carried in the body, so a game that retries after a dropped response cannot file twice.
+- **Idempotent.** Before filing, the relay lists the 50 newest `in-game-report` issues and looks
+  for the report id's marker comment in their bodies. That uses the issues list, not search,
+  because GitHub's search index lags. A game that retries after a dropped response gets the
+  first issue back, and the retry does not count against its limits.
 - **Abuse controls.**
-  - Rate limit per IP with the Workers rate-limiting binding: 5 reports an hour and 20 a day,
-    plus a global ceiling of 200 a day.
+  - Rate limit per sender: 5 reports an hour and 20 a day, plus a global ceiling of 200 a day.
+    The counters live in a Workers KV namespace with expiring keys. The rate-limiting binding only
+    counts over 10- or 60-second windows. KV is eventually consistent, so a burst can slip a
+    report or two past a limit, which is fine for abuse control.
   - Request cap of 2 MB. The screenshot must decode as a JPEG of at most 1920×1200.
   - Strict schema validation: title up to 120 characters, description up to 4,000, log tail up
     to 200 lines.

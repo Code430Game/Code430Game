@@ -1,0 +1,10 @@
+[project]
+name = "code430-report-relay"
+version = "0.1.0"
+description = "Files in-game issue reports as GitHub issues (Cloudflare Python Worker)."
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+# Deploy-time only: pywrangler (Cloudflare's CLI for Python Workers) and the runtime's type stubs.
+dev = ["workers-py>=1.17", "workers-runtime-sdk>=1.9"]

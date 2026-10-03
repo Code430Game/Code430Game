@@ -14,12 +14,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "cryptography>=43",
     "pytest>=8.3",
     "ruff>=0.6",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = [".", "report_relay/src"]
 
 [tool.ruff]
 line-length = 100

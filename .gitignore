@@ -53,3 +53,7 @@ packs/*/chunks/
 .env
 **/.env
 game/log/
+
+# Report relay: pywrangler vendoring and wrangler state
+tools/report_relay/src/vendor/
+tools/report_relay/.wrangler/
