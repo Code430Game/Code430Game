@@ -69,5 +69,5 @@ stop a vehicle pretty quick ... should provide resistance for sure but maybe we 
 - Addendum: `character_mesh.gd` (bone id per vertex for the shader), new
   `pedestrian_walk.gdshader`, reusable `actors/character/character_ragdoll.gd/.tscn`, `pedestrian_body.gd/.tscn`
   (layer, sensor), `player.tscn` (mask gains the pedestrian layer), `pedestrian_config.json`
-  (hit tunables), testbed `--ped-hit` scenario for repeatable recordings. The Deck benchmark is
+  (hit tunables), the hit lab scene `scenes/ped_hit_lab.tscn` for repeatable recordings. The Deck benchmark is
   rerun with the walk shader and a hit in progress.
