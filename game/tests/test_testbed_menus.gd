@@ -39,7 +39,10 @@ func after() -> void:
 			break
 		await get_tree().process_frame
 	_bed.queue_free()
-	await get_tree().process_frame
+	# Let anything the testbed left in flight wind down before the next suite: without this,
+	# the next suite sometimes aborted on a worker thread touching /root (exit 134).
+	for i in range(60):
+		await get_tree().process_frame
 
 
 func _all_done(pending: Dictionary) -> bool:

@@ -43,7 +43,7 @@ var recover_callback: Callable
 ## VehicleCatalogue entry the car is built from; set before _ready, or call apply_entry.
 ## Empty: the catalogue's default player car.
 @export var vehicle_id: String = ""
-const COM_HEIGHT_M := 0.1
+const COM_HEIGHT_FRACTION := 0.07  # of body height: 0.10 m for a sedan, 0.23 m for a box truck
 ## Length of the current body, for the chase camera's framing.
 var length_m: float = 4.6
 
@@ -124,9 +124,10 @@ func apply_entry(id: String) -> void:
 	top_speed_kph = float(e["top_speed_kph"])
 	steer_max_rad = float(e["steer_max_rad"])
 	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
-	# Arcade-low centre of mass, like the old car's (about 0.1 m up): at a realistic height
-	# (wheel radius + 0.15, about 0.5 m) the grip let every class roll over at full lock and 60.
-	center_of_mass = Vector3(0.0, COM_HEIGHT_M, 0.0)
+	# Arcade-low centre of mass that grows with the body, so tall vans and trucks lean more in a
+	# hard turn than a sedan without rolling: at a realistic height (wheel radius + 0.15, about
+	# 0.5 m) the grip let every class roll over at full lock and 60. Entries may set their own.
+	center_of_mass = Vector3(0.0, float(d.get("com_height_m", height * COM_HEIGHT_FRACTION)), 0.0)
 	var mesh_node := $Mesh as MeshInstance3D
 	mesh_node.mesh = VehicleMesh.build(e, VehicleMesh.Lod.LOD0, false, VehicleCatalogue.livery(vehicle_id))
 	mesh_node.material_override = null
