@@ -109,3 +109,35 @@ func test_remote_replica_builds_the_vehicle_it_is_told() -> void:
 	assert_str(r.vehicle_id()).is_equal("box_truck")
 	var shape := (r._car_shape.shape as BoxShape3D)
 	assert_float(shape.size.z).is_equal_approx(float(VehicleCatalogue.entry("box_truck")["dims"]["length_m"]), 0.01)
+
+
+## Seconds from rest to 60 km/h at full throttle, then metres from 60 km/h to a stop braking.
+func _accel_and_brake(id: String, at: Vector3) -> Vector2:
+	var car := _car(id, at)
+	car.global_transform = Transform3D(Basis.looking_at(Vector3(1, 0, 0), Vector3.UP), at)
+	for i in range(60):
+		await get_tree().physics_frame  # settle on the wheels
+	var t := 0.0
+	while float(car.call("forward_speed")) * 3.6 < 60.0 and t < 30.0:
+		car.set("override_throttle", 1.0)
+		await get_tree().physics_frame
+		t += 1.0 / 60.0
+	var start := car.global_position
+	var guard := 0
+	while float(car.call("forward_speed")) > 0.3 and guard < 60 * 30:
+		car.set("override_throttle", 0.0)
+		car.set("override_brake", 1.0)
+		await get_tree().physics_frame
+		guard += 1
+	return Vector2(t, car.global_position.distance_to(start))
+
+
+func test_hatchback_suv_and_box_truck_handle_differently() -> void:
+	_floor()
+	var hatch := await _accel_and_brake("hatchback", Vector3(-80, 0.1, -60))
+	var suv := await _accel_and_brake("suv", Vector3(-80, 0.1, 0))
+	var truck := await _accel_and_brake("box_truck", Vector3(-80, 0.1, 60))
+	print("handling: 0-60 km/h s, 60-0 m: hatchback %.1f s %.1f m, suv %.1f s %.1f m, box truck %.1f s %.1f m" % [hatch.x, hatch.y, suv.x, suv.y, truck.x, truck.y])
+	assert_float(truck.x).is_greater(hatch.x * 1.3)  # the truck is slow off the line
+	assert_float(truck.y).is_greater(hatch.y)  # and takes longer to stop
+	assert_float(suv.x).is_not_equal(hatch.x)

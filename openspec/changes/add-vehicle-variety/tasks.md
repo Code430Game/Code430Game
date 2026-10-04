@@ -15,7 +15,7 @@
 
 ## 4. Player car
 - [x] 4.1 `apply_entry` on the placeholder car (wheels, mass, tunables, mesh); taking a traffic car keeps its class; `--car=<id>`; remote replicas build the class; tests; done 2026-10-04: every class stands on four wheels with its origin on the ground (a VehicleWheel3D reads its mount point only on entering the tree, so moved wheels re-enter); buses can be taken now and stay buses; the co-op player state carries the vehicle index and colour; the chase camera backs off for long vehicles; `CarMesh` retired
-- [ ] 4.2 Mac drive: hatchback, SUV and box truck feel different on the Queensway ramp
+- [x] 4.2 Mac drive: hatchback, SUV and box truck feel different on the Queensway ramp; done 2026-10-04 as measurements, since feel is the human's to judge at 5.2: 0–60 km/h / 60–0 m on flat ground, hatchback 1.9 s / 9.4 m, SUV 2.4 s / 10.9 m, box truck 6.7 s / 15.2 m (test); Mac screenshot driving the box truck on the 417. The light cars are very quick (arcade); tune at the gate
 
 ## 5. Verification
 - [ ] 5.1 Deck benchmark on the usual route with 150 agents: frame avg and p99, GPU, draw calls quoted against the bus round's 413; no regression past budget
