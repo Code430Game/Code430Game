@@ -65,7 +65,7 @@ player is a `CharacterRig` (Skeleton3D, 11 bones, `CharacterMesh.walk_pose`).
   `INSTANCE_CUSTOM.zw` stay free for its paint marks (the walk uses only `.xy`), and its
   raycasts and projectiles must include the pedestrian layer (3) in their mask, because the
   walker is no longer on layer 1.
-- **Repeatable hit for recordings.** Testbed `--ped-hit` puts the player's car on a straight
+- **Repeatable hit for recordings.** The hit lab scene (`scenes/ped_hit_lab.tscn`) puts the player's car on a straight
   road at 50 km/h with one pedestrian walking ahead, then logs the car's speed before and
   after. Recordings use Godot's `--write-movie` at a fixed fps, converted with ffmpeg. The
   "before" recording is taken from `main`'s behaviour (the shipped frozen body) with the same
