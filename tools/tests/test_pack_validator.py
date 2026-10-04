@@ -191,3 +191,54 @@ def test_unknown_supported_mode_is_an_error(tmp_path: Path):
     write_pack(tmp_path, "p", {**GOOD, "supported_modes": ["grimdark"]})
     (report,) = validate_root(tmp_path)
     assert any("unknown mode 'grimdark'" in e for e in report.errors)
+
+
+BASE_VEHICLES = REPO_ROOT / "game" / "actors" / "vehicles" / "vehicles.v0.json"
+
+
+def _vehicles(**changes) -> bytes:
+    base = json.loads(BASE_VEHICLES.read_text(encoding="utf-8"))
+    entry = {**base["vehicles"][0], "id": "pack.limo", "name": "Long Car", **changes}
+    return json.dumps({"schema_version": 0, "vehicles": [entry]}).encode()
+
+
+def test_base_vehicle_catalogue_matches_the_schema() -> None:
+    from pack_tools.validate import (
+        VEHICLES_SCHEMA_PATH,
+        load_content_rules,
+        load_schema,
+        validate_vehicles,
+    )
+
+    desc, _ = load_content_rules()
+    data = json.loads(BASE_VEHICLES.read_text(encoding="utf-8"))
+    assert validate_vehicles(data, desc, load_schema(VEHICLES_SCHEMA_PATH)) == []
+    assert {v["body_class"] for v in data["vehicles"]} == {
+        "sedan",
+        "hatchback",
+        "coupe",
+        "suv",
+        "pickup",
+        "van",
+        "box_truck",
+        "taxi",
+        "bus",
+    }
+
+
+def test_pack_vehicle_passes(tmp_path: Path) -> None:
+    write_pack(tmp_path, "p", GOOD, {"vehicles.v0.json": _vehicles()})
+    assert errors_for(tmp_path) == []
+
+
+def test_pack_vehicle_with_unknown_body_class_is_rejected(tmp_path: Path) -> None:
+    write_pack(tmp_path, "p", GOOD, {"vehicles.v0.json": _vehicles(body_class="hovercraft")})
+    errors = errors_for(tmp_path)
+    assert any("vehicles.v0.json" in e and "body_class" in e for e in errors)
+
+
+def test_pack_vehicle_unknown_descriptor_is_rejected(tmp_path: Path) -> None:
+    write_pack(
+        tmp_path, "p", GOOD, {"vehicles.v0.json": _vehicles(descriptors={"spiders": "mild"})}
+    )
+    assert any("unknown descriptor 'spiders'" in e for e in errors_for(tmp_path))

@@ -138,6 +138,7 @@ func _ready() -> void:
 	if not _pack.load(dir):
 		_hud.text = "Failed to load pack at %s" % dir
 		return
+	VehicleCatalogue.merge_pack_dir(dir)  # a pack may add vehicles
 	var t0 := Time.get_ticks_msec()
 	_streamer = ChunkStreamer.new()
 	_streamer.name = "Streamer"

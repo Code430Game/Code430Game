@@ -1,5 +1,5 @@
 ## 1. Catalogue
-- [ ] 1.1 `vehicles.schema.v0.json`, base `vehicles.v0.json` with nine entries, `VehicleCatalogue` autoload with merge and `pick_for_spawn`; `pack_tools` validates pack copies; tests
+- [x] 1.1 `vehicles.schema.v0.json`, base `vehicles.v0.json` with nine entries, `VehicleCatalogue` autoload with merge and `pick_for_spawn`; `pack_tools` validates pack copies; tests; done 2026-10-04 (the map pack's `vehicles.v0.json`, if any, merges at load: there is no general pack loader yet)
 
 ## 2. Generator
 - [ ] 2.1 `trim_sheet.gd`: generated atlas; test on determinism and cell colours

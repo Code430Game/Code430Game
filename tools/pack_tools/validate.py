@@ -23,6 +23,8 @@ CONTENT_DIR = REPO_ROOT / "game" / "core" / "content"
 DESCRIPTORS_PATH = CONTENT_DIR / "content-descriptors.v0.json"
 MODES_DIR = CONTENT_DIR / "modes"
 ADS_NAME = "ads.v0.json"
+VEHICLES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vehicles.schema.v0.json"
+VEHICLES_NAME = "vehicles.v0.json"
 LEVELS = ["none", "mild", "strong"]
 MANIFEST_NAME = "pack.json"
 
@@ -203,7 +205,41 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
         errors, warnings = validate_ads(ads, manifest, desc, modes, load_schema(ADS_SCHEMA_PATH))
         report.errors.extend(errors)
         report.warnings.extend(warnings)
+    vehicles_path = pack_dir / VEHICLES_NAME
+    if vehicles_path.is_file():
+        try:
+            vehicles = json.loads(vehicles_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{VEHICLES_NAME}: invalid JSON: {exc}")
+            return report
+        report.errors.extend(validate_vehicles(vehicles, desc, load_schema(VEHICLES_SCHEMA_PATH)))
     return report
+
+
+def validate_vehicles(
+    vehicles: dict, desc: dict, vehicles_validator: Draft202012Validator
+) -> list[str]:
+    """Schema (body class, dims, tunables) and descriptor checks for a vehicles file."""
+    errors = []
+    for err in sorted(vehicles_validator.iter_errors(vehicles), key=lambda e: list(e.path)):
+        where = "/".join(str(p) for p in err.path) or "(root)"
+        errors.append(f"{VEHICLES_NAME}: {where}: {err.message}")
+    if errors:
+        return errors
+    seen = set()
+    for v in vehicles.get("vehicles", []):
+        vid = v["id"]
+        if vid in seen:
+            errors.append(f"{VEHICLES_NAME}: duplicate id '{vid}'")
+        seen.add(vid)
+        errors.extend(_descriptor_errors(f"{VEHICLES_NAME}: {vid}", v.get("descriptors", {}), desc))
+        for key, variant in v.get("liveries", {}).get("variants", {}).items():
+            errors.extend(
+                _descriptor_errors(
+                    f"{VEHICLES_NAME}: {vid} livery {key}", variant.get("descriptors", {}), desc
+                )
+            )
+    return errors
 
 
 def find_packs(root: Path) -> list[Path]:
