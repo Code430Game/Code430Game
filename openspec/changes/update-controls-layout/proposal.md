@@ -26,6 +26,14 @@ instead of whichever are free.
 - **Remappable.** A controls page in settings lists every action with its bindings and lets the
   player rebind a gamepad button or key with a press; conflicts within a context are refused
   with a message. Bindings persist in settings. A reset-to-default button.
+- **Tabbed menus (added 2026-10-04, human: "the controls on the home screen are running off the
+  screen so we should probably present them on the pause screen per device type ... Tabs like
+  controls, options, settings").** The start and pause menus get tabs (Controls, Options,
+  Settings, and the existing items under a first tab) instead of one long list. The controls
+  hint list leaves the home screen and becomes the Controls tab, showing the layout for the
+  device in use (controller or keyboard and mouse, switching with the last input as the HUD
+  hints already do), with the remapping from the next bullet on the same tab. Tabs cycle with
+  LB/RB (and Q/E) so the Deck needs no pointer.
 - **Doc.** `docs/controls.md` regenerated from the input map by a tool so it cannot drift again.
 - **Not in this change:** touchpad or gyro on the Deck, Steam Input configs, cover, crouch,
   phone, weapon wheel UI itself (combat change), drive-by.
