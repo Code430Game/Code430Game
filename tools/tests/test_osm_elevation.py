@@ -192,3 +192,61 @@ def test_cycleway_across_a_street_is_flush_with_it_and_ramps_at_the_curb():
     assert zs == sorted(zs)
     assert 0.3 < zs[2] - zs[1] < 0.5 and 0.3 < zs[4] - zs[3] < 0.5, zs
     assert pts[0][2] == -20.0 and pts[-1][2] == 20.0
+
+
+def test_sidewalks_follow_roads_on_their_own_layer():
+    """Issue #14: a bridge's sidewalk crossing right above the street below took that street's
+    height and lay across it; a street's sidewalk passing under a bridge must not ride the deck."""
+    from osm_import.elevation import apply_pedestrian_elevation
+    from osm_import.graph import PedestrianWay
+
+    g, _ = build(OVERPASS, FlatSource(10.0))
+    deck = next(e for e in g.edges.values() if e.bridge)
+    below = next(e for e in g.edges.values() if e.name == "Below")
+    deck_y = max(p[1] for p in deck.polyline)
+    below_y = min(p[1] for p in below.polyline)
+    assert deck_y - below_y > 4.0  # the deck clears the street
+    hw = deck.width_m / 2.0
+    on_deck = PedestrianWay(
+        "p1",
+        [(-25.0, 0.0, hw + 1.0), (0.0, 0.0, hw + 1.0), (25.0, 0.0, hw + 1.0)],
+        "footway",
+        1,
+        None,
+        "sidewalk",
+        2.0,
+        layer=1,
+    )
+    at_street = PedestrianWay(
+        "p2",
+        [(6.0, 0.0, -40.0), (6.0, 0.0, 0.0), (6.0, 0.0, 40.0)],
+        "footway",
+        2,
+        None,
+        "sidewalk",
+        2.0,
+    )
+    g.pedestrian = [on_deck, at_street]
+    apply_pedestrian_elevation(g, FlatSource(10.0), CFG)
+    over_street = min(on_deck.polyline, key=lambda p: abs(p[0]))
+    assert over_street[1] > deck_y - 0.5, on_deck.polyline
+    under_deck = min(at_street.polyline, key=lambda p: abs(p[2]))
+    assert under_deck[1] < below_y + 1.0, at_street.polyline
+
+
+def test_bridge_tag_puts_a_pedestrian_way_on_layer_one():
+    g, _ = build(
+        [
+            (1, [(-100, 0), (100, 0)], {"highway": "residential"}),
+            (
+                2,
+                [(-50, 5), (50, 5)],
+                {"highway": "footway", "footway": "sidewalk", "bridge": "yes"},
+            ),
+            (3, [(-50, -5), (50, -5)], {"highway": "footway", "footway": "sidewalk"}),
+            (4, [(-50, 9), (50, 9)], {"highway": "footway", "bridge": "yes", "layer": "2"}),
+        ],
+        FlatSource(10.0),
+    )
+    layers = {w.osm_way_id: w.layer for w in g.pedestrian}
+    assert layers == {2: 1, 3: 0, 4: 2}
