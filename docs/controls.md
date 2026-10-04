@@ -17,6 +17,7 @@ The on-screen hints switch to whichever device you touched last.
 | reset a stuck car | R3 (click the right stick) while driving | R |
 | camera: chase, top-down, high | D-pad down (while driving) | V |
 | headlights: auto (dusk to dawn), on, off | D-pad up (while driving) | H |
+| radio: Hilltop FM, Quest FM, Deep Crypt 84, Chatter AM, off | D-pad left (while driving) | Q |
 | map | Back / View | M |
 | pause menu | Menu / Start | Esc |
 | report a problem | hold Menu / Start for 1 s, or "Report a problem" in the pause menu | F8 (or hold Esc) |
@@ -41,5 +42,7 @@ Testbed flags worth knowing: `--time=HH` starts the clock at that hour (`--time=
 `--bus-share=0.5` makes half of the spawned traffic buses (default 8 %).
 For screenshots: `--camera=px,py,pz,tx,ty,tz` fixes the view, `--creator` opens the character
 creator once the world is up, `--screenshot=path` saves a PNG when the benchmark ends.
+`--radio=hilltop|quest|crypt|chatter|off` tunes the car radio at start. `--record-music=path.wav` records the Music bus
+until the benchmark ends.
 `--report` opens "Report a problem" once the world is up, and `--report-send` also saves (and,
 with a relay configured, sends) the report.

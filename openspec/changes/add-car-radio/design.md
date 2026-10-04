@@ -46,14 +46,26 @@ All of it is composed here. Being in the style of a genre is fine; quoting anoth
 melody, even a few notes of a famous phrase, is not, and the names and taglines are invented.
 
 ## Rendering once, playing a sample
-Rendering a loop in GDScript costs about 9% of real time on the Mac's M1, so filling a generator
-every frame would cost roughly 1.5 ms a frame there and several on the Deck. Instead `Radio`
-renders each station's loop once on a `WorkerThreadPool` task when the radio first needs it,
-into an `AudioStreamWAV` (16-bit mono, 22,050 Hz, about 2.5 MB a loop) with forward looping
-over exactly one pass. Playback then costs what any sample costs. To make the wrap match the
-loop's start, the render runs a pass and keeps the second one, so the echo tail and envelopes
-at the end of the kept pass are what a real repeat would hand to its start. `ChipPlayer`'s
-generator path stays for tests and short previews.
+The first synth cost about 9% of real time on the Mac's M1, so filling a generator every frame
+would cost roughly 1.5 ms a frame there and several on the Deck. Instead `Radio` renders each
+station's loop once into an `AudioStreamWAV` (16-bit mono, 22,050 Hz, about 2.5 MB a loop) that
+loops forward over exactly one pass, and playback costs what any sample costs.
+- **Block rendering.** `ChipSong.render` works from one step boundary to the next and keeps each
+  channel's state in locals inside its inner loop: 1.7 to 1.9% of real time, about a second per
+  loop on the Mac (five times faster than per-sample calls).
+- **Warm-up, one pass.** The render starts four seconds before the loop's end and throws that
+  away, then keeps one pass, so held notes, envelopes and the echo at the start of the kept pass
+  are what a real repeat hands it. Four seconds covers the dungeon's bar-long drone.
+- **One render at a time.** A `WorkerThreadPool` task (high priority) renders the queue's head;
+  the station being played goes to the front, the other stations follow one by one.
+- **Disk cache.** Each render is saved under `user://radio_cache/<id>_<hash>.wav`, the hash over
+  the track's data and a synth version, and loaded next time. Changing a track's notes makes a new
+  file.
+
+Measured on the Mac: a first session plays the station 1.25 s after getting in, a cached one
+after about 1 s (the first in-game try, rendering two passes of all four loops at once, took 34
+to 53 s and was silent for the first 19 s of the run). `ChipPlayer`'s generator path stays for
+tests and short previews.
 
 ## Talk radio
 Speech as chip babble, in the spirit of the "animalese" approach: no words, only syllables that

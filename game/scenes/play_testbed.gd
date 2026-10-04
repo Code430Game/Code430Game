@@ -40,6 +40,10 @@ var _spawn_transform: Transform3D
 var _keyboard: bool = false  # last input came from keyboard or mouse: show those hints
 var _day_night: DayNight
 var _vehicle_audio: VehicleAudio
+var _radio: Radio
+var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
+var _record_music: String = ""  # --record-music=<path.wav>: record the Music bus, saved when the benchmark ends
+var _music_recorder: AudioEffectRecord
 var _ambience: AmbienceAudio
 var _mute: bool = false
 var _start_hour: float = -1.0  # --time=HH
@@ -212,6 +216,8 @@ func _ready() -> void:
 func _on_entered_vehicle(car: VehicleBody3D) -> void:
 	if _vehicle_audio != null:
 		_vehicle_audio.attach(car)  # the engine follows the player into whichever car they take
+	if _radio != null:
+		_radio.car_entered()
 	_camera.target = car
 	_camera.global_position = car.global_position + car.global_basis.z * 7.5 + Vector3.UP * 3.0
 	_camera.current = true
@@ -240,6 +246,8 @@ func _on_take_granted(t: Transform3D, color: Color) -> void:
 
 
 func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
+	if _radio != null:
+		_radio.car_exited()
 	_player.activate_camera()
 	_minimap.player = _player
 	_overview.player = _player
@@ -274,6 +282,17 @@ func _setup_audio() -> void:
 	_vehicle_audio = VehicleAudio.new()
 	_vehicle_audio.name = "VehicleAudio"
 	_vehicle_audio.attach(_car)
+	_radio = Radio.new()
+	_radio.name = "Radio"
+	add_child(_radio)
+	if _radio_start != "":
+		_radio.select(_radio_start if _radio_start == Radio.OFF or _radio_start.contains(".") else "code430.base." + _radio_start)
+	if _player != null and _player.is_driving():
+		_radio.car_entered()
+	if _record_music != "":
+		_music_recorder = AudioEffectRecord.new()
+		AudioServer.add_bus_effect(AudioServer.get_bus_index("Music"), _music_recorder)
+		_music_recorder.set_recording_active(true)
 	_ambience = AmbienceAudio.new()
 	_ambience.name = "Ambience"
 	_ambience.traffic = _traffic
@@ -560,6 +579,10 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--record-music="):
+			_record_music = arg.get_slice("=", 1)
+		elif arg.begins_with("--radio="):
+			_radio_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--report-title="):
 			_report_title = arg.get_slice("=", 1)
 		elif arg == "--report" or arg == "--report-send":
@@ -714,6 +737,12 @@ func _process(delta: float) -> void:
 		if _bench_elapsed >= _bench_seconds + BENCH_WARMUP_S and not _bench_done:
 			_bench_done = true
 			_print_benchmark()
+			if _music_recorder != null:
+				_music_recorder.set_recording_active(false)
+				var rec := _music_recorder.get_recording()
+				if rec != null:
+					rec.save_to_wav(_record_music)
+					print("music recording: %s (%.1f s)" % [_record_music, rec.get_length()])
 			if _screenshot_path != "":
 				await RenderingServer.frame_post_draw
 				var err := get_viewport().get_texture().get_image().save_png(_screenshot_path)
@@ -722,6 +751,8 @@ func _process(delta: float) -> void:
 
 
 func _print_benchmark() -> void:
+	if _radio != null:
+		print("benchmark: " + _radio.describe())
 	var sorted := _bench_frames.duplicate()
 	sorted.sort()
 	var sum := 0.0

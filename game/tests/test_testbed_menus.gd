@@ -33,6 +33,11 @@ func after() -> void:
 			if pending.is_empty() or _all_done(pending):
 				break
 			await get_tree().process_frame
+	var radio: Radio = _bed.get("_radio")
+	for i in range(1200):
+		if radio == null or not radio.rendering():
+			break
+		await get_tree().process_frame
 	_bed.queue_free()
 	await get_tree().process_frame
 
