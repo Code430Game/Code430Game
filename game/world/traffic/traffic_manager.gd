@@ -750,7 +750,7 @@ static func _color_index(colors: Array, color: Color) -> int:
 	return 0
 
 
-## Replaces the agent behind `body` with a drivable car in its colour at its position.
+## Replaces the agent behind `body` with a drivable car of its class and colour at its position.
 ## Returns null when the body has no agent. The car is added under this manager's parent.
 func take_car(body: TrafficCar) -> VehicleBody3D:
 	var a := body.agent
@@ -758,9 +758,10 @@ func take_car(body: TrafficCar) -> VehicleBody3D:
 		return null
 	var car: VehicleBody3D = DRIVABLE_CAR_SCENE.instantiate()
 	car.set("body_color", a.color)
+	car.set("vehicle_id", a.vehicle_id)
 	var holder: Node = get_parent() if get_parent() != null else self
 	holder.add_child(car)
-	car.global_transform = a.transform.translated_local(Vector3(0.0, 0.3, 0.0))
+	car.global_transform = a.transform.translated_local(Vector3(0.0, 0.1, 0.0))
 	if car.has_method("set_spawn"):
 		car.set_spawn(car.global_transform)
 	_leave_junction(a)
@@ -794,20 +795,18 @@ func hit_near(position: Vector3, velocity: Vector3, reach: float = 4.0) -> bool:
 
 
 ## Host: removes the nearest live agent within `reach` of `position` for a guest to take.
-## Returns {"transform", "color"} or an empty Dictionary.
+## Returns {"transform", "color", "vehicle"} or an empty Dictionary.
 func release_near(position: Vector3, reach: float = 4.0) -> Dictionary:
 	var best: TrafficAgent = null
 	var best_d := reach
 	for a in agents:
-		if a.kind == Kind.BUS:
-			continue  # the player's vehicle is a car; buses stay in service
 		var d := a.position().distance_to(position)
 		if d < best_d:
 			best_d = d
 			best = a
 	if best == null:
 		return {}
-	var out := {"transform": best.transform, "color": best.color}
+	var out := {"transform": best.transform, "color": best.color, "vehicle": best.vehicle_id}
 	_leave_junction(best)
 	_release_body(best)
 	agents.erase(best)

@@ -86,6 +86,7 @@ var _bumps: bool = false
 var _last_vy: float = 0.0
 const BUMP_THRESHOLD_MPS2 := 90.0
 var _spawn_override: Vector3 = Vector3.INF
+var _car_id: String = ""  # --car=<vehicle id>: start in this catalogue vehicle (default: the catalogue's)
 var _road_label: String = ""
 var _road_label_next: float = 0.0
 var _open_map_on_start: bool = false
@@ -148,6 +149,7 @@ func _ready() -> void:
 	print("testbed: streamer ready (%d chunks indexed, glb cache %s) in %d ms" % [_pack.chunk_coords().size(), _streamer.use_glb, Time.get_ticks_msec() - t0])
 	_graph_view.set_graph(_pack.graph)
 	_car = CAR_SCENE.instantiate()
+	_car.set("vehicle_id", _car_id)
 	_car.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_car)
 	var spawn := _pack.spawn_transform()
@@ -241,11 +243,12 @@ func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
 		_player.enter_vehicle(car)
 
 
-func _on_take_granted(t: Transform3D, color: Color) -> void:
+func _on_take_granted(t: Transform3D, color: Color, vehicle_id: String) -> void:
 	var car: VehicleBody3D = TrafficManager.DRIVABLE_CAR_SCENE.instantiate()
 	car.set("body_color", color)
+	car.set("vehicle_id", vehicle_id)
 	add_child(car)
-	car.global_transform = t.translated_local(Vector3(0.0, 0.3, 0.0))
+	car.global_transform = t.translated_local(Vector3(0.0, 0.1, 0.0))
 	car.set_spawn(car.global_transform)
 	_player.enter_vehicle(car)
 
@@ -272,8 +275,8 @@ func _setup_day_night() -> void:
 	add_child(_day_night)
 	_day_night.setup($Sun as DirectionalLight3D, ($WorldEnvironment as WorldEnvironment).environment)
 	_day_night.register_shader(_pack.building_material as ShaderMaterial)
-	_day_night.register_emissive(CarMesh.light_material(), CarMesh.LIGHT_NIGHT_ENERGY)
-	_day_night.register_emissive(CarMesh.tail_material(), CarMesh.LIGHT_NIGHT_ENERGY * 0.6)
+	_day_night.register_emissive(VehicleMesh.light_material(), VehicleMesh.LIGHT_NIGHT_ENERGY)
+	_day_night.register_emissive(VehicleMesh.tail_material(), VehicleMesh.LIGHT_NIGHT_ENERGY * 0.6)
 	if _traffic != null and _traffic.tail_material != null:
 		_day_night.register_shader(_traffic.tail_material)
 	_day_night.register_shader(SignalHeads.head_material())
@@ -621,6 +624,8 @@ func _parse_args() -> void:
 			_start_in_car = true
 		elif arg.begins_with("--traffic="):
 			_traffic_cap = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--car="):
+			_car_id = arg.get_slice("=", 1)
 		elif arg.begins_with("--peds="):
 			_peds_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--knockdown-every="):
