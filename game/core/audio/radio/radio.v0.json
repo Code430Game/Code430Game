@@ -2,6 +2,7 @@
   "stations": [
     {"id": "code430.base.hilltop", "descriptors": {}, "variants": {"fallback": {"name": "Hilltop FM", "tagline": "Bounce along.", "track": "hilltop"}}},
     {"id": "code430.base.quest", "descriptors": {}, "variants": {"fallback": {"name": "Quest FM", "tagline": "Onward, hero.", "track": "questline"}}},
-    {"id": "code430.base.crypt", "descriptors": {}, "variants": {"fallback": {"name": "Deep Crypt 84", "tagline": "Mind the dark.", "track": "deep_crypt"}}}
+    {"id": "code430.base.crypt", "descriptors": {}, "variants": {"fallback": {"name": "Deep Crypt 84", "tagline": "Mind the dark.", "track": "deep_crypt"}}},
+    {"id": "code430.base.chatter", "descriptors": {}, "variants": {"fallback": {"name": "Chatter AM", "tagline": "Talk, talk, talk.", "track": "chatter"}}}
   ]
 }

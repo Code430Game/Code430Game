@@ -6,9 +6,10 @@
 - [x] 1.3 `music.schema.v0.json` (with a `talk` object for talk radio) and `radio.schema.v0.json`; `tools/tests/test_radio_data.py` checks both files against them, that every station's track exists, that every loop is 30 to 60 s, and that channels line up at the loop point
 
 ## 2. Stations
-- [ ] 2.1 Three music loops, 30 to 60 s each: bright platformer, overworld adventure, dungeon. Original melodies; checked by ear on the Mac and against the no-reuse rule
-  - Composed 2026-10-04: Hilltop Hop (C major, 136 bpm, 32 bars, 56.5 s), Questline (D major with a borrowed C, 112 bpm, 24 bars, 51.4 s), Deep Crypt (A minor, 84 bpm, 16 bars, 45.7 s, echo). Rendered to WAV for the human: peak about 0.6. Waiting on the ear check.
-- [ ] 2.2 Talk radio (trial): syllable synthesis with speech-like pitch contours, two hosts taking turns, a jingle between segments, as a loop
+- [x] 2.1 Three music loops, 30 to 60 s each: bright platformer, overworld adventure, dungeon. Original melodies; checked by ear on the Mac and against the no-reuse rule
+  - Composed 2026-10-04: Hilltop Hop (C major, 136 bpm, 32 bars, 56.5 s), Questline (D major with a borrowed C, 112 bpm, 24 bars, 51.4 s), Deep Crypt (A minor, 84 bpm, 16 bars, 45.7 s, echo). Rendered to WAV for the human: peak about 0.6. Human, 2026-10-04: "They sound great and hit the creative targets we were going for!!" (Questline heard in full, the other two half-way).
+- [x] 2.2 Talk radio (trial): syllable synthesis with speech-like pitch contours, two hosts taking turns, a jingle between segments, as a loop
+  - Chatter AM ("Chatter Hour", 48 s): hosts Dee (150 Hz, slower) and Jo (240 Hz, quicker), a two-bar jingle opening each of two talk segments. Syllables are a noise consonant into a pulse vowel (duty by vowel) gliding on the phrase contour. Tests: segments fit between the jingles, a question rises and a statement falls, talk renders as sound. Rendered to WAV for the human; keep or drop at gate 3.2.
 - [ ] 2.3 `Radio`: stations and Off, cycle on D-pad left or R while driving, remembered station, Music bus and volume, start on entry and pause on exit, tune-in toast; `radio_cycle` action and input-map test; `--radio=<station>` testbed flag; tests in `test_audio.gd`
 - [ ] 2.4 Mac run: each station recorded for a minute through a car swap; the station resumes after getting back in, and so does the engine
 

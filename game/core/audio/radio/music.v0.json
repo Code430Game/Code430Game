@@ -177,6 +177,183 @@
      "pattern": "C2:10 . . . . . . . . . . . C3:3 . . ."
     }
    ]
+  },
+  {
+   "id": "chatter",
+   "title": "Chatter Hour",
+   "tempo_bpm": 120,
+   "steps_per_beat": 4,
+   "instruments": {
+    "lead": {
+     "wave": "pulse",
+     "duty": 0.125,
+     "attack": 0.004,
+     "decay": 0.1,
+     "sustain": 0.6,
+     "release": 0.08,
+     "vibrato_hz": 6,
+     "vibrato_cents": 10
+    },
+    "bass": {
+     "wave": "triangle",
+     "attack": 0.004,
+     "decay": 0.1,
+     "sustain": 0.8,
+     "release": 0.06
+    },
+    "drums": {
+     "wave": "noise",
+     "attack": 0.001,
+     "decay": 0.05,
+     "sustain": 0.0,
+     "release": 0.02
+    }
+   },
+   "channels": [
+    {
+     "instrument": "lead",
+     "pattern": "C5:12 ~ E5:12 ~ G5:12 ~ C6:12 ~ ~ ~ . . B5:12 ~ C6:12 ~ D6:12 ~ ~ ~ G5:12 ~ ~ ~ C6:12 ~ ~ ~ ~ ~ ~ ~ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . C5:12 ~ E5:12 ~ G5:12 ~ C6:12 ~ ~ ~ . . B5:12 ~ C6:12 ~ D6:12 ~ ~ ~ G5:12 ~ ~ ~ C6:12 ~ ~ ~ ~ ~ ~ ~ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+    },
+    {
+     "instrument": "bass",
+     "pattern": "C3:12 ~ ~ ~ ~ ~ ~ ~ G2:12 ~ ~ ~ ~ ~ ~ ~ G2:12 ~ ~ ~ ~ ~ ~ ~ C3:12 ~ ~ ~ ~ ~ ~ ~ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . C3:12 ~ ~ ~ ~ ~ ~ ~ G2:12 ~ ~ ~ ~ ~ ~ ~ G2:12 ~ ~ ~ ~ ~ ~ ~ C3:12 ~ ~ ~ ~ ~ ~ ~ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+    },
+    {
+     "instrument": "drums",
+     "pattern": "C3:9 ~ . . G5:9 ~ . . C3:9 ~ C3:9 ~ G5:9 ~ ~ ~ C3:9 ~ . . G5:9 ~ . . G5:9 ~ G5:9 ~ C3:9 ~ ~ ~ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . C3:9 ~ . . G5:9 ~ . . C3:9 ~ C3:9 ~ G5:9 ~ ~ ~ C3:9 ~ . . G5:9 ~ . . G5:9 ~ G5:9 ~ C3:9 ~ ~ ~ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+    }
+   ],
+   "talk": {
+    "voices": {
+     "dee": {
+      "base_hz": 150,
+      "range": 4,
+      "syllables_per_s": 6.5
+     },
+     "jo": {
+      "base_hz": 240,
+      "range": 6,
+      "syllables_per_s": 8.0
+     }
+    },
+    "segments": [
+     {
+      "start_s": 4.5,
+      "phrases": [
+       {
+        "voice": "dee",
+        "text": "ha lo ha lo. ba ko ri ta ne mo!",
+        "pause_s": 0.35
+       },
+       {
+        "voice": "jo",
+        "text": "o ki ta po? ri ra ne ko ta su?",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "dee",
+        "text": "ma ru ko ta. ne ri po sa ke to la mo",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "shi ra po! ki ta ki ta ne!",
+        "pause_s": 0.4
+       },
+       {
+        "voice": "dee",
+        "text": "ho ho ho ho ho!",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "pe ri to ma su ne ka la ri po? ta ki?",
+        "pause_s": 0.35
+       },
+       {
+        "voice": "dee",
+        "text": "ba ru do. ko ne ma sa ri to ku ne ma",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "o o! fa ri na ta ko!",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "dee",
+        "text": "ne ka. ta ri mo zu ba ko re ta",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "ha ha ha ha ha ha!",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "dee",
+        "text": "so ra ki. mo te na po ri ka su",
+        "pause_s": 0.5
+       }
+      ]
+     },
+     {
+      "start_s": 28.5,
+      "phrases": [
+       {
+        "voice": "jo",
+        "text": "chi ka ri po ta ne mo? ra ki?",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "dee",
+        "text": "mm ha. go ra ne ta ko ba ri su to ma",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "ki ki ta! po ra ne ri ma su ko",
+        "pause_s": 0.35
+       },
+       {
+        "voice": "dee",
+        "text": "wa ka ta. na ri ho ke to ba",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "e? ne ra po ki ta su?",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "dee",
+        "text": "ho ho ho ho!",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "ta ri ko ma ne su po ki ra la",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "dee",
+        "text": "ba ko ri ta ne mo. sa yo na po ri ta",
+        "pause_s": 0.3
+       },
+       {
+        "voice": "jo",
+        "text": "ri ra ro! ki ta ne ma ko!",
+        "pause_s": 0.35
+       },
+       {
+        "voice": "dee",
+        "text": "ha lo ha lo ha lo!",
+        "pause_s": 0.5
+       }
+      ]
+     }
+    ]
+   }
   }
  ]
 }
