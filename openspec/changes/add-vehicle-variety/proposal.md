@@ -1,6 +1,6 @@
 # Change: Vehicle catalogue with body classes and LODs
 
-**Status: proposed 2026-10-02 (human: "another pass of the vehicles to create higher quality and more variety").**
+**Status: proposed 2026-10-02 (human: "another pass of the vehicles to create higher quality and more variety"); approved 2026-10-04 with the immovable-traffic-car fix folded in (human: "Lets merge the immovable car bug with the same pr"). The design's open decisions were taken as proposed: eight body classes, and invented livery names with no local in-jokes.**
 
 ## Why
 Every car on the road is the same 4.3 m sedan hull in eight colours, and the bus is a box.
@@ -38,6 +38,15 @@ plates. A catalogue also means a pack can add a vehicle with JSON and no art.
   and radius, mass, engine, brake, grip, steer and top speed, so an SUV wallows and a hatchback
   darts. Taking a traffic car keeps its class and colour. Testbed `--car=<id>` for screenshots
   and benchmarks; the spawn car is the catalogue default.
+- **Traffic cars are solid but not immovable (fix, folded in 2026-10-04).** The human saw
+  "two cars got pinned and things flew to the other end of the map". Traffic bodies are frozen
+  kinematic RigidBody3Ds moved by setting their transform, the same pattern that made
+  pedestrians stop cars dead (fixed in `add-pedestrians`). The solver treats a frozen body as
+  immovable, and a teleported one carries no velocity, so a car wedged against or between them
+  is pushed out with whatever speed resolves the overlap. A hit lab reproduces it first and
+  confirms the cause; then traffic bodies near a closing player car switch to dynamic before
+  contact (carrying the agent's velocity and the class's mass), so crashes trade momentum
+  between two real bodies, and the separation speed is capped so a wedged car can't be flung.
 - **Not in this change:** damage deformation, interiors and drivers, motorcycles and
   bicycles, suspension or tyre model changes beyond the exposed tunables, horns and sirens,
   trailers.
@@ -59,7 +68,8 @@ brand. Body shapes carry no descriptors.
   `bus_mesh.gd` (catalogue entry), `placeholder_car.gd` and `.tscn` (tunables from data),
   `game/world/traffic/traffic_manager.gd` (per-class MultiMeshes, LOD pick, spawn weights,
   snapshot stride), `traffic_agent.gd` (class index), `traffic_car.gd` (box and mass),
-  `traffic_config.json` (colours move to the catalogue), `game/core/net/world_sync.gd` and
+  `traffic_config.json` (colours move to the catalogue; hit tunables), `traffic_car.gd`
+  (sensor, dynamic before contact), `game/core/net/world_sync.gd` and
   `player_sync.gd` (class), `game/actors/remote_player.gd`, `game/scenes/play_testbed.gd`
   (`--car=`), `docs/pack-format/vehicles.schema.v0.json`, `tools/pack_tools/validate.py`,
   tests (`test_vehicle_mesh.gd` replaces `test_car_mesh.gd`, traffic and sync tests).
