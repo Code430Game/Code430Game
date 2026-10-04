@@ -2,7 +2,7 @@
 - [x] 1.1 `vehicles.schema.v0.json`, base `vehicles.v0.json` with nine entries, `VehicleCatalogue` autoload with merge and `pick_for_spawn`; `pack_tools` validates pack copies; tests; done 2026-10-04 (the map pack's `vehicles.v0.json`, if any, merges at load: there is no general pack loader yet)
 
 ## 2. Generator
-- [ ] 2.1 `trim_sheet.gd`: generated atlas; test on determinism and cell colours
+- [x] 2.1 `trim_sheet.gd`: generated atlas; test on determinism and cell colours
 - [ ] 2.2 `vehicle_mesh.gd`: parametric profile per class, LOD0 details, LOD1; tests on triangle budgets per class, outward faces, surface colour split, bounds matching `dims`
 - [ ] 2.3 Mac screenshots: a lineup of all nine classes at LOD0 and LOD1 side by side, day and night
 
