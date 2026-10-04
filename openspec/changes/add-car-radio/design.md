@@ -45,12 +45,23 @@ samples at the seam.
 All of it is composed here. Being in the style of a genre is fine; quoting another game's
 melody, even a few notes of a famous phrase, is not, and the names and taglines are invented.
 
+## Rendering once, playing a sample
+Rendering a loop in GDScript costs about 9% of real time on the Mac's M1, so filling a generator
+every frame would cost roughly 1.5 ms a frame there and several on the Deck. Instead `Radio`
+renders each station's loop once on a `WorkerThreadPool` task when the radio first needs it,
+into an `AudioStreamWAV` (16-bit mono, 22,050 Hz, about 2.5 MB a loop) with forward looping
+over exactly one pass. Playback then costs what any sample costs. To make the wrap match the
+loop's start, the render runs a pass and keeps the second one, so the echo tail and envelopes
+at the end of the kept pass are what a real repeat would hand to its start. `ChipPlayer`'s
+generator path stays for tests and short previews.
+
 ## Talk radio
 Speech as chip babble, in the spirit of the "animalese" approach: no words, only syllables that
 carry a voice's rhythm and intonation.
-- **Syllable channel.** A track may have one `talk` channel whose tokens are syllables
-  (`ba`, `ko`, `ri`, `.` for a pause, `?` and `!` marking a phrase's contour), with a `voice`:
-  base pitch, pitch range, and speaking rate.
+- **Talk object.** A talk track has a `talk` object instead of note channels' melody: named
+  `voices` (base pitch, pitch range, syllables per second) and a list of `phrases`, each a voice
+  and a text of syllables (`ba ko ri`, with `.` a pause and `?` or `!` ending a phrase to set its
+  contour). Its music channels carry the jingle.
 - **Synthesis.** Each syllable is a short burst: a noise consonant (a few milliseconds of
   filtered noise, its band chosen by the consonant) into a pulse or triangle vowel whose pitch
   glides along the phrase contour (falling for a statement, rising for `?`, a jump for `!`). The

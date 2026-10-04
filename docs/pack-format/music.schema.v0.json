@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.invalid/music.schema.v0.json",
+  "title": "Code 430 chip music tracks, version 0",
+  "description": "Tracks the game synthesises at runtime (ChipSong). Notes are C4, F#3, Bb2 with an optional :v volume 0..15; ~ holds, . releases. Talk tracks add one syllable channel (see talk).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tracks"],
+  "properties": {
+    "tracks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "tempo_bpm", "steps_per_beat", "instruments", "channels"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "title": {"type": "string", "minLength": 1, "maxLength": 60},
+          "tempo_bpm": {"type": "number", "minimum": 40, "maximum": 240},
+          "steps_per_beat": {"type": "integer", "minimum": 1, "maximum": 8},
+          "instruments": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["wave"],
+              "properties": {
+                "wave": {"enum": ["pulse", "triangle", "noise"]},
+                "duty": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+                "attack": {"type": "number", "minimum": 0},
+                "decay": {"type": "number", "minimum": 0},
+                "sustain": {"type": "number", "minimum": 0, "maximum": 1},
+                "release": {"type": "number", "minimum": 0},
+                "vibrato_hz": {"type": "number", "minimum": 0},
+                "vibrato_cents": {"type": "number", "minimum": 0}
+              }
+            }
+          },
+          "channels": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["instrument", "pattern"],
+              "properties": {
+                "instrument": {"type": "string"},
+                "pattern": {"type": "string", "pattern": "^((~|\\.|[A-G](#|b)?[0-9](:([0-9]|1[0-5]))?)( |$))+$"}
+              }
+            }
+          },
+          "echo": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {"delay_s": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}, "gain": {"type": "number", "minimum": 0, "maximum": 0.9}}
+          },
+          "talk": {
+            "type": "object",
+            "description": "Talk radio: hosts and their phrases, rendered as chip babble.",
+            "additionalProperties": false,
+            "required": ["voices", "phrases"],
+            "properties": {
+              "voices": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["base_hz", "range", "syllables_per_s"],
+                  "properties": {"base_hz": {"type": "number"}, "range": {"type": "number"}, "syllables_per_s": {"type": "number"}}
+                }
+              },
+              "phrases": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["voice", "text"],
+                  "properties": {"voice": {"type": "string"}, "text": {"type": "string", "pattern": "^[a-z .?!]+$"}, "pause_s": {"type": "number", "minimum": 0}}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
