@@ -105,3 +105,50 @@ func test_echo_repeats_a_note_later() -> void:
 	for i in range(int(RATE * 0.55), int(RATE * 0.6)):
 		late = maxf(late, absf(buf[i].x))
 	assert_float(late).is_greater(0.01)  # the dry note ended long before; this is the echo
+
+
+func _chatter() -> Dictionary:
+	var doc: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://core/audio/radio/music.v0.json"))
+	for t in doc["tracks"]:
+		if t["id"] == "chatter":
+			return t
+	return {}
+
+
+func test_talk_segments_fit_between_the_jingles() -> void:
+	var track := _chatter()
+	var song := ChipSong.from_dict(track, RATE)
+	var segments: Array = track["talk"]["segments"]
+	var bar_s := 60.0 / float(track["tempo_bpm"]) * 4.0
+	var second_jingle := 12 * bar_s
+	for e in song.talk_events:
+		var start := float(e[0]) / RATE
+		var end := float(e[1]) / RATE
+		if start < float(segments[1]["start_s"]):
+			assert_float(end).override_failure_message("segment A runs into the second jingle").is_less(second_jingle)
+		else:
+			assert_float(end).override_failure_message("segment B runs past the loop").is_less(song.length_s())
+	assert_int(song.talk_events.size()).is_greater(100)
+
+
+func test_question_rises_and_statement_falls() -> void:
+	var talk := {"voices": {"v": {"base_hz": 200.0, "range": 6.0, "syllables_per_s": 8.0}},
+		"segments": [{"start_s": 0.0, "phrases": [
+			{"voice": "v", "text": "ba ko ri ta ne mo?"},
+			{"voice": "v", "text": "ba ko ri ta ne mo"}]}]}
+	var events := ChipSong.build_talk(talk, RATE, 1)
+	assert_int(events.size()).is_equal(12)
+	# Question: the last syllable ends well above the first; statement: the reverse.
+	assert_float(events[5][6]).is_greater(events[0][5] * pow(2.0, 2.0 / 12.0))
+	assert_float(events[11][6]).is_less(events[6][5])
+
+
+func test_talk_renders_speech_and_silence() -> void:
+	var song := ChipSong.from_dict(_chatter(), RATE)
+	var e0: Array = song.talk_events[0]
+	song.render(e0[0])  # up to the first syllable (the jingle has finished by then)
+	var speech := song.render(int(0.4 * RATE))
+	var loud := 0.0
+	for v in speech:
+		loud = maxf(loud, absf(v.x))
+	assert_float(loud).is_greater(0.05)
