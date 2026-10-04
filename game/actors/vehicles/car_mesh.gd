@@ -97,31 +97,17 @@ static func build(with_wheels: bool) -> ArrayMesh:
 
 
 ## One shared tail-light material: red glow after dusk (DayNight raises its energy).
-static var _tails: StandardMaterial3D = null
 
 
 static func tail_material() -> StandardMaterial3D:
-	if _tails == null:
-		_tails = StandardMaterial3D.new()
-		_tails.vertex_color_use_as_albedo = true
-		_tails.emission_enabled = true
-		_tails.emission = Color(1.0, 0.12, 0.08)
-		_tails.emission_energy_multiplier = 0.0
-	return _tails
+	return VehicleMesh.tail_material()  # one shared instance for every vehicle
 
 
 ## Bright red for the player's tail lights while braking, day or night.
-static var _brake: StandardMaterial3D = null
 
 
 static func brake_material() -> StandardMaterial3D:
-	if _brake == null:
-		_brake = StandardMaterial3D.new()
-		_brake.vertex_color_use_as_albedo = true
-		_brake.emission_enabled = true
-		_brake.emission = Color(1.0, 0.1, 0.05)
-		_brake.emission_energy_multiplier = 5.0
-	return _brake
+	return VehicleMesh.brake_material()  # one shared instance for every vehicle
 
 
 ## Tintable body material: vertex colour (white) times the tint, or the MultiMesh instance colour.
@@ -143,18 +129,11 @@ static func dark_material() -> StandardMaterial3D:
 
 
 ## One shared lights material for every car, so DayNight can brighten them all at once.
-static var _lights: StandardMaterial3D = null
 const LIGHT_NIGHT_ENERGY := 4.0
 
 
 static func light_material() -> StandardMaterial3D:
-	if _lights == null:
-		_lights = StandardMaterial3D.new()
-		_lights.vertex_color_use_as_albedo = true
-		_lights.emission_enabled = true
-		_lights.emission = Color(1.0, 0.9, 0.7)
-		_lights.emission_energy_multiplier = 0.0  # DayNight raises this after dusk
-	return _lights
+	return VehicleMesh.light_material()  # one shared instance for every vehicle
 
 
 ## Quad with its front face outward: the vertex order is flipped if the normal points toward
