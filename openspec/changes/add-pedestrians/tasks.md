@@ -22,4 +22,4 @@
 ## 4. Verification
 - [x] 4.1 Deck (2026-09-30, same run as streaming 3.1): 120 pedestrians plus 150 traffic agents, GPU 6.70 ms, render CPU 1.10 ms, physics process 7.71 ms (was 5.9 ms with traffic alone)
 - [x] 4.1b Deck rerun (2026-10-04, `--benchmark=40 --autodrive --preset=deck --peds=120 --traffic=150`, against `main` built the same day): main avg 10.17 ms, p99 14.58, GPU 9.11, physics 9.85; this branch avg 10.52, p99 16.67, GPU 9.71, physics 10.65; with `--knockdown-every=2` (15 knock-downs, 1.7 ragdolls falling per frame on average) avg 11.12, p99 19.85, GPU 10.09, physics 12.82. All far inside the 33.3 ms floor; single runs, routes differ
-- [ ] 4.2 **Stop: human walks and drives among pedestrians on the Deck** (now also: limbs swing, drive into people and compare the hit, closes #15)
+- [x] 4.2 **Stop: human walks and drives among pedestrians on the Deck** (now also: limbs swing, drive into people and compare the hit, closes #15); passed 2026-10-04: "The pedestrians are moving their arms and they respond WAY better to the car. I think that's mostly good now" (graphics to improve in later rounds)
