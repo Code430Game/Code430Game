@@ -3,7 +3,7 @@
 
 ## 2. Generator
 - [x] 2.1 `trim_sheet.gd`: generated atlas; test on determinism and cell colours
-- [ ] 2.2 `vehicle_mesh.gd`: parametric profile per class, LOD0 details, LOD1; tests on triangle budgets per class, outward faces, surface colour split, bounds matching `dims`
+- [x] 2.2 `vehicle_mesh.gd`: parametric profile per class, LOD0 details, LOD1; tests on triangle budgets per class, outward faces, surface colour split, bounds matching `dims`; done 2026-10-04: every face carries its own outward normal (flat shading) and the test checks each triangle's winding against it, plus exact checks on side panels, roof and underside; LOD0 410–430 triangles with wheels, LOD1 145–200
 - [ ] 2.3 Mac screenshots: a lineup of all nine classes at LOD0 and LOD1 side by side, day and night
 
 ## 3. Traffic
