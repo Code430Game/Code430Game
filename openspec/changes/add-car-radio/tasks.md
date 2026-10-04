@@ -1,7 +1,8 @@
 ## 1. Engine fix and synth
 - [x] 1.1 Engine sound after getting back in: a test drives in, out and back in and finds the engine voice silent (reproducing the human's report), then `VehicleAudio` restarts its voices on entry and the test passes
   - Reproduced: back into the same car the engine resumed; into a different car it was silent, because the engine voice lived only on the starting car. `VehicleAudio.attach(car)` now follows the player into whichever car they take and restarts stopped voices; `test_testbed_vehicle_audio.gd` covers both cases.
-- [ ] 1.2 `ChipPlayer`: four-channel tracker voice on one generator stream, envelopes, vibrato, note parsing, sample-clock timing; tests on note frequencies, step timing, a rendered loop's RMS under the clip ceiling, and no click at the loop point
+- [x] 1.2 `ChipPlayer`: four-channel tracker voice on one generator stream, envelopes, vibrato, note parsing, sample-clock timing; tests on note frequencies, step timing, a rendered loop's RMS under the clip ceiling, and no click at the loop point
+  - Split as `ChipSong` (renders a track to samples; all tests run on it, no audio device) and `ChipPlayer` (feeds a generator on the Music bus). `test_chip_song.gd`: note frequencies, tokens, steps on the sample clock, a pulse A4 at 440 Hz, a dense four-channel loop under the clip ceiling, no envelope jump across the loop seam, echo.
 - [ ] 1.3 `music.schema.v0.json` (with the talk syllable channel) and `radio.schema.v0.json`; `pack_tools` validates both; tests
 
 ## 2. Stations
