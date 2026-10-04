@@ -191,3 +191,6 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   `test_testbed_menus.gd` (the full testbed, with chunk-streamer and radio tasks). Running only
   those two suites 6 times did not reproduce it. Suspect a WorkerThreadPool task from the
   testbed outliving its teardown. Rerunning CI passes.
+  **Mitigated 2026-10-04:** became 3 in 5 runs once traffic grew; ignoring the testbed suite
+  gave 4 of 4 clean runs, confirming it as the source. Letting the freed testbed settle for 60
+  frames in its `after()` gave 5 of 5 clean. The thread itself is still unnamed.
