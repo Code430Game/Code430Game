@@ -30,11 +30,13 @@ player is a `CharacterRig` (Skeleton3D, 11 bones, `CharacterMesh.walk_pose`).
   infinite-mass body. This replaces unfreezing the capsule, which the probe showed comes a
   frame too late.
 - **Resistance is explicit and tunable.** On a hit the car gets an impulse against its motion,
-  `hit_car_impulse_ns` (default 1200 N·s, about 3.6 km/h off a 1200 kg car), on top of the
-  real contacts between the ragdoll's bones and the car (about 3 km/h at 50 km/h in the probe).
-  The person's bones start with `car_velocity * hit_transfer` (default 0.9) plus
-  `hit_lift_mps` (1.5) upward. Traffic cars are kinematic-driven agents: they get the person
-  thrown but no impulse.
+  `hit_car_impulse_ns` (2000 N·s, about 6 km/h off a 1200 kg car; in the hit lab at 50 km/h
+  the car loses 5.3 km/h more than coasting over the same stretch), on top of any real contact
+  between the falling body and the car. The person starts with `car_velocity * hit_transfer`
+  (0.9) plus `hit_lift_mps` (1.5) upward. Traffic cars are frozen and moved by transform, so
+  their `linear_velocity` is zero and their velocity comes from the agent (forward times
+  speed). Before this, a traffic car could never knock anyone down, because the old 1.5 m/s
+  check on `linear_velocity` never passed. They throw the person but get no impulse.
 - **Ragdoll is a character component, not a pedestrian one.** `CharacterRagdoll`
   (`game/actors/character/character_ragdoll.gd`) works from any `CharacterProfile` and knows
   nothing about pedestrians, cars or weapons. Its API: `begin(profile, xform, pose, velocity)`,
@@ -75,8 +77,8 @@ player is a `CharacterRig` (Skeleton3D, 11 bones, `CharacterMesh.walk_pose`).
 - Ragdoll physics cost: about 10 bodies and joints per active ragdoll, at most 6 at once.
   Measured in the Deck benchmark with a hit in progress (task 4.1b).
 - Shader drift from `walk_pose`: guarded by the coefficient test.
-- A car fast enough to cross the sensor in one physics tick (above roughly 30 m/s): the
-  sensor is checked by a shape cast along the car's motion as well as by overlap.
+- Tunnelling past the sensor: a 4.2 m car and a 0.9 m sensor overlap for at least one 60 Hz
+  tick at any speed under about 300 m/s, so overlap alone is enough.
 
 ## Migration Plan
 None: no saved data. Co-op snapshots are unchanged; clients run the walk phase locally from
