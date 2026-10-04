@@ -33,6 +33,13 @@ Pedestrians and traffic cars only have physics bodies within the body radius of 
 is the same reach a shot needs; a hit beyond that reach is rare and is resolved by the host
 against the agent nearest the hit position, as `hit_near` already does for car hits.
 
+Since `add-pedestrians` (addendum 2026-10-04): walking pedestrians sit on physics layer 3, so
+shot rays and projectiles must include it in their mask. A lethal impact goes to
+`PedestrianManager.knock_down(agent, impulse, point)`, which starts the ragdoll fall with the
+impulse on the nearest bone. Pool meshes use `INSTANCE_CUSTOM.xy` for the walk cycle, which
+leaves `.zw` for paint. A downed player can fall with the same `CharacterRagdoll`
+(`game/actors/character/`): `begin`, then `apply_impulse` at the hit point.
+
 ## Reactions
 - Pedestrians gain `FLEEING` between `WALKING` and `HIT`: speed 3.2 m/s away from the threat
   along the ribbon for `flee_s`, then back to walking. `DOWN` is reached from a lethal impact
