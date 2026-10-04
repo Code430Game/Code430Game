@@ -549,6 +549,31 @@ func knock_down(a: Pedestrian, impulse: Vector3, point: Vector3, spread: float =
 		a.body.apply_impulse(impulse, point - a.body.global_position)
 
 
+## Knocks down the walking pedestrian nearest `around` within `radius`, pushed with `impulse`
+## at chest height (benchmarks and debug). Returns false when nobody is in reach.
+func knock_down_nearest(around: Vector3, radius: float, impulse: Vector3) -> bool:
+	var best: Pedestrian = null
+	var best_d := radius
+	for a in agents:
+		var d := a.position().distance_to(around)
+		if a.state == Pedestrian.State.WALKING and d < best_d:
+			best_d = d
+			best = a
+	if best == null:
+		return false
+	knock_down(best, impulse, best.position() + Vector3.UP * 1.1)
+	return true
+
+
+## Ragdolls currently simulating (not yet settled).
+func falling_count() -> int:
+	var n := 0
+	for rd in _ragdolls:
+		if rd.active and not rd.is_settled():
+			n += 1
+	return n
+
+
 ## A free ragdoll, or the one under the downed person with the least time left (who goes).
 func _take_ragdoll() -> CharacterRagdoll:
 	if _ragdolls.is_empty() or pool_profiles.is_empty():
