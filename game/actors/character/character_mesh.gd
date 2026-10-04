@@ -58,10 +58,18 @@ static func bone_pivot(i: int, profile: Dictionary) -> Vector3:
 	return (BONES[i][2] as Vector3) * s
 
 
+## Walk cycle coefficients, shared with pedestrian_walk.gdshader (a test keeps them equal).
+const WALK_SWING := 0.55  # thigh swing at full amount, radians
+const WALK_KNEE := 0.9  # knee bend
+const WALK_ARM := 0.8  # upper arm swing, as a fraction of the thigh swing
+const WALK_ELBOW := 0.35  # elbow bend
+const WALK_BOB := 0.025  # hip bob, metres
+
+
 ## Walk pose at `phase` (radians, one stride per 2 pi) blended by `amount` 0..1:
 ## bone name -> rotation about X (radians); hips get a vertical bob under "hips_bob".
 static func walk_pose(phase: float, amount: float) -> Dictionary:
-	var swing := 0.55 * amount
+	var swing := WALK_SWING * amount
 	var leg_l := -swing * sin(phase)
 	var leg_r := swing * sin(phase)
 	return {
@@ -69,14 +77,30 @@ static func walk_pose(phase: float, amount: float) -> Dictionary:
 		"thigh_r": leg_r,
 		# Rotation about +X swings a hanging bone's lower end toward -Z, the facing direction.
 		# Knees and elbows bend the other way: the heel lifts behind, the hand comes forward.
-		"shin_l": -0.9 * amount * maxf(0.0, sin(phase - PI * 0.5)),
-		"shin_r": -0.9 * amount * maxf(0.0, sin(phase + PI * 0.5)),
-		"upper_arm_l": 0.8 * swing * sin(phase),
-		"upper_arm_r": -0.8 * swing * sin(phase),
-		"forearm_l": 0.35 * amount,
-		"forearm_r": 0.35 * amount,
-		"hips_bob": 0.025 * amount * absf(sin(phase)),
+		"shin_l": -WALK_KNEE * amount * maxf(0.0, sin(phase - PI * 0.5)),
+		"shin_r": -WALK_KNEE * amount * maxf(0.0, sin(phase + PI * 0.5)),
+		"upper_arm_l": WALK_ARM * swing * sin(phase),
+		"upper_arm_r": -WALK_ARM * swing * sin(phase),
+		"forearm_l": WALK_ELBOW * amount,
+		"forearm_r": WALK_ELBOW * amount,
+		"hips_bob": WALK_BOB * amount * absf(sin(phase)),
 	}
+
+
+## Where a rest-pose vertex of `bone` lands under the walk pose, by walking up the bone chain
+## the way pedestrian_walk.gdshader does on the GPU (the shader is checked against this).
+static func walk_vertex(v: Vector3, bone: int, profile: Dictionary, phase: float, amount: float) -> Vector3:
+	var pose := walk_pose(phase, amount)
+	var b := bone
+	var p := v - bone_pivot(b, profile)
+	while b >= 0:
+		var parent := bone_index(BONES[b][1])
+		p = Basis(Vector3.RIGHT, float(pose.get(BONES[b][0], 0.0))) * p
+		p += bone_pivot(b, profile) - (bone_pivot(parent, profile) if parent >= 0 else Vector3.ZERO)
+		if parent < 0:
+			p.y += float(pose["hips_bob"])
+		b = parent
+	return p
 
 
 ## Model-space transform of bone `i` under `pose` (empty: rest).
@@ -94,8 +118,9 @@ static func bone_global(i: int, profile: Dictionary, pose: Dictionary) -> Transf
 
 
 ## The body mesh. With `skinned` the surface carries bone indices and weights for a
-## Skeleton3D; otherwise `pose` is baked into the vertices.
-static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = false) -> ArrayMesh:
+## Skeleton3D; otherwise `pose` is baked into the vertices. With `bone_channel` each vertex
+## also carries its bone index in CUSTOM0.r (for pedestrian_walk.gdshader, rest pose).
+static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = false, bone_channel: bool = false) -> ArrayMesh:
 	var p := CharacterProfile.normalise(profile)
 	var sy: float = p["height"]
 	var sw: float = p["build"]
@@ -109,7 +134,10 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 	var sleeve: Color = CharacterProfile.CLOTH[p["jacket_colour"]] if jacket else top
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	if bone_channel:
+		st.set_custom_format(0, SurfaceTool.CUSTOM_R_FLOAT)
 	var b := _Builder.new(st, p, pose, skinned, s)
+	b.bone_channel = bone_channel
 	# Legs and shoes
 	for side: float in [-1.0, 1.0]:
 		var thigh := "thigh_l" if side > 0.0 else "thigh_r"
@@ -227,6 +255,7 @@ class _Builder:
 	var profile: Dictionary
 	var pose: Dictionary
 	var skinned: bool
+	var bone_channel: bool = false
 	var scale: Vector3
 	var _bone_xf: Dictionary = {}  # name -> posed transform * inverse bind, model space
 
@@ -251,6 +280,8 @@ class _Builder:
 			var xf: Transform3D = _bone_xf[bone]
 			pos = xf * pos
 			n = (xf.basis * n).normalized()
+		if bone_channel:
+			st.set_custom(0, Color(float(CharacterMesh.bone_index(bone)), 0.0, 0.0, 0.0))
 		st.set_color(color)
 		st.set_normal(n)
 		st.add_vertex(pos)
