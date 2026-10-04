@@ -16,7 +16,8 @@
     "positional_shadow_size": 2048,
     "shadow_quality": "soft_low",
     "max_fps": 0,
-    "headlight_shadows": false
+    "headlight_shadows": false,
+    "vehicle_lod0_m": 60.0
   },
   "high": {
     "label": "High (desktop)",
@@ -34,6 +35,7 @@
     "positional_shadow_size": 4096,
     "shadow_quality": "soft_high",
     "max_fps": 0,
-    "headlight_shadows": true
+    "headlight_shadows": true,
+    "vehicle_lod0_m": 110.0
   }
 }

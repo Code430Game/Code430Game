@@ -17,6 +17,7 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | Positional shadow atlas | 2048 | 4096 | viewport |
 | Soft shadow quality | low | high | RenderingServer |
 | FPS cap | none | none | Engine |
+| Vehicle detail distance (`vehicle_lod0_m`) | 60 m | 110 m | traffic: LOD0 bodies within this distance of a player, LOD1 beyond |
 
 ## Adding a feature
 1. Add the key to both presets in `presets.json`.
