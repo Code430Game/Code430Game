@@ -37,6 +37,7 @@ var _pools: Array[MultiMeshInstance3D] = []
 var pool_profiles: Array[Dictionary] = []
 var _last_snapshot_ms: int = 0
 var _bodies: Array[PedestrianBody] = []
+var _ragdolls: Array[CharacterRagdoll] = []
 
 
 func _ready() -> void:
@@ -144,6 +145,11 @@ func _setup_rendering() -> void:
 		body.process_mode = Node.PROCESS_MODE_DISABLED
 		body.global_position = Vector3(0, -1000, 0)
 		_bodies.append(body)
+	for i in range(int(config.get("ragdoll_pool", 6))):
+		var rd := CharacterRagdoll.new()
+		rd.name = "Ragdoll%d" % i
+		add_child(rd)
+		_ragdolls.append(rd)
 
 
 ## The walk shader material for one body look: its bone pivots as the shader's uniform.
@@ -217,7 +223,7 @@ func step(delta: float) -> void:
 		if a.state != Pedestrian.State.WALKING:
 			_step_struck(a, delta)
 			if a.state == Pedestrian.State.DOWN and a.timer <= 0.0:
-				_release_body(a)
+				_drop(a)
 				agents.remove_at(i)
 			continue
 		var d := _distance_to_anchors(a.position())
@@ -231,11 +237,15 @@ func step(delta: float) -> void:
 
 func _step_struck(a: Pedestrian, delta: float) -> void:
 	a.timer -= delta
-	if a.body != null:
+	if a.ragdoll != null:
+		a.transform = a.ragdoll.root_transform()
+	elif a.body != null:
 		a.transform = a.body.global_transform
 	if a.state == Pedestrian.State.HIT and a.timer <= 0.0:
 		a.state = Pedestrian.State.DOWN
 		a.timer = float(config["remove_after_s"])
+		if a.ragdoll != null:
+			a.ragdoll.settle()
 		if a.body != null:
 			a.body.make_walker()
 
@@ -359,7 +369,7 @@ func _despawn_far() -> void:
 	for i in range(agents.size() - 1, -1, -1):
 		var a := agents[i]
 		if _distance_to_anchors(a.position()) > far:
-			_release_body(a)
+			_drop(a)
 			agents.remove_at(i)
 
 
@@ -420,7 +430,7 @@ func apply_snapshot(data: PackedFloat32Array) -> void:
 	var n := data.size() / 5
 	var colors: Array = config["colors"]
 	while agents.size() > n:
-		_release_body(agents[agents.size() - 1])
+		_drop(agents[agents.size() - 1])
 		agents.pop_back()
 	while agents.size() < n:
 		agents.append(Pedestrian.new())
@@ -488,8 +498,9 @@ func _release_body(a: Pedestrian) -> void:
 		return
 	a.body.agent = null
 	a.body.make_walker()
-	a.body.process_mode = Node.PROCESS_MODE_DISABLED
 	a.body.global_position = Vector3(0, -1000, 0)
+	# Deferred: this can run inside a physics callback (a knock-down from the sensor).
+	a.body.park.call_deferred()
 	a.body = null
 
 
@@ -508,21 +519,74 @@ func _on_body_hit(body: PedestrianBody, vehicle: Node3D, velocity: Vector3) -> v
 
 ## How fast a knocked-down person's body is moving (zero while walking or without a body).
 func thrown_velocity(a: Pedestrian) -> Vector3:
-	if a.state == Pedestrian.State.WALKING or a.body == null or a.body.freeze:
+	if a.state == Pedestrian.State.WALKING:
+		return Vector3.ZERO
+	if a.ragdoll != null:
+		return Vector3.ZERO if a.ragdoll.is_settled() else a.ragdoll.velocity()
+	if a.body == null or a.body.freeze:
 		return Vector3.ZERO
 	return a.body.linear_velocity
 
 
 ## Knocks a walking pedestrian down: `impulse` (N s) applied at world `point`. The one entry
-## point for anything that floors someone (vehicles now; later weapons and the like).
-func knock_down(a: Pedestrian, impulse: Vector3, point: Vector3) -> void:
+## point for anything that floors someone (vehicles now; later weapons and the like). The
+## person falls as a ragdoll from the pool, `spread` (0..1, default from the config) of the
+## impulse moving the whole body and the rest the bone nearest `point`; without a ragdoll the
+## walking capsule tumbles instead.
+func knock_down(a: Pedestrian, impulse: Vector3, point: Vector3, spread: float = -1.0) -> void:
 	if a.state != Pedestrian.State.WALKING:
 		return
 	a.state = Pedestrian.State.HIT
 	a.timer = float(config["hit_physics_s"])
-	if a.body != null:
+	var rd := _take_ragdoll()
+	if rd != null:
+		_release_body(a)
+		a.ragdoll = rd
+		rd.begin(pool_profiles[_pool_of(a)], a.transform, a.walk_phase, a.walk_amount)
+		rd.apply_impulse(impulse, point, float(config.get("hit_spread", 0.7)) if spread < 0.0 else spread)
+	elif a.body != null:
 		a.body.make_dynamic(Vector3.ZERO)
 		a.body.apply_impulse(impulse, point - a.body.global_position)
+
+
+## A free ragdoll, or the one under the downed person with the least time left (who goes).
+func _take_ragdoll() -> CharacterRagdoll:
+	if _ragdolls.is_empty() or pool_profiles.is_empty():
+		return null
+	for rd in _ragdolls:
+		if not rd.active:
+			return rd
+	var oldest: Pedestrian = null
+	for a in agents:
+		if a.ragdoll != null and a.state == Pedestrian.State.DOWN and (oldest == null or a.timer < oldest.timer):
+			oldest = a
+	if oldest == null:
+		return null  # every ragdoll is mid-fall: this one tumbles as a capsule
+	var rd := oldest.ragdoll
+	_drop(oldest)
+	agents.erase(oldest)
+	return rd
+
+
+func _pool_of(a: Pedestrian) -> int:
+	if a.pool < 0:
+		a.pool = int(a.color.r * 255.0 + a.color.g * 255.0 * 3.0 + a.color.b * 255.0 * 7.0) % POOLS
+	return a.pool
+
+
+## Lets go of everything an agent holds (body, ragdoll) before it is removed.
+func _drop(a: Pedestrian) -> void:
+	_release_body(a)
+	if a.ragdoll != null:
+		a.ragdoll.release()
+		a.ragdoll = null
+
+
+## Removes every agent (co-op clients switching to the host's people).
+func clear_agents() -> void:
+	for a in agents:
+		_drop(a)
+	agents.clear()
 
 
 ## The walk shader's per-instance data for an agent: phase, amount (zero unless walking).
@@ -537,9 +601,9 @@ func _render() -> void:
 	var counts := PackedInt32Array()
 	counts.resize(POOLS)
 	for a in agents:
-		if a.pool < 0:
-			a.pool = int(a.color.r * 255.0 + a.color.g * 255.0 * 3.0 + a.color.b * 255.0 * 7.0) % POOLS
-		var mm := _pools[a.pool].multimesh
+		if a.ragdoll != null:
+			continue  # drawn by its ragdoll
+		var mm := _pools[_pool_of(a)].multimesh
 		var k := counts[a.pool]
 		if k >= mm.instance_count:
 			continue

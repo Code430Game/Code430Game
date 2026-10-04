@@ -80,3 +80,10 @@ func make_walker() -> void:
 	collision_mask = 0
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
+
+
+## Takes an unused body out of the physics world. Skips it when it was handed to someone
+## again before this deferred call ran.
+func park() -> void:
+	if agent == null:
+		process_mode = Node.PROCESS_MODE_DISABLED

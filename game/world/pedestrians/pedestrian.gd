@@ -21,6 +21,7 @@ var transform: Transform3D = Transform3D.IDENTITY
 var walk_phase: float = 0.0  # walk cycle, radians (see CharacterRig.step_walk)
 var walk_amount: float = 0.0  # 0 standing .. 1 full stride
 var body: PedestrianBody = null
+var ragdoll: CharacterRagdoll = null  # while knocked down, when the pool has one
 
 
 func position() -> Vector3:
