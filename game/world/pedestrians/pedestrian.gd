@@ -18,6 +18,8 @@ var timer: float = 0.0  # HIT: physics window left; DOWN: time until removal
 var color: Color = Color.WHITE
 var pool: int = -1  # body pool (PedestrianManager.POOLS), chosen from the colour when unset
 var transform: Transform3D = Transform3D.IDENTITY
+var walk_phase: float = 0.0  # walk cycle, radians (see CharacterRig.step_walk)
+var walk_amount: float = 0.0  # 0 standing .. 1 full stride
 var body: PedestrianBody = null
 
 
