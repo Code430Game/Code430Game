@@ -133,6 +133,25 @@ func _on_body_entered(_body: Node) -> void:
 	impacted.emit(maxf(closing, _last_velocity.length() * 0.3))
 
 
+var _speed_limit: float = INF
+var _speed_limit_until_ms: int = 0
+
+
+## For `seconds`, keeps the car from going faster than `max_mps` or the speed it had just
+## before this physics step, whichever is higher: a crash can slow it, never launch it.
+func limit_speed(max_mps: float, seconds: float) -> void:
+	_speed_limit = maxf(max_mps, _last_velocity.length() + 2.0)
+	_speed_limit_until_ms = Time.get_ticks_msec() + int(seconds * 1000.0)
+
+
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	if _speed_limit < INF:
+		if Time.get_ticks_msec() > _speed_limit_until_ms:
+			_speed_limit = INF
+		elif state.linear_velocity.length() > _speed_limit:
+			state.linear_velocity = state.linear_velocity.limit_length(_speed_limit)
+
+
 func _physics_process(delta: float) -> void:
 	_last_velocity = linear_velocity
 	var driven := driver_peer_id == Players.LOCAL_PEER_ID

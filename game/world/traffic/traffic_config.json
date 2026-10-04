@@ -53,5 +53,6 @@
     "tertiary",
     "primary_link",
     "secondary_link"
-  ]
+  ],
+  "separation_cap_mps": 25.0
 }
