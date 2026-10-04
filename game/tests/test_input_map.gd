@@ -5,7 +5,7 @@ const REQUIRED_ACTIONS: PackedStringArray = [
 	"move_forward", "move_back", "move_left", "move_right",
 	"look_up", "look_down", "look_left", "look_right",
 	"sprint", "jump", "interact", "accelerate", "brake", "handbrake", "pause",
-	"debug_modifier", "debug_toggle", "debug_graph", "reset_vehicle", "map_toggle",
+	"debug_modifier", "debug_toggle", "debug_graph", "reset_vehicle", "map_toggle", "radio_cycle",
 ]
 
 
@@ -43,7 +43,7 @@ func test_every_action_has_a_gamepad_binding() -> void:
 ## the handbrake and the car reset once both sat on RB and every handbrake pull teleported the car.
 func test_driving_actions_use_distinct_buttons() -> void:
 	const DRIVING_ACTIONS: PackedStringArray = [
-		"accelerate", "brake", "handbrake", "reset_vehicle", "camera_cycle", "headlights_cycle", "interact", "pause", "map_toggle",
+		"accelerate", "brake", "handbrake", "reset_vehicle", "camera_cycle", "headlights_cycle", "interact", "pause", "map_toggle", "radio_cycle",
 	]
 	var owner_by_button: Dictionary = {}
 	for action in DRIVING_ACTIONS:

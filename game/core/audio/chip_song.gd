@@ -16,6 +16,9 @@ extends RefCounted
 ## Phrases come in segments that start at set times; the music channels carry the jingles.
 
 const MAX_CHANNELS := 4
+const WAVE_PULSE := 0
+const WAVE_TRIANGLE := 1
+const WAVE_NOISE := 2
 const MASTER_GAIN := 0.22  # four full channels sum to under 1.0
 const NOTE_NAMES := {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 
@@ -51,6 +54,7 @@ const CONSONANTS := {
 class Channel:
 	extends RefCounted
 	var wave: String = "pulse"
+	var wave_kind: int = WAVE_PULSE
 	var duty: float = 0.5
 	var attack: float = 0.01
 	var decay: float = 0.1
@@ -83,6 +87,7 @@ static func from_dict(track: Dictionary, rate: float = Synth.MIX_RATE) -> ChipSo
 		var ch := Channel.new()
 		var inst: Dictionary = instruments.get(ch_data.get("instrument", ""), {})
 		ch.wave = str(inst.get("wave", "pulse"))
+		ch.wave_kind = {"pulse": WAVE_PULSE, "triangle": WAVE_TRIANGLE, "noise": WAVE_NOISE}.get(ch.wave, WAVE_PULSE)
 		ch.duty = float(inst.get("duty", 0.5))
 		ch.attack = maxf(float(inst.get("attack", 0.01)), 0.001)
 		ch.decay = maxf(float(inst.get("decay", 0.1)), 0.001)
@@ -142,24 +147,33 @@ func length_s() -> float:
 	return length_steps * step_samples / mix_rate
 
 
-## Renders `frames` stereo samples, continuing where the last call stopped.
+## Renders `frames` stereo samples, continuing where the last call stopped. Works in blocks that
+## run from one step boundary to the next, so each channel's inner loop touches only locals.
 func render(frames: int) -> PackedVector2Array:
-	var out := PackedVector2Array()
-	out.resize(frames)
-	var dt := 1.0 / mix_rate
+	var mixbuf := PackedFloat32Array()
+	mixbuf.resize(frames)
+	mixbuf.fill(0.0)
 	var loop := loop_samples()
-	for i in range(frames):
-		var global_step := int(floor(_sample / step_samples))
-		var mix := 0.0
+	var done := 0
+	while done < frames:
+		var abs_s := _sample + done
+		var global_step := int(floor(abs_s / step_samples))
+		var next_start := int(ceil((global_step + 1) * step_samples))
+		var block := maxi(1, mini(frames - done, next_start - abs_s))
 		for ch in channels:
 			var step := global_step % length_steps % ch.steps.size()
 			if step != ch.last_step:
 				_enter_step(ch, ch.steps[step])
 				ch.last_step = step
-			mix += _channel_sample(ch, dt)
+			_render_block(ch, mixbuf, done, block)
 		if not talk_events.is_empty():
-			mix += _talk_sample(_sample % loop) * TALK_GAIN
-		var s := mix * MASTER_GAIN
+			for i in range(block):
+				mixbuf[done + i] += _talk_sample((abs_s + i) % loop) * TALK_GAIN
+		done += block
+	var out := PackedVector2Array()
+	out.resize(frames)
+	for i in range(frames):
+		var s := mixbuf[i] * MASTER_GAIN
 		if echo_samples > 0:
 			var delayed := _echo[_echo_pos]
 			_echo[_echo_pos] = s + delayed * echo_gain
@@ -167,8 +181,16 @@ func render(frames: int) -> PackedVector2Array:
 			s += delayed * echo_gain
 		s = clampf(s, -1.0, 1.0)
 		out[i] = Vector2(s, s)
-		_sample += 1
+	_sample += frames
 	return out
+
+
+## Jumps to `sample` (in loop time): the next render enters whatever steps are current there.
+## Rendering a little before a point warms envelopes and the echo up to it.
+func seek(sample: int) -> void:
+	_sample = sample
+	for ch in channels:
+		ch.last_step = -1
 
 
 ## Syllable events for a talk object: each phrase's syllables spaced by its voice's rate, its
@@ -282,39 +304,67 @@ func _enter_step(ch: Channel, step: Array) -> void:
 			pass  # hold: keep going
 
 
-func _channel_sample(ch: Channel, dt: float) -> float:
-	# Envelope.
-	match ch.stage:
-		0:
-			ch.level += dt / ch.attack
-			if ch.level >= 1.0:
-				ch.level = 1.0
-				ch.stage = 1
-		1:
-			ch.level -= dt / ch.decay * (1.0 - ch.sustain)
-			if ch.level <= ch.sustain:
-				ch.level = ch.sustain
-				ch.stage = 2
-		3:
-			ch.level = maxf(0.0, ch.level - dt / ch.release)
-	if ch.level <= 0.0 or ch.hz <= 0.0:
-		return 0.0
-	ch.note_time += dt
+## Adds `n` samples of one channel into `buf` from `offset`, carrying its state in locals.
+func _render_block(ch: Channel, buf: PackedFloat32Array, offset: int, n: int) -> void:
+	var dt := 1.0 / mix_rate
+	var level := ch.level
+	var stage := ch.stage
+	var phase := ch.phase
 	var hz := ch.hz
-	if ch.vibrato_cents > 0.0 and ch.vibrato_hz > 0.0:
-		hz *= pow(2.0, ch.vibrato_cents * sin(TAU * ch.vibrato_hz * ch.note_time) / 1200.0)
-	ch.phase = fposmod(ch.phase + hz / mix_rate, 1.0)
-	var v := 0.0
-	match ch.wave:
-		"pulse":
-			v = 1.0 if ch.phase < ch.duty else -1.0
-		"triangle":
-			v = 4.0 * absf(ch.phase - 0.5) - 1.0
-		"noise":
+	var vol := ch.volume
+	var att := dt / ch.attack
+	var dec := dt / ch.decay * (1.0 - ch.sustain)
+	var sus := ch.sustain
+	var rel := dt / ch.release
+	var vib := ch.vibrato_cents > 0.0 and ch.vibrato_hz > 0.0
+	var vib_k := 0.693147 * ch.vibrato_cents / 1200.0  # 2^(c/1200) ~ 1 + c ln2 / 1200 for a few cents
+	var vib_w := TAU * ch.vibrato_hz
+	var note_time := ch.note_time
+	var inc := hz / mix_rate
+	var wave := ch.wave_kind
+	var duty := ch.duty
+	var ncount := ch.noise_count
+	var nval := ch.noise_value
+	for i in range(n):
+		if stage == 0:
+			level += att
+			if level >= 1.0:
+				level = 1.0
+				stage = 1
+		elif stage == 1:
+			level -= dec
+			if level <= sus:
+				level = sus
+				stage = 2
+		elif stage == 3:
+			level -= rel
+			if level < 0.0:
+				level = 0.0
+		if level <= 0.0 or hz <= 0.0:
+			continue
+		note_time += dt
+		var step_inc := inc
+		if vib:
+			step_inc = inc * (1.0 + vib_k * sin(vib_w * note_time))
+		phase += step_inc
+		if phase >= 1.0:
+			phase -= 1.0
+		var v: float
+		if wave == WAVE_PULSE:
+			v = 1.0 if phase < duty else -1.0
+		elif wave == WAVE_TRIANGLE:
+			v = 4.0 * absf(phase - 0.5) - 1.0
+		else:
 			# Sample-and-hold noise: a higher note changes value more often (a brighter hiss).
-			ch.noise_count += hz / mix_rate * 8.0
-			if ch.noise_count >= 1.0:
-				ch.noise_count -= floor(ch.noise_count)
-				ch.noise_value = Synth.noise(_noise_state)
-			v = ch.noise_value
-	return v * ch.level * ch.volume
+			ncount += step_inc * 8.0
+			if ncount >= 1.0:
+				ncount -= floor(ncount)
+				nval = Synth.noise(_noise_state)
+			v = nval
+		buf[offset + i] += v * level * vol
+	ch.level = level
+	ch.stage = stage
+	ch.phase = phase
+	ch.note_time = note_time
+	ch.noise_count = ncount
+	ch.noise_value = nval
