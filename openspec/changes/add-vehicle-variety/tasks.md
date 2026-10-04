@@ -14,7 +14,7 @@
 - [x] 3.4 Immovable traffic fix, part 2: a sensor on traffic bodies switches them to dynamic before a closing vehicle touches them, with the agent's velocity and the class's mass; separation speed capped; tests: rear-end shares momentum, the wedge never exceeds the cap, a frozen traffic body never meets a vehicle in contact; record **after** with the same camera; done 2026-10-04. **After** (Mac, same camera): rear-end 48.9 → 22.1 km/h with the traffic car shoved up the road (was −0.8, stopped dead); nudge pushes the parked car to 6.8 m/s (was 12.4); wedge peaks at 2.4 m/s (was 12–15 when the recovered car snapped back); no frozen body ever touches the player's car. The launch was the recovery snap (see design)
 
 ## 4. Player car
-- [ ] 4.1 `apply_entry` on the placeholder car (wheels, mass, tunables, mesh); taking a traffic car keeps its class; `--car=<id>`; remote replicas build the class; tests
+- [x] 4.1 `apply_entry` on the placeholder car (wheels, mass, tunables, mesh); taking a traffic car keeps its class; `--car=<id>`; remote replicas build the class; tests; done 2026-10-04: every class stands on four wheels with its origin on the ground (a VehicleWheel3D reads its mount point only on entering the tree, so moved wheels re-enter); buses can be taken now and stay buses; the co-op player state carries the vehicle index and colour; the chase camera backs off for long vehicles; `CarMesh` retired
 - [ ] 4.2 Mac drive: hatchback, SUV and box truck feel different on the Queensway ramp
 
 ## 5. Verification
