@@ -1,0 +1,581 @@
+{
+ "schema_version": 0,
+ "default_player": "sedan",
+ "vehicles": [
+  {
+   "id": "sedan",
+   "name": "Commuter",
+   "body_class": "sedan",
+   "dims": {
+    "length_m": 4.6,
+    "width_m": 1.8,
+    "height_m": 1.45,
+    "wheelbase_m": 2.7,
+    "track_m": 1.56,
+    "wheel_radius_m": 0.33,
+    "front_overhang_m": 0.9,
+    "cabin_start_m": 1.75,
+    "roof_length_m": 1.3
+   },
+   "mass_kg": 1400,
+   "engine_force": 4500,
+   "brake_force": 80,
+   "grip": 2.5,
+   "top_speed_kph": 150,
+   "steer_max_rad": 0.6,
+   "seats": 5,
+   "colors": [
+    [
+     0.85,
+     0.85,
+     0.87
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.55,
+     0.58,
+     0.62
+    ],
+    [
+     0.7,
+     0.15,
+     0.12
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ],
+    [
+     0.2,
+     0.45,
+     0.25
+    ],
+    [
+     0.8,
+     0.65,
+     0.2
+    ],
+    [
+     0.35,
+     0.2,
+     0.15
+    ]
+   ],
+   "spawn": {
+    "weight": 3.0
+   }
+  },
+  {
+   "id": "hatchback",
+   "name": "Runabout",
+   "body_class": "hatchback",
+   "dims": {
+    "length_m": 4.0,
+    "width_m": 1.75,
+    "height_m": 1.48,
+    "wheelbase_m": 2.5,
+    "track_m": 1.52,
+    "wheel_radius_m": 0.31,
+    "front_overhang_m": 0.8,
+    "cabin_start_m": 1.45,
+    "roof_length_m": 1.55
+   },
+   "mass_kg": 1150,
+   "engine_force": 3800,
+   "brake_force": 70,
+   "grip": 2.5,
+   "top_speed_kph": 140,
+   "steer_max_rad": 0.65,
+   "seats": 5,
+   "colors": [
+    [
+     0.85,
+     0.85,
+     0.87
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.55,
+     0.58,
+     0.62
+    ],
+    [
+     0.7,
+     0.15,
+     0.12
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ],
+    [
+     0.2,
+     0.45,
+     0.25
+    ],
+    [
+     0.8,
+     0.65,
+     0.2
+    ],
+    [
+     0.35,
+     0.2,
+     0.15
+    ]
+   ],
+   "spawn": {
+    "weight": 2.0,
+    "roads": {
+     "motorway": 0.6,
+     "arterial": 1.0,
+     "local": 1.4
+    }
+   }
+  },
+  {
+   "id": "coupe",
+   "name": "Streak",
+   "body_class": "coupe",
+   "dims": {
+    "length_m": 4.5,
+    "width_m": 1.82,
+    "height_m": 1.3,
+    "wheelbase_m": 2.6,
+    "track_m": 1.58,
+    "wheel_radius_m": 0.33,
+    "front_overhang_m": 0.95,
+    "cabin_start_m": 1.95,
+    "roof_length_m": 0.95
+   },
+   "mass_kg": 1450,
+   "engine_force": 5600,
+   "brake_force": 85,
+   "grip": 2.8,
+   "top_speed_kph": 190,
+   "steer_max_rad": 0.6,
+   "seats": 4,
+   "colors": [
+    [
+     0.85,
+     0.85,
+     0.87
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.55,
+     0.58,
+     0.62
+    ],
+    [
+     0.7,
+     0.15,
+     0.12
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ],
+    [
+     0.2,
+     0.45,
+     0.25
+    ],
+    [
+     0.8,
+     0.65,
+     0.2
+    ],
+    [
+     0.35,
+     0.2,
+     0.15
+    ]
+   ],
+   "spawn": {
+    "weight": 0.6
+   }
+  },
+  {
+   "id": "suv",
+   "name": "Ridgeline",
+   "body_class": "suv",
+   "dims": {
+    "length_m": 4.8,
+    "width_m": 1.95,
+    "height_m": 1.75,
+    "wheelbase_m": 2.85,
+    "track_m": 1.66,
+    "wheel_radius_m": 0.38,
+    "front_overhang_m": 0.9,
+    "cabin_start_m": 1.6,
+    "roof_length_m": 2.0
+   },
+   "mass_kg": 2000,
+   "engine_force": 5200,
+   "brake_force": 100,
+   "grip": 2.5,
+   "top_speed_kph": 145,
+   "steer_max_rad": 0.55,
+   "seats": 5,
+   "colors": [
+    [
+     0.85,
+     0.85,
+     0.87
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.55,
+     0.58,
+     0.62
+    ],
+    [
+     0.7,
+     0.15,
+     0.12
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ],
+    [
+     0.2,
+     0.45,
+     0.25
+    ],
+    [
+     0.8,
+     0.65,
+     0.2
+    ],
+    [
+     0.35,
+     0.2,
+     0.15
+    ]
+   ],
+   "spawn": {
+    "weight": 2.0
+   }
+  },
+  {
+   "id": "pickup",
+   "name": "Hauler",
+   "body_class": "pickup",
+   "dims": {
+    "length_m": 5.6,
+    "width_m": 2.0,
+    "height_m": 1.85,
+    "wheelbase_m": 3.5,
+    "track_m": 1.7,
+    "wheel_radius_m": 0.39,
+    "front_overhang_m": 0.95,
+    "cabin_start_m": 1.8,
+    "roof_length_m": 1.3,
+    "bed_length_m": 1.9
+   },
+   "mass_kg": 2200,
+   "engine_force": 5600,
+   "brake_force": 105,
+   "grip": 2.5,
+   "top_speed_kph": 150,
+   "steer_max_rad": 0.55,
+   "seats": 5,
+   "colors": [
+    [
+     0.85,
+     0.85,
+     0.87
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.55,
+     0.58,
+     0.62
+    ],
+    [
+     0.7,
+     0.15,
+     0.12
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ],
+    [
+     0.2,
+     0.45,
+     0.25
+    ],
+    [
+     0.8,
+     0.65,
+     0.2
+    ],
+    [
+     0.35,
+     0.2,
+     0.15
+    ]
+   ],
+   "spawn": {
+    "weight": 1.0,
+    "roads": {
+     "motorway": 1.3,
+     "arterial": 1.0,
+     "local": 0.8
+    }
+   }
+  },
+  {
+   "id": "van",
+   "name": "Courier",
+   "body_class": "van",
+   "dims": {
+    "length_m": 5.3,
+    "width_m": 2.0,
+    "height_m": 2.3,
+    "wheelbase_m": 3.3,
+    "track_m": 1.72,
+    "wheel_radius_m": 0.35,
+    "front_overhang_m": 0.85,
+    "cabin_start_m": 0.65,
+    "roof_length_m": 4.0
+   },
+   "mass_kg": 2400,
+   "engine_force": 5000,
+   "brake_force": 110,
+   "grip": 2.5,
+   "top_speed_kph": 130,
+   "steer_max_rad": 0.55,
+   "seats": 3,
+   "colors": [
+    [
+     0.92,
+     0.92,
+     0.92
+    ],
+    [
+     0.78,
+     0.8,
+     0.82
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ]
+   ],
+   "spawn": {
+    "weight": 0.8,
+    "hours": [
+     [
+      8,
+      18,
+      2.0
+     ],
+     [
+      20,
+      6,
+      0.4
+     ]
+    ]
+   }
+  },
+  {
+   "id": "box_truck",
+   "name": "Freightline",
+   "body_class": "box_truck",
+   "dims": {
+    "length_m": 7.5,
+    "width_m": 2.4,
+    "height_m": 3.3,
+    "wheelbase_m": 4.4,
+    "track_m": 1.95,
+    "wheel_radius_m": 0.45,
+    "front_overhang_m": 1.1,
+    "cabin_start_m": 0.9,
+    "box_length_m": 5.2
+   },
+   "mass_kg": 6500,
+   "engine_force": 9000,
+   "brake_force": 220,
+   "grip": 2.2,
+   "top_speed_kph": 110,
+   "steer_max_rad": 0.5,
+   "seats": 3,
+   "colors": [
+    [
+     0.92,
+     0.92,
+     0.92
+    ],
+    [
+     0.78,
+     0.8,
+     0.82
+    ],
+    [
+     0.25,
+     0.27,
+     0.3
+    ],
+    [
+     0.15,
+     0.3,
+     0.6
+    ]
+   ],
+   "spawn": {
+    "weight": 0.4,
+    "roads": {
+     "motorway": 1.6,
+     "arterial": 1.0,
+     "local": 0.4
+    },
+    "hours": [
+     [
+      7,
+      18,
+      2.5
+     ],
+     [
+      22,
+      5,
+      0.25
+     ]
+    ]
+   }
+  },
+  {
+   "id": "taxi",
+   "name": "Metro Cab",
+   "body_class": "taxi",
+   "dims": {
+    "length_m": 4.6,
+    "width_m": 1.8,
+    "height_m": 1.45,
+    "wheelbase_m": 2.7,
+    "track_m": 1.56,
+    "wheel_radius_m": 0.33,
+    "front_overhang_m": 0.9,
+    "cabin_start_m": 1.75,
+    "roof_length_m": 1.3
+   },
+   "mass_kg": 1450,
+   "engine_force": 4500,
+   "brake_force": 80,
+   "grip": 2.5,
+   "top_speed_kph": 150,
+   "steer_max_rad": 0.6,
+   "seats": 5,
+   "colors": [
+    [
+     0.95,
+     0.78,
+     0.1
+    ]
+   ],
+   "spawn": {
+    "weight": 0.4,
+    "roads": {
+     "motorway": 0.5,
+     "arterial": 1.5,
+     "local": 0.8
+    },
+    "hours": [
+     [
+      18,
+      24,
+      3.0
+     ],
+     [
+      0,
+      3,
+      3.0
+     ],
+     [
+      6,
+      10,
+      1.3
+     ]
+    ]
+   },
+   "liveries": {
+    "variants": {
+     "fallback": {
+      "stripe": "check",
+      "roof_sign": "TAXI"
+     }
+    }
+   }
+  },
+  {
+   "id": "bus",
+   "name": "Transit",
+   "body_class": "bus",
+   "dims": {
+    "length_m": 11.5,
+    "width_m": 2.5,
+    "height_m": 3.0,
+    "wheelbase_m": 6.0,
+    "track_m": 2.1,
+    "wheel_radius_m": 0.5,
+    "front_overhang_m": 2.4
+   },
+   "mass_kg": 12000,
+   "engine_force": 14000,
+   "brake_force": 300,
+   "grip": 2.2,
+   "top_speed_kph": 90,
+   "steer_max_rad": 0.45,
+   "seats": 40,
+   "colors": [
+    [
+     0.82,
+     0.12,
+     0.12
+    ]
+   ],
+   "spawn": {
+    "weight": 0.85,
+    "roads": {
+     "motorway": 0.3,
+     "arterial": 1.0,
+     "local": 0.0
+    }
+   }
+  }
+ ]
+}

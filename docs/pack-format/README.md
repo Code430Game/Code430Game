@@ -69,6 +69,7 @@ item (a billboard goes blank). First item type: billboard ads in `ads.v0.json`
 | `water.v0.json` | no | Pre-triangulated water polygons with a surface height; schema `water.schema.v0.json`. |
 | `buildings.v0.json` | no | Building footprints with height and ground height, roof pre-triangulated; schema `buildings.schema.v0.json`. |
 | `ads.v0.json` | no | Billboard ads with per-mode variants; schema `ads.schema.v0.json`. |
+| `vehicles.v0.json` | no | Vehicles merged after the base catalogue (same id replaces): body class, dimensions, mass and handling, palette, spawn weights by road group and hour, liveries with per-mode variants; schema `vehicles.schema.v0.json`. Any pack type may ship one. |
 | `overrides.json` | no | Hand fixes applied on top of the generated data (empty for now). |
 | `chunks/*.glb` + `chunks/build.json` | no | Pre-built meshes from the Godot pack builder. `build.json` holds a hash of the inputs; the game ignores chunks whose hash no longer matches and generates meshes at load instead. |
 
