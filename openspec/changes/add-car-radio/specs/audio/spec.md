@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Car Radio
-The game SHALL play chip-style music synthesised at runtime from note data on a radio that runs while a player drives. It SHALL have stations, each a single seamless loop of 30 to 60 seconds composed for the game: a bright platformer piece, an overworld adventure piece, a dungeon piece and a talk-radio piece of chip babble, plus Off. Players SHALL cycle stations while driving, the last station SHALL be remembered, and the radio SHALL have its own Music volume. No station reuses another game's melodies, names or sounds.
+The game SHALL play chip-style music synthesised at runtime from note data on a radio that runs while a player drives. It SHALL have stations, each a single seamless loop of 30 to 60 seconds composed for the game: a bright platformer piece, a racing piece, an overworld adventure piece, a dungeon piece and a talk-radio piece of chip babble, plus Off. Players SHALL cycle stations while driving, the last station SHALL be remembered, and the radio SHALL have its own Music volume. No station reuses another game's melodies, names or sounds.
 
 #### Scenario: Enter a car
 - **WHEN** a player gets into a car with a station remembered

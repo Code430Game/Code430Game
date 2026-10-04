@@ -54,13 +54,14 @@ func _await_render(r: Radio, track_id: String) -> void:
 		await get_tree().process_frame
 
 
-func test_cycle_is_four_stations_then_off() -> void:
+func test_cycle_is_five_stations_then_off() -> void:
 	var ids := _radio.cycle_ids()
-	assert_int(ids.size()).is_equal(5)
-	assert_str(ids[4]).is_equal(Radio.OFF)
+	assert_int(ids.size()).is_equal(6)
+	assert_str(ids[5]).is_equal(Radio.OFF)
 	assert_str(_radio.variant(ids[0])["name"]).is_equal("Hilltop FM")
-	assert_str(_radio.variant(ids[3])["name"]).is_equal("Chatter AM")
-	_radio.select(ids[3])
+	assert_str(_radio.variant(ids[1])["name"]).is_equal("Redline FM")
+	assert_str(_radio.variant(ids[4])["name"]).is_equal("Chatter AM")
+	_radio.select(ids[4])
 	_radio.cycle(1)
 	assert_str(_radio.station_id).is_equal(Radio.OFF)
 	_radio.cycle(1)

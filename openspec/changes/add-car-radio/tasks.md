@@ -15,7 +15,10 @@
 - [x] 2.4 Mac run: each station recorded for a minute through a car swap; the station resumes after getting back in, and so does the engine
   - 2026-10-04: `--record-music` recorded the Music bus in a windowed run for each station: music from 1.0 to 1.25 s after getting in, loudness matching the offline renders (RMS 0.135 to 0.172). The first try was silent because the loops took 34 to 53 s to render; fixed by block rendering, one pass with warm-up, one render at a time and the cache. Getting out, back in and into another car is covered by `test_radio.gd` and `test_testbed_vehicle_audio.gd`.
 
+- [x] 2.5 Racing loop (human request at the Deck gate): Redline, E minor, 156 bpm, 32 bars, 49.2 s, peak 0.63; a fifth station, Redline FM, second in the cycle; the cycle test counts five stations and Off
+
 ## 3. Verification
 - [x] 3.1 Deck benchmark on the usual autodrive route with the radio playing: generator fill inside render CPU and no frame regression
   - Steam Deck, 2026-10-04, build 43313ba (deck preset, 40 s autodrive, Quest FM on): first run (loops rendering, 1.3 to 1.7 s each) avg 10.04 ms, p99 13.89, GPU 9.00; cached run avg 9.83, p99 13.33, GPU 8.77. Before the radio: avg 10.09 / 9.74, p99 13.55 / 14.29, GPU 8.99 / 8.71. No regression. The Music bus recording on the Deck has the station from 1.5 s after getting in, RMS 0.171.
-- [ ] 3.2 **Stop: human drives on the Deck, cycles the stations, and decides whether talk radio stays**
+- [x] 3.2 **Stop: human drives on the Deck, cycles the stations, and decides whether talk radio stays**
+  - 2026-10-04: "All awesome." The music followed into a new vehicle. Chatter AM stays as it is ("It's fine. I have been listening to it for a bit. And it's good for now"). Asked for a racing station, added as 2.5. Idea for later, in the backlog: your own car keeps your station and a stolen car plays its owner's.

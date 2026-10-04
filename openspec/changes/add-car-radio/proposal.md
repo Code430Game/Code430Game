@@ -22,6 +22,10 @@ gets back in, so the radio's enter/exit hooks fix that too.
   - **Overworld adventure:** a heroic, open melody over arpeggios, in the spirit of 16-bit
     adventure-game overworlds.
   - **Dungeon:** slow, minor, sparse; low drones, a creeping bass line and echoing pulses.
+  - **Racing:** fast, minor-key pop-rock drive: a soaring lead over chugging eighth-note "power
+    chords", an octave bass and a rock beat (human, 2026-10-04, after the first Deck drive: "we
+    should also do some sort of racing game music!!", with The Cardigans' "My Favourite Game" as
+    the feel. It is written from scratch: none of that song's melody or riff).
   - **Talk radio (trial):** two hosts' "speech" as chip babble. Syllables are synthesised with
     speech-like pitch contours and rhythm but no real words, the hosts take turns, and a short
     jingle plays between segments, as a 30 to 60 second loop. It stays only if it sounds good on
