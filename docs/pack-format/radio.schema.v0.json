@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.invalid/radio.schema.v0.json",
+  "title": "Code 430 radio stations, version 0",
+  "description": "Stations in the car radio's cycle (Off is added by the game). Each is tone-tagged content with a required fallback variant naming one track.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stations"],
+  "properties": {
+    "stations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "descriptors", "variants"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_.]+$"},
+          "descriptors": {"type": "object"},
+          "variants": {
+            "type": "object",
+            "required": ["fallback"],
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "tagline", "track"],
+              "properties": {
+                "name": {"type": "string", "minLength": 1, "maxLength": 30},
+                "tagline": {"type": "string", "maxLength": 60},
+                "track": {"type": "string"},
+                "descriptors": {"type": "object"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
