@@ -3,6 +3,12 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-04
+
+- **Radio per car (human, 2026-10-04, Deck drive for `add-car-radio`).** Today the radio follows
+  the player into any car. Idea: the player's own car keeps their chosen station, and a stolen or
+  taken car plays whatever station its owner had on (a random one). Not started.
+
 ## 2026-10-03
 
 - **Curb inside a junction at a curved road join (human, 2026-10-03, Deck drive for
