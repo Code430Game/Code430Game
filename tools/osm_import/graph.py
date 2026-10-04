@@ -90,6 +90,7 @@ class PedestrianWay:
     margin_m: float | None = (
         None  # terrain follows the way within half width + this (None: road margin)
     )
+    layer: int = 0  # OSM layer (bridge=yes without one is 1); sidewalks follow roads on it
 
 
 @dataclass
@@ -336,6 +337,9 @@ def build_graph(
         covered = (
             T.is_truthy(way.tags.get("tunnel")) and way.tags.get("tunnel") != "building_passage"
         ) or T.is_truthy(way.tags.get("covered"))
+        layer = T.parse_layer(way.tags.get("layer"))
+        if layer == 0 and T.is_truthy(way.tags.get("bridge")):
+            layer = 1
         peds.append(
             PedestrianWay(
                 f"p{way.id}",
@@ -346,6 +350,7 @@ def build_graph(
                 kind,
                 width,
                 covered,
+                layer=layer,
             )
         )
 

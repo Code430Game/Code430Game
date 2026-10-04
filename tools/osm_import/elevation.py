@@ -750,7 +750,11 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
         nearest_class = None
         for p in w.polyline:
             x, z = p[0], p[2]
-            best_d, best_y, best_hw = math.inf, None, 0.0
+            # The nearest road on the way's own layer wins; only when none is in reach does any
+            # road count (issue #14: a bridge's sidewalk right above the street below took the
+            # street's height and lay across it).
+            same = [math.inf, None, 0.0, None]
+            other = [math.inf, None, 0.0, None]
             for a, b, (eid, i) in (
                 () if w.covered else idx.near(x, z, follow + 20.0)
             ):  # covered ways pass under roads: terrain only
@@ -758,7 +762,8 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                 if e.bridge and w.kind not in ("sidewalk", "crossing"):
                     continue  # paths do not ride on decks; they pass under them
                 d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
-                if d < best_d and d <= e.width_m / 2.0 + follow:
+                pick = same if e.layer == w.layer else other
+                if d < pick[0] and d <= e.width_m / 2.0 + follow:
                     dx, dz = b[0] - a[0], b[1] - a[1]
                     l2 = dx * dx + dz * dz
                     t = (
@@ -766,10 +771,13 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                         if l2 > 0
                         else 0.0
                     )
-                    best_d = d
-                    best_y = e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t
-                    best_hw = e.width_m / 2.0
-                    nearest_class = e.road_class
+                    pick[0] = d
+                    pick[1] = e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t
+                    pick[2] = e.width_m / 2.0
+                    pick[3] = e.road_class
+            best_d, best_y, best_hw, cls = same if same[1] is not None else other
+            if cls is not None:
+                nearest_class = cls
             inside_ribbon = best_y is not None and best_d <= best_hw
             beside_road = best_y is not None and best_d <= best_hw + beside
             if w.kind == "sidewalk" and best_y is not None:
@@ -889,6 +897,7 @@ def split_pedestrian_under_bridges(graph: RoadGraph) -> int:
                             w.kind,
                             w.width_m,
                             w.covered,
+                            layer=w.layer,
                         )
                     )
                     n += 1
@@ -904,6 +913,7 @@ def split_pedestrian_under_bridges(graph: RoadGraph) -> int:
                     w.kind,
                     w.width_m,
                     w.covered,
+                    layer=w.layer,
                 )
             )
     graph.pedestrian = out
