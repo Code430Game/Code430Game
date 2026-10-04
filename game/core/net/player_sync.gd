@@ -62,15 +62,21 @@ func _process(delta: float) -> void:
 		return
 	_accum = 0.0
 	var car_t := Transform3D.IDENTITY
+	var vehicle := -1
+	var car_color := Color.WHITE
 	if player.is_driving():
 		car_t = player.vehicle.global_transform
-	_state.rpc(player.is_driving(), player.global_transform, car_t)
+		vehicle = VehicleCatalogue.index_of(str(player.vehicle.get("vehicle_id")))
+		car_color = player.vehicle.get("body_color")
+	_state.rpc(player.is_driving(), player.global_transform, car_t, vehicle, car_color)
 
 
 @rpc("any_peer", "unreliable")
-func _state(is_driving: bool, body_t: Transform3D, car_t: Transform3D) -> void:
+func _state(is_driving: bool, body_t: Transform3D, car_t: Transform3D, vehicle: int = -1, car_color: Color = Color.WHITE) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	var r: RemotePlayer = remotes.get(id)
 	if r == null:
 		return
 	r.push_state(is_driving, body_t, car_t)
+	if is_driving:
+		r.set_vehicle(VehicleCatalogue.id_at(vehicle), car_color)

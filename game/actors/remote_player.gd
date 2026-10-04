@@ -17,6 +17,9 @@ var _rig: CharacterRig = null
 var _last_pos: Vector3 = Vector3.INF
 var _car: AnimatableBody3D
 var _car_mesh: MeshInstance3D
+var _car_shape: CollisionShape3D
+var _vehicle_id: String = ""
+var _car_color: Color = Color.WHITE
 var _samples: Array = []  # [{"t": float, "driving": bool, "body": Transform3D, "car": Transform3D}]
 var _clock: float = 0.0
 
@@ -29,20 +32,34 @@ func setup(id: int, tint: Color, profile: Dictionary = {}) -> void:
 	apply_profile(profile)
 	_car = AnimatableBody3D.new()
 	_car.sync_to_physics = true
-	var shape := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	box.size = Vector3(CarMesh.WIDTH_M, 1.3, CarMesh.LENGTH_M)
-	shape.shape = box
-	shape.position.y = 0.75
-	_car.add_child(shape)
+	_car_shape = CollisionShape3D.new()
+	_car.add_child(_car_shape)
 	_car_mesh = MeshInstance3D.new()
-	_car_mesh.mesh = CarMesh.build(true)
-	_car_mesh.set_surface_override_material(0, CarMesh.body_material(tint))
-	_car_mesh.position.y = CarMesh.GROUND_LIFT_M
 	_car.add_child(_car_mesh)
 	_car.top_level = true
 	add_child(_car)
 	_car.visible = false
+	set_vehicle(VehicleCatalogue.default_player, tint)
+
+
+## Builds the replica car as `vehicle_id` in `car_color` (only when either changed).
+func set_vehicle(vehicle_id: String, car_color: Color) -> void:
+	if vehicle_id == _vehicle_id and car_color == _car_color:
+		return
+	_vehicle_id = vehicle_id
+	_car_color = car_color
+	var e := VehicleCatalogue.entry(vehicle_id)
+	_car_mesh.mesh = VehicleMesh.build(e, VehicleMesh.Lod.LOD0, true, VehicleCatalogue.livery(vehicle_id))
+	_car_mesh.set_surface_override_material(0, VehicleMesh.body_material(car_color))
+	var box := BoxShape3D.new()
+	box.size = VehicleMesh.box_size(e)
+	_car_shape.shape = box
+	_car_shape.position.y = box.size.y * 0.5 + 0.1
+
+
+## The vehicle the replica currently shows.
+func vehicle_id() -> String:
+	return _vehicle_id
 
 
 ## Wears the peer's character; an empty profile keeps the tinted capsule stand-in.

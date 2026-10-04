@@ -60,6 +60,8 @@ func _process(delta: float) -> void:
 	var back := target.global_basis.z.rotated(Vector3.UP, _orbit)
 	back.y = 0.0
 	back = back.normalized()
-	var desired := target.global_position + back * distance_m + Vector3.UP * height_m
+	# Long vehicles (vans, trucks, buses) get pulled back so they stay in frame.
+	var extra := maxf(float(target.get("length_m")) - 4.6, 0.0) if target.get("length_m") != null else 0.0
+	var desired := target.global_position + back * (distance_m + extra) + Vector3.UP * (height_m + extra * 0.25)
 	global_position = global_position.lerp(desired, clampf(position_smoothing * delta, 0.0, 1.0))
 	look_at(target.global_position + Vector3.UP * look_height_m, Vector3.UP)

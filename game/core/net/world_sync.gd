@@ -36,7 +36,7 @@ func _process(delta: float) -> void:
 
 
 ## Guest: asks the host for the traffic car at `position`; the answer spawns a car via `take_granted`.
-signal take_granted(transform: Transform3D, color: Color)
+signal take_granted(transform: Transform3D, color: Color, vehicle_id: String)
 
 
 func request_take(position: Vector3) -> void:
@@ -50,12 +50,12 @@ func _request_take(position: Vector3) -> void:
 	var got := traffic.release_near(position)
 	if got.is_empty():
 		return
-	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"])
+	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"], got["vehicle"])
 
 
 @rpc("authority", "reliable")
-func _grant_take(transform: Transform3D, color: Color) -> void:
-	take_granted.emit(transform, color)
+func _grant_take(transform: Transform3D, color: Color, vehicle_id: String) -> void:
+	take_granted.emit(transform, color, vehicle_id)
 
 
 ## Guest: tells the host one of its cars was hit here.

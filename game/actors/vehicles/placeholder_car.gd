@@ -40,6 +40,11 @@ var recover_callback: Callable
 
 ## Body tint for surface 0 of the generated mesh; set before _ready or call set_body_color.
 @export var body_color: Color = Color(0.85, 0.25, 0.2)
+## VehicleCatalogue entry the car is built from; set before _ready, or call apply_entry.
+## Empty: the catalogue's default player car.
+@export var vehicle_id: String = ""
+## Length of the current body, for the chase camera's framing.
+var length_m: float = 4.6
 
 
 ## Emitted when the car hits something at `speed_mps` (closing speed estimate).
@@ -52,11 +57,7 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
-	var mesh_node := $Mesh as MeshInstance3D
-	mesh_node.mesh = CarMesh.build(false)
-	mesh_node.material_override = null
-	mesh_node.position = Vector3(0.0, -0.12, 0.0)  # underside about 0.4 m over the road, like the old box
-	set_body_color(body_color)
+	apply_entry(vehicle_id if vehicle_id != "" else VehicleCatalogue.default_player)
 
 
 var _headlights: Array[SpotLight3D] = []
@@ -66,7 +67,7 @@ var _headlights: Array[SpotLight3D] = []
 func add_headlights(shadows: bool) -> void:
 	for x in [-0.6, 0.6]:
 		var l := SpotLight3D.new()
-		l.position = Vector3(x, 0.45, -2.1)
+		l.position = Vector3(x, 0.8, -length_m * 0.5)
 		l.rotation_degrees = Vector3(-6.0, 0.0, 0.0)
 		l.spot_range = 45.0
 		l.spot_angle = 28.0
@@ -87,7 +88,7 @@ func set_braking(on: bool) -> void:
 	_braking = on
 	var mesh_node := $Mesh as MeshInstance3D
 	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 3:
-		mesh_node.set_surface_override_material(3, CarMesh.brake_material() if on else null)
+		mesh_node.set_surface_override_material(3, VehicleMesh.brake_material() if on else null)
 
 
 ## Brightness of the headlights, 0 off to 1 full; follows the night factor.
@@ -102,7 +103,69 @@ func set_body_color(color: Color) -> void:
 	body_color = color
 	var mesh_node := $Mesh as MeshInstance3D
 	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0:
-		mesh_node.set_surface_override_material(0, CarMesh.body_material(color))
+		mesh_node.set_surface_override_material(0, VehicleMesh.body_material(color))
+
+
+## Builds the car from a catalogue entry: body mesh, wheel layout and radius, collision box,
+## mass and handling. The body's origin is on the ground under its centre, like the mesh's.
+func apply_entry(id: String) -> void:
+	var e: Dictionary = VehicleCatalogue.entry(id)
+	vehicle_id = str(e.get("id", id))
+	var d: Dictionary = e["dims"]
+	var wr := float(d["wheel_radius_m"])
+	var height := float(d["height_m"])
+	length_m = float(d["length_m"])
+	mass = float(e["mass_kg"])
+	engine_force_max = float(e["engine_force"])
+	reverse_force_max = engine_force_max * 0.55
+	brake_force_max = float(e["brake_force"])
+	handbrake_force = brake_force_max * 2.0
+	top_speed_kph = float(e["top_speed_kph"])
+	steer_max_rad = float(e["steer_max_rad"])
+	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
+	center_of_mass = Vector3(0.0, wr + 0.15, 0.0)
+	var mesh_node := $Mesh as MeshInstance3D
+	mesh_node.mesh = VehicleMesh.build(e, VehicleMesh.Lod.LOD0, false, VehicleCatalogue.livery(vehicle_id))
+	mesh_node.material_override = null
+	mesh_node.transform = Transform3D.IDENTITY
+	for i in range(4):
+		mesh_node.set_surface_override_material(i, null)
+	_braking = false
+	var clearance := wr * 0.6
+	var box := BoxShape3D.new()
+	box.size = Vector3(float(d["width_m"]), height - clearance - 0.1, length_m)
+	var shape := $Shape as CollisionShape3D
+	shape.shape = box
+	shape.transform = Transform3D(Basis(), Vector3(0.0, clearance + box.size.y * 0.5, 0.0))
+	var rest := 0.2
+	var wheel_mesh := CylinderMesh.new()
+	wheel_mesh.top_radius = wr
+	wheel_mesh.bottom_radius = wr
+	wheel_mesh.height = clampf(wr * 0.68, 0.2, 0.32)
+	wheel_mesh.material = VehicleMesh.dark_material()
+	var positions := VehicleMesh.wheel_positions(e)
+	var names := ["WheelFL", "WheelFR", "WheelRL", "WheelRR"]
+	for i in range(4):
+		var w := get_node(names[i]) as VehicleWheel3D
+		# The attach point sits so the tyre touches y = 0 with the suspension a little compressed.
+		w.position = Vector3(positions[i].x, wr + rest - 0.05, positions[i].z)
+		w.wheel_radius = wr
+		w.wheel_rest_length = rest
+		w.wheel_friction_slip = float(e["grip"])
+		w.suspension_max_force = mass * 9.8 * 1.5  # per wheel: the box truck must not bottom out
+		var wm := w.get_child(0) as MeshInstance3D
+		wm.mesh = wheel_mesh
+		if w.is_inside_tree():
+			# A wheel reads its mount point when it enters the tree: re-enter so the move counts.
+			remove_child(w)
+			add_child(w)
+	var seat := get_node_or_null("Seat") as Marker3D
+	if seat != null:
+		seat.position = Vector3(-float(d["width_m"]) * 0.22, wr + 0.45, -length_m * 0.5 + float(d.get("cabin_start_m", 1.7)) + 0.6)
+	for l in _headlights:
+		l.position.z = -length_m * 0.5
+		l.position.y = minf(height * 0.5, 1.0)
+	set_body_color(body_color)
 
 
 ## Speed along the car's forward axis in m/s (positive = forward).
