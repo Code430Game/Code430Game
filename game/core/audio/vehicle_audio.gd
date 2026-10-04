@@ -25,6 +25,24 @@ func _ready() -> void:
 		p.play()
 
 
+## Moves the voices to `new_car` (the local player got into it): reparents under it, follows its
+## collisions, and restarts any voice that stopped while nobody was driving. One VehicleAudio
+## serves the local player, whichever car they drive.
+func attach(new_car: VehicleBody3D) -> void:
+	if car != null and car != new_car and car.impacted.is_connected(impact):
+		car.impacted.disconnect(impact)
+	car = new_car
+	if get_parent() != new_car:
+		if get_parent() != null:
+			get_parent().remove_child(self)
+		new_car.add_child(self)
+	if not new_car.impacted.is_connected(impact):
+		new_car.impacted.connect(impact)
+	for p in [_engine, _tyres, _impact]:
+		if p != null and not p.playing:
+			p.play()
+
+
 ## Starts a thump whose loudness follows the collision speed.
 func impact(speed_mps: float) -> void:
 	var g := Synth.impact_gain(speed_mps)
