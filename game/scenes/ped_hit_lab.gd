@@ -17,6 +17,7 @@ const MEASURE_FROM_Z := CONTACT_Z + 3.0  # car centre where the measurement star
 var speed_kph: float = 50.0
 var exit_after_s: float = -1.0
 var with_walker: bool = true  # false (--no-walker): the coasting baseline
+var brake_after_hit: bool = false  # --brake: brake hard 0.3 s after contact, as a driver would (recordings)
 var car: VehicleBody3D
 var peds: PedestrianManager
 var walker: Pedestrian
@@ -36,6 +37,8 @@ func _ready() -> void:
 			exit_after_s = float(arg.get_slice("=", 1))
 		elif arg == "--no-walker":
 			with_walker = false
+		elif arg == "--brake":
+			brake_after_hit = true
 	_build_world()
 	_build_car()
 	if with_walker:
@@ -67,9 +70,9 @@ func _build_world() -> void:
 	for i in range(6):  # crossing stripes
 		_slab(Vector3(0.6, 0.02, 3.0), Vector3(-3.75 + i * 1.5, 0.005, 0), Color(0.9, 0.9, 0.88))
 	var cam := Camera3D.new()
-	cam.position = Vector3(7.5, 1.9, -5.0)
+	cam.position = Vector3(10.0, 3.0, 4.0)
 	add_child(cam)
-	cam.look_at(Vector3(0, 0.8, 0.5))
+	cam.look_at(Vector3(0, 0.5, -6.0))
 	cam.fov = 60.0
 	cam.current = true
 
@@ -131,6 +134,8 @@ func _physics_process(delta: float) -> void:
 	if _hit_at < 0.0 and z <= MEASURE_FROM_Z:
 		_hit_at = _elapsed
 		_before_kph = v_kph
+	if brake_after_hit and _hit_at >= 0.0 and _elapsed - _hit_at > 0.3 and v_kph > 1.0:
+		car.override_brake = 1.0
 	if _hit_at >= 0.0:
 		if _elapsed - _hit_at <= MEASURE_S:
 			_lowest_kph = minf(_lowest_kph, v_kph)
