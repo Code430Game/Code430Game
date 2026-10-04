@@ -11,6 +11,7 @@ extends Node3D
 ## far from every player step every Nth frame with a larger delta.
 
 const BODY_SCENE := preload("res://world/pedestrians/pedestrian_body.tscn")
+const WALK_SHADER := preload("res://world/pedestrians/pedestrian_walk.gdshader")
 const CONFIG_PATH := "res://world/pedestrians/pedestrian_config.json"
 
 var config: Dictionary = {}
@@ -31,8 +32,10 @@ var anchors: PackedVector3Array = PackedVector3Array()
 var obstacles: Array[Node3D] = []
 var _spawn_timer: float = 0.0
 var _frame: int = 0
-const POOLS := 8  # distinct pre-posed bodies; agents are spread across them
+const POOLS := 8  # distinct body looks; agents are spread across them
 var _pools: Array[MultiMeshInstance3D] = []
+var pool_profiles: Array[Dictionary] = []
+var _last_snapshot_ms: int = 0
 var _bodies: Array[PedestrianBody] = []
 
 
@@ -123,7 +126,11 @@ func _setup_rendering() -> void:
 		var mmi := MultiMeshInstance3D.new()
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = CharacterMesh.build(CharacterProfile.random(rng), CharacterMesh.walk_pose(TAU * i / POOLS, 0.7))
+		mm.use_custom_data = true  # x = walk phase, y = walk amount (pedestrian_walk.gdshader)
+		var profile := CharacterProfile.random(rng)
+		pool_profiles.append(profile)
+		mm.mesh = CharacterMesh.build(profile, {}, false, true)
+		mm.mesh.surface_set_material(0, walk_material(profile))
 		mm.instance_count = max_agents
 		mm.visible_instance_count = 0
 		mmi.multimesh = mm
@@ -136,6 +143,17 @@ func _setup_rendering() -> void:
 		body.process_mode = Node.PROCESS_MODE_DISABLED
 		body.global_position = Vector3(0, -1000, 0)
 		_bodies.append(body)
+
+
+## The walk shader material for one body look: its bone pivots as the shader's uniform.
+static func walk_material(profile: Dictionary) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = WALK_SHADER
+	var pivots := PackedVector3Array()
+	for b in range(CharacterMesh.BONES.size()):
+		pivots.append(CharacterMesh.bone_pivot(b, profile))
+	mat.set_shader_parameter("pivots", pivots)
+	return mat
 
 
 func active_count() -> int:
@@ -157,6 +175,10 @@ func profile_line() -> String:
 
 func _physics_process(delta: float) -> void:
 	if mirror:
+		for a in agents:
+			var w := CharacterRig.step_walk(a.walk_phase, a.walk_amount, delta, a.speed)
+			a.walk_phase = w.x
+			a.walk_amount = w.y
 		_assign_bodies()
 		_render()
 		return
@@ -220,6 +242,22 @@ func _step_struck(a: Pedestrian, delta: float) -> void:
 
 
 func _step_agent(a: Pedestrian, delta: float) -> void:
+	var before := a.position()
+	_move_agent(a, delta)
+	_animate(a, before, delta)
+
+
+## Advances the walk cycle from how far the agent actually moved (zero while waiting).
+func _animate(a: Pedestrian, before: Vector3, delta: float) -> void:
+	var moved := Vector2(a.position().x - before.x, a.position().z - before.z).length()
+	if moved > 3.0:  # a jump (snapshot reorder, respawn): keep the cycle, not a sprint
+		return
+	var w := CharacterRig.step_walk(a.walk_phase, a.walk_amount, delta, moved / maxf(delta, 0.0001))
+	a.walk_phase = w.x
+	a.walk_amount = w.y
+
+
+func _move_agent(a: Pedestrian, delta: float) -> void:
 	var path: WalkGraph.WalkPath = walk.paths[a.path_id]
 	var dir := path.direction_at(a.distance) * (1.0 if a.forward else -1.0)
 	if _player_ahead(a, dir):
@@ -387,12 +425,18 @@ func apply_snapshot(data: PackedFloat32Array) -> void:
 		agents.pop_back()
 	while agents.size() < n:
 		agents.append(Pedestrian.new())
+	var now := Time.get_ticks_msec()
+	var dt := clampf(float(now - _last_snapshot_ms) / 1000.0, 0.001, 1.0)
+	_last_snapshot_ms = now
 	for i in range(n):
 		var a := agents[i]
 		var k := i * 5
 		var yaw := data[k + 3]
 		var fwd := Vector3(sin(yaw), 0.0, cos(yaw))
+		var before := a.position()
 		a.transform = Transform3D(Basis.looking_at(fwd, Vector3.UP), Vector3(data[k], data[k + 1], data[k + 2]))
+		var moved := Vector2(a.position().x - before.x, a.position().z - before.z).length()
+		a.speed = moved / dt if moved < 3.0 else a.speed  # walking pace between snapshots, for the walk cycle
 		var ci := int(data[k + 4])
 		if ci >= 0 and ci < colors.size():
 			var c: Array = colors[ci]
@@ -460,6 +504,12 @@ func _on_body_hit(body: PedestrianBody) -> void:
 	body.freeze = false
 
 
+## The walk shader's per-instance data for an agent: phase, amount (zero unless walking).
+static func walk_custom(a: Pedestrian) -> Color:
+	var walking := a.state == Pedestrian.State.WALKING
+	return Color(a.walk_phase, a.walk_amount if walking else 0.0, 0.0, 0.0)
+
+
 func _render() -> void:
 	if _pools.is_empty():
 		return
@@ -473,6 +523,7 @@ func _render() -> void:
 		if k >= mm.instance_count:
 			continue
 		mm.set_instance_transform(k, a.transform)
+		mm.set_instance_custom_data(k, walk_custom(a))
 		counts[a.pool] = k + 1
 	for i in range(POOLS):
 		_pools[i].multimesh.visible_instance_count = counts[i]

@@ -43,13 +43,23 @@ func apply_profile(p: Dictionary) -> void:
 
 ## Steps the walk cycle: `speed` in m/s along the ground.
 func advance(delta: float, speed: float) -> void:
-	var target := clampf(speed / 1.2, 0.0, 1.0)
-	amount = move_toward(amount, target, BLEND_RATE * delta)
-	if speed > 0.05:
-		phase = fmod(phase + TAU * speed * delta / STRIDE_M, TAU)
-	elif amount < 0.02:
-		phase = 0.0
+	var w := step_walk(phase, amount, delta, speed)
+	phase = w.x
+	amount = w.y
 	_pose()
+
+
+## One step of the walk cycle: returns (phase, amount) after `delta` at `speed` m/s. Shared
+## with pedestrians, whose cycle runs in a shader.
+static func step_walk(phase_in: float, amount_in: float, delta: float, speed: float) -> Vector2:
+	var target := clampf(speed / 1.2, 0.0, 1.0)
+	var a := move_toward(amount_in, target, BLEND_RATE * delta)
+	var p := phase_in
+	if speed > 0.05:
+		p = fmod(p + TAU * speed * delta / STRIDE_M, TAU)
+	elif a < 0.02:
+		p = 0.0
+	return Vector2(p, a)
 
 
 ## Sets the pose directly (previews and tests).
