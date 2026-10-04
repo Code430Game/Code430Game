@@ -32,6 +32,10 @@ var _traffic: TrafficManager
 var _traffic_cap: int = -1
 var _peds: PedestrianManager
 var _peds_cap: int = -1
+var _knockdown_every: float = 0.0  # --knockdown-every=S: benchmark knocks down the nearest pedestrian every S seconds
+var _knockdown_timer: float = 0.0
+var _knockdowns: int = 0
+var _bench_falling: PackedFloat32Array = PackedFloat32Array()  # ragdolls simulating per frame after warm-up
 var _player_sync: PlayerSync
 var _world_sync: WorldSync
 var _host_port: int = -1  # --host[=port]
@@ -612,6 +616,8 @@ func _parse_args() -> void:
 			_traffic_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--peds="):
 			_peds_cap = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--knockdown-every="):
+			_knockdown_every = float(arg.get_slice("=", 1))
 		elif arg == "--mute":
 			_mute = true
 		elif arg.begins_with("--time="):
@@ -666,6 +672,14 @@ func _process(delta: float) -> void:
 			_peds.obstacles = obstacles
 			if _traffic != null:
 				_traffic.obstacle_points = _peds.crossing_positions()
+			if _knockdown_every > 0.0 and _bench_elapsed > BENCH_WARMUP_S and not anchors.is_empty():
+				_knockdown_timer -= delta
+				if _knockdown_timer <= 0.0:
+					_knockdown_timer = _knockdown_every
+					var push := Vector3(randf_range(-1.0, 1.0), 0.15, randf_range(-1.0, 1.0)).normalized() * 900.0
+					if _peds.knock_down_nearest(anchors[0], 60.0, push):
+						_knockdowns += 1
+				_bench_falling.append(_peds.falling_count())
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:
@@ -789,6 +803,11 @@ func _print_benchmark() -> void:
 		print("benchmark: traffic cost %s" % _traffic.profile_line())
 	if _peds != null:
 		print("benchmark: pedestrians %d, cost %s" % [_peds.active_count(), _peds.profile_line()])
+		if _knockdown_every > 0.0:
+			var falling := 0.0
+			for f in _bench_falling:
+				falling += f
+			print("benchmark: knockdowns %d, ragdolls falling on average %.2f per frame" % [_knockdowns, falling / maxf(_bench_falling.size(), 1.0)])
 	if _streamer != null:
 		print("benchmark: chunks in scene %d, built %d, downgraded %d, freed %d, failed %d, first playable %d ms" % [_streamer.chunk_count(), _streamer.stats["built"], _streamer.stats["downgraded"], _streamer.stats["freed"], _streamer.stats["failed"], _first_playable_ms])
 		print("benchmark: streamer cost add max %.1f ms (ema %.2f), shapes max %.1f ms (ema %.2f), frames over 8 ms %d" % [_streamer.profile["add_max_ms"], _streamer.profile["add_ema_ms"], _streamer.profile["shape_max_ms"], _streamer.profile["shape_ema_ms"], _streamer.profile["slow_frames"]])
