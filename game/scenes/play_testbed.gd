@@ -210,6 +210,8 @@ func _ready() -> void:
 
 
 func _on_entered_vehicle(car: VehicleBody3D) -> void:
+	if _vehicle_audio != null:
+		_vehicle_audio.attach(car)  # the engine follows the player into whichever car they take
 	_camera.target = car
 	_camera.global_position = car.global_position + car.global_basis.z * 7.5 + Vector3.UP * 3.0
 	_camera.current = true
@@ -271,9 +273,7 @@ func _setup_audio() -> void:
 		AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), true)
 	_vehicle_audio = VehicleAudio.new()
 	_vehicle_audio.name = "VehicleAudio"
-	_vehicle_audio.car = _car
-	_car.add_child(_vehicle_audio)
-	_car.impacted.connect(func(speed: float) -> void: _vehicle_audio.impact(speed))
+	_vehicle_audio.attach(_car)
 	_ambience = AmbienceAudio.new()
 	_ambience.name = "Ambience"
 	_ambience.traffic = _traffic
