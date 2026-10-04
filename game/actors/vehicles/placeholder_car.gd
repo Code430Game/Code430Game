@@ -22,6 +22,7 @@ extends VehicleBody3D
 ## External driver input (autodrive). When set, replaces player input for one physics frame.
 var override_throttle: float = -1.0
 var override_steer: float = 0.0
+var override_brake: float = -1.0  # 0..1 for one physics frame (labs and scripted drives), like override_throttle
 
 ## Seconds the car may stay upside down (or below the world floor) before it is put back on the road.
 @export var recover_after_s: float = 3.0
@@ -142,6 +143,9 @@ func _physics_process(delta: float) -> void:
 		accel = override_throttle
 		steer_in = override_steer
 		override_throttle = -1.0
+	if override_brake >= 0.0:
+		brk = override_brake
+		override_brake = -1.0
 	var speed := absf(forward_speed())
 	var fade := clampf(speed / steer_fade_speed_mps, 0.0, 1.0)
 	var lock := steer_max_rad * lerpf(1.0, steer_min_fraction, fade)

@@ -84,8 +84,13 @@ func test_pedestrian_stops_for_a_player_right_ahead() -> void:
 	assert_float(a.position().x).is_greater(26.0)
 
 
-func test_hit_pedestrian_tumbles_then_lies_still_then_goes_away() -> void:
-	var m := _manager(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}]))
+func test_without_a_ragdoll_the_capsule_tumbles_then_lies_still_then_goes_away() -> void:
+	# The ragdoll path is in test_character_ragdoll.gd; this is the fallback with an empty pool.
+	var m: PedestrianManager = auto_free(PedestrianManager.new())
+	add_child(m)
+	m.config["ragdoll_pool"] = 0
+	m.setup(WalkGraph.build(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}])))
+	m.enabled = false
 	m.anchors = PackedVector3Array([Vector3.ZERO])
 	var a := _add(m, 0, 20.0)
 	m._assign_bodies()

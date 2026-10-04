@@ -445,7 +445,7 @@ func _set_mirror(on: bool) -> void:
 	if _peds != null:
 		_peds.mirror = on
 		if on:
-			_peds.agents.clear()
+			_peds.clear_agents()
 
 
 func _refresh_session_status() -> void:

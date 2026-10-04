@@ -25,6 +25,8 @@
   "hit_lift_mps": 1.5,
   "hit_car_impulse_ns": 2000.0,
   "mass_kg": 75.0,
+  "hit_spread": 0.7,
+  "ragdoll_pool": 6,
   "remove_after_s": 25.0,
   "body_pool": 16,
   "body_radius_m": 45.0,

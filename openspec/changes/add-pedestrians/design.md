@@ -45,17 +45,15 @@ player is a `CharacterRig` (Skeleton3D, 11 bones, `CharacterMesh.walk_pose`).
   `settled` signal. Pedestrians keep a pool of them; the player, co-op players and later NPCs
   can use the same class (for example the player going down in `add-weapons-and-combat`).
   Callers decide when to fall and how hard; the ragdoll only does the physics.
-- **Ragdoll from the player rig.** `character_ragdoll.tscn`: a `CharacterRig` with a
+- **Ragdoll from the player rig.** `CharacterRagdoll` (built in code): a `CharacterRig` with a
   `PhysicalBoneSimulator3D` and one `PhysicalBone3D` per bone (capsules sized from the profile,
   cone-twist joints at shoulders, hips and neck, hinge-like limits at elbows and knees, masses
   adding up to 75 kg). `PedestrianManager` builds a pool of `ragdoll_pool` (default 6) at setup. On a hit the
   pedestrian leaves its MultiMesh, and a ragdoll takes its profile and walk pose at the moment
   of impact, then simulates for `hit_physics_s`. At the end it copies the bones' global poses
   into the skeleton's poses, stops simulating, and stays as a still skinned mesh until removal.
-  Busy pool: recycle the downed ragdoll with the least time left. Fallback, if `PhysicalBone3D`
-  under Jolt misbehaves (joint explosions, tunnelling at speed): rigid limbs as `RigidBody3D`s
-  joined by `Generic6DOFJoint3D`s that write their transforms into the same skeleton. Task 3.6
-  decides on the Mac before the Deck run.
+  Busy pool: recycle the downed ragdoll with the least time left. (A `Generic6DOFJoint3D`
+  fallback was planned in case `PhysicalBone3D` misbehaved under Jolt; it doesn't, see 3.6.)
 - **One knock-down entry point, ready for weapons.** The car sensor doesn't start the
   ragdoll itself. It calls `PedestrianManager.knock_down(agent, impulse, point)`, which picks a
   ragdoll and applies the impulse to the bone nearest `point`: a car takes the legs out, and a
