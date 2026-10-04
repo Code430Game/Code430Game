@@ -80,8 +80,11 @@ the tree is not paused (the same rule as the D-pad camera and headlights). Setti
 label style.
 
 ## Getting back in
-`VehicleAudio` feeds its engine and tyre generators only while the car is driven, so the parked
-car makes no sound. While nobody drives, the generators run dry. The fix restarts any voice
-that is no longer playing when a driver gets in, and `Radio` starts on the same signal, so both
-come back together. The test drives in, out and back in through `Player` and checks
-`engine_running()` and that the engine player is playing.
+`VehicleAudio` was created once, under the car the player starts in. A car taken later (any
+traffic car) had no engine voice at all, which is the silence the human heard after getting out
+and into another car; getting back into the first car worked. Now one `VehicleAudio` serves the
+local player: `attach(car)` on every entry reparents it under that car, follows that car's
+collisions, and restarts any voice that stopped while nobody drove (headless tests do not show a
+starved generator stopping, but a real audio device may). `Radio` starts on the same entry
+signal. The full-testbed test gets out and back into the same car, and out and into another car,
+and checks the engine is running and its player playing each time.

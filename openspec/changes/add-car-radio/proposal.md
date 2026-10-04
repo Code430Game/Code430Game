@@ -1,6 +1,6 @@
 # Change: Car radio with chip music
 
-**Status: revised 2026-10-03 (human: "Lets do 3 music stations and a 4th. I am really thinking each would just be a loopable file so they're not full stations ... mario, zelda, and a darker zelda dungeon style. And then we can try the talk radio and if it sounds good we can keep it ... probably more than a couple seconds so it's not too repetitive"; and "when you leave the car it turns off, but when you get back in the engine audio does not resume ... This would need to be expanded with the car radio ticket"). First proposed 2026-10-02 ("could we add radios? With simple SNES / vintage style music in the cars?"). Awaiting approval.**
+**Status: revised 2026-10-03 (human: "Lets do 3 music stations and a 4th. I am really thinking each would just be a loopable file so they're not full stations ... mario, zelda, and a darker zelda dungeon style. And then we can try the talk radio and if it sounds good we can keep it ... probably more than a couple seconds so it's not too repetitive"; and "when you leave the car it turns off, but when you get back in the engine audio does not resume ... This would need to be expanded with the car radio ticket"). First proposed 2026-10-02 ("could we add radios? With simple SNES / vintage style music in the cars?"). Approved 2026-10-04 (human: "I want to test the music though").**
 
 ## Why
 Driving is the core loop and it is silent apart from the engine. A radio gives every car a
