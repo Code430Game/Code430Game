@@ -185,3 +185,9 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   a car wedged between one and anything else gets pushed out with a huge velocity. Fix as a
   `fix/` change: unfreeze or sensor-switch like the pedestrians, and cap the depenetration
   speed. Reproduce with a lab scene first.
+- **Flaky gdUnit crash (exit 134)**, about 2 in 14 full local runs on 2026-10-04 (GitHub CI
+  passed every time). A worker thread hits `/root: The caller thread can't call the function
+  propagate_notification()` and aborts during `test_report_store.gd`, which runs right after
+  `test_testbed_menus.gd` (the full testbed, with chunk-streamer and radio tasks). Running only
+  those two suites 6 times did not reproduce it. Suspect a WorkerThreadPool task from the
+  testbed outliving its teardown. Rerunning CI passes.
