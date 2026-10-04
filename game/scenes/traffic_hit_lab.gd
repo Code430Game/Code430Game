@@ -31,11 +31,13 @@ var _elapsed: float = 0.0
 var _contact_at: float = -1.0
 var _before_kph: float = -1.0
 var _lowest_kph: float = INF
+var _after_kph: float = INF  # 0.15 s after contact: the crash itself, before sliding to a stop
 var _peak_body_mps: float = 0.0
 var _peak_car_mps: float = 0.0
 var _car_start: Vector3
 var _max_displacement: float = 0.0
 var _max_height: float = 0.0
+var _frozen_contacts: int = 0  # frames a frozen traffic body touched the player's car
 
 
 func _ready() -> void:
@@ -175,8 +177,13 @@ func _physics_process(delta: float) -> void:
 		for a in traffic.agents:
 			if a.position().distance_to(car.global_position) < (a.length_m + 4.6) * 0.5 + 0.4:
 				_contact_at = _elapsed
+	for a in traffic.agents:
+		if a.body != null and a.body.freeze and a.body.get_colliding_bodies().has(car):
+			_frozen_contacts += 1
 	if _contact_at >= 0.0 and _elapsed - _contact_at <= MEASURE_S:
 		_lowest_kph = minf(_lowest_kph, v_kph)
+		if _after_kph == INF and _elapsed - _contact_at >= 0.15:
+			_after_kph = v_kph
 		_peak_car_mps = maxf(_peak_car_mps, car.linear_velocity.length())
 		_peak_body_mps = maxf(_peak_body_mps, car.linear_velocity.length())
 		for a in traffic.agents:
@@ -190,7 +197,7 @@ func _physics_process(delta: float) -> void:
 	if OS.has_environment("TRAFFIC_HIT_TRACE") and _contact_at >= 0.0 and _elapsed - _contact_at <= MEASURE_S and int(_elapsed * 60) % 10 == 0:
 		var line := "t+%.2f car x %.2f v %.1f |" % [_elapsed - _contact_at, car.global_position.x, car.linear_velocity.length()]
 		for a in traffic.agents:
-			line += " agent x %.2f retired %s body %s" % [a.position().x, a.retired, "none" if a.body == null else ("frozen" if a.body.freeze else "dyn v %.1f" % a.body.linear_velocity.length())]
+			line += " agent x %.2f retired %s body %s near %s overlaps %d" % [a.position().x, a.retired, "none" if a.body == null else ("frozen" if a.body.freeze else "dyn v %.1f" % a.body.linear_velocity.length()), a.body != null and a.body.vehicle_near(), a.body.sensor.get_overlapping_bodies().size() if a.body != null else -1]
 		print(line)
 	if exit_after_s > 0.0 and _elapsed >= exit_after_s:
 		if result.is_empty():
@@ -204,11 +211,13 @@ func _finish() -> void:
 		"contact": _contact_at >= 0.0,
 		"before_kph": _before_kph,
 		"lowest_kph": _lowest_kph,
+		"after_kph": _after_kph,
 		"peak_car_mps": _peak_car_mps,
 		"peak_body_mps": _peak_body_mps,
 		"max_height_m": _max_height,
 		"off_line_m": _max_displacement,
+		"frozen_contacts": _frozen_contacts,
 	}
-	print("traffic-hit: %s, contact %s, player car %.1f -> lowest %.1f km/h, peak speed car %.1f m/s, any body %.1f m/s, highest %.2f m, off line %.2f m" % [
-		scenario, result["contact"], _before_kph, _lowest_kph, _peak_car_mps, _peak_body_mps, _max_height, _max_displacement])
+	print("traffic-hit: %s, contact %s, player car %.1f -> %.1f km/h just after (lowest %.1f), peak speed car %.1f m/s, any body %.1f m/s, highest %.2f m, off line %.2f m, frozen contacts %d" % [
+		scenario, result["contact"], _before_kph, _after_kph, _lowest_kph, _peak_car_mps, _peak_body_mps, _max_height, _max_displacement, _frozen_contacts])
 	finished.emit(result)

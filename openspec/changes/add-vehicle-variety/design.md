@@ -66,16 +66,23 @@
   velocity. `body_entered` unfreezes it only after the first contact is solved, which is the
   same timing bug as pedestrians. Two such bodies closing on a car leave the solver no valid
   way to separate them except launching the car.
-- **Fix:** as with pedestrians, a slightly larger sensor (`Area3D`, mask 1) on each pooled
-  traffic body reports a `VehicleBody3D` closing at more than `hit_min_speed_mps`. The body
-  unfreezes before contact with `linear_velocity` set to the agent's (forward times speed) and
-  its class mass, and the agent goes to the existing `resting` or hit handling. Traffic cars
-  stay solid to the player on foot (layer 1). Closing between traffic bodies themselves is
-  left to the agents' headway, as now.
-- **Separation cap:** for a short window after an unfreeze, the bodies involved (the player's
-  car and the struck traffic cars) clamp their linear speed to `max(speed before contact,
-  separation_cap_mps)` (default 25 m/s) in `_integrate_forces` for traffic and in the player
-  car's physics step. A wedge can never launch anything, and normal crashes are untouched.
+- **Fix (as built):** knocking a car out of traffic on a sensor, as pedestrians do, would send
+  every car the player brushes past spinning off its lane. Instead each pooled traffic body has
+  a sensor (its box grown 1 m on every side). While a player's vehicle is inside it, the body
+  is **guarded**: dynamic, with its class mass, and steered along its lane by blending its
+  velocity a quarter of the way per step toward the agent (aimed no faster than the agent's
+  speed plus 3 m/s). Steering by setting velocity outright made it an unstoppable pusher again
+  (it threw a wedged car at 12 m/s). A real contact then goes through the existing hit handling
+  between two real bodies; a near miss refreezes it. The sensor is queried for overlaps each
+  time, because counting enter and exit events lost track across freeze changes.
+- **The launch, found:** when a hit car's 3 s window ends, the manager refroze it and snapped it
+  back onto its lane. Snapping a frozen body a few centimetres into a car pressed against it
+  threw that car backwards at 12 m/s (−43 km/h) and the car behind at 15 m/s. Recovery now
+  keeps the body guarded (dynamic) while a vehicle is near, and never refreezes into a contact.
+- **Separation cap:** while dynamic, a traffic body's speed is capped at
+  `max(separation_cap_mps, its speed + 2)` (25 m/s by default), and the player's car gets
+  `limit_speed`: for the hit window it can't exceed the cap or its speed from before the
+  contact, whichever is higher. A crash can slow a car but never launch it.
 - **Lab:** `scenes/traffic_hit_lab.tscn`, built like `ped_hit_lab`: a rear-end at 50 km/h and
   a wedge (two traffic cars closing on the stationary player car from front and back). It logs
   the player car's speed before and after and the peak speed of every body, prints one

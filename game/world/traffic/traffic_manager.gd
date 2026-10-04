@@ -233,9 +233,10 @@ func _step_retired(a: TrafficAgent, delta: float) -> void:
 	if a.hit_timer > 0.0:
 		return
 	if a.body != null and not a.body.freeze:
-		a.body.freeze = true
-		a.body.linear_velocity = Vector3.ZERO
-		a.body.angular_velocity = Vector3.ZERO
+		if a.body.vehicle_near():
+			a.body.guarded = true  # never refreeze into a contact: a frozen snap launches whatever it touches
+		else:
+			a.body.refreeze()
 	if not _try_recover(a):
 		a.resting = true
 		_leave_junction(a)
@@ -656,9 +657,17 @@ func _assign_bodies() -> void:
 			body.set_box(VehicleMesh.box_size(entry), float(entry.get("mass_kg", 1400.0)))
 			body.process_mode = Node.PROCESS_MODE_INHERIT
 			body.freeze = true
+	var delta := get_physics_process_delta_time()
+	var cap := float(config.get("separation_cap_mps", 25.0))
 	for a in agents:
-		if a.body != null and not a.retired:
-			a.body.global_transform = a.transform.translated_local(Vector3.ZERO)
+		if a.body == null or a.retired:
+			continue
+		if not mirror and a.body.vehicle_near():
+			a.body.follow(a.transform, delta, a.speed + 3.0, maxf(cap, a.speed + 5.0))  # dynamic before any contact
+		else:
+			if a.body.guarded:
+				a.body.refreeze()
+			a.body.global_transform = a.transform
 
 
 func _free_body() -> TrafficCar:
@@ -672,8 +681,7 @@ func _release_body(a: TrafficAgent) -> void:
 	if a.body == null:
 		return
 	a.body.agent = null
-	a.body.freeze = true
-	a.body.linear_velocity = Vector3.ZERO
+	a.body.refreeze()
 	a.body.process_mode = Node.PROCESS_MODE_DISABLED
 	a.body.global_position = Vector3(0, -1000, 0)
 	a.body = null
@@ -817,7 +825,15 @@ func _on_body_hit(car: TrafficCar) -> void:
 	a.resting = false
 	a.hit_timer = float(config["hit_physics_s"])
 	_leave_junction(a)
-	car.freeze = false
+	# Usually already dynamic (guarded); if not, it carries on at its own speed.
+	if car.freeze:
+		car.freeze = false
+		car.linear_velocity = -a.transform.basis.z * a.speed
+	# Nothing involved may leave the contact faster than it came in, or than the cap.
+	var cap := float(config.get("separation_cap_mps", 25.0))
+	car.speed_cap = maxf(cap, a.speed + 2.0)
+	if car.last_hitter != null and car.last_hitter.has_method("limit_speed"):
+		car.last_hitter.limit_speed(cap, float(config["hit_physics_s"]))
 
 
 ## The MultiMesh key ("vehicle_id:lod") an agent draws from.
