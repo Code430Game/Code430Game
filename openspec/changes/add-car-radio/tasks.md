@@ -16,5 +16,6 @@
   - 2026-10-04: `--record-music` recorded the Music bus in a windowed run for each station: music from 1.0 to 1.25 s after getting in, loudness matching the offline renders (RMS 0.135 to 0.172). The first try was silent because the loops took 34 to 53 s to render; fixed by block rendering, one pass with warm-up, one render at a time and the cache. Getting out, back in and into another car is covered by `test_radio.gd` and `test_testbed_vehicle_audio.gd`.
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark on the usual autodrive route with the radio playing: generator fill inside render CPU and no frame regression
+- [x] 3.1 Deck benchmark on the usual autodrive route with the radio playing: generator fill inside render CPU and no frame regression
+  - Steam Deck, 2026-10-04, build 43313ba (deck preset, 40 s autodrive, Quest FM on): first run (loops rendering, 1.3 to 1.7 s each) avg 10.04 ms, p99 13.89, GPU 9.00; cached run avg 9.83, p99 13.33, GPU 8.77. Before the radio: avg 10.09 / 9.74, p99 13.55 / 14.29, GPU 8.99 / 8.71. No regression. The Music bus recording on the Deck has the station from 1.5 s after getting in, RMS 0.171.
 - [ ] 3.2 **Stop: human drives on the Deck, cycles the stations, and decides whether talk radio stays**
