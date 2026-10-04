@@ -59,3 +59,24 @@
   enough for the first pass to cut the draw-call cost in half.
 - Taxi and box truck liveries carry invented names; confirm no Ottawa in-jokes are wanted
   there before content is authored.
+
+## Immovable traffic fix (folded in 2026-10-04)
+- **Cause to confirm with the lab:** `TrafficCar` is frozen kinematic while following and is
+  moved by `global_transform =` each frame, so it is infinite-mass to the solver and carries no
+  velocity. `body_entered` unfreezes it only after the first contact is solved, which is the
+  same timing bug as pedestrians. Two such bodies closing on a car leave the solver no valid
+  way to separate them except launching the car.
+- **Fix:** as with pedestrians, a slightly larger sensor (`Area3D`, mask 1) on each pooled
+  traffic body reports a `VehicleBody3D` closing at more than `hit_min_speed_mps`. The body
+  unfreezes before contact with `linear_velocity` set to the agent's (forward times speed) and
+  its class mass, and the agent goes to the existing `resting` or hit handling. Traffic cars
+  stay solid to the player on foot (layer 1). Closing between traffic bodies themselves is
+  left to the agents' headway, as now.
+- **Separation cap:** for a short window after an unfreeze, the bodies involved (the player's
+  car and the struck traffic cars) clamp their linear speed to `max(speed before contact,
+  separation_cap_mps)` (default 25 m/s) in `_integrate_forces` for traffic and in the player
+  car's physics step. A wedge can never launch anything, and normal crashes are untouched.
+- **Lab:** `scenes/traffic_hit_lab.tscn`, built like `ped_hit_lab`: a rear-end at 50 km/h and
+  a wedge (two traffic cars closing on the stationary player car from front and back). It logs
+  the player car's speed before and after and the peak speed of every body, prints one
+  `traffic-hit:` line per scenario, and is reused by the tests.

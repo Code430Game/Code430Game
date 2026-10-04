@@ -10,6 +10,9 @@
 - [ ] 3.1 Per-class, per-LOD MultiMeshes, LOD pick by distance, spawn weights by road group and hour, pooled body box and mass from the class; tests on class mix at noon and at 22:00 and on LOD assignment
 - [ ] 3.2 Snapshot stride 7 with class index; mirror client rebuilds classes; sync tests
 
+- [ ] 3.3 Immovable traffic fix, part 1: `scenes/traffic_hit_lab.tscn` (the player's car rear-ends a stopped traffic car at 50 km/h; the player's car wedged between two traffic cars that close on it), logging speeds and the peak speed of every body; confirm the cause from the numbers, and record **before** on the Mac
+- [ ] 3.4 Immovable traffic fix, part 2: a sensor on traffic bodies switches them to dynamic before a closing vehicle touches them, with the agent's velocity and the class's mass; separation speed capped; tests: rear-end shares momentum, the wedge never exceeds the cap, a frozen traffic body never meets a vehicle in contact; record **after** with the same camera
+
 ## 4. Player car
 - [ ] 4.1 `apply_entry` on the placeholder car (wheels, mass, tunables, mesh); taking a traffic car keeps its class; `--car=<id>`; remote replicas build the class; tests
 - [ ] 4.2 Mac drive: hatchback, SUV and box truck feel different on the Queensway ramp
