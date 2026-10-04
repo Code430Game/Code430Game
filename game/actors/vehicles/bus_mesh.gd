@@ -11,7 +11,7 @@ const GROUND_LIFT_M := 0.0
 const FLOOR_M := 0.45  # body underside
 
 
-static func build() -> ArrayMesh:
+static func build(with_wheels: bool = true) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	var tools: Array[SurfaceTool] = []
 	for i in range(4):
@@ -29,9 +29,10 @@ static func build() -> ArrayMesh:
 	_box(tools[1], Vector3(hw + 0.02, 1.2, -3.2), Vector3(0.04, 1.6, 1.1), CarMesh.DARK_COLOR)
 	_box(tools[1], Vector3(0.0, 0.6, -hl - 0.03), Vector3(WIDTH_M, 0.35, 0.06), CarMesh.DARK_COLOR)
 	_box(tools[1], Vector3(0.0, 0.6, hl + 0.03), Vector3(WIDTH_M, 0.35, 0.06), CarMesh.DARK_COLOR)
-	for x: float in [-hw + 0.25, hw - 0.25]:
-		for z: float in [-3.9, 3.9]:
-			_box(tools[1], Vector3(x, 0.5, z), Vector3(0.35, 1.0, 1.0), CarMesh.DARK_COLOR)
+	if with_wheels:
+		for x: float in [-hw + 0.25, hw - 0.25]:
+			for z: float in [-3.9, 3.9]:
+				_box(tools[1], Vector3(x, 0.5, z), Vector3(0.35, 1.0, 1.0), CarMesh.DARK_COLOR)
 	# Lights
 	for x: float in [-hw + 0.35, hw - 0.35]:
 		_box(tools[2], Vector3(x, 0.95, -hl - 0.03), Vector3(0.35, 0.22, 0.06), CarMesh.HEADLIGHT_COLOR)
