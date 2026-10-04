@@ -88,20 +88,84 @@ func test_hit_pedestrian_tumbles_then_lies_still_then_goes_away() -> void:
 	var m := _manager(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}]))
 	m.anchors = PackedVector3Array([Vector3.ZERO])
 	var a := _add(m, 0, 20.0)
-	var body: PedestrianBody = m._bodies[0]
-	a.body = body
-	body.agent = a
-	m._on_body_hit(body)
+	m._assign_bodies()
+	var body: PedestrianBody = a.body
+	m.knock_down(a, Vector3(0, 100, -600), a.position() + Vector3.UP * 0.5)
 	assert_int(a.state).is_equal(Pedestrian.State.HIT)
 	assert_bool(body.freeze).is_false()
 	for i in range(int(float(m.config["hit_physics_s"]) * 60) + 5):
 		m.step(1.0 / 60.0)
 	assert_int(a.state).is_equal(Pedestrian.State.DOWN)
 	assert_bool(body.freeze).is_true()
+	assert_int(body.collision_mask).is_equal(0)
 	for i in range(int(float(m.config["remove_after_s"]) * 60) + 5):
 		m.step(1.0 / 60.0)
 	assert_int(m.agents.size()).is_equal(0)
 	assert_object(body.agent).is_null()
+
+
+func test_walkers_are_out_of_reach_of_vehicles_but_not_of_people() -> void:
+	var m := _manager(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}]))
+	var body: PedestrianBody = m._bodies[0]
+	assert_int(body.collision_layer).is_equal(PedestrianBody.LAYER)
+	assert_int(body.collision_mask).is_equal(0)  # a frozen body touching a car is a wall to it
+	var car: VehicleBody3D = auto_free(TrafficManager.DRIVABLE_CAR_SCENE.instantiate())
+	assert_int(car.collision_mask & PedestrianBody.LAYER).is_equal(0)
+	var player: Node = auto_free(load("res://actors/player/player.tscn").instantiate())
+	assert_int((player as CharacterBody3D).collision_mask & PedestrianBody.LAYER).is_not_equal(0)
+
+
+func test_person_on_foot_is_blocked_and_nobody_falls() -> void:
+	var m := _manager(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}]))
+	m.anchors = PackedVector3Array([Vector3(20, 0, 0)])
+	var a := _add(m, 0, 20.0)
+	a.speed = 0.0
+	m.enabled = false
+	m._assign_bodies()
+	assert_object(a.body).is_not_null()
+	var walker_mask: int = (auto_free(load("res://actors/player/player.tscn").instantiate()) as CharacterBody3D).collision_mask
+	var person := CharacterBody3D.new()
+	person.collision_mask = walker_mask
+	var shape := CollisionShape3D.new()
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = 0.3
+	capsule.height = 1.7
+	shape.shape = capsule
+	shape.position.y = 0.95
+	person.add_child(shape)
+	add_child(person)
+	auto_free(person)
+	person.global_position = Vector3(20, 0.05, 2.0)
+	for i in range(90):  # walk straight at the pedestrian for 1.5 s at 2 m/s
+		person.velocity = Vector3(0, 0, -2.0)
+		person.move_and_slide()
+		await get_tree().physics_frame
+	assert_float(person.global_position.z).is_greater(0.4)  # stopped against them
+	assert_int(a.state).is_equal(Pedestrian.State.WALKING)
+
+
+func test_traffic_car_knocks_a_walker_down() -> void:
+	var m := _manager(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}]))
+	m.anchors = PackedVector3Array([Vector3(20, 0, 0)])
+	var a := _add(m, 0, 20.0)
+	a.speed = 0.0
+	m._assign_bodies()
+	var car: TrafficCar = auto_free(load("res://world/traffic/traffic_car.tscn").instantiate())
+	add_child(car)
+	var agent := TrafficAgent.new()
+	agent.speed = 10.0
+	agent.transform = Transform3D(Basis(), Vector3(20, 0, 8))  # facing -Z, toward the walker
+	car.agent = agent
+	for i in range(60):
+		agent.transform.origin.z -= 10.0 / 60.0
+		car.global_transform = agent.transform
+		await get_tree().physics_frame
+		if a.state != Pedestrian.State.WALKING:
+			break
+	assert_int(a.state).is_equal(Pedestrian.State.HIT)
+	await get_tree().physics_frame  # the impulse lands on the next physics step
+	await get_tree().physics_frame
+	assert_float(m.thrown_velocity(a).z).is_less(-3.0)  # thrown the way the car was going
 
 
 func test_spawning_respects_cap_and_distances() -> void:

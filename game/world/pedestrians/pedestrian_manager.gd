@@ -139,6 +139,7 @@ func _setup_rendering() -> void:
 	for i in range(int(config["body_pool"])):
 		var body: PedestrianBody = BODY_SCENE.instantiate()
 		body.hit.connect(_on_body_hit)
+		body.min_hit_speed = float(config.get("hit_min_speed_mps", 1.5))
 		add_child(body)
 		body.process_mode = Node.PROCESS_MODE_DISABLED
 		body.global_position = Vector3(0, -1000, 0)
@@ -236,9 +237,7 @@ func _step_struck(a: Pedestrian, delta: float) -> void:
 		a.state = Pedestrian.State.DOWN
 		a.timer = float(config["remove_after_s"])
 		if a.body != null:
-			a.body.freeze = true
-			a.body.linear_velocity = Vector3.ZERO
-			a.body.angular_velocity = Vector3.ZERO
+			a.body.make_walker()
 
 
 func _step_agent(a: Pedestrian, delta: float) -> void:
@@ -488,20 +487,42 @@ func _release_body(a: Pedestrian) -> void:
 	if a.body == null:
 		return
 	a.body.agent = null
-	a.body.freeze = true
-	a.body.linear_velocity = Vector3.ZERO
+	a.body.make_walker()
 	a.body.process_mode = Node.PROCESS_MODE_DISABLED
 	a.body.global_position = Vector3(0, -1000, 0)
 	a.body = null
 
 
-func _on_body_hit(body: PedestrianBody) -> void:
+## A vehicle closing on a walker's sensor: the person is thrown with most of the vehicle's
+## velocity and a little lift, and the player's car feels a configured knock back.
+func _on_body_hit(body: PedestrianBody, vehicle: Node3D, velocity: Vector3) -> void:
 	var a := body.agent
 	if a == null or a.state != Pedestrian.State.WALKING:
 		return
+	var mass := float(config.get("mass_kg", 75.0))
+	var throw := velocity * float(config.get("hit_transfer", 0.9)) + Vector3.UP * float(config.get("hit_lift_mps", 1.5))
+	knock_down(a, throw * mass, a.position() + Vector3.UP * 0.5)
+	if vehicle is VehicleBody3D and velocity.length() > 0.01:
+		(vehicle as VehicleBody3D).apply_central_impulse(-velocity.normalized() * float(config.get("hit_car_impulse_ns", 2000.0)))
+
+
+## How fast a knocked-down person's body is moving (zero while walking or without a body).
+func thrown_velocity(a: Pedestrian) -> Vector3:
+	if a.state == Pedestrian.State.WALKING or a.body == null or a.body.freeze:
+		return Vector3.ZERO
+	return a.body.linear_velocity
+
+
+## Knocks a walking pedestrian down: `impulse` (N s) applied at world `point`. The one entry
+## point for anything that floors someone (vehicles now; later weapons and the like).
+func knock_down(a: Pedestrian, impulse: Vector3, point: Vector3) -> void:
+	if a.state != Pedestrian.State.WALKING:
+		return
 	a.state = Pedestrian.State.HIT
 	a.timer = float(config["hit_physics_s"])
-	body.freeze = false
+	if a.body != null:
+		a.body.make_dynamic(Vector3.ZERO)
+		a.body.apply_impulse(impulse, point - a.body.global_position)
 
 
 ## The walk shader's per-instance data for an agent: phase, amount (zero unless walking).

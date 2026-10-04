@@ -178,3 +178,10 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   road), portal and interior meshes, lighting, and a sheltering population for them
   (homelessness is in scope for the base game; the sanitized tone mode would drop it).
 - Parking aisles and driveways are still dropped by the importer (earlier round).
+- **Cars pinned against traffic cars fling things across the map** (human, 2026-10-04: "two
+  cars got pinned and things flew to the other end of the map"). Likely the same cause as the
+  pedestrian hard stop fixed in add-pedestrians 3.5: traffic bodies (`traffic_car.gd`) are
+  frozen kinematic until `body_entered` unfreezes them, so the solver treats them as immovable;
+  a car wedged between one and anything else gets pushed out with a huge velocity. Fix as a
+  `fix/` change: unfreeze or sensor-switch like the pedestrians, and cap the depenetration
+  speed. Reproduce with a lab scene first.
