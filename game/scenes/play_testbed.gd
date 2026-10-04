@@ -493,7 +493,13 @@ func _setup_traffic() -> void:
 	_traffic.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_traffic)
 	if _bus_share_override >= 0.0:
-		_traffic.config["bus_share"] = _bus_share_override
+		# The bus's catalogue weight that gives this share of an arterial's traffic.
+		var others := 0.0
+		for id in VehicleCatalogue.ids():
+			if id != "bus":
+				others += VehicleCatalogue.spawn_weight(VehicleCatalogue.entry(id), "primary", 12.0)
+		var share := clampf(_bus_share_override, 0.0, 0.95)
+		(VehicleCatalogue.entry("bus")["spawn"] as Dictionary)["weight"] = others * share / (1.0 - share)
 	_traffic.setup(lane_graph, _pack.graph, _pack.junctions)
 	if _traffic_cap >= 0:
 		_traffic.max_agents = _traffic_cap
@@ -667,6 +673,8 @@ func _process(delta: float) -> void:
 			_streamer.anchors = anchors
 		if _traffic != null:
 			_traffic.anchors = anchors
+			if _day_night != null:
+				_traffic.hour = _day_night.hour
 			_traffic.obstacles = obstacles
 		if _peds != null:
 			_peds.anchors = anchors

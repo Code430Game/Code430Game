@@ -269,7 +269,8 @@ func test_sidestep_slides_over_with_the_heading_held_straight() -> void:
 func _bus(m: TrafficManager, path_id: int, distance: float) -> TrafficAgent:
 	var a := _add_agent(m, path_id, distance, 5.0)
 	a.kind = TrafficManager.Kind.BUS
-	a.length_m = float(m.config["bus_length_m"])
+	a.vehicle_id = "bus"
+	a.length_m = float(VehicleCatalogue.entry("bus")["dims"]["length_m"])
 	a.next_stop_d = m._next_stop(path_id, distance)
 	return a
 
@@ -345,3 +346,86 @@ func test_cars_avoid_tunnel_roads_when_another_way_continues() -> void:
 		for i in range(300):
 			m.step(1.0 / 60.0)
 		assert_str(m.lanes.paths[car.path_id].edge_id).is_equal("w3.0")
+
+
+func _spawn_mix(m: TrafficManager, hour: float, n: int) -> Dictionary:
+	m.hour = hour
+	m.rng.seed = 99
+	var counts := {}
+	var spawned := 0
+	var tries := 0
+	while spawned < n and tries < n * 20:
+		tries += 1
+		m.agents.clear()
+		m._spawn_one()
+		if m.agents.is_empty():
+			continue
+		var id: String = m.agents[0].vehicle_id
+		counts[id] = int(counts.get(id, 0)) + 1
+		spawned += 1
+	return counts
+
+
+func test_vans_and_trucks_by_day_taxis_by_night_on_an_arterial() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[-200, 0, 0], [200, 0, 0]], "class": "secondary"}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 120)])
+	var noon := _spawn_mix(m, 12.0, 800)
+	var late := _spawn_mix(m, 22.0, 800)
+	var work_noon: int = int(noon.get("van", 0)) + int(noon.get("box_truck", 0))
+	var work_late: int = int(late.get("van", 0)) + int(late.get("box_truck", 0))
+	assert_int(work_noon).is_greater(work_late * 2)
+	assert_int(int(late.get("taxi", 0))).is_greater(int(noon.get("taxi", 0)) * 2)
+	assert_int(noon.size()).is_greater_equal(7)  # a real mix, not one hull in eight colours
+
+
+func test_residential_streets_get_no_buses_and_bus_lanes_only_buses() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[-200, 0, 0], [200, 0, 0]], "class": "residential"}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 120)])
+	assert_int(int(_spawn_mix(m, 12.0, 400).get("bus", 0))).is_equal(0)
+	var b := _manager(_graph([{"id": "w1.0", "pl": [[-200, 0, 0], [200, 0, 0]], "class": "secondary", "bus": "only"}]))
+	b.anchors = PackedVector3Array([Vector3(0, 0, 120)])
+	var mix := _spawn_mix(b, 12.0, 50)
+	assert_int(int(mix.get("bus", 0))).is_equal(50)
+
+
+func test_far_cars_draw_at_lod1_and_near_ones_at_lod0() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]]}]))
+	var near := _add_agent(m, 0, 10.0, 0.0)
+	var far := _add_agent(m, 0, 300.0, 0.0)
+	near.vehicle_id = "van"
+	far.vehicle_id = "van"
+	near.anchor_dist = m.lod0_m - 5.0
+	far.anchor_dist = m.lod0_m + 5.0
+	assert_str(m.mesh_key(near)).is_equal("van:0")
+	assert_str(m.mesh_key(far)).is_equal("van:1")
+	m._render()
+	assert_int(m._meshes["van:0"].multimesh.visible_instance_count).is_equal(1)
+	assert_int(m._meshes["van:1"].multimesh.visible_instance_count).is_equal(1)
+	far.anchor_dist = 1.0  # the player drives up to it
+	m._render()
+	assert_int(m._meshes["van:0"].multimesh.visible_instance_count).is_equal(2)
+	assert_int(m._meshes["van:1"].multimesh.visible_instance_count).is_equal(0)
+
+
+func test_a_busy_class_grows_its_multimesh_instead_of_dropping_cars() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]]}]))
+	var cap: int = m._meshes["taxi:1"].multimesh.instance_count
+	for i in range(cap + 5):
+		var a := _add_agent(m, 0, float(i), 0.0)
+		a.vehicle_id = "taxi"
+		a.anchor_dist = 500.0
+	m._render()
+	assert_int(m._meshes["taxi:1"].multimesh.visible_instance_count).is_equal(cap + 5)
+
+
+func test_pooled_bodies_take_the_vehicles_box_and_mass() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]]}]))
+	m.anchors = PackedVector3Array([Vector3(10, 0, 0)])
+	var a := _add_agent(m, 0, 10.0, 0.0)
+	a.vehicle_id = "box_truck"
+	a.anchor_dist = 0.0
+	m._assign_bodies()
+	assert_object(a.body).is_not_null()
+	assert_float(a.body.mass).is_equal(float(VehicleCatalogue.entry("box_truck")["mass_kg"]))
+	var shape := (a.body.get_node("Shape") as CollisionShape3D).shape as BoxShape3D
+	assert_float(shape.size.z).is_equal_approx(float(VehicleCatalogue.entry("box_truck")["dims"]["length_m"]), 0.01)

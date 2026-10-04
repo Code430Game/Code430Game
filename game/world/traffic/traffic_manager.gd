@@ -2,9 +2,10 @@ class_name TrafficManager
 extends Node3D
 ## Spawns and drives traffic agents on a LaneGraph around the players.
 ##
-## Agents are plain data (TrafficAgent). One MultiMesh draws them all; a small
-## pool of physics bodies follows the agents nearest the players so the player
-## can collide with them. Each physics step an agent gets a target speed from
+## Agents are plain data (TrafficAgent), each a VehicleCatalogue entry picked at spawn by
+## road group and hour. One MultiMesh per vehicle and level of detail draws them (LOD0 near a
+## player, LOD1 beyond); a small pool of physics bodies, sized and weighted per vehicle,
+## follows the agents nearest the players so the player can collide with them. Each physics step an agent gets a target speed from
 ## its lane's limit, the car ahead (headway rule), and junction priority (claim
 ## within stopping distance, first claim goes first, waiting cars give up after
 ## a while). Agents beyond `distant_rate_m` from every player step every Nth
@@ -45,8 +46,12 @@ var _spawn_timer: float = 0.0
 var _frame: int = 0
 var _debug_mesh: MeshInstance3D
 enum Kind { CAR, BUS }
-var _multimesh: MultiMeshInstance3D
-var _bus_multimesh: MultiMeshInstance3D
+## Clock hour 0..24 for spawn weights (vans by day, taxis by night). Set by the scene.
+var hour: float = 12.0
+## Beyond this distance from every player a vehicle draws at LOD1 (preset `vehicle_lod0_m`).
+var lod0_m: float = 80.0
+var _meshes: Dictionary = {}  # "vehicle_id:lod" -> MultiMeshInstance3D
+var _body_material: StandardMaterial3D
 var _stops_by_path: Dictionary = {}  # lane path id -> Array of stop distances (floats), sorted
 var _bodies: Array[TrafficCar] = []
 var _lane_cells: Dictionary = {}  # Vector2i (64 m cells) -> Array[int] lane path ids
@@ -112,34 +117,35 @@ func setup(lane_graph: LaneGraph, graph: RoadGraph = null, junctions: Dictionary
 
 
 func _setup_rendering() -> void:
-	if _multimesh != null:
+	if not _meshes.is_empty():
 		return
-	_multimesh = MultiMeshInstance3D.new()
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.use_custom_data = true  # r = brake 0..1 per car
-	var car_mesh := CarMesh.build(true)  # white body takes the instance colour; glass and lights keep theirs
+	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
+	lod0_m = float(preset.get("vehicle_lod0_m", config.get("lod0_m", 80.0)))
 	tail_material = ShaderMaterial.new()
 	tail_material.shader = TAIL_SHADER
-	car_mesh.surface_set_material(3, tail_material)
-	mm.mesh = car_mesh
-	mm.instance_count = max_agents
-	mm.visible_instance_count = 0
-	_multimesh.multimesh = mm
-	add_child(_multimesh)
-	_bus_multimesh = MultiMeshInstance3D.new()
-	var bmm := MultiMesh.new()
-	bmm.transform_format = MultiMesh.TRANSFORM_3D
-	bmm.use_colors = true
-	bmm.use_custom_data = true
-	var bus_mesh := BusMesh.build()
-	bus_mesh.surface_set_material(3, tail_material)
-	bmm.mesh = bus_mesh
-	bmm.instance_count = maxi(int(max_agents * float(config.get("bus_share", 0.08)) * 3.0), 8)
-	bmm.visible_instance_count = 0
-	_bus_multimesh.multimesh = bmm
-	add_child(_bus_multimesh)
+	_body_material = VehicleMesh.body_material(Color.WHITE)  # white bodies take the instance colour
+	var total := 0.0
+	for id in VehicleCatalogue.ids():
+		total += float((VehicleCatalogue.entry(id).get("spawn", {}) as Dictionary).get("weight", 0.0))
+	for id in VehicleCatalogue.ids():
+		var entry := VehicleCatalogue.entry(id)
+		var share := float((entry.get("spawn", {}) as Dictionary).get("weight", 0.0)) / maxf(total, 0.001)
+		for lod in [VehicleMesh.Lod.LOD0, VehicleMesh.Lod.LOD1]:
+			var mmi := MultiMeshInstance3D.new()
+			mmi.name = "%s_lod%d" % [id, lod]
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.use_colors = true
+			mm.use_custom_data = true  # r = brake 0..1 per car
+			var mesh := VehicleMesh.build(entry, lod, true, VehicleCatalogue.livery(id))
+			mesh.surface_set_material(0, _body_material)
+			mesh.surface_set_material(3, tail_material)
+			mm.mesh = mesh
+			mm.instance_count = maxi(int(ceil(max_agents * share * 1.5)), 8)  # grows in _render when a class is busier
+			mm.visible_instance_count = 0
+			mmi.multimesh = mm
+			add_child(mmi)
+			_meshes["%s:%d" % [id, lod]] = mmi
 	for i in range(BODY_POOL):
 		var body: TrafficCar = CAR_SCENE.instantiate()
 		body.hit.connect(_on_body_hit)
@@ -568,45 +574,44 @@ func _spawn_one() -> void:
 	var candidates := lanes_near(anchor, float(config["spawn_radius_m"]))
 	if candidates.is_empty():
 		return
-	var kind := Kind.BUS if rng.randf() < float(config.get("bus_share", 0.0)) else Kind.CAR
-	var bus_classes: Array = config.get("bus_classes", [])
 	var pool: Array[LaneGraph.LanePath] = []
 	for lp in candidates:
-		if lp.tunnel:
-			continue  # underground roads are not drawn; nothing should appear from inside them
-		if kind == Kind.BUS:
-			if lp.bus_only or bus_classes.has(lp.road_class):
-				pool.append(lp)
-		elif not lp.bus_only:
+		if not lp.tunnel:  # underground roads are not drawn; nothing should appear from inside them
 			pool.append(lp)
 	if pool.is_empty():
 		return
 	var weights: Dictionary = config["class_weights"]
 	var total := 0.0
 	for lp in pool:
-		total += float(weights.get(lp.road_class, 0.5)) * (3.0 if lp.bus_only and kind == Kind.BUS else 1.0)
+		total += float(weights.get(lp.road_class, 0.5))
 	var r := rng.randf() * total
 	var chosen: LaneGraph.LanePath = pool[pool.size() - 1]
 	for lp in pool:
-		r -= float(weights.get(lp.road_class, 0.5)) * (3.0 if lp.bus_only and kind == Kind.BUS else 1.0)
+		r -= float(weights.get(lp.road_class, 0.5))
 		if r <= 0.0:
 			chosen = lp
 			break
+	# The vehicle: weighted for this road and hour. Bus lanes take only buses; buses keep to
+	# the roads they run on.
+	var bus_classes: Array = config.get("bus_classes", [])
+	var vehicle_id := "bus" if chosen.bus_only else VehicleCatalogue.pick_for_spawn(chosen.road_class, hour, rng, not bus_classes.has(chosen.road_class))
+	var entry := VehicleCatalogue.entry(vehicle_id)
+	if chosen.bus_only and entry.get("body_class") != "bus":
+		return  # a pack replaced the bus with something else: nothing to put in the bus lane
 	var d := rng.randf() * chosen.length
 	var pos := chosen.position_at(d)
 	if _distance_to_anchors(pos) < float(config["min_spawn_distance_m"]):
 		return
-	var length := float(config["bus_length_m"]) if kind == Kind.BUS else float(config["car_length_m"])
+	var length := float((entry.get("dims", {}) as Dictionary).get("length_m", config["car_length_m"]))
 	if not _lane_gap_clear(chosen.id, d, length):
 		return
 	var a := TrafficAgent.new()
-	a.kind = kind
+	a.vehicle_id = str(entry.get("id", vehicle_id))
+	a.kind = Kind.BUS if entry.get("body_class") == "bus" else Kind.CAR
 	a.length_m = length
-	var colors: Array = config["bus_colors"] if kind == Kind.BUS else config["colors"]
-	var c: Array = colors[rng.randi_range(0, colors.size() - 1)]
-	a.color = Color(float(c[0]), float(c[1]), float(c[2]))
+	a.color = VehicleCatalogue.pick_color(a.vehicle_id, rng)
 	a.path_id = chosen.id
-	a.next_stop_d = _next_stop(chosen.id, d) if kind == Kind.BUS else INF
+	a.next_stop_d = _next_stop(chosen.id, d) if a.kind == Kind.BUS else INF
 	a.distance = d
 	a.speed = float(chosen.speed_kph) / 3.6 * 0.5
 	a.transform = Transform3D(Basis.looking_at(chosen.direction_at(d), Vector3.UP), pos)
@@ -647,10 +652,8 @@ func _assign_bodies() -> void:
 				break
 			a.body = body
 			body.agent = a
-			if a.kind == Kind.BUS:
-				body.set_box(Vector3(float(config["bus_width_m"]), float(config["bus_height_m"]), float(config["bus_length_m"])))
-			else:
-				body.set_box(Vector3(float(config["car_width_m"]), 1.3, float(config["car_length_m"])))
+			var entry := VehicleCatalogue.entry(a.vehicle_id)
+			body.set_box(VehicleMesh.box_size(entry), float(entry.get("mass_kg", 1400.0)))
 			body.process_mode = Node.PROCESS_MODE_INHERIT
 			body.freeze = true
 	for a in agents:
@@ -676,10 +679,14 @@ func _release_body(a: TrafficAgent) -> void:
 	a.body = null
 
 
-## Host: packs the agents within `radius` of `around` as x, y, z, yaw, colour index per agent.
+## Values per agent in a snapshot: x, y, z, yaw, colour index, kind, vehicle index.
+const SNAPSHOT_STRIDE := 7
+
+
+## Host: packs the agents within `radius` of `around` (see SNAPSHOT_STRIDE). The colour index
+## is into the vehicle's own palette; the vehicle index is its VehicleCatalogue position.
 func snapshot(around: Vector3, radius: float) -> PackedFloat32Array:
 	var out := PackedFloat32Array()
-	var colors: Array = config["colors"]
 	for a in agents:
 		var p := a.position()
 		if Vector2(p.x - around.x, p.z - around.z).length() > radius:
@@ -689,15 +696,16 @@ func snapshot(around: Vector3, radius: float) -> PackedFloat32Array:
 		out.append(p.y)
 		out.append(p.z)
 		out.append(atan2(fwd.x, fwd.z))
-		out.append(float(_color_index(config["bus_colors"] if a.kind == Kind.BUS else colors, a.color)))
+		out.append(float(_color_index(_palette(a.vehicle_id), a.color)))
 		out.append(float(a.kind))
+		out.append(float(VehicleCatalogue.index_of(a.vehicle_id)))
 	return out
 
 
-## Client: replaces the agents with the host's snapshot (see `snapshot`).
+## Client: replaces the agents with the host's snapshot (see `snapshot`). An unknown vehicle
+## index (a pack the client lacks) falls back to the sedan.
 func apply_snapshot(data: PackedFloat32Array) -> void:
-	var n := data.size() / 6
-	var colors: Array = config["colors"]
+	var n := data.size() / SNAPSHOT_STRIDE
 	while agents.size() > n:
 		_release_body(agents[agents.size() - 1])
 		agents.pop_back()
@@ -705,18 +713,25 @@ func apply_snapshot(data: PackedFloat32Array) -> void:
 		agents.append(TrafficAgent.new())
 	for i in range(n):
 		var a := agents[i]
-		var k := i * 6
+		var k := i * SNAPSHOT_STRIDE
 		var yaw := data[k + 3]
 		var fwd := Vector3(sin(yaw), 0.0, cos(yaw))
 		a.transform = Transform3D(Basis.looking_at(fwd, Vector3.UP), Vector3(data[k], data[k + 1], data[k + 2]))
 		a.kind = int(data[k + 5])
-		a.length_m = float(config["bus_length_m"]) if a.kind == Kind.BUS else float(config["car_length_m"])
-		var palette: Array = config["bus_colors"] if a.kind == Kind.BUS else colors
+		a.vehicle_id = VehicleCatalogue.id_at(int(data[k + 6]))
+		var entry := VehicleCatalogue.entry(a.vehicle_id)
+		a.length_m = float((entry.get("dims", {}) as Dictionary).get("length_m", config["car_length_m"]))
+		var palette := _palette(a.vehicle_id)
 		var ci := int(data[k + 4])
 		if ci >= 0 and ci < palette.size():
 			var c: Array = palette[ci]
 			a.color = Color(float(c[0]), float(c[1]), float(c[2]))
 		a.anchor_dist = _distance_to_anchors(a.transform.origin)
+
+
+## The colours a vehicle is drawn from (its livery's when the livery overrides them).
+static func _palette(vehicle_id: String) -> Array:
+	return VehicleCatalogue.livery(vehicle_id).get("colors", VehicleCatalogue.entry(vehicle_id).get("colors", [[1, 1, 1]]))
 
 
 static func _color_index(colors: Array, color: Color) -> int:
@@ -805,30 +820,32 @@ func _on_body_hit(car: TrafficCar) -> void:
 	car.freeze = false
 
 
+## The MultiMesh key ("vehicle_id:lod") an agent draws from.
+func mesh_key(a: TrafficAgent) -> String:
+	var id := a.vehicle_id if _meshes.has("%s:0" % a.vehicle_id) else VehicleCatalogue.FALLBACK_ID
+	return "%s:%d" % [id, VehicleMesh.Lod.LOD0 if a.anchor_dist <= lod0_m else VehicleMesh.Lod.LOD1]
+
+
 func _render() -> void:
-	if _multimesh == null:
+	if _meshes.is_empty():
 		return
-	var mm := _multimesh.multimesh
-	var bmm := _bus_multimesh.multimesh
-	var cars := 0
-	var buses := 0
+	var groups := {}
 	for a in agents:
-		if a.kind == Kind.BUS:
-			if buses >= bmm.instance_count:
-				continue
-			bmm.set_instance_transform(buses, a.transform.translated_local(Vector3(0.0, BusMesh.GROUND_LIFT_M, 0.0)))
-			bmm.set_instance_color(buses, a.color)
-			bmm.set_instance_custom_data(buses, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
-			buses += 1
-		else:
-			if cars >= mm.instance_count:
-				continue
-			mm.set_instance_transform(cars, a.transform.translated_local(Vector3(0.0, CarMesh.GROUND_LIFT_M, 0.0)))
-			mm.set_instance_color(cars, a.color)
-			mm.set_instance_custom_data(cars, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
-			cars += 1
-	mm.visible_instance_count = cars
-	bmm.visible_instance_count = buses
+		var key := mesh_key(a)
+		if not groups.has(key):
+			groups[key] = []
+		(groups[key] as Array).append(a)
+	for key: String in _meshes:
+		var mm: MultiMesh = (_meshes[key] as MultiMeshInstance3D).multimesh
+		var list: Array = groups.get(key, [])
+		if list.size() > mm.instance_count:
+			mm.instance_count = int(list.size() * 1.5)  # reallocates; every instance is written below
+		for i in range(list.size()):
+			var a: TrafficAgent = list[i]
+			mm.set_instance_transform(i, a.transform)
+			mm.set_instance_color(i, a.color)
+			mm.set_instance_custom_data(i, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
+		mm.visible_instance_count = list.size()
 
 
 ## Draws lane paths (green) and connectors (orange) as lines; toggled by the scene's graph view.

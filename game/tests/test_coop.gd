@@ -10,28 +10,44 @@ func test_manifest_mismatch_names_the_field() -> void:
 	assert_str(Session.mismatch_reason(host, {"id": "a", "version": "1", "hash": "y"})).contains("hash")
 
 
-func test_traffic_snapshot_round_trips_positions_headings_and_colours() -> void:
+func test_traffic_snapshot_round_trips_positions_headings_colours_and_classes() -> void:
 	var m: TrafficManager = auto_free(TrafficManager.new())
 	add_child(m)
-	var colors: Array = m.config["colors"]
 	var a := TrafficAgent.new()
+	a.vehicle_id = "box_truck"
 	a.transform = Transform3D(Basis.looking_at(Vector3(1, 0, 0), Vector3.UP), Vector3(10, 2, 30))
-	var c: Array = colors[3]
+	var c: Array = VehicleCatalogue.entry("box_truck")["colors"][2]
 	a.color = Color(float(c[0]), float(c[1]), float(c[2]))
+	var taxi := TrafficAgent.new()
+	taxi.vehicle_id = "taxi"
+	taxi.color = VehicleCatalogue.pick_color("taxi", RandomNumberGenerator.new())
+	taxi.transform = Transform3D(Basis(), Vector3(-20, 0, 5))
 	var far := TrafficAgent.new()
 	far.transform = Transform3D(Basis(), Vector3(900, 0, 0))
-	m.agents = [a, far]
+	m.agents = [a, taxi, far]
 	var data := m.snapshot(Vector3.ZERO, 350.0)
-	assert_int(data.size()).is_equal(6)
+	assert_int(data.size()).is_equal(2 * TrafficManager.SNAPSHOT_STRIDE)
 	var mirror: TrafficManager = auto_free(TrafficManager.new())
 	add_child(mirror)
 	mirror.mirror = true
 	mirror.apply_snapshot(data)
-	assert_int(mirror.agents.size()).is_equal(1)
+	assert_int(mirror.agents.size()).is_equal(2)
 	var b: TrafficAgent = mirror.agents[0]
 	assert_float(b.position().distance_to(Vector3(10, 2, 30))).is_less(0.01)
 	assert_float((-b.transform.basis.z).dot(Vector3(1, 0, 0))).is_greater(0.999)
 	assert_object(b.color).is_equal(a.color)
+	assert_str(b.vehicle_id).is_equal("box_truck")
+	assert_float(b.length_m).is_equal_approx(float(VehicleCatalogue.entry("box_truck")["dims"]["length_m"]), 0.01)
+	assert_str(mirror.agents[1].vehicle_id).is_equal("taxi")
+	assert_object(mirror.agents[1].color).is_equal(taxi.color)
+
+
+func test_unknown_vehicle_index_falls_back_to_the_sedan() -> void:
+	var mirror: TrafficManager = auto_free(TrafficManager.new())
+	add_child(mirror)
+	mirror.mirror = true
+	mirror.apply_snapshot(PackedFloat32Array([0, 0, 0, 0, 0, 0, 99]))
+	assert_str(mirror.agents[0].vehicle_id).is_equal("sedan")
 
 
 func test_remote_player_interpolates_toward_the_newest_sample() -> void:
