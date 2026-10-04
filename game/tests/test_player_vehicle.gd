@@ -141,3 +141,38 @@ func test_hatchback_suv_and_box_truck_handle_differently() -> void:
 	assert_float(truck.x).is_greater(hatch.x * 1.3)  # the truck is slow off the line
 	assert_float(truck.y).is_greater(hatch.y)  # and takes longer to stop
 	assert_float(suv.x).is_not_equal(hatch.x)
+
+
+## Holds `kph` then turns at full lock for 3 s on flat ground. Returns the least upright the
+## car got (1 = flat, below 0.5 = on its side or worse).
+func _hard_turn(id: String, at: Vector3, kph: float) -> float:
+	var car := _car(id, at)
+	car.global_transform = Transform3D(Basis.looking_at(Vector3(1, 0, 0), Vector3.UP), at)
+	for i in range(60):
+		await get_tree().physics_frame
+	var guard := 0
+	while float(car.call("forward_speed")) * 3.6 < kph and guard < 60 * 20:
+		car.set("override_throttle", 1.0)
+		await get_tree().physics_frame
+		guard += 1
+	var worst := 1.0
+	for i in range(180):
+		car.set("override_throttle", 0.6)
+		car.set("override_steer", 1.0)
+		await get_tree().physics_frame
+		worst = minf(worst, car.global_basis.y.y)
+	return worst
+
+
+func test_cars_take_a_full_lock_turn_at_60_without_rolling() -> void:
+	_floor()
+	var z := -80.0
+	var report := ""
+	var worst_all := 1.0
+	for id: String in ["hatchback", "sedan", "suv", "van", "box_truck"]:
+		var w := await _hard_turn(id, Vector3(-60, 0.1, z), 60.0)
+		report += " %s %.2f" % [id, w]
+		worst_all = minf(worst_all, w)
+		z += 40.0
+	print("hard turn, least upright:" + report)
+	assert_float(worst_all).override_failure_message("rolled:" + report).is_greater(0.8)
