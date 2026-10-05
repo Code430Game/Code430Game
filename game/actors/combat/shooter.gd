@@ -8,6 +8,8 @@ extends Node
 ## variant or paint and a run for a non-lethal one. Gunshots send walkers in earshot running.
 
 signal fired(weapon: Dictionary)
+## A weapon hit a person; `downed` when it knocked them down (the police hear about it).
+signal hit_person(agent: Pedestrian, weapon: Dictionary, downed: bool)
 
 const BALL_POOL := 12
 const BALL_LIFE_S := 2.0
@@ -238,11 +240,13 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 			push.y = 0.0
 			push = push.normalized() * float(imp.get("lethal_push", 400.0)) + Vector3.UP * 60.0
 			peds.knock_down(a, push, pos)
+			hit_person.emit(a, w, true)
 			if effects != null and ContentMode.allows("gore"):
 				effects.mark("blood", a.position() + Vector3.UP * 0.02, Vector3.UP)
 		else:
 			_paint_index = (_paint_index + 1) % 4
 			peds.paint(a, _paint_index, from, float(weapons.config.get("flee_s", 6.0)))
+			hit_person.emit(a, w, false)
 		return
 	if effects != null and collider is StaticBody3D:
 		_paint_index = (_paint_index + 1) % 4

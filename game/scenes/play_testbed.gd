@@ -50,6 +50,8 @@ var _vehicle_audio: VehicleAudio
 var _reset_ring: HoldRing
 var _shooter: Shooter
 var _combat_effects: CombatEffects
+var _wanted: Wanted
+var _stars_label: Label
 var _lit_car: VehicleBody3D  # the car whose headlights the lights setting drives: the one driven last
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
@@ -263,6 +265,8 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 
 
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
+	if _wanted != null and _wanted.police_sees(traffic_body.global_position):
+		_wanted.report("theft", traffic_body.global_position)  # only a theft the police see counts
 	if _parked != null and traffic_body.has_meta("parked_key"):
 		if Session.is_client():
 			_world_sync.request_take_parked(str(traffic_body.get_meta("parked_key")))  # the host answers via _on_take_granted
@@ -394,6 +398,35 @@ func _setup_combat() -> void:
 	_shooter.hud = label
 	_shooter.reticle = reticle
 	add_child(_shooter)
+	_setup_wanted()
+
+
+## The wanted level (add-police): crimes from weapons, car hits and car theft; stars on the HUD.
+func _setup_wanted() -> void:
+	_wanted = Wanted.new()
+	_wanted.name = "Wanted"
+	_wanted.peds = _peds
+	add_child(_wanted)
+	_stars_label = Label.new()
+	_stars_label.name = "Stars"
+	_stars_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_stars_label.position = Vector2(-320.0, 44.0)
+	_stars_label.size = Vector2(300.0, 36.0)
+	_stars_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_stars_label.add_theme_font_size_override("font_size", 28)
+	_stars_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	_stars_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	$HUD.add_child(_stars_label)
+	_wanted.stars_changed.connect(func(_n: int) -> void: _stars_label.text = _wanted.stars_text())
+	_shooter.fired.connect(func(w: Dictionary) -> void:
+		if str(w.get("mechanic", "")) != "melee" and bool(w.get("lethal", false)):
+			_wanted.report("gunfire", _player.global_position))
+	_shooter.hit_person.connect(func(a: Pedestrian, _w: Dictionary, downed: bool) -> void:
+		_wanted.report("assault_down" if downed else "assault", a.position()))
+	if _peds != null:
+		_peds.struck_by_vehicle.connect(func(a: Pedestrian, vehicle: Node3D) -> void:
+			if vehicle == _driven_car() and _player.is_driving():
+				_wanted.report("assault_down", a.position()))
 
 
 func _setup_net() -> void:
@@ -902,6 +935,8 @@ func _process(delta: float) -> void:
 	var driving := _player != null and _player.is_driving()
 	_camera.look_behind = in_play and driving and Input.is_action_pressed("look_behind")
 	_reset_ring.progress = _driven_car().reset_progress() if driving else 0.0
+	if _wanted != null:
+		_wanted.target = Players.local_controlled_body()
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
 		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
