@@ -19,6 +19,9 @@ signal stall_taken(key: String)
 const CONFIG_PATH := "res://world/dressing/parking_config.json"
 const BODY_SCENE := preload("res://world/traffic/traffic_car.tscn")
 const TAIL_SHADER := preload("res://actors/vehicles/car_tail.gdshader")
+## Cell size of the lookup grid: the per-tick body check and the draw pass only visit the cells
+## near a player instead of every parked car in the city (thousands in a big pack).
+const CELL_M := 32.0
 
 class Parked:
 	extends RefCounted
@@ -53,6 +56,8 @@ var per_chunk_cap: int = 120
 var bodies_max: int = 8
 var lod0_m: float = 80.0
 var cars: Array[Parked] = []  # occupied stalls for the current hour block
+var _grid: Dictionary = {}  # Vector2i cell -> Array[Parked]
+var _by_key: Dictionary = {}  # Parked.key -> Parked
 var taken: Dictionary = {}  # Parked.key -> true for the session
 var _bucket: int = -1
 var _meshes: Dictionary = {}  # "vehicle_id:lod" -> MultiMeshInstance3D
@@ -128,6 +133,8 @@ func fill() -> void:
 	for c in cars:
 		_release(c)
 	cars.clear()
+	_grid.clear()
+	_by_key.clear()
 	_bucket = bucket_of(hour)
 	var weights: Dictionary = config.get("vehicle_weights", {"sedan": 1.0})
 	var ids: Array = []
@@ -164,6 +171,36 @@ func fill() -> void:
 			p.color = Color(float(col[0]), float(col[1]), float(col[2]))
 			p.chunk = RoadGeometry.chunk_of(Vector3(s.centre.x, 0.0, s.centre.y))
 			cars.append(p)
+			_by_key[key] = p
+			var cell := _cell_of(s.centre)
+			if not _grid.has(cell):
+				_grid[cell] = []
+			(_grid[cell] as Array).append(p)
+
+
+static func _cell_of(p: Vector2) -> Vector2i:
+	return Vector2i(int(floor(p.x / CELL_M)), int(floor(p.y / CELL_M)))
+
+
+## [distance, car] for every car within `radius` of a player, nearest first; visits only the
+## grid cells around the players.
+func _near(radius: float) -> Array:
+	var seen := {}
+	var out: Array = []
+	for a in anchors:
+		var lo := _cell_of(Vector2(a.x - radius, a.z - radius))
+		var hi := _cell_of(Vector2(a.x + radius, a.z + radius))
+		for cx in range(lo.x, hi.x + 1):
+			for cy in range(lo.y, hi.y + 1):
+				for c: Parked in _grid.get(Vector2i(cx, cy), []):
+					if seen.has(c):
+						continue
+					seen[c] = true
+					var d := _distance(c.stall.centre)
+					if d <= radius:
+						out.append([d, c])
+	out.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+	return out
 
 
 func _physics_process(delta: float) -> void:
@@ -187,13 +224,7 @@ func _distance(p: Vector2) -> float:
 
 ## The cars to draw: within the draw radius, nearest first, at most the cap per chunk.
 func visible_cars() -> Array[Parked]:
-	var radius := float(config.get("draw_radius_m", 350.0))
-	var near: Array = []
-	for c in cars:
-		var d := _distance(c.stall.centre)
-		if d <= radius:
-			near.append([d, c])
-	near.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+	var near := _near(float(config.get("draw_radius_m", 350.0)))
 	var per_chunk := {}
 	var out: Array[Parked] = []
 	for pair: Array in near:
@@ -231,19 +262,14 @@ func render() -> void:
 
 ## Gives the nearest cars bodies; frozen unless a vehicle is close, refrozen where they rest.
 func _update_bodies() -> void:
-	var radius := float(config.get("body_radius_m", 45.0))
-	var near: Array = []
-	for c in cars:
-		var d := _distance(c.stall.centre)
-		if d <= radius:
-			near.append([d, c])
-	near.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+	var near := _near(float(config.get("body_radius_m", 45.0)))
 	var wanted := {}
 	for i in range(mini(near.size(), _bodies.size())):
 		wanted[near[i][1]] = true
-	for c in cars:
-		if c.body != null and not wanted.has(c) and c.body.freeze:
-			_release(c)
+	for b in _bodies:
+		var held := car_for(b) if b.agent != null else null
+		if held != null and not wanted.has(held) and b.freeze:
+			_release(held)
 	for c: Parked in wanted:
 		if c.body == null:
 			_attach(c)
@@ -297,11 +323,7 @@ func _release(c: Parked) -> void:
 func car_for(body: Node) -> Parked:
 	if body == null or not body.has_meta("parked_key"):
 		return null
-	var key: String = body.get_meta("parked_key")
-	for c in cars:
-		if c.key == key:
-			return c
-	return null
+	return _by_key.get(body.get_meta("parked_key"))
 
 
 ## Turns the parked car behind `body` into a drivable car of its class and colour at its
@@ -321,7 +343,7 @@ func take(body: Node) -> VehicleBody3D:
 		car.set_spawn(car.global_transform)
 	taken[c.key] = true
 	_release(c)
-	cars.erase(c)
+	_forget(c)
 	render()
 	stall_taken.emit(c.key)
 	return car
@@ -330,21 +352,27 @@ func take(body: Node) -> VehicleBody3D:
 ## Host: empties the stall `key` for a guest who takes its car. Returns {"transform", "color",
 ## "vehicle"}, or {} when the stall holds no car (already taken, or not occupied this hour).
 func release_key(key: String) -> Dictionary:
-	for c in cars:
-		if c.key == key:
-			var out := {"transform": c.body.global_transform if c.body != null else c.transform(), "color": c.color, "vehicle": c.vehicle_id}
-			mark_taken(key)
-			stall_taken.emit(key)
-			return out
-	return {}
+	var c: Parked = _by_key.get(key)
+	if c == null:
+		return {}
+	var out := {"transform": c.body.global_transform if c.body != null else c.transform(), "color": c.color, "vehicle": c.vehicle_id}
+	mark_taken(key)
+	stall_taken.emit(key)
+	return out
 
 
 ## Any peer: the car in stall `key` has been taken; it stays empty for the session.
 func mark_taken(key: String) -> void:
 	taken[key] = true
-	for c in cars:
-		if c.key == key:
-			_release(c)
-			cars.erase(c)
-			break
+	var c: Parked = _by_key.get(key)
+	if c != null:
+		_release(c)
+		_forget(c)
 	render()
+
+
+func _forget(c: Parked) -> void:
+	cars.erase(c)
+	_by_key.erase(c.key)
+	var cell: Array = _grid.get(_cell_of(c.stall.centre), [])
+	cell.erase(c)
