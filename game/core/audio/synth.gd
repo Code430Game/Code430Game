@@ -22,6 +22,20 @@ static func make_player(bus: String, volume_db: float = 0.0) -> AudioStreamPlaye
 	return p
 
 
+## A positional player with a generator stream (sounds others hear from where they are).
+static func make_player_3d(bus: String, volume_db: float = 0.0, unit_size: float = 10.0) -> AudioStreamPlayer3D:
+	var p := AudioStreamPlayer3D.new()
+	var gen := AudioStreamGenerator.new()
+	gen.mix_rate = MIX_RATE
+	gen.buffer_length = BUFFER_S
+	p.stream = gen
+	p.bus = bus
+	p.volume_db = volume_db
+	p.unit_size = unit_size
+	p.tree_exiting.connect(_outlive_playback.bind(gen))
+	return p
+
+
 ## Godot's generator playback holds only a raw pointer to its stream and reads it on the audio
 ## thread every mix, and a player's stop reaches that thread a mix later. Freeing the player
 ## right away freed the stream under the mixer (signal 11 on the audio thread in CI), so the

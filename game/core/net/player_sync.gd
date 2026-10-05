@@ -5,6 +5,9 @@ extends Node
 
 const SEND_HZ := 20.0
 
+## A remote peer started sounding their horn at `position` (the host startles its pedestrians).
+signal remote_horn(position: Vector3)
+
 var player: Player
 var remote_parent: Node3D
 var remotes: Dictionary = {}  # peer id -> RemotePlayer
@@ -68,11 +71,12 @@ func _process(delta: float) -> void:
 		car_t = player.vehicle.global_transform
 		vehicle = VehicleCatalogue.index_of(str(player.vehicle.get("vehicle_id")))
 		car_color = player.vehicle.get("body_color")
-	_state.rpc(player.is_driving(), player.global_transform, car_t, vehicle, car_color)
+	var horn := player.is_driving() and Input.is_action_pressed("horn") and not get_tree().paused
+	_state.rpc(player.is_driving(), player.global_transform, car_t, vehicle, car_color, horn)
 
 
 @rpc("any_peer", "unreliable")
-func _state(is_driving: bool, body_t: Transform3D, car_t: Transform3D, vehicle: int = -1, car_color: Color = Color.WHITE) -> void:
+func _state(is_driving: bool, body_t: Transform3D, car_t: Transform3D, vehicle: int = -1, car_color: Color = Color.WHITE, horn: bool = false) -> void:
 	var id := multiplayer.get_remote_sender_id()
 	var r: RemotePlayer = remotes.get(id)
 	if r == null:
@@ -80,3 +84,7 @@ func _state(is_driving: bool, body_t: Transform3D, car_t: Transform3D, vehicle: 
 	r.push_state(is_driving, body_t, car_t)
 	if is_driving:
 		r.set_vehicle(VehicleCatalogue.id_at(vehicle), car_color)
+	var sounding := horn and is_driving
+	if sounding and not r.horn.sounding:
+		remote_horn.emit(car_t.origin)
+	r.horn.sounding = sounding
