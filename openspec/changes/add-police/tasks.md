@@ -10,5 +10,6 @@
   - 2026-10-05: chase screenshots from the start position shared; the chase is easier to judge from `--police-log` (each second: stars, cars, officers, distance and speed per car), which showed two cars closing from 140 m to 25 m, an officer getting out, and a bust about 14 s in. `--wanted=N` starts a chase. First-pass limits: officers walk straight at the player and follow their height (they float up to a deck), and police cars ignore one-way rules
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark during a 3-star chase against main
+- [x] 3.1 Deck benchmark during a 3-star chase against main
+  - 2026-10-05, idle Deck, deck preset: route with no chase avg 12.96 ms, p99 18.21. A 3-star chase on foot at the start (`--wanted=3`, 4 police cars) avg 13.81, p99 18.66, physics mean 14.3. About 0.85 ms for four chasing cars
 - [ ] 3.2 Human tries a chase in clean and gritty on the Deck (feedback to the backlog; not a merge gate)

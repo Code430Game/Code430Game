@@ -10,5 +10,6 @@
   - 2026-10-05: gun shots shared for clean (paint blobs, "Paintball gun 12 / 20") and dystopia (scorch marks, "Blaster 8 / 16"); `--weapon=1|2 --shoot=N` holds a weapon and fires for screenshots. Marks are flat blobs (paint, blood) or discs (holes, scorch), not textured decals. Punching and kicking are a follow-up (human: "that could be a different ticket"); empty hands stay in the cycle
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark: 30 s of firing on a busy street with the decal pool full; frame avg and p99 against main
+- [x] 3.1 Deck benchmark: 30 s of firing on a busy street with the decal pool full; frame avg and p99 against main
+  - 2026-10-05, idle Deck, deck preset: route avg 13.11 ms, p99 17.78. 30 s firing from the start in gritty (`--weapon=2 --shoot=120`, mark pool full) avg 12.47, p99 17.50; the same in clean with paintballs avg 12.47, p99 17.52. No cost from weapons
 - [ ] 3.2 Human tries all three tones on the Deck (feedback goes to the backlog; not a merge gate)
