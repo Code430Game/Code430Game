@@ -18,5 +18,5 @@
 - [x] 4.2 Mac drive: hatchback, SUV and box truck feel different on the Queensway ramp; done 2026-10-04 as measurements, since feel is the human's to judge at 5.2: 0–60 km/h / 60–0 m on flat ground, hatchback 1.9 s / 9.4 m, SUV 2.4 s / 10.9 m, box truck 6.7 s / 15.2 m (test); Mac screenshot driving the box truck on the 417. The light cars are very quick (arcade); tune at the gate
 
 ## 5. Verification
-- [ ] 5.1 Deck benchmark on the usual route with 150 agents: frame avg and p99, GPU, draw calls quoted against the bus round's 413; no regression past budget
-- [ ] 5.2 **Stop: human drives a few classes on the Deck and watches the traffic mix downtown and on the 417**
+- [x] 5.1 Moved to `add-parking-lots` 4.1 (2026-10-04): today's Deck runs overlapped the human playing, so they were discarded, and the Deck then stayed off; one benchmark of the combined build (vehicles plus parking) on an idle Deck covers both
+- [x] 5.2 **Stop: human drives a few classes on the Deck and watches the traffic mix downtown and on the 417**; passed 2026-10-04: "The cars mostly worked when i tested them myself. And even the bus was steal-able." (an earlier drive found them tippy; fixed with a height-scaled centre of mass)
