@@ -100,3 +100,20 @@ func test_lots_are_bucketed_into_every_chunk_they_touch() -> void:
 	var buckets := ParkingLotBuilder.by_chunk([lot], 256.0)
 	assert_bool(buckets.has(Vector2i(0, 0))).is_true()
 	assert_bool(buckets.has(Vector2i(1, 0))).is_true()
+
+
+func test_stalls_keep_off_a_street_the_lot_outline_overlaps() -> void:
+	# The lot's south edge runs over the middle of a 7 m street along z = 6.
+	var nodes := [
+		{"id": "a", "position": [-50.0, 0.0, 6.0], "ground_y": 0, "junction_type": "junction"},
+		{"id": "b", "position": [200.0, 0.0, 6.0], "ground_y": 0, "junction_type": "junction"},
+	]
+	var edges := [{"id": "w5.0", "from": "a", "to": "b", "polyline": [[-50.0, 0.0, 6.0], [200.0, 0.0, 6.0]], "class": "residential",
+		"lanes_forward": 1, "lanes_backward": 1, "oneway": false, "speed_kph": 40, "width_m": 7.0, "layer": 0, "bridge": false,
+		"tunnel": false, "name": "", "osm_way_id": 5, "defaulted_fields": [], "access": null, "length_m": 250.0, "bus": "", "bus_lane": -1}]
+	var g := RoadGraph.from_dict({"meta": {}, "nodes": nodes, "edges": edges, "pedestrian_ways": [], "bus_stops": []})
+	var lot := ParkingLotBuilder.lot_from_dict(_lot([[[0, 2], [60, 2], [60, 30], [0, 30]]], {"stall_dir": [1, 0]}), g, ParkingLotBuilder.street_grid(g))
+	assert_int(lot.stalls.size()).is_greater(0)
+	for s in lot.stalls:
+		for c in ParkingLotBuilder.stall_corners(s):
+			assert_float(c.y).is_greater(6.0 + 3.5)  # clear of the carriageway

@@ -18,6 +18,8 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | Soft shadow quality | low | high | RenderingServer |
 | FPS cap | none | none | Engine |
 | Vehicle detail distance (`vehicle_lod0_m`) | 60 m | 110 m | traffic: LOD0 bodies within this distance of a player, LOD1 beyond |
+| Parked cars per chunk (`parked_cars_per_chunk`) | 120 | 300 | parked cars: the stalls farthest from any player stay empty above this |
+| Parked car bodies (`parked_car_bodies`) | 8 | 16 | parked cars: how many of the nearest get physics bodies |
 
 ## Adding a feature
 1. Add the key to both presets in `presets.json`.

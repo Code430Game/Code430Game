@@ -32,6 +32,8 @@ var _traffic: TrafficManager
 var _traffic_cap: int = -1
 var _peds: PedestrianManager
 var _peds_cap: int = -1
+var _parked: ParkedCars
+var _parking_occupancy: float = -1.0  # --parking-occupancy=0..1: pin the share of full stalls (screenshots)
 var _knockdown_every: float = 0.0  # --knockdown-every=S: benchmark knocks down the nearest pedestrian every S seconds
 var _knockdown_timer: float = 0.0
 var _knockdowns: int = 0
@@ -189,6 +191,7 @@ func _ready() -> void:
 	_setup_maps()
 	_setup_traffic()
 	_setup_pedestrians()
+	_setup_parked_cars()
 	_setup_day_night()
 	_setup_audio()
 	_setup_net()
@@ -233,6 +236,12 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 
 
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
+	if _parked != null and traffic_body.has_meta("parked_key"):
+		if not Session.is_client():  # the host owns parked cars like traffic; guests can't take them yet
+			var parked_car := _parked.take(traffic_body)
+			if parked_car != null:
+				_player.enter_vehicle(parked_car)
+		return
 	if _traffic == null or not (traffic_body is TrafficCar):
 		return
 	if Session.is_client():
@@ -474,6 +483,18 @@ func _refresh_session_status() -> void:
 	_pause_menu.set_status("%s: %d/%d players: %s, %s%s%s" % [Session.role, Session.peers.size(), Session.max_players, ", ".join(names), tone, warn, where])
 
 
+func _setup_parked_cars() -> void:
+	_parked = ParkedCars.new()
+	_parked.name = "ParkedCars"
+	_parked.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_parked.occupancy_override = _parking_occupancy
+	if _day_night != null:
+		_parked.hour = _day_night.hour
+	add_child(_parked)
+	_parked.setup(_pack.parking_lots)
+	print("parking: %d lots, %d parked cars at %.0f:00" % [_pack.parking_lots.size(), _parked.cars.size(), _parked.hour])
+
+
 func _setup_pedestrians() -> void:
 	var t0 := Time.get_ticks_msec()
 	var walk := WalkGraph.build(_pack.graph.pedestrian)
@@ -624,6 +645,8 @@ func _parse_args() -> void:
 			_start_in_car = true
 		elif arg.begins_with("--traffic="):
 			_traffic_cap = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--parking-occupancy="):
+			_parking_occupancy = float(arg.get_slice("=", 1))
 		elif arg.begins_with("--car="):
 			_car_id = arg.get_slice("=", 1)
 		elif arg.begins_with("--peds="):
@@ -694,6 +717,10 @@ func _process(delta: float) -> void:
 					if _peds.knock_down_nearest(anchors[0], 60.0, push):
 						_knockdowns += 1
 				_bench_falling.append(_peds.falling_count())
+		if _parked != null:
+			_parked.anchors = anchors
+			if _day_night != null:
+				_parked.hour = _day_night.hour
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
 	if _car != null and _player != null:

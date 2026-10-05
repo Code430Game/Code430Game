@@ -194,3 +194,8 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   **Mitigated 2026-10-04:** became 3 in 5 runs once traffic grew; ignoring the testbed suite
   gave 4 of 4 clean runs, confirming it as the source. Letting the freed testbed settle for 60
   frames in its `after()` gave 5 of 5 clean. The thread itself is still unnamed.
+- **Street-side parking bays are exported but not populated** (add-parking-lots, 2026-10-04):
+  256 bays in `parking.v0.json`, but road meshes and traffic lanes have no parking lane, so a
+  kerbside car would sit in the travel lane. Needs road widths that include the parking lane
+  (or a lane offset for traffic) before bays get cars. Guests in co-op can't take parked cars
+  yet either (host-only, like traffic before `request_take`).
