@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/services.schema.v0.json",
+  "title": "Code 430 emergency services v0",
+  "description": "Optional file in a map pack. Police stations, security desks, hospitals, fire stations, ambulance posts and helipads with a position and the nearest road node.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "places"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "places": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "name", "at", "road_node"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"enum": ["police", "security", "hospital", "fire_station", "ambulance", "helipad"]},
+          "name": {"type": ["string", "null"]},
+          "at": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+          "road_node": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

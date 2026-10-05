@@ -48,7 +48,7 @@ static func road_width_px(road_class: String) -> float:
 
 
 ## Draws the map into `texture`. Must be called from a node in the tree; awaits one frame.
-func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = []) -> void:
+func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = [], places: Array = []) -> void:
 	var viewport := SubViewport.new()
 	viewport.size = size_px
 	viewport.transparent_bg = false
@@ -61,6 +61,7 @@ func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon
 	canvas.buildings = buildings
 	canvas.lots = lots
 	canvas.green = green
+	canvas.places = places
 	viewport.add_child(canvas)
 	host.add_child(viewport)
 	await RenderingServer.frame_post_draw
@@ -78,6 +79,7 @@ class MapCanvas:
 	var buildings: Array[BuildingBuilder.Building] = []
 	var lots: Array = []  # ParkingLotBuilder.Lot
 	var green: Array = []  # {"kind", "vertices": PackedVector2Array, "triangles": PackedInt32Array}
+	var places: Array = []  # Services.Place
 
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(renderer.size_px)), BACKGROUND)
@@ -147,3 +149,10 @@ class MapCanvas:
 				pts.append(renderer.world_to_pixel(p.x, p.z))
 			var color: Color = RoadGraphDebugView.DEBUG_COLORS.get(e.road_class, Color.WHITE)
 			draw_polyline(pts, color.darkened(0.25), MapRenderer.road_width_px(e.road_class), true)
+		# Emergency services on top of everything (add-emergency-services).
+		for pl in places:
+			var icon: Dictionary = Services.ICON.get(pl.kind, {"letter": "?", "color": Color.WHITE})
+			var c := renderer.world_to_pixel(pl.at.x, pl.at.z)
+			draw_circle(c, 7.0, Color(0, 0, 0, 0.7))
+			draw_circle(c, 6.0, icon["color"])
+			draw_string(ThemeDB.fallback_font, c + Vector2(-3.5, 4.5), str(icon["letter"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
