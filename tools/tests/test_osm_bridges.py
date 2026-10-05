@@ -219,3 +219,38 @@ def test_export_matches_the_schema():
     d = build_bridges(graph_for(ways), ground, CFG.bridges).to_dict()
     errors = list(Draft202012Validator(schema).iter_errors(d))
     assert not errors, errors[0].message
+
+
+def test_ground_under_a_deck_is_lowered_below_the_soffit_and_nowhere_else():
+    import numpy as np
+
+    from osm_import.pack import SAMPLES_PER_CHUNK, TERRAIN_RES_M, ChunkTerrain, clamp_under_decks
+
+    g = graph_for(OVERPASS)
+    r = build_bridges(g, ground, CFG.bridges)
+    b = r.bridges[0]
+    deck_y = max(p[1] for p in g.edges["w2.0"].polyline)
+    # A refill ridge: the ground everywhere stands just under the road surface.
+    chunks = [
+        ChunkTerrain(
+            cx, cz, np.full((SAMPLES_PER_CHUNK, SAMPLES_PER_CHUNK), deck_y - 0.5, np.float32)
+        )
+        for cx in (-1, 0)
+        for cz in (-1, 0)
+    ]
+    assert clamp_under_decks(chunks, r) > 0
+    soffit = deck_y - b.depth_m
+    by = {(c.cx, c.cz): c for c in chunks}
+
+    def h(x, z):
+        ch = by[(int(x // 256), int(z // 256))]
+        return float(
+            ch.heights[
+                round((z - ch.min_z) / TERRAIN_RES_M),
+                round((x - ch.min_x) / TERRAIN_RES_M),
+            ]
+        )
+
+    assert h(0, 0) <= soffit - 0.3 + 1e-3  # mid-span: under the soffit
+    assert h(0, 40) == deck_y - 0.5  # well beside the bridge: untouched
+    assert h(-120, 0) == deck_y - 0.5  # along the approach: untouched

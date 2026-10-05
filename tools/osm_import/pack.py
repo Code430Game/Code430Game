@@ -229,6 +229,90 @@ def carve_bridges(chunk: ChunkTerrain, bridge_segments: list[tuple]) -> int:
     return int(mask.sum())
 
 
+UNDER_DECK_SLOPE = 1.5  # embankments fall 1 m per 1.5 m from a bridge end
+UNDER_DECK_SIDE_M = 8.0  # natural ground is read this far outside the deck edges
+UNDER_DECK_GAP_M = 0.3  # ground stays at least this far below the soffit
+UNDER_DECK_REACH_M = 5.0  # and that holds this far past the deck edges (closes gaps between decks)
+
+
+def clamp_under_decks(chunks: list[ChunkTerrain], bridges) -> int:
+    """Lowers the ground under every deck (add-bridge-structures 2.2) so no refill ridge rises
+    into or close under it: at each station the ground goes down to the lower of an
+    embankment slope falling away from the nearest bridge end and the natural ground beside
+    the deck there, and never above the soffit. Ground only ever goes down. Returns cells
+    changed."""
+    by_key = {(c.cx, c.cz): c for c in chunks}
+    sampler = ChunkSampler(chunks)
+    changed = 0
+    for b in bridges.bridges:
+        ends = [(e.x, e.y, e.z) for e in b.ends]
+        for deck in b.decks:
+            pts = deck.points
+            for i in range(len(pts) - 1):
+                a, c = pts[i], pts[i + 1]
+                seg = math.dist((a[0], a[2]), (c[0], c[2]))
+                if seg <= 0:
+                    continue
+                dx, dz = (c[0] - a[0]) / seg, (c[2] - a[2]) / seg
+                nx, nz = -dz, dx
+                n = max(1, int(seg // 2.0))
+                for k in range(n + 1):
+                    t = k / n
+                    x, y, z = (
+                        a[0] + (c[0] - a[0]) * t,
+                        a[1] + (c[1] - a[1]) * t,
+                        a[2] + (c[2] - a[2]) * t,
+                    )
+                    lw = deck.left_m[i] + (deck.left_m[i + 1] - deck.left_m[i]) * t
+                    rw = deck.right_m[i] + (deck.right_m[i + 1] - deck.right_m[i]) * t
+                    reach = max(lw, rw) + UNDER_DECK_REACH_M
+                    soffit = y - b.depth_m - UNDER_DECK_GAP_M
+                    beside = min(
+                        sampler.sample(
+                            x + nx * (reach + UNDER_DECK_SIDE_M),
+                            z + nz * (reach + UNDER_DECK_SIDE_M),
+                        ),
+                        sampler.sample(
+                            x - nx * (reach + UNDER_DECK_SIDE_M),
+                            z - nz * (reach + UNDER_DECK_SIDE_M),
+                        ),
+                    )
+                    if ends:
+                        ex, ey, ez = min(ends, key=lambda e: math.dist((e[0], e[2]), (x, z)))
+                        slope = ey - b.depth_m - math.dist((ex, ez), (x, z)) / UNDER_DECK_SLOPE
+                    else:
+                        slope = -math.inf
+                    target = min(soffit, max(slope, beside))
+                    changed += _lower_disc(by_key, x, z, reach, target)
+    return changed
+
+
+def _lower_disc(by_key: dict, x: float, z: float, radius: float, target: float) -> int:
+    n = 0
+    for cx in range(
+        math.floor((x - radius) / CHUNK_SIZE_M),
+        math.floor((x + radius) / CHUNK_SIZE_M) + 1,
+    ):
+        for cz in range(
+            math.floor((z - radius) / CHUNK_SIZE_M),
+            math.floor((z + radius) / CHUNK_SIZE_M) + 1,
+        ):
+            ch = by_key.get((cx, cz))
+            if ch is None:
+                continue
+            c0 = max(0, math.floor((x - radius - ch.min_x) / TERRAIN_RES_M))
+            c1 = min(SAMPLES_PER_CHUNK - 1, math.ceil((x + radius - ch.min_x) / TERRAIN_RES_M))
+            r0 = max(0, math.floor((z - radius - ch.min_z) / TERRAIN_RES_M))
+            r1 = min(SAMPLES_PER_CHUNK - 1, math.ceil((z + radius - ch.min_z) / TERRAIN_RES_M))
+            for r in range(r0, r1 + 1):
+                for c in range(c0, c1 + 1):
+                    px, pz = ch.min_x + c * TERRAIN_RES_M, ch.min_z + r * TERRAIN_RES_M
+                    if math.hypot(px - x, pz - z) <= radius and ch.heights[r, c] > target:
+                        ch.heights[r, c] = target
+                        n += 1
+    return n
+
+
 def flatten_roads(chunk: ChunkTerrain, ground_segments: list[tuple]) -> int:
     """Set terrain under roads to the road surface, blending over the shoulder. Returns cells changed."""
     dist, road_y, half_w, shoulder_w = _distance_field(
