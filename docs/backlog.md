@@ -3,10 +3,6 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
-## 2026-10-05
-
-- **Co-op tab in the pause menu (human, 2026-10-05: "I might move the network game to its own tab").** Host, Join, the address field and the player list move from the Game tab to a Co-op tab.
-
 ## 2026-10-04
 
 - **Radio per car (human, 2026-10-04, Deck drive for `add-car-radio`).** Today the radio follows
@@ -150,3 +146,4 @@ Finished or now tracked by an OpenSpec change; kept so their history is easy to 
 - Cars pinned against traffic cars fling things across the map (fixed in add-vehicle-variety 3.4)
 - Flaky gdUnit crash (exit 134) (fixed 2026-10-05, #25)
 - gdUnit orphan count of about 2,200 (fixed 2026-10-05: the two whole-testbed suites flush the streamer's built-but-unadded chunks and queued meshes after each test; 0 orphans)
+- Co-op tab in the pause menu (done 2026-10-05: Host, Join, the address and the session status moved off the Game tab)
