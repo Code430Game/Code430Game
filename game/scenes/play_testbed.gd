@@ -476,6 +476,7 @@ func _setup_wanted() -> void:
 	_police.player = _player
 	_police.holder = _world
 	_police.stations = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind == "police")
+	_police.helipads = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind == "helipad")
 	_police.log_chase = _police_log
 	add_child(_police)
 	_police.busted.connect(func() -> void: _caught("busted"))
@@ -1015,6 +1016,8 @@ func _process(delta: float) -> void:
 	_reset_ring.progress = _driven_car().reset_progress() if driving else 0.0
 	if _wanted != null:
 		_wanted.target = Players.local_controlled_body()
+	if _police != null and _day_night != null:
+		_police.night = _day_night.night_factor()
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
 		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():

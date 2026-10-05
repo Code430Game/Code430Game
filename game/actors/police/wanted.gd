@@ -17,6 +17,8 @@ var peds: PedestrianManager
 var police_positions := PackedVector3Array()
 ## Who the police are after (the local player's body or car), set by the scene.
 var target: Node3D
+## True while the police helicopter can see the target (set each frame by the PoliceManager).
+var helicopter_sees: bool = false
 
 
 func _init() -> void:
@@ -75,7 +77,7 @@ func _set_stars(n: int) -> void:
 func _process(delta: float) -> void:
 	if stars <= 0 or get_tree().paused:
 		return
-	if target != null and police_sees(target.global_position):
+	if target != null and (helicopter_sees or police_sees(target.global_position)):
 		unseen_s = 0.0
 		return
 	unseen_s += delta

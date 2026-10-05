@@ -110,3 +110,45 @@ func test_the_officer_weapon_follows_the_tone() -> void:
 	for i in range(10):
 		await get_tree().physics_frame
 	assert_int(shots[0]).is_greater(0)
+
+
+func test_the_helicopter_comes_at_three_stars_and_heads_home_below() -> void:
+	var pm := _setup()
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]
+	pm.wanted.set_stars(2)
+	for i in range(3):
+		await get_tree().physics_frame
+	assert_bool(pm.helicopter == null).is_true()
+	pm.wanted.set_stars(3)
+	for i in range(3):
+		await get_tree().physics_frame
+	assert_bool(pm.helicopter != null).is_true()
+	var y := pm.helicopter.global_position.y - pm.player.global_position.y
+	assert_float(y).is_greater(40.0)  # no pad here: it arrives at cruise height
+	pm.wanted.set_stars(2)
+	await get_tree().physics_frame
+	assert_int(pm.helicopter.state).is_equal(PoliceHelicopter.State.RETURN)
+	assert_bool(pm.wanted.helicopter_sees).is_false()
+
+
+func test_a_ceiling_hides_the_player_from_the_helicopter() -> void:
+	var pm := _setup()
+	var heli: PoliceHelicopter = auto_free(PoliceHelicopter.new())
+	pm.holder.add_child(heli)
+	heli.state = PoliceHelicopter.State.CHASE
+	heli.target = pm.player
+	heli.global_position = pm.player.global_position + Vector3(0, 55, 0)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert_bool(heli.sees_target()).is_true()
+	var slab := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(300, 1, 300)
+	shape.shape = box
+	slab.add_child(shape)
+	pm.holder.add_child(slab)
+	slab.global_position = pm.player.global_position + Vector3(0, 6, 0)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert_bool(heli.sees_target()).is_false()
