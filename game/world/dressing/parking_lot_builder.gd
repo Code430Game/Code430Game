@@ -39,6 +39,7 @@ class Stall:
 	var width: float
 	var depth: float
 	var index: int  # within its lot, stable
+	var y: float = NAN  # ground under the stall, set when its chunk builds (NAN until then)
 
 
 class Lot:
@@ -75,14 +76,43 @@ static func load_lots(pack_dir: String, graph: RoadGraph) -> Array[Lot]:
 	if typeof(data) != TYPE_DICTIONARY:
 		push_error("ParkingLotBuilder: cannot read %s" % path)
 		return out
+	var streets := street_grid(graph)
 	for d: Dictionary in data.get("lots", []):
 		if not DRAWN_KINDS.has(str(d.get("kind", "surface"))):
 			continue
-		out.append(lot_from_dict(d, graph))
+		out.append(lot_from_dict(d, graph, streets))
 	return out
 
 
-static func lot_from_dict(d: Dictionary, graph: RoadGraph) -> Lot:
+const STREET_CELL_M := 64.0
+
+
+## Street (non-parking) edge segments by 64 m cell: [a, b, half width] in (x, z), so stalls can
+## keep off carriageways that a lot's outline overlaps.
+static func street_grid(graph: RoadGraph) -> Dictionary:
+	var grid := {}
+	if graph == null:
+		return grid
+	for eid in graph.sorted_edge_ids():
+		var e: RoadGraph.RoadEdge = graph.edges[eid]
+		if e.road_class == "parking":
+			continue
+		for i in range(e.polyline.size() - 1):
+			var a := Vector2(e.polyline[i].x, e.polyline[i].z)
+			var b := Vector2(e.polyline[i + 1].x, e.polyline[i + 1].z)
+			var seg := [a, b, e.width_m * 0.5]
+			var lo := Vector2i(int(floor(minf(a.x, b.x) / STREET_CELL_M)), int(floor(minf(a.y, b.y) / STREET_CELL_M)))
+			var hi := Vector2i(int(floor(maxf(a.x, b.x) / STREET_CELL_M)), int(floor(maxf(a.y, b.y) / STREET_CELL_M)))
+			for cx in range(lo.x, hi.x + 1):
+				for cz in range(lo.y, hi.y + 1):
+					var key := Vector2i(cx, cz)
+					if not grid.has(key):
+						grid[key] = []
+					(grid[key] as Array).append(seg)
+	return grid
+
+
+static func lot_from_dict(d: Dictionary, graph: RoadGraph, streets: Dictionary = {}) -> Lot:
 	var lot := Lot.new()
 	lot.id = str(d["id"])
 	lot.kind = str(d.get("kind", "surface"))
@@ -113,7 +143,7 @@ static func lot_from_dict(d: Dictionary, graph: RoadGraph) -> Lot:
 		lo = Vector2(minf(lo.x, p.x), minf(lo.y, p.y))
 		hi = Vector2(maxf(hi.x, p.x), maxf(hi.y, p.y))
 	lot.bounds = Rect2(lo, hi - lo)
-	lot.stalls = layout_stalls(lot, graph)
+	lot.stalls = layout_stalls(lot, graph, streets)
 	return lot
 
 
@@ -139,7 +169,15 @@ static func edge_distance(lot: Lot, p: Vector2) -> float:
 
 
 ## Stall rectangles along the lot's aisles (or one virtual aisle), deterministic.
-static func layout_stalls(lot: Lot, graph: RoadGraph) -> Array[Stall]:
+static func layout_stalls(lot: Lot, graph: RoadGraph, streets: Dictionary = {}) -> Array[Stall]:
+	var near_streets: Array = []
+	var lo := Vector2i(int(floor(lot.bounds.position.x / STREET_CELL_M)), int(floor(lot.bounds.position.y / STREET_CELL_M)))
+	var hi := Vector2i(int(floor(lot.bounds.end.x / STREET_CELL_M)), int(floor(lot.bounds.end.y / STREET_CELL_M)))
+	for cx in range(lo.x, hi.x + 1):
+		for cz in range(lo.y, hi.y + 1):
+			for seg in streets.get(Vector2i(cx, cz), []):
+				if not near_streets.has(seg):
+					near_streets.append(seg)
 	var aisles: Array = []  # [PackedVector2Array polyline, half width]
 	for eid in lot.aisles:
 		if graph == null or not graph.edges.has(eid):
@@ -187,7 +225,7 @@ static func layout_stalls(lot: Lot, graph: RoadGraph) -> Array[Stall]:
 					s.facing = facing
 					s.width = w
 					s.depth = depth
-					if _fits(lot, s, stalls, aisles, aisle):
+					if _fits(lot, s, stalls, aisles, aisle) and _clear_of_streets(s, near_streets):
 						s.index = stalls.size()
 						stalls.append(s)
 	if lot.capacity >= 0 and stalls.size() > lot.capacity:
@@ -232,6 +270,19 @@ static func stall_corners(s: Stall) -> PackedVector2Array:
 	var f := s.facing * s.depth * 0.5
 	var r := Vector2(-s.facing.y, s.facing.x) * s.width * 0.5
 	return PackedVector2Array([s.centre - f - r, s.centre - f + r, s.centre + f + r, s.centre + f - r])
+
+
+## False when any corner or the middle of the stall lies on a street's carriageway.
+static func _clear_of_streets(s: Stall, streets: Array) -> bool:
+	var probes := stall_corners(s)
+	probes.append(s.centre)
+	for seg: Array in streets:
+		var half: float = seg[2]
+		for p in probes:
+			var q := Geometry2D.get_closest_point_to_segment(p, seg[0], seg[1])
+			if q.distance_to(p) < half + 0.3:
+				return false
+	return true
 
 
 static func _fits(lot: Lot, s: Stall, placed: Array[Stall], aisles: Array, own: Array) -> bool:
@@ -305,6 +356,7 @@ static func build_chunk(lots: Array, coord: Vector2i, heights: TerrainBuilder.Ch
 		for s in lot.stalls:
 			if not chunk_rect.has_point(s.centre):
 				continue
+			s.y = heights.sample(s.centre.x, s.centre.y) + LIFT_M  # where a parked car stands
 			var r := Vector2(-s.facing.y, s.facing.x)
 			var back := s.centre + s.facing * s.depth * 0.5
 			var front := s.centre - s.facing * s.depth * 0.5
