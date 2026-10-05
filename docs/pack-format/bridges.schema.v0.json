@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/bridges.schema.v0.json",
+  "title": "Code 430 bridges v0",
+  "description": "Optional file in a map pack. Bridges grouped from bridge=* ways and man_made=bridge outlines: deck strips (road edges and walkways, with the half-width each side; left is left of travel along the points), piers clear of what runs below, and the ends where abutments go.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "bridges"],
+  "$defs": {
+    "xyz": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+    "dir": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+  },
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "bridges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "name", "edges", "walkways", "span_m", "depth_m", "decks", "piers", "ends"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^bridge[0-9]+$"},
+          "kind": {"enum": ["over_road", "over_water", "over_ground", "footbridge"]},
+          "name": {"type": ["string", "null"]},
+          "edges": {"type": "array", "items": {"type": "string"}},
+          "walkways": {"type": "array", "items": {"type": "string"}},
+          "span_m": {"type": "number", "minimum": 0},
+          "depth_m": {"type": "number", "exclusiveMinimum": 0},
+          "decks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "points", "left_m", "right_m"],
+              "properties": {
+                "source": {"type": "string"},
+                "points": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/xyz"}},
+                "left_m": {"type": "array", "items": {"type": "number", "minimum": 0}},
+                "right_m": {"type": "array", "items": {"type": "number", "minimum": 0}}
+              }
+            }
+          },
+          "piers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "z", "top_y", "bottom_y", "dir", "width_m", "kind"],
+              "properties": {
+                "x": {"type": "number"},
+                "z": {"type": "number"},
+                "top_y": {"type": "number"},
+                "bottom_y": {"type": "number"},
+                "dir": {"$ref": "#/$defs/dir"},
+                "width_m": {"type": "number", "exclusiveMinimum": 0},
+                "kind": {"enum": ["wall", "column"]}
+              }
+            }
+          },
+          "ends": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "y", "z", "dir", "width_m"],
+              "properties": {
+                "x": {"type": "number"},
+                "y": {"type": "number"},
+                "z": {"type": "number"},
+                "dir": {"$ref": "#/$defs/dir"},
+                "width_m": {"type": "number", "exclusiveMinimum": 0}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
