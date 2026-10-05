@@ -43,9 +43,5 @@ static func build(ways: Array[RoadGraph.PedestrianWay]) -> Dictionary:
 	return buckets
 
 
-static func material() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.vertex_color_is_srgb = true
-	m.roughness = 0.95
-	return m
+static func material() -> Material:
+	return SurfaceDetail.material("concrete", 0.95)

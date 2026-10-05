@@ -352,12 +352,8 @@ static func _mesh_instance(name: String, mesh: Mesh, material: Material, begin: 
 	return mi
 
 
-static func _road_material() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.vertex_color_is_srgb = true  # colours are authored in sRGB; without this they render washed out
-	m.roughness = 0.9
-	return m
+static func _road_material() -> Material:
+	return SurfaceDetail.material("asphalt", 0.9)  # vertex colours (sRGB) with asphalt grain
 
 
 static func _terrain_material() -> StandardMaterial3D:
