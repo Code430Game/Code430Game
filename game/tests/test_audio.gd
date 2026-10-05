@@ -53,3 +53,18 @@ func test_engine_voice_is_silent_when_nobody_drives() -> void:
 	assert_bool(va.engine_running()).is_false()
 	car.driver_peer_id = Players.LOCAL_PEER_ID
 	assert_bool(va.engine_running()).is_true()
+
+
+func test_generator_outlives_its_freed_player() -> void:
+	# The generator playback reads its stream on the audio thread a mix after the player stops;
+	# freeing both at once crashed the mixer (signal 11 after the testbed teardown in CI).
+	var p := Synth.make_player("Master")
+	add_child(p)
+	p.play()
+	var gen: WeakRef = weakref(p.stream)
+	p.free()
+	await get_tree().process_frame
+	assert_bool(gen.get_ref() != null).is_true()  # a bool: an object assert would hold the stream
+	await get_tree().create_timer(Synth.KEEP_AFTER_EXIT_S + 0.2).timeout
+	await get_tree().process_frame
+	assert_bool(gen.get_ref() == null).is_true()
