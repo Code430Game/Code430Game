@@ -89,3 +89,25 @@ func test_only_the_driver_holding_horn_sounds_it() -> void:
 	Input.action_release("horn")
 	await get_tree().process_frame
 	assert_bool(va.horn.sounding).is_false()
+
+
+func test_the_chase_camera_stays_under_a_ceiling() -> void:
+	# A slab 2.5 m over the car, as in a garage (#43): the camera must not rise through it.
+	var car := _car()
+	car.freeze = true
+	car.global_position = Vector3(0, 0.5, 0)
+	var ceiling: StaticBody3D = auto_free(StaticBody3D.new())
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(60, 0.3, 60)
+	shape.shape = box
+	ceiling.add_child(shape)
+	add_child(ceiling)
+	ceiling.global_position = Vector3(0, 3.0, 0)
+	var cam: ChaseCamera = auto_free(ChaseCamera.new())
+	add_child(cam)
+	cam.target = car
+	for i in range(30):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	assert_float(cam.global_position.y).is_less(3.0 - 0.15)

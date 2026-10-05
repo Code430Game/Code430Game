@@ -252,6 +252,30 @@ def build_barriers(
                 return False
         return True
 
+    shared_gap = float(rules.get("parapet_shared_deck_gap_m", 3.5))
+
+    def shared_deck(x: float, y: float, z: float, own: str) -> bool:
+        """True when another bridge deck at about the same level runs within `shared_gap` of
+        (x, z): two one-way carriageways side by side (the Mackenzie King Bridge, #45) are
+        one deck, so no parapet stands in the gap between them."""
+        way = own.split(".")[0]
+        for a, b, (oid, ohw, ya, yb) in road_index.near(x, z, 15.0):
+            if oid.split(".")[0] == way or not graph.edges[oid].bridge:
+                continue
+            dx, dz = b[0] - a[0], b[1] - a[1]
+            l2 = dx * dx + dz * dz
+            if l2 == 0:
+                continue
+            t = ((x - a[0]) * dx + (z - a[1]) * dz) / l2
+            margin = 1.0 / math.sqrt(l2)
+            if t <= margin or t >= 1.0 - margin:
+                continue  # at or past the segment's end: a deck continuing from this one, not beside it
+            if _seg_dist(x, z, a[0], a[1], b[0], b[1]) > ohw + shared_gap:
+                continue
+            if abs(y - (ya + (yb - ya) * t)) < overlap_height:
+                return True
+        return False
+
     curb_classes = set(rules.get("curb_classes", []))
     curb_range = float(rules.get("curb_sidewalk_range_m", 3.5))
     # One-way carriageways of boulevard classes, for median curbs.
@@ -330,9 +354,13 @@ def build_barriers(
                         outer = max(outer, d + ww / 2.0)
                     px, pz = x + nx * (outer - inset), z + nz * (outer - inset)
                     pts.append((px, y, pz))
-                    keep.append(clear_of_roads(px, y, pz, eid))
+                    keep.append(clear_of_roads(px, y, pz, eid) and not shared_deck(px, y, pz, eid))
                     curb_pts.append((ex, y, ez))
-                    curb_keep.append(outer > hw + 0.5 and clear_of_roads(ex, y, ez, eid))
+                    curb_keep.append(
+                        outer > hw + 0.5
+                        and clear_of_roads(ex, y, ez, eid)
+                        and not shared_deck(ex, y, ez, eid)
+                    )
                 for run in _runs(pts, keep):
                     add("parapet", float(rules.get("parapet_height_m", 1.0)), eid, run)
                 for run in _runs(curb_pts, curb_keep):
