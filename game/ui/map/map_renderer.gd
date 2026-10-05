@@ -14,6 +14,7 @@ const BACKGROUND := Color(0.09, 0.10, 0.12)
 const WATER := Color(0.16, 0.32, 0.45)
 const BUILDING := Color(0.20, 0.21, 0.24)
 const PARKING := Color(0.25, 0.26, 0.29)  # lots: a shade lighter than buildings, under them
+const GARAGE := Color(0.45, 0.62, 0.9)  # underground garages: a dashed outline and a P, over the buildings
 
 var metres_per_pixel: float = DEFAULT_METRES_PER_PIXEL
 var min_x: float = 0.0
@@ -78,6 +79,8 @@ class MapCanvas:
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(renderer.size_px)), BACKGROUND)
 		for lot: ParkingLotBuilder.Lot in lots:
+			if lot.kind == "underground":
+				continue  # drawn on top of the buildings, below
 			var pts := PackedVector2Array()
 			for v in lot.outer:
 				pts.append(renderer.world_to_pixel(v.x, v.y))
@@ -99,6 +102,17 @@ class MapCanvas:
 				if absf((bb - a).cross(c - a)) < 0.5:
 					continue
 				draw_colored_polygon(PackedVector2Array([a, bb, c]), BUILDING)
+		for lot: ParkingLotBuilder.Lot in lots:
+			if lot.kind != "underground":
+				continue
+			var ring := PackedVector2Array()
+			for v in lot.outer:
+				ring.append(renderer.world_to_pixel(v.x, v.y))
+			for i in range(ring.size()):
+				draw_dashed_line(ring[i], ring[(i + 1) % ring.size()], GARAGE, 1.5, 4.0)
+			var centre := renderer.world_to_pixel(lot.bounds.get_center().x, lot.bounds.get_center().y)
+			draw_circle(centre, 7.0, GARAGE)
+			draw_string(ThemeDB.fallback_font, centre + Vector2(-4.0, 5.0), "P", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
 		for w in water:
 			var pts := PackedVector2Array()
 			for v in w.vertices:
