@@ -20,7 +20,7 @@ const LOD_FADE_M := 40.0
 ## (terrain LOD1/LOD2, roads LOD1, buildings LOD1, water); NEAR adds LOD0 detail and collision.
 enum Tier { NONE = 0, FAR = 1, NEAR = 2 }
 ## Child names that only exist at the NEAR tier (dropped on a downgrade).
-const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor"]
+const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor", "parking_markings_lod0", "parking_props_lod0", "parking_signs"]
 const SPAWN_MIN_EDGE_M := 150.0  # spawn edges shorter than this are usually bbox stubs
 const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
 const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
@@ -50,6 +50,8 @@ var underpass_material: Material = UnderpassBuilder.material()
 var barrier_material: Material
 var barriers: Array[BarrierBuilder.Barrier] = []
 var barrier_chunks: Dictionary = {}
+var parking_lots: Array[ParkingLotBuilder.Lot] = []
+var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
@@ -95,6 +97,8 @@ func load(dir: String) -> bool:
 	barrier_material = BarrierBuilder.material()
 	barriers = BarrierBuilder.load_barriers(dir)
 	barrier_chunks = BarrierBuilder.build(barriers)
+	parking_lots = ParkingLotBuilder.load_lots(dir, graph)
+	parking_chunks = ParkingLotBuilder.by_chunk(parking_lots, RoadGeometry.CHUNK_SIZE_M)
 	return terrain_index.size() > 0
 
 
@@ -239,6 +243,22 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 		var mw: ArrayMesh = water_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("water", mw, water_material, 0.0, TERRAIN_LOD2_END_M))
 		water_mesh = mw
+	var labels: Array = []
+	if parking_chunks.has(coord):
+		var lots := ParkingLotBuilder.build_chunk(parking_chunks[coord], coord, heights, RoadGeometry.CHUNK_SIZE_M)
+		if not (lots["surface"] as RoadMeshBuilder.ChunkTriangles).is_empty():
+			var mp: ArrayMesh = (lots["surface"] as RoadMeshBuilder.ChunkTriangles).to_mesh()
+			var lot_mi := _mesh_instance("parking_lod0", mp, road_material, 0.0, TERRAIN_LOD1_END_M)
+			lot_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			chunk.add_child(lot_mi)
+		if near and not (lots["markings"] as RoadMeshBuilder.ChunkTriangles).is_empty():
+			var mk := _mesh_instance("parking_markings_lod0", (lots["markings"] as RoadMeshBuilder.ChunkTriangles).to_mesh(), marking_material, 0.0, marking_visible_to_m)
+			mk.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			chunk.add_child(mk)
+		if near and not (lots["props"] as RoadMeshBuilder.ChunkTriangles).is_empty():
+			chunk.add_child(_mesh_instance("parking_props_lod0", (lots["props"] as RoadMeshBuilder.ChunkTriangles).to_mesh(), road_material, 0.0, ROAD_LOD0_END_M))
+		if near:
+			labels = lots["labels"]
 	var holes: Array = terrain_holes.get(coord, [])
 	var t1 := TerrainBuilder.build_mesh(heights, 1, holes)
 	var t2 := TerrainBuilder.build_mesh(heights, 2, holes)
@@ -249,7 +269,7 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 	chunk.add_child(_mesh_instance("terrain_lod2", t2, terrain_material, TERRAIN_LOD1_END_M, TERRAIN_LOD2_END_M))
 	if near:
 		collision_meshes.append(t1)
-	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier}
+	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier, "labels": labels}
 
 
 ## Main thread only: adds the collision body and wading floor described by build_chunk_meshes.
@@ -266,6 +286,24 @@ static func attach_collision(parts: Dictionary) -> void:
 		node.add_child(build_collision(parts["collision_meshes"]))
 	if parts.get("water_mesh") != null:
 		node.add_child(build_water_floor(parts["water_mesh"]))
+	# Text (lot signs) is made here, on the main thread: Label3D touches fonts and themes.
+	var labels: Array = parts.get("labels", [])
+	if not labels.is_empty():
+		var signs := Node3D.new()
+		signs.name = "parking_signs"
+		for l: Array in labels:
+			var label := Label3D.new()
+			label.text = str(l[2])
+			label.font_size = 64 if str(l[2]).length() <= 2 else 28
+			label.pixel_size = 0.006
+			label.modulate = Color.WHITE
+			label.outline_size = 0
+			label.width = 140.0
+			label.autowrap_mode = TextServer.AUTOWRAP_WORD
+			label.transform = Transform3D(l[1], l[0])
+			label.visibility_range_end = 120.0
+			signs.add_child(label)
+		node.add_child(signs)
 
 
 ## Worker-thread step: builds the collision shapes for a chunk's meshes into parts["shapes"],

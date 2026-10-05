@@ -30,7 +30,7 @@ const CLASS_COLORS := {
 	"residential": Color(0.42, 0.42, 0.44),
 	"living_street": Color(0.46, 0.44, 0.42),
 	"service": Color(0.48, 0.48, 0.48),
-	"parking": Color(0.46, 0.46, 0.47),
+	"parking": Color(0.36, 0.36, 0.37),  # near the lot asphalt, so aisles do not read as pale stripes
 }
 const JUNCTION_COLOR := Color(0.33, 0.33, 0.35)
 
