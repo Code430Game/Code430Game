@@ -1,0 +1,138 @@
+{
+ "places": [
+  {
+   "at": [
+    535.64,
+    68.39,
+    966.2
+   ],
+   "id": "n5175725941",
+   "kind": "ambulance",
+   "name": "Ottawa Ambulance Post - Catherine",
+   "road_node": "n3946608913"
+  },
+  {
+   "at": [
+    1158.55,
+    68.52,
+    -119.08
+   ],
+   "id": "n6016200471",
+   "kind": "security",
+   "name": "UOttawa Campus Protection",
+   "road_node": "n901214632"
+  },
+  {
+   "at": [
+    -938.72,
+    43.21,
+    -1008.73
+   ],
+   "id": "w121189893",
+   "kind": "helipad",
+   "name": null,
+   "road_node": "n7294974019"
+  },
+  {
+   "at": [
+    911.96,
+    69.25,
+    -597.01
+   ],
+   "id": "w152488092",
+   "kind": "fire_station",
+   "name": "Ottawa Fire Station 13",
+   "road_node": "n7132286907"
+  },
+  {
+   "at": [
+    -1444.44,
+    57.53,
+    1336.18
+   ],
+   "id": "w171963936",
+   "kind": "fire_station",
+   "name": "Ottawa Fire Station 11",
+   "road_node": "n1829214946"
+  },
+  {
+   "at": [
+    638.6,
+    68.53,
+    865.23
+   ],
+   "id": "w207590986",
+   "kind": "police",
+   "name": "Ottawa Police Headquarters",
+   "road_node": "n6555326754"
+  },
+  {
+   "at": [
+    -1083.79,
+    80.43,
+    733.09
+   ],
+   "id": "w237125270",
+   "kind": "hospital",
+   "name": "Saint-Vincent Hospital",
+   "road_node": "n12407480403"
+  },
+  {
+   "at": [
+    564.49,
+    57.93,
+    -1409.16
+   ],
+   "id": "w449590357",
+   "kind": "ambulance",
+   "name": "Ottawa Ambulance Post - St. Patrick",
+   "road_node": "c901057972"
+  },
+  {
+   "at": [
+    -758.37,
+    69.89,
+    1408.5
+   ],
+   "id": "w481263832",
+   "kind": "ambulance",
+   "name": "Ottawa Ambulance Post - Gladstone",
+   "road_node": "n6586705262"
+  },
+  {
+   "at": [
+    -143.31,
+    58.13,
+    -1359.52
+   ],
+   "id": "w634367874",
+   "kind": "hospital",
+   "name": "Élisabeth Bruyère Hospital",
+   "road_node": "n7787781207"
+  },
+  {
+   "at": [
+    314.49,
+    64.74,
+    -693.77
+   ],
+   "id": "w651533596",
+   "kind": "police",
+   "name": null,
+   "road_node": "n6809857764"
+  },
+  {
+   "at": [
+    412.18,
+    65.02,
+    -553.16
+   ],
+   "id": "w651637553",
+   "kind": "security",
+   "name": "Rideau Centre Security",
+   "road_node": "n901055249"
+  }
+ ],
+ "schema_version": 0,
+ "units": "metres, x east, z south; y the ground"
+}
