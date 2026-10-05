@@ -12,7 +12,7 @@ func _catalogue() -> Node:
 
 func test_base_set_has_the_nine_classes_and_a_fallback() -> void:
 	var c := _catalogue()
-	assert_int(c.ids().size()).is_equal(9)
+	assert_int(c.ids().size()).is_equal(10)  # nine classes plus the police car (sedan body)
 	for cls: String in CatalogueScript.BODY_CLASSES:
 		var found := false
 		for id in c.ids():
@@ -39,8 +39,8 @@ func test_pack_entries_merge_after_the_base_set() -> void:
 	assert_bool(c.has("pack.limo")).is_true()
 	assert_bool(c.has("pack.hover")).is_false()
 	assert_float(float(c.entry("coupe")["top_speed_kph"])).is_equal(260.0)  # same id replaces
-	assert_int(c.ids().size()).is_equal(10)
-	assert_int(c.index_of("pack.limo")).is_equal(9)  # appended: base indices stay stable
+	assert_int(c.ids().size()).is_equal(11)
+	assert_int(c.index_of("pack.limo")).is_equal(10)  # appended: base indices stay stable
 
 
 func test_road_groups() -> void:
@@ -68,6 +68,13 @@ func test_vans_and_trucks_by_day_taxis_by_night() -> void:
 	assert_int(work_noon).is_greater(work_late * 2)
 	assert_int(int(late.get("taxi", 0))).is_greater(int(noon.get("taxi", 0)) * 2)
 	assert_int(int(noon.get("sedan", 0))).is_greater(int(noon.get("coupe", 0)))
+
+
+func test_police_cars_never_spawn_as_traffic() -> void:
+	var c := _catalogue()
+	assert_bool(c.has("police")).is_true()
+	for road in ["primary", "residential", "motorway"]:
+		assert_int(int(_mix(c, road, 12.0).get("police", 0))).is_equal(0)
 
 
 func test_buses_stay_off_local_streets_and_can_be_excluded() -> void:

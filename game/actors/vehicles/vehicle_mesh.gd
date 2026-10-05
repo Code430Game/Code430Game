@@ -130,6 +130,9 @@ static func brake_material() -> StandardMaterial3D:
 	return _brake
 
 
+const POLICE_BLUE := Color(0.08, 0.18, 0.6)
+
+
 class _Builder:
 	var e: Dictionary
 	var lod: int
@@ -471,6 +474,10 @@ class _Builder:
 		# Mirrors at the foot of the windscreen.
 		for side: float in [-1.0, 1.0]:
 			box(0, Vector3(side * (hw + 0.07), windscreen[0].y + 0.1, windscreen[0].x + 0.12), Vector3(0.12, 0.11, 0.07), Color.WHITE)
+		if str(livery.get("stripe", "none")) == "police":
+			for side: float in [-1.0, 1.0]:
+				var x := side * (hw + PROUD_M)
+				box(1, Vector3(x, hb - 0.2, (zf + zr) * 0.5), Vector3(0.012, 0.16, (zr - zf) * 0.86), POLICE_BLUE)
 		if str(livery.get("stripe", "none")) == "check":
 			for side: float in [-1.0, 1.0]:
 				var x := side * (hw + PROUD_M)

@@ -52,6 +52,8 @@ var _shooter: Shooter
 var _combat_effects: CombatEffects
 var _wanted: Wanted
 var _stars_label: Label
+var _police: PoliceManager
+var _banner: Label
 var _lit_car: VehicleBody3D  # the car whose headlights the lights setting drives: the one driven last
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
@@ -77,6 +79,8 @@ var _bench_physics: PackedFloat32Array = PackedFloat32Array()  # physics process
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
+var _police_log: bool = false  # --police-log: print the chase each second
+var _wanted_at_start: int = 0  # --wanted=N: start with N stars (screenshots, chases on demand)
 var _weapon_at_start: int = 0  # --weapon=1|2: hold the melee weapon or the gun from the start (screenshots)
 var _shots_at_start: int = 0  # --shoot=N: aim and fire N times once the world is up (screenshots)
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
@@ -216,6 +220,8 @@ func _ready() -> void:
 	ContentMode.mode_changed.connect(func(_id: String) -> void: _refresh_session_status())
 	if _open_creator_at_start:
 		get_tree().create_timer(1.5).timeout.connect(_open_creator)
+	if _wanted_at_start > 0 and _wanted != null:
+		get_tree().create_timer(1.0).timeout.connect(func() -> void: _wanted.set_stars(_wanted_at_start))
 	if _weapon_at_start > 0 and _shooter != null:
 		get_tree().create_timer(1.2).timeout.connect(_demo_fire)
 	if _menu_at_start != "":
@@ -366,6 +372,44 @@ func _demo_fire() -> void:
 
 ## Weapons on foot (add-weapons-and-combat): the shooter, its marks and sounds, and the HUD
 ## line and reticle.
+func _update_stars() -> void:
+	var text := _wanted.stars_text()
+	if ContentMode.flag("lethal_weapons") and _player.health < float(_wanted.config.get("player_health", 100.0)):
+		text += "   ♥ %d" % int(ceil(_player.health))
+	_stars_label.text = text
+
+
+## Police fire (lethal modes): health down; at zero the player is wasted.
+func _hurt(damage: float) -> void:
+	if not ContentMode.flag("lethal_weapons"):
+		return
+	_player.health -= damage
+	_update_stars()
+	if _player.health <= 0.0:
+		_caught("wasted")
+
+
+## Busted or wasted: a banner, the wanted level and the police cleared, health and weapons
+## refilled, and the player back at the start on foot.
+func _caught(how: String) -> void:
+	var text := "WASTED" if how == "wasted" else "BUSTED"
+	if not ContentMode.flag("lethal_weapons"):
+		text = "CAUGHT! Fined for mischief"
+	_banner.text = text
+	_banner.visible = true
+	get_tree().create_timer(3.0).timeout.connect(func() -> void: _banner.visible = false)
+	_police.reset()
+	_wanted.clear()
+	if _player.is_driving():
+		_player.try_exit_vehicle()
+	_player.global_position = _pack.spawn_transform().origin + Vector3.UP * 1.0
+	_player.velocity = Vector3.ZERO
+	_player.stuck_s = 0.0
+	_player.health = float(_wanted.config.get("player_health", 100.0))
+	_shooter.weapons.refill()
+	_update_stars()
+
+
 func _setup_combat() -> void:
 	if _player == null:
 		return
@@ -417,7 +461,30 @@ func _setup_wanted() -> void:
 	_stars_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
 	_stars_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 	$HUD.add_child(_stars_label)
-	_wanted.stars_changed.connect(func(_n: int) -> void: _stars_label.text = _wanted.stars_text())
+	_wanted.stars_changed.connect(func(_n: int) -> void: _update_stars())
+	_police = PoliceManager.new()
+	_police.name = "Police"
+	_police.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_police.wanted = _wanted
+	_police.graph = _pack.graph
+	_police.player = _player
+	_police.holder = _world
+	_police.log_chase = _police_log
+	add_child(_police)
+	_police.busted.connect(func() -> void: _caught("busted"))
+	_police.net_hit.connect(func(seconds: float) -> void: _player.stuck_s = maxf(_player.stuck_s, seconds))
+	_police.shot_at.connect(_hurt)
+	_banner = Label.new()
+	_banner.name = "Banner"
+	_banner.set_anchors_preset(Control.PRESET_CENTER)
+	_banner.position = Vector2(-400.0, -120.0)
+	_banner.size = Vector2(800.0, 80.0)
+	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_banner.add_theme_font_size_override("font_size", 52)
+	_banner.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	_banner.add_theme_color_override("font_shadow_color", Color.BLACK)
+	_banner.visible = false
+	$HUD.add_child(_banner)
 	_shooter.fired.connect(func(w: Dictionary) -> void:
 		if str(w.get("mechanic", "")) != "melee" and bool(w.get("lethal", false)):
 			_wanted.report("gunfire", _player.global_position))
@@ -731,6 +798,10 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg == "--police-log":
+			_police_log = true
+		elif arg.begins_with("--wanted="):
+			_wanted_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--weapon="):
 			_weapon_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--shoot="):
