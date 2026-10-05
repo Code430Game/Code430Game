@@ -29,6 +29,8 @@ PARKING_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "parking.schema.v0.js
 PARKING_NAME = "parking.v0.json"
 BRIDGES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "bridges.schema.v0.json"
 BRIDGES_NAME = "bridges.v0.json"
+VEGETATION_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vegetation.schema.v0.json"
+VEGETATION_NAME = "vegetation.v0.json"
 LEVELS = ["none", "mild", "strong"]
 MANIFEST_NAME = "pack.json"
 
@@ -239,6 +241,19 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
         for err in sorted(validator.iter_errors(bridges), key=lambda e: list(e.path)):
             where = "/".join(str(p) for p in err.path) or "(root)"
             report.errors.append(f"{BRIDGES_NAME}: {where}: {err.message}")
+    veg_path = pack_dir / VEGETATION_NAME
+    if veg_path.is_file():
+        try:
+            veg = json.loads(veg_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{VEGETATION_NAME}: invalid JSON: {exc}")
+            return report
+        validator = load_schema(VEGETATION_SCHEMA_PATH)
+        for err in sorted(validator.iter_errors(veg), key=lambda e: list(e.path)):
+            where = "/".join(str(p) for p in err.path) or "(root)"
+            report.errors.append(f"{VEGETATION_NAME}: {where}: {err.message}")
+            if len(report.errors) > 20:
+                break
     return report
 
 
