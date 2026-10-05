@@ -4,10 +4,10 @@
 - [x] 1.3 Update the binding paragraphs in `add-weapons-and-combat` and `add-car-radio` to this layout (the radio shipped on D-pad left already, archived; nothing to change)
 
 ## 2. Remapping
-- [ ] 2.1 Settings overrides for bindings, applied at boot before any scene reads the map; tests
-- [ ] 2.2 Pause menu controls page: list, press-to-rebind, conflict refusal, reset to default; works with a controller alone on the Deck
+- [x] 2.1 Settings overrides for bindings, applied at boot before any scene reads the map; tests
+- [x] 2.2 Pause menu controls page: list, press-to-rebind, conflict refusal, reset to default; works with a controller alone on the Deck (controller-only tests pass on the Mac; the Deck run is in 4.1)
 
-- [ ] 2.3 Tabbed start and pause menus (Controls, Options, Settings, first tab for the existing items), LB/RB and Q/E cycle tabs; the home screen's controls list moves to the Controls tab and shows the current device's layout (controller or keyboard and mouse); nothing runs off screen at 1280×800; tests and a Deck screenshot
+- [x] 2.3 Tabbed start and pause menus (Controls, Options, Settings, first tab for the existing items), LB/RB and Q/E cycle tabs; the home screen's controls list moves to the Controls tab and shows the current device's layout (controller or keyboard and mouse); nothing runs off screen at 1280×800; tests and a Deck screenshot (Mac screenshots in the PR; there is no separate start screen, the game opens in play, so the HUD's controls line became a pointer to the tab; Deck screenshot with 4.1)
 
 ## 3. Doc
 - [ ] 3.1 `tools/controls_doc.py` generates `docs/controls.md`; CI stale check; doc regenerated

@@ -70,6 +70,7 @@ var _bench_physics: PackedFloat32Array = PackedFloat32Array()  # physics process
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
+var _menu_at_start: String = ""  # --menu=game|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
@@ -204,6 +205,11 @@ func _ready() -> void:
 	ContentMode.mode_changed.connect(func(_id: String) -> void: _refresh_session_status())
 	if _open_creator_at_start:
 		get_tree().create_timer(1.5).timeout.connect(_open_creator)
+	if _menu_at_start != "":
+		get_tree().create_timer(1.5).timeout.connect(func() -> void:
+			_pause_menu.open()
+			_pause_menu.showing_pad = not _menu_at_start.ends_with(",keyboard")
+			_pause_menu.show_tab(maxi(PauseMenu.TABS.find(_menu_at_start.get_slice(",", 0).capitalize()), 0)))
 	if _report_at_start != "":
 		get_tree().create_timer(2.0).timeout.connect(func() -> void:
 			_pause_menu.capture()
@@ -301,6 +307,7 @@ func _setup_audio() -> void:
 	_radio = Radio.new()
 	_radio.name = "Radio"
 	add_child(_radio)
+	_pause_menu.radio = _radio
 	if _radio_start != "":
 		_radio.select(_radio_start if _radio_start == Radio.OFF or _radio_start.contains(".") else "code430.base." + _radio_start)
 	if _player != null and _player.is_driving():
@@ -602,6 +609,8 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--menu="):
+			_menu_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--record-music="):
 			_record_music = arg.get_slice("=", 1)
 		elif arg.begins_with("--radio="):
@@ -672,6 +681,12 @@ func _hint(controller: String, keyboard: String) -> String:
 	return keyboard if _keyboard else controller
 
 
+## The HUD's one-line pointer to the full list (the pause menu's Controls tab), which used to be
+## the whole layout and ran off the screen.
+func _controls_hint() -> String:
+	return _hint("Menu: pause, controls (LB / RB tabs)", "Esc: pause, controls (Q / E tabs)")
+
+
 func _process(delta: float) -> void:
 	if _player != null and (get_tree().paused or _player.is_driving() or not _keyboard) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -705,6 +720,7 @@ func _process(delta: float) -> void:
 				_bench_falling.append(_peds.falling_count())
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
+	_prompt.visible = not get_tree().paused  # under the pause menu it only showed through the dim
 	if _car != null and _player != null:
 		_bench_elapsed_hud(delta)
 		var body: Node3D = Players.local_controlled_body()
@@ -724,13 +740,13 @@ func _process(delta: float) -> void:
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, D-pad right lights, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, H lights, M map, Esc pause"),
+				_controls_hint(),
 			]
 			_prompt.text = ""
 		else:
 			_hud.text = "on foot%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause", "WASD walk, Shift run, Space jump, click then mouse to look, E get in, M map, Esc pause"),
+				_controls_hint(),
 			]
 			_prompt.text = _hint("Y  get in", "E  get in") if _player.nearest_vehicle() != null else ""
 	if _autodrive and _car != null:

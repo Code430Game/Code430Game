@@ -184,3 +184,57 @@ static func conflict(action: String, event: InputEvent) -> String:
 				if same_input(e, event):
 					return other
 	return ""
+
+
+## A binding as plain data for the settings file (and back): which button, axis direction,
+## key or mouse button.
+static func event_to_dict(event: InputEvent) -> Dictionary:
+	if event is InputEventJoypadButton:
+		return {"type": "button", "index": (event as InputEventJoypadButton).button_index}
+	if event is InputEventJoypadMotion:
+		var m := event as InputEventJoypadMotion
+		return {"type": "axis", "axis": m.axis, "value": signf(m.axis_value)}
+	if event is InputEventKey:
+		return {"type": "key", "code": _keycode(event as InputEventKey)}
+	if event is InputEventMouseButton:
+		return {"type": "mouse", "index": (event as InputEventMouseButton).button_index}
+	return {}
+
+
+static func event_from_dict(d: Dictionary) -> InputEvent:
+	match str(d.get("type", "")):
+		"button":
+			var b := InputEventJoypadButton.new()
+			b.button_index = int(d["index"]) as JoyButton
+			return b
+		"axis":
+			var m := InputEventJoypadMotion.new()
+			m.axis = int(d["axis"]) as JoyAxis
+			m.axis_value = float(d["value"])
+			return m
+		"key":
+			var k := InputEventKey.new()
+			k.physical_keycode = int(d["code"]) as Key
+			return k
+		"mouse":
+			var mb := InputEventMouseButton.new()
+			mb.button_index = int(d["index"]) as MouseButton
+			return mb
+	return null
+
+
+## Replaces `action`'s bindings of the event's kind (controller, or keyboard and mouse) with it.
+static func replace_binding(action: String, event: InputEvent) -> void:
+	var pad := is_pad_event(event)
+	for e in InputMap.action_get_events(action):
+		if is_pad_event(e) == pad:
+			InputMap.action_erase_event(action, e)
+	InputMap.action_add_event(action, event)
+
+
+## True for actions whose bindings the player may change: single actions, not stick groups.
+static func rebindable(action: String) -> bool:
+	for row: Dictionary in data()["rows"]:
+		if row.get("action", "") == action and not bool(row.get("reserved", false)):
+			return true
+	return false
