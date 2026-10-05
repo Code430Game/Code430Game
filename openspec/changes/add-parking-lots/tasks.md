@@ -6,7 +6,7 @@
 - [x] 2.1 `parking_only` on lane paths and connectors from class `parking`; `choose_next`, spawning and bus routing skip them; the player's car drives them; tests; done 2026-10-04: a street that ends in a driveway is a dead end to traffic (parking lanes are a hard exclusion in `choose_next`)
 
 ## 3. Game
-- [ ] 3.1 `parking_lot_builder.gd`: slab, kerb, stall markings by orientation, curb stops, entrance sign with operator text; map fill; tests on stall layout for the fixture lots
+- [x] 3.1 `parking_lot_builder.gd`: slab, kerb, stall markings by orientation, curb stops, entrance sign with operator text; map fill; tests on stall layout for the fixture lots; done 2026-10-04: Ottawa draws 681 lots, 408 with stalls, 8,318 stalls. The asphalt is the lot clipped to each 4 m terrain cell at the terrain's heights (no step at entrances); shallow lots without an aisle get a one-row virtual aisle along a side. Sign text is a Label3D added on the main thread when the chunk attaches. Surface and curb stops have no collision (the terrain carries the car; curb stops would snag wheels). Lots draw on the overview map and minimap a shade lighter than buildings
 - [ ] 3.2 `parked_cars.gd` and `parking_config.json`: seeded occupancy by hour, catalogue classes, per-chunk MultiMeshes with LODs and caps per preset, bodies from the pool, `--parking-occupancy=`; taking a parked car; tests on determinism and caps
 - [ ] 3.3 Mac screenshots: a Market lot by day and at night, a Queensway lot, a residential street with bays, the map with lots
 
