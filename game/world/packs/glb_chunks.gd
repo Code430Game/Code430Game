@@ -124,7 +124,10 @@ static func import_chunk_parts(path: String, materials: Dictionary, tier: int) -
 			else:
 				mi.material_override = materials.get("terrain") if role.begins_with("terrain") else materials.get("road")
 			if near and role in ["roads_lod0", "junctions_lod0", "terrain_lod0", "buildings_lod0", "sidewalks_lod0", "barriers_lod0"]:  # LOD0 terrain: see MapPack.build_chunk_meshes (#27)
-				collision_meshes.append(mi.mesh)
+				if role == "terrain_lod0":
+					collision_meshes.append_array(MapPack.split_for_collision(mi.mesh, 4))
+				else:
+					collision_meshes.append(mi.mesh)
 	scene.free()
 	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier}
 

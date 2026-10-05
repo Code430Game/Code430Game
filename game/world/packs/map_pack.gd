@@ -248,7 +248,7 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 		# Collide with the terrain that is drawn up close. LOD1 skips every other sample, so it
 		# cannot follow the ground pressed down beside a road: under the 417 at Metcalfe it rose
 		# up to 1.6 m through the asphalt, an invisible wall that lifted cars onto it (#27).
-		collision_meshes.append(t0)
+		collision_meshes.append_array(split_for_collision(t0, 4))  # four LOD1-sized shapes: one per streamed frame
 	chunk.add_child(_mesh_instance("terrain_lod1", t1, terrain_material, TERRAIN_LOD0_END_M if near else 0.0, TERRAIN_LOD1_END_M))
 	chunk.add_child(_mesh_instance("terrain_lod2", t2, terrain_material, TERRAIN_LOD1_END_M, TERRAIN_LOD2_END_M))
 	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier}
@@ -323,6 +323,26 @@ static func build_collision(meshes: Array[Mesh]) -> StaticBody3D:
 		if shape != null:
 			body.add_child(shape)
 	return body
+
+
+## `m`'s triangles cut into `parts` plain meshes (positions only) for collision, so a big mesh
+## becomes several shapes that the streamer can add on separate frames.
+static func split_for_collision(m: Mesh, parts: int) -> Array[Mesh]:
+	var out: Array[Mesh] = []
+	var faces := m.get_faces()
+	var tris := faces.size() / 3
+	if tris == 0:
+		return out
+	var per := int(ceil(float(tris) / parts))
+	for start in range(0, tris, per):
+		var piece := faces.slice(start * 3, mini(start + per, tris) * 3)
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = piece
+		var mesh := ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.append(mesh)
+	return out
 
 
 ## One trimesh collision shape for a mesh (the expensive part of a chunk add), or null for
