@@ -12,5 +12,7 @@
   - 2026-10-05: before (main) and after shots under the 417 at Metcalfe, the Mackenzie King and Laurier canal crossings, and Pooley's footbridge were shared. The terrain clamp (`pack.clamp_under_decks`) lowers the ground under each deck to the lower of a 1:1.5 slope from the nearest end and the ground beside the deck, never above the soffit, 5 m past the deck edges; 22,659 cell-lowerings in Ottawa. 2.3 is done in the importer (walkways lifted onto decks, the under-road's sidewalks untouched; `test_osm_bridges.py`); the game draws sidewalks from those heights, so it needed no change
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark on the usual route against main, idle Deck
-- [ ] 3.2 **Stop: human drives under the 417 and over a canal bridge, and walks a bridge walkway, on the Deck**
+- [x] 3.1 Deck benchmark on the usual route against main, idle Deck
+  - 2026-10-05, idle Deck, deck preset, 40 s autodrive: main with bridges avg 12.05 ms, p99 19.06, GPU 10.71 (this morning's main, before parking, textures and bridges: 11.42 / 16.10 / 10.13). With garages added too: avg 12.47, p99 16.67, GPU 11.07. About 0.6 ms on average for the day's merges together
+- [x] 3.2 **Stop: human drives under the 417 and over a canal bridge, and walks a bridge walkway, on the Deck**
+  - 2026-10-05: the build was on the Deck; the human asked to move on once the tests passed ("do your tests and then if they work move on") and will report by issue
