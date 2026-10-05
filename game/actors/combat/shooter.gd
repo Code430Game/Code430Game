@@ -53,7 +53,7 @@ func _physics_process(delta: float) -> void:
 		_reload_left -= delta
 		if _reload_left <= 0.0:
 			weapons.reload()
-	var active := player != null and not player.is_driving() and not get_tree().paused
+	var active := player != null and not player.is_driving() and not get_tree().paused and player.stuck_s <= 0.0
 	if not active:
 		if player != null:
 			player.aiming = false

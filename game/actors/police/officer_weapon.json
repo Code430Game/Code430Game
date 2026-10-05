@@ -1,0 +1,16 @@
+{
+  "_comment": "The weapon police officers use (add-police), resolved by tone like the player's weapons: a net that holds the player in clean, a pistol or blaster at the top wanted level elsewhere.",
+  "id": "officer",
+  "slot": 2,
+  "mechanic": "hitscan",
+  "rate_s": 1.1,
+  "magazine": 0,
+  "reload_s": 0.0,
+  "range_m": 22.0,
+  "spread_deg": 0.0,
+  "variants": {
+    "fallback": {"name": "Pistol", "impact": "bullet", "lethal": true, "descriptors": {"violence": "strong"}},
+    "dystopia": {"name": "Blaster", "impact": "energy", "lethal": true, "descriptors": {"violence": "strong", "dystopia_tech": "mild"}},
+    "clean": {"name": "Net gun", "impact": "paint", "lethal": false, "descriptors": {"violence": "mild"}}
+  }
+}

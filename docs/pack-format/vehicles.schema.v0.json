@@ -278,12 +278,16 @@
           "enum": [
             "none",
             "check",
-            "band"
+            "band",
+            "police"
           ]
         },
         "roof_sign": {
           "type": "string",
           "maxLength": 12
+        },
+        "light_bar": {
+          "type": "boolean"
         },
         "descriptors": {
           "$ref": "#/$defs/descriptors"
