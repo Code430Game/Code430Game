@@ -253,14 +253,16 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 
 
 ## Main thread only: adds the collision body and wading floor described by build_chunk_meshes.
-## Uses shapes prepared by prepare_shapes when present.
+## Uses the triangle lists prepared by prepare_shapes when present.
 static func attach_collision(parts: Dictionary) -> void:
 	var node: Node3D = parts["node"]
-	if parts.has("shapes"):
+	if parts.has("shape_faces"):
 		var body := StaticBody3D.new()
 		body.name = "collision"
-		for shape in parts["shapes"]:
-			body.add_child(shape)
+		for faces: PackedVector3Array in parts["shape_faces"]:
+			var shape := shape_from_faces(faces)
+			if shape != null:
+				body.add_child(shape)
 		node.add_child(body)
 	else:
 		node.add_child(build_collision(parts["collision_meshes"]))
@@ -268,15 +270,31 @@ static func attach_collision(parts: Dictionary) -> void:
 		node.add_child(build_water_floor(parts["water_mesh"]))
 
 
-## Worker-thread step: builds the collision shapes for a chunk's meshes into parts["shapes"],
-## so the main thread only has to attach them. Resources may be created off the main thread.
+## Worker-thread step: extracts each collision mesh's triangles into parts["shape_faces"]. The
+## shapes themselves are made on the main thread (shape_from_faces): creating a shape
+## allocates an id in the physics server, which is not thread-safe, and doing it from worker
+## threads raced the main thread's shape work ("Attempting to initialize the wrong RID",
+## and the flaky test aborts that came with it).
 static func prepare_shapes(parts: Dictionary) -> void:
-	var shapes: Array[CollisionShape3D] = []
+	var faces: Array[PackedVector3Array] = []
 	for m in parts["collision_meshes"]:
-		var shape := trimesh_shape(m)
-		if shape != null:
-			shapes.append(shape)
-	parts["shapes"] = shapes
+		if m != null and m.get_surface_count() > 0:
+			var f: PackedVector3Array = m.get_faces()
+			if not f.is_empty():
+				faces.append(f)
+	parts["shape_faces"] = faces
+
+
+## Main thread only: a trimesh collision shape from a triangle list, or null when empty.
+static func shape_from_faces(faces: PackedVector3Array) -> CollisionShape3D:
+	if faces.is_empty():
+		return null
+	var trimesh := ConcavePolygonShape3D.new()
+	trimesh.set_faces(faces)
+	trimesh.backface_collision = true  # a fast body that gets below a surface is pushed back, not lost
+	var shape := CollisionShape3D.new()
+	shape.shape = trimesh
+	return shape
 
 
 ## Drops the NEAR-only children (LOD0 meshes, collision, wading floor) from a built chunk.
