@@ -21,7 +21,11 @@
     "parked_cars_per_chunk": 120,
     "parked_car_bodies": 8,
     "surface_detail_px": 512,
-    "surface_detail_macro": false
+    "surface_detail_macro": false,
+    "vegetation_trees_per_chunk": 400,
+    "vegetation_bushes_per_chunk": 600,
+    "vegetation_lod0_m": 260.0,
+    "vegetation_sway": false
   },
   "high": {
     "label": "High (desktop)",
@@ -44,6 +48,10 @@
     "parked_cars_per_chunk": 300,
     "parked_car_bodies": 16,
     "surface_detail_px": 1024,
-    "surface_detail_macro": true
+    "surface_detail_macro": true,
+    "vegetation_trees_per_chunk": 1200,
+    "vegetation_bushes_per_chunk": 2000,
+    "vegetation_lod0_m": 400.0,
+    "vegetation_sway": true
   }
 }
