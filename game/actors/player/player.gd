@@ -25,6 +25,8 @@ var _rig: CharacterRig = null
 var vehicle: VehicleBody3D = null
 ## Called with this player when it wants to enter a vehicle; the scene decides which camera to use.
 var _yaw: float = 0.0
+## True while look behind is held: the camera faces back over the shoulder.
+var look_behind: bool = false
 var _pitch: float = 0.0
 var _mouse_look: Vector2 = Vector2.ZERO  # accumulated mouse motion this frame, radians
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
@@ -95,6 +97,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _orbit(delta: float) -> void:
+	look_behind = Input.is_action_pressed("look_behind") and not get_tree().paused
 	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
 	_yaw -= look.x * config.camera_orbit_speed_rad_s * delta + _mouse_look.x
 	_pitch = clampf(_pitch + look.y * config.camera_orbit_speed_rad_s * delta + _mouse_look.y, deg_to_rad(config.camera_pitch_min_deg), deg_to_rad(config.camera_pitch_max_deg))
@@ -110,7 +113,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _apply_camera_angles() -> void:
-	_pivot.rotation = Vector3(-_pitch, _yaw, 0.0)
+	_pivot.rotation = Vector3(-_pitch, _yaw + (PI if look_behind else 0.0), 0.0)
 
 
 func _move(delta: float) -> void:
@@ -121,6 +124,8 @@ func _move(delta: float) -> void:
 		velocity.y = config.jump_velocity(_gravity)
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var cam_forward := -_pivot.global_basis.z
+	if look_behind:
+		cam_forward = -cam_forward  # glancing back does not turn the stick round
 	cam_forward.y = 0.0
 	cam_forward = cam_forward.normalized()
 	var cam_right := Vector3(-cam_forward.z, 0.0, cam_forward.x)

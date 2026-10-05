@@ -13,6 +13,7 @@ const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const PLAYER_SCENE := preload("res://actors/player/player.tscn")
 const ON_FOOT_OFFSET_M := 2.2
 const BENCH_WARMUP_S := 3.0
+const HORN_STARTLE_M := 25.0  # pedestrians this close turn to look when the horn sounds
 
 @onready var _world: Node3D = $World
 @onready var _camera: ChaseCamera = $ChaseCamera
@@ -44,6 +45,7 @@ var _spawn_transform: Transform3D
 var _keyboard: bool = false  # last input came from keyboard or mouse: show those hints
 var _day_night: DayNight
 var _vehicle_audio: VehicleAudio
+var _reset_ring: HoldRing
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
 var _record_music: String = ""  # --record-music=<path.wav>: record the Music bus, saved when the benchmark ends
@@ -74,7 +76,7 @@ var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz
 var _fixed_cam: Camera3D = null
 var _bus_share_override: float = -1.0  # --bus-share=0..1: fraction of traffic spawned as buses (screenshots)
 enum Headlights { AUTO, ON, OFF }
-var _headlights: int = Headlights.AUTO  # D-pad up / H cycles auto (dusk to dawn), on, off
+var _headlights: int = Headlights.AUTO  # D-pad right / H cycles auto (dusk to dawn), on, off
 var _start_position: Vector3 = Vector3.ZERO
 var _bench_done: bool = false
 var _autodrive_edge: RoadGraph.RoadEdge
@@ -101,6 +103,12 @@ func _ready() -> void:
 	_camera.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_graph_view.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_parse_args()
+	_reset_ring = HoldRing.new()
+	_reset_ring.name = "ResetRing"
+	_reset_ring.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_reset_ring.position = Vector2(-20.0, -170.0)
+	_reset_ring.text = "reset"
+	$HUD.add_child(_reset_ring)
 	_pause_menu.overview_map = _overview
 	_pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	_pause_menu.character_requested.connect(_open_creator)
@@ -313,6 +321,7 @@ func _setup_net() -> void:
 	_player_sync.name = "PlayerSync"
 	_player_sync.player = _player
 	_player_sync.remote_parent = _world
+	_player_sync.remote_horn.connect(func(at: Vector3) -> void: if _peds != null and Session.is_host(): _peds.startle(at, HORN_STARTLE_M))
 	add_child(_player_sync)
 	_world_sync = WorldSync.new()
 	_world_sync.name = "WorldSync"
@@ -715,7 +724,7 @@ func _process(delta: float) -> void:
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, D-pad up lights, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, H lights, M map, Esc pause"),
+				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, D-pad right lights, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, H lights, M map, Esc pause"),
 			]
 			_prompt.text = ""
 		else:
@@ -751,6 +760,11 @@ func _process(delta: float) -> void:
 	var in_play := not get_tree().paused
 	if in_play and Input.is_action_just_pressed("headlights_cycle") and _player != null and _player.is_driving():
 		_headlights = (_headlights + 1) % 3
+	var driving := _player != null and _player.is_driving()
+	_camera.look_behind = in_play and driving and Input.is_action_pressed("look_behind")
+	_reset_ring.progress = _car.reset_progress() if driving and _car != null else 0.0
+	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
+		_peds.startle(_car.global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
 		_camera.cycle_mode()
 		_camera.look_at(_car.global_position, Vector3.UP)

@@ -2,6 +2,7 @@ class_name ChaseCamera
 extends Camera3D
 ## Follows a target from behind with smoothing. Right stick orbits temporarily.
 ## `mode` cycles chase, top-down (follows and turns with the car) and high top-down.
+## `look_behind` (held R3) swings the chase view round to face backwards at once, and back on release.
 
 enum Mode { CHASE, TOPDOWN, HIGH }
 const TOPDOWN_HEIGHT_M := 45.0
@@ -19,6 +20,9 @@ var _orbit: float = 0.0
 var mode: int = Mode.CHASE
 ## When positive, top-down modes use this height (the testbed's --topdown=<m> for screenshots).
 var height_override: float = -1.0
+## While true the chase view looks back past the car's nose at what is behind it.
+var look_behind: bool = false
+var _was_behind: bool = false
 
 
 ## Next camera mode in the cycle.
@@ -57,11 +61,13 @@ func _process(delta: float) -> void:
 		_orbit += -look.x * orbit_speed_rad_s * delta
 	else:
 		_orbit = move_toward(_orbit, 0.0, orbit_return_speed * delta)
-	var back := target.global_basis.z.rotated(Vector3.UP, _orbit)
+	var snap := look_behind != _was_behind  # a glance back is a cut, not a slow swing
+	_was_behind = look_behind
+	var back := target.global_basis.z.rotated(Vector3.UP, PI if look_behind else _orbit)
 	back.y = 0.0
 	back = back.normalized()
 	# Long vehicles (vans, trucks, buses) get pulled back so they stay in frame.
 	var extra := maxf(float(target.get("length_m")) - 4.6, 0.0) if target.get("length_m") != null else 0.0
 	var desired := target.global_position + back * (distance_m + extra) + Vector3.UP * (height_m + extra * 0.25)
-	global_position = global_position.lerp(desired, clampf(position_smoothing * delta, 0.0, 1.0))
+	global_position = desired if snap else global_position.lerp(desired, clampf(position_smoothing * delta, 0.0, 1.0))
 	look_at(target.global_position + Vector3.UP * look_height_m, Vector3.UP)

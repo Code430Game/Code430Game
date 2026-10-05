@@ -1,7 +1,7 @@
 ## 1. Layout
-- [ ] 1.1 Input map: horn (L3 drive), look behind (R3 tap), reset on R3 hold with HUD ring, headlights to D-pad right, `radio_cycle` D-left reserved, combat actions reserved (LT aim, RT fire, LB weapon, B reload); `test_input_map.gd` per-context conflict test covers both contexts
-- [ ] 1.2 `placeholder_car.gd` and `chase_camera.gd`: hold-to-reset, look behind; `vehicle_audio.gd` horn voice via `Synth`; tests
-- [ ] 1.3 Update the binding paragraphs in `add-weapons-and-combat` and `add-car-radio` to this layout
+- [x] 1.1 Input map: horn (L3 drive), look behind (R3 tap), reset on R3 hold with HUD ring, headlights to D-pad right, `radio_cycle` D-left reserved, combat actions reserved (LT aim, RT fire, LB weapon, B reload); `test_input_map.gd` per-context conflict test covers both contexts
+- [x] 1.2 `placeholder_car.gd` and `chase_camera.gd`: hold-to-reset, look behind; `vehicle_audio.gd` horn voice via `Synth`; tests
+- [x] 1.3 Update the binding paragraphs in `add-weapons-and-combat` and `add-car-radio` to this layout (the radio shipped on D-pad left already, archived; nothing to change)
 
 ## 2. Remapping
 - [ ] 2.1 Settings overrides for bindings, applied at boot before any scene reads the map; tests
