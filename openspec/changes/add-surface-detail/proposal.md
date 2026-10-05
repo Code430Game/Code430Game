@@ -45,7 +45,7 @@ Not content. Wear and dirt levels may later read the mode's variant key; not now
 - Affected specs: `street-dressing` (Sidewalks From Footways modified, Zebra Crossings added),
   `road-markings` (no requirement change: the crossing stripes use the marking chunks and the
   existing rules file).
-- Affected code: `game/world/build/` (detail texture generator, new), `game/world/roads/road_mesh_builder.gd`,
+- Affected code: `game/world/roads/surface_detail.gd` and `ground_detail.gdshader` (detail textures, new), `game/world/roads/road_mesh_builder.gd`,
   `junction_builder.gd`, `marking_builder.gd`, `sidewalk_builder.gd`, their materials and
   shaders, `game/core/settings/presets.json`, `docs/graphics-presets.md`, tests on the stripe
   count and joint spacing; Ottawa pack re-exported only if the sidewalk GLB role needs the
