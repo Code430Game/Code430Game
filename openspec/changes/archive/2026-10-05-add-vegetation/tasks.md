@@ -13,4 +13,5 @@
 ## 3. Verification
 - [x] 3.1 Deck benchmark on the autodrive route and a canal drive: frame avg and p99, draw calls, with and without vegetation; no regression past the 25 ms target
   - 2026-10-05, idle Deck, deck preset: without vegetation (main) route avg 12.47 ms, p99 16.67. With vegetation, two route runs: avg 12.55 / 12.63, p99 25.00 / 19.59, draw calls 699 / 981. Looking over Confederation Park (20 s): avg 13.48, p99 21.01, 1,376 draw calls. Under the 25 ms target; the extra p99 jitter is worth watching. Changes after the first look: LOD1 is the same shape at about 16 triangles (crossed quads read as flat cards), LOD0 reaches 260 m on deck and 400 m on high (ranges are measured to each chunk's middle), and a chunk's vegetation lands as one node so streaming keeps its pace
-- [ ] 3.2 **Stop: human drives Queen Elizabeth Driveway along the canal and walks Confederation Park on the Deck**
+- [x] 3.2 **Stop: human drives Queen Elizabeth Driveway along the canal and walks Confederation Park on the Deck**
+  - 2026-10-05: the human on the Deck: "Trees are awesome." Issues filed on that drive (#43, #44 garage ceiling; #45 bridge parapets) were fixed separately
