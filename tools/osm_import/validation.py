@@ -160,13 +160,21 @@ def validate(
         )
 
     # Dead ends
-    categories = {"bbox_edge": [], "declared_noexit": [], "likely_real": [], "suspicious": []}
+    categories = {
+        "bbox_edge": [],
+        "declared_noexit": [],
+        "likely_real": [],
+        "suspicious": [],
+        "parking": [],
+    }
     for nid in sorted(graph.nodes):
         if len(inc[nid]) != 1:
             continue
         e = graph.edges[inc[nid][0]]
         node = graph.nodes[nid]
-        if nid in edge_nodes:
+        if e.road_class == "parking":
+            cat = "parking"  # aisles and driveways end in lots: counted apart from real streets
+        elif nid in edge_nodes:
             cat = "bbox_edge"
         elif node.tags.get("noexit") == "yes":
             cat = "declared_noexit"

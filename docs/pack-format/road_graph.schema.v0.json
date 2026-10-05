@@ -11,7 +11,7 @@
     "polyline": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 2},
     "node_id": {"type": "string", "pattern": "^[nc][0-9]+$"},
     "road_class": {
-      "enum": ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street", "service"]
+      "enum": ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street", "service", "parking"]
     }
   },
   "properties": {
