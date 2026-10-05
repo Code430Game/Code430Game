@@ -14,7 +14,8 @@ const BACKGROUND := Color(0.09, 0.10, 0.12)
 const WATER := Color(0.16, 0.32, 0.45)
 const BUILDING := Color(0.20, 0.21, 0.24)
 const PARKING := Color(0.25, 0.26, 0.29)  # lots: a shade lighter than buildings, under them
-const GARAGE := Color(0.45, 0.62, 0.9)  # underground garages: a dashed outline and a P, over the buildings
+const GARAGE := Color(0.45, 0.62, 0.9)
+const GREEN := {"park": Color(0.17, 0.27, 0.17), "garden": Color(0.17, 0.27, 0.17), "grass": Color(0.16, 0.24, 0.16), "wood": Color(0.13, 0.23, 0.14), "scrub": Color(0.16, 0.24, 0.15)}  # underground garages: a dashed outline and a P, over the buildings
 
 var metres_per_pixel: float = DEFAULT_METRES_PER_PIXEL
 var min_x: float = 0.0
@@ -47,7 +48,7 @@ static func road_width_px(road_class: String) -> float:
 
 
 ## Draws the map into `texture`. Must be called from a node in the tree; awaits one frame.
-func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = []) -> void:
+func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = []) -> void:
 	var viewport := SubViewport.new()
 	viewport.size = size_px
 	viewport.transparent_bg = false
@@ -59,6 +60,7 @@ func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon
 	canvas.water = water
 	canvas.buildings = buildings
 	canvas.lots = lots
+	canvas.green = green
 	viewport.add_child(canvas)
 	host.add_child(viewport)
 	await RenderingServer.frame_post_draw
@@ -75,9 +77,23 @@ class MapCanvas:
 	var water: Array[WaterBuilder.WaterPolygon]
 	var buildings: Array[BuildingBuilder.Building] = []
 	var lots: Array = []  # ParkingLotBuilder.Lot
+	var green: Array = []  # {"kind", "vertices": PackedVector2Array, "triangles": PackedInt32Array}
 
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(renderer.size_px)), BACKGROUND)
+		# Parks, grass and woods under the lots and buildings (add-vegetation 2.3).
+		for area: Dictionary in green:
+			var gp := PackedVector2Array()
+			for v: Vector2 in area["vertices"]:
+				gp.append(renderer.world_to_pixel(v.x, v.y))
+			var tris: PackedInt32Array = area["triangles"]
+			var col: Color = GREEN.get(area["kind"], GREEN["grass"])
+			for t in range(0, tris.size() - 2, 3):
+				var ga := gp[tris[t]]
+				var gb := gp[tris[t + 1]]
+				var gc := gp[tris[t + 2]]
+				if absf((gb - ga).cross(gc - ga)) >= 0.5:
+					draw_colored_polygon(PackedVector2Array([ga, gb, gc]), col)
 		for lot: ParkingLotBuilder.Lot in lots:
 			if lot.kind == "underground":
 				continue  # drawn on top of the buildings, below
