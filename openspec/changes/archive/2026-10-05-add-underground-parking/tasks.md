@@ -11,5 +11,7 @@
   - 2026-10-05: screenshots shared (NAC from the street and inside, the museum ramp from above, a door-tier portal, the map). Garages get their own stall layout: aisles every 17 m, a row each side, so the NAC holds 106 stalls; columns stand where stall backs meet and light strips run over the aisles. A faint emission keeps the level from reading black. Surface-lot stalls on a ramp's cut are dropped (one put a car on a portal). Garage occupancy uses the commercial row (a garage without a fee tag counts as paid) rather than a new `garage` row. Not done here, in the backlog: the minimap showing the floor while inside, and the ragged corners of the 4 m terrain cut beside some ramps
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark against main, including a drive into a garage
-- [ ] 3.2 Human tries it on the Deck (not a merge gate; feedback goes to the backlog)
+- [x] 3.1 Deck benchmark against main, including a drive into a garage
+  - 2026-10-05, idle Deck, deck preset: route avg 12.47 ms, p99 16.67, GPU 11.07, 6,955 parked cars (3,903 before garages); parked outside the NAC garage (20 s) avg 12.23, p99 18.60. Main before garages was avg 12.05, p99 19.06
+- [x] 3.2 Human tries it on the Deck (not a merge gate; feedback goes to the backlog)
+  - 2026-10-05: deployed; the human is working and will report by issue
