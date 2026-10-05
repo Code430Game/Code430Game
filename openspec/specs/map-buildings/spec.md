@@ -2,7 +2,9 @@
 
 ## Purpose
 Buildings from OSM footprints: carried in the map pack, extruded to their height with roofs and facades in the game, and drawn as footprints on the maps.
+
 ## Requirements
+
 ### Requirement: Building Footprints In Map Packs
 The import tool SHALL write `buildings.v0.json` with every building footprint intersecting the bbox, clipped, with a height derived from OSM tags or a per-type default, and a ground height from the terrain.
 
@@ -28,3 +30,23 @@ The overview map and minimap SHALL draw building footprints as a dim fill under 
 - **WHEN** the map is open over Centretown
 - **THEN** blocks show filled footprints between the streets
 
+### Requirement: Facades From Data
+Buildings SHALL choose their facade treatment and colour from OSM material, colour, kind and height, with a per-building seed deciding only within a treatment's palette, so the same building always looks the same and tagged colours are honoured.
+
+#### Scenario: Tagged colour
+- **WHEN** a building carries `building:colour`
+- **THEN** its walls use that colour
+
+### Requirement: Roof Shapes
+Houses and small buildings SHALL get gabled or hipped roofs from `roof:shape`, or a gable along the long axis when untagged and under the house height limit; flat roofs over the parapet height SHALL carry a parapet lip and tall roofs mechanical boxes.
+
+#### Scenario: Untagged house
+- **WHEN** a house has no roof tags and is under 12 m
+- **THEN** it gets a gabled roof along its longer side
+
+### Requirement: Street Level
+Buildings with a shop or amenity tag or a retail kind SHALL get a glass shopfront ground storey with an awning band on walls longer than 6 m, and apartment blocks over 12 m SHALL get balconies on their long sides.
+
+#### Scenario: Bank Street
+- **WHEN** the player walks a commercial block
+- **THEN** the ground floors show shopfronts and awnings in varied colours
