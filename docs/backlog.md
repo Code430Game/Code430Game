@@ -194,15 +194,17 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   **Mitigated 2026-10-04:** became 3 in 5 runs once traffic grew; ignoring the testbed suite
   gave 4 of 4 clean runs, confirming it as the source. Letting the freed testbed settle for 60
   frames in its `after()` gave 5 of 5 clean. The thread itself is still unnamed.
+  **Fixed 2026-10-05** (`fix/audio-generator-teardown`): the thread is the dummy audio
+  driver's mixer, and the `/root` error is the crash handler's `NOTIFICATION_CRASH` sent from
+  it. Godot's `AudioStreamGeneratorPlayback` holds a raw pointer to its stream and reads it
+  every mix; freeing a player dropped the stream before the mixer saw the stop. `Synth`
+  now keeps each generator for 0.5 s after its player leaves the tree.
   **One cause found and fixed 2026-10-04:** the headless (dummy) renderer's mesh storage is not
   thread-safe, and chunk build tasks creating meshes at once corrupted it ("Attempting to
   initialize the wrong RID", "Parameter mem is null"). The streamer now builds synchronously
   under the headless renderer, and collision shapes are made on the main thread everywhere
-  (the physics server isn't thread-safe either). **Still open:** a rarer abort (signal 11)
-  right after `test_testbed_menus` tears down, a worker thread calling
-  `propagate_notification()` on `/root`; it isn't the radio task, the report relay or gdUnit
-  itself. The official build has no symbols, so the native backtrace names no function. Next
-  step: a debug Godot build, or bisect the testbed's subsystems in that suite.
+  (the physics server isn't thread-safe either). The rarer abort (signal 11) after
+  `test_testbed_menus` was the audio mixer, fixed in #25 (see the entry above).
 - **Junctions where terrain still shows through** (add-surface-detail 1.2, 2026-10-04): 16 of 915
   by `test_junction_terrain.gd`, including n14141327481 (+10.5 m), n472497779 (+10.7 m),
   n472558217 (+2.9 m), n4991525553 (+0.4 m), n2609373961 (+0.18 m), c1236845823 (+0.17 m).
