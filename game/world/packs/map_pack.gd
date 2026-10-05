@@ -60,6 +60,7 @@ var garage_material: Material
 var garage_light_material: Material
 var vegetation_chunks: Dictionary = {}  # chunk -> {"trees", "bushes"} rows, priority order
 var green_areas: Array = []  # for the maps
+var services: Array[Services.Place] = []  # police stations, hospitals, fire stations, helipads
 var parking_lots: Array[ParkingLotBuilder.Lot] = []
 var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
 
@@ -117,6 +118,7 @@ func load(dir: String) -> bool:
 	vegetation_chunks = VegetationBuilder.load_by_chunk(dir, RoadGeometry.CHUNK_SIZE_M)
 	VegetationBuilder.read_preset()
 	green_areas = VegetationBuilder.load_areas(dir)
+	services = Services.load_places(dir)
 	garages = GarageBuilder.load_garages(dir, graph)
 	var built := GarageBuilder.build(garages)
 	garage_chunks = built["structure"]

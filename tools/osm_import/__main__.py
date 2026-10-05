@@ -30,6 +30,7 @@ from osm_import.pack import (
 from osm_import.parking import build_parking, parking_query
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
+from osm_import.services import build_services, services_query
 from osm_import.validation import render_markdown
 from osm_import.vegetation import build_vegetation, vegetation_query
 from osm_import.water import build_water, water_query
@@ -130,6 +131,9 @@ def _import(args: argparse.Namespace) -> int:
             v_payload, bbox, proj, result.graph, buildings, water, ChunkSampler(chunks)
         )
         result.report.summary["vegetation"] = vegetation.counts()
+        s_payload, _meta = fetch_query(services_query(bbox), bbox, args.cache_dir)
+        services = build_services(s_payload, bbox, proj, result.graph, ChunkSampler(chunks))
+        result.report.summary["services"] = services.counts()
         result.report.summary["terrain"] = tstats
         paths = write_pack(
             args.pack_out,
@@ -149,11 +153,13 @@ def _import(args: argparse.Namespace) -> int:
             parking,
             bridges,
             vegetation,
+            services,
         )
         print(f"terrain: {tstats}")
         print(f"barriers: {barriers.counts}")
         print(f"bridges: {bridges.counts()}")
         print(f"vegetation: {vegetation.counts()}")
+        print(f"services: {services.counts()}")
         if buildings is not None:
             print(
                 f"buildings: {len(buildings.buildings)} footprints, heights {buildings.height_sources}"

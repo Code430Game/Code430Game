@@ -33,6 +33,8 @@ VEGETATION_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vegetation.schema
 VEGETATION_NAME = "vegetation.v0.json"
 WEAPONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "weapons.schema.v0.json"
 WEAPONS_NAME = "weapons.v0.json"
+SERVICES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "services.schema.v0.json"
+SERVICES_NAME = "services.v0.json"
 MODES_DIR = REPO_ROOT / "game" / "core" / "content" / "modes"
 
 
@@ -272,6 +274,17 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
         for err in sorted(validator.iter_errors(bridges), key=lambda e: list(e.path)):
             where = "/".join(str(p) for p in err.path) or "(root)"
             report.errors.append(f"{BRIDGES_NAME}: {where}: {err.message}")
+    services_path = pack_dir / SERVICES_NAME
+    if services_path.is_file():
+        try:
+            services = json.loads(services_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{SERVICES_NAME}: invalid JSON: {exc}")
+            return report
+        validator = load_schema(SERVICES_SCHEMA_PATH)
+        for err in sorted(validator.iter_errors(services), key=lambda e: list(e.path)):
+            where = "/".join(str(p) for p in err.path) or "(root)"
+            report.errors.append(f"{SERVICES_NAME}: {where}: {err.message}")
     weapons_path = pack_dir / WEAPONS_NAME
     if weapons_path.is_file():
         try:

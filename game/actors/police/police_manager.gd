@@ -23,6 +23,7 @@ var wanted: Wanted
 var graph: RoadGraph
 var player: Player
 var holder: Node3D  # where cars and officers live (the world)
+var stations: Array = []  # Services.Place of kind police: the first car leaves from one in range
 var cars: Array[VehicleBody3D] = []
 var officers: Array[Node3D] = []
 var _plans: Dictionary = {}  # car -> {"points": PackedVector3Array, "i": int, "age": float}
@@ -120,8 +121,14 @@ func _spawn_car(around: Vector3) -> bool:
 	var hi := float(cfg("spawn_max_m", 160.0))
 	var cam := get_viewport().get_camera_3d()
 	var best: RoadGraph.RoadNode = null
+	if cars.is_empty():
+		for st in stations:
+			var node: RoadGraph.RoadNode = graph.nodes.get(st.road_node)
+			if node != null and node.position.distance_to(around) <= hi * 1.5 and not route(node.position, around).is_empty():
+				best = node  # the first car of a chase rolls out of the station
+				break
 	var ids := graph.nodes.keys()
-	for k in range(60):
+	for k in range(0 if best != null else 60):
 		var n: RoadGraph.RoadNode = graph.nodes[ids[_rng.randi_range(0, ids.size() - 1)]]
 		var d := n.position.distance_to(around)
 		if d < lo or d > hi or absf(n.position.y - around.y) > 5.0:

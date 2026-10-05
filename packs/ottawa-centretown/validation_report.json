@@ -12535,6 +12535,14 @@
    "with_capacity": 32
   },
   "ramp_problems": 0,
+  "services": {
+   "ambulance": 3,
+   "fire_station": 2,
+   "helipad": 1,
+   "hospital": 2,
+   "police": 2,
+   "security": 2
+  },
   "terrain": {
    "cells_carved": 6750,
    "cells_flattened": 386720,

@@ -33,6 +33,7 @@ from osm_import.osm_data import BBox
 from osm_import.parking import ParkingResult
 from osm_import.png import encode_heights, write_rgb8
 from osm_import.projection import LocalFrame
+from osm_import.services import ServicesResult
 from osm_import.underpasses import dig_underpasses
 from osm_import.vegetation import VegetationResult
 from osm_import.water import WaterResult
@@ -467,6 +468,7 @@ def write_pack(
     parking: ParkingResult | None = None,
     bridges: BridgesResult | None = None,
     vegetation: VegetationResult | None = None,
+    services: ServicesResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -551,6 +553,9 @@ def write_pack(
     if vegetation is not None:
         paths["vegetation"] = out_dir / "vegetation.v0.json"
         dump_json(vegetation.to_dict(), paths["vegetation"])
+    if services is not None:
+        paths["services"] = out_dir / "services.v0.json"
+        dump_json(services.to_dict(), paths["services"])
     return paths
 
 

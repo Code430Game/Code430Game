@@ -392,9 +392,15 @@ func _hurt(damage: float) -> void:
 ## Busted or wasted: a banner, the wanted level and the police cleared, health and weapons
 ## refilled, and the player back at the start on foot.
 func _caught(how: String) -> void:
+	# Taken to the nearest police station when busted, the nearest hospital when wasted
+	# (add-emergency-services); the start when the pack has none.
+	var place := Services.nearest(_pack.services, "hospital" if how == "wasted" else "police", _player.global_position)
+	var arrive_at := Services.arrival(place, _pack.graph) if place != null else _pack.spawn_transform().origin
 	var text := "WASTED" if how == "wasted" else "BUSTED"
 	if not ContentMode.flag("lethal_weapons"):
 		text = "CAUGHT! Fined for mischief"
+	if place != null and place.name != "":
+		text += "\n" + place.name
 	_banner.text = text
 	_banner.visible = true
 	get_tree().create_timer(3.0).timeout.connect(func() -> void: _banner.visible = false)
@@ -402,7 +408,7 @@ func _caught(how: String) -> void:
 	_wanted.clear()
 	if _player.is_driving():
 		_player.try_exit_vehicle()
-	_player.global_position = _pack.spawn_transform().origin + Vector3.UP * 1.0
+	_player.global_position = arrive_at + Vector3.UP * 1.0
 	_player.velocity = Vector3.ZERO
 	_player.stuck_s = 0.0
 	_player.health = float(_wanted.config.get("player_health", 100.0))
@@ -469,6 +475,7 @@ func _setup_wanted() -> void:
 	_police.graph = _pack.graph
 	_police.player = _player
 	_police.holder = _world
+	_police.stations = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind == "police")
 	_police.log_chase = _police_log
 	add_child(_police)
 	_police.busted.connect(func() -> void: _caught("busted"))
@@ -725,7 +732,7 @@ func _setup_maps() -> void:
 	_overview.graph = _pack.graph
 	_overview.player = Players.local_controlled_body()
 	var t0 := Time.get_ticks_msec()
-	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas)
+	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas, _pack.services)
 	print("map texture %s rendered in %d ms" % [_map_renderer.size_px, Time.get_ticks_msec() - t0])
 	if _open_map_on_start:
 		_overview.open()
