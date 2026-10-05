@@ -23,16 +23,15 @@ def test_filter_classes():
         ]
     )
     result = filter_ways(data, CFG)
-    assert [w.id for w in result.drivable] == [1, 7]
+    assert [w.id for w in result.drivable] == [1, 4, 7]  # parking aisles are kept (class parking)
     assert [w.id for w in result.pedestrian] == [2]
     assert result.dropped == {
         "highway=construction": 1,
-        "service=parking_aisle": 1,
         "access=private": 1,
         "area=yes": 1,
         "highway=bus_stop": 1,
     }
-    assert {w.id for w, _ in result.dropped_ways} == {4, 5}
+    assert {w.id for w, _ in result.dropped_ways} == {5}
 
 
 def test_way_with_one_known_node_is_dropped():

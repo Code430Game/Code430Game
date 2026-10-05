@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/parking.schema.v0.json",
+  "title": "Code 430 parking lots and street bays v0",
+  "description": "Parking lots from OSM amenity=parking with the aisles inside them and their entrances, plus street-side bays from parking:* tags on street edges. The game lays out stalls from stall_dir and drapes each lot over its terrain grid. Written by tools/osm_import (stage parking.py).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "lots",
+    "bays"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 0
+    },
+    "units": {
+      "type": "string"
+    },
+    "lots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "stall_dir",
+          "ground_y",
+          "rings",
+          "aisles",
+          "entrances",
+          "osm_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[wr][0-9]+\\.[0-9]+$"
+          },
+          "kind": {
+            "enum": [
+              "surface",
+              "multi-storey",
+              "underground",
+              "rooftop",
+              "street_side"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "operator": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "access": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fee": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "orientation": {
+            "enum": [
+              "perpendicular",
+              "diagonal",
+              "parallel",
+              null
+            ]
+          },
+          "stall_dir": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "ground_y": {
+            "type": "number"
+          },
+          "rings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "aisles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entrances": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "osm_id": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "bays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "edge",
+          "side",
+          "orientation",
+          "osm_way_id"
+        ],
+        "properties": {
+          "edge": {
+            "type": "string"
+          },
+          "side": {
+            "enum": [
+              "left",
+              "right"
+            ]
+          },
+          "orientation": {
+            "enum": [
+              "perpendicular",
+              "diagonal",
+              "parallel"
+            ]
+          },
+          "osm_way_id": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

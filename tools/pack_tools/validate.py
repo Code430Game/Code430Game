@@ -25,6 +25,8 @@ MODES_DIR = CONTENT_DIR / "modes"
 ADS_NAME = "ads.v0.json"
 VEHICLES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vehicles.schema.v0.json"
 VEHICLES_NAME = "vehicles.v0.json"
+PARKING_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "parking.schema.v0.json"
+PARKING_NAME = "parking.v0.json"
 LEVELS = ["none", "mild", "strong"]
 MANIFEST_NAME = "pack.json"
 
@@ -213,6 +215,17 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
             report.errors.append(f"{VEHICLES_NAME}: invalid JSON: {exc}")
             return report
         report.errors.extend(validate_vehicles(vehicles, desc, load_schema(VEHICLES_SCHEMA_PATH)))
+    parking_path = pack_dir / PARKING_NAME
+    if parking_path.is_file():
+        try:
+            parking = json.loads(parking_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{PARKING_NAME}: invalid JSON: {exc}")
+            return report
+        validator = load_schema(PARKING_SCHEMA_PATH)
+        for err in sorted(validator.iter_errors(parking), key=lambda e: list(e.path)):
+            where = "/".join(str(p) for p in err.path) or "(root)"
+            report.errors.append(f"{PARKING_NAME}: {where}: {err.message}")
     return report
 
 

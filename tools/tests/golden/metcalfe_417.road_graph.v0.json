@@ -6,6 +6,172 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n9898327055",
+   "id": "w1079862211.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 29.084,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1079862211,
+   "polyline": [
+    [
+     -199.629,
+     60.125,
+     -261.61
+    ],
+    [
+     -188.226,
+     60.772,
+     -242.602
+    ],
+    [
+     -184.662,
+     60.991,
+     -236.672
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n9898327053",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137961563",
+   "id": "w1079862213.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 18.09,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1079862213,
+   "polyline": [
+    [
+     -215.448,
+     59.899,
+     -252.835
+    ],
+    [
+     -199.629,
+     60.125,
+     -261.61
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n9898327055",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n9898327055",
+   "id": "w1079862213.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 16.143,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1079862213,
+   "polyline": [
+    [
+     -199.629,
+     60.125,
+     -261.61
+    ],
+    [
+     -185.508,
+     60.311,
+     -269.433
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137961562",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137961566",
+   "id": "w1079862214.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 37.69,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1079862214,
+   "polyline": [
+    [
+     -255.889,
+     59.212,
+     -232.616
+    ],
+    [
+     -248.894,
+     59.322,
+     -237.178
+    ],
+    [
+     -223.878,
+     59.701,
+     -252.507
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n9898327060",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "tertiary_link",
    "control_from": "none",
    "control_to": "none",
@@ -17,7 +183,7 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 31.387,
+   "length_m": 27.773,
    "name": null,
    "oneway": true,
    "osm_way_id": 108234121,
@@ -48,13 +214,13 @@
      -63.862
     ],
     [
-     170.419,
-     68.82,
-     -60.165
+     173.873,
+     68.699,
+     -61.226
     ]
    ],
    "speed_kph": 50,
-   "to": "n1242125950",
+   "to": "c1242125950",
    "tunnel": false,
    "width_m": 3.5
   },
@@ -74,7 +240,7 @@
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 61.433,
+   "length_m": 24.316,
    "name": "McLeod Street",
    "oneway": true,
    "osm_way_id": 108234123,
@@ -88,20 +254,10 @@
      -123.49,
      64.296,
      -182.097
-    ],
-    [
-     -151.746,
-     63.834,
-     -165.673
-    ],
-    [
-     -155.584,
-     63.757,
-     -163.451
     ]
    ],
    "speed_kph": 30,
-   "to": "n2178655070",
+   "to": "n12068124256",
    "tunnel": false,
    "width_m": 7.0
   },
@@ -116,25 +272,57 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n2178655070",
+   "from": "n12068124256",
    "id": "w108234123.1",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 48.476,
+   "length_m": 41.239,
    "name": "McLeod Street",
    "oneway": true,
    "osm_way_id": 108234123,
    "polyline": [
     [
-     -155.584,
-     63.757,
-     -163.451
+     -123.49,
+     64.296,
+     -182.097
     ],
     [
-     -170.179,
-     63.435,
-     -155.132
+     -159.144,
+     63.682,
+     -161.374
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "c12523021922",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "c12523021922",
+   "id": "w108234123.4",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 44.354,
+   "name": "McLeod Street",
+   "oneway": true,
+   "osm_way_id": 108234123,
+   "polyline": [
+    [
+     -159.166,
+     63.682,
+     -161.413
     ],
     [
      -191.961,
@@ -442,6 +630,50 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n10557304831",
+   "id": "w1132239034.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 33.005,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1132239034,
+   "polyline": [
+    [
+     -129.308,
+     60.742,
+     -306.894
+    ],
+    [
+     -116.416,
+     61.48,
+     -284.563
+    ],
+    [
+     -112.807,
+     61.707,
+     -278.31
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n10557304829",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "secondary",
    "control_from": "none",
    "control_to": "none",
@@ -484,6 +716,275 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12064289102",
+   "id": "w1302640746.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 17.759,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1302640746,
+   "polyline": [
+    [
+     185.995,
+     64.249,
+     -257.441
+    ],
+    [
+     193.346,
+     64.46,
+     -244.935
+    ],
+    [
+     194.997,
+     64.506,
+     -242.132
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n12064289101",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12068124256",
+   "id": "w1303081932.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 27.847,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1303081932,
+   "polyline": [
+    [
+     -123.49,
+     64.296,
+     -182.097
+    ],
+    [
+     -125.828,
+     64.098,
+     -185.95
+    ],
+    [
+     -137.911,
+     63.112,
+     -205.919
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n12068124257",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12523021917",
+   "id": "w1353401234.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 21.596,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1353401234,
+   "polyline": [
+    [
+     -208.099,
+     61.121,
+     -198.142
+    ],
+    [
+     -215.144,
+     60.678,
+     -209.78
+    ],
+    [
+     -219.287,
+     60.431,
+     -216.615
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n12523021918",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12523021920",
+   "id": "w1353401235.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 53.855,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1353401235,
+   "polyline": [
+    [
+     -187.135,
+     62.104,
+     -184.453
+    ],
+    [
+     -169.248,
+     62.453,
+     -194.388
+    ],
+    [
+     -154.077,
+     63.642,
+     -169.493
+    ],
+    [
+     -151.868,
+     63.682,
+     -165.873
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c12523021922",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12523021924",
+   "id": "w1353401236.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 36.594,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1353401236,
+   "polyline": [
+    [
+     -79.765,
+     64.648,
+     -207.421
+    ],
+    [
+     -82.283,
+     64.446,
+     -211.365
+    ],
+    [
+     -99.44,
+     63.136,
+     -238.276
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n12523021925",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12523021927",
+   "id": "w1353401237.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 33.663,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 1353401237,
+   "polyline": [
+    [
+     -258.979,
+     60.377,
+     -142.382
+    ],
+    [
+     -244.113,
+     61.267,
+     -117.501
+    ],
+    [
+     -241.706,
+     61.469,
+     -113.489
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c12523021928",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "secondary",
    "control_from": "none",
    "control_to": "none",
@@ -520,6 +1021,50 @@
    "to": "n901052479",
    "tunnel": false,
    "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505543",
+   "id": "w1483343201.0",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 17.55,
+   "name": null,
+   "oneway": true,
+   "osm_way_id": 1483343201,
+   "polyline": [
+    [
+     -208.444,
+     59.642,
+     278.81
+    ],
+    [
+     -215.005,
+     59.677,
+     267.222
+    ],
+    [
+     -217.07,
+     59.688,
+     263.527
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6960505542",
+   "tunnel": false,
+   "width_m": 5.5
   },
   {
    "access": null,
@@ -637,7 +1182,7 @@
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 38.159,
+   "length_m": 43.161,
    "name": "Metcalfe Street",
    "oneway": true,
    "osm_way_id": 222838924,
@@ -653,9 +1198,9 @@
      56.537
     ],
     [
-     -99.053,
-     69.132,
-     28.675
+     -101.614,
+     69.06,
+     24.379
     ]
    ],
    "speed_kph": 50,
@@ -720,6 +1265,117 @@
    "to": "n901053478",
    "tunnel": false,
    "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2178655069",
+   "id": "w222839599.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 17.868,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 222839599,
+   "polyline": [
+    [
+     -120.52,
+     65.265,
+     -155.185
+    ],
+    [
+     -115.557,
+     65.341,
+     -158.12
+    ],
+    [
+     -108.678,
+     65.478,
+     -160.905
+    ],
+    [
+     -106.652,
+     65.576,
+     -159.954
+    ],
+    [
+     -105.04,
+     65.692,
+     -158.119
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n2317854684",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2317854684",
+   "id": "w222839599.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 133.676,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 222839599,
+   "polyline": [
+    [
+     -105.04,
+     65.692,
+     -158.119
+    ],
+    [
+     -102.711,
+     65.905,
+     -154.088
+    ],
+    [
+     -89.039,
+     67.162,
+     -130.406
+    ],
+    [
+     -75.861,
+     68.336,
+     -107.573
+    ],
+    [
+     -61.384,
+     68.501,
+     -115.837
+    ],
+    [
+     -90.639,
+     65.84,
+     -166.662
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n2317854728",
+   "tunnel": false,
+   "width_m": 5.5
   },
   {
    "access": null,
@@ -1110,6 +1766,100 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n3649886580",
+   "id": "w360442685.0",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 91.371,
+   "name": null,
+   "oneway": true,
+   "osm_way_id": 360442685,
+   "polyline": [
+    [
+     191.983,
+     66.663,
+     -145.442
+    ],
+    [
+     189.341,
+     66.789,
+     -142.098
+    ],
+    [
+     182.621,
+     67.043,
+     -136.8
+    ],
+    [
+     178.195,
+     67.338,
+     -127.972
+    ],
+    [
+     175.924,
+     67.519,
+     -122.18
+    ],
+    [
+     175.72,
+     67.686,
+     -114.827
+    ],
+    [
+     178.341,
+     67.764,
+     -108.25
+    ],
+    [
+     180.131,
+     67.818,
+     -103.457
+    ],
+    [
+     183.572,
+     67.946,
+     -92.106
+    ],
+    [
+     182.965,
+     68.068,
+     -86.079
+    ],
+    [
+     181.19,
+     68.206,
+     -80.727
+    ],
+    [
+     177.84,
+     68.431,
+     -72.368
+    ],
+    [
+     175.815,
+     68.699,
+     -62.227
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c1242125950",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "service",
    "control_from": "none",
    "control_to": "none",
@@ -1486,15 +2236,15 @@
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 39.74,
+   "length_m": 39.77,
    "name": "Victory Gardens Private",
    "oneway": false,
    "osm_way_id": 391440212,
    "polyline": [
     [
-     -103.378,
-     69.132,
-     21.52
+     -103.353,
+     69.06,
+     21.505
     ],
     [
      -109.408,
@@ -1674,6 +2424,50 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n5162226660",
+   "id": "w391440232.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 52.821,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 391440232,
+   "polyline": [
+    [
+     -176.635,
+     64.931,
+     72.475
+    ],
+    [
+     -137.356,
+     67.161,
+     49.313
+    ],
+    [
+     -137.38,
+     67.251,
+     42.091
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n3946608913",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "secondary",
    "control_from": "none",
    "control_to": "none",
@@ -1685,7 +2479,7 @@
    "lanes_backward": 2,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 134.544,
+   "length_m": 23.303,
    "name": "Gladstone Avenue",
    "oneway": false,
    "osm_way_id": 435133941,
@@ -1704,12 +2498,108 @@
      -219.287,
      60.431,
      -216.615
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n12523021918",
+   "tunnel": false,
+   "width_m": 14.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n12523021918",
+   "id": "w435133941.1",
+   "lanes_backward": 2,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 40.016,
+   "name": "Gladstone Avenue",
+   "oneway": false,
+   "osm_way_id": 435133941,
+   "polyline": [
+    [
+     -219.287,
+     60.431,
+     -216.615
     ],
     [
      -184.662,
      60.991,
      -236.672
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n9898327053",
+   "tunnel": false,
+   "width_m": 14.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n9898327053",
+   "id": "w435133941.2",
+   "lanes_backward": 2,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 57.555,
+   "name": "Gladstone Avenue",
+   "oneway": false,
+   "osm_way_id": 435133941,
+   "polyline": [
+    [
+     -184.662,
+     60.991,
+     -236.672
     ],
+    [
+     -134.866,
+     61.554,
+     -265.533
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n6412767549",
+   "tunnel": false,
+   "width_m": 14.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6412767549",
+   "id": "w435133941.3",
+   "lanes_backward": 2,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 13.67,
+   "name": "Gladstone Avenue",
+   "oneway": false,
+   "osm_way_id": 435133941,
+   "polyline": [
     [
      -134.866,
      61.554,
@@ -1989,7 +2879,7 @@
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 263.653,
+   "length_m": 215.439,
    "name": "Isabella Street",
    "oneway": true,
    "osm_way_id": 463448330,
@@ -2033,17 +2923,87 @@
      -217.07,
      59.688,
      263.527
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n6960505542",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6960505542",
+   "id": "w463448330.1",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 51.855,
+   "name": "Isabella Street",
+   "oneway": true,
+   "osm_way_id": 463448330,
+   "polyline": [
+    [
+     -217.07,
+     59.688,
+     263.527
     ],
     [
-     -174.933,
-     61.189,
-     240.095
+     -171.751,
+     61.316,
+     238.326
     ]
    ],
    "speed_kph": 50,
    "to": "c10199439704",
    "tunnel": false,
    "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2317854684",
+   "id": "w463594593.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 16.744,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 463594593,
+   "polyline": [
+    [
+     -105.04,
+     65.692,
+     -158.119
+    ],
+    [
+     -90.639,
+     65.84,
+     -166.662
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n2317854728",
+   "tunnel": false,
+   "width_m": 5.5
   },
   {
    "access": null,
@@ -2057,20 +3017,20 @@
     "speed_kph",
     "width"
    ],
-   "from": "n901045647",
+   "from": "c7137980785",
    "id": "w463598090.0",
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 18.658,
+   "length_m": 18.705,
    "name": null,
    "oneway": false,
    "osm_way_id": 463598090,
    "polyline": [
     [
-     -70.133,
-     69.554,
-     -70.015
+     -70.11,
+     69.489,
+     -69.975
     ],
     [
      -72.176,
@@ -2087,6 +3047,150 @@
    "to": "n2178655053",
    "tunnel": false,
    "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2178655069",
+   "id": "w463598091.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 26.304,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 463598091,
+   "polyline": [
+    [
+     -120.52,
+     65.265,
+     -155.185
+    ],
+    [
+     -126.276,
+     65.164,
+     -151.923
+    ],
+    [
+     -143.41,
+     64.813,
+     -142.226
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n2178655064",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2178655064",
+   "id": "w463598091.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 97.058,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 463598091,
+   "polyline": [
+    [
+     -143.41,
+     64.813,
+     -142.226
+    ],
+    [
+     -178.015,
+     63.918,
+     -121.879
+    ],
+    [
+     -184.912,
+     63.711,
+     -117.827
+    ],
+    [
+     -193.399,
+     63.446,
+     -112.833
+    ],
+    [
+     -218.566,
+     62.606,
+     -98.039
+    ],
+    [
+     -228.096,
+     62.231,
+     -95.454
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n2317854674",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2317854674",
+   "id": "w463598091.2",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 22.41,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 463598091,
+   "polyline": [
+    [
+     -228.096,
+     62.231,
+     -95.454
+    ],
+    [
+     -235.353,
+     61.727,
+     -109.682
+    ],
+    [
+     -238.36,
+     61.469,
+     -115.375
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c12523021928",
+   "tunnel": false,
+   "width_m": 3.5
   },
   {
    "access": null,
@@ -2226,6 +3330,251 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c4686479969",
+   "id": "w474768796.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 6.148,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 474768796,
+   "polyline": [
+    [
+     93.597,
+     69.971,
+     95.606
+    ],
+    [
+     92.02,
+     70.046,
+     92.968
+    ],
+    [
+     93.657,
+     69.971,
+     95.571
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c4686479969",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6248007630",
+   "id": "w474768799.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 34.551,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 474768799,
+   "polyline": [
+    [
+     24.472,
+     66.509,
+     200.063
+    ],
+    [
+     11.383,
+     67.489,
+     174.042
+    ],
+    [
+     9.611,
+     67.687,
+     168.916
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n4686479973",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n4686479973",
+   "id": "w474768799.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 23.886,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 474768799,
+   "polyline": [
+    [
+     9.611,
+     67.687,
+     168.916
+    ],
+    [
+     3.947,
+     68.55,
+     145.711
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c4686479967",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c4686479967",
+   "id": "w474768801.0",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 103.996,
+   "name": null,
+   "oneway": true,
+   "osm_way_id": 474768801,
+   "polyline": [
+    [
+     6.178,
+     68.55,
+     153.018
+    ],
+    [
+     44.127,
+     69.257,
+     131.635
+    ],
+    [
+     86.762,
+     69.707,
+     107.6
+    ],
+    [
+     91.616,
+     69.726,
+     104.519
+    ],
+    [
+     96.784,
+     69.971,
+     102.01
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c4686479969",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6474136322",
+   "id": "w474768804.0",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 109.094,
+   "name": null,
+   "oneway": true,
+   "osm_way_id": 474768804,
+   "polyline": [
+    [
+     103.636,
+     69.251,
+     113.766
+    ],
+    [
+     99.972,
+     69.226,
+     116.645
+    ],
+    [
+     95.689,
+     69.228,
+     118.764
+    ],
+    [
+     57.213,
+     68.838,
+     141.512
+    ],
+    [
+     45.533,
+     68.615,
+     148.424
+    ],
+    [
+     18.192,
+     67.912,
+     164.789
+    ],
+    [
+     9.611,
+     67.687,
+     168.916
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n4686479973",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "residential",
    "control_from": "none",
    "control_to": "none",
@@ -2359,20 +3708,20 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n2317854714",
+   "from": "c2317854714",
    "id": "w543211832.0",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 27.159,
+   "length_m": 33.26,
    "name": "Argyle Avenue",
    "oneway": true,
    "osm_way_id": 543211832,
    "polyline": [
     [
-     -40.131,
-     69.975,
-     -86.48
+     -45.44,
+     69.93,
+     -83.473
     ],
     [
      -26.661,
@@ -2395,6 +3744,246 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n5587304703",
+   "id": "w584500162.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 53.428,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 584500162,
+   "polyline": [
+    [
+     113.787,
+     69.759,
+     87.854
+    ],
+    [
+     124.275,
+     68.999,
+     108.753
+    ],
+    [
+     137.254,
+     68.138,
+     130.306
+    ],
+    [
+     141.538,
+     67.987,
+     132.654
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n5587304701",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c4686479969",
+   "id": "w584500163.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 20.75,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 584500163,
+   "polyline": [
+    [
+     93.925,
+     69.971,
+     95.429
+    ],
+    [
+     103.636,
+     69.251,
+     113.766
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6474136322",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6474136322",
+   "id": "w584500163.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 30.923,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 584500163,
+   "polyline": [
+    [
+     103.636,
+     69.251,
+     113.766
+    ],
+    [
+     106.781,
+     69.027,
+     119.403
+    ],
+    [
+     118.799,
+     68.163,
+     140.715
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n5587304706",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n5590839344",
+   "id": "w584955021.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 73.731,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 584955021,
+   "polyline": [
+    [
+     -248.549,
+     61.729,
+     -60.132
+    ],
+    [
+     -263.677,
+     61.154,
+     -49.885
+    ],
+    [
+     -235.414,
+     62.59,
+     -2.168
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6248007587",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n2317854674",
+   "id": "w584955022.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 51.584,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 584955022,
+   "polyline": [
+    [
+     -228.096,
+     62.231,
+     -95.454
+    ],
+    [
+     -241.965,
+     61.737,
+     -87.818
+    ],
+    [
+     -246.573,
+     61.572,
+     -85.28
+    ],
+    [
+     -254.832,
+     61.299,
+     -78.473
+    ],
+    [
+     -254.585,
+     61.356,
+     -73.505
+    ],
+    [
+     -253.445,
+     61.448,
+     -68.629
+    ],
+    [
+     -248.549,
+     61.729,
+     -60.132
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n5590839344",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "secondary",
    "control_from": "none",
    "control_to": "none",
@@ -2406,7 +3995,7 @@
    "lanes_backward": 0,
    "lanes_forward": 3,
    "layer": 0,
-   "length_m": 47.725,
+   "length_m": 42.245,
    "name": "O'Connor Street",
    "oneway": true,
    "osm_way_id": 584955024,
@@ -2426,6 +4015,38 @@
      60.423,
      80.442
     ],
+    [
+     -267.389,
+     60.63,
+     95.474
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n6948814819",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6948814819",
+   "id": "w584955024.1",
+   "lanes_backward": 0,
+   "lanes_forward": 3,
+   "layer": 0,
+   "length_m": 5.48,
+   "name": "O'Connor Street",
+   "oneway": true,
+   "osm_way_id": 584955024,
+   "polyline": [
     [
      -267.389,
      60.63,
@@ -2458,7 +4079,7 @@
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 25.491,
+   "length_m": 25.898,
    "name": "Isabella Street",
    "oneway": true,
    "osm_way_id": 604790375,
@@ -2469,13 +4090,13 @@
      149.036
     ],
     [
-     -1.207,
-     68.797,
-     138.992
+     -0.834,
+     68.55,
+     138.832
     ]
    ],
    "speed_kph": 50,
-   "to": "n4686479967",
+   "to": "c4686479967",
    "tunnel": false,
    "width_m": 7.0
   },
@@ -2490,34 +4111,34 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n4686479967",
+   "from": "c4686479967",
    "id": "w604790375.1",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 103.858,
+   "length_m": 104.51,
    "name": "Isabella Street",
    "oneway": true,
    "osm_way_id": 604790375,
    "polyline": [
     [
-     -1.207,
-     68.797,
-     138.992
+     -1.501,
+     68.55,
+     139.152
     ],
     [
      87.563,
-     70.182,
+     70.158,
      90.675
     ],
     [
-     90.031,
-     70.176,
-     89.374
+     90.312,
+     69.971,
+     89.226
     ]
    ],
    "speed_kph": 50,
-   "to": "n4686479969",
+   "to": "c4686479969",
    "tunnel": false,
    "width_m": 7.0
   },
@@ -2622,21 +4243,53 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n1242125950",
+   "from": "c1242125950",
    "id": "w667314129.0",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 34.393,
+   "length_m": 29.059,
    "name": "Catherine Street",
    "oneway": true,
    "osm_way_id": 667314129,
    "polyline": [
     [
-     170.419,
-     68.82,
-     -60.165
+     173.793,
+     68.699,
+     -62.029
     ],
+    [
+     148.358,
+     69.616,
+     -47.976
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n901220249",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n901220249",
+   "id": "w667314129.1",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 9.188,
+   "name": "Catherine Street",
+   "oneway": true,
+   "osm_way_id": 667314129,
+   "polyline": [
     [
      148.358,
      69.616,
@@ -2745,20 +4398,20 @@
     "speed_kph",
     "width"
    ],
-   "from": "n4686479968",
+   "from": "c4686479967",
    "id": "w667314139.0",
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 15.981,
+   "length_m": 4.992,
    "name": null,
    "oneway": false,
    "osm_way_id": 667314139,
    "polyline": [
     [
-     5.785,
-     68.295,
-     153.24
+     1.702,
+     68.55,
+     146.47
     ],
     [
      0.437,
@@ -2766,13 +4419,13 @@
      144.372
     ],
     [
-     -1.207,
-     68.797,
-     138.992
+     2.289,
+     68.55,
+     146.116
     ]
    ],
    "speed_kph": 20,
-   "to": "n4686479967",
+   "to": "c4686479967",
    "tunnel": false,
    "width_m": 7.0
   },
@@ -2918,6 +4571,104 @@
    "bridge": false,
    "bus": "",
    "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6412767549",
+   "id": "w684470058.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 18.896,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 684470058,
+   "polyline": [
+    [
+     -134.866,
+     61.554,
+     -265.533
+    ],
+    [
+     -130.835,
+     61.829,
+     -258.299
+    ],
+    [
+     -125.522,
+     62.2,
+     -249.11
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6412767544",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6412767544",
+   "id": "w684470058.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 59.851,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 684470058,
+   "polyline": [
+    [
+     -125.522,
+     62.2,
+     -249.11
+    ],
+    [
+     -116.138,
+     62.9,
+     -232.875
+    ],
+    [
+     -126.101,
+     62.813,
+     -227.205
+    ],
+    [
+     -135.152,
+     62.129,
+     -243.081
+    ],
+    [
+     -125.522,
+     62.2,
+     -249.11
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6412767544",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
    "class": "motorway",
    "control_from": "none",
    "control_to": "none",
@@ -2949,6 +4700,862 @@
    "to": "n903982432",
    "tunnel": false,
    "width_m": 17.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6542779426",
+   "id": "w696707704.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 35.403,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 696707704,
+   "polyline": [
+    [
+     60.542,
+     65.146,
+     -238.899
+    ],
+    [
+     75.344,
+     66.093,
+     -211.986
+    ],
+    [
+     77.602,
+     66.234,
+     -207.878
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6542779425",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c2317854714",
+   "id": "w698013429.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 65.121,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 698013429,
+   "polyline": [
+    [
+     -43.308,
+     69.93,
+     -84.717
+    ],
+    [
+     -38.92,
+     70.262,
+     -77.07
+    ],
+    [
+     -30.231,
+     70.801,
+     -62.753
+    ],
+    [
+     -9.783,
+     71.725,
+     -28.892
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6555326754",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6555326762",
+   "id": "w698013431.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 64.58,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 698013431,
+   "polyline": [
+    [
+     62.8,
+     69.969,
+     -108.222
+    ],
+    [
+     65.827,
+     70.122,
+     -102.508
+    ],
+    [
+     85.637,
+     70.764,
+     -68.119
+    ],
+    [
+     94.837,
+     70.897,
+     -52.153
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6555326760",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6555326765",
+   "id": "w698013432.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 45.221,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 698013432,
+   "polyline": [
+    [
+     -53.763,
+     65.279,
+     205.85
+    ],
+    [
+     -33.166,
+     64.337,
+     240.623
+    ],
+    [
+     -30.712,
+     64.226,
+     244.755
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6555326764",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6555326770",
+   "id": "w698013433.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 43.629,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 698013433,
+   "polyline": [
+    [
+     -79.191,
+     65.657,
+     180.39
+    ],
+    [
+     -74.746,
+     65.494,
+     187.805
+    ],
+    [
+     -61.728,
+     64.95,
+     210.204
+    ],
+    [
+     -53.763,
+     65.279,
+     205.85
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6555326765",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6555326765",
+   "id": "w698013433.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 44.612,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 698013433,
+   "polyline": [
+    [
+     -53.763,
+     65.279,
+     205.85
+    ],
+    [
+     -42.803,
+     65.722,
+     199.855
+    ],
+    [
+     -26.457,
+     64.919,
+     227.504
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6555326766",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n5587304706",
+   "id": "w698013436.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 27.757,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 698013436,
+   "polyline": [
+    [
+     118.799,
+     68.163,
+     140.715
+    ],
+    [
+     112.393,
+     68.038,
+     147.727
+    ],
+    [
+     110.207,
+     68.03,
+     148.963
+    ],
+    [
+     96.516,
+     67.943,
+     156.746
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6555326776",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6948814824",
+   "id": "w742234136.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 14.3,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 742234136,
+   "polyline": [
+    [
+     -279.845,
+     60.099,
+     102.488
+    ],
+    [
+     -273.733,
+     60.357,
+     98.841
+    ],
+    [
+     -267.389,
+     60.63,
+     95.474
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6948814819",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c6948814827",
+   "id": "w742234139.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 6.917,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 742234139,
+   "polyline": [
+    [
+     -274.092,
+     59.553,
+     168.155
+    ],
+    [
+     -272.397,
+     59.567,
+     171.17
+    ],
+    [
+     -274.093,
+     59.553,
+     168.155
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c6948814827",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c6948814827",
+   "id": "w742234140.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 29.509,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 742234140,
+   "polyline": [
+    [
+     -278.314,
+     59.553,
+     161.059
+    ],
+    [
+     -252.953,
+     60.536,
+     145.972
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6948814829",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c6948814827",
+   "id": "w742234141.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 47.7,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 742234141,
+   "polyline": [
+    [
+     -274.186,
+     59.553,
+     168.206
+    ],
+    [
+     -283.062,
+     59.471,
+     151.924
+    ],
+    [
+     -258.079,
+     60.482,
+     136.895
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6948814831",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505529",
+   "id": "w743693690.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 30.85,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 743693690,
+   "polyline": [
+    [
+     133.354,
+     66.473,
+     187.658
+    ],
+    [
+     121.108,
+     67.305,
+     166.377
+    ],
+    [
+     117.97,
+     67.526,
+     160.918
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6960505528",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505556",
+   "id": "w743693698.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 26.625,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 743693698,
+   "polyline": [
+    [
+     -126.937,
+     62.441,
+     239.266
+    ],
+    [
+     -137.307,
+     62.636,
+     222.879
+    ],
+    [
+     -141.176,
+     62.701,
+     216.768
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6960505555",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505563",
+   "id": "w743693701.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 11.465,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 743693701,
+   "polyline": [
+    [
+     -13.037,
+     64.348,
+     247.861
+    ],
+    [
+     -15.802,
+     64.504,
+     242.583
+    ],
+    [
+     -18.358,
+     64.649,
+     237.706
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6960505562",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505566",
+   "id": "w743693702.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 16.449,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 743693702,
+   "polyline": [
+    [
+     -33.281,
+     63.495,
+     265.154
+    ],
+    [
+     -38.538,
+     63.729,
+     255.776
+    ],
+    [
+     -41.329,
+     63.855,
+     250.808
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6960505565",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n901220249",
+   "id": "w744673064.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 28.041,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 744673064,
+   "polyline": [
+    [
+     148.358,
+     69.616,
+     -47.976
+    ],
+    [
+     145.554,
+     69.64,
+     -52.288
+    ],
+    [
+     140.568,
+     69.643,
+     -61.285
+    ],
+    [
+     141.859,
+     69.548,
+     -64.941
+    ],
+    [
+     149.447,
+     69.269,
+     -69.265
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6969599898",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6969599904",
+   "id": "w744673065.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 71.57,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 744673065,
+   "polyline": [
+    [
+     119.822,
+     68.133,
+     -141.123
+    ],
+    [
+     122.692,
+     68.232,
+     -136.344
+    ],
+    [
+     156.673,
+     68.885,
+     -79.769
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6969599903",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n5590839344",
+   "id": "w751115420.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 55.995,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 751115420,
+   "polyline": [
+    [
+     -248.549,
+     61.729,
+     -60.132
+    ],
+    [
+     -220.511,
+     63.295,
+     -11.662
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n6248007586",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c10199439704",
+   "id": "w751624276.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 22.641,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 751624276,
+   "polyline": [
+    [
+     -163.431,
+     61.316,
+     230.793
+    ],
+    [
+     -160.512,
+     61.657,
+     235.891
+    ],
+    [
+     -152.177,
+     61.515,
+     250.439
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7026546374",
+   "tunnel": false,
+   "width_m": 5.5
   },
   {
    "access": null,
@@ -3103,7 +5710,7 @@
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 24.47,
+   "length_m": 24.421,
    "name": null,
    "oneway": false,
    "osm_way_id": 764042081,
@@ -3119,15 +5726,426 @@
      -157.97
     ],
     [
-     -155.584,
-     63.757,
-     -163.451
+     -155.56,
+     63.682,
+     -163.408
     ]
    ],
    "speed_kph": 20,
-   "to": "n2178655070",
+   "to": "c12523021922",
    "tunnel": false,
    "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137961559",
+   "id": "w764042082.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 34.594,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042082,
+   "polyline": [
+    [
+     -242.616,
+     60.941,
+     -143.375
+    ],
+    [
+     -218.212,
+     61.6,
+     -156.676
+    ],
+    [
+     -212.237,
+     61.754,
+     -159.925
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137961558",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c12523021922",
+   "id": "w764042084.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 33.825,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042084,
+   "polyline": [
+    [
+     -170.201,
+     63.682,
+     -155.172
+    ],
+    [
+     -172.252,
+     63.264,
+     -158.794
+    ],
+    [
+     -187.135,
+     62.104,
+     -184.453
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n12523021920",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n12523021920",
+   "id": "w764042084.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 6.777,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042084,
+   "polyline": [
+    [
+     -187.135,
+     62.104,
+     -184.453
+    ],
+    [
+     -190.536,
+     61.855,
+     -190.315
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137961567",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137980786",
+   "id": "w764042085.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 48.47,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042085,
+   "polyline": [
+    [
+     -53.21,
+     70.832,
+     -23.874
+    ],
+    [
+     -72.082,
+     69.741,
+     -58.11
+    ],
+    [
+     -76.605,
+     69.489,
+     -66.324
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "c7137980785",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c2317854714",
+   "id": "w764042086.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 49.922,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042086,
+   "polyline": [
+    [
+     -52.938,
+     69.93,
+     -79.32
+    ],
+    [
+     -48.608,
+     70.16,
+     -71.542
+    ],
+    [
+     -41.934,
+     70.604,
+     -59.564
+    ],
+    [
+     -33.278,
+     70.879,
+     -56.012
+    ],
+    [
+     -24.805,
+     71.331,
+     -40.186
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137980790",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137980791",
+   "id": "w764042087.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 22.11,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042087,
+   "polyline": [
+    [
+     -72.382,
+     70.282,
+     -12.861
+    ],
+    [
+     -53.21,
+     70.832,
+     -23.874
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137980786",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137980786",
+   "id": "w764042087.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 32.755,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042087,
+   "polyline": [
+    [
+     -53.21,
+     70.832,
+     -23.874
+    ],
+    [
+     -24.805,
+     71.331,
+     -40.186
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137980790",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "c3946608912",
+   "id": "w764042089.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 40.751,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042089,
+   "polyline": [
+    [
+     -106.854,
+     69.06,
+     15.859
+    ],
+    [
+     -99.288,
+     69.236,
+     11.208
+    ],
+    [
+     -79.201,
+     70.062,
+     -1.486
+    ],
+    [
+     -83.777,
+     69.876,
+     -8.181
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137980798",
+   "tunnel": false,
+   "width_m": 5.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n7137980808",
+   "id": "w764042090.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 72.626,
+   "name": null,
+   "oneway": false,
+   "osm_way_id": 764042090,
+   "polyline": [
+    [
+     -79.151,
+     69.942,
+     26.534
+    ],
+    [
+     -70.165,
+     70.223,
+     30.744
+    ],
+    [
+     -56.3,
+     70.749,
+     22.808
+    ],
+    [
+     -65.613,
+     70.536,
+     7.24
+    ],
+    [
+     -81.007,
+     69.952,
+     15.641
+    ],
+    [
+     -79.151,
+     69.942,
+     26.534
+    ]
+   ],
+   "speed_kph": 15,
+   "to": "n7137980808",
+   "tunnel": false,
+   "width_m": 5.5
   },
   {
    "access": null,
@@ -3147,15 +6165,15 @@
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 18.229,
+   "length_m": 18.252,
    "name": null,
    "oneway": false,
    "osm_way_id": 764042091,
    "polyline": [
     [
-     -94.805,
-     69.132,
-     35.875
+     -94.825,
+     69.06,
+     35.887
     ],
     [
      -87.293,
@@ -3194,7 +6212,7 @@
    "lanes_backward": 0,
    "lanes_forward": 3,
    "layer": 0,
-   "length_m": 58.788,
+   "length_m": 32.196,
    "name": "Metcalfe Street",
    "oneway": true,
    "osm_way_id": 76419495,
@@ -3209,6 +6227,38 @@
      59.818,
      -212.192
     ],
+    [
+     -255.889,
+     59.212,
+     -232.616
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n7137961566",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n7137961566",
+   "id": "w76419495.1",
+   "lanes_backward": 0,
+   "lanes_forward": 3,
+   "layer": 0,
+   "length_m": 26.592,
+   "name": "Metcalfe Street",
+   "oneway": true,
+   "osm_way_id": 76419495,
+   "polyline": [
     [
      -255.889,
      59.212,
@@ -3237,7 +6287,7 @@
     "width"
    ],
    "from": "c901047389",
-   "id": "w76419495.2",
+   "id": "w76419495.3",
    "lanes_backward": 0,
    "lanes_forward": 3,
    "layer": 0,
@@ -3349,30 +6399,89 @@
     "width"
    ],
    "from": "c10199439704",
-   "id": "w76419917.1",
+   "id": "w76419917.2",
    "lanes_backward": 0,
    "lanes_forward": 4,
    "layer": 0,
-   "length_m": 155.471,
+   "length_m": 37.225,
    "name": "Isabella Street",
    "oneway": true,
    "osm_way_id": 76419917,
    "polyline": [
     [
-     -176.423,
-     61.189,
-     237.461
-    ],
-    [
-     -163.843,
-     61.71,
-     230.074
+     -173.279,
+     61.316,
+     235.612
     ],
     [
      -141.176,
      62.701,
      216.768
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n6960505555",
+   "tunnel": false,
+   "width_m": 14.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6960505555",
+   "id": "w76419917.3",
+   "lanes_backward": 0,
+   "lanes_forward": 4,
+   "layer": 0,
+   "length_m": 71.872,
+   "name": "Isabella Street",
+   "oneway": true,
+   "osm_way_id": 76419917,
+   "polyline": [
+    [
+     -141.176,
+     62.701,
+     216.768
     ],
+    [
+     -79.191,
+     65.657,
+     180.39
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n6555326770",
+   "tunnel": false,
+   "width_m": 14.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6555326770",
+   "id": "w76419917.4",
+   "lanes_backward": 0,
+   "lanes_forward": 4,
+   "layer": 0,
+   "length_m": 42.726,
+   "name": "Isabella Street",
+   "oneway": true,
+   "osm_way_id": 76419917,
+   "polyline": [
     [
      -79.191,
      65.657,
@@ -3405,7 +6514,7 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 379.281,
+   "length_m": 49.174,
    "name": "McLeod Street",
    "oneway": true,
    "osm_way_id": 76420027,
@@ -3426,14 +6535,41 @@
      -131.923
     ],
     [
-     -238.395,
-     61.521,
-     -115.441
-    ],
+     -240.05,
+     61.469,
+     -114.464
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "c12523021928",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "c12523021928",
+   "id": "w76420027.2",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 330.107,
+   "name": "McLeod Street",
+   "oneway": true,
+   "osm_way_id": 76420027,
+   "polyline": [
     [
-     -241.722,
-     61.417,
-     -113.514
+     -240.058,
+     61.469,
+     -114.478
     ],
     [
      -257.545,
@@ -3512,7 +6648,7 @@
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 67.021,
+   "length_m": 63.295,
    "name": "Argyle Avenue",
    "oneway": true,
    "osm_way_id": 76420450,
@@ -3523,18 +6659,13 @@
      -35.956
     ],
     [
-     -76.551,
-     69.42,
-     -66.226
-    ],
-    [
-     -70.133,
-     69.554,
-     -70.015
+     -73.341,
+     69.489,
+     -68.12
     ]
    ],
    "speed_kph": 50,
-   "to": "n901045647",
+   "to": "c7137980785",
    "tunnel": false,
    "width_m": 7.0
   },
@@ -3549,44 +6680,29 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n901045647",
-   "id": "w76420450.1",
+   "from": "c7137980785",
+   "id": "w76420450.2",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 34.225,
+   "length_m": 31.845,
    "name": "Argyle Avenue",
    "oneway": true,
    "osm_way_id": 76420450,
    "polyline": [
     [
-     -70.133,
-     69.554,
-     -70.015
+     -73.408,
+     69.489,
+     -68.242
     ],
     [
-     -52.94,
-     69.846,
-     -79.323
-    ],
-    [
-     -46.383,
-     69.923,
-     -82.878
-    ],
-    [
-     -43.277,
-     69.951,
-     -84.663
-    ],
-    [
-     -40.131,
-     69.975,
-     -86.48
+     -45.403,
+     69.93,
+     -83.403
     ]
    ],
    "speed_kph": 50,
-   "to": "n2317854714",
+   "to": "c2317854714",
    "tunnel": false,
    "width_m": 7.0
   },
@@ -3703,7 +6819,7 @@
    "lanes_backward": 0,
    "lanes_forward": 3,
    "layer": 0,
-   "length_m": 238.463,
+   "length_m": 43.151,
    "name": "Catherine Street",
    "oneway": true,
    "osm_way_id": 76420835,
@@ -3719,9 +6835,41 @@
      158.502
     ],
     [
-     -270.046,
-     59.584,
-     175.356
+     -269.892,
+     59.553,
+     175.265
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "c6948814827",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "c6948814827",
+   "id": "w76420835.1",
+   "lanes_backward": 0,
+   "lanes_forward": 3,
+   "layer": 0,
+   "length_m": 195.312,
+   "name": "Catherine Street",
+   "oneway": true,
+   "osm_way_id": 76420835,
+   "polyline": [
+    [
+     -269.891,
+     59.553,
+     175.265
     ],
     [
      -309.893,
@@ -3775,15 +6923,15 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 80.883,
+   "length_m": 83.964,
    "name": "O'Connor Street",
    "oneway": true,
    "osm_way_id": 76421510,
    "polyline": [
     [
-     -175.944,
-     61.189,
-     238.277
+     -172.919,
+     61.316,
+     236.226
     ],
     [
      -178.732,
@@ -3837,7 +6985,7 @@
    "lanes_backward": 0,
    "lanes_forward": 3,
    "layer": 0,
-   "length_m": 108.053,
+   "length_m": 105.423,
    "name": "O'Connor Street",
    "oneway": true,
    "osm_way_id": 76421741,
@@ -3873,9 +7021,9 @@
      231.494
     ],
     [
-     -175.944,
-     61.189,
-     238.277
+     -172.919,
+     61.316,
+     236.226
     ]
    ],
    "speed_kph": 50,
@@ -4047,7 +7195,7 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 224.936,
+   "length_m": 228.096,
    "name": null,
    "oneway": true,
    "osm_way_id": 76423511,
@@ -4088,9 +7236,9 @@
      238.111
     ],
     [
-     -176.019,
-     61.189,
-     237.19
+     -172.867,
+     61.316,
+     236.971
     ]
    ],
    "speed_kph": 60,
@@ -4399,7 +7547,7 @@
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 39.709,
+   "length_m": 25.182,
    "name": "Metcalfe Street",
    "oneway": true,
    "osm_way_id": 76424229,
@@ -4424,6 +7572,38 @@
      62.337,
      -146.234
     ],
+    [
+     -212.237,
+     61.754,
+     -159.925
+    ]
+   ],
+   "speed_kph": 50,
+   "to": "n7137961558",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n7137961558",
+   "id": "w76424229.1",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 14.527,
+   "name": "Metcalfe Street",
+   "oneway": true,
+   "osm_way_id": 76424229,
+   "polyline": [
     [
      -212.237,
      61.754,
@@ -4533,7 +7713,7 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 116.591,
+   "length_m": 16.643,
    "name": "Pretoria Avenue",
    "oneway": true,
    "osm_way_id": 76424542,
@@ -4543,6 +7723,39 @@
      67.56,
      152.831
     ],
+    [
+     117.97,
+     67.526,
+     160.918
+    ]
+   ],
+   "speed_kph": 40,
+   "to": "n6960505528",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505528",
+   "id": "w76424542.3",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 99.948,
+   "name": "Pretoria Avenue",
+   "oneway": true,
+   "osm_way_id": 76424542,
+   "polyline": [
     [
      117.97,
      67.526,
@@ -4572,7 +7785,7 @@
     "width"
    ],
    "from": "n4686479974",
-   "id": "w76424542.3",
+   "id": "w76424542.4",
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
@@ -4620,11 +7833,11 @@
     "width"
    ],
    "from": "n901214027",
-   "id": "w76424542.4",
+   "id": "w76424542.5",
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 179.307,
+   "length_m": 38.378,
    "name": "Pretoria Avenue",
    "oneway": true,
    "osm_way_id": 76424542,
@@ -4643,12 +7856,111 @@
      -18.358,
      64.649,
      237.706
+    ]
+   ],
+   "speed_kph": 40,
+   "to": "n6960505562",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505562",
+   "id": "w76424542.6",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 14.224,
+   "name": "Pretoria Avenue",
+   "oneway": true,
+   "osm_way_id": 76424542,
+   "polyline": [
+    [
+     -18.358,
+     64.649,
+     237.706
     ],
     [
      -30.712,
      64.226,
      244.755
+    ]
+   ],
+   "speed_kph": 40,
+   "to": "n6555326764",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6555326764",
+   "id": "w76424542.7",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 12.221,
+   "name": "Pretoria Avenue",
+   "oneway": true,
+   "osm_way_id": 76424542,
+   "polyline": [
+    [
+     -30.712,
+     64.226,
+     244.755
     ],
+    [
+     -41.329,
+     63.855,
+     250.808
+    ]
+   ],
+   "speed_kph": 40,
+   "to": "n6960505565",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "speed_kph",
+    "width"
+   ],
+   "from": "n6960505565",
+   "id": "w76424542.8",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 114.483,
+   "name": "Pretoria Avenue",
+   "oneway": true,
+   "osm_way_id": 76424542,
+   "polyline": [
     [
      -41.329,
      63.855,
@@ -4738,7 +8050,7 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 60.544,
+   "length_m": 56.614,
    "name": null,
    "oneway": true,
    "osm_way_id": 76443862,
@@ -4784,18 +8096,13 @@
      -66.842
     ],
     [
-     176.418,
-     68.577,
-     -65.247
-    ],
-    [
-     170.419,
-     68.82,
-     -60.165
+     173.423,
+     68.699,
+     -62.701
     ]
    ],
    "speed_kph": 50,
-   "to": "n1242125950",
+   "to": "c1242125950",
    "tunnel": false,
    "width_m": 3.5
   },
@@ -4810,20 +8117,20 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n2317854714",
+   "from": "c2317854714",
    "id": "w76443921.0",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 138.29,
+   "length_m": 143.989,
    "name": "Metcalfe Street",
    "oneway": true,
    "osm_way_id": 76443921,
    "polyline": [
     [
-     -40.131,
-     69.975,
-     -86.48
+     -43.771,
+     69.93,
+     -82.096
     ],
     [
      -38.629,
@@ -5091,7 +8398,7 @@
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 177.765,
+   "length_m": 92.029,
    "name": "Park Avenue",
    "oneway": false,
    "osm_way_id": 76444115,
@@ -5116,6 +8423,38 @@
      67.036,
      -188.312
     ],
+    [
+     77.602,
+     66.234,
+     -207.878
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "n6542779425",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6542779425",
+   "id": "w76444115.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 85.736,
+   "name": "Park Avenue",
+   "oneway": false,
+   "osm_way_id": 76444115,
+   "polyline": [
     [
      77.602,
      66.234,
@@ -5349,7 +8688,7 @@
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 72.985,
+   "length_m": 32.689,
    "name": "Park Avenue",
    "oneway": false,
    "osm_way_id": 76444221,
@@ -5369,6 +8708,38 @@
      64.839,
      -231.993
     ],
+    [
+     194.997,
+     64.506,
+     -242.132
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "n12064289101",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n12064289101",
+   "id": "w76444221.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 40.295,
+   "name": "Park Avenue",
+   "oneway": false,
+   "osm_way_id": 76444221,
+   "polyline": [
     [
      194.997,
      64.506,
@@ -5720,7 +9091,7 @@
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 69.404,
+   "length_m": 43.191,
    "name": "McLeod Street",
    "oneway": true,
    "osm_way_id": 76444588,
@@ -5735,6 +9106,38 @@
      64.64,
      -224.961
     ],
+    [
+     -79.765,
+     64.648,
+     -207.421
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "n12523021924",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n12523021924",
+   "id": "w76444588.1",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 26.213,
+   "name": "McLeod Street",
+   "oneway": true,
+   "osm_way_id": 76444588,
+   "polyline": [
     [
      -79.765,
      64.648,
@@ -5839,7 +9242,7 @@
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 164.042,
+   "length_m": 28.34,
    "name": "Argyle Avenue",
    "oneway": false,
    "osm_way_id": 76445067,
@@ -5863,12 +9266,76 @@
      62.8,
      69.969,
      -108.222
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "n6555326762",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6555326762",
+   "id": "w76445067.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 65.832,
+   "name": "Argyle Avenue",
+   "oneway": false,
+   "osm_way_id": 76445067,
+   "polyline": [
+    [
+     62.8,
+     69.969,
+     -108.222
     ],
     [
      108.262,
      68.532,
      -134.455
     ],
+    [
+     119.822,
+     68.133,
+     -141.123
+    ]
+   ],
+   "speed_kph": 30,
+   "to": "n6969599904",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n6969599904",
+   "id": "w76445067.2",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 69.87,
+   "name": "Argyle Avenue",
+   "oneway": false,
+   "osm_way_id": 76445067,
+   "polyline": [
     [
      119.822,
      68.133,
@@ -5897,7 +9364,7 @@
     "width"
    ],
    "from": "n3649886583",
-   "id": "w76445067.1",
+   "id": "w76445067.3",
    "lanes_backward": 1,
    "lanes_forward": 1,
    "layer": 0,
@@ -6017,20 +9484,20 @@
    "defaulted_fields": [
     "width"
    ],
-   "from": "n4686479969",
+   "from": "c4686479969",
    "id": "w76445391.0",
    "lanes_backward": 0,
    "lanes_forward": 1,
    "layer": 0,
-   "length_m": 21.722,
+   "length_m": 21.499,
    "name": "Isabella Street",
    "oneway": true,
    "osm_way_id": 76445391,
    "polyline": [
     [
-     90.031,
-     70.176,
-     89.374
+     90.227,
+     69.971,
+     89.267
     ],
     [
      109.112,
@@ -7255,24 +10722,19 @@
     "width"
    ],
    "from": "c3946608912",
-   "id": "w986514843.1",
+   "id": "w986514843.2",
    "lanes_backward": 0,
    "lanes_forward": 2,
    "layer": 0,
-   "length_m": 73.857,
+   "length_m": 68.855,
    "name": "Metcalfe Street",
    "oneway": true,
    "osm_way_id": 986514843,
    "polyline": [
     [
-     -99.054,
-     69.132,
-     28.675
-    ],
-    [
-     -106.738,
-     68.893,
-     15.788
+     -101.615,
+     69.06,
+     24.379
     ],
     [
      -128.987,
@@ -7337,16 +10799,14 @@
   "generator": "code430 osm_import",
   "license": "ODbL-1.0",
   "notes": {
-   "edges_removed_in_clusters": 11,
+   "edges_removed_in_clusters": 20,
    "filter_dropped": {
-    "area=yes": 1,
-    "service=driveway": 19,
-    "service=parking_aisle": 31
+    "area=yes": 1
    },
    "forks": 3,
-   "junction_clusters": 7,
+   "junction_clusters": 15,
    "merges": 1,
-   "nodes_merged": 17
+   "nodes_merged": 37
   },
   "origin": {
    "crs": "EPSG:32618",
@@ -7369,33 +10829,157 @@
  "nodes": [
   {
    "control": "none",
-   "ground_y": 61.189,
+   "ground_y": 61.316,
    "id": "c10199439704",
    "junction_type": "junction",
    "osm_node_ids": [
     3671168709,
     4824077738,
+    7026546375,
     10199439704
    ],
    "position": [
-    -175.944,
-    61.189,
-    238.277
+    -172.919,
+    61.316,
+    236.226
    ]
   },
   {
    "control": "none",
-   "ground_y": 69.132,
+   "ground_y": 68.699,
+   "id": "c1242125950",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    1242125950,
+    3649886570
+   ],
+   "position": [
+    173.419,
+    68.699,
+    -62.706
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 63.682,
+   "id": "c12523021922",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    2178655070,
+    7137961569,
+    12523021922
+   ],
+   "position": [
+    -159.17,
+    63.682,
+    -161.419
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.469,
+   "id": "c12523021928",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    2317854679,
+    12523021928
+   ],
+   "position": [
+    -240.058,
+    61.469,
+    -114.478
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.93,
+   "id": "c2317854714",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    2317854714,
+    6555326756,
+    7137980789
+   ],
+   "position": [
+    -45.449,
+    69.93,
+    -83.489
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.06,
    "id": "c3946608912",
    "junction_type": "junction",
    "osm_node_ids": [
     3946608912,
+    7137980801,
     7137980810
    ],
    "position": [
-    -99.054,
-    69.132,
-    28.675
+    -101.615,
+    69.06,
+    24.379
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 68.55,
+   "id": "c4686479967",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    4686479967,
+    4686479968
+   ],
+   "position": [
+    2.289,
+    68.55,
+    146.116
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.947,
+   "id": "c4686479969",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    4686479969,
+    4686479970
+   ],
+   "position": [
+    93.657,
+    69.971,
+    95.571
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 59.553,
+   "id": "c6948814827",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6948814827,
+    6948814828
+   ],
+   "position": [
+    -274.093,
+    59.553,
+    168.155
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.489,
+   "id": "c7137980785",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    901045647,
+    7137980785
+   ],
+   "position": [
+    -73.342,
+    69.489,
+    -68.121
    ]
   },
   {
@@ -7493,7 +11077,7 @@
    "control": "none",
    "ground_y": 61.707,
    "id": "n10557304829",
-   "junction_type": "pass_through",
+   "junction_type": "junction",
    "osm_node_ids": [
     10557304829
    ],
@@ -7501,6 +11085,76 @@
     -112.807,
     61.707,
     -278.31
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.742,
+   "id": "n10557304831",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    10557304831
+   ],
+   "position": [
+    -129.308,
+    60.742,
+    -306.894
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.506,
+   "id": "n12064289101",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    12064289101
+   ],
+   "position": [
+    194.997,
+    64.506,
+    -242.132
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.249,
+   "id": "n12064289102",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    12064289102
+   ],
+   "position": [
+    185.995,
+    64.249,
+    -257.441
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.296,
+   "id": "n12068124256",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    12068124256
+   ],
+   "position": [
+    -123.49,
+    64.296,
+    -182.097
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 63.112,
+   "id": "n12068124257",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    12068124257
+   ],
+   "position": [
+    -137.911,
+    63.112,
+    -205.919
    ]
   },
   {
@@ -7515,20 +11169,6 @@
     200.929,
     67.904,
     -63.65
-   ]
-  },
-  {
-   "control": "none",
-   "ground_y": 68.82,
-   "id": "n1242125950",
-   "junction_type": "junction",
-   "osm_node_ids": [
-    1242125950
-   ],
-   "position": [
-    170.419,
-    68.82,
-    -60.165
    ]
   },
   {
@@ -7589,6 +11229,90 @@
   },
   {
    "control": "none",
+   "ground_y": 61.121,
+   "id": "n12523021917",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    12523021917
+   ],
+   "position": [
+    -208.099,
+    61.121,
+    -198.142
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.431,
+   "id": "n12523021918",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    12523021918
+   ],
+   "position": [
+    -219.287,
+    60.431,
+    -216.615
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 62.104,
+   "id": "n12523021920",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    12523021920
+   ],
+   "position": [
+    -187.135,
+    62.104,
+    -184.453
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.648,
+   "id": "n12523021924",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    12523021924
+   ],
+   "position": [
+    -79.765,
+    64.648,
+    -207.421
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 63.136,
+   "id": "n12523021925",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    12523021925
+   ],
+   "position": [
+    -99.44,
+    63.136,
+    -238.276
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.377,
+   "id": "n12523021927",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    12523021927
+   ],
+   "position": [
+    -258.979,
+    60.377,
+    -142.382
+   ]
+  },
+  {
+   "control": "none",
    "ground_y": 68.848,
    "id": "n2178655053",
    "junction_type": "junction",
@@ -7605,7 +11329,7 @@
    "control": "none",
    "ground_y": 64.813,
    "id": "n2178655064",
-   "junction_type": "dead_end",
+   "junction_type": "junction",
    "osm_node_ids": [
     2178655064
    ],
@@ -7619,7 +11343,7 @@
    "control": "none",
    "ground_y": 65.265,
    "id": "n2178655069",
-   "junction_type": "dead_end",
+   "junction_type": "junction",
    "osm_node_ids": [
     2178655069
    ],
@@ -7631,16 +11355,16 @@
   },
   {
    "control": "none",
-   "ground_y": 63.757,
-   "id": "n2178655070",
+   "ground_y": 62.231,
+   "id": "n2317854674",
    "junction_type": "junction",
    "osm_node_ids": [
-    2178655070
+    2317854674
    ],
    "position": [
-    -155.584,
-    63.757,
-    -163.451
+    -228.096,
+    62.231,
+    -95.454
    ]
   },
   {
@@ -7655,6 +11379,20 @@
     -102.461,
     64.52,
     -194.305
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 65.692,
+   "id": "n2317854684",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    2317854684
+   ],
+   "position": [
+    -105.04,
+    65.692,
+    -158.119
    ]
   },
   {
@@ -7701,16 +11439,16 @@
   },
   {
    "control": "none",
-   "ground_y": 69.975,
-   "id": "n2317854714",
-   "junction_type": "junction",
+   "ground_y": 65.84,
+   "id": "n2317854728",
+   "junction_type": "pass_through",
    "osm_node_ids": [
-    2317854714
+    2317854728
    ],
    "position": [
-    -40.131,
-    69.975,
-    -86.48
+    -90.639,
+    65.84,
+    -166.662
    ]
   },
   {
@@ -7815,7 +11553,7 @@
    "control": "none",
    "ground_y": 66.663,
    "id": "n3649886580",
-   "junction_type": "dead_end",
+   "junction_type": "pass_through",
    "osm_node_ids": [
     3649886580
    ],
@@ -7857,7 +11595,7 @@
    "control": "none",
    "ground_y": 67.251,
    "id": "n3946608913",
-   "junction_type": "pass_through",
+   "junction_type": "junction",
    "osm_node_ids": [
     3946608913
    ],
@@ -7911,44 +11649,16 @@
   },
   {
    "control": "none",
-   "ground_y": 68.797,
-   "id": "n4686479967",
+   "ground_y": 67.687,
+   "id": "n4686479973",
    "junction_type": "junction",
    "osm_node_ids": [
-    4686479967
+    4686479973
    ],
    "position": [
-    -1.207,
-    68.797,
-    138.992
-   ]
-  },
-  {
-   "control": "none",
-   "ground_y": 68.295,
-   "id": "n4686479968",
-   "junction_type": "dead_end",
-   "osm_node_ids": [
-    4686479968
-   ],
-   "position": [
-    5.785,
-    68.295,
-    153.24
-   ]
-  },
-  {
-   "control": "none",
-   "ground_y": 70.176,
-   "id": "n4686479969",
-   "junction_type": "pass_through",
-   "osm_node_ids": [
-    4686479969
-   ],
-   "position": [
-    90.031,
-    70.176,
-    89.374
+    9.611,
+    67.687,
+    168.916
    ]
   },
   {
@@ -7977,6 +11687,20 @@
     -140.778,
     60.517,
     307.521
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.931,
+   "id": "n5162226660",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    5162226660
+   ],
+   "position": [
+    -176.635,
+    64.931,
+    72.475
    ]
   },
   {
@@ -8053,7 +11777,7 @@
    "control": "none",
    "ground_y": 67.987,
    "id": "n5587304701",
-   "junction_type": "dead_end",
+   "junction_type": "pass_through",
    "osm_node_ids": [
     5587304701
    ],
@@ -8067,7 +11791,7 @@
    "control": "none",
    "ground_y": 69.759,
    "id": "n5587304703",
-   "junction_type": "dead_end",
+   "junction_type": "pass_through",
    "osm_node_ids": [
     5587304703
    ],
@@ -8109,7 +11833,7 @@
    "control": "none",
    "ground_y": 68.163,
    "id": "n5587304706",
-   "junction_type": "dead_end",
+   "junction_type": "junction",
    "osm_node_ids": [
     5587304706
    ],
@@ -8117,6 +11841,20 @@
     118.799,
     68.163,
     140.715
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.729,
+   "id": "n5590839344",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    5590839344
+   ],
+   "position": [
+    -248.549,
+    61.729,
+    -60.132
    ]
   },
   {
@@ -8135,9 +11873,37 @@
   },
   {
    "control": "none",
+   "ground_y": 63.295,
+   "id": "n6248007586",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6248007586
+   ],
+   "position": [
+    -220.511,
+    63.295,
+    -11.662
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 62.59,
+   "id": "n6248007587",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6248007587
+   ],
+   "position": [
+    -235.414,
+    62.59,
+    -2.168
+   ]
+  },
+  {
+   "control": "none",
    "ground_y": 66.509,
    "id": "n6248007630",
-   "junction_type": "dead_end",
+   "junction_type": "pass_through",
    "osm_node_ids": [
     6248007630
    ],
@@ -8145,6 +11911,48 @@
     24.472,
     66.509,
     200.063
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 62.2,
+   "id": "n6412767544",
+   "junction_type": "pass_through",
+   "osm_node_ids": [
+    6412767544
+   ],
+   "position": [
+    -125.522,
+    62.2,
+    -249.11
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.554,
+   "id": "n6412767549",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6412767549
+   ],
+   "position": [
+    -134.866,
+    61.554,
+    -265.533
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.251,
+   "id": "n6474136322",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6474136322
+   ],
+   "position": [
+    103.636,
+    69.251,
+    113.766
    ]
   },
   {
@@ -8163,9 +11971,541 @@
   },
   {
    "control": "none",
+   "ground_y": 66.234,
+   "id": "n6542779425",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6542779425
+   ],
+   "position": [
+    77.602,
+    66.234,
+    -207.878
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 65.146,
+   "id": "n6542779426",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6542779426
+   ],
+   "position": [
+    60.542,
+    65.146,
+    -238.899
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 71.725,
+   "id": "n6555326754",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6555326754
+   ],
+   "position": [
+    -9.783,
+    71.725,
+    -28.892
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 70.897,
+   "id": "n6555326760",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6555326760
+   ],
+   "position": [
+    94.837,
+    70.897,
+    -52.153
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.969,
+   "id": "n6555326762",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6555326762
+   ],
+   "position": [
+    62.8,
+    69.969,
+    -108.222
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.226,
+   "id": "n6555326764",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6555326764
+   ],
+   "position": [
+    -30.712,
+    64.226,
+    244.755
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 65.279,
+   "id": "n6555326765",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6555326765
+   ],
+   "position": [
+    -53.763,
+    65.279,
+    205.85
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.919,
+   "id": "n6555326766",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6555326766
+   ],
+   "position": [
+    -26.457,
+    64.919,
+    227.504
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 65.657,
+   "id": "n6555326770",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6555326770
+   ],
+   "position": [
+    -79.191,
+    65.657,
+    180.39
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 67.943,
+   "id": "n6555326776",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6555326776
+   ],
+   "position": [
+    96.516,
+    67.943,
+    156.746
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.63,
+   "id": "n6948814819",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6948814819
+   ],
+   "position": [
+    -267.389,
+    60.63,
+    95.474
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.099,
+   "id": "n6948814824",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6948814824
+   ],
+   "position": [
+    -279.845,
+    60.099,
+    102.488
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.536,
+   "id": "n6948814829",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6948814829
+   ],
+   "position": [
+    -252.953,
+    60.536,
+    145.972
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.482,
+   "id": "n6948814831",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6948814831
+   ],
+   "position": [
+    -258.079,
+    60.482,
+    136.895
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 67.526,
+   "id": "n6960505528",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6960505528
+   ],
+   "position": [
+    117.97,
+    67.526,
+    160.918
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 66.473,
+   "id": "n6960505529",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6960505529
+   ],
+   "position": [
+    133.354,
+    66.473,
+    187.658
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 59.688,
+   "id": "n6960505542",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6960505542
+   ],
+   "position": [
+    -217.07,
+    59.688,
+    263.527
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 59.642,
+   "id": "n6960505543",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6960505543
+   ],
+   "position": [
+    -208.444,
+    59.642,
+    278.81
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 62.701,
+   "id": "n6960505555",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6960505555
+   ],
+   "position": [
+    -141.176,
+    62.701,
+    216.768
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 62.441,
+   "id": "n6960505556",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6960505556
+   ],
+   "position": [
+    -126.937,
+    62.441,
+    239.266
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.649,
+   "id": "n6960505562",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6960505562
+   ],
+   "position": [
+    -18.358,
+    64.649,
+    237.706
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 64.348,
+   "id": "n6960505563",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6960505563
+   ],
+   "position": [
+    -13.037,
+    64.348,
+    247.861
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 63.855,
+   "id": "n6960505565",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6960505565
+   ],
+   "position": [
+    -41.329,
+    63.855,
+    250.808
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 63.495,
+   "id": "n6960505566",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6960505566
+   ],
+   "position": [
+    -33.281,
+    63.495,
+    265.154
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.269,
+   "id": "n6969599898",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6969599898
+   ],
+   "position": [
+    149.447,
+    69.269,
+    -69.265
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 68.885,
+   "id": "n6969599903",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    6969599903
+   ],
+   "position": [
+    156.673,
+    68.885,
+    -79.769
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 68.133,
+   "id": "n6969599904",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    6969599904
+   ],
+   "position": [
+    119.822,
+    68.133,
+    -141.123
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.515,
+   "id": "n7026546374",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7026546374
+   ],
+   "position": [
+    -152.177,
+    61.515,
+    250.439
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.754,
+   "id": "n7137961558",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    7137961558
+   ],
+   "position": [
+    -212.237,
+    61.754,
+    -159.925
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.941,
+   "id": "n7137961559",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7137961559
+   ],
+   "position": [
+    -242.616,
+    60.941,
+    -143.375
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.311,
+   "id": "n7137961562",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7137961562
+   ],
+   "position": [
+    -185.508,
+    60.311,
+    -269.433
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 59.899,
+   "id": "n7137961563",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7137961563
+   ],
+   "position": [
+    -215.448,
+    59.899,
+    -252.835
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 59.212,
+   "id": "n7137961566",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    7137961566
+   ],
+   "position": [
+    -255.889,
+    59.212,
+    -232.616
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.855,
+   "id": "n7137961567",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7137961567
+   ],
+   "position": [
+    -190.536,
+    61.855,
+    -190.315
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 70.832,
+   "id": "n7137980786",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    7137980786
+   ],
+   "position": [
+    -53.21,
+    70.832,
+    -23.874
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 71.331,
+   "id": "n7137980790",
+   "junction_type": "pass_through",
+   "osm_node_ids": [
+    7137980790
+   ],
+   "position": [
+    -24.805,
+    71.331,
+    -40.186
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 70.282,
+   "id": "n7137980791",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7137980791
+   ],
+   "position": [
+    -72.382,
+    70.282,
+    -12.861
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 69.876,
+   "id": "n7137980798",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    7137980798
+   ],
+   "position": [
+    -83.777,
+    69.876,
+    -8.181
+   ]
+  },
+  {
+   "control": "none",
    "ground_y": 69.942,
    "id": "n7137980808",
-   "junction_type": "dead_end",
+   "junction_type": "pass_through",
    "osm_node_ids": [
     7137980808
    ],
@@ -8201,20 +12541,6 @@
     -181.989,
     68.681,
     203.32
-   ]
-  },
-  {
-   "control": "none",
-   "ground_y": 69.554,
-   "id": "n901045647",
-   "junction_type": "junction",
-   "osm_node_ids": [
-    901045647
-   ],
-   "position": [
-    -70.133,
-    69.554,
-    -70.015
    ]
   },
   {
@@ -8737,6 +13063,20 @@
   },
   {
    "control": "none",
+   "ground_y": 69.616,
+   "id": "n901220249",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    901220249
+   ],
+   "position": [
+    148.358,
+    69.616,
+    -47.976
+   ]
+  },
+  {
+   "control": "none",
    "ground_y": 71.526,
    "id": "n901221872",
    "junction_type": "junction",
@@ -9055,6 +13395,48 @@
     295.873,
     74.063,
     -69.132
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.991,
+   "id": "n9898327053",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    9898327053
+   ],
+   "position": [
+    -184.662,
+    60.991,
+    -236.672
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.125,
+   "id": "n9898327055",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    9898327055
+   ],
+   "position": [
+    -199.629,
+    60.125,
+    -261.61
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 59.701,
+   "id": "n9898327060",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    9898327060
+   ],
+   "position": [
+    -223.878,
+    59.701,
+    -252.507
    ]
   }
  ],
@@ -11172,8 +15554,28 @@
      -79.753
     ],
     [
+     -245.489,
+     61.683,
+     -83.394
+    ],
+    [
+     -245.501,
+     61.683,
+     -83.416
+    ],
+    [
+     -245.713,
+     61.585,
+     -83.784
+    ],
+    [
+     -245.725,
+     61.585,
+     -83.806
+    ],
+    [
      -246.573,
-     61.572,
+     61.592,
      -85.28
     ],
     [
@@ -11209,7 +15611,7 @@
    "polyline": [
     [
      -237.869,
-     62.474,
+     62.71,
      -0.611
     ],
     [
@@ -11304,7 +15706,7 @@
     ],
     [
      -259.538,
-     61.158,
+     61.476,
      -72.692
     ]
    ],
@@ -11385,9 +15787,29 @@
      -110.338
     ],
     [
+     -183.899,
+     63.829,
+     -115.929
+    ],
+    [
+     -184.111,
+     63.73,
+     -116.326
+    ],
+    [
      -184.912,
-     63.711,
+     63.731,
      -117.827
+    ],
+    [
+     -185.759,
+     63.732,
+     -119.301
+    ],
+    [
+     -185.983,
+     63.832,
+     -119.692
     ],
     [
      -194.242,
@@ -11789,22 +16211,42 @@
    "polyline": [
     [
      -259.538,
-     61.158,
+     61.376,
      -72.692
     ],
     [
      -254.585,
-     61.356,
+     61.376,
      -73.505
     ],
     [
+     -252.904,
+     61.374,
+     -73.784
+    ],
+    [
+     -252.897,
+     61.374,
+     -73.785
+    ],
+    [
+     -252.46,
+     61.373,
+     -73.858
+    ],
+    [
+     -252.453,
+     61.373,
+     -73.859
+    ],
+    [
      -249.366,
-     61.568,
+     61.369,
      -74.371
     ],
     [
      -244.037,
-     61.786,
+     61.479,
      -75.248
     ],
     [
@@ -12115,7 +16557,7 @@
     ],
     [
      -135.022,
-     64.172,
+     64.159,
      -167.663
     ],
     [
@@ -12145,7 +16587,7 @@
     ],
     [
      -187.393,
-     63.04,
+     63.039,
      -137.958
     ],
     [
@@ -12246,8 +16688,18 @@
      -125.781
     ],
     [
+     -91.82,
+     67.277,
+     -128.923
+    ],
+    [
+     -91.423,
+     67.178,
+     -129.134
+    ],
+    [
      -89.039,
-     67.162,
+     67.182,
      -130.406
     ]
    ],
@@ -12704,27 +17156,27 @@
    "polyline": [
     [
      -173.263,
-     61.201,
+     61.124,
      243.581
     ],
     [
-     -176.095,
-     61.013,
-     245.374
+     -175.382,
+     61.054,
+     244.923
     ],
     [
-     -176.475,
-     61.003,
-     245.615
+     -175.762,
+     61.042,
+     245.164
     ],
     [
      -176.854,
-     60.993,
+     61.006,
      245.855
     ],
     [
      -177.234,
-     60.983,
+     60.993,
      246.096
     ],
     [
@@ -12734,42 +17186,42 @@
     ],
     [
      -183.295,
-     60.833,
+     60.843,
      249.872
     ],
     [
      -183.552,
-     60.834,
+     60.844,
      249.35
     ],
     [
      -183.75,
-     60.835,
+     60.845,
      248.946
     ],
     [
      -185.272,
-     60.841,
+     60.85,
      245.845
     ],
     [
      -186.863,
-     60.844,
+     60.854,
      242.782
     ],
     [
      -187.071,
-     60.844,
+     60.854,
      242.383
     ],
     [
      -188.226,
-     60.882,
+     60.884,
      240.159
     ],
     [
      -188.434,
-     60.877,
+     60.879,
      239.759
     ],
     [
@@ -13892,7 +18344,7 @@
     ],
     [
      185.273,
-     68.141,
+     68.279,
      -81.415
     ]
    ],
@@ -13908,52 +18360,72 @@
    "polyline": [
     [
      185.273,
-     68.141,
+     68.279,
      -81.415
     ],
     [
      184.163,
-     68.205,
+     68.326,
      -79.758
     ],
     [
      183.054,
-     68.258,
+     68.367,
      -78.212
     ],
     [
      181.867,
-     68.317,
+     68.414,
      -76.666
     ],
     [
+     181.299,
+     68.435,
+     -75.973
+    ],
+    [
+     181.014,
+     68.446,
+     -75.625
+    ],
+    [
      180.602,
-     68.385,
+     68.462,
      -75.122
     ],
     [
      179.26,
-     68.442,
+     68.508,
      -73.689
     ],
     [
      177.84,
-     68.516,
+     68.551,
      -72.368
     ],
     [
      176.342,
-     68.577,
+     68.593,
      -71.047
     ],
     [
+     175.725,
+     68.608,
+     -70.548
+    ],
+    [
+     175.375,
+     68.617,
+     -70.266
+    ],
+    [
      174.845,
-     68.642,
+     68.631,
      -69.838
     ],
     [
      173.27,
-     68.702,
+     68.666,
      -68.74
     ],
     [
@@ -13963,22 +18435,37 @@
     ],
     [
      167.135,
-     68.92,
+     68.957,
      -65.015
     ],
     [
      148.84,
-     69.63,
+     69.758,
      -54.071
     ],
     [
+     147.449,
+     69.759,
+     -53.316
+    ],
+    [
+     147.053,
+     69.759,
+     -53.101
+    ],
+    [
      145.554,
-     69.757,
+     69.76,
      -52.288
     ],
     [
+     144.061,
+     69.76,
+     -51.474
+    ],
+    [
      143.809,
-     69.818,
+     69.76,
      -51.336
     ],
     [
@@ -14506,18 +18993,38 @@
      -18.941
     ],
     [
+     -217.851,
+     63.311,
+     -13.353
+    ],
+    [
+     -218.231,
+     63.312,
+     -13.112
+    ],
+    [
      -220.511,
-     63.295,
+     63.315,
      -11.662
     ],
     [
+     -232.756,
+     62.607,
+     -3.861
+    ],
+    [
+     -233.136,
+     62.607,
+     -3.619
+    ],
+    [
      -235.414,
-     62.59,
+     62.61,
      -2.168
     ],
     [
      -237.869,
-     62.474,
+     62.61,
      -0.611
     ]
    ],
@@ -14533,12 +19040,22 @@
    "polyline": [
     [
      -102.711,
-     65.905,
+     65.925,
      -154.088
     ],
     [
+     -105.146,
+     65.917,
+     -152.905
+    ],
+    [
+     -105.55,
+     65.915,
+     -152.708
+    ],
+    [
      -108.282,
-     65.729,
+     65.905,
      -151.38
     ],
     [
@@ -14578,17 +19095,37 @@
     ],
     [
      -123.528,
-     65.508,
+     65.187,
      -147.5
     ],
     [
+     -125.14,
+     65.185,
+     -150.095
+    ],
+    [
+     -125.378,
+     65.185,
+     -150.478
+    ],
+    [
      -126.276,
-     65.285,
+     65.184,
      -151.923
     ],
     [
+     -127.173,
+     65.183,
+     -153.368
+    ],
+    [
+     -127.411,
+     65.183,
+     -153.75
+    ],
+    [
      -128.406,
-     65.285,
+     65.181,
      -155.352
     ]
    ],
@@ -14604,12 +19141,12 @@
    "polyline": [
     [
      -135.022,
-     64.172,
+     64.159,
      -167.663
     ],
     [
      -128.406,
-     65.385,
+     65.281,
      -155.352
     ]
    ],
@@ -14813,38 +19350,113 @@
      181.225
     ],
     [
+     8.66,
+     67.503,
+     175.638
+    ],
+    [
+     9.049,
+     67.504,
+     175.41
+    ],
+    [
      11.383,
-     67.489,
+     67.509,
      174.042
     ],
     [
+     13.688,
+     67.537,
+     172.441
+    ],
+    [
+     14.058,
+     67.542,
+     172.184
+    ],
+    [
      19.633,
-     67.776,
+     67.927,
      168.312
     ],
     [
+     19.386,
+     67.928,
+     167.709
+    ],
+    [
+     19.216,
+     67.928,
+     167.293
+    ],
+    [
      18.192,
-     67.912,
+     67.932,
      164.789
     ],
     [
+     16.896,
+     67.929,
+     162.418
+    ],
+    [
+     16.895,
+     67.929,
+     162.417
+    ],
+    [
+     16.68,
+     67.928,
+     162.023
+    ],
+    [
+     16.68,
+     67.928,
+     162.022
+    ],
+    [
      12.49,
-     68.315,
+     68.648,
      154.352
     ],
     [
+     10.507,
+     68.623,
+     154.023
+    ],
+    [
+     10.063,
+     68.617,
+     153.95
+    ],
+    [
+     9.13,
+     68.605,
+     153.795
+    ],
+    [
+     8.686,
+     68.6,
+     153.721
+    ],
+    [
      5.785,
-     68.315,
+     68.29,
      153.24
     ],
     [
-     0.725,
-     68.435,
-     151.563
+     2.753,
+     68.351,
+     152.235
+    ],
+    [
+     2.325,
+     68.36,
+     152.094
     ],
     [
      0.346,
-     68.444,
+     68.4,
      151.438
     ],
     [
@@ -14911,52 +19523,142 @@
    "polyline": [
     [
      85.368,
-     70.136,
+     70.102,
      96.7
     ],
     [
      88.043,
-     70.137,
+     69.741,
      101.456
     ],
     [
+     89.129,
+     69.742,
+     102.387
+    ],
+    [
+     89.471,
+     69.743,
+     102.68
+    ],
+    [
      91.616,
-     69.726,
+     69.746,
      104.519
     ],
     [
+     93.166,
+     69.763,
+     106.769
+    ],
+    [
+     93.422,
+     69.766,
+     107.139
+    ],
+    [
+     98.169,
+     69.246,
+     114.028
+    ],
+    [
+     98.182,
+     69.246,
+     114.047
+    ],
+    [
+     98.424,
+     69.246,
+     114.398
+    ],
+    [
+     98.437,
+     69.246,
+     114.418
+    ],
+    [
      99.972,
-     69.226,
+     69.246,
      116.645
     ],
     [
+     100.232,
+     69.246,
+     119.533
+    ],
+    [
+     100.272,
+     69.246,
+     119.981
+    ],
+    [
      100.544,
-     69.019,
+     69.247,
      123.005
     ],
     [
+     104.053,
+     69.046,
+     120.979
+    ],
+    [
+     104.442,
+     69.046,
+     120.754
+    ],
+    [
      106.781,
-     69.027,
+     69.047,
      119.403
     ],
     [
+     109.118,
+     69.049,
+     118.05
+    ],
+    [
+     109.507,
+     69.049,
+     117.825
+    ],
+    [
      116.808,
-     69.015,
+     69.009,
      113.6
     ],
     [
      121.45,
-     69.007,
+     69.015,
      110.606
     ],
     [
+     121.64,
+     69.015,
+     110.482
+    ],
+    [
+     122.016,
+     69.016,
+     110.235
+    ],
+    [
      124.275,
-     68.999,
+     69.019,
      108.753
     ],
     [
+     126.517,
+     69.032,
+     107.2
+    ],
+    [
+     126.887,
+     69.034,
+     106.944
+    ],
+    [
      129.156,
-     68.985,
+     69.047,
      105.372
     ]
    ],
@@ -15215,33 +19917,93 @@
    "polyline": [
     [
      -168.934,
-     61.309,
+     61.436,
      240.607
     ],
     [
+     -163.261,
+     61.775,
+     237.43
+    ],
+    [
+     -162.868,
+     61.775,
+     237.21
+    ],
+    [
      -160.512,
-     61.827,
+     61.777,
      235.891
     ],
     [
+     -158.157,
+     61.777,
+     234.57
+    ],
+    [
+     -157.764,
+     61.777,
+     234.35
+    ],
+    [
      -147.422,
-     62.393,
+     62.399,
      228.551
     ],
     [
      -147.03,
-     62.41,
+     62.416,
      228.331
     ],
     [
+     -140.058,
+     62.757,
+     224.421
+    ],
+    [
+     -139.666,
+     62.757,
+     224.201
+    ],
+    [
      -137.307,
-     62.831,
+     62.756,
      222.879
     ],
     [
+     -134.949,
+     62.754,
+     221.557
+    ],
+    [
+     -134.556,
+     62.754,
+     221.337
+    ],
+    [
+     -77.495,
+     65.616,
+     189.346
+    ],
+    [
+     -77.102,
+     65.615,
+     189.126
+    ],
+    [
      -74.746,
-     65.78,
+     65.614,
      187.805
+    ],
+    [
+     -72.391,
+     65.613,
+     186.485
+    ],
+    [
+     -71.998,
+     65.613,
+     186.265
     ],
     [
      -28.628,
@@ -15444,47 +20206,127 @@
    "polyline": [
     [
      -78.594,
-     64.767,
+     64.572,
      -213.555
     ],
     [
+     -80.433,
+     64.569,
+     -212.463
+    ],
+    [
+     -80.82,
+     64.568,
+     -212.233
+    ],
+    [
      -82.283,
-     64.767,
+     64.566,
      -211.365
     ],
     [
+     -83.744,
+     64.564,
+     -210.495
+    ],
+    [
+     -84.131,
+     64.563,
+     -210.265
+    ],
+    [
      -85.468,
-     64.755,
+     64.561,
      -209.47
     ],
     [
+     -123.106,
+     64.221,
+     -187.536
+    ],
+    [
+     -123.495,
+     64.221,
+     -187.31
+    ],
+    [
      -125.828,
-     64.415,
+     64.218,
      -185.95
     ],
     [
+     -128.161,
+     64.217,
+     -184.591
+    ],
+    [
+     -128.55,
+     64.216,
+     -184.364
+    ],
+    [
+     -151.355,
+     63.763,
+     -171.079
+    ],
+    [
+     -151.743,
+     63.763,
+     -170.852
+    ],
+    [
      -154.077,
-     63.952,
+     63.762,
      -169.493
     ],
     [
+     -156.411,
+     63.76,
+     -168.134
+    ],
+    [
+     -156.8,
+     63.76,
+     -167.908
+    ],
+    [
      -158.78,
-     63.855,
+     63.847,
      -166.756
     ],
     [
+     -169.541,
+     63.383,
+     -160.396
+    ],
+    [
+     -169.928,
+     63.383,
+     -160.167
+    ],
+    [
      -172.252,
-     63.555,
+     63.384,
      -158.794
     ],
     [
+     -174.605,
+     63.383,
+     -157.468
+    ],
+    [
+     -174.997,
+     63.382,
+     -157.247
+    ],
+    [
      -191.808,
-     63.063,
+     63.06,
      -147.773
     ],
     [
      -193.056,
-     63.034,
+     63.033,
      -147.328
     ],
     [
@@ -15769,31 +20611,81 @@
     ],
     [
      -120.837,
-     67.977,
+     67.975,
      -30.185
     ],
     [
+     -73.947,
+     69.862,
+     -57.042
+    ],
+    [
+     -73.557,
+     69.862,
+     -57.265
+    ],
+    [
      -72.082,
-     69.532,
+     69.861,
      -58.11
     ],
     [
+     -70.606,
+     69.86,
+     -58.955
+    ],
+    [
+     -70.216,
+     69.86,
+     -59.179
+    ],
+    [
      -56.425,
-     69.833,
+     70.283,
      -67.076
     ],
     [
+     -50.475,
+     70.281,
+     -70.476
+    ],
+    [
+     -50.084,
+     70.281,
+     -70.699
+    ],
+    [
      -48.608,
-     69.967,
+     70.28,
      -71.542
     ],
     [
+     -47.132,
+     70.28,
+     -72.385
+    ],
+    [
+     -46.741,
+     70.28,
+     -72.608
+    ],
+    [
+     -40.788,
+     70.381,
+     -76.005
+    ],
+    [
+     -40.397,
+     70.381,
+     -76.228
+    ],
+    [
      -38.92,
-     70.071,
+     70.382,
      -77.07
     ]
    ],
-   "width_m": 3.0
+   "width_m": 1.5
   },
   {
    "class": "footway",
@@ -15809,13 +20701,33 @@
      -141.12
     ],
     [
+     -217.105,
+     61.722,
+     -154.831
+    ],
+    [
+     -217.337,
+     61.722,
+     -155.217
+    ],
+    [
      -218.212,
-     61.865,
+     61.72,
      -156.676
     ],
     [
+     -219.114,
+     61.718,
+     -158.121
+    ],
+    [
+     -219.352,
+     61.717,
+     -158.503
+    ],
+    [
      -221.732,
-     61.634,
+     61.711,
      -162.317
     ],
     [
@@ -15871,22 +20783,22 @@
     ],
     [
      -168.708,
-     61.309,
+     61.436,
      242.587
     ],
     [
      -168.827,
-     61.309,
-     241.542
+     61.436,
+     241.54
     ],
     [
      -168.878,
-     61.309,
-     241.095
+     61.436,
+     241.093
     ],
     [
      -168.934,
-     61.309,
+     61.436,
      240.607
     ]
    ],
@@ -15917,12 +20829,32 @@
     ],
     [
      -273.733,
-     60.746,
+     60.477,
      98.841
     ],
     [
+     -272.869,
+     60.48,
+     100.305
+    ],
+    [
+     -272.868,
+     60.48,
+     100.307
+    ],
+    [
+     -272.64,
+     60.481,
+     100.693
+    ],
+    [
+     -272.639,
+     60.481,
+     100.694
+    ],
+    [
      -251.503,
-     61.121,
+     60.602,
      136.507
     ],
     [
@@ -16081,7 +21013,7 @@
     ],
     [
      -289.168,
-     58.955,
+     58.94,
      194.946
     ],
     [
@@ -16121,9 +21053,29 @@
      219.792
     ],
     [
+     119.237,
+     67.426,
+     167.436
+    ],
+    [
+     119.629,
+     67.426,
+     167.215
+    ],
+    [
      121.108,
-     67.647,
+     67.425,
      166.377
+    ],
+    [
+     122.588,
+     67.425,
+     165.54
+    ],
+    [
+     122.979,
+     67.425,
+     165.318
     ],
     [
      164.208,
@@ -16199,7 +21151,7 @@
     ],
     [
      -89.02,
-     69.51,
+     69.508,
      58.681
     ],
     [
@@ -16229,7 +21181,7 @@
     ],
     [
      -118.244,
-     68.763,
+     68.715,
      10.646
     ],
     [
@@ -16260,32 +21212,52 @@
     ],
     [
      -245.539,
-     60.825,
+     60.824,
      153.768
     ],
     [
      -262.457,
-     60.123,
+     60.1,
      164.622
     ],
     [
      -264.373,
-     60.043,
+     60.017,
      165.884
     ],
     [
      -264.749,
-     60.027,
+     60.001,
      166.132
     ],
     [
+     -270.598,
+     59.686,
+     169.985
+    ],
+    [
+     -270.598,
+     59.686,
+     169.985
+    ],
+    [
+     -270.973,
+     59.686,
+     170.232
+    ],
+    [
+     -270.974,
+     59.686,
+     170.232
+    ],
+    [
      -272.397,
-     59.708,
+     59.687,
      171.17
     ],
     [
      -289.206,
-     59.153,
+     59.132,
      181.136
     ],
     [
@@ -16447,8 +21419,18 @@
    "polyline": [
     [
      -38.92,
-     70.071,
+     70.382,
      -77.07
+    ],
+    [
+     -37.437,
+     70.383,
+     -77.903
+    ],
+    [
+     -37.045,
+     70.384,
+     -78.123
     ],
     [
      17.292,
@@ -16504,7 +21486,7 @@
    "polyline": [
     [
      -183.295,
-     60.933,
+     60.943,
      249.872
     ],
     [
@@ -16590,9 +21572,29 @@
      219.727
     ],
     [
+     -30.428,
+     64.456,
+     239.065
+    ],
+    [
+     -30.819,
+     64.456,
+     239.288
+    ],
+    [
      -33.166,
-     64.343,
+     64.457,
      240.623
+    ],
+    [
+     -35.513,
+     64.458,
+     241.959
+    ],
+    [
+     -35.904,
+     64.458,
+     242.181
     ],
     [
      -133.612,
@@ -16656,12 +21658,22 @@
      -171.213
     ],
     [
+     72.616,
+     66.215,
+     -210.41
+    ],
+    [
+     73.006,
+     66.214,
+     -210.635
+    ],
+    [
      75.344,
-     66.352,
+     66.213,
      -211.986
     ]
    ],
-   "width_m": 2.0
+   "width_m": 1.5
   },
   {
    "class": "footway",
@@ -16697,23 +21709,43 @@
      285.107
     ],
     [
+     -217.742,
+     59.797,
+     268.782
+    ],
+    [
+     -217.351,
+     59.797,
+     268.559
+    ],
+    [
      -215.005,
-     59.808,
+     59.797,
      267.222
     ],
     [
+     -212.658,
+     59.797,
+     265.886
+    ],
+    [
+     -212.267,
+     59.797,
+     265.663
+    ],
+    [
      -211.159,
-     59.946,
+     59.947,
      265.033
     ],
     [
      -186.081,
-     60.844,
+     60.854,
      250.737
     ],
     [
      -183.295,
-     60.933,
+     60.943,
      249.872
     ]
    ],
@@ -16887,12 +21919,12 @@
     ],
     [
      -77.112,
-     69.477,
+     69.472,
      46.995
     ],
     [
      -79.031,
-     69.457,
+     69.451,
      45.39
     ],
     [
@@ -16921,9 +21953,29 @@
      28.087
     ],
     [
+     -97.682,
+     69.355,
+     13.918
+    ],
+    [
+     -97.911,
+     69.355,
+     13.531
+    ],
+    [
      -99.288,
-     69.01,
+     69.356,
      11.208
+    ],
+    [
+     -100.665,
+     69.358,
+     8.884
+    ],
+    [
+     -100.894,
+     69.359,
+     8.497
     ],
     [
      -122.338,
@@ -17059,9 +22111,29 @@
      -58.2
     ],
     [
+     -245.977,
+     61.386,
+     -116.428
+    ],
+    [
+     -245.587,
+     61.386,
+     -116.653
+    ],
+    [
      -244.113,
-     61.535,
+     61.387,
      -117.501
+    ],
+    [
+     -242.64,
+     61.388,
+     -118.35
+    ],
+    [
+     -242.25,
+     61.389,
+     -118.574
     ],
     [
      -213.247,
@@ -17197,14 +22269,54 @@
      228.743
     ],
     [
+     -13.94,
+     64.626,
+     241.504
+    ],
+    [
+     -14.329,
+     64.626,
+     241.729
+    ],
+    [
      -15.802,
-     64.763,
+     64.624,
      242.583
     ],
     [
+     -17.273,
+     64.622,
+     243.437
+    ],
+    [
+     -17.663,
+     64.621,
+     243.662
+    ],
+    [
+     -36.679,
+     63.849,
+     254.697
+    ],
+    [
+     -37.068,
+     63.849,
+     254.923
+    ],
+    [
      -38.538,
-     63.973,
+     63.849,
      255.776
+    ],
+    [
+     -40.009,
+     63.848,
+     256.629
+    ],
+    [
+     -40.399,
+     63.848,
+     256.855
     ],
     [
      -126.883,
@@ -17512,12 +22624,12 @@
     ],
     [
      -42.802,
-     70.082,
+     70.074,
      -90.814
     ],
     [
      -44.376,
-     70.081,
+     70.069,
      -89.716
     ],
     [
@@ -17655,12 +22767,12 @@
     ],
     [
      -11.822,
-     68.508,
+     68.399,
      151.312
     ],
     [
      -9.531,
-     68.585,
+     68.449,
      149.654
     ],
     [
@@ -17675,37 +22787,57 @@
     ],
     [
      3.447,
-     68.747,
+     68.67,
      142.683
     ],
     [
-     3.518,
-     68.748,
-     142.643
+     3.592,
+     68.67,
+     142.602
     ],
     [
      3.84,
-     68.75,
+     68.67,
      142.463
     ],
     [
-     3.91,
-     68.751,
-     142.423
+     3.985,
+     68.67,
+     142.381
     ],
     [
      85.368,
-     70.236,
+     70.202,
      96.7
     ],
     [
      92.02,
-     70.296,
+     70.166,
      92.968
     ],
     [
+     93.503,
+     70.164,
+     92.135
+    ],
+    [
+     93.504,
+     70.164,
+     92.135
+    ],
+    [
+     93.895,
+     70.164,
+     91.915
+    ],
+    [
+     93.896,
+     70.164,
+     91.914
+    ],
+    [
      104.451,
-     70.225,
+     70.154,
      85.986
     ],
     [
@@ -17780,9 +22912,29 @@
      -98.062
     ],
     [
+     63.113,
+     70.242,
+     -100.908
+    ],
+    [
+     63.501,
+     70.242,
+     -101.137
+    ],
+    [
      65.827,
-     70.094,
+     70.242,
      -102.508
+    ],
+    [
+     68.156,
+     70.239,
+     -103.88
+    ],
+    [
+     68.544,
+     70.238,
+     -104.108
     ],
     [
      112.394,
@@ -17790,9 +22942,29 @@
      -129.932
     ],
     [
+     120.018,
+     68.352,
+     -134.678
+    ],
+    [
+     120.4,
+     68.352,
+     -134.916
+    ],
+    [
      122.692,
-     68.25,
+     68.352,
      -136.344
+    ],
+    [
+     124.984,
+     68.351,
+     -137.771
+    ],
+    [
+     125.366,
+     68.351,
+     -138.009
     ],
     [
      133.202,
@@ -18247,11 +23419,11 @@
     ],
     [
      -78.594,
-     64.767,
+     64.572,
      -213.555
     ]
    ],
-   "width_m": 2.0
+   "width_m": 1.5
   },
   {
    "class": "footway",
@@ -18304,8 +23476,18 @@
    "polyline": [
     [
      75.344,
-     66.352,
+     66.213,
      -211.986
+    ],
+    [
+     77.688,
+     66.211,
+     -213.328
+    ],
+    [
+     78.078,
+     66.211,
+     -213.551
     ],
     [
      141.61,
@@ -18391,9 +23573,39 @@
      -219.956
     ],
     [
+     -247.247,
+     59.441,
+     -234.492
+    ],
+    [
+     -247.247,
+     59.441,
+     -234.493
+    ],
+    [
+     -247.482,
+     59.441,
+     -234.875
+    ],
+    [
+     -247.483,
+     59.441,
+     -234.876
+    ],
+    [
      -248.894,
-     59.324,
+     59.442,
      -237.178
+    ],
+    [
+     -250.246,
+     59.443,
+     -239.516
+    ],
+    [
+     -250.471,
+     59.443,
+     -239.906
     ],
     [
      -261.794,
@@ -18447,9 +23659,29 @@
      -294.693
     ],
     [
+     -114.603,
+     61.597,
+     -285.722
+    ],
+    [
+     -114.982,
+     61.598,
+     -285.479
+    ],
+    [
      -116.416,
-     61.827,
+     61.6,
      -284.563
+    ],
+    [
+     -117.884,
+     61.601,
+     -283.705
+    ],
+    [
+     -118.272,
+     61.601,
+     -283.478
     ],
     [
      -167.899,
@@ -18462,9 +23694,29 @@
      -254.253
     ],
     [
+     -185.506,
+     60.894,
+     -244.192
+    ],
+    [
+     -185.895,
+     60.894,
+     -243.965
+    ],
+    [
      -188.226,
-     61.11,
+     60.892,
      -242.602
+    ],
+    [
+     -190.563,
+     60.891,
+     -241.249
+    ],
+    [
+     -190.952,
+     60.891,
+     -241.024
     ],
     [
      -232.658,
@@ -18647,9 +23899,29 @@
      -204.974
     ],
     [
+     -217.875,
+     60.796,
+     -208.209
+    ],
+    [
+     -217.485,
+     60.796,
+     -208.434
+    ],
+    [
      -215.144,
-     60.554,
+     60.798,
      -209.78
+    ],
+    [
+     -212.803,
+     60.8,
+     -211.126
+    ],
+    [
+     -212.413,
+     60.801,
+     -211.351
     ],
     [
      -138.912,
@@ -18657,9 +23929,29 @@
      -253.624
     ],
     [
+     -133.562,
+     61.95,
+     -256.721
+    ],
+    [
+     -133.172,
+     61.95,
+     -256.946
+    ],
+    [
      -130.835,
-     61.673,
+     61.949,
      -258.299
+    ],
+    [
+     -128.519,
+     61.947,
+     -259.69
+    ],
+    [
+     -128.134,
+     61.946,
+     -259.922
     ],
     [
      -87.976,
@@ -18936,17 +24228,17 @@
     ],
     [
      125.288,
-     69.251,
+     69.408,
      98.295
     ],
     [
      129.156,
-     68.985,
+     69.147,
      105.372
     ],
     [
      139.594,
-     68.107,
+     68.46,
      122.004
     ],
     [
@@ -19044,8 +24336,18 @@
    "polyline": [
     [
      -30.231,
-     70.801,
+     70.821,
      -62.753
+    ],
+    [
+     -28.742,
+     70.823,
+     -63.576
+    ],
+    [
+     -28.349,
+     70.923,
+     -63.794
     ],
     [
      -10.135,
@@ -19104,13 +24406,33 @@
      -60.697
     ],
     [
+     82.904,
+     70.884,
+     -66.554
+    ],
+    [
+     83.294,
+     70.784,
+     -66.778
+    ],
+    [
      85.637,
-     70.764,
+     70.784,
      -68.119
     ],
     [
+     87.98,
+     70.784,
+     -69.462
+    ],
+    [
+     88.371,
+     70.884,
+     -69.685
+    ],
+    [
      88.924,
-     70.666,
+     70.884,
      -70.002
     ]
    ],
@@ -19126,17 +24448,47 @@
    "polyline": [
     [
      59.283,
-     68.675,
+     68.853,
      145.563
     ],
     [
+     58.649,
+     68.855,
+     144.322
+    ],
+    [
+     58.444,
+     68.855,
+     143.921
+    ],
+    [
      57.213,
-     68.838,
+     68.858,
      141.512
     ],
     [
+     54.88,
+     68.84,
+     139.751
+    ],
+    [
+     54.521,
+     68.837,
+     139.48
+    ],
+    [
+     46.84,
+     69.289,
+     133.683
+    ],
+    [
+     46.481,
+     69.288,
+     133.412
+    ],
+    [
      44.127,
-     69.257,
+     69.277,
      131.635
     ]
    ],
@@ -19152,12 +24504,22 @@
    "polyline": [
     [
      96.397,
-     69.026,
+     69.326,
      124.781
     ],
     [
+     109.141,
+     68.15,
+     147.096
+    ],
+    [
+     109.364,
+     68.15,
+     147.487
+    ],
+    [
      110.207,
-     68.03,
+     68.15,
      148.963
     ]
    ],
@@ -19178,22 +24540,22 @@
     ],
     [
      19.633,
-     67.776,
+     68.027,
      168.312
     ],
     [
      59.283,
-     68.675,
+     68.953,
      145.563
     ],
     [
      96.397,
-     69.026,
+     69.326,
      124.781
     ],
     [
      100.544,
-     69.019,
+     69.347,
      123.005
     ]
    ],
@@ -19348,17 +24710,17 @@
    "polyline": [
     [
      -258.079,
-     60.482,
+     60.502,
      136.895
     ],
     [
      -255.352,
-     60.547,
+     60.602,
      139.196
     ],
     [
      -252.953,
-     60.536,
+     60.556,
      145.972
     ]
    ],
@@ -19374,12 +24736,12 @@
    "polyline": [
     [
      -251.503,
-     61.121,
+     60.602,
      136.507
     ],
     [
      -255.352,
-     60.547,
+     60.602,
      139.196
     ]
    ],
@@ -19487,7 +24849,7 @@
     ],
     [
      -85.468,
-     64.655,
+     64.461,
      -209.47
     ]
    ],
@@ -19592,17 +24954,17 @@
    "polyline": [
     [
      -211.159,
-     59.946,
+     59.947,
      265.033
     ],
     [
      -204.148,
-     59.749,
+     59.762,
      277.892
     ],
     [
      -206.07,
-     59.573,
+     59.762,
      286.652
     ],
     [
@@ -19621,7 +24983,7 @@
      295.802
     ]
    ],
-   "width_m": 3.0
+   "width_m": 2.0
   },
   {
    "class": "cycleway",
@@ -19633,7 +24995,7 @@
    "polyline": [
     [
      -173.263,
-     61.301,
+     61.224,
      243.581
     ],
     [
@@ -19713,14 +25075,14 @@
      225.551
     ],
     [
-     -174.721,
+     -174.722,
      61.389,
-     227.882
+     227.881
     ],
     [
      -174.535,
      61.395,
-     228.292
+     228.291
     ],
     [
      -173.074,
@@ -19733,23 +25095,23 @@
      234.596
     ],
     [
-     -170.116,
-     61.395,
-     237.883
-    ],
-    [
-     -169.937,
-     61.393,
-     238.296
-    ],
-    [
      -168.934,
-     61.209,
+     61.336,
      240.607
     ],
     [
+     -170.096,
+     61.335,
+     241.405
+    ],
+    [
+     -170.467,
+     61.321,
+     241.66
+    ],
+    [
      -173.263,
-     61.201,
+     61.124,
      243.581
     ]
    ],
@@ -19774,73 +25136,78 @@
      225.731
     ],
     [
-     -178.379,
-     61.322,
-     229.759
-    ],
-    [
-     -178.269,
-     61.325,
-     229.963
-    ],
-    [
-     -178.166,
-     61.327,
-     230.155
-    ],
-    [
-     -178.055,
-     61.33,
-     230.359
-    ],
-    [
      -178.042,
      61.331,
      230.385
     ],
     [
      -176.458,
-     61.296,
+     61.336,
      235.078
     ],
     [
      -176.314,
-     61.285,
+     61.239,
      235.504
     ],
     [
      -176.095,
-     61.242,
+     61.244,
      236.155
     ],
     [
+     -176.057,
+     61.245,
+     236.266
+    ],
+    [
      -175.951,
-     61.239,
+     61.248,
      236.582
     ],
     [
+     -175.913,
+     61.248,
+     236.692
+    ],
+    [
      -175.752,
-     61.235,
+     61.252,
      237.171
     ],
     [
-     -174.673,
-     61.209,
-     239.951
+     -175.592,
+     61.256,
+     237.584
     ],
     [
-     -174.51,
-     61.209,
-     240.37
+     -175.107,
+     61.23,
+     238.833
+    ],
+    [
+     -174.944,
+     61.22,
+     239.252
+    ],
+    [
+     -173.961,
+     61.164,
+     241.783
+    ],
+    [
+     -173.798,
+     61.255,
+     242.203
     ],
     [
      -173.412,
-     61.203,
+     61.232,
      243.198
     ],
     [
      -173.263,
-     61.301,
+     61.224,
      243.581
     ]
    ],
@@ -20004,8 +25371,18 @@
    "polyline": [
     [
      193.346,
-     64.626,
+     64.58,
      -244.935
+    ],
+    [
+     191.831,
+     64.579,
+     -244.157
+    ],
+    [
+     191.43,
+     64.578,
+     -243.952
     ],
     [
      189.005,
@@ -20403,9 +25780,29 @@
      -128.999
     ],
     [
+     -233.498,
+     61.843,
+     -110.772
+    ],
+    [
+     -233.886,
+     61.844,
+     -110.544
+    ],
+    [
      -235.353,
-     61.635,
+     61.847,
      -109.682
+    ],
+    [
+     -236.847,
+     61.848,
+     -108.869
+    ],
+    [
+     -237.242,
+     61.849,
+     -108.654
     ],
     [
      -254.678,

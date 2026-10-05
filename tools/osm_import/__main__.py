@@ -18,7 +18,8 @@ from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.export import pedestrian_to_list
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.osm_data import BBox, OsmData
-from osm_import.pack import build_terrain, elevation_attribution_for, write_pack
+from osm_import.pack import ChunkSampler, build_terrain, elevation_attribution_for, write_pack
+from osm_import.parking import build_parking, parking_query
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
 from osm_import.validation import render_markdown
@@ -86,6 +87,15 @@ def _import(args: argparse.Namespace) -> int:
         # Barriers use final pedestrian heights (curbs), so they come after the terrain.
         barriers = build_barriers(result.graph, elevation, buildings, cfg, proj.bbox_local(bbox))
         result.report.summary["barriers"] = barriers.counts
+        parking = None
+        if args.parking:
+            if args.parking_json:
+                p_payload = json.loads(args.parking_json.read_text(encoding="utf-8"))
+            else:
+                p_payload, _meta = fetch_query(parking_query(bbox), bbox, args.cache_dir)
+            # After the terrain: lots take their ground height from the built (graded) terrain.
+            parking = build_parking(p_payload, bbox, proj, result.graph, ChunkSampler(chunks), data)
+            result.report.summary["parking"] = parking.counts()
         result.report.summary["terrain"] = tstats
         paths = write_pack(
             args.pack_out,
@@ -102,6 +112,7 @@ def _import(args: argparse.Namespace) -> int:
             water,
             buildings,
             barriers,
+            parking,
         )
         print(f"terrain: {tstats}")
         print(f"barriers: {barriers.counts}")
@@ -111,6 +122,8 @@ def _import(args: argparse.Namespace) -> int:
             )
         if water is not None:
             print(f"water: {len(water.polygons)} polygons, {len(water.skipped)} skipped")
+        if parking is not None:
+            print(f"parking: {parking.counts()}")
     else:
         paths = write_outputs(result, args.out, title)
     s = result.report.summary
@@ -174,6 +187,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     imp.add_argument(
         "--buildings-json", type=Path, help="Read this Overpass buildings JSON instead of fetching"
+    )
+    imp.add_argument(
+        "--parking",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Fetch and write parking lots and street bays with --pack-out",
+    )
+    imp.add_argument(
+        "--parking-json", type=Path, help="Read this Overpass parking JSON instead of fetching"
     )
     imp.add_argument(
         "--osm-json", type=Path, help="Read this Overpass JSON file instead of fetching"

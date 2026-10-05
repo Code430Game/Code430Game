@@ -134,3 +134,33 @@ func test_stale_chunks_are_detected() -> void:
 	f.store_string("{\"changed\": true}")
 	f.close()
 	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
+
+
+func test_parking_lots_load_and_build_in_their_chunks() -> void:
+	assert_int(_pack.parking_lots.size()).is_greater(600)  # surface and street-side lots
+	var stalls := 0
+	var with_stalls := 0
+	for lot in _pack.parking_lots:
+		stalls += lot.stalls.size()
+		if not lot.stalls.is_empty():
+			with_stalls += 1
+	print("parking: %d lots drawn, %d with stalls, %d stalls" % [_pack.parking_lots.size(), with_stalls, stalls])
+	assert_int(with_stalls).is_greater(_pack.parking_lots.size() / 2)
+	# A chunk with a lot builds its asphalt, markings, props and sign labels.
+	var road_result := RoadMeshBuilder.build(_pack.graph, _pack.junctions)
+	var built := 0
+	for coord: Vector2i in _pack.parking_chunks:
+		var entry: Dictionary = {}
+		for e in _pack.terrain_index["chunks"]:
+			if int(e["cx"]) == coord.x and int(e["cz"]) == coord.y:
+				entry = e
+		if entry.is_empty():
+			continue
+		var heights := TerrainBuilder.load_chunk(_pack.pack_dir, _pack.terrain_index, entry)
+		var chunk: Node3D = auto_free(_pack.build_chunk(coord, heights, road_result, true))
+		assert_object(chunk.get_node_or_null("parking_lod0")).is_not_null()
+		assert_object(chunk.get_node_or_null("parking_markings_lod0")).is_not_null()
+		built += 1
+		if built >= 2:
+			break
+	assert_int(built).is_equal(2)

@@ -1,0 +1,30 @@
+{
+  "_comment": "Parked cars in parking lot stalls. Occupancy by lot type and time of day; hours on a 24 h clock; distances metres. Per-preset caps live in core/settings/presets.json (parked_cars_per_chunk, parked_car_bodies).",
+  "occupancy": {
+    "commercial": {
+      "day": 0.8,
+      "night": 0.3
+    },
+    "residential": {
+      "day": 0.4,
+      "night": 0.75
+    }
+  },
+  "day_hours": [
+    7,
+    19
+  ],
+  "hour_bucket": 3,
+  "vehicle_weights": {
+    "sedan": 3.0,
+    "hatchback": 3.0,
+    "suv": 2.0,
+    "coupe": 0.5,
+    "pickup": 1.0,
+    "van": 0.6,
+    "taxi": 0.1
+  },
+  "draw_radius_m": 350.0,
+  "body_radius_m": 45.0,
+  "refresh_s": 0.5
+}

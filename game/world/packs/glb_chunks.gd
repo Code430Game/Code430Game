@@ -112,7 +112,7 @@ static func import_chunk_parts(path: String, materials: Dictionary, tier: int) -
 			if role == "water":
 				mi.material_override = materials.get("water") if materials.get("water") != null else WaterBuilder.material()
 				water_mesh = mi.mesh
-			elif role == "markings_lod0":
+			elif role == "markings_lod0" or role == "parking_markings_lod0":
 				mi.material_override = materials.get("marking") if materials.get("marking") != null else MarkingBuilder.material()
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			elif role.begins_with("buildings"):
@@ -134,6 +134,12 @@ static func import_chunk_parts(path: String, materials: Dictionary, tier: int) -
 
 static func _ranges_for(role: String) -> Vector2:
 	match role:
+		"parking_lod0":
+			return Vector2(0.0, MapPack.TERRAIN_LOD1_END_M)
+		"parking_markings_lod0":
+			return Vector2(0.0, 350.0)
+		"parking_props_lod0":
+			return Vector2(0.0, MapPack.ROAD_LOD0_END_M)
 		"roads_lod0":
 			return Vector2(0.0, MapPack.ROAD_LOD0_END_M)
 		"roads_lod1":

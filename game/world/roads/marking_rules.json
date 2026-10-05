@@ -24,6 +24,7 @@
     "unclassified":   {"centre_style": "single_dashed", "edge_lines": false},
     "residential":    {"centre_style": "none", "edge_lines": false},
     "living_street":  {"centre_style": "none", "edge_lines": false},
-    "service":        {"centre_style": "none", "edge_lines": false}
+    "service":        {"centre_style": "none", "edge_lines": false},
+    "parking":        {"centre_style": "none", "edge_lines": false}
   }
 }

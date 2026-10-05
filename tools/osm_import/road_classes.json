@@ -65,7 +65,12 @@
   ],
   "pedestrian_classes": ["footway", "path", "pedestrian", "steps", "cycleway", "living_street", "track"],
   "excluded_highway_values": ["construction", "proposed", "abandoned", "razed", "platform", "bus_stop", "elevator", "corridor"],
-  "excluded_service_values": ["parking_aisle", "driveway", "drive-through", "emergency_access"],
+  "excluded_service_values": ["drive-through", "emergency_access"],
+  "parking": {
+    "_comment": "service ways that become class parking: never chosen by traffic, driven freely by players",
+    "service_values": ["parking_aisle", "driveway"],
+    "width_m": {"parking_aisle": 5.5, "driveway": 3.5}
+  },
   "excluded_access_values": ["no", "private"],
   "implied_oneway_classes": ["motorway", "motorway_link"],
   "major_classes": ["motorway", "trunk", "primary", "secondary", "tertiary"],
@@ -84,6 +89,7 @@
     "unclassified":   {"lanes": 2, "lanes_oneway": 1, "speed_kph": 40,  "cluster_radius_m": 10.0, "max_grade": 0.08},
     "residential":    {"lanes": 2, "lanes_oneway": 1, "speed_kph": 40,  "cluster_radius_m": 10.0, "max_grade": 0.08},
     "living_street":  {"lanes": 2, "lanes_oneway": 1, "speed_kph": 20,  "cluster_radius_m": 8.0,  "max_grade": 0.10},
-    "service":        {"lanes": 2, "lanes_oneway": 1, "speed_kph": 20,  "cluster_radius_m": 4.0,  "max_grade": 0.12}
+    "service":        {"lanes": 2, "lanes_oneway": 1, "speed_kph": 20,  "cluster_radius_m": 4.0,  "max_grade": 0.12},
+    "parking":        {"lanes": 2, "lanes_oneway": 1, "speed_kph": 15,  "cluster_radius_m": 3.0,  "max_grade": 0.12}
   }
 }

@@ -22,6 +22,7 @@ const DEBUG_COLORS := {
 	"residential": Color(1.0, 1.0, 1.0),
 	"living_street": Color(0.9, 0.7, 1.0),
 	"service": Color(0.55, 0.55, 0.6),
+	"parking": Color(0.5, 0.5, 0.55),
 }
 
 var _graph: RoadGraph
