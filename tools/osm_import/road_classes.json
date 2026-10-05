@@ -12,6 +12,18 @@
     "min_through_angle_deg": 140.0,
     "blend_m": 40.0
   },
+  "bridges": {
+    "_comment": "add-bridge-structures: grouping, walkways on decks, piers and abutments (see bridges.py).",
+    "merge_gap_m": 3.0,
+    "walkway_range_m": 4.0,
+    "pier_spacing_m": 25.0,
+    "pier_spacing_water_m": 40.0,
+    "pier_clearance_m": 1.5,
+    "depth_per_span": 0.06,
+    "depth_min_m": 0.8,
+    "depth_max_m": 1.8,
+    "end_clear_m": 4.0
+  },
   "barriers": {
     "highway_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
     "parapet_height_m": 1.0,
