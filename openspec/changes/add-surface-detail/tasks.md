@@ -13,4 +13,5 @@
 ## 4. Verification
 - [x] 4.1 Deck benchmark on the usual route, both presets; no regression on `deck`
   - Steam Deck, 2026-10-05, idle (deck preset, 40 s autodrive): main avg 11.42 ms, p99 16.10, GPU 10.13; this branch avg 11.38, p99 16.67, GPU 10.13. No regression. The high preset is not run on the Deck, which always uses `deck`; it was checked on the Mac. After the first Deck round (human: "rough, could be scaled down a bit for more of a noise look"), the grain is finer and softer: asphalt tiles every 2.5 m, was 4; concrete every 1.5 m, was 2; noise about 1.8× the frequency at two-thirds the contrast. Recipe v3
-- [ ] 4.2 **Stop: human walks a crossing and a block of sidewalk downtown on the Deck**
+- [x] 4.2 **Stop: human walks a crossing and a block of sidewalk downtown on the Deck**
+  - 2026-10-05: the human played the round build on the Deck: "The textures are rough could be scaled down a bit maybe for more of a noise look but on the whole it looks good". The grain was made finer and softer (4.1 note). Merged at the human's request without a second look
