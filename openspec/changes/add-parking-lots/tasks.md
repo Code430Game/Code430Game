@@ -11,5 +11,5 @@
 - [x] 3.3 Mac screenshots: a Market lot by day and at night, a Queensway lot, a residential street with bays, the map with lots; done 2026-10-04 (Deck preset; the high preset's fog hides lots): a Market lot by day and at 23:00, the Indigo lot with its operator sign, a Queensway lot with the take prompt next to a parked car, and the overview map with lots filled. No residential bays shot: bays are not populated (see 3.2). The Market shot showed strip lots (an outline covering only a row of stalls, aisle outside) with no stalls; they now get one row: 498 lots with stalls (was 408), 8,556 stalls
 
 ## 4. Verification
-- [ ] 4.1 Deck benchmark on the usual route plus a pass through the Market lots; counts and frame time recorded here
+- [ ] 4.1 Deck benchmark on the usual route plus a pass through the Market lots; counts and frame time recorded here (also stands in for `add-vehicle-variety` 5.1: one idle-Deck run of the combined build)
 - [ ] 4.2 **Stop: human pulls into a lot, parks, takes a parked car and drives out on the Deck**
