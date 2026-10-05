@@ -429,3 +429,51 @@ func test_pooled_bodies_take_the_vehicles_box_and_mass() -> void:
 	assert_float(a.body.mass).is_equal(float(VehicleCatalogue.entry("box_truck")["mass_kg"]))
 	var shape := (a.body.get_node("Shape") as CollisionShape3D).shape as BoxShape3D
 	assert_float(shape.size.z).is_equal_approx(float(VehicleCatalogue.entry("box_truck")["dims"]["length_m"]), 0.01)
+
+
+func test_parking_lanes_are_flagged_and_traffic_never_takes_them() -> void:
+	# A street meets a driveway (class parking) and carries on straight.
+	var g := _graph([
+		{"id": "w1.0", "pl": [[-100, 0, 0], [0, 0, 0]]},
+		{"id": "w2.0", "pl": [[0, 0, 0], [100, 0, 0]]},
+		{"id": "w3.0", "pl": [[0, 0, 0], [0, 0, 60]], "class": "parking"},
+	])
+	var m := _manager(g)
+	var feeder := -1
+	for p in m.lanes.paths:
+		if p.edge_id == "w3.0":
+			assert_bool(p.parking_only).is_true()
+		elif p.edge_id != "":
+			assert_bool(p.parking_only).is_false()
+		if p.edge_id == "w1.0":
+			feeder = p.id
+	var into_parking := 0
+	for p in m.lanes.paths:
+		if p.is_connector and p.next.size() == 1 and m.lanes.paths[p.next[0]].parking_only:
+			assert_bool(p.parking_only).is_true()  # the connector into it is flagged too
+			into_parking += 1
+	assert_int(into_parking).is_greater(0)
+	var rng := RandomNumberGenerator.new()
+	var feeder_path: LaneGraph.LanePath = m.lanes.paths[feeder]
+	for i in range(200):
+		var nxt := m.lanes.choose_next(feeder_path, rng)
+		assert_bool(m.lanes.paths[nxt].parking_only).is_false()
+
+
+func test_a_street_ending_in_a_driveway_is_a_dead_end_to_traffic() -> void:
+	var g := _graph([
+		{"id": "w1.0", "pl": [[-100, 0, 0], [0, 0, 0]]},
+		{"id": "w3.0", "pl": [[0, 0, 0], [0, 0, 60]], "class": "parking"},
+	])
+	var m := _manager(g)
+	for p in m.lanes.paths:
+		if p.edge_id == "w1.0":
+			assert_int(m.lanes.choose_next(p, RandomNumberGenerator.new())).is_equal(-1)
+
+
+func test_nothing_spawns_on_a_parking_aisle() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[-200, 0, 0], [200, 0, 0]], "class": "parking"}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 120)])
+	for i in range(200):
+		m._spawn_one()
+	assert_int(m.agents.size()).is_equal(0)

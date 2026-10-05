@@ -22,6 +22,7 @@ class LanePath:
 	var lane_index: int = 0
 	var is_connector: bool = false
 	var bus_only: bool = false  # reserved for buses: cars never enter it
+	var parking_only: bool = false  # a parking aisle or driveway: traffic never enters it, players drive it
 	var tunnel: bool = false  # underground road: traffic keeps out unless nothing else continues
 	var straightness: float = 1.0  # connectors: cos of the turn angle, for straight-preferring choice
 	var points: PackedVector3Array
@@ -94,18 +95,21 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> LaneGraph:
 			var offset := divider + (k + 0.5) * lane_w
 			var lp := lg._add_lane(edge, k, _offset_polyline(pl, normals, offset), edge.from_node, edge.to_node)
 			lp.bus_only = edge.bus == "only" or (edge.bus == "lane" and k == edge.bus_lane)
+			lp.parking_only = edge.road_class == "parking"
 		for k in range(edge.lanes_backward):
 			var offset := divider - (k + 0.5) * lane_w
 			var back := _offset_polyline(pl, normals, offset)
 			back.reverse()
 			var lp := lg._add_lane(edge, edge.lanes_forward + k, back, edge.to_node, edge.from_node)
 			lp.bus_only = edge.bus == "only"
+			lp.parking_only = edge.road_class == "parking"
 	for nid in graph.sorted_node_ids():
 		lg._connect_node(graph, nid)
 	# A connector into a reserved lane is reserved too, so lane choice sees it one step early.
 	for lp in lg.paths:
 		if lp.is_connector and lp.next.size() == 1:
 			lp.bus_only = lg.paths[lp.next[0]].bus_only
+			lp.parking_only = lg.paths[lp.next[0]].parking_only
 			lp.tunnel = lg.paths[lp.next[0]].tunnel
 	return lg
 
@@ -218,12 +222,20 @@ func lanes_near(position: Vector3, radius: float) -> Array[LanePath]:
 func choose_next(lp: LanePath, rng: RandomNumberGenerator, allowed: Callable = Callable(), preferred: Callable = Callable()) -> int:
 	if lp.next.is_empty():
 		return -1
-	var options: PackedInt32Array = lp.next
+	# Parking aisles and driveways are never traffic's, even when nothing else continues:
+	# a street ending in a driveway is a dead end to traffic.
+	var options := PackedInt32Array()
+	for n in lp.next:
+		if not paths[n].parking_only:
+			options.append(n)
+	if options.is_empty():
+		return -1
+	var open_options := options
 	for test: Callable in [preferred, allowed]:
 		if not test.is_valid():
 			continue
 		var filtered := PackedInt32Array()
-		for n in lp.next:
+		for n in open_options:
 			if test.call(paths[n]):
 				filtered.append(n)
 		if not filtered.is_empty():

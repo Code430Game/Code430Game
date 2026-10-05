@@ -478,8 +478,8 @@ func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
 func _allowed_for(a: TrafficAgent) -> Callable:
 	if a.kind == Kind.BUS:
 		var classes: Array = config.get("bus_classes", [])
-		return func(lp: LaneGraph.LanePath) -> bool: return not lp.tunnel and (lp.is_connector or lp.bus_only or classes.has(lp.road_class))
-	return func(lp: LaneGraph.LanePath) -> bool: return not lp.bus_only and not lp.tunnel
+		return func(lp: LaneGraph.LanePath) -> bool: return not lp.tunnel and not lp.parking_only and (lp.is_connector or lp.bus_only or classes.has(lp.road_class))
+	return func(lp: LaneGraph.LanePath) -> bool: return not lp.bus_only and not lp.tunnel and not lp.parking_only
 
 
 func _preferred_for(a: TrafficAgent) -> Callable:
@@ -577,7 +577,9 @@ func _spawn_one() -> void:
 		return
 	var pool: Array[LaneGraph.LanePath] = []
 	for lp in candidates:
-		if not lp.tunnel:  # underground roads are not drawn; nothing should appear from inside them
+		# Underground roads are not drawn (nothing should appear from inside them); parking
+		# aisles and driveways are the player's, never traffic's.
+		if not lp.tunnel and not lp.parking_only:
 			pool.append(lp)
 	if pool.is_empty():
 		return
