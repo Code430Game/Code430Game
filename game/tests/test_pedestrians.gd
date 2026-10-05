@@ -302,3 +302,22 @@ func test_walkers_keep_off_cycle_lanes() -> void:
 	for i in range(60):
 		lonely._physics_process(1.0 / 60.0)
 	assert_int(lonely.active_count()).is_equal(0)
+
+
+func test_a_horn_stops_nearby_walkers_who_turn_to_look() -> void:
+	var m := _manager(_ways([{"id": "p1", "pl": [[0, 0, 0], [100, 0, 0]]}]))
+	m.anchors = PackedVector3Array([Vector3.ZERO])
+	var near := _add(m, 0, 20.0, true, 1.5)
+	var far := _add(m, 0, 80.0, true, 1.5)
+	var horn_at := Vector3(20.0, 0.0, 10.0)  # beside the near walker
+	assert_int(m.startle(horn_at, 25.0)).is_equal(1)
+	var x0 := near.position().x
+	for i in range(30):
+		m.step(1.0 / 60.0)
+	assert_float(near.position().x).is_equal_approx(x0, 0.01)  # stood still
+	var facing := -near.transform.basis.z
+	assert_float(facing.dot(Vector3(0, 0, 1))).is_greater(0.95)  # looking at the car
+	assert_float(far.startled).is_equal(0.0)
+	for i in range(150):  # the look is over: walking on
+		m.step(1.0 / 60.0)
+	assert_float(near.position().x).is_greater(x0 + 0.3)

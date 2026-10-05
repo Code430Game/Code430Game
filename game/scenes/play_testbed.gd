@@ -13,6 +13,7 @@ const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const PLAYER_SCENE := preload("res://actors/player/player.tscn")
 const ON_FOOT_OFFSET_M := 2.2
 const BENCH_WARMUP_S := 3.0
+const HORN_STARTLE_M := 25.0  # pedestrians this close turn to look when the horn sounds
 
 @onready var _world: Node3D = $World
 @onready var _camera: ChaseCamera = $ChaseCamera
@@ -46,6 +47,7 @@ var _spawn_transform: Transform3D
 var _keyboard: bool = false  # last input came from keyboard or mouse: show those hints
 var _day_night: DayNight
 var _vehicle_audio: VehicleAudio
+var _reset_ring: HoldRing
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
 var _record_music: String = ""  # --record-music=<path.wav>: record the Music bus, saved when the benchmark ends
@@ -70,13 +72,14 @@ var _bench_physics: PackedFloat32Array = PackedFloat32Array()  # physics process
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
+var _menu_at_start: String = ""  # --menu=game|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
 var _fixed_cam: Camera3D = null
 var _bus_share_override: float = -1.0  # --bus-share=0..1: fraction of traffic spawned as buses (screenshots)
 enum Headlights { AUTO, ON, OFF }
-var _headlights: int = Headlights.AUTO  # D-pad up / H cycles auto (dusk to dawn), on, off
+var _headlights: int = Headlights.AUTO  # D-pad right / H cycles auto (dusk to dawn), on, off
 var _start_position: Vector3 = Vector3.ZERO
 var _bench_done: bool = false
 var _autodrive_edge: RoadGraph.RoadEdge
@@ -103,6 +106,12 @@ func _ready() -> void:
 	_camera.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_graph_view.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_parse_args()
+	_reset_ring = HoldRing.new()
+	_reset_ring.name = "ResetRing"
+	_reset_ring.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_reset_ring.position = Vector2(-20.0, -170.0)
+	_reset_ring.text = "reset"
+	$HUD.add_child(_reset_ring)
 	_pause_menu.overview_map = _overview
 	_pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	_pause_menu.character_requested.connect(_open_creator)
@@ -199,6 +208,11 @@ func _ready() -> void:
 	ContentMode.mode_changed.connect(func(_id: String) -> void: _refresh_session_status())
 	if _open_creator_at_start:
 		get_tree().create_timer(1.5).timeout.connect(_open_creator)
+	if _menu_at_start != "":
+		get_tree().create_timer(1.5).timeout.connect(func() -> void:
+			_pause_menu.open()
+			_pause_menu.showing_pad = not _menu_at_start.ends_with(",keyboard")
+			_pause_menu.show_tab(maxi(PauseMenu.TABS.find(_menu_at_start.get_slice(",", 0).capitalize()), 0)))
 	if _report_at_start != "":
 		get_tree().create_timer(2.0).timeout.connect(func() -> void:
 			_pause_menu.capture()
@@ -304,6 +318,7 @@ func _setup_audio() -> void:
 	_radio = Radio.new()
 	_radio.name = "Radio"
 	add_child(_radio)
+	_pause_menu.radio = _radio
 	if _radio_start != "":
 		_radio.select(_radio_start if _radio_start == Radio.OFF or _radio_start.contains(".") else "code430.base." + _radio_start)
 	if _player != null and _player.is_driving():
@@ -324,6 +339,7 @@ func _setup_net() -> void:
 	_player_sync.name = "PlayerSync"
 	_player_sync.player = _player
 	_player_sync.remote_parent = _world
+	_player_sync.remote_horn.connect(func(at: Vector3) -> void: if _peds != null and Session.is_host(): _peds.startle(at, HORN_STARTLE_M))
 	add_child(_player_sync)
 	_world_sync = WorldSync.new()
 	_world_sync.name = "WorldSync"
@@ -619,6 +635,8 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--menu="):
+			_menu_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--record-music="):
 			_record_music = arg.get_slice("=", 1)
 		elif arg.begins_with("--radio="):
@@ -691,6 +709,12 @@ func _hint(controller: String, keyboard: String) -> String:
 	return keyboard if _keyboard else controller
 
 
+## The HUD's one-line pointer to the full list (the pause menu's Controls tab), which used to be
+## the whole layout and ran off the screen.
+func _controls_hint() -> String:
+	return _hint("Menu: pause, controls (LB / RB tabs)", "Esc: pause, controls (Q / E tabs)")
+
+
 func _process(delta: float) -> void:
 	if _player != null and (get_tree().paused or _player.is_driving() or not _keyboard) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -728,6 +752,7 @@ func _process(delta: float) -> void:
 				_parked.hour = _day_night.hour
 		if _traffic.lanes != null and _graph_view.visible != (_traffic._debug_mesh != null and _traffic._debug_mesh.visible):
 			_traffic.set_debug_visible(_graph_view.visible)
+	_prompt.visible = not get_tree().paused  # under the pause menu it only showed through the dim
 	if _car != null and _player != null:
 		_bench_elapsed_hud(delta)
 		var body: Node3D = Players.local_controlled_body()
@@ -747,13 +772,13 @@ func _process(delta: float) -> void:
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("RT accelerate, LT brake/reverse, RB handbrake, Y get out, D-pad down camera, D-pad up lights, Back map, Menu pause", "W accelerate, S brake/reverse, A D steer, Space handbrake, E get out, V camera, H lights, M map, Esc pause"),
+				_controls_hint(),
 			]
 			_prompt.text = ""
 		else:
 			_hud.text = "on foot%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				net, body.global_position.x, body.global_position.y, body.global_position.z,
-				_hint("left stick walk, L3 run, A jump, right stick look, Y get in, Back map, Menu pause", "WASD walk, Shift run, Space jump, click then mouse to look, E get in, M map, Esc pause"),
+				_controls_hint(),
 			]
 			_prompt.text = _hint("Y  get in", "E  get in") if _player.nearest_vehicle() != null else ""
 	if _autodrive and _car != null:
@@ -783,6 +808,11 @@ func _process(delta: float) -> void:
 	var in_play := not get_tree().paused
 	if in_play and Input.is_action_just_pressed("headlights_cycle") and _player != null and _player.is_driving():
 		_headlights = (_headlights + 1) % 3
+	var driving := _player != null and _player.is_driving()
+	_camera.look_behind = in_play and driving and Input.is_action_pressed("look_behind")
+	_reset_ring.progress = _car.reset_progress() if driving and _car != null else 0.0
+	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
+		_peds.startle(_car.global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
 		_camera.cycle_mode()
 		_camera.look_at(_car.global_position, Vector3.UP)

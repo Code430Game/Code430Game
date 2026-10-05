@@ -83,3 +83,51 @@ func test_apply_to_environment_follows_preset() -> void:
 	s.apply_preset("high")
 	s.apply_to_environment(env)
 	assert_bool(env.sdfgi_enabled).is_true()
+
+
+func _button(index: int) -> InputEventJoypadButton:
+	var b := InputEventJoypadButton.new()
+	b.button_index = index as JoyButton
+	return b
+
+
+func test_rebind_saves_and_a_fresh_start_applies_it() -> void:
+	var s := _make(false)
+	assert_str(s.rebind("horn", _button(JOY_BUTTON_DPAD_UP))).is_equal("")
+	assert_str(Controls.binding_text("horn", true)).is_equal("D-pad up")
+	assert_str(Controls.binding_text("horn", false)).is_equal("G")  # the key is untouched
+	InputMap.load_from_project_settings()  # what a fresh start sees before Settings runs
+	assert_str(Controls.binding_text("horn", true)).is_equal("L3")
+	var again := _make(false)
+	again.apply_bindings()
+	assert_str(Controls.binding_text("horn", true)).is_equal("D-pad up")
+	InputMap.load_from_project_settings()
+
+
+func test_conflicting_rebind_is_refused_with_the_action_named() -> void:
+	var s := _make(false)
+	assert_str(s.rebind("horn", _button(JOY_BUTTON_RIGHT_SHOULDER))).is_equal("handbrake")
+	assert_str(Controls.binding_text("horn", true)).is_equal("L3")
+	assert_dict(s.binding_overrides).is_empty()
+	var space := InputEventKey.new()
+	space.physical_keycode = KEY_SPACE
+	assert_str(s.rebind("horn", space)).is_equal("handbrake")
+	assert_str(s.rebind("sprint", space)).is_equal("jump")  # on foot Space jumps
+	InputMap.load_from_project_settings()
+
+
+func test_reset_restores_defaults_and_forgets_the_file() -> void:
+	var s := _make(false)
+	s.rebind("camera_cycle", _button(JOY_BUTTON_DPAD_UP))
+	s.reset_bindings()
+	assert_str(Controls.binding_text("camera_cycle", true)).is_equal("D-pad down")
+	var again := _make(false)
+	assert_dict(again.binding_overrides).is_empty()
+
+
+func test_stick_groups_and_unknown_entries_are_not_rebound() -> void:
+	var s := _make(false)
+	assert_str(s.rebind("move_left", _button(JOY_BUTTON_X))).is_not_empty()
+	s.binding_overrides = {"no_such_action/pad": {"type": "button", "index": 2}, "horn/pad": {"type": "nonsense"}}
+	s.apply_bindings()  # neither crashes nor binds
+	assert_str(Controls.binding_text("horn", true)).is_equal("L3")

@@ -1,6 +1,6 @@
 # Change: Surface detail, sidewalk joints and zebra crossings
 
-**Status: proposed 2026-10-02 (human, after a Deck drive: "we should add textures and sidewalk line breaks; the cross walks should be striped like Abbey Road").**
+**Status: proposed 2026-10-02 (human, after a Deck drive: "we should add textures and sidewalk line breaks; the cross walks should be striped like Abbey Road"); approved 2026-10-04 (human: "i want to add textures to the surfaces too"), with the backlog's grass-through-roads fix folded in. The design's open decisions were taken from the human's request: zebra stripes on every crossing ("like Abbey Road"), and slab lengths of 1.5 m downtown and 2 m on paths.**
 
 ## Why
 Roads, sidewalks and crossings are flat vertex colours: a sidewalk is one grey ribbon with no
@@ -27,6 +27,11 @@ joints on sidewalks, and zebra stripes on crossings.
   with signals); unsignalised crossings get the same stripes, which is the human's preference
   over Ottawa's two-line markings. Stripes are marking quads in the marking chunks, using the
   paint detail so they wear like the lane lines.
+- **Grass through roads (folded in from the backlog, 2026-10-03).** Terrain still shows through
+  some junction surfaces, mostly in the corners between arms, because the importer flattens the
+  terrain only under edge ribbons. It now also flattens a disc under every junction node at the
+  node's height, sized from the widest arm, and a test on the Ottawa pack counts junction
+  surfaces with terrain poking through, before and after.
 - **Not in this change:** road patches and potholes, manhole covers and drains (vegetation and
   underpass rounds own grates), textured building facades, decals from combat.
 
@@ -40,7 +45,7 @@ Not content. Wear and dirt levels may later read the mode's variant key; not now
 - Affected specs: `street-dressing` (Sidewalks From Footways modified, Zebra Crossings added),
   `road-markings` (no requirement change: the crossing stripes use the marking chunks and the
   existing rules file).
-- Affected code: `game/world/build/` (detail texture generator, new), `game/world/roads/road_mesh_builder.gd`,
+- Affected code: `game/world/roads/surface_detail.gd` and `ground_detail.gdshader` (detail textures, new), `game/world/roads/road_mesh_builder.gd`,
   `junction_builder.gd`, `marking_builder.gd`, `sidewalk_builder.gd`, their materials and
   shaders, `game/core/settings/presets.json`, `docs/graphics-presets.md`, tests on the stripe
   count and joint spacing; Ottawa pack re-exported only if the sidewalk GLB role needs the
