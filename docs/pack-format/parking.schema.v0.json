@@ -168,6 +168,147 @@
           }
         }
       }
+    },
+    "garages": {
+      "description": "Underground garages built from parking entrances (add-underground-parking). tier door: a ramp to a closed door; tier garage: a ramp to one level under `rings`.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "tier",
+          "name",
+          "capacity",
+          "access",
+          "fee",
+          "floor_y",
+          "ceiling_y",
+          "footprint",
+          "building",
+          "rings",
+          "entrances"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^g[0-9]+$"
+          },
+          "tier": {
+            "enum": [
+              "door",
+              "garage"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "access": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fee": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "floor_y": {
+            "type": "number"
+          },
+          "ceiling_y": {
+            "type": "number"
+          },
+          "footprint": {
+            "enum": [
+              "lot",
+              "building",
+              "capacity",
+              "none"
+            ]
+          },
+          "building": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rings": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "entrances": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "osm_id",
+                "at",
+                "dir",
+                "ramp"
+              ],
+              "properties": {
+                "osm_id": {
+                  "type": "integer"
+                },
+                "at": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "dir": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "ramp": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
