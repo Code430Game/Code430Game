@@ -12453,10 +12453,10 @@
  "ramps": [],
  "summary": {
   "barriers": {
-   "curb": 3587,
+   "curb": 3571,
    "guardrail": 38,
    "median": 24,
-   "parapet": 107,
+   "parapet": 92,
    "roadblock": 147,
    "soundwall": 18
   },

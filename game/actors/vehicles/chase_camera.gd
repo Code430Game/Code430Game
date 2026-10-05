@@ -17,6 +17,7 @@ const HIGH_HEIGHT_M := 160.0
 @export var orbit_return_speed: float = 3.0
 
 var _orbit: float = 0.0
+const CAMERA_CLEARANCE_M := 0.35
 var mode: int = Mode.CHASE
 ## When positive, top-down modes use this height (the testbed's --topdown=<m> for screenshots).
 var height_override: float = -1.0
@@ -70,4 +71,29 @@ func _process(delta: float) -> void:
 	var extra := maxf(float(target.get("length_m")) - 4.6, 0.0) if target.get("length_m") != null else 0.0
 	var desired := target.global_position + back * (distance_m + extra) + Vector3.UP * (height_m + extra * 0.25)
 	global_position = desired if snap else global_position.lerp(desired, clampf(position_smoothing * delta, 0.0, 1.0))
-	look_at(target.global_position + Vector3.UP * look_height_m, Vector3.UP)
+	var focus := target.global_position + Vector3.UP * look_height_m
+	global_position = _clear_of_world(focus, global_position)
+	look_at(focus, Vector3.UP)
+
+
+## Pulls the camera in front of the first solid world surface between the car and it (a garage
+## ceiling, a bridge deck, a wall): from above a ceiling it saw straight through (#43). Cars,
+## people and other moving bodies are looked past.
+func _clear_of_world(focus: Vector3, wanted: Vector3) -> Vector3:
+	var space := get_world_3d().direct_space_state if is_inside_tree() else null
+	if space == null:
+		return wanted
+	var exclude: Array[RID] = []
+	if target is CollisionObject3D:
+		exclude.append((target as CollisionObject3D).get_rid())
+	for i in range(4):
+		var q := PhysicsRayQueryParameters3D.create(focus, wanted)
+		q.exclude = exclude
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return wanted
+		if hit["collider"] is StaticBody3D:
+			var back: Vector3 = (focus - hit["position"]).normalized()
+			return hit["position"] + back * CAMERA_CLEARANCE_M
+		exclude.append(hit["rid"])
+	return wanted
