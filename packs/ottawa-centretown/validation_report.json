@@ -12548,6 +12548,25 @@
    }
   },
   "total_length_km": 247.578,
+  "vegetation": {
+   "areas": 393,
+   "bushes": 37174,
+   "chunks_over_400_trees": 1,
+   "max_trees_in_a_chunk": 456,
+   "skipped": {
+    "edge on a road, sidewalk, building or water": 1344,
+    "frontage on a road, sidewalk, building or water": 31807,
+    "outside the district": 269,
+    "scatter on a road, sidewalk, building or water": 1572,
+    "tagged on a road, sidewalk, building or water": 270
+   },
+   "trees": 18998,
+   "trees_by_source": {
+    "row": 64,
+    "scatter": 7348,
+    "tagged": 11586
+   }
+  },
   "water": {
    "polygons": 18,
    "skipped": []

@@ -31,6 +31,7 @@ from osm_import.parking import build_parking, parking_query
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
 from osm_import.validation import render_markdown
+from osm_import.vegetation import build_vegetation, vegetation_query
 from osm_import.water import build_water, water_query
 
 
@@ -122,6 +123,13 @@ def _import(args: argparse.Namespace) -> int:
                 cfg.parking.get("garages"),
             )
             result.report.summary["parking"] = parking.counts()
+        # Vegetation last: it keeps off the final roads, sidewalks, buildings and water, and
+        # stands on the finished terrain.
+        v_payload, _meta = fetch_query(vegetation_query(bbox), bbox, args.cache_dir)
+        vegetation = build_vegetation(
+            v_payload, bbox, proj, result.graph, buildings, water, ChunkSampler(chunks)
+        )
+        result.report.summary["vegetation"] = vegetation.counts()
         result.report.summary["terrain"] = tstats
         paths = write_pack(
             args.pack_out,
@@ -140,10 +148,12 @@ def _import(args: argparse.Namespace) -> int:
             barriers,
             parking,
             bridges,
+            vegetation,
         )
         print(f"terrain: {tstats}")
         print(f"barriers: {barriers.counts}")
         print(f"bridges: {bridges.counts()}")
+        print(f"vegetation: {vegetation.counts()}")
         if buildings is not None:
             print(
                 f"buildings: {len(buildings.buildings)} footprints, heights {buildings.height_sources}"

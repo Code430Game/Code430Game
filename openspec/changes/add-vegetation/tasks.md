@@ -1,6 +1,7 @@
 ## 1. Importer
-- [ ] 1.1 `vegetation.py`: query, ring assembly, archetype mapping, rows, seeded Poisson-disc scatter, bushes on park edges and frontages, exclusion margins, terrain heights, priority order; schema; validator; tests on a fixture with a tagged tree, a row, a park with a road through it and a residential block
-- [ ] 1.2 Validation report counts and over-cap figures; golden fixture; Ottawa pack re-exported with the tree, bush and area counts noted here
+- [x] 1.1 `vegetation.py`: query, ring assembly, archetype mapping, rows, seeded Poisson-disc scatter, bushes on park edges and frontages, exclusion margins, terrain heights, priority order; schema; validator; tests on a fixture with a tagged tree, a row, a park with a road through it and a residential block
+- [x] 1.2 Validation report counts and over-cap figures; golden fixture; Ottawa pack re-exported with the tree, bush and area counts noted here
+  - 2026-10-05 Ottawa re-export: 18,998 trees (11,586 mapped, 64 in rows, 7,348 scattered), 37,174 bushes (mostly frontage), 393 green areas; at most 456 trees in a chunk, one chunk over the deck cap of 400. Skips are counted in the report (270 mapped trees on a road surface, building or water; 31,807 frontage spots blocked). `vegetation.v0.json` is 6.4 MB. The golden fixture is unchanged: it covers the road graph only, and vegetation has its own tests. Mapped trees and rows are kept only off the road surface, buildings and water, because street trees stand in the sidewalk strip; scattered planting keeps the full margins
 
 ## 2. Game
 - [ ] 2.1 `tree_meshes.gd` archetypes under the triangle budgets, `canopy.gdshader`, presets entries; tests on triangle counts and that both presets declare the features
