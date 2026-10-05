@@ -18,6 +18,7 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | Soft shadow quality | low | high | RenderingServer |
 | FPS cap | none | none | Engine |
 | Vehicle detail distance (`vehicle_lod0_m`) | 60 m | 110 m | traffic: LOD0 bodies within this distance of a player, LOD1 beyond |
+| Surface detail (`surface_detail_px`, `surface_detail_macro`) | 512 px, one sample | 1024 px, plus a large-scale sample against tiling | ground materials (asphalt, concrete, paint) via `SurfaceDetail` |
 
 ## Adding a feature
 1. Add the key to both presets in `presets.json`.

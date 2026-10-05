@@ -17,7 +17,9 @@
     "shadow_quality": "soft_low",
     "max_fps": 0,
     "headlight_shadows": false,
-    "vehicle_lod0_m": 60.0
+    "vehicle_lod0_m": 60.0,
+    "surface_detail_px": 512,
+    "surface_detail_macro": false
   },
   "high": {
     "label": "High (desktop)",
@@ -36,6 +38,8 @@
     "shadow_quality": "soft_high",
     "max_fps": 0,
     "headlight_shadows": true,
-    "vehicle_lod0_m": 110.0
+    "vehicle_lod0_m": 110.0,
+    "surface_detail_px": 1024,
+    "surface_detail_macro": true
   }
 }
