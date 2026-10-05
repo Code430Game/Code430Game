@@ -12,13 +12,13 @@ extends RefCounted
 const SHADER := preload("res://world/roads/ground_detail.gdshader")
 ## kind -> [seed, frequency, grain amplitude, speckle chance, speckle amplitude, tile metres]
 const KINDS := {
-	"asphalt": [431, 0.09, 0.22, 0.012, 0.28, 4.0],
-	"concrete": [432, 0.05, 0.2, 0.006, 0.16, 2.0],
-	"paint": [433, 0.03, 0.10, 0.0, 0.0, 3.0],
+	"asphalt": [431, 0.16, 0.14, 0.02, 0.2, 2.5],
+	"concrete": [432, 0.1, 0.13, 0.01, 0.12, 1.5],
+	"paint": [433, 0.06, 0.08, 0.0, 0.0, 2.0],
 }
 
 static var _cache: Dictionary = {}  # "kind:size" -> ImageTexture
-const RECIPE_VERSION := 2  # bump when build_image changes, so cached PNGs are rebuilt
+const RECIPE_VERSION := 3  # bump when build_image changes, so cached PNGs are rebuilt
 
 
 ## The preset's detail texture size and macro switch (defaults when there is no preset).
