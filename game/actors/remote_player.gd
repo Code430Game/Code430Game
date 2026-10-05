@@ -18,6 +18,7 @@ var _last_pos: Vector3 = Vector3.INF
 var _car: AnimatableBody3D
 var _car_mesh: MeshInstance3D
 var _car_shape: CollisionShape3D
+var horn: Horn  # on the replica car, sounding while the peer holds theirs
 var _vehicle_id: String = ""
 var _car_color: Color = Color.WHITE
 var _samples: Array = []  # [{"t": float, "driving": bool, "body": Transform3D, "car": Transform3D}]
@@ -36,6 +37,8 @@ func setup(id: int, tint: Color, profile: Dictionary = {}) -> void:
 	_car.add_child(_car_shape)
 	_car_mesh = MeshInstance3D.new()
 	_car.add_child(_car_mesh)
+	horn = Horn.new()
+	_car.add_child(horn)
 	_car.top_level = true
 	add_child(_car)
 	_car.visible = false

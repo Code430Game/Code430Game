@@ -1,10 +1,12 @@
 class_name PauseMenu
 extends CanvasLayer
-## Pause screen on the `pause` action (Menu/Start, Escape). Handles its own
-## navigation in _input so it works while the tree is paused and with any
-## controller mapping: up/down move the selection, A activates, B or Menu resume.
-## Holding Menu (or Escape) for REPORT_HOLD_S goes straight to "Report a problem". Opening
-## captures the frame under the menu and a frame-time snapshot for the report.
+## Pause screen on the `pause` action (Menu/Start, Escape), in tabs: Game (resume, character,
+## co-op, report, quit), Controls (every action for the device in use, press A to rebind),
+## Options (tone, music volume) and Settings (graphics). LB/RB or Q/E change tab. Handles its
+## own navigation in _input so it works while the tree is paused and with any controller
+## mapping: up/down move the selection, left/right change a value, A activates, B or Menu
+## resume. Holding Menu (or Escape) for REPORT_HOLD_S goes straight to "Report a problem".
+## Opening captures the frame under the menu and a frame-time snapshot for the report.
 
 signal resumed
 signal quit_requested
@@ -13,35 +15,77 @@ signal host_requested
 signal join_requested(address: String)
 signal report_requested
 
-@onready var _buttons: Array[Button] = [$Panel/VBox/Resume, $Panel/VBox/Character, $Panel/VBox/Tone, $Panel/VBox/Host, $Panel/VBox/Join, $Panel/VBox/Report, $Panel/VBox/Quit]
-const TONE_ROW := 2
-const JOIN_ROW := 4
-const REPORT_ROW := 5
-const QUIT_ROW := 6
+const TABS: PackedStringArray = ["Game", "Controls", "Options", "Settings"]
+const GAME_TAB := 0
+const CONTROLS_TAB := 1
+const OPTIONS_TAB := 2
+const SETTINGS_TAB := 3
+## Rows of the Game tab.
+const JOIN_ROW := 3
+const REPORT_ROW := 4
+const QUIT_ROW := 5
 ## Holding the pause button this long after it opened the menu opens the report form.
 const REPORT_HOLD_S := 1.0
-@onready var _address: LineEdit = $Panel/VBox/Address
-@onready var _players: Label = $Panel/VBox/Players
+const ROW_FONT := 20
+const MUSIC_STEP_DB := 2.0
+const MUSIC_MIN_DB := -40.0
+const MUSIC_MAX_DB := 6.0
+const PRESETS: PackedStringArray = ["auto", "deck", "high"]
+
+@onready var _address: LineEdit = $Panel/VBox/Pages/Game/Address
+@onready var _players: Label = $Panel/VBox/Pages/Game/Players
+@onready var _tab_bar: HBoxContainer = $Panel/VBox/Tabs
+@onready var _hint: Label = $Panel/VBox/Hint
+@onready var _pages_root: Control = $Panel/VBox/Pages
 
 var overview_map: OverviewMap
-var _selected: int = 0
+## The radio whose music volume the Options tab sets (the scene hands it over).
+var radio: Radio
+var tab: int = GAME_TAB
+## Controller layout on the Controls tab, or keyboard and mouse; follows the last input.
+var showing_pad: bool = true
+## The action waiting for a press on the Controls tab, or "".
+var capturing: String = ""
 ## The frame and frame-time stats from just before the menu opened, for issue reports.
 var captured_frame: Image
 var captured_frame_stats: Dictionary = {}
+
+var _pages: Array[Control] = []
+var _rows: Array = []  # per tab: Array[Button]
+var _selected: PackedInt32Array = [0, 0, 0, 0]
+var _tab_labels: Array[Button] = []
+var _controls_list: VBoxContainer
+var _controls_scroll: ScrollContainer
+var _controls_note: Label
+var _device_label: Label
 var _hold_s: float = -1.0  # time the pause button has been held since it opened the menu; -1 when not held
 
 
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_buttons[0].pressed.connect(close)
-	_buttons[1].pressed.connect(func() -> void: character_requested.emit())
-	_buttons[TONE_ROW].pressed.connect(func() -> void: _cycle_tone(1))
-	_buttons[3].pressed.connect(func() -> void: host_requested.emit())
-	_buttons[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
-	_buttons[REPORT_ROW].pressed.connect(func() -> void: report_requested.emit())
-	_buttons[QUIT_ROW].pressed.connect(func() -> void: quit_requested.emit())
-	_highlight()
+	var game: Array[Button] = [$Panel/VBox/Pages/Game/Resume, $Panel/VBox/Pages/Game/Character, $Panel/VBox/Pages/Game/Host, $Panel/VBox/Pages/Game/Join, $Panel/VBox/Pages/Game/Report, $Panel/VBox/Pages/Game/Quit]
+	game[0].pressed.connect(close)
+	game[1].pressed.connect(func() -> void: character_requested.emit())
+	game[2].pressed.connect(func() -> void: host_requested.emit())
+	game[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
+	game[REPORT_ROW].pressed.connect(func() -> void: report_requested.emit())
+	game[QUIT_ROW].pressed.connect(func() -> void: quit_requested.emit())
+	_pages = [$Panel/VBox/Pages/Game, _build_controls_page(), _build_options_page(), _build_settings_page()]
+	_rows = [game, [], [], []]
+	for i in range(TABS.size()):
+		var b := Button.new()
+		b.text = TABS[i]
+		b.toggle_mode = true
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 18)
+		b.pressed.connect(show_tab.bind(i))
+		_tab_bar.add_child(b)
+		_tab_labels.append(b)
+	_rebuild_controls()
+	_rebuild_options()
+	_rebuild_settings()
+	show_tab(GAME_TAB)
 
 
 ## Status line under the buttons: who is in the session, or why a join failed.
@@ -49,7 +93,31 @@ func set_status(text: String) -> void:
 	_players.text = text
 
 
+## The buttons of a tab, top to bottom (tests and the testbed).
+func rows(of_tab: int) -> Array:
+	return _rows[of_tab]
+
+
+func selected_row() -> int:
+	return _selected[tab]
+
+
+func show_tab(index: int) -> void:
+	tab = posmod(index, TABS.size())
+	capturing = ""
+	for i in range(_pages.size()):
+		_pages[i].visible = i == tab
+		_tab_labels[i].button_pressed = i == tab
+	if tab == CONTROLS_TAB:
+		_rebuild_controls()
+	_update_hint()
+	_highlight()
+
+
 func _input(event: InputEvent) -> void:
+	if capturing != "" and visible:
+		_capture(event)
+		return
 	if _address.has_focus() and visible and not event.is_action_pressed("pause"):
 		return  # typing an address: keys go to the field, B leaves it
 	if event.is_action_pressed("pause"):
@@ -62,29 +130,275 @@ func _input(event: InputEvent) -> void:
 		_hold_s = -1.0
 	if not visible:
 		return
-	if event.is_action_pressed("ui_cancel"):
+	_note_device(event)
+	if _is_tab_press(event, true):
+		show_tab(tab + 1)
+	elif _is_tab_press(event, false):
+		show_tab(tab - 1)
+	elif event.is_action_pressed("ui_cancel"):
 		close()
 	elif event.is_action_pressed("ui_accept"):
-		_buttons[_selected].pressed.emit()
-	elif event.is_action_pressed("ui_right") and _selected == JOIN_ROW:
+		var row: Array = _rows[tab]
+		if not row.is_empty():
+			(row[_selected[tab]] as Button).pressed.emit()
+	elif event.is_action_pressed("ui_right") and tab == GAME_TAB and _selected[tab] == JOIN_ROW:
 		_address.grab_focus()  # edit the address with the on-screen keyboard
-	elif (event.is_action_pressed("ui_right") or event.is_action_pressed("ui_left")) and _selected == TONE_ROW:
-		_cycle_tone(1 if event.is_action_pressed("ui_right") else -1)
+	elif event.is_action_pressed("ui_right") or event.is_action_pressed("ui_left"):
+		var row: Array = _rows[tab]
+		if row.is_empty():
+			return
+		var b: Button = row[_selected[tab]]
+		if b.has_meta("step"):
+			(b.get_meta("step") as Callable).call(1 if event.is_action_pressed("ui_right") else -1)
+		else:
+			return
 	elif event.is_action_pressed("ui_down"):
-		_selected = (_selected + 1) % _buttons.size()
-		_highlight()
+		_move(1)
 	elif event.is_action_pressed("ui_up"):
-		_selected = (_selected - 1 + _buttons.size()) % _buttons.size()
-		_highlight()
+		_move(-1)
 	else:
 		return
 	get_viewport().set_input_as_handled()
+
+
+## LB/RB on a controller, Q/E on the keyboard: fixed menu buttons, whatever the game bindings.
+static func _is_tab_press(event: InputEvent, next: bool) -> bool:
+	if event is InputEventJoypadButton and event.pressed:
+		return (event as InputEventJoypadButton).button_index == (JOY_BUTTON_RIGHT_SHOULDER if next else JOY_BUTTON_LEFT_SHOULDER)
+	if event is InputEventKey and event.pressed and not event.echo:
+		return (event as InputEventKey).physical_keycode == (KEY_E if next else KEY_Q)
+	return false
+
+
+func _note_device(event: InputEvent) -> void:
+	var pad := showing_pad
+	if Controls.is_key_event(event):
+		pad = false
+	elif event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) > 0.3):
+		pad = true
+	if pad != showing_pad:
+		showing_pad = pad
+		_update_hint()
+		if tab == CONTROLS_TAB:
+			_rebuild_controls()
+			_highlight()
+
+
+func _update_hint() -> void:
+	var tabs := "LB / RB tabs" if showing_pad else "Q / E tabs"
+	var back := "B or Menu resume" if showing_pad else "Esc resume"
+	var accept := "A" if showing_pad else "Enter"
+	match tab:
+		CONTROLS_TAB:
+			_hint.text = "%s    %s rebind    %s" % [tabs, accept, back]
+		OPTIONS_TAB, SETTINGS_TAB:
+			_hint.text = "%s    left / right change    %s" % [tabs, back]
+		_:
+			_hint.text = "%s    %s select    %s    %s map" % [tabs, accept, back, "View" if showing_pad else "M"]
+
+
+func _move(delta: int) -> void:
+	var row: Array = _rows[tab]
+	if row.is_empty():
+		return
+	_selected[tab] = posmod(_selected[tab] + delta, row.size())
+	_highlight()
+
+
+func _highlight() -> void:
+	var row: Array = _rows[tab]
+	if row.is_empty():
+		return
+	_selected[tab] = clampi(_selected[tab], 0, row.size() - 1)
+	for i in range(row.size()):
+		var b: Button = row[i]
+		var base: String = b.get_meta("text", b.text.trim_prefix("> ").trim_prefix("   "))
+		b.text = ("> " if i == _selected[tab] else "   ") + base
+	var current: Button = row[_selected[tab]]
+	if visible and current.is_visible_in_tree():
+		current.grab_focus()
+	if tab == CONTROLS_TAB and _controls_scroll != null:
+		_controls_scroll.ensure_control_visible.call_deferred(current)
+
+
+func _row_button(text: String) -> Button:
+	var b := Button.new()
+	b.set_meta("text", text)
+	b.text = text
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.add_theme_font_size_override("font_size", ROW_FONT)
+	return b
+
+
+func _set_text(b: Button, text: String) -> void:
+	b.set_meta("text", text)
+	b.text = text
+
+
+# --- Controls tab ---
+
+func _build_controls_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Controls"
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.add_theme_constant_override("separation", 6)
+	_device_label = Label.new()
+	_device_label.add_theme_font_size_override("font_size", 15)
+	_device_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	page.add_child(_device_label)
+	_controls_scroll = ScrollContainer.new()
+	_controls_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_controls_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	page.add_child(_controls_scroll)
+	_controls_list = VBoxContainer.new()
+	_controls_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_controls_list.add_theme_constant_override("separation", 2)
+	_controls_scroll.add_child(_controls_list)
+	_controls_note = Label.new()
+	_controls_note.add_theme_font_size_override("font_size", 15)
+	_controls_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_controls_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(_controls_note)
+	_pages_root.add_child(page)
+	return page
+
+
+## Lists every action of each context for the device in use; rows that can be rebound press
+## into capture mode, the last row resets every binding.
+func _rebuild_controls() -> void:
+	if _controls_list == null:
+		return
+	var keep := _selected[CONTROLS_TAB]
+	for c in _controls_list.get_children():
+		_controls_list.remove_child(c)
+		c.queue_free()
+	_device_label.text = "Showing the %s layout (switches with the last thing you pressed)" % ("controller" if showing_pad else "keyboard and mouse")
+	var buttons: Array[Button] = []
+	for ctx: String in ["foot", "drive", Controls.ANY, "debug"]:
+		var heading := Label.new()
+		heading.text = Controls.context_label(ctx)
+		heading.add_theme_font_size_override("font_size", 17)
+		heading.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+		_controls_list.add_child(heading)
+		for row in Controls.rows(ctx):
+			var b := _binding_row(row)
+			_controls_list.add_child(b)
+			buttons.append(b)
+	var reset := _row_button("Reset all controls to the defaults")
+	reset.pressed.connect(_reset_controls)
+	_controls_list.add_child(reset)
+	buttons.append(reset)
+	_rows[CONTROLS_TAB] = buttons
+	_selected[CONTROLS_TAB] = clampi(keep, 0, buttons.size() - 1)
+
+
+func _binding_row(row: Dictionary) -> Button:
+	var b := _row_button(str(row["label"]))
+	b.custom_minimum_size = Vector2(0, 30)
+	b.add_theme_font_size_override("font_size", 17)
+	var binding := Label.new()
+	binding.text = Controls.row_text(row, showing_pad)
+	binding.add_theme_font_size_override("font_size", 17)
+	binding.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	binding.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	binding.set_anchors_preset(Control.PRESET_FULL_RECT)
+	binding.offset_right = -12.0
+	binding.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(binding)
+	b.set_meta("binding", binding)
+	var action := str(row.get("action", ""))
+	var fixed := row.has("pad" if showing_pad else "key")
+	if action != "" and not fixed and Controls.rebindable(action):
+		b.set_meta("action", action)
+		b.pressed.connect(_start_capture.bind(b))
+	else:
+		b.pressed.connect(func() -> void: _controls_note.text = "%s can't be changed here." % str(row["label"]).capitalize())
+	return b
+
+
+func _start_capture(b: Button) -> void:
+	capturing = str(b.get_meta("action"))
+	(b.get_meta("binding") as Label).text = "press a %s...  (%s cancels)" % ["button" if showing_pad else "key", "Menu" if showing_pad else "Esc"]
+	_controls_note.text = "Rebinding %s." % Controls.label(capturing)
+
+
+## While capturing: the next press of the device shown becomes the binding, unless it clashes.
+## The pause button cancels. Releases, stick wiggles and the other device are ignored.
+func _capture(event: InputEvent) -> void:
+	get_viewport().set_input_as_handled()
+	if event.is_action_pressed("pause"):
+		_controls_note.text = "Kept %s as it was." % Controls.label(capturing)
+		capturing = ""
+		_rebuild_controls()
+		_highlight()
+		return
+	var press: InputEvent = null
+	if showing_pad:
+		if event is InputEventJoypadButton and event.pressed:
+			press = event
+		elif event is InputEventJoypadMotion:
+			var m := event as InputEventJoypadMotion
+			if (m.axis == JOY_AXIS_TRIGGER_LEFT or m.axis == JOY_AXIS_TRIGGER_RIGHT) and m.axis_value > 0.6:
+				press = Controls.event_from_dict({"type": "axis", "axis": m.axis, "value": 1.0})
+	elif (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
+		press = event
+	if press == null:
+		return
+	if press is InputEventJoypadButton:
+		press = Controls.event_from_dict(Controls.event_to_dict(press))  # drop device and pressure
+	elif press is InputEventKey:
+		press = Controls.event_from_dict(Controls.event_to_dict(press))
+	var action := capturing
+	capturing = ""
+	var clash := Settings.rebind(action, press)
+	if clash != "":
+		_controls_note.text = "%s is already used for %s. Nothing changed." % [Controls.event_text(press), clash]
+	else:
+		_controls_note.text = "%s is now %s." % [Controls.label(action).capitalize(), Controls.event_text(press)]
+	_rebuild_controls()
+	_highlight()
+
+
+func _reset_controls() -> void:
+	Settings.reset_bindings()
+	_controls_note.text = "Every control is back to its default."
+	_rebuild_controls()
+	_highlight()
+
+
+# --- Options tab ---
+
+func _build_options_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Options"
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.add_theme_constant_override("separation", 12)
+	_pages_root.add_child(page)
+	return page
+
+
+func _rebuild_options() -> void:
+	var page := _pages[OPTIONS_TAB]
+	if (_rows[OPTIONS_TAB] as Array).is_empty():
+		var tone := _row_button("")
+		tone.set_meta("step", func(d: int) -> void: _cycle_tone(d))
+		tone.pressed.connect(func() -> void: _cycle_tone(1))
+		var music := _row_button("")
+		music.set_meta("step", func(d: int) -> void: _step_music(d))
+		page.add_child(tone)
+		page.add_child(music)
+		_rows[OPTIONS_TAB] = [tone, music]
+	var rows_now: Array = _rows[OPTIONS_TAB]
+	_set_text(rows_now[0], _tone_text())
+	var music_text := "Music volume: <  %+.0f dB  >" % radio.music_volume_db if radio != null else "Music volume: (radio not running)"
+	_set_text(rows_now[1], music_text)
 
 
 func _cycle_tone(delta: int) -> void:
 	if ContentMode.locked:
 		return
 	ContentMode.cycle(delta)
+	_rebuild_options()
 	_highlight()
 
 
@@ -94,11 +408,49 @@ func _tone_text() -> String:
 	return "Tone: <  %s  >" % ContentMode.mode_name()
 
 
-func _highlight() -> void:
-	_buttons[TONE_ROW].text = _tone_text()
-	for i in range(_buttons.size()):
-		_buttons[i].text = ("> " if i == _selected else "   ") + _buttons[i].text.trim_prefix("> ").trim_prefix("   ")
-	_buttons[_selected].grab_focus()
+func _step_music(delta: int) -> void:
+	if radio == null:
+		return
+	radio.set_music_volume_db(clampf(radio.music_volume_db + delta * MUSIC_STEP_DB, MUSIC_MIN_DB, MUSIC_MAX_DB))
+	_rebuild_options()
+	_highlight()
+
+
+# --- Settings tab ---
+
+func _build_settings_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Settings"
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.add_theme_constant_override("separation", 12)
+	_pages_root.add_child(page)
+	return page
+
+
+func _rebuild_settings() -> void:
+	var page := _pages[SETTINGS_TAB]
+	if (_rows[SETTINGS_TAB] as Array).is_empty():
+		var graphics := _row_button("")
+		graphics.set_meta("step", func(d: int) -> void: _step_preset(d))
+		graphics.pressed.connect(func() -> void: _step_preset(1))
+		page.add_child(graphics)
+		var note := Label.new()
+		note.name = "Note"
+		note.add_theme_font_size_override("font_size", 15)
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		page.add_child(note)
+		_rows[SETTINGS_TAB] = [graphics]
+	var current := Settings.preset_override
+	var shown := "Auto (%s)" % Settings.resolve_preset_name().capitalize() if current == Settings.PRESET_AUTO else current.capitalize()
+	_set_text(_rows[SETTINGS_TAB][0], "Graphics: <  %s  >" % shown)
+	(page.get_node("Note") as Label).text = "Auto picks Deck on a Steam Deck (%s here) and High elsewhere. Saved for next time." % ("detected" if Settings.is_steam_deck else "not detected")
+
+
+func _step_preset(delta: int) -> void:
+	var i := PRESETS.find(Settings.preset_override)
+	Settings.set_preset_override(PRESETS[posmod(maxi(i, 0) + delta, PRESETS.size())])
+	_rebuild_settings()
+	_highlight()
 
 
 func _process(delta: float) -> void:
@@ -125,8 +477,10 @@ func open() -> void:
 		overview_map.close()
 	capture()
 	visible = true
-	_selected = 0
-	_highlight()
+	_selected = PackedInt32Array([0, 0, 0, 0])
+	_rebuild_options()
+	_rebuild_settings()
+	show_tab(GAME_TAB)
 	get_tree().paused = true
 
 
@@ -150,5 +504,6 @@ func reopen() -> void:
 
 func close() -> void:
 	visible = false
+	capturing = ""
 	get_tree().paused = false
 	resumed.emit()

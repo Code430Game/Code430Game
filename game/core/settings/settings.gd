@@ -1,5 +1,5 @@
 extends Node
-## Settings autoload: graphics preset selection and persistence.
+## Settings autoload: graphics preset selection, the player's control bindings, persistence.
 ##
 ## Preset data lives in presets.json. The active preset is `deck` on Steam Deck
 ## hardware unless the player saved an override; otherwise `high`. Rendering
@@ -13,6 +13,9 @@ const PRESETS_PATH := "res://core/settings/presets.json"
 const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SECTION_GRAPHICS := "graphics"
 const KEY_PRESET := "preset"
+## Rebound controls: key "<action>/pad" or "<action>/key", value Controls.event_to_dict().
+## Defaults stay in project.godot, so resetting is deleting this section.
+const SECTION_CONTROLS := "controls"
 const PRESET_AUTO := "auto"
 const PRESET_DECK := "deck"
 const PRESET_HIGH := "high"
@@ -51,12 +54,15 @@ var preset_override: String = PRESET_AUTO
 var current_preset_name: String = ""
 ## True when the machine was detected as a Steam Deck.
 var is_steam_deck: bool = false
+## The player's rebinds, "<action>/pad" or "<action>/key" -> Controls.event_to_dict().
+var binding_overrides: Dictionary = {}
 
 
 func _ready() -> void:
 	presets = load_presets(PRESETS_PATH)
 	is_steam_deck = DeckDetector.is_steam_deck(DeckDetector.collect_facts())
 	load_settings()
+	apply_bindings()  # autoloads are ready before the first scene reads the input map
 	apply_preset(resolve_preset_name())
 
 
@@ -92,6 +98,12 @@ func load_settings() -> void:
 		var value: Variant = cfg.get_value(SECTION_GRAPHICS, KEY_PRESET, PRESET_AUTO)
 		if typeof(value) == TYPE_STRING:
 			preset_override = value
+	binding_overrides = {}
+	if cfg.has_section(SECTION_CONTROLS):
+		for key in cfg.get_section_keys(SECTION_CONTROLS):
+			var d: Variant = cfg.get_value(SECTION_CONTROLS, key)
+			if d is Dictionary:
+				binding_overrides[key] = d
 
 
 ## Writes the current override to disk.
@@ -99,7 +111,42 @@ func save_settings() -> Error:
 	var cfg := ConfigFile.new()
 	cfg.load(settings_path)
 	cfg.set_value(SECTION_GRAPHICS, KEY_PRESET, preset_override)
+	if cfg.has_section(SECTION_CONTROLS):
+		cfg.erase_section(SECTION_CONTROLS)
+	for key: String in binding_overrides:
+		cfg.set_value(SECTION_CONTROLS, key, binding_overrides[key])
 	return cfg.save(settings_path)
+
+
+## Puts the saved rebinds over the project defaults. Unknown actions and bad entries are skipped.
+func apply_bindings() -> void:
+	for key: String in binding_overrides:
+		var action := key.get_slice("/", 0)
+		var event := Controls.event_from_dict(binding_overrides[key])
+		if event != null and InputMap.has_action(action) and Controls.rebindable(action):
+			Controls.replace_binding(action, event)
+
+
+## Binds `event` to `action` (replacing its controller or keyboard binding) and saves. Refused,
+## returning the conflicting action's label, when another action live at the same time already
+## uses that press; returns "" when bound.
+func rebind(action: String, event: InputEvent) -> String:
+	if not Controls.rebindable(action):
+		return action
+	var other := Controls.conflict(action, event)
+	if other != "":
+		return Controls.label(other)
+	Controls.replace_binding(action, event)
+	binding_overrides["%s/%s" % [action, "pad" if Controls.is_pad_event(event) else "key"]] = Controls.event_to_dict(event)
+	save_settings()
+	return ""
+
+
+## Back to the bindings in project.godot, and forgets the saved rebinds.
+func reset_bindings() -> void:
+	binding_overrides = {}
+	InputMap.load_from_project_settings()
+	save_settings()
 
 
 ## Sets the player's preset choice ("auto", "deck", "high"), saves it, and applies it.
