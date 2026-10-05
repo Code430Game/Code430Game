@@ -11,7 +11,7 @@ const CROSSING_DROP_M := 0.0  # the import already places crossings 2 cm above t
 const VISIBLE_TO_M := 500.0
 const COLORS := {
 	"sidewalk": Color(0.72, 0.71, 0.68),
-	"crossing": Color(0.62, 0.62, 0.62),
+	"crossing": Color(0.4, 0.4, 0.41),  # road grey: the zebra stripes on top carry the crossing
 	"footway": Color(0.70, 0.69, 0.66),
 	"pedestrian": Color(0.70, 0.69, 0.66),
 	"steps": Color(0.60, 0.59, 0.57),

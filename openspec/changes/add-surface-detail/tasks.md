@@ -7,7 +7,7 @@
 - [x] 2.1 `sidewalk_builder.gd`: distance-along and across in UV2; joint lines in the shader; longitudinal joint on wide ribbons; test on spacing; GLB export attribute and Ottawa pack re-exported; done 2026-10-04: UV = metres along and across, UV2 = (width, slab length: 1.5 m sidewalks and footways, 2 m paths, none on crossings, cycle lanes and steps); no pack re-export needed (sidewalks are built at runtime and GLB keeps both UV sets)
 
 ## 3. Crossings
-- [ ] 3.1 Zebra stripe quads per crossing in the marking chunks, clipped to the curb, with a stop line on signalised approaches; tests on stripe count and extent
+- [x] 3.1 Zebra stripe quads per crossing in the marking chunks, clipped to the curb, with a stop line on signalised approaches; tests on stripe count and extent; done 2026-10-04: 1,151 Ottawa crossings striped; bars 0.5 m with 0.5 m gaps, long side along the road, 0.3 m inside the carriageway, drawn on top of the crossing's own strip (now road grey so the stripes carry it). Stop lines are new (nothing drew them before): 2 m before the stripes, across the lanes heading into a signalised junction within 35 m
 - [ ] 3.2 Mac screenshots: Bank and Somerset crossing, a Market sidewalk with joints, asphalt grain by day and at dusk on both presets
 
 ## 4. Verification
