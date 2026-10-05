@@ -2,7 +2,9 @@
 
 ## Purpose
 Knowing where you are: the full-screen overview map and the corner minimap, both drawn from the road graph and the map pack.
+
 ## Requirements
+
 ### Requirement: Overview Map
 The game SHALL provide a toggleable full-screen map rendered from the road graph and water polygons, centred on the player with a heading marker, zoomable with the triggers, usable with a controller alone.
 
@@ -33,3 +35,9 @@ While driving, the HUD SHALL show a minimap: a crop of the overview map texture 
 - **WHEN** the overview map is open
 - **THEN** the minimap is hidden
 
+### Requirement: Parks On Maps
+The overview map and minimap SHALL fill park, grass and wooded areas green under the roads and above the building fill.
+
+#### Scenario: Map over the canal
+- **WHEN** the map is open over Confederation Park
+- **THEN** the park shows as a green fill with the roads drawn over it
