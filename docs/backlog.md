@@ -207,7 +207,8 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   by `test_junction_terrain.gd`, including n14141327481 (+10.5 m), n472497779 (+10.7 m),
   n472558217 (+2.9 m), n4991525553 (+0.4 m), n2609373961 (+0.18 m), c1236845823 (+0.17 m).
   The big ones look like junctions in cuttings or at tunnel mouths, not the corner problem.
-  Look at each in game; the test guards the count.
+  Look at each in game; the test guards the share. With add-parking-lots' pack it is 47 of
+  1,936 (2.4%): many driveway and aisle junctions on slopes add to it.
 - **README's pack-builder command is stale:** `godot ... -s res://world/build/pack_builder.gd`
   points at a file that does not exist (and `build/` is gitignored, which also swallowed new
   files placed under `game/world/build/` once).
