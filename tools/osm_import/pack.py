@@ -34,6 +34,7 @@ from osm_import.parking import ParkingResult
 from osm_import.png import encode_heights, write_rgb8
 from osm_import.projection import LocalFrame
 from osm_import.underpasses import dig_underpasses
+from osm_import.vegetation import VegetationResult
 from osm_import.water import WaterResult
 
 CHUNK_SIZE_M = 256.0
@@ -465,6 +466,7 @@ def write_pack(
     barriers: BarriersResult | None = None,
     parking: ParkingResult | None = None,
     bridges: BridgesResult | None = None,
+    vegetation: VegetationResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -546,6 +548,9 @@ def write_pack(
     if bridges is not None:
         paths["bridges"] = out_dir / "bridges.v0.json"
         dump_json(bridges.to_dict(), paths["bridges"])
+    if vegetation is not None:
+        paths["vegetation"] = out_dir / "vegetation.v0.json"
+        dump_json(vegetation.to_dict(), paths["vegetation"])
     return paths
 
 

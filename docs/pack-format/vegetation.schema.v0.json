@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/vegetation.schema.v0.json",
+  "title": "Code 430 vegetation v0",
+  "description": "Optional file in a map pack. Trees and bushes as compact rows [x, y, z, archetype, height, crown, seed, source], written per 256 m chunk in priority order (tagged, row, frontage and edge, scatter) so a cap keeps mapped trees; and green areas with triangles for the maps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "columns", "trees", "bushes", "areas"],
+  "$defs": {
+    "plant": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number"}, {"type": "number"}, {"type": "number"},
+        {"enum": ["broadleaf", "columnar", "conifer", "bush_round", "bush_low"]},
+        {"type": "number", "exclusiveMinimum": 0},
+        {"type": "number", "minimum": 0},
+        {"type": "integer"},
+        {"enum": ["tagged", "row", "frontage", "edge", "scatter"]}
+      ],
+      "items": false,
+      "minItems": 8
+    }
+  },
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "columns": {"type": "array", "items": {"type": "string"}},
+    "trees": {"type": "array", "items": {"$ref": "#/$defs/plant"}},
+    "bushes": {"type": "array", "items": {"$ref": "#/$defs/plant"}},
+    "areas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "name", "vertices", "triangles"],
+        "properties": {
+          "id": {"type": "string"},
+          "kind": {"enum": ["park", "garden", "grass", "wood", "scrub"]},
+          "name": {"type": ["string", "null"]},
+          "vertices": {"type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}},
+          "triangles": {"type": "array", "items": {"type": "integer", "minimum": 0}}
+        }
+      }
+    }
+  }
+}
