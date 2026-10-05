@@ -43,6 +43,11 @@ var _results: Dictionary = {}  # written by worker threads under _mutex
 var _shape_queue: Array = []  # [[StaticBody3D, CollisionShape3D], ...] shapes still to attach
 var _mesh_queue: Array = []  # [[Node3D, Node], ...] mesh instances still to add to their chunk
 var _mutex := Mutex.new()
+## Build chunks on worker threads. Off under the headless (dummy) renderer, as in CI and the
+## tests: its mesh storage is not thread-safe, and chunk tasks creating meshes at once
+## corrupted it ("Attempting to initialize the wrong RID", "Parameter mem is null", and the
+## occasional abort, exit 134, that followed). The real renderers are thread-safe.
+var threaded: bool = DisplayServer.get_name() != "headless"
 
 
 func setup(p: MapPack, w: Node3D) -> void:
@@ -176,11 +181,21 @@ func _schedule_builds() -> void:
 			continue
 		candidates.append([_distance_to_anchors(coord), coord, wanted])
 	candidates.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var built_now := 0
 	for c in candidates:
-		if _pending.size() >= BUILDS_IN_FLIGHT:
+		if _pending.size() >= BUILDS_IN_FLIGHT or built_now >= BUILDS_IN_FLIGHT:
 			break
 		var coord: Vector2i = c[1]
 		var tier: int = c[2]
+		if not threaded:
+			var parts := _build_parts(coord, tier)
+			if parts.is_empty():
+				_failed[coord] = true
+				stats["failed"] += 1
+			else:
+				_ready[coord] = parts
+			built_now += 1
+			continue
 		var task := WorkerThreadPool.add_task(_build_task.bind(coord, tier), false, "chunk %s" % coord)
 		_pending[coord] = {"task": task, "tier": tier}
 
@@ -273,14 +288,15 @@ func _queue_collision(parts: Dictionary) -> void:
 	var body := StaticBody3D.new()
 	body.name = "collision"
 	node.add_child(body)
-	var shapes: Array = parts.get("shapes", [])
-	if shapes.is_empty():
+	# Triangle lists come from the worker (prepare_shapes); the shapes are made here on the main
+	# thread, a few per frame in _create_queued_shapes (the physics server is not thread-safe).
+	var faces: Array = parts.get("shape_faces", [])
+	if faces.is_empty():
 		for m in parts["collision_meshes"]:
-			var s := MapPack.trimesh_shape(m)
-			if s != null:
-				shapes.append(s)
-	for shape in shapes:
-		_shape_queue.append([body, shape])
+			if m != null and m.get_surface_count() > 0:
+				faces.append(m.get_faces())
+	for f in faces:
+		_shape_queue.append([body, f])
 	if parts.get("water_mesh") != null:
 		node.add_child(MapPack.build_water_floor(parts["water_mesh"]))
 
@@ -303,12 +319,11 @@ func _create_queued_shapes() -> void:
 	while made < SHAPES_PER_FRAME and not _shape_queue.is_empty():
 		var item: Array = _shape_queue.pop_front()
 		var body: StaticBody3D = item[0]
-		var shape: CollisionShape3D = item[1]
 		if not is_instance_valid(body) or not body.is_inside_tree():
-			if is_instance_valid(shape):
-				shape.free()
 			continue  # the chunk was freed or downgraded before its shapes arrived
-		body.add_child(shape)
+		var shape := MapPack.shape_from_faces(item[1])
+		if shape != null:
+			body.add_child(shape)
 		made += 1
 
 
