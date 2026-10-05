@@ -19,7 +19,13 @@ from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.export import pedestrian_to_list
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.osm_data import BBox, OsmData
-from osm_import.pack import ChunkSampler, build_terrain, elevation_attribution_for, write_pack
+from osm_import.pack import (
+    ChunkSampler,
+    build_terrain,
+    clamp_under_decks,
+    elevation_attribution_for,
+    write_pack,
+)
 from osm_import.parking import build_parking, parking_query
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
@@ -89,6 +95,8 @@ def _import(args: argparse.Namespace) -> int:
         bridges = build_bridges(
             result.graph, ChunkSampler(chunks).sample, cfg.bridges, outlines, proj, water
         )
+        tstats["cells_lowered_under_decks"] = clamp_under_decks(chunks, bridges)
+        bridges.reset_pier_feet(ChunkSampler(chunks).sample)
         result.report.summary["bridges"] = bridges.counts()
         # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
         result.graph_dict["pedestrian_ways"] = pedestrian_to_list(result.graph)

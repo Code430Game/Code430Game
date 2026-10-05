@@ -12536,6 +12536,7 @@
    "cells_carved": 6750,
    "cells_flattened": 386720,
    "cells_lowered_for_water": 58750,
+   "cells_lowered_under_decks": 22659,
    "cells_under_buildings": 160487,
    "chunks": 196,
    "underpasses": {
