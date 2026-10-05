@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 ## The full testbed: D-pad presses that navigate menus must not reach the driving hotkeys
-## (D-pad down cycles the camera, D-pad up the headlights), human report 2026-10-03.
+## (D-pad down cycles the camera, D-pad right the headlights), human report 2026-10-03.
 
 const TESTBED := preload("res://scenes/play_testbed.tscn")
 
@@ -83,6 +83,7 @@ func test_dpad_in_the_pause_menu_leaves_camera_and_lights_alone() -> void:
 	for i in range(3):
 		await _press(JOY_BUTTON_DPAD_DOWN)
 		await _press(JOY_BUTTON_DPAD_UP)
+		await _press(JOY_BUTTON_DPAD_RIGHT)  # the headlights button; on the first row it does nothing
 	assert_int(cam.mode).override_failure_message("camera changed behind the pause menu").is_equal(mode)
 	assert_int(_bed.get("_headlights")).override_failure_message("lights changed behind the pause menu").is_equal(lights)
 	await _press(JOY_BUTTON_B)  # resume
@@ -97,6 +98,7 @@ func _assert_dpad_leaves_driving_alone(where: String) -> void:
 	for i in range(3):
 		await _press(JOY_BUTTON_DPAD_DOWN)
 		await _press(JOY_BUTTON_DPAD_UP)
+		await _press(JOY_BUTTON_DPAD_RIGHT)  # the headlights button; on the first row it does nothing
 	assert_int(cam.mode).override_failure_message("camera changed behind the %s" % where).is_equal(mode)
 	assert_int(_bed.get("_headlights")).override_failure_message("lights changed behind the %s" % where).is_equal(lights)
 

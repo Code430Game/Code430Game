@@ -1,0 +1,46 @@
+{
+  "_doc": "Every action the player can press, grouped by context. Read by Controls (conflict rules, the Controls tab, rebinding) and tools/controls_doc.py (docs/controls.md). Bindings themselves live in project.godot; 'pad'/'key' here only override the generated text for stick groups and notes. 'reserved' rows are bound but not used yet, so they are hidden from players.",
+  "contexts": {
+    "foot": "On foot",
+    "drive": "Driving",
+    "debug": "Debug (hold View / Back)",
+    "any": "Anywhere"
+  },
+  "hold_s": 1.0,
+  "tap_s": 0.3,
+  "shared": [
+    ["look_behind", "reset_vehicle"]
+  ],
+  "rows": [
+    {"context": "foot", "label": "walk", "actions": ["move_forward", "move_back", "move_left", "move_right"], "pad": "left stick", "key": "W A S D"},
+    {"context": "foot", "label": "look around", "actions": ["look_up", "look_down", "look_left", "look_right"], "pad": "right stick", "key": "click once, then move the mouse (Esc releases it)"},
+    {"context": "foot", "label": "run", "action": "sprint"},
+    {"context": "foot", "label": "jump", "action": "jump"},
+    {"context": "foot", "label": "get in a car, or take a traffic car", "action": "interact"},
+    {"context": "foot", "label": "look behind", "action": "look_behind"},
+    {"context": "foot", "label": "aim", "action": "aim", "reserved": true},
+    {"context": "foot", "label": "fire", "action": "fire", "reserved": true},
+    {"context": "foot", "label": "next weapon", "action": "weapon_next", "reserved": true},
+    {"context": "foot", "label": "reload", "action": "reload", "reserved": true},
+    {"context": "foot", "label": "map", "action": "map_toggle"},
+    {"context": "foot", "label": "pause menu", "action": "pause"},
+
+    {"context": "drive", "label": "accelerate", "action": "accelerate"},
+    {"context": "drive", "label": "brake or reverse", "action": "brake"},
+    {"context": "drive", "label": "steer", "actions": ["move_left", "move_right"], "pad": "left stick", "key": "A D"},
+    {"context": "drive", "label": "handbrake", "action": "handbrake"},
+    {"context": "drive", "label": "horn", "action": "horn"},
+    {"context": "drive", "label": "look behind", "action": "look_behind"},
+    {"context": "drive", "label": "reset a stuck car", "action": "reset_vehicle", "hold": true},
+    {"context": "drive", "label": "get out", "action": "interact"},
+    {"context": "drive", "label": "camera: chase, top-down, high", "action": "camera_cycle"},
+    {"context": "drive", "label": "headlights: auto (dusk to dawn), on, off", "action": "headlights_cycle"},
+    {"context": "drive", "label": "radio: next station", "action": "radio_cycle"},
+    {"context": "drive", "label": "map", "action": "map_toggle"},
+    {"context": "drive", "label": "pause menu", "action": "pause"},
+
+    {"context": "any", "label": "report a problem", "action": "report_open", "pad": "hold Menu / Start for 1 s, or \"Report a problem\" in the pause menu"},
+    {"context": "debug", "label": "debug overlay", "action": "debug_toggle"},
+    {"context": "debug", "label": "road graph overlay", "action": "debug_graph"}
+  ]
+}

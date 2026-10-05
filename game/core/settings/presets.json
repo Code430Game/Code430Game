@@ -19,7 +19,9 @@
     "headlight_shadows": false,
     "vehicle_lod0_m": 60.0,
     "parked_cars_per_chunk": 120,
-    "parked_car_bodies": 8
+    "parked_car_bodies": 8,
+    "surface_detail_px": 512,
+    "surface_detail_macro": false
   },
   "high": {
     "label": "High (desktop)",
@@ -40,6 +42,8 @@
     "headlight_shadows": true,
     "vehicle_lod0_m": 110.0,
     "parked_cars_per_chunk": 300,
-    "parked_car_bodies": 16
+    "parked_car_bodies": 16,
+    "surface_detail_px": 1024,
+    "surface_detail_macro": true
   }
 }

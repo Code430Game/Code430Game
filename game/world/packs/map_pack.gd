@@ -4,7 +4,7 @@ extends RefCounted
 ##
 ## Chunk layout (one Node3D per 256 m chunk, named "chunk_<cx>_<cz>"):
 ##   roads_lod0, roads_lod1, junctions_lod0, terrain_lod0/1/2  (MeshInstance3D)
-##   collision  (StaticBody3D with trimesh shapes from roads, junctions, terrain LOD1)
+##   collision  (StaticBody3D with trimesh shapes from roads, junctions, terrain LOD0)
 ## Visibility ranges implement the LODs. GLB chunks written by PackBuilder use the
 ## same names, so the loader can consume either.
 
@@ -265,22 +265,26 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 	if near:
 		var t0 := TerrainBuilder.build_mesh(heights, 0, holes)
 		chunk.add_child(_mesh_instance("terrain_lod0", t0, terrain_material, 0.0, TERRAIN_LOD0_END_M))
+		# Collide with the terrain that is drawn up close. LOD1 skips every other sample, so it
+		# cannot follow the ground pressed down beside a road: under the 417 at Metcalfe it rose
+		# up to 1.6 m through the asphalt, an invisible wall that lifted cars onto it (#27).
+		collision_meshes.append_array(split_for_collision(t0, 4))  # four LOD1-sized shapes: one per streamed frame
 	chunk.add_child(_mesh_instance("terrain_lod1", t1, terrain_material, TERRAIN_LOD0_END_M if near else 0.0, TERRAIN_LOD1_END_M))
 	chunk.add_child(_mesh_instance("terrain_lod2", t2, terrain_material, TERRAIN_LOD1_END_M, TERRAIN_LOD2_END_M))
-	if near:
-		collision_meshes.append(t1)
 	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier, "labels": labels}
 
 
 ## Main thread only: adds the collision body and wading floor described by build_chunk_meshes.
-## Uses shapes prepared by prepare_shapes when present.
+## Uses the triangle lists prepared by prepare_shapes when present.
 static func attach_collision(parts: Dictionary) -> void:
 	var node: Node3D = parts["node"]
-	if parts.has("shapes"):
+	if parts.has("shape_faces"):
 		var body := StaticBody3D.new()
 		body.name = "collision"
-		for shape in parts["shapes"]:
-			body.add_child(shape)
+		for faces: PackedVector3Array in parts["shape_faces"]:
+			var shape := shape_from_faces(faces)
+			if shape != null:
+				body.add_child(shape)
 		node.add_child(body)
 	else:
 		node.add_child(build_collision(parts["collision_meshes"]))
@@ -306,15 +310,31 @@ static func attach_collision(parts: Dictionary) -> void:
 		node.add_child(signs)
 
 
-## Worker-thread step: builds the collision shapes for a chunk's meshes into parts["shapes"],
-## so the main thread only has to attach them. Resources may be created off the main thread.
+## Worker-thread step: extracts each collision mesh's triangles into parts["shape_faces"]. The
+## shapes themselves are made on the main thread (shape_from_faces): creating a shape
+## allocates an id in the physics server, which is not thread-safe, and doing it from worker
+## threads raced the main thread's shape work ("Attempting to initialize the wrong RID",
+## and the flaky test aborts that came with it).
 static func prepare_shapes(parts: Dictionary) -> void:
-	var shapes: Array[CollisionShape3D] = []
+	var faces: Array[PackedVector3Array] = []
 	for m in parts["collision_meshes"]:
-		var shape := trimesh_shape(m)
-		if shape != null:
-			shapes.append(shape)
-	parts["shapes"] = shapes
+		if m != null and m.get_surface_count() > 0:
+			var f: PackedVector3Array = m.get_faces()
+			if not f.is_empty():
+				faces.append(f)
+	parts["shape_faces"] = faces
+
+
+## Main thread only: a trimesh collision shape from a triangle list, or null when empty.
+static func shape_from_faces(faces: PackedVector3Array) -> CollisionShape3D:
+	if faces.is_empty():
+		return null
+	var trimesh := ConcavePolygonShape3D.new()
+	trimesh.set_faces(faces)
+	trimesh.backface_collision = true  # a fast body that gets below a surface is pushed back, not lost
+	var shape := CollisionShape3D.new()
+	shape.shape = trimesh
+	return shape
 
 
 ## Drops the NEAR-only children (LOD0 meshes, collision, wading floor) from a built chunk.
@@ -361,6 +381,26 @@ static func build_collision(meshes: Array[Mesh]) -> StaticBody3D:
 	return body
 
 
+## `m`'s triangles cut into `parts` plain meshes (positions only) for collision, so a big mesh
+## becomes several shapes that the streamer can add on separate frames.
+static func split_for_collision(m: Mesh, parts: int) -> Array[Mesh]:
+	var out: Array[Mesh] = []
+	var faces := m.get_faces()
+	var tris := faces.size() / 3
+	if tris == 0:
+		return out
+	var per := int(ceil(float(tris) / parts))
+	for start in range(0, tris, per):
+		var piece := faces.slice(start * 3, mini(start + per, tris) * 3)
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = piece
+		var mesh := ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.append(mesh)
+	return out
+
+
 ## One trimesh collision shape for a mesh (the expensive part of a chunk add), or null for
 ## a mesh with no triangles.
 static func trimesh_shape(m: Mesh) -> CollisionShape3D:
@@ -390,12 +430,8 @@ static func _mesh_instance(name: String, mesh: Mesh, material: Material, begin: 
 	return mi
 
 
-static func _road_material() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	m.vertex_color_is_srgb = true  # colours are authored in sRGB; without this they render washed out
-	m.roughness = 0.9
-	return m
+static func _road_material() -> Material:
+	return SurfaceDetail.material("asphalt", 0.9)  # vertex colours (sRGB) with asphalt grain
 
 
 static func _terrain_material() -> StandardMaterial3D:

@@ -34,6 +34,7 @@ var driver_peer_id: int = 0
 
 var _spawn: Transform3D
 var _recover_timer: float = 0.0
+var _reset_hold_s: float = 0.0  # seconds the reset button has been held; -1 once it fired
 ## Called with the car when it needs recovering; the testbed sets this to place it on the nearest road.
 var recover_callback: Callable
 
@@ -246,8 +247,7 @@ func _physics_process(delta: float) -> void:
 	if driven and Input.is_action_pressed("handbrake"):
 		brake = handbrake_force
 	set_braking(brake > 0.0 and forward_speed() > -reverse_threshold_mps)
-	if driven and Input.is_action_just_pressed("reset_vehicle"):
-		_recover()
+	_step_reset_hold(driven and Input.is_action_pressed("reset_vehicle"), delta)
 	var upside_down := global_basis.y.y < 0.0
 	var fell_out := global_position.y < world_floor_y
 	if fell_out:
@@ -258,6 +258,25 @@ func _physics_process(delta: float) -> void:
 			_recover()
 	else:
 		_recover_timer = 0.0
+
+
+## Reset only fires once its button has been held for the hold time (R3 tap looks behind); it
+## then waits for a release so a long hold resets once.
+func _step_reset_hold(held: bool, delta: float) -> void:
+	if not held:
+		_reset_hold_s = 0.0
+		return
+	if _reset_hold_s < 0.0:
+		return  # already reset on this hold
+	_reset_hold_s += delta
+	if _reset_hold_s >= Controls.hold_s():
+		_reset_hold_s = -1.0
+		_recover()
+
+
+## How far the reset hold has got, 0..1, for the HUD ring (0 when not held or already done).
+func reset_progress() -> float:
+	return clampf(_reset_hold_s / Controls.hold_s(), 0.0, 1.0) if _reset_hold_s > 0.0 else 0.0
 
 
 func _recover() -> void:

@@ -2,7 +2,7 @@
 - [ ] 1.1 `weapons.schema.v0.json`, the first-party `weapons.v0.json` (five weapons, clean variants), `combat_config.json` (impact kinds, decal caps, flee and down times); `pack_tools` validates weapon files and refuses `lethal` variants keyed to a mode whose flag is off; tests
 
 ## 2. Game
-- [ ] 2.1 Input actions (`aim`, `fire`, `reload`, `weapon_next`, `weapon_prev`, `weapon_1..5`) and the input-map test; `WeaponSet` loads definitions, picks variants, handles mode changes
+- [ ] 2.1 Input actions (`aim`, `fire`, `reload`, `weapon_next` are already reserved by update-controls-layout; add `weapon_prev`, `weapon_1..5` as keyboard and mouse wheel, and the LB hold wheel) and the input-map test; `WeaponSet` loads definitions, picks variants, handles mode changes
 - [ ] 2.2 `Shooter` on the player: aim camera and reticle, hitscan, melee sweep, projectile pool, reload and magazines, debug refill; HUD slot and ammo; tests on spread, rate and reload
 - [ ] 2.3 Impacts: decal pool per preset, muzzle flash, synthesised shot and pop voices; mode switch clears decals; tests on pool recycling
 - [ ] 2.4 Pedestrian reactions: `FLEEING`, paint tint, lethal to `DOWN` with blood decal only when gore is allowed, earshot flee; traffic damage tint, disable threshold, tyre shot; tests in `test_pedestrians.gd` and `test_traffic.gd` for every mode
