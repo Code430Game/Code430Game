@@ -125,3 +125,20 @@ func test_bodies_are_frozen_until_a_vehicle_comes_close() -> void:
 		await get_tree().physics_frame
 	p._update_bodies()
 	assert_bool(target.body.freeze).is_false()  # dynamic before any contact
+
+
+func test_a_guest_take_empties_the_stall_on_every_peer() -> void:
+	var lots := [_lot("w1.0", Vector2(0, 0))]
+	var host := _parked(lots, 12.0)
+	var guest := _parked(lots, 12.0)  # the same cars: same seed, same hour
+	var key: String = host.cars[0].key
+	var announced: Array[String] = []
+	host.stall_taken.connect(func(k: String) -> void: announced.append(k))
+	var got := host.release_key(key)
+	assert_str(str(got["vehicle"])).is_not_empty()
+	assert_array(announced).contains_exactly([key])  # the host tells the others
+	guest.mark_taken(key)  # what _stall_taken does on each guest
+	assert_int(guest.cars.size()).is_equal(host.cars.size())
+	for i in range(host.cars.size()):
+		assert_str(guest.cars[i].key).is_equal(host.cars[i].key)
+	assert_dict(host.release_key(key)).is_empty()  # nothing left to take there

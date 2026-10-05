@@ -130,7 +130,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 ## 2026-10-01
 
 - **Character detail (human, 2026-10-01: "would love to see improved detail").** Next creator round: rounded head and limbs, separate forearms and shins with a walk cycle, more hair styles, beards, glasses, jackets over tops, and the same body on pedestrians.
-- **Testbed sometimes starts on foot despite `--drive`** on Mac screenshot runs (seen 2026-10-01, roughly one run in three; the Deck build is unaffected). Suspect a race between the spawn-in-car and the first collision frame. Unfixed.
+- **Testbed sometimes starts on foot despite `--drive`** on Mac screenshot runs (seen 2026-10-01, roughly one run in three). Could not reproduce 2026-10-04: ten runs, windowed and headless, all started driving; likely fixed by the spawn and streaming work since. Reopen if seen.
 - **Visibility ranges on city-wide MultiMeshes** are measured to the bounding box centre; removed from signal heads and billboards. Any future city-wide MultiMesh must be chunked or range-free.
 - **Character creator plan (from the human).** First start spawns a randomised character so
   nothing blocks play; the creator then tweaks that body's features; presets are saved,
@@ -197,5 +197,4 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 - **Street-side parking bays are exported but not populated** (add-parking-lots, 2026-10-04):
   256 bays in `parking.v0.json`, but road meshes and traffic lanes have no parking lane, so a
   kerbside car would sit in the travel lane. Needs road widths that include the parking lane
-  (or a lane offset for traffic) before bays get cars. Guests in co-op can't take parked cars
-  yet either (host-only, like traffic before `request_take`).
+  (or a lane offset for traffic) before bays get cars.

@@ -237,10 +237,12 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
 	if _parked != null and traffic_body.has_meta("parked_key"):
-		if not Session.is_client():  # the host owns parked cars like traffic; guests can't take them yet
-			var parked_car := _parked.take(traffic_body)
-			if parked_car != null:
-				_player.enter_vehicle(parked_car)
+		if Session.is_client():
+			_world_sync.request_take_parked(str(traffic_body.get_meta("parked_key")))  # the host answers via _on_take_granted
+			return
+		var parked_car := _parked.take(traffic_body)
+		if parked_car != null:
+			_player.enter_vehicle(parked_car)
 		return
 	if _traffic == null or not (traffic_body is TrafficCar):
 		return
@@ -327,6 +329,9 @@ func _setup_net() -> void:
 	_world_sync.name = "WorldSync"
 	_world_sync.traffic = _traffic
 	_world_sync.peds = _peds
+	_world_sync.parked = _parked
+	if _parked != null:
+		_parked.stall_taken.connect(_world_sync.announce_stall_taken)
 	_world_sync.player_sync = _player_sync
 	_world_sync.day_night = _day_night
 	_world_sync.take_granted.connect(_on_take_granted)

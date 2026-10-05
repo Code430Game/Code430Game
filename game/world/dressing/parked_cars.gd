@@ -13,6 +13,9 @@ extends Node3D
 ## refrozen where they came to rest, never snapped back (a frozen snap launches what it
 ## touches). A taken car's stall stays empty for the session.
 
+## Emitted when a car is taken from a stall here (the host tells the other peers).
+signal stall_taken(key: String)
+
 const CONFIG_PATH := "res://world/dressing/parking_config.json"
 const BODY_SCENE := preload("res://world/traffic/traffic_car.tscn")
 const TAIL_SHADER := preload("res://actors/vehicles/car_tail.gdshader")
@@ -320,4 +323,28 @@ func take(body: Node) -> VehicleBody3D:
 	_release(c)
 	cars.erase(c)
 	render()
+	stall_taken.emit(c.key)
 	return car
+
+
+## Host: empties the stall `key` for a guest who takes its car. Returns {"transform", "color",
+## "vehicle"}, or {} when the stall holds no car (already taken, or not occupied this hour).
+func release_key(key: String) -> Dictionary:
+	for c in cars:
+		if c.key == key:
+			var out := {"transform": c.body.global_transform if c.body != null else c.transform(), "color": c.color, "vehicle": c.vehicle_id}
+			mark_taken(key)
+			stall_taken.emit(key)
+			return out
+	return {}
+
+
+## Any peer: the car in stall `key` has been taken; it stays empty for the session.
+func mark_taken(key: String) -> void:
+	taken[key] = true
+	for c in cars:
+		if c.key == key:
+			_release(c)
+			cars.erase(c)
+			break
+	render()
