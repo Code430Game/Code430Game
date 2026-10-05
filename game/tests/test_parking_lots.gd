@@ -117,3 +117,12 @@ func test_stalls_keep_off_a_street_the_lot_outline_overlaps() -> void:
 	for s in lot.stalls:
 		for c in ParkingLotBuilder.stall_corners(s):
 			assert_float(c.y).is_greater(6.0 + 3.5)  # clear of the carriageway
+
+
+func test_a_strip_lot_too_shallow_for_an_aisle_gets_one_row() -> void:
+	var lot := ParkingLotBuilder.lot_from_dict(_lot([[[0, 0], [40, 0], [40, 9], [0, 9]]], {"stall_dir": [1, 0]}), null)
+	assert_int(lot.stalls.size()).is_greater(10)
+	for s in lot.stalls:
+		assert_float(s.centre.y).is_equal_approx(4.5, 0.01)  # down the middle
+		for c in ParkingLotBuilder.stall_corners(s):
+			assert_bool(ParkingLotBuilder.contains(lot, c)).is_true()
