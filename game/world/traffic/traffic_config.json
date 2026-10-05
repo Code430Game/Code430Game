@@ -20,7 +20,8 @@
     "unclassified": 1.0,
     "residential": 1.0,
     "living_street": 0.4,
-    "service": 0.2
+    "service": 0.2,
+    "parking": 0.0
   },
   "speed_fraction": 0.9,
   "connector_speed_kph": 25,

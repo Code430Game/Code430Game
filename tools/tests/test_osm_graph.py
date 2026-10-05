@@ -209,3 +209,32 @@ def test_projector_picks_the_utm_zone_of_the_region():
     assert van.frame.crs == "EPSG:32610"
     x, z = van.to_local(49.28, -123.12)
     assert abs(x) < 5.0 and abs(z) < 5.0  # the centre is the origin
+
+
+def test_parking_aisles_and_driveways_become_class_parking_joined_to_the_street():
+    g = build(
+        [
+            (1, [(-100, 0), (0, 0), (100, 0)], {"highway": "residential", "name": "Street"}),
+            (2, [(0, 0), (0, 60)], {"highway": "service", "service": "parking_aisle"}),
+            (3, [(50, 0), (50, -30)], {"highway": "service", "service": "driveway"}),
+            (4, [(-50, 0), (-50, -30)], {"highway": "service", "service": "drive-through"}),
+            (
+                5,
+                [(80, 0), (80, 40)],
+                {"highway": "service", "service": "parking_aisle", "width": "7"},
+            ),
+        ]
+    )
+    aisle = g.edges["w2.0"]
+    assert aisle.road_class == "parking"
+    assert aisle.speed_kph == 15
+    assert aisle.width_m == pytest.approx(5.5)
+    assert aisle.lanes_forward == 1 and aisle.lanes_backward == 1
+    assert "width" in aisle.defaulted_fields
+    assert g.edges["w3.0"].width_m == pytest.approx(3.5)
+    assert g.edges["w5.0"].width_m == pytest.approx(7.0)  # a tagged width wins
+    assert not any(e.osm_way_id == 4 for e in g.edges.values())  # drive-throughs still dropped
+    # The aisle shares the street's node: it splits the street there.
+    assert aisle.from_node in {
+        e.to_node for e in g.edges.values() if e.road_class == "residential"
+    } | {e.from_node for e in g.edges.values() if e.road_class == "residential"}

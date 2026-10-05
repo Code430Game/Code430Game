@@ -142,6 +142,15 @@ def _lanes(
     return max(total - half, 1), max(half, 1)
 
 
+def road_class_of(tags: dict, cfg: ImportConfig) -> str:
+    """The edge class: the highway value, except parking aisles and driveways, which become
+    class `parking` (kept in the graph so lots are drivable; traffic never uses them)."""
+    highway = tags["highway"]
+    if highway == "service" and tags.get("service") in cfg.parking.get("service_values", []):
+        return "parking"
+    return highway
+
+
 def _edge_from_segment(
     way: OsmWay,
     seg_index: int,
@@ -151,7 +160,7 @@ def _edge_from_segment(
     cfg: ImportConfig,
 ) -> RoadEdge:
     tags = way.tags
-    road_class = tags["highway"]
+    road_class = road_class_of(tags, cfg)
     defaulted: list[str] = []
     ow = T.parse_oneway(tags.get("oneway"))
     if ow == "unset":
@@ -203,7 +212,10 @@ def _edge_from_segment(
     bus, bus_lane = _bus_lanes(tags, lanes_f, ow == "reverse")
     width = T.parse_width_m(tags.get("width"))
     if width is None:
-        width = (lanes_f + lanes_b) * cfg.lane_width_m
+        if road_class == "parking":
+            width = float(cfg.parking.get("width_m", {}).get(tags.get("service", ""), 5.5))
+        else:
+            width = (lanes_f + lanes_b) * cfg.lane_width_m
         defaulted.append("width")
     speed = T.parse_maxspeed_kph(tags.get("maxspeed"))
     if speed is None:

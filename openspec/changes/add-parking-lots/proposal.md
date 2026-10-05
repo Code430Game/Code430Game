@@ -1,6 +1,6 @@
 # Change: Parking lots, aisles and parked cars
 
-**Status: proposed 2026-10-02 (human: "we should also add parking lots to the specs"). This revisits the 2026-09-30 decision to keep parking aisles and driveways out of the road graph (follow-up 8.1 in the archived `add-osm-road-import`); the human asked for lots, and lots are not drivable without their aisles.**
+**Status: proposed 2026-10-02 (human: "we should also add parking lots to the specs"); approved 2026-10-04 to build before the next test round (human: "lets also squeeze in the parking lots before the next round i need to test"), on top of `add-vehicle-variety` (parked cars come from its catalogue). The design's open decisions were taken as proposed: aisles and driveways join the road graph (lots aren't drivable without them), multi-storey garages stay plain buildings, and the occupancy table is a starting guess. This revisits the 2026-09-30 decision to keep parking aisles and driveways out of the road graph (follow-up 8.1 in the archived `add-osm-road-import`); the human asked for lots, and lots are not drivable without their aisles.**
 
 ## Why
 The district has 695 `amenity=parking` features in the extract (662 surface lots, 12

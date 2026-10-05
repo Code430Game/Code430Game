@@ -9,6 +9,7 @@ const SIGNAL_SYNC_S := 5.0
 
 var traffic: TrafficManager
 var peds: PedestrianManager
+var parked: ParkedCars
 var player_sync: PlayerSync
 var day_night: DayNight
 var _accum: float = 0.0
@@ -56,6 +57,34 @@ func _request_take(position: Vector3) -> void:
 @rpc("authority", "reliable")
 func _grant_take(transform: Transform3D, color: Color, vehicle_id: String) -> void:
 	take_granted.emit(transform, color, vehicle_id)
+
+
+## Guest: asks the host for the parked car in stall `key` (parked cars are the same on every
+## peer, so the stall key names it); the answer arrives like a traffic car's, via take_granted.
+func request_take_parked(key: String) -> void:
+	_request_take_parked.rpc_id(1, key)
+
+
+@rpc("any_peer", "reliable")
+func _request_take_parked(key: String) -> void:
+	if not Session.is_host() or parked == null:
+		return
+	var got := parked.release_key(key)  # also tells every peer the stall is empty (stall_taken)
+	if got.is_empty():
+		return
+	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"], got["vehicle"])
+
+
+## Host: tells the guests that a stall was emptied (by anyone), so their copies match.
+func announce_stall_taken(key: String) -> void:
+	if Session.is_host() and Session.connected:
+		_stall_taken.rpc(key)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _stall_taken(key: String) -> void:
+	if parked != null:
+		parked.mark_taken(key)
 
 
 ## Guest: tells the host one of its cars was hit here.
