@@ -18,6 +18,14 @@ func before() -> void:
 			break
 
 
+## Land whatever the streamer still has queued: queued meshes are outside the tree, and gdUnit
+## counted them as orphans of every test here (about 1,100 per suite).
+func after_test() -> void:
+	var streamer: Node = _bed.get("_streamer") if _bed != null else null
+	if streamer != null and streamer.has_method("flush"):
+		streamer.flush()
+
+
 func after() -> void:
 	get_tree().paused = false
 	if _bed == null:
