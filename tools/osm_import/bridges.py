@@ -154,6 +154,12 @@ class BridgesResult:
     walkways_lifted: int = 0
     piers_skipped: int = 0
 
+    def reset_pier_feet(self, sample_ground) -> None:
+        """Stands every pier on the ground again (after the terrain under decks was lowered)."""
+        for b in self.bridges:
+            for p in b.piers:
+                p.bottom_y = sample_ground(p.x, p.z) - 1.0
+
     def counts(self) -> dict:
         kinds: dict[str, int] = {}
         for b in self.bridges:

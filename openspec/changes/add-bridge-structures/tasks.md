@@ -5,10 +5,11 @@
   - 2026-10-05 Ottawa re-export: 33 bridges from 62 bridge edges (16 over a road, 10 over water, 4 over ground, 3 footbridges), including the Alexandra, Mackenzie King, Portage, Queensway, Booth Street, Plaza and Laurier bridges by their outline names; 55 walkways on decks, 12 of them lifted onto the deck (all 5 found under decks in the survey); 98 piers placed, 7 left out for want of a clear spot; 95 abutment ends. The bbox has no `man_made=bridge` relations, only ways
 
 ## 2. Game
-- [ ] 2.1 `bridge_builder.gd`: deck slab, soffit, fascia; part of the NEAR tier and collision; tests that a ray from below hits the soffit and a ray from above still hits the road at its height
-- [ ] 2.2 Piers clear of the roads and sidewalks underneath, columns over water; abutments; terrain clamp under decks; tests (no pier within 1.5 m of a ribbon underneath; terrain below the soffit by the clearance)
-- [ ] 2.3 Deck walkways drawn at deck height with the parapet outside them; the under-road keeps its own sidewalks; tests
-- [ ] 2.4 Mac screenshots from under the 417 at Metcalfe, a canal crossing and a footbridge, before and after
+- [x] 2.1 `bridge_builder.gd`: deck slab, soffit, fascia; part of the NEAR tier and collision; tests that a ray from below hits the soffit and a ray from above still hits the road at its height
+- [x] 2.2 Piers clear of the roads and sidewalks underneath, columns over water; abutments; terrain clamp under decks; tests (no pier within 1.5 m of a ribbon underneath; terrain below the soffit by the clearance)
+- [x] 2.3 Deck walkways drawn at deck height with the parapet outside them; the under-road keeps its own sidewalks; tests
+- [x] 2.4 Mac screenshots from under the 417 at Metcalfe, a canal crossing and a footbridge, before and after
+  - 2026-10-05: before (main) and after shots under the 417 at Metcalfe, the Mackenzie King and Laurier canal crossings, and Pooley's footbridge were shared. The terrain clamp (`pack.clamp_under_decks`) lowers the ground under each deck to the lower of a 1:1.5 slope from the nearest end and the ground beside the deck, never above the soffit, 5 m past the deck edges; 22,659 cell-lowerings in Ottawa. 2.3 is done in the importer (walkways lifted onto decks, the under-road's sidewalks untouched; `test_osm_bridges.py`); the game draws sidewalks from those heights, so it needed no change
 
 ## 3. Verification
 - [ ] 3.1 Deck benchmark on the usual route against main, idle Deck
