@@ -8,7 +8,7 @@
 
 ## 3. Crossings
 - [x] 3.1 Zebra stripe quads per crossing in the marking chunks, clipped to the curb, with a stop line on signalised approaches; tests on stripe count and extent; done 2026-10-04: 1,151 Ottawa crossings striped; bars 0.5 m with 0.5 m gaps, long side along the road, 0.3 m inside the carriageway, drawn on top of the crossing's own strip (now road grey so the stripes carry it). Stop lines are new (nothing drew them before): 2 m before the stripes, across the lanes heading into a signalised junction within 35 m
-- [ ] 3.2 Mac screenshots: Bank and Somerset crossing, a Market sidewalk with joints, asphalt grain by day and at dusk on both presets
+- [x] 3.2 Mac screenshots: Bank and Somerset crossing, a Market sidewalk with joints, asphalt grain by day and at dusk on both presets; done 2026-10-04: a striped crossing by day and at dusk (deck), the Sparks Street sidewalks with joints (deck), and the crossing on high (fogged: the high preset's fog is in the backlog). Shared with the human
 
 ## 4. Verification
 - [ ] 4.1 Deck benchmark on the usual route, both presets; no regression on `deck`
