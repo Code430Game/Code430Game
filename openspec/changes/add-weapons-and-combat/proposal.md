@@ -21,9 +21,10 @@ hit code.
   paintball repeater, water balloon launcher. `ContentMode.pick_variant` chooses; a variant marked
   `lethal` is only usable when `ContentMode.flag("lethal_weapons")` is true, and a weapon whose
   allowed variant has no `impact` the mode permits leaves its slot empty.
-- **Carrying and firing.** Five slots, cycle with D-pad left/right or the mouse wheel and number
-  keys, aim on the left trigger / right mouse, fire on the right trigger / left mouse, reload on
-  RB / R (on foot only; those inputs stay the driving actions in a car). Aiming tightens the
+- **Carrying and firing.** Five slots on the layout `update-controls-layout` settled (and
+  reserved in the input map): LB tapped for the next weapon and held for the weapon wheel / Tab,
+  the mouse wheel and number keys; aim on LT / right mouse, fire on RT / left mouse, reload on
+  B / R (on foot only; those inputs stay the driving actions in a car). Aiming tightens the
   chase camera over the shoulder with a reticle. Melee swings on fire. Guns are hitscan;
   paintballs, balloons and other `projectile` variants are small physics bodies with a short
   life that call the same hit callback. A debug refill on the debug menu is the only ammo

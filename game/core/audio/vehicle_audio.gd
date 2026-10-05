@@ -1,12 +1,14 @@
 class_name VehicleAudio
 extends Node
-## Engine, tyre and impact voices for one car, fed each frame from its speed and throttle.
-## Attach under the car; call `impact(speed)` from a collision.
+## Engine, tyre, impact and horn voices for one car, fed each frame from its speed and throttle.
+## Attach under the car; call `impact(speed)` from a collision. The horn sounds while the
+## driver holds `horn`; it sits on the car itself so it is heard from there.
 
 var car: VehicleBody3D
 var _engine: AudioStreamPlayer
 var _tyres: AudioStreamPlayer
 var _impact: AudioStreamPlayer
+var horn: Horn
 var _phase: float = 0.0
 var _phase2: float = 0.0
 var _noise_state: Array = [0x9E3779B9]
@@ -23,6 +25,9 @@ func _ready() -> void:
 	for p in [_engine, _tyres, _impact]:
 		add_child(p)
 		p.play()
+	horn = Horn.new()
+	horn.name = "Horn"
+	_move_horn.call_deferred()  # the car may be busy setting up its children right now
 
 
 ## Moves the voices to `new_car` (the local player got into it): reparents under it, follows its
@@ -36,11 +41,24 @@ func attach(new_car: VehicleBody3D) -> void:
 		if get_parent() != null:
 			get_parent().remove_child(self)
 		new_car.add_child(self)
+	if horn != null and horn.get_parent() != new_car:
+		horn.sounding = false
+		_move_horn.call_deferred()
 	if not new_car.impacted.is_connected(impact):
 		new_car.impacted.connect(impact)
 	for p in [_engine, _tyres, _impact]:
 		if p != null and not p.playing:
 			p.play()
+
+
+## Puts the horn on the current car (or keeps it here when there is none yet).
+func _move_horn() -> void:
+	var target: Node = car if is_instance_valid(car) else self
+	if horn.get_parent() == target:
+		return
+	if horn.get_parent() != null:
+		horn.get_parent().remove_child(horn)
+	target.add_child(horn)
 
 
 ## Starts a thump whose loudness follows the collision speed.
@@ -54,7 +72,10 @@ func impact(speed_mps: float) -> void:
 
 func _process(delta: float) -> void:
 	if car == null or muted:
+		if horn != null:
+			horn.sounding = false
 		return
+	horn.sounding = _driven() and Input.is_action_pressed("horn")
 	# The engine and tyres are the driver's voices: silent while nobody is in the car, or the
 	# idle note followed the player on foot across the whole city (the generator players are
 	# not positional). Impacts still sound when something hits the parked car.

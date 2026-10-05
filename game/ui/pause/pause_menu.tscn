@@ -18,10 +18,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -190.0
-offset_top = -262.0
-offset_right = 190.0
-offset_bottom = 262.0
+offset_left = -380.0
+offset_top = -330.0
+offset_right = 380.0
+offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -35,55 +35,66 @@ theme_override_font_sizes/font_size = 26
 text = "Paused"
 horizontal_alignment = 1
 
+[node name="Tabs" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
 [node name="Hint" type="Label" parent="Panel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "A select    B or Menu resume    Back map"
+text = "LB / RB tabs    A select    B or Menu resume"
 horizontal_alignment = 1
 
-[node name="Resume" type="Button" parent="Panel/VBox"]
+[node name="Pages" type="Control" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 520)
+layout_mode = 2
+
+[node name="Game" type="VBoxContainer" parent="Panel/VBox/Pages"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 12
+
+[node name="Resume" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Resume"
 
-[node name="Character" type="Button" parent="Panel/VBox"]
+[node name="Character" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Character"
 
-[node name="Tone" type="Button" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Tone"
-
-[node name="Host" type="Button" parent="Panel/VBox"]
+[node name="Host" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Host co-op game"
 
-[node name="Join" type="Button" parent="Panel/VBox"]
+[node name="Join" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Join game at address below"
 
-[node name="Address" type="LineEdit" parent="Panel/VBox"]
+[node name="Address" type="LineEdit" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 placeholder_text = "host address, e.g. 192.168.1.20"
 text = "127.0.0.1"
 
-[node name="Players" type="Label" parent="Panel/VBox"]
+[node name="Players" type="Label" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "offline"
 horizontal_alignment = 1
 
-[node name="Report" type="Button" parent="Panel/VBox"]
+[node name="Report" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Report a problem (hold Menu)"
 
-[node name="Quit" type="Button" parent="Panel/VBox"]
+[node name="Quit" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Quit to desktop"
