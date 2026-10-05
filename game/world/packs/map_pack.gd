@@ -4,7 +4,7 @@ extends RefCounted
 ##
 ## Chunk layout (one Node3D per 256 m chunk, named "chunk_<cx>_<cz>"):
 ##   roads_lod0, roads_lod1, junctions_lod0, terrain_lod0/1/2  (MeshInstance3D)
-##   collision  (StaticBody3D with trimesh shapes from roads, junctions, terrain LOD1)
+##   collision  (StaticBody3D with trimesh shapes from roads, junctions, terrain LOD0)
 ## Visibility ranges implement the LODs. GLB chunks written by PackBuilder use the
 ## same names, so the loader can consume either.
 
@@ -245,10 +245,12 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 	if near:
 		var t0 := TerrainBuilder.build_mesh(heights, 0, holes)
 		chunk.add_child(_mesh_instance("terrain_lod0", t0, terrain_material, 0.0, TERRAIN_LOD0_END_M))
+		# Collide with the terrain that is drawn up close. LOD1 skips every other sample, so it
+		# cannot follow the ground pressed down beside a road: under the 417 at Metcalfe it rose
+		# up to 1.6 m through the asphalt, an invisible wall that lifted cars onto it (#27).
+		collision_meshes.append(t0)
 	chunk.add_child(_mesh_instance("terrain_lod1", t1, terrain_material, TERRAIN_LOD0_END_M if near else 0.0, TERRAIN_LOD1_END_M))
 	chunk.add_child(_mesh_instance("terrain_lod2", t2, terrain_material, TERRAIN_LOD1_END_M, TERRAIN_LOD2_END_M))
-	if near:
-		collision_meshes.append(t1)
 	return {"node": chunk, "collision_meshes": collision_meshes, "water_mesh": water_mesh, "tier": tier}
 
 
