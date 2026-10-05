@@ -90,7 +90,10 @@ func test_lb_rb_and_q_e_cycle_the_tabs() -> void:
 	var menu := await _open()
 	assert_int(menu.tab).is_equal(PauseMenu.GAME_TAB)
 	await _press(JOY_BUTTON_RIGHT_SHOULDER)
+	assert_int(menu.tab).is_equal(PauseMenu.COOP_TAB)
+	await _press(JOY_BUTTON_RIGHT_SHOULDER)
 	assert_int(menu.tab).is_equal(PauseMenu.CONTROLS_TAB)
+	await _press(JOY_BUTTON_LEFT_SHOULDER)
 	await _press(JOY_BUTTON_LEFT_SHOULDER)
 	await _press(JOY_BUTTON_LEFT_SHOULDER)
 	assert_int(menu.tab).is_equal(PauseMenu.SETTINGS_TAB)  # wraps round
@@ -105,6 +108,7 @@ func test_lb_rb_and_q_e_cycle_the_tabs() -> void:
 func test_controls_tab_shows_the_layout_of_the_device_in_use() -> void:
 	var menu := await _open()
 	await _press(JOY_BUTTON_RIGHT_SHOULDER)
+	await _press(JOY_BUTTON_RIGHT_SHOULDER)  # past Co-op to Controls
 	var horn: Button = menu.rows(PauseMenu.CONTROLS_TAB)[_row_named(menu, "horn")]
 	assert_str((horn.get_meta("binding") as Label).text).is_equal("L3")
 	var reset: Button = menu.rows(PauseMenu.CONTROLS_TAB)[_row_named(menu, "reset a stuck car")]
@@ -126,6 +130,7 @@ func _select(menu: PauseMenu, row: int) -> void:
 func test_rebinding_with_a_controller_alone_and_conflicts_refused() -> void:
 	var menu := await _open()
 	await _press(JOY_BUTTON_RIGHT_SHOULDER)
+	await _press(JOY_BUTTON_RIGHT_SHOULDER)  # past Co-op to Controls
 	await _select(menu, _row_named(menu, "horn"))
 	await _press(JOY_BUTTON_A)
 	assert_str(menu.capturing).is_equal("horn")
@@ -193,5 +198,24 @@ func test_options_and_settings_change_with_left_and_right() -> void:
 	assert_str(Settings.preset_override).is_not_equal(preset_before)
 	await _press(JOY_BUTTON_DPAD_LEFT)
 	assert_str(Settings.preset_override).is_equal(preset_before)
+	menu.close()
+	_restore_settings()
+
+
+func test_co_op_has_its_own_tab_and_join_still_focuses_the_address() -> void:
+	var menu := await _open()
+	var joined := [""]
+	menu.join_requested.connect(func(a: String) -> void: joined[0] = a)
+	await _press(JOY_BUTTON_RIGHT_SHOULDER)
+	assert_int(menu.tab).is_equal(PauseMenu.COOP_TAB)
+	assert_int(menu.rows(PauseMenu.COOP_TAB).size()).is_equal(2)
+	assert_int(menu.rows(PauseMenu.GAME_TAB).size()).is_equal(4)  # resume, character, report, quit
+	await _press(JOY_BUTTON_DPAD_DOWN)
+	assert_int(menu.selected_row()).is_equal(PauseMenu.JOIN_ROW)
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	assert_bool(menu._address.has_focus()).is_true()
+	menu._address.release_focus()
+	await _press(JOY_BUTTON_A)
+	assert_str(joined[0]).is_equal("127.0.0.1")
 	menu.close()
 	_restore_settings()

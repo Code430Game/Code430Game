@@ -72,7 +72,7 @@ var _bench_physics: PackedFloat32Array = PackedFloat32Array()  # physics process
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
-var _menu_at_start: String = ""  # --menu=game|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
+var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
@@ -212,7 +212,12 @@ func _ready() -> void:
 		get_tree().create_timer(1.5).timeout.connect(func() -> void:
 			_pause_menu.open()
 			_pause_menu.showing_pad = not _menu_at_start.ends_with(",keyboard")
-			_pause_menu.show_tab(maxi(PauseMenu.TABS.find(_menu_at_start.get_slice(",", 0).capitalize()), 0)))
+			var want := _menu_at_start.get_slice(",", 0).to_lower().replace("-", "")
+			var index := 0
+			for i in range(PauseMenu.TABS.size()):
+				if PauseMenu.TABS[i].to_lower().replace("-", "") == want:
+					index = i
+			_pause_menu.show_tab(index))
 	if _report_at_start != "":
 		get_tree().create_timer(2.0).timeout.connect(func() -> void:
 			_pause_menu.capture()
