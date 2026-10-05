@@ -194,6 +194,11 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   **Mitigated 2026-10-04:** became 3 in 5 runs once traffic grew; ignoring the testbed suite
   gave 4 of 4 clean runs, confirming it as the source. Letting the freed testbed settle for 60
   frames in its `after()` gave 5 of 5 clean. The thread itself is still unnamed.
+  **Fixed 2026-10-05** (`fix/audio-generator-teardown`): the thread is the dummy audio
+  driver's mixer, and the `/root` error is the crash handler's `NOTIFICATION_CRASH` sent from
+  it. Godot's `AudioStreamGeneratorPlayback` holds a raw pointer to its stream and reads it
+  every mix; freeing a player dropped the stream before the mixer saw the stop. `Synth`
+  now keeps each generator for 0.5 s after its player leaves the tree.
 - **Street-side parking bays are exported but not populated** (add-parking-lots, 2026-10-04):
   256 bays in `parking.v0.json`, but road meshes and traffic lanes have no parking lane, so a
   kerbside car would sit in the travel lane. Needs road widths that include the parking lane
