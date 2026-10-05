@@ -81,7 +81,11 @@
   "parking": {
     "_comment": "service ways that become class parking: never chosen by traffic, driven freely by players",
     "service_values": ["parking_aisle", "driveway"],
-    "width_m": {"parking_aisle": 5.5, "driveway": 3.5}
+    "width_m": {"parking_aisle": 5.5, "driveway": 3.5},
+    "garages": {
+      "_comment": "add-underground-parking: entrances become garages (see garages.py). Overrides open the garage tier for these names (entrance or served building).",
+      "garage_overrides": ["NAC underground parking", "National Arts Centre", "Victoria Memorial Museum Building"]
+    }
   },
   "excluded_access_values": ["no", "private"],
   "implied_oneway_classes": ["motorway", "motorway_link"],

@@ -12520,6 +12520,9 @@
   "oneway_dead_ends": 31,
   "parking": {
    "bays": 256,
+   "door_tier": 76,
+   "garage_tier": 16,
+   "garages": 92,
    "kinds": {
     "multi-storey": 12,
     "street_side": 11,

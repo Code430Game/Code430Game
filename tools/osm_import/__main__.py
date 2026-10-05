@@ -18,6 +18,7 @@ from osm_import.buildings import build_buildings, buildings_query
 from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.export import pedestrian_to_list
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
+from osm_import.garages import build_garages
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pack import (
     ChunkSampler,
@@ -111,6 +112,15 @@ def _import(args: argparse.Namespace) -> int:
                 p_payload, _meta = fetch_query(parking_query(bbox), bbox, args.cache_dir)
             # After the terrain: lots take their ground height from the built (graded) terrain.
             parking = build_parking(p_payload, bbox, proj, result.graph, ChunkSampler(chunks), data)
+            parking.garages = build_garages(
+                data,
+                result.graph,
+                proj,
+                buildings,
+                [lot for lot in parking.lots if lot.kind == "underground"],
+                ChunkSampler(chunks),
+                cfg.parking.get("garages"),
+            )
             result.report.summary["parking"] = parking.counts()
         result.report.summary["terrain"] = tstats
         paths = write_pack(
