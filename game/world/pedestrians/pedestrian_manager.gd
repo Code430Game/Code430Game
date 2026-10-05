@@ -33,6 +33,7 @@ var obstacles: Array[Node3D] = []
 var _spawn_timer: float = 0.0
 var _frame: int = 0
 const POOLS := 8  # distinct body looks; agents are spread across them
+const STARTLE_S := 1.5  # how long a walker stops to look at a horn
 var _pools: Array[MultiMeshInstance3D] = []
 var pool_profiles: Array[Dictionary] = []
 var _last_snapshot_ms: int = 0
@@ -268,6 +269,13 @@ func _animate(a: Pedestrian, before: Vector3, delta: float) -> void:
 
 func _move_agent(a: Pedestrian, delta: float) -> void:
 	var path: WalkGraph.WalkPath = walk.paths[a.path_id]
+	if a.startled > 0.0:
+		a.startled -= delta
+		var to := a.startle_from - a.position()
+		to.y = 0.0
+		if to.length_squared() > 0.01:
+			a.transform = Transform3D(Basis.looking_at(to.normalized(), Vector3.UP), a.position())
+		return
 	var dir := path.direction_at(a.distance) * (1.0 if a.forward else -1.0)
 	if _player_ahead(a, dir):
 		a.wait_time += delta
@@ -551,6 +559,18 @@ func knock_down(a: Pedestrian, impulse: Vector3, point: Vector3, spread: float =
 
 ## Knocks down the walking pedestrian nearest `around` within `radius`, pushed with `impulse`
 ## at chest height (benchmarks and debug). Returns false when nobody is in reach.
+## A horn or a shout at `point`: walkers within `radius` stop and turn to look for `seconds`.
+## Returns how many did.
+func startle(point: Vector3, radius: float, seconds: float = STARTLE_S) -> int:
+	var n := 0
+	for a in agents:
+		if a.state == Pedestrian.State.WALKING and a.position().distance_to(point) <= radius:
+			a.startled = seconds * randf_range(0.8, 1.2)
+			a.startle_from = point
+			n += 1
+	return n
+
+
 func knock_down_nearest(around: Vector3, radius: float, impulse: Vector3) -> bool:
 	var best: Pedestrian = null
 	var best_d := radius
