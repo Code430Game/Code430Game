@@ -1,12 +1,12 @@
 # road-network Specification
 
 ## Purpose
-TBD - created by archiving change add-osm-road-import. Update Purpose after archive.
+The city's roads as data and as geometry: the OSM import into a validated road graph with classes, lanes, one-way streets, bridges, tunnels and layers, junctions that meet cleanly, road surfaces with their detail texture, and the validation report that finds the import's mistakes.
 
 ## Requirements
 
 ### Requirement: OSM Road Import
-The import tool SHALL produce a road graph from OpenStreetMap data for a given bounding box, preserving connectivity, one-way direction, road class, lanes, bridges, tunnels, and layers.
+The import tool SHALL produce a road graph from OpenStreetMap data for a given bounding box, preserving connectivity, one-way direction, road class, lanes, bridges, tunnels, and layers, and SHALL keep `service=parking_aisle` and `service=driveway` ways as edges of class `parking` connected to the streets they meet.
 
 #### Scenario: Import a bounding box
 - **WHEN** the tool runs with a bounding box
@@ -16,6 +16,10 @@ The import tool SHALL produce a road graph from OpenStreetMap data for a given b
 #### Scenario: One-way preserved
 - **WHEN** an OSM way is tagged `oneway=yes`
 - **THEN** the corresponding edge is one-way in the same direction
+
+#### Scenario: Parking aisle kept
+- **WHEN** a `highway=service` way is tagged `service=parking_aisle`
+- **THEN** it is exported as an edge of class `parking` sharing nodes with the street it joins, and the validation report counts it under that class, not among real-street dead ends
 
 ### Requirement: Deterministic Output
 Given identical input data and configuration, the import tool SHALL produce byte-identical output.

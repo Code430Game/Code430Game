@@ -1,7 +1,7 @@
 # world-time Specification
 
 ## Purpose
-TBD - created by archiving change add-day-night. Update Purpose after archive.
+A day-night clock that lights the city (sun, sky, lamps and headlights after dusk), shared by every peer in a co-op session.
 ## Requirements
 ### Requirement: Time Of Day
 The world SHALL keep a time of day that advances at a configurable rate, and the sun's direction, energy and colour, the sky colours and the ambient light SHALL follow it, with a faint moon light at night.

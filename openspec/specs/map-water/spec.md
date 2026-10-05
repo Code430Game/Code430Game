@@ -1,7 +1,7 @@
 # map-water Specification
 
 ## Purpose
-TBD - created by archiving change add-water-and-wayfinding. Update Purpose after archive.
+Rivers, the canal and other water from OSM polygons: carried in the map pack, drawn as water surfaces with a floor to wade on, and meeting the land at a shoreline.
 ## Requirements
 ### Requirement: Water Polygons In Map Packs
 The import tool SHALL write `water.v0.json` containing every OpenStreetMap water area intersecting the bbox, clipped to the bbox, triangulated, with a surface height and the OSM id and name.

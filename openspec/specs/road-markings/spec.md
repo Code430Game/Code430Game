@@ -1,7 +1,7 @@
 # road-markings Specification
 
 ## Purpose
-TBD - created by archiving change add-lane-markings. Update Purpose after archive.
+Lane lines, edge lines and other paint generated from the road graph by rules kept as data, and built into the streamed chunks with the roads.
 ## Requirements
 ### Requirement: Generated Lane Markings
 The game SHALL generate lane markings from the road graph for every drivable edge: a centre line on two-way roads, dashed dividers between same-direction lanes, and edge lines, following each road's trimmed polyline.

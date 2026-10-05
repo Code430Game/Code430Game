@@ -1,7 +1,7 @@
 # world-streaming Specification
 
 ## Purpose
-TBD - created by archiving change add-chunk-streaming. Update Purpose after archive.
+The city is split into chunks that are built and freed around the players at detail tiers by distance, so a whole district runs on the Steam Deck.
 ## Requirements
 ### Requirement: Chunks Stream Around Players
 The world SHALL be built in 256 m chunks on demand, nearest to the players first, on worker threads, with a bounded number of chunks added to the scene per frame. The chunks around each player's spawn SHALL exist before the player is placed.

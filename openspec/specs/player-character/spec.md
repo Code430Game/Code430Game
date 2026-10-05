@@ -1,7 +1,7 @@
 # player-character Specification
 
 ## Purpose
-TBD - created by archiving change add-player-on-foot. Update Purpose after archive.
+The player on foot and in cars: movement, the third-person camera, getting in and out of vehicles, the player registry co-op builds on, tunables in a config resource, and the character profile with its creator.
 ## Requirements
 ### Requirement: On-Foot Movement
 The game SHALL provide a player character that walks, runs, and jumps on road and terrain meshes using a gamepad alone, with camera-relative movement.
