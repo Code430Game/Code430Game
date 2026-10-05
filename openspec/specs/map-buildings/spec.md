@@ -1,7 +1,7 @@
 # map-buildings Specification
 
 ## Purpose
-TBD - created by archiving change add-buildings. Update Purpose after archive.
+Buildings from OSM footprints: carried in the map pack, extruded to their height with roofs and facades in the game, and drawn as footprints on the maps.
 ## Requirements
 ### Requirement: Building Footprints In Map Packs
 The import tool SHALL write `buildings.v0.json` with every building footprint intersecting the bbox, clipped, with a height derived from OSM tags or a per-type default, and a ground height from the terrain.

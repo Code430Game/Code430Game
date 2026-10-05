@@ -1,7 +1,7 @@
 # wayfinding Specification
 
 ## Purpose
-TBD - created by archiving change add-water-and-wayfinding. Update Purpose after archive.
+Knowing where you are: the full-screen overview map and the corner minimap, both drawn from the road graph and the map pack.
 ## Requirements
 ### Requirement: Overview Map
 The game SHALL provide a toggleable full-screen map rendered from the road graph and water polygons, centred on the player with a heading marker, zoomable with the triggers, usable with a controller alone.
