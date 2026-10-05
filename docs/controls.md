@@ -71,7 +71,7 @@ it, A randomises, loads, saves or deletes a preset, B keeps the body and returns
 and colour, top, jacket and its colour, trousers, shoes, hat, beard, glasses, height, build. The first start
 gives you a random body; the last one you made is loaded next time. Saved in `user://characters.json`.
 
-Co-op lives on the pause menu's Game tab: **Host co-op game** shows the address friends join at;
+Co-op has its own tab in the pause menu: **Host co-op game** shows the address friends join at;
 **Join game** uses the address field (right on the Join line focuses it for the Deck's
 on-screen keyboard). Command-line equivalents: `--host[=port]` and `--join=address[:port]`.
 
@@ -82,6 +82,6 @@ For screenshots: `--camera=px,py,pz,tx,ty,tz` fixes the view, `--creator` opens 
 creator once the world is up, `--screenshot=path` saves a PNG when the benchmark ends.
 `--radio=hilltop|redline|quest|crypt|chatter|off` tunes the car radio at start. `--record-music=path.wav` records the Music bus
 until the benchmark ends.
-`--menu=game|controls|options|settings[,keyboard]` opens the pause menu on that tab once the world is up.
+`--menu=game|coop|controls|options|settings[,keyboard]` opens the pause menu on that tab once the world is up.
 `--report` opens "Report a problem" once the world is up, and `--report-send` also saves (and,
 with a relay configured, sends) the report.

@@ -1,7 +1,7 @@
 class_name PauseMenu
 extends CanvasLayer
 ## Pause screen on the `pause` action (Menu/Start, Escape), in tabs: Game (resume, character,
-## co-op, report, quit), Controls (every action for the device in use, press A to rebind),
+## report, quit), Co-op (host, join at an address, who is in the session), Controls (every action for the device in use, press A to rebind),
 ## Options (tone, music volume) and Settings (graphics). LB/RB or Q/E change tab. Handles its
 ## own navigation in _input so it works while the tree is paused and with any controller
 ## mapping: up/down move the selection, left/right change a value, A activates, B or Menu
@@ -15,15 +15,18 @@ signal host_requested
 signal join_requested(address: String)
 signal report_requested
 
-const TABS: PackedStringArray = ["Game", "Controls", "Options", "Settings"]
+const TABS: PackedStringArray = ["Game", "Co-op", "Controls", "Options", "Settings"]
 const GAME_TAB := 0
-const CONTROLS_TAB := 1
-const OPTIONS_TAB := 2
-const SETTINGS_TAB := 3
+const COOP_TAB := 1
+const CONTROLS_TAB := 2
+const OPTIONS_TAB := 3
+const SETTINGS_TAB := 4
 ## Rows of the Game tab.
-const JOIN_ROW := 3
-const REPORT_ROW := 4
-const QUIT_ROW := 5
+const REPORT_ROW := 2
+const QUIT_ROW := 3
+## Rows of the Co-op tab.
+const HOST_ROW := 0
+const JOIN_ROW := 1
 ## Holding the pause button this long after it opened the menu opens the report form.
 const REPORT_HOLD_S := 1.0
 const ROW_FONT := 20
@@ -32,8 +35,8 @@ const MUSIC_MIN_DB := -40.0
 const MUSIC_MAX_DB := 6.0
 const PRESETS: PackedStringArray = ["auto", "deck", "high"]
 
-@onready var _address: LineEdit = $Panel/VBox/Pages/Game/Address
-@onready var _players: Label = $Panel/VBox/Pages/Game/Players
+@onready var _address: LineEdit = $Panel/VBox/Pages/Coop/Address
+@onready var _players: Label = $Panel/VBox/Pages/Coop/Players
 @onready var _tab_bar: HBoxContainer = $Panel/VBox/Tabs
 @onready var _hint: Label = $Panel/VBox/Hint
 @onready var _pages_root: Control = $Panel/VBox/Pages
@@ -52,7 +55,7 @@ var captured_frame_stats: Dictionary = {}
 
 var _pages: Array[Control] = []
 var _rows: Array = []  # per tab: Array[Button]
-var _selected: PackedInt32Array = [0, 0, 0, 0]
+var _selected: PackedInt32Array = [0, 0, 0, 0, 0]
 var _tab_labels: Array[Button] = []
 var _controls_list: VBoxContainer
 var _controls_scroll: ScrollContainer
@@ -64,15 +67,16 @@ var _hold_s: float = -1.0  # time the pause button has been held since it opened
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	var game: Array[Button] = [$Panel/VBox/Pages/Game/Resume, $Panel/VBox/Pages/Game/Character, $Panel/VBox/Pages/Game/Host, $Panel/VBox/Pages/Game/Join, $Panel/VBox/Pages/Game/Report, $Panel/VBox/Pages/Game/Quit]
+	var game: Array[Button] = [$Panel/VBox/Pages/Game/Resume, $Panel/VBox/Pages/Game/Character, $Panel/VBox/Pages/Game/Report, $Panel/VBox/Pages/Game/Quit]
 	game[0].pressed.connect(close)
 	game[1].pressed.connect(func() -> void: character_requested.emit())
-	game[2].pressed.connect(func() -> void: host_requested.emit())
-	game[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
 	game[REPORT_ROW].pressed.connect(func() -> void: report_requested.emit())
 	game[QUIT_ROW].pressed.connect(func() -> void: quit_requested.emit())
-	_pages = [$Panel/VBox/Pages/Game, _build_controls_page(), _build_options_page(), _build_settings_page()]
-	_rows = [game, [], [], []]
+	var coop: Array[Button] = [$Panel/VBox/Pages/Coop/Host, $Panel/VBox/Pages/Coop/Join]
+	coop[HOST_ROW].pressed.connect(func() -> void: host_requested.emit())
+	coop[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
+	_pages = [$Panel/VBox/Pages/Game, $Panel/VBox/Pages/Coop, _build_controls_page(), _build_options_page(), _build_settings_page()]
+	_rows = [game, coop, [], [], []]
 	for i in range(TABS.size()):
 		var b := Button.new()
 		b.text = TABS[i]
@@ -141,7 +145,7 @@ func _input(event: InputEvent) -> void:
 		var row: Array = _rows[tab]
 		if not row.is_empty():
 			(row[_selected[tab]] as Button).pressed.emit()
-	elif event.is_action_pressed("ui_right") and tab == GAME_TAB and _selected[tab] == JOIN_ROW:
+	elif event.is_action_pressed("ui_right") and tab == COOP_TAB and _selected[tab] == JOIN_ROW:
 		_address.grab_focus()  # edit the address with the on-screen keyboard
 	elif event.is_action_pressed("ui_right") or event.is_action_pressed("ui_left"):
 		var row: Array = _rows[tab]
@@ -477,7 +481,7 @@ func open() -> void:
 		overview_map.close()
 	capture()
 	visible = true
-	_selected = PackedInt32Array([0, 0, 0, 0])
+	_selected = PackedInt32Array([0, 0, 0, 0, 0])
 	_rebuild_options()
 	_rebuild_settings()
 	show_tab(GAME_TAB)

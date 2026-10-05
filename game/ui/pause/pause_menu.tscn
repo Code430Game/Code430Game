@@ -57,6 +57,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/separation = 12
 
+[node name="Coop" type="VBoxContainer" parent="Panel/VBox/Pages"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 12
+
 [node name="Resume" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
@@ -67,23 +75,23 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Character"
 
-[node name="Host" type="Button" parent="Panel/VBox/Pages/Game"]
+[node name="Host" type="Button" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Host co-op game"
 
-[node name="Join" type="Button" parent="Panel/VBox/Pages/Game"]
+[node name="Join" type="Button" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Join game at address below"
 
-[node name="Address" type="LineEdit" parent="Panel/VBox/Pages/Game"]
+[node name="Address" type="LineEdit" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 placeholder_text = "host address, e.g. 192.168.1.20"
 text = "127.0.0.1"
 
-[node name="Players" type="Label" parent="Panel/VBox/Pages/Game"]
+[node name="Players" type="Label" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "offline"
