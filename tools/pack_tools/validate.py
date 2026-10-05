@@ -31,6 +31,37 @@ BRIDGES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "bridges.schema.v0.js
 BRIDGES_NAME = "bridges.v0.json"
 VEGETATION_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vegetation.schema.v0.json"
 VEGETATION_NAME = "vegetation.v0.json"
+WEAPONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "weapons.schema.v0.json"
+WEAPONS_NAME = "weapons.v0.json"
+MODES_DIR = REPO_ROOT / "game" / "core" / "content" / "modes"
+
+
+def nonlethal_variant_keys(modes_dir: Path = MODES_DIR) -> set[str]:
+    """Variant keys of the tone modes whose `lethal_weapons` flag is off (clean)."""
+    keys = set()
+    for p in sorted(modes_dir.glob("*.json")):
+        mode = json.loads(p.read_text(encoding="utf-8"))
+        if not mode.get("flags", {}).get("lethal_weapons", False):
+            keys.add(str(mode.get("variant_key", mode.get("id", p.stem))))
+    return keys
+
+
+def validate_weapons(weapons: dict, validator: Draft202012Validator) -> list[str]:
+    """Schema errors, plus any lethal variant keyed to a mode that bans lethal weapons."""
+    errors = []
+    for err in sorted(validator.iter_errors(weapons), key=lambda e: list(e.path)):
+        where = "/".join(str(p) for p in err.path) or "(root)"
+        errors.append(f"{WEAPONS_NAME}: {where}: {err.message}")
+    banned = nonlethal_variant_keys()
+    for w in weapons.get("weapons", []):
+        for key, v in w.get("variants", {}).items():
+            if key in banned and v.get("lethal"):
+                errors.append(
+                    f"{WEAPONS_NAME}: {w.get('id')}: variant '{key}' is lethal in a mode without lethal weapons"
+                )
+    return errors
+
+
 LEVELS = ["none", "mild", "strong"]
 MANIFEST_NAME = "pack.json"
 
@@ -241,6 +272,14 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
         for err in sorted(validator.iter_errors(bridges), key=lambda e: list(e.path)):
             where = "/".join(str(p) for p in err.path) or "(root)"
             report.errors.append(f"{BRIDGES_NAME}: {where}: {err.message}")
+    weapons_path = pack_dir / WEAPONS_NAME
+    if weapons_path.is_file():
+        try:
+            weapons = json.loads(weapons_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{WEAPONS_NAME}: invalid JSON: {exc}")
+            return report
+        report.errors.extend(validate_weapons(weapons, load_schema(WEAPONS_SCHEMA_PATH)))
     veg_path = pack_dir / VEGETATION_NAME
     if veg_path.is_file():
         try:

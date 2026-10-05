@@ -1,0 +1,38 @@
+{
+  "schema_version": 0,
+  "_comment": "First-party weapons (add-weapons-and-combat, first pass). Mechanic stats are tone-neutral; each variant is what the active tone puts in hand. `fallback` is the gritty weapon. Generic names only.",
+  "weapons": [
+    {
+      "id": "melee",
+      "slot": 1,
+      "mechanic": "melee",
+      "rate_s": 0.45,
+      "magazine": 0,
+      "reload_s": 0.0,
+      "range_m": 1.8,
+      "spread_deg": 0.0,
+      "descriptors": {"violence": "strong"},
+      "variants": {
+        "fallback": {"name": "Knife", "impact": "blade", "lethal": true, "descriptors": {"violence": "strong"}},
+        "dystopia": {"name": "Sabre", "impact": "energy", "lethal": true, "range_m": 2.2, "descriptors": {"violence": "strong", "dystopia_tech": "mild"}},
+        "clean": {"name": "Paint brush", "impact": "paint", "lethal": false, "descriptors": {"violence": "mild"}}
+      }
+    },
+    {
+      "id": "gun",
+      "slot": 2,
+      "mechanic": "hitscan",
+      "rate_s": 0.32,
+      "magazine": 12,
+      "reload_s": 1.4,
+      "range_m": 70.0,
+      "spread_deg": 1.5,
+      "descriptors": {"violence": "strong"},
+      "variants": {
+        "fallback": {"name": "Pistol", "impact": "bullet", "lethal": true, "descriptors": {"violence": "strong"}},
+        "dystopia": {"name": "Blaster", "impact": "energy", "lethal": true, "magazine": 16, "tracer": true, "descriptors": {"violence": "strong", "dystopia_tech": "mild"}},
+        "clean": {"name": "Paintball gun", "impact": "paint", "lethal": false, "mechanic": "projectile", "magazine": 20, "range_m": 45.0, "speed_mps": 40.0, "descriptors": {"violence": "mild"}}
+      }
+    }
+  ]
+}
