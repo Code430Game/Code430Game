@@ -89,9 +89,16 @@ func test_glb_round_trip_keeps_meshes() -> void:
 		var a: MeshInstance3D = chunk.get_node(role)
 		var b: MeshInstance3D = back.get_node_or_null(role)
 		assert_object(b).override_failure_message("missing %s after import" % role).is_not_null()
-		assert_int(b.mesh.surface_get_array_len(0)).is_equal(a.mesh.surface_get_array_len(0))
+		# Triangles, not vertices: glTF import drops vertices no triangle uses (a terrain hole
+		# for a garage ramp leaves a few).
+		assert_int(_triangles(b.mesh)).override_failure_message("%s triangles" % role).is_equal(_triangles(a.mesh))
 	assert_object(back.get_node_or_null("collision")).is_not_null()
 	DirAccess.remove_absolute(path)
+
+
+static func _triangles(m: Mesh) -> int:
+	var n: int = m.surface_get_array_index_len(0)
+	return (n if n > 0 else m.surface_get_array_len(0)) / 3
 
 
 func test_spawn_is_on_the_highway() -> void:

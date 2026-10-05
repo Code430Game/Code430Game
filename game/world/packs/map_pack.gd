@@ -20,7 +20,7 @@ const LOD_FADE_M := 40.0
 ## (terrain LOD1/LOD2, roads LOD1, buildings LOD1, water); NEAR adds LOD0 detail and collision.
 enum Tier { NONE = 0, FAR = 1, NEAR = 2 }
 ## Child names that only exist at the NEAR tier (dropped on a downgrade).
-const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "bridges_lod0", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor", "parking_markings_lod0", "parking_props_lod0", "parking_signs"]
+const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "bridges_lod0", "garages_lod0", "garage_lights", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor", "parking_markings_lod0", "parking_props_lod0", "parking_signs"]
 const SPAWN_MIN_EDGE_M := 150.0  # spawn edges shorter than this are usually bbox stubs
 const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
 const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
@@ -53,6 +53,11 @@ var barrier_chunks: Dictionary = {}
 var bridges: Array[BridgeBuilder.Bridge] = []
 var bridge_chunks: Dictionary = {}
 var bridge_material: Material
+var garages: Array[GarageBuilder.Garage] = []
+var garage_chunks: Dictionary = {}  # chunk -> ChunkTriangles (ramps, doors, garage boxes)
+var garage_light_chunks: Dictionary = {}
+var garage_material: Material
+var garage_light_material: Material
 var parking_lots: Array[ParkingLotBuilder.Lot] = []
 var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
 
@@ -105,6 +110,23 @@ func load(dir: String) -> bool:
 	bridge_chunks = BridgeBuilder.build(bridges)
 	parking_lots = ParkingLotBuilder.load_lots(dir, graph)
 	parking_chunks = ParkingLotBuilder.by_chunk(parking_lots, RoadGeometry.CHUNK_SIZE_M)
+	# Garages after the surface lots' chunks: their stalls join parking_lots (for parked cars)
+	# but are drawn by GarageBuilder at floor height, not draped on the terrain.
+	garages = GarageBuilder.load_garages(dir, graph)
+	var built := GarageBuilder.build(garages)
+	garage_chunks = built["structure"]
+	garage_light_chunks = built["lights"]
+	garage_material = GarageBuilder.material()
+	garage_light_material = GarageBuilder.light_material()
+	GarageBuilder.clear_ramps(parking_lots, garages)  # no surface stall on a ramp cut
+	for g in garages:
+		if g.lot != null:
+			parking_lots.append(g.lot)
+	var garage_holes := GarageBuilder.holes_by_chunk(garages)
+	for coord: Vector2i in garage_holes:
+		if not terrain_holes.has(coord):
+			terrain_holes[coord] = []
+		(terrain_holes[coord] as Array).append_array(garage_holes[coord])
 	return terrain_index.size() > 0
 
 
@@ -230,6 +252,14 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 		var mbar: ArrayMesh = barrier_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("barriers_lod0", mbar, barrier_material, 0.0, ROAD_LOD0_END_M))
 		collision_meshes.append(mbar)
+	if near and garage_chunks.has(coord):
+		var mg: ArrayMesh = garage_chunks[coord].to_mesh()
+		chunk.add_child(_mesh_instance("garages_lod0", mg, garage_material, 0.0, ROAD_LOD0_END_M))
+		collision_meshes.append(mg)
+	if near and garage_light_chunks.has(coord):
+		var ml := _mesh_instance("garage_lights", garage_light_chunks[coord].to_mesh(), garage_light_material, 0.0, ROAD_LOD0_END_M)
+		ml.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		chunk.add_child(ml)
 	if near and bridge_chunks.has(coord):
 		var mbr: ArrayMesh = bridge_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("bridges_lod0", mbr, bridge_material, 0.0, ROAD_LOD1_END_M))
