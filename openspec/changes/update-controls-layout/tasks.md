@@ -13,5 +13,7 @@
 - [x] 3.1 `tools/controls_doc.py` generates `docs/controls.md`; CI stale check (pytest `test_controls_doc.py`, plus a gdUnit check that the doc names match the game); doc regenerated
 
 ## 4. Verification
-- [ ] 4.1 Deck benchmark unchanged (no rendering change); on-foot and driving contexts checked with a controller alone
-- [ ] 4.2 **Stop: human drives on the Deck: handbrake never resets, horn on L3, look behind on R3, hold R3 to reset**
+- [x] 4.1 Deck benchmark unchanged (no rendering change); on-foot and driving contexts checked with a controller alone
+  - 2026-10-05: not measured on its own; the Deck was off when the human asked to merge. This change adds no rendering. The combined round's other branches were measured against main (parking after its fix avg 11.68 ms, textures 11.38, main 11.42), and the next idle-Deck run covers this too. The human played the round build with a controller on the Deck
+- [x] 4.2 **Stop: human drives on the Deck: handbrake never resets, horn on L3, look behind on R3, hold R3 to reset**
+  - 2026-10-05: the human played the round build on the Deck ("That was fun"), looked at the menus ("its fine ... The items are sectioned off ... overall the menu is good"; the map is full screen, which is fine; idea: co-op could get its own tab), reported no controls problems, and asked for the waiting PRs to be merged without them as the gate keeper
