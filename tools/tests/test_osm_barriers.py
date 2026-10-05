@@ -333,3 +333,41 @@ def test_boulevard_median_gets_curbs_on_both_inner_edges():
             assert all(v > 0 for v in toward)
         else:
             assert all(v < 0 for v in toward)
+
+
+def test_side_by_side_bridge_carriageways_share_one_pair_of_parapets():
+    # Two one-way decks 2 m apart (the Mackenzie King Bridge, #45): no walls in the gap.
+    g = graph_for(
+        [
+            (
+                1,
+                [(-150, 0), (150, 0)],
+                {
+                    "highway": "secondary",
+                    "oneway": "yes",
+                    "bridge": "yes",
+                    "layer": "1",
+                    "width": "10.5",
+                },
+            ),
+            (
+                2,
+                [(150, 9), (-150, 9)],
+                {
+                    "highway": "secondary",
+                    "oneway": "yes",
+                    "bridge": "yes",
+                    "layer": "1",
+                    "width": "7",
+                },
+            ),
+        ],
+        FlatSource(10.0),
+    )
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    parapets = [b for b in r.barriers if b.kind == "parapet"]
+    assert len(parapets) == 2
+    z1 = g.edges["w1.0"].polyline[0][2]
+    z2 = g.edges["w2.0"].polyline[0][2]
+    sides = sorted(sum(p[2] for p in b.points) / len(b.points) for b in parapets)
+    assert sides[0] < min(z1, z2) and sides[1] > max(z1, z2)  # one outside each deck, none between
