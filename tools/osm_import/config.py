@@ -34,6 +34,7 @@ class ImportConfig:
     excluded_highway_values: frozenset[str]
     excluded_service_values: frozenset[str]
     excluded_access_values: frozenset[str]
+    parking: dict
     implied_oneway_classes: frozenset[str]
     major_classes: frozenset[str]
     likely_real_dead_end_classes: frozenset[str]
@@ -64,6 +65,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> ImportConfig:
         excluded_highway_values=frozenset(raw["excluded_highway_values"]),
         excluded_service_values=frozenset(raw["excluded_service_values"]),
         excluded_access_values=frozenset(raw["excluded_access_values"]),
+        parking=dict(raw.get("parking", {})),
         implied_oneway_classes=frozenset(raw["implied_oneway_classes"]),
         major_classes=frozenset(raw["major_classes"]),
         likely_real_dead_end_classes=frozenset(raw["likely_real_dead_end_classes"]),

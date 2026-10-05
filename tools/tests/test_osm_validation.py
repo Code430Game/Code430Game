@@ -33,6 +33,7 @@ def test_clean_grid_has_no_findings():
         "declared_noexit": 0,
         "likely_real": 0,
         "suspicious": 4,
+        "parking": 0,
     }
 
 
@@ -95,14 +96,22 @@ def test_ramp_connecting_motorway_to_street_is_fine():
 
 def test_island_explained_by_filtered_connector():
     ways = GRID + [
-        (3, [(0, 0), (80, 80)], {"highway": "service", "service": "driveway"}),
+        (3, [(0, 0), (80, 80)], {"highway": "service", "service": "emergency_access"}),
         (4, [(80, 80), (120, 80), (120, 120)], {"highway": "service", "name": "Lot road"}),
     ]
     r = run(ways)
     assert r.summary["components"] == 2
-    assert r.components[1].likely_cause == "connector filtered out (service=driveway)"
+    assert r.components[1].likely_cause == "connector filtered out (service=emergency_access)"
     md = render_markdown(r, "test")
-    assert "connector filtered out (service=driveway)" in md
+    assert "connector filtered out (service=emergency_access)" in md
+
+
+def test_a_driveway_now_joins_its_lot_road_to_the_streets():
+    ways = GRID + [
+        (3, [(0, 0), (80, 80)], {"highway": "service", "service": "driveway"}),
+        (4, [(80, 80), (120, 80), (120, 120)], {"highway": "service", "name": "Lot road"}),
+    ]
+    assert run(ways).summary["components"] == 1
 
 
 def test_region_file_supplies_bbox_and_pack_id(tmp_path, monkeypatch):
@@ -131,3 +140,13 @@ def test_region_file_supplies_bbox_and_pack_id(tmp_path, monkeypatch):
     assert main(["--region", str(region), "--out", str(tmp_path / "out")]) == 0
     # The region is resolved inside _import; here we check the parser accepted it without --bbox.
     assert captured["region"] == region and captured["bbox"] is None
+
+
+def test_parking_dead_ends_are_counted_apart_from_streets():
+    ways = GRID + [
+        (6, [(0, 0), (40, -40)], {"highway": "service", "service": "parking_aisle"}),
+        (7, [(0, 0), (-30, -30)], {"highway": "service", "service": "driveway"}),
+    ]
+    r = run(ways)
+    assert len(r.dead_ends["parking"]) == 2
+    assert len(r.dead_ends["suspicious"]) == 4  # the four real street ends, unchanged

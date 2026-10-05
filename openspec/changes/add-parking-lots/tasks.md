@@ -1,5 +1,5 @@
 ## 1. Importer
-- [ ] 1.1 Class `parking` in `road_classes.json`; aisles and driveways kept with widths and speed; `drive-through` and `emergency_access` still dropped; schema enum; graph tests; validation report lists the class separately and recounts islands
+- [x] 1.1 Class `parking` in `road_classes.json`; aisles and driveways kept with widths and speed; `drive-through` and `emergency_access` still dropped; schema enum; graph tests; validation report lists the class separately and recounts islands; done 2026-10-04: on the Metcalfe/417 fixture, 60 parking edges join the streets; the network stays one component; likely-real dead ends 13 → 4 (driveways reconnect service roads); 32 parking dead ends counted apart; boundary dead ends unchanged at 17; goldens re-baked. Ottawa islands recounted with the 1.2 re-export
 - [ ] 1.2 `parking.py`: fetch lots (ways and relations), rings clipped, kind, capacity, access, fee, operator, orientation, `stall_dir` from aisles, entrances, ground height; street-side bays from `parking:*` tags; `parking.v0.json` and schema; `pack_tools` validates it; tests on a fixture with a lot with an aisle, a lot without, a diagonal lot and a street with bays; golden files re-baked; Ottawa pack re-exported with the lot, bay and stall counts noted here
 
 ## 2. Lanes
