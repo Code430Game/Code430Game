@@ -13,4 +13,5 @@
 ## 4. Verification
 - [x] 4.1 Deck benchmark on the usual route plus a pass through the Market lots; counts and frame time recorded here (also stands in for `add-vehicle-variety` 5.1: one idle-Deck run of the combined build)
   - Steam Deck, 2026-10-05, idle (deck preset, 40 s autodrive; 681 lots, 3,903 parked cars at noon): main avg 11.42 ms, p99 16.10, GPU 10.13, physics 9.51. This branch first measured avg 15.71, p99 27.69, GPU 13.23, physics 17.11: the body check and the draw pass walked and sorted every parked car in the city each physics tick. With a 32 m lookup grid (only the cells near a player) and a key index: avg 11.68, p99 16.67, GPU 10.38, physics 11.52. The textures branch alone was avg 11.38, so the combined round matches. Not yet run: the pass through the Market lots, which goes with 4.2
-- [ ] 4.2 **Stop: human pulls into a lot, parks, takes a parked car and drives out on the Deck**
+- [x] 4.2 **Stop: human pulls into a lot, parks, takes a parked car and drives out on the Deck**
+  - 2026-10-05: the human played the round build on the Deck. On the lots: "idk we probably need to do some more passes with the fill in algorithm"; they will send screenshots for a later pass, which goes in the backlog. Merged at the human's request so later work builds on it
