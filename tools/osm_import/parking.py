@@ -96,6 +96,7 @@ class ParkingResult:
     lots: list[ParkingLot] = field(default_factory=list)
     bays: list[ParkingBay] = field(default_factory=list)
     skipped: list[dict] = field(default_factory=list)
+    garages: list = field(default_factory=list)  # garages.Garage
 
     def counts(self) -> dict:
         kinds: dict[str, int] = {}
@@ -108,6 +109,9 @@ class ParkingResult:
             "with_capacity": sum(1 for lot in self.lots if lot.capacity is not None),
             "bays": len(self.bays),
             "skipped": len(self.skipped),
+            "garages": len(self.garages),
+            "garage_tier": sum(1 for g in self.garages if g.tier == "garage"),
+            "door_tier": sum(1 for g in self.garages if g.tier == "door"),
         }
 
     def to_dict(self) -> dict:
@@ -145,6 +149,7 @@ class ParkingResult:
                 }
                 for b in sorted(self.bays, key=lambda b: (b.edge, b.side))
             ],
+            "garages": [g.to_dict() for g in self.garages],
         }
 
 
