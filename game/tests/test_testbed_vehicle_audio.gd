@@ -96,3 +96,30 @@ func test_engine_sounds_in_another_car() -> void:
 	player.enter_vehicle(other)
 	await _frames(5)
 	assert_bool(_engine_audible()).override_failure_message("silent in a different car").is_true()
+
+
+## Headlights, the HUD speed, the reset ring and the horn follow the car being driven. They used
+## to stay on the start car: in a taken car the lights glowed on the car left behind.
+func test_headlights_follow_the_car_being_driven() -> void:
+	var player: Player = _bed.get("_player")
+	var first: VehicleBody3D = player.vehicle
+	_bed.set("_headlights", 1)  # on
+	await _frames(3)
+	assert_bool(_lit(first)).is_true()
+	await _get_out()
+	var other: VehicleBody3D = TrafficManager.DRIVABLE_CAR_SCENE.instantiate()
+	_bed.add_child(other)
+	other.global_transform = player.global_transform.translated(Vector3(0.0, 0.5, 6.0))
+	player.enter_vehicle(other)
+	await _frames(3)
+	assert_bool(_lit(other)).override_failure_message("the taken car has no lights").is_true()
+	assert_bool(_lit(first)).override_failure_message("the car left behind is still lit").is_false()
+	assert_object(_bed.call("_driven_car")).is_same(other)
+	_bed.set("_headlights", 0)
+
+
+func _lit(car: VehicleBody3D) -> bool:
+	for l: SpotLight3D in car.get("_headlights"):
+		if l.visible and l.light_energy > 0.0:
+			return true
+	return false

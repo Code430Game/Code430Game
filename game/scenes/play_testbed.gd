@@ -48,6 +48,7 @@ var _keyboard: bool = false  # last input came from keyboard or mouse: show thos
 var _day_night: DayNight
 var _vehicle_audio: VehicleAudio
 var _reset_ring: HoldRing
+var _lit_car: VehicleBody3D  # the car whose headlights the lights setting drives: the one driven last
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
 var _record_music: String = ""  # --record-music=<path.wav>: record the Music bus, saved when the benchmark ends
@@ -716,6 +717,30 @@ func _hint(controller: String, keyboard: String) -> String:
 
 ## The HUD's one-line pointer to the full list (the pause menu's Controls tab), which used to be
 ## the whole layout and ran off the screen.
+## The car the player is in, or the one they last drove (the start car until they take another).
+## The headlights, the HUD's speed, the reset ring and the horn follow it; a taken car used to
+## leave them all on the start car.
+func _driven_car() -> VehicleBody3D:
+	if _player != null and _player.is_driving() and _player.vehicle != null:
+		return _player.vehicle
+	return _lit_car if is_instance_valid(_lit_car) else _car
+
+
+## Moves the headlights to the car being driven (adding them the first time), switches off the
+## one left behind, and sets their brightness.
+func _light_driven_car(amount: float) -> void:
+	var car := _driven_car()
+	if car != _lit_car:
+		if is_instance_valid(_lit_car) and _lit_car.has_method("set_headlights"):
+			_lit_car.set_headlights(0.0)
+		if car.has_method("add_headlights") and (car.get("_headlights") as Array).is_empty():
+			var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
+			car.add_headlights(bool(preset.get("headlight_shadows", false)))
+		_lit_car = car
+	if car.has_method("set_headlights"):
+		car.set_headlights(amount)
+
+
 func _controls_hint() -> String:
 	return _hint("Menu: pause, controls (LB / RB tabs)", "Esc: pause, controls (Q / E tabs)")
 
@@ -771,12 +796,12 @@ func _process(delta: float) -> void:
 				amount = 1.0
 			elif _headlights == Headlights.OFF:
 				amount = 0.0
-			_car.set_headlights(amount)
+			_light_driven_car(amount)
 			if _headlights != Headlights.AUTO:
 				net += "  |  lights %s" % ("on" if _headlights == Headlights.ON else "off")
 		if _player.is_driving():
 			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
-				int(_car.speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
+				int(_driven_car().speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
 				_controls_hint(),
 			]
 			_prompt.text = ""
@@ -815,12 +840,12 @@ func _process(delta: float) -> void:
 		_headlights = (_headlights + 1) % 3
 	var driving := _player != null and _player.is_driving()
 	_camera.look_behind = in_play and driving and Input.is_action_pressed("look_behind")
-	_reset_ring.progress = _car.reset_progress() if driving and _car != null else 0.0
+	_reset_ring.progress = _driven_car().reset_progress() if driving else 0.0
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
-		_peds.startle(_car.global_position, HORN_STARTLE_M)
+		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
 		_camera.cycle_mode()
-		_camera.look_at(_car.global_position, Vector3.UP)
+		_camera.look_at(_driven_car().global_position, Vector3.UP)
 	if _bench_seconds > 0.0:
 		_bench_elapsed += delta
 		if _bench_elapsed > BENCH_WARMUP_S:
