@@ -327,6 +327,23 @@ func _create_queued_shapes() -> void:
 		made += 1
 
 
+## Adds every built chunk and attaches every queued mesh and shape now (tests: they sit
+## outside the tree until they land, which gdUnit counts as orphan nodes; play keeps spreading them over frames).
+func flush() -> void:
+	for coord in _ready.keys():  # built chunks waiting their turn are outside the tree too
+		var parts: Dictionary = _ready[coord]
+		_ready.erase(coord)
+		if _wanted_tier(coord) == MapPack.Tier.NONE:
+			parts["node"].free()
+		else:
+			_add_parts(coord, parts)
+	while not _mesh_queue.is_empty() or not _shape_queue.is_empty():
+		var before := _mesh_queue.size() + _shape_queue.size()
+		_create_queued_shapes()
+		if _mesh_queue.size() + _shape_queue.size() == before:
+			break
+
+
 ## Shapes and meshes still waiting to be attached.
 func collision_pending() -> int:
 	return _shape_queue.size() + _mesh_queue.size()

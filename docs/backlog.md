@@ -103,7 +103,6 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   the exact spot; suspect a steep grade difference between adjacent carriageways leaving
   a terrain step between them.
 - **Garage follow-ups** (add-underground-parking, 2026-10-05): the minimap should show the garage floor while the player is inside; beside some ramps the 4 m terrain cut leaves black triangles past the coping (the museum ramp), so cut the terrain to the ramp strip itself or widen the coping per cell.
-- **gdUnit orphan count (about 2,200) is the streamer's queue, not a leak** (checked 2026-10-05 after a review flagged it): the two whole-testbed suites report chunk meshes waiting in `ChunkStreamer`'s mesh queue (terrain_lod1/2, roads_lod1, buildings_lod1, parking_lod0, water) as orphans; with the testbed freed the orphan count is 0. It grows as chunks gain parts. To quiet it, drain the queue in those suites' `after()` or have the streamer free queued nodes on exit.
 - **Parking lot fill needs more passes** (human, 2026-10-05 Deck round: "we probably need to do some more passes with the fill in algorithm"). They will send screenshots of the lots that look wrong; start from those (stall layout in `parking_lot_builder.gd`: rows, aisles, `_row_only`, `_clear_of_streets`).
 - **Street-side parking bays are exported but not populated** (add-parking-lots, 2026-10-04):
   256 bays in `parking.v0.json`, but road meshes and traffic lanes have no parking lane, so a
@@ -150,3 +149,4 @@ Finished or now tracked by an OpenSpec change; kept so their history is easy to 
 - Pedestrian underpasses and tunnels (add-underpasses, archived 2026-10-05; interiors are add-underpass-interiors)
 - Cars pinned against traffic cars fling things across the map (fixed in add-vehicle-variety 3.4)
 - Flaky gdUnit crash (exit 134) (fixed 2026-10-05, #25)
+- gdUnit orphan count of about 2,200 (fixed 2026-10-05: the two whole-testbed suites flush the streamer's built-but-unadded chunks and queued meshes after each test; 0 orphans)
