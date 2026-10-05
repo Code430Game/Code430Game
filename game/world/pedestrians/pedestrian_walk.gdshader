@@ -38,7 +38,15 @@ vec3 rot_x(vec3 p, float a) {
 	return vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z);
 }
 
+// Paint from weapons (add-weapons-and-combat): INSTANCE_CUSTOM.z is the palette index + 1 (0 =
+// clean), .w how much; splotches by position so it reads as paint, not a dye.
+const vec3 PAINT[4] = vec3[](vec3(0.95, 0.25, 0.55), vec3(0.2, 0.75, 0.95), vec3(0.98, 0.82, 0.15), vec3(0.45, 0.9, 0.3));
+varying vec2 paint;
+varying vec3 local_pos;
+
 void vertex() {
+	paint = INSTANCE_CUSTOM.zw;
+	local_pos = VERTEX;
 	float phase = INSTANCE_CUSTOM.x;
 	float amount = INSTANCE_CUSTOM.y;
 	int b = int(CUSTOM0.r + 0.5);
@@ -61,5 +69,10 @@ void vertex() {
 
 void fragment() {
 	ALBEDO = COLOR.rgb;
+	if (paint.x > 0.5) {
+		vec3 q = local_pos * 7.0;
+		float splotch = step(0.15, sin(q.x * 1.3 + q.y * 0.7) * sin(q.y * 1.1 - q.z * 0.9) + 0.35);
+		ALBEDO = mix(ALBEDO, PAINT[clamp(int(paint.x + 0.5) - 1, 0, 3)], splotch * paint.y);
+	}
 	ROUGHNESS = 0.8;
 }

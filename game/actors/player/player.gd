@@ -27,6 +27,11 @@ var vehicle: VehicleBody3D = null
 var _yaw: float = 0.0
 ## True while look behind is held: the camera faces back over the shoulder.
 var look_behind: bool = false
+## While true (aim held with a weapon) the camera pulls in over the right shoulder and the
+## character faces where it looks.
+var aiming: bool = false
+const AIM_DISTANCE_SHARE := 0.45
+const AIM_SHOULDER_M := 0.6
 var _pitch: float = 0.0
 var _mouse_look: Vector2 = Vector2.ZERO  # accumulated mouse motion this frame, radians
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
@@ -72,6 +77,11 @@ func is_driving() -> bool:
 
 
 ## Makes this player's camera the active one.
+## The player's own camera (weapons aim through it).
+func camera() -> Camera3D:
+	return _camera
+
+
 func activate_camera() -> void:
 	_camera.current = true
 
@@ -102,6 +112,11 @@ func _orbit(delta: float) -> void:
 	_yaw -= look.x * config.camera_orbit_speed_rad_s * delta + _mouse_look.x
 	_pitch = clampf(_pitch + look.y * config.camera_orbit_speed_rad_s * delta + _mouse_look.y, deg_to_rad(config.camera_pitch_min_deg), deg_to_rad(config.camera_pitch_max_deg))
 	_mouse_look = Vector2.ZERO
+	var k := clampf(10.0 * delta, 0.0, 1.0)
+	_arm.spring_length = lerpf(_arm.spring_length, config.camera_distance_m * (AIM_DISTANCE_SHARE if aiming else 1.0), k)
+	_arm.position.x = lerpf(_arm.position.x, AIM_SHOULDER_M if aiming else 0.0, k)
+	if aiming:
+		_body_mesh.rotation.y = lerp_angle(_body_mesh.rotation.y, _yaw, k)
 	_apply_camera_angles()
 
 

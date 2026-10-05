@@ -24,6 +24,10 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | jump | A | Space |
 | get in a car, or take a traffic car | Y | E |
 | look behind | R3 | C |
+| aim | LT | right click |
+| fire or swing | RT | left click |
+| next weapon (hands, melee, gun) | LB | Tab |
+| reload | B | R |
 | map | View | M |
 | pause menu | Menu | Esc |
 

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/weapons.schema.v0.json",
+  "title": "Code 430 weapons v0",
+  "description": "Weapons with a tone-neutral mechanic and per-mode variants (`fallback` required). A variant may override mechanic, magazine, range and speed; a variant marked lethal is refused in any mode whose lethal_weapons flag is off.",
+  "type": "object",
+  "required": ["schema_version", "weapons"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "_comment": {"type": "string"},
+    "weapons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "slot", "mechanic", "rate_s", "magazine", "reload_s", "range_m", "spread_deg", "variants"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_.]+$"},
+          "slot": {"type": "integer", "minimum": 1, "maximum": 5},
+          "mechanic": {"enum": ["melee", "hitscan", "projectile"]},
+          "rate_s": {"type": "number", "exclusiveMinimum": 0},
+          "magazine": {"type": "integer", "minimum": 0},
+          "reload_s": {"type": "number", "minimum": 0},
+          "range_m": {"type": "number", "exclusiveMinimum": 0},
+          "spread_deg": {"type": "number", "minimum": 0},
+          "descriptors": {"type": "object"},
+          "variants": {
+            "type": "object",
+            "required": ["fallback"],
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "impact", "lethal"],
+              "properties": {
+                "name": {"type": "string"},
+                "impact": {"enum": ["blade", "bullet", "energy", "paint"]},
+                "lethal": {"type": "boolean"},
+                "mechanic": {"enum": ["melee", "hitscan", "projectile"]},
+                "magazine": {"type": "integer", "minimum": 0},
+                "range_m": {"type": "number", "exclusiveMinimum": 0},
+                "speed_mps": {"type": "number", "exclusiveMinimum": 0},
+                "tracer": {"type": "boolean"},
+                "descriptors": {"type": "object"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

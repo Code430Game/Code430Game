@@ -117,7 +117,7 @@ func test_controls_tab_shows_the_layout_of_the_device_in_use() -> void:
 	assert_bool(menu.showing_pad).is_false()
 	horn = menu.rows(PauseMenu.CONTROLS_TAB)[_row_named(menu, "horn")]
 	assert_str((horn.get_meta("binding") as Label).text).is_equal("G")
-	assert_int(_row_named(menu, "aim")).is_equal(-1)  # reserved for combat: not shown yet
+	assert_int(_row_named(menu, "aim")).is_greater(-1)  # combat is live: aim is listed
 	menu.close()
 	_restore_settings()
 
