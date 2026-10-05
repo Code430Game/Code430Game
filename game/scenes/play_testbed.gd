@@ -48,6 +48,8 @@ var _keyboard: bool = false  # last input came from keyboard or mouse: show thos
 var _day_night: DayNight
 var _vehicle_audio: VehicleAudio
 var _reset_ring: HoldRing
+var _shooter: Shooter
+var _combat_effects: CombatEffects
 var _lit_car: VehicleBody3D  # the car whose headlights the lights setting drives: the one driven last
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
@@ -73,6 +75,8 @@ var _bench_physics: PackedFloat32Array = PackedFloat32Array()  # physics process
 var _autodrive: bool = false
 var _screenshot_path: String = ""
 var _open_creator_at_start: bool = false  # --creator: open the character creator once loaded (screenshots)
+var _weapon_at_start: int = 0  # --weapon=1|2: hold the melee weapon or the gun from the start (screenshots)
+var _shots_at_start: int = 0  # --shoot=N: aim and fire N times once the world is up (screenshots)
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
@@ -204,11 +208,14 @@ func _ready() -> void:
 	_setup_parked_cars()
 	_setup_day_night()
 	_setup_audio()
+	_setup_combat()
 	_setup_net()
 	_setup_billboards()
 	ContentMode.mode_changed.connect(func(_id: String) -> void: _refresh_session_status())
 	if _open_creator_at_start:
 		get_tree().create_timer(1.5).timeout.connect(_open_creator)
+	if _weapon_at_start > 0 and _shooter != null:
+		get_tree().create_timer(1.2).timeout.connect(_demo_fire)
 	if _menu_at_start != "":
 		get_tree().create_timer(1.5).timeout.connect(func() -> void:
 			_pause_menu.open()
@@ -337,6 +344,56 @@ func _setup_audio() -> void:
 	_ambience.name = "Ambience"
 	_ambience.traffic = _traffic
 	add_child(_ambience)
+
+
+## --weapon / --shoot: holds a weapon, aims and fires a few times for screenshots.
+func _demo_fire() -> void:
+	_shooter.weapons.slot = _weapon_at_start
+	for i in range(_shots_at_start):
+		_player.aiming = true
+		_shooter._cooldown = 0.0
+		_shooter._reload_left = 0.0
+		_shooter.pull_trigger()
+		await get_tree().create_timer(0.25).timeout
+		if i % 3 == 2:
+			_player._yaw += 0.15  # spread the marks along the wall
+	_player.aiming = true
+
+
+## Weapons on foot (add-weapons-and-combat): the shooter, its marks and sounds, and the HUD
+## line and reticle.
+func _setup_combat() -> void:
+	if _player == null:
+		return
+	_combat_effects = CombatEffects.new()
+	_combat_effects.name = "CombatEffects"
+	_world.add_child(_combat_effects)
+	var label := Label.new()
+	label.name = "Weapon"
+	label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	label.position = Vector2(-320.0, 16.0)
+	label.size = Vector2(300.0, 30.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	$HUD.add_child(label)
+	var reticle := ColorRect.new()
+	reticle.name = "Reticle"
+	reticle.color = Color(1, 1, 1, 0.9)
+	reticle.size = Vector2(6, 6)
+	reticle.set_anchors_preset(Control.PRESET_CENTER)
+	reticle.position = Vector2(-3, -3)
+	reticle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	reticle.visible = false
+	$HUD.add_child(reticle)
+	_shooter = Shooter.new()
+	_shooter.name = "Shooter"
+	_shooter.player = _player
+	_shooter.peds = _peds
+	_shooter.effects = _combat_effects
+	_shooter.hud = label
+	_shooter.reticle = reticle
+	add_child(_shooter)
 
 
 func _setup_net() -> void:
@@ -641,6 +698,10 @@ func _parse_args() -> void:
 			_screenshot_path = arg.get_slice("=", 1)
 		elif arg == "--creator":
 			_open_creator_at_start = true
+		elif arg.begins_with("--weapon="):
+			_weapon_at_start = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--shoot="):
+			_shots_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--menu="):
 			_menu_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--record-music="):

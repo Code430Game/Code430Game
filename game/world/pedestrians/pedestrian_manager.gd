@@ -34,6 +34,8 @@ var _spawn_timer: float = 0.0
 var _frame: int = 0
 const POOLS := 8  # distinct body looks; agents are spread across them
 const STARTLE_S := 1.5  # how long a walker stops to look at a horn
+const FLEE_S := 6.0  # how long a painted or frightened walker runs
+const FLEE_SPEED_MPS := 3.4
 var _pools: Array[MultiMeshInstance3D] = []
 var pool_profiles: Array[Dictionary] = []
 var _last_snapshot_ms: int = 0
@@ -269,6 +271,17 @@ func _animate(a: Pedestrian, before: Vector3, delta: float) -> void:
 
 func _move_agent(a: Pedestrian, delta: float) -> void:
 	var path: WalkGraph.WalkPath = walk.paths[a.path_id]
+	var pace := 1.0
+	if a.fleeing > 0.0:
+		a.fleeing -= delta
+		a.startled = 0.0
+		# Run whichever way along the path takes them away from the threat.
+		var ahead := path.direction_at(a.distance) * (1.0 if a.forward else -1.0)
+		var away := a.position() - a.flee_from
+		away.y = 0.0
+		if away.length_squared() > 0.01 and ahead.dot(away) < 0.0:
+			a.forward = not a.forward
+		pace = FLEE_SPEED_MPS / maxf(a.speed, 0.1)
 	if a.startled > 0.0:
 		a.startled -= delta
 		var to := a.startle_from - a.position()
@@ -277,7 +290,7 @@ func _move_agent(a: Pedestrian, delta: float) -> void:
 			a.transform = Transform3D(Basis.looking_at(to.normalized(), Vector3.UP), a.position())
 		return
 	var dir := path.direction_at(a.distance) * (1.0 if a.forward else -1.0)
-	if _player_ahead(a, dir):
+	if a.fleeing <= 0.0 and _player_ahead(a, dir):
 		a.wait_time += delta
 		if a.wait_time < float(config["stop_wait_max_s"]):
 			_place(a, path, dir)
@@ -287,7 +300,7 @@ func _move_agent(a: Pedestrian, delta: float) -> void:
 		dir = -dir
 	else:
 		a.wait_time = 0.0
-	a.distance += a.speed * delta * (1.0 if a.forward else -1.0)
+	a.distance += a.speed * pace * delta * (1.0 if a.forward else -1.0)
 	if a.distance >= path.length or a.distance <= 0.0:
 		_turn_at_end(a, path)
 		path = walk.paths[a.path_id]
@@ -571,6 +584,35 @@ func startle(point: Vector3, radius: float, seconds: float = STARTLE_S) -> int:
 	return n
 
 
+## A non-lethal hit (paint): the walker gets splotches of palette colour `palette_index` and
+## runs off from `from`.
+func paint(a: Pedestrian, palette_index: int, from: Vector3, seconds: float = FLEE_S) -> void:
+	if a.state != Pedestrian.State.WALKING:
+		return
+	a.paint_index = palette_index + 1
+	a.paint_amount = minf(a.paint_amount + 0.45, 0.95)
+	a.fleeing = seconds
+	a.flee_from = from
+
+
+## Gunfire at `point`: walkers within `radius` run away from it for `seconds`. Returns how many.
+func flee(point: Vector3, radius: float, seconds: float = FLEE_S) -> int:
+	var n := 0
+	for a in agents:
+		if a.state == Pedestrian.State.WALKING and a.position().distance_to(point) <= radius:
+			a.fleeing = seconds * randf_range(0.8, 1.2)
+			a.flee_from = point
+			n += 1
+	return n
+
+
+## The walker behind a physics body, or null (weapons hit bodies).
+func agent_of(body: Node) -> Pedestrian:
+	if body is PedestrianBody:
+		return (body as PedestrianBody).agent
+	return null
+
+
 func knock_down_nearest(around: Vector3, radius: float, impulse: Vector3) -> bool:
 	var best: Pedestrian = null
 	var best_d := radius
@@ -637,7 +679,7 @@ func clear_agents() -> void:
 ## The walk shader's per-instance data for an agent: phase, amount (zero unless walking).
 static func walk_custom(a: Pedestrian) -> Color:
 	var walking := a.state == Pedestrian.State.WALKING
-	return Color(a.walk_phase, a.walk_amount if walking else 0.0, 0.0, 0.0)
+	return Color(a.walk_phase, a.walk_amount if walking else 0.0, float(a.paint_index), a.paint_amount)
 
 
 func _render() -> void:

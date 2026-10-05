@@ -1,0 +1,14 @@
+{
+  "_comment": "Impact kinds: what a hit leaves on the world, how it sounds, and what it does to a person. Distances in metres, times in seconds.",
+  "impacts": {
+    "bullet": {"decal": "hole", "sound": "shot", "lethal_push": 520.0},
+    "blade": {"decal": "", "sound": "swish", "lethal_push": 260.0},
+    "energy": {"decal": "scorch", "sound": "zap", "lethal_push": 600.0},
+    "paint": {"decal": "splat", "sound": "pop", "lethal_push": 0.0}
+  },
+  "decal_cap": {"deck": 48, "high": 160},
+  "flee_s": 6.0,
+  "flee_speed_mps": 3.4,
+  "earshot_m": 30.0,
+  "paint_colors": [[0.95, 0.25, 0.55], [0.2, 0.75, 0.95], [0.98, 0.82, 0.15], [0.45, 0.9, 0.3]]
+}

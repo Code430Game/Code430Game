@@ -1,6 +1,8 @@
-# Change: Weapons and combat, paintball in clean
+# Change: Weapons, first pass (a melee weapon and a gun in every tone)
 
 **Status: proposed 2026-10-02 (human asked for a slate of proposals that other agents can pick up in fresh contexts). Human's brief: "shooting people with various devices and stabbing; paintball vs bullets for the different tones."**
+
+**Scoped down 2026-10-05 (human: "I wonder if we add a knife and pistol (gritty) or sabre and blaster (dystopian), or paint brush and paintball gun (pg)" ... "Do the simple weapons and then add the police!").** This first pass carries two weapons, each with a variant per tone. The rest of the original slate (more weapons, traffic damage, player health, co-op shots) moves to follow-ups; police are their own change next.
 
 ## Why
 The game has cars, people and a city but no way to act on them beyond driving. Weapons are
@@ -12,48 +14,41 @@ a paintball marker in `clean` and a pistol in `gritty` share every line of aimin
 hit code.
 
 ## What Changes
-- **Weapons as data.** `docs/pack-format/weapons.schema.v0.json`: a weapon has a slot, a
-  mechanic (`melee`, `hitscan`, `projectile`), rate, magazine, reload time, range, spread,
-  descriptors and per-mode `variants` with a required `fallback`. A variant names the thing in
-  hand, its `impact` kind (`bullet`, `blade`, `blunt`, `paint`, `water`, `foam`), whether it is
-  `lethal`, and may override the mechanic. First-party set in `game/actors/combat/weapons.v0.json`:
-  fists, knife, pistol, SMG, shotgun with `clean` variants foam gloves, foam bat, paintball marker,
-  paintball repeater, water balloon launcher. `ContentMode.pick_variant` chooses; a variant marked
-  `lethal` is only usable when `ContentMode.flag("lethal_weapons")` is true, and a weapon whose
-  allowed variant has no `impact` the mode permits leaves its slot empty.
-- **Carrying and firing.** Five slots on the layout `update-controls-layout` settled (and
-  reserved in the input map): LB tapped for the next weapon and held for the weapon wheel / Tab,
-  the mouse wheel and number keys; aim on LT / right mouse, fire on RT / left mouse, reload on
-  B / R (on foot only; those inputs stay the driving actions in a car). Aiming tightens the
-  chase camera over the shoulder with a reticle. Melee swings on fire. Guns are hitscan;
-  paintballs, balloons and other `projectile` variants are small physics bodies with a short
-  life that call the same hit callback. A debug refill on the debug menu is the only ammo
-  source.
-- **Impacts.** Pooled decals on world geometry (bullet holes, paint splats, wet marks) with a
-  per-preset cap and oldest-first recycling; muzzle flash and a synthesised shot or pop from
-  `Synth`. Traffic cars take a per-agent damage value shown as a body tint (dents or paint
-  smears by impact kind); past a threshold a car stops and stays put (`resting`). Tyres can be
-  shot out only when `lethal_weapons` is on.
-- **Victim reactions** (`pedestrians`): a lethal impact sends a pedestrian to `DOWN` as a car
-  hit does, with a blood decal only when `ContentMode.allows("gore")`; a non-lethal impact
-  marks the body (paint colour, wet) and sends it `FLEEING`, running off the ribbon for a
-  configured time before walking again. Pedestrians within earshot of gunfire flee in every
-  mode. Nobody is ever `DOWN` in `clean`.
-- **Player health.** 100 points, damaged by lethal impacts from other players (co-op) and by
-  vehicle hits; at zero the player is down for a few seconds and respawns at the spawn point
-  with slots refilled. In `clean` players are painted, never down.
-- **Not in this change:** wanted level and police response (own change), weapon shops and the
-  economy, ammo pickups in the world, NPCs that fight back, fire and explosions, missions, a
-  hospital point of interest for respawn (spawn point for now), drive-by firing from a car.
+- **Weapons as data.** `docs/pack-format/weapons.schema.v0.json`; a weapon has a slot, a
+  mechanic (`melee`, `hitscan`, `projectile`), rate, magazine, reload time, range, spread and
+  per-mode `variants` with a required `fallback`. A variant names the thing in hand, its
+  `impact` (`blade`, `bullet`, `energy`, `paint`), whether it is `lethal`, and may override the
+  mechanic. First-party set in `game/actors/combat/weapons.v0.json`, two weapons:
+
+  | weapon | clean | gritty (fallback) | dystopia |
+  |---|---|---|---|
+  | melee | paint brush (paint, a splat) | knife (blade) | sabre (energy, glowing) |
+  | gun | paintball gun (paint projectile) | pistol (bullet, hitscan) | blaster (energy bolt, hitscan with a glowing tracer) |
+
+  `ContentMode.pick_variant` chooses; a variant marked `lethal` is refused when
+  `flag("lethal_weapons")` is false.
+- **Carrying and firing.** On foot only. LB (Tab) cycles empty hands, melee, gun; LT / right
+  mouse aims, pulling the camera over the shoulder with a reticle; RT / left mouse fires or
+  swings; B / R reloads. Guns raycast from the camera through the reticle; paintballs are small
+  pooled bodies with gravity; melee is a short sweep in front of the player. One hit path for
+  all three. Unlimited reserve ammo in this pass (magazines and reloads only).
+- **Impacts.** Pooled decals on world geometry (paint splats, bullet holes, scorch marks) with
+  a per-preset cap and oldest-first recycling; a muzzle flash or bolt glow; synthesised shot,
+  zap, swish and splat voices from `Synth`.
+- **Pedestrian reactions.** A lethal hit knocks the pedestrian down through
+  `PedestrianManager.knock_down` (the ragdoll hook built for this), with a blood mark only when
+  `ContentMode.allows("gore")`. A non-lethal hit tints the body with paint and sends it
+  fleeing: running away from the shooter for a configured time, then walking again. Walkers
+  within earshot of a gunshot flee in every mode. Nobody goes down in `clean`.
+- **Not in this change:** more weapons (SMG, shotgun, water balloons), traffic damage and shot
+  tyres, player health and respawn (with the police change), co-op shots (a guest's shots are
+  local in this pass; host-authoritative hits follow), weapon shops, ammo pickups, NPCs that
+  fight back, explosions, drive-by firing.
 
 ## Co-op authority
-The shooter owns its projectiles and hit tests and reports hits to the host through
-`WorldSync` (`report_shot`, next to `report_hit` in `game/core/net/world_sync.gd`); the host
-applies pedestrian and traffic damage and replicates the result through the existing snapshots,
-which gain a state code per agent. Player health is host-authoritative: a hit on another player
-goes to the host, which tells the victim. Decals, flashes and sounds are local cosmetics
-triggered by an unreliable shot event broadcast to everyone in range. Hosts use the same path
-with no round trip.
+First pass: shots, decals and reactions run on the shooter's machine; on a host that is the
+authoritative simulation. A guest's hits do not yet reach the host (follow-up: `report_shot`
+through `WorldSync`, the host applies reactions and snapshots carry them).
 
 ## Tone
 Weapons read `ContentMode` only through `pick_variant`, `allows("gore")` and

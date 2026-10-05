@@ -5,6 +5,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-05
 
+- **Punching and kicking** (human, 2026-10-05, while planning weapons: "another could be punching and kicking. Or that could be a different ticket"). Empty hands are already a slot in the weapon cycle; fists and kicks would fill it, with a non-lethal shove in clean.
 - **Side-by-side bridge carriageways at different heights** (issue #45, Mackenzie King Bridge at x 517, z -523): the 2-lane way runs about 0.48 m above the 3-lane one where their ribbons touch, so the step shows as a low strip (the deck's side face) between them. The parapets that stood in that gap were removed in the #45 fix. Proper fix: the elevation stage should give touching carriageways of one bridge a shared height, blending into the approaches.
 
 ## 2026-10-04
