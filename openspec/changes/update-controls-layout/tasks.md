@@ -10,7 +10,7 @@
 - [x] 2.3 Tabbed start and pause menus (Controls, Options, Settings, first tab for the existing items), LB/RB and Q/E cycle tabs; the home screen's controls list moves to the Controls tab and shows the current device's layout (controller or keyboard and mouse); nothing runs off screen at 1280×800; tests and a Deck screenshot (Mac screenshots in the PR; there is no separate start screen, the game opens in play, so the HUD's controls line became a pointer to the tab; Deck screenshot with 4.1)
 
 ## 3. Doc
-- [ ] 3.1 `tools/controls_doc.py` generates `docs/controls.md`; CI stale check; doc regenerated
+- [x] 3.1 `tools/controls_doc.py` generates `docs/controls.md`; CI stale check (pytest `test_controls_doc.py`, plus a gdUnit check that the doc names match the game); doc regenerated
 
 ## 4. Verification
 - [ ] 4.1 Deck benchmark unchanged (no rendering change); on-foot and driving contexts checked with a controller alone

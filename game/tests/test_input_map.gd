@@ -94,3 +94,31 @@ func test_a_conflicting_binding_is_named() -> void:
 	var dpad_up := InputEventJoypadButton.new()
 	dpad_up.button_index = JOY_BUTTON_DPAD_UP
 	assert_str(Controls.conflict("horn", dpad_up)).is_equal("")
+
+
+## docs/controls.md is written by tools/controls_doc.py from the same data; its button and key
+## names must be the ones the game shows (the Python name table copies Controls.event_text).
+func test_controls_doc_names_match_the_game() -> void:
+	var path := ProjectSettings.globalize_path("res://").path_join("../docs/controls.md")
+	var lines := FileAccess.get_file_as_string(path).split("\n")
+	var ctx := ""
+	var by_label := {}
+	var compared := 0
+	for line in lines:
+		if line.begins_with("### "):
+			ctx = ""
+			for c: String in Controls.data()["contexts"]:
+				if Controls.context_label(c) == line.substr(4):
+					ctx = c
+			by_label = {}
+			for row in Controls.rows(ctx):
+				by_label[str(row["label"])] = row
+		elif line.begins_with("| ") and ctx != "" and not line.begins_with("| action"):
+			var cells := line.split("|")
+			var label := cells[1].strip_edges()
+			assert_bool(by_label.has(label)).override_failure_message("doc row %s is not in controls.json" % label).is_true()
+			if by_label.has(label):
+				assert_str(cells[2].strip_edges()).is_equal(Controls.row_text(by_label[label], true))
+				assert_str(cells[3].strip_edges()).is_equal(Controls.row_text(by_label[label], false))
+				compared += 1
+	assert_int(compared).is_greater(20)
