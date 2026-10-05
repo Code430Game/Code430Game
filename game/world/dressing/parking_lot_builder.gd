@@ -188,6 +188,9 @@ static func layout_stalls(lot: Lot, graph: RoadGraph, streets: Dictionary = {}) 
 			pl.append(Vector2(p.x, p.z))
 		aisles.append([pl, e.width_m * 0.5])
 	if aisles.is_empty():
+		var row := _row_only(lot, near_streets)
+		if not row.is_empty():
+			return row  # just a strip of stalls: the aisle is outside the lot
 		aisles.append([_virtual_aisle(lot), AISLE_HALF_DEFAULT_M])
 	var w := STALL_W_M
 	var depth := STALL_D_M
@@ -231,6 +234,47 @@ static func layout_stalls(lot: Lot, graph: RoadGraph, streets: Dictionary = {}) 
 	if lot.capacity >= 0 and stalls.size() > lot.capacity:
 		stalls.resize(lot.capacity)
 	return stalls
+
+
+## Stalls for a lot too shallow for an aisle and a row (the outline covers only the stalls,
+## the aisle lies outside it): one row down the middle, as deep as fits. Empty when the lot is
+## deep enough for an aisle, or too shallow for a car.
+static func _row_only(lot: Lot, near_streets: Array) -> Array[Stall]:
+	var out: Array[Stall] = []
+	var c := Vector2.ZERO
+	for p in lot.outer:
+		c += p
+	c /= maxf(lot.outer.size(), 1)
+	var n := Vector2(-lot.stall_dir.y, lot.stall_dir.x)
+	var lo := INF
+	var hi := -INF
+	var a_lo := INF
+	var a_hi := -INF
+	for p in lot.outer:
+		lo = minf(lo, (p - c).dot(n))
+		hi = maxf(hi, (p - c).dot(n))
+		a_lo = minf(a_lo, (p - c).dot(lot.stall_dir))
+		a_hi = maxf(a_hi, (p - c).dot(lot.stall_dir))
+	var deep := hi - lo
+	var with_aisle := 2.0 * AISLE_HALF_DEFAULT_M + STALL_D_M + 2.0 * EDGE_CLEAR_M
+	if deep >= with_aisle or deep < 4.5 + 2.0 * EDGE_CLEAR_M:
+		return out
+	var depth := minf(STALL_D_M, deep - 2.0 * EDGE_CLEAR_M - 0.1)
+	var mid := c + n * ((lo + hi) * 0.5)
+	var count := int((a_hi - a_lo - 1.0) / STALL_W_M)
+	var start := a_lo + (a_hi - a_lo - count * STALL_W_M) * 0.5 + STALL_W_M * 0.5
+	for k in range(count):
+		var s := Stall.new()
+		s.centre = mid + lot.stall_dir * (start + k * STALL_W_M)
+		s.facing = n
+		s.width = STALL_W_M
+		s.depth = depth
+		if _fits(lot, s, out, [], []) and _clear_of_streets(s, near_streets):
+			s.index = out.size()
+			out.append(s)
+	if lot.capacity >= 0 and out.size() > lot.capacity:
+		out.resize(lot.capacity)
+	return out
 
 
 ## One aisle along `stall_dir`: through the middle when two rows of stalls fit across the lot,
