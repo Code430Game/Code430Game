@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 from osm_import.barriers import build_barriers
+from osm_import.bridges import bridges_query, build_bridges
 from osm_import.buildings import build_buildings, buildings_query
 from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.export import pedestrian_to_list
@@ -82,6 +83,13 @@ def _import(args: argparse.Namespace) -> int:
         chunks, tstats = build_terrain(
             result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m, buildings, cfg
         )
+        # Bridges after the terrain (pier feet stand on it); they lift deck walkways, so the
+        # pedestrian ways are re-exported after them.
+        outlines, _meta = fetch_query(bridges_query(bbox), bbox, args.cache_dir)
+        bridges = build_bridges(
+            result.graph, ChunkSampler(chunks).sample, cfg.bridges, outlines, proj, water
+        )
+        result.report.summary["bridges"] = bridges.counts()
         # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
         result.graph_dict["pedestrian_ways"] = pedestrian_to_list(result.graph)
         # Barriers use final pedestrian heights (curbs), so they come after the terrain.
@@ -113,9 +121,11 @@ def _import(args: argparse.Namespace) -> int:
             buildings,
             barriers,
             parking,
+            bridges,
         )
         print(f"terrain: {tstats}")
         print(f"barriers: {barriers.counts}")
+        print(f"bridges: {bridges.counts()}")
         if buildings is not None:
             print(
                 f"buildings: {len(buildings.buildings)} footprints, heights {buildings.height_sources}"

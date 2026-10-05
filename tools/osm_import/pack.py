@@ -18,6 +18,7 @@ from pathlib import Path
 import numpy as np
 
 from osm_import.barriers import BarriersResult
+from osm_import.bridges import BridgesResult
 from osm_import.buildings import BuildingsResult
 from osm_import.config import ImportConfig
 from osm_import.elevation import (
@@ -379,6 +380,7 @@ def write_pack(
     buildings: BuildingsResult | None = None,
     barriers: BarriersResult | None = None,
     parking: ParkingResult | None = None,
+    bridges: BridgesResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -457,6 +459,9 @@ def write_pack(
     if parking is not None:
         paths["parking"] = out_dir / "parking.v0.json"
         dump_json(parking.to_dict(), paths["parking"])
+    if bridges is not None:
+        paths["bridges"] = out_dir / "bridges.v0.json"
+        dump_json(bridges.to_dict(), paths["bridges"])
     return paths
 
 

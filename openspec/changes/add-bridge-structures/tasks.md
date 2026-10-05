@@ -1,7 +1,8 @@
 ## 1. Importer
-- [ ] 1.1 Fetch `man_made=bridge` outlines; `bridges.py` groups bridge edges (shared nodes, parallel carriageways within the merge gap, outlines first) into bridges with span, level, kind and ends; tests on fixtures: a two-way overpass, a divided highway, a canal bridge with an outline, a footbridge
-- [ ] 1.2 Walkways: mark the pedestrian ways that belong to a bridge and give them the deck's heights; sidewalk tags on bridge roads become deck walkways; ground sidewalks never join a deck; tests (including the 5 walkways found under decks in the survey)
-- [ ] 1.3 `bridges.v0.json` and schema; `pack_tools` validates it; Ottawa pack re-exported with the bridge and walkway counts noted here
+- [x] 1.1 Fetch `man_made=bridge` outlines; `bridges.py` groups bridge edges (shared nodes, parallel carriageways within the merge gap, outlines first) into bridges with span, level, kind and ends; tests on fixtures: a two-way overpass, a divided highway, a canal bridge with an outline, a footbridge
+- [x] 1.2 Walkways: mark the pedestrian ways that belong to a bridge and give them the deck's heights; sidewalk tags on bridge roads become deck walkways; ground sidewalks never join a deck; tests (including the 5 walkways found under decks in the survey)
+- [x] 1.3 `bridges.v0.json` and schema; `pack_tools` validates it; Ottawa pack re-exported with the bridge and walkway counts noted here
+  - 2026-10-05 Ottawa re-export: 33 bridges from 62 bridge edges (16 over a road, 10 over water, 4 over ground, 3 footbridges), including the Alexandra, Mackenzie King, Portage, Queensway, Booth Street, Plaza and Laurier bridges by their outline names; 55 walkways on decks, 12 of them lifted onto the deck (all 5 found under decks in the survey); 98 piers placed, 7 left out for want of a clear spot; 95 abutment ends. The bbox has no `man_made=bridge` relations, only ways
 
 ## 2. Game
 - [ ] 2.1 `bridge_builder.gd`: deck slab, soffit, fascia; part of the NEAR tier and collision; tests that a ray from below hits the soffit and a ray from above still hits the road at its height
