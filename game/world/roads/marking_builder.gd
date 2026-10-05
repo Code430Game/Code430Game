@@ -119,7 +119,90 @@ func build(graph: RoadGraph, junctions: Dictionary) -> Dictionary:
 				_ribbon(offset_pl, float(rules["line_width_m"]), c, buckets)
 			else:
 				_dashes(offset_pl, float(rules["line_width_m"]), float(rules["dash_on_m"]), float(rules["dash_off_m"]), c, buckets)
+	build_crossings(graph, buckets, lift, color("white"))
 	return buckets
+
+
+const ZEBRA_BAR_M := 0.5  # bar thickness across the road; the gap between bars is the same
+const ZEBRA_EDGE_M := 0.3  # bars stop this far inside the carriageway's edges
+const STOP_LINE_W_M := 0.4
+const STOP_LINE_SETBACK_M := 2.0  # from the crossing's near edge
+const SIGNAL_REACH_M := 35.0
+const CROSSING_REACH_M := 15.0
+
+
+## Zebra stripes on every crossing (bars across the road, long side along it, like Abbey Road)
+## and, where the crossing sits by a signalised junction, a stop line for the traffic heading
+## into that junction. Returns how many crossings got stripes.
+static func build_crossings(graph: RoadGraph, buckets: Dictionary, lift: float, white: Color) -> int:
+	var striped := 0
+	for w in graph.pedestrian:
+		if w.kind != "crossing" or w.polyline.size() < 2 or w.covered:
+			continue
+		var a := w.polyline[0]
+		var b := w.polyline[w.polyline.size() - 1]
+		var mid := (a + b) * 0.5
+		var hit := graph.nearest_edge(mid, CROSSING_REACH_M)
+		if hit.is_empty():
+			continue
+		var e: RoadGraph.RoadEdge = hit["edge"]
+		if e.road_class == "parking":
+			continue
+		var at := _closest_on(e.polyline, mid)
+		var centre: Vector3 = at[0]
+		var t: Vector2 = at[1]  # road direction here (unit, x/z)
+		var across := Vector2(-t.y, t.x)
+		var hw := e.width_m * 0.5
+		var half_len := maxf(w.width_m, 2.0) * 0.5  # bars as long as the crossing is wide
+		# On top of the crossing's own strip (the import sets it just above the road).
+		var y := maxf(centre.y + lift, maxf(a.y, b.y) + SidewalkBuilder.SURFACE_LIFT_M + 0.008)
+		var s := -hw + ZEBRA_EDGE_M + ZEBRA_BAR_M * 0.5
+		var bars := 0
+		while s <= hw - ZEBRA_EDGE_M - ZEBRA_BAR_M * 0.5 + 0.001:
+			var c := Vector2(centre.x, centre.z) + across * s
+			var p0 := Vector3(c.x - t.x * half_len, y, c.y - t.y * half_len)
+			var p1 := Vector3(c.x + t.x * half_len, y, c.y + t.y * half_len)
+			_ribbon(PackedVector3Array([p0, p1]), ZEBRA_BAR_M, white, buckets)
+			bars += 1
+			s += ZEBRA_BAR_M * 2.0
+		if bars > 0:
+			striped += 1
+		for nid in [e.from_node, e.to_node]:
+			if not graph.is_signalised(nid):
+				continue
+			var j: Vector3 = graph.nodes[nid].position
+			if Vector2(j.x - centre.x, j.z - centre.z).length() > SIGNAL_REACH_M:
+				continue
+			# Traffic heading for the junction meets the crossing first: its stop line sits on the
+			# far side of the stripes from the junction, across the lanes to the right of travel.
+			var toward := Vector2(j.x - centre.x, j.z - centre.z).normalized()
+			var v := t if t.dot(toward) >= 0.0 else -t
+			var right := Vector2(-v.y, v.x)
+			var base := Vector2(centre.x, centre.z) - v * (half_len + STOP_LINE_SETBACK_M)
+			var p0 := Vector3(base.x, y, base.y)
+			var p1 := Vector3(base.x + right.x * (hw - ZEBRA_EDGE_M), y, base.y + right.y * (hw - ZEBRA_EDGE_M))
+			_ribbon(PackedVector3Array([p0, p1]), STOP_LINE_W_M, white, buckets)
+	return striped
+
+
+## [closest point on the polyline (with its height), unit direction there (x, z)].
+static func _closest_on(pl: PackedVector3Array, p: Vector3) -> Array:
+	var best := INF
+	var out: Array = [pl[0], Vector2(1, 0)]
+	for i in range(pl.size() - 1):
+		var a := pl[i]
+		var b := pl[i + 1]
+		var ab := Vector2(b.x - a.x, b.z - a.z)
+		var l2 := ab.length_squared()
+		if l2 < 1e-6:
+			continue
+		var f := clampf(Vector2(p.x - a.x, p.z - a.z).dot(ab) / l2, 0.0, 1.0)
+		var q := a.lerp(b, f)
+		var d := Vector2(p.x - q.x, p.z - q.z).length()
+		if d < best:
+			best = d
+			out = [q, ab.normalized()]
+	return out
 
 
 static func _ribbon(pl: PackedVector3Array, width: float, c: Color, buckets: Dictionary) -> void:
