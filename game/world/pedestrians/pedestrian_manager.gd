@@ -10,6 +10,9 @@ extends Node3D
 ## tumbles as a rigid body for the hit window, then lies still until removal. Agents
 ## far from every player step every Nth frame with a larger delta.
 
+## A vehicle knocked a walker down (the police hear about it if someone saw).
+signal struck_by_vehicle(agent: Pedestrian, vehicle: Node3D)
+
 const BODY_SCENE := preload("res://world/pedestrians/pedestrian_body.tscn")
 const WALK_SHADER := preload("res://world/pedestrians/pedestrian_walk.gdshader")
 const CONFIG_PATH := "res://world/pedestrians/pedestrian_config.json"
@@ -534,6 +537,7 @@ func _on_body_hit(body: PedestrianBody, vehicle: Node3D, velocity: Vector3) -> v
 	var mass := float(config.get("mass_kg", 75.0))
 	var throw := velocity * float(config.get("hit_transfer", 0.9)) + Vector3.UP * float(config.get("hit_lift_mps", 1.5))
 	knock_down(a, throw * mass, a.position() + Vector3.UP * 0.5)
+	struck_by_vehicle.emit(a, vehicle)
 	if vehicle is VehicleBody3D and velocity.length() > 0.01:
 		(vehicle as VehicleBody3D).apply_central_impulse(-velocity.normalized() * float(config.get("hit_car_impulse_ns", 2000.0)))
 
