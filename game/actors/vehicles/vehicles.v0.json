@@ -576,6 +576,53 @@
      "local": 0.0
     }
    }
+  },
+  {
+   "id": "police",
+   "name": "Patrol Car",
+   "body_class": "sedan",
+   "dims": {
+    "length_m": 4.6,
+    "width_m": 1.8,
+    "height_m": 1.45,
+    "wheelbase_m": 2.7,
+    "track_m": 1.56,
+    "wheel_radius_m": 0.33,
+    "front_overhang_m": 0.9,
+    "cabin_start_m": 1.75,
+    "roof_length_m": 1.3
+   },
+   "mass_kg": 1400,
+   "engine_force": 5625,
+   "brake_force": 80,
+   "grip": 2.5,
+   "top_speed_kph": 170,
+   "steer_max_rad": 0.6,
+   "seats": 5,
+   "colors": [
+    [
+     0.95,
+     0.95,
+     0.97
+    ]
+   ],
+   "spawn": {
+    "weight": 0.0,
+    "roads": {
+     "motorway": 0.0,
+     "arterial": 0.0,
+     "local": 0.0
+    },
+    "hours": []
+   },
+   "liveries": {
+    "variants": {
+     "fallback": {
+      "stripe": "police",
+      "light_bar": true
+     }
+    }
+   }
   }
  ]
 }

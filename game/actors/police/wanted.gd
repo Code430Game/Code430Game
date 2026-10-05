@@ -54,6 +54,12 @@ func report(kind: String, pos: Vector3) -> bool:
 	return true
 
 
+## Sets the level directly (screenshots, tests, debug).
+func set_stars(n: int) -> void:
+	unseen_s = 0.0
+	_set_stars(clampi(n, 0, int(config.get("max_stars", 3))))
+
+
 func clear() -> void:
 	unseen_s = 0.0
 	_set_stars(0)

@@ -30,6 +30,10 @@ var look_behind: bool = false
 ## While true (aim held with a weapon) the camera pulls in over the right shoulder and the
 ## character faces where it looks.
 var aiming: bool = false
+## Seconds left held in place (a police net in clean): no moving, no weapons.
+var stuck_s: float = 0.0
+## Health in modes with lethal weapons (add-police); the scene handles reaching zero.
+var health: float = 100.0
 const AIM_DISTANCE_SHARE := 0.45
 const AIM_SHOULDER_M := 0.6
 var _pitch: float = 0.0
@@ -138,6 +142,9 @@ func _move(delta: float) -> void:
 	elif Input.is_action_just_pressed("jump") and not wading:
 		velocity.y = config.jump_velocity(_gravity)
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	if stuck_s > 0.0:
+		stuck_s -= delta
+		input = Vector2.ZERO  # netted: the player struggles in place
 	var cam_forward := -_pivot.global_basis.z
 	if look_behind:
 		cam_forward = -cam_forward  # glancing back does not turn the stick round
