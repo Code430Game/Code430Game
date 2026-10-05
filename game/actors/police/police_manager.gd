@@ -18,12 +18,21 @@ const REPLAN_S := 2.0
 const DIRECT_M := 35.0
 const STEER_GAIN := 1.6
 const STUCK_S := 3.0
+const HELI_FAR_PAD_M := 700.0
+const HELI_ARRIVE_M := 400.0
 
 var wanted: Wanted
 var graph: RoadGraph
 var player: Player
 var holder: Node3D  # where cars and officers live (the world)
 var stations: Array = []  # Services.Place of kind police: the first car leaves from one in range
+var helipads: Array = []  # Services.Place of kind helipad: where the helicopter lives
+var helicopter: PoliceHelicopter
+## 0 day .. 1 night (the scene's day-night clock), for the helicopter's searchlight.
+var night: float = 0.0
+var _rotor_voice: AudioStreamPlayer
+var _rotor_t: float = 0.0
+var _noise_state: Array = [0x1234567]
 var cars: Array[VehicleBody3D] = []
 var officers: Array[Node3D] = []
 var _plans: Dictionary = {}  # car -> {"points": PackedVector3Array, "i": int, "age": float}
@@ -45,6 +54,9 @@ func _ready() -> void:
 	_siren = Synth.make_player("SFX", -12.0)
 	add_child(_siren)
 	_siren.play()
+	_rotor_voice = Synth.make_player("SFX", -8.0)
+	add_child(_rotor_voice)
+	_rotor_voice.play()
 	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://actors/police/officer_weapon.json"))
 	_officer_weapon = data if data is Dictionary else {}
 
@@ -88,6 +100,7 @@ func _physics_process(delta: float) -> void:
 			continue
 		_step_officer(o, delta)
 		positions.append(o.global_position)
+	_step_helicopter(target)
 	wanted.police_positions = positions
 	_maybe_let_out(target)
 	_check_busted(delta)
@@ -99,6 +112,8 @@ func _physics_process(delta: float) -> void:
 			var line := "police: stars %d cars %d officers %d" % [wanted.stars, cars.size(), officers.size()]
 			for car in cars:
 				line += " | d %.0f y %.1f v %.0f" % [car.global_position.distance_to(target.global_position), car.global_position.y, float(car.call("speed_kph"))]
+			if helicopter != null:
+				line += " | heli d %.0f alt %.0f sees %s" % [helicopter.global_position.distance_to(target.global_position), helicopter.global_position.y - target.global_position.y, helicopter.sees_target()]
 			print(line)
 
 
@@ -112,6 +127,7 @@ func _process(_delta: float) -> void:
 				(bar.get_child(0) as MeshInstance3D).visible = on
 				(bar.get_child(1) as MeshInstance3D).visible = not on
 	_fill_siren()
+	_fill_rotor()
 
 
 func _spawn_car(around: Vector3) -> bool:
@@ -371,6 +387,48 @@ func _check_busted(delta: float) -> void:
 		_busted_s = 0.0
 
 
+## Three stars bring the helicopter from the nearest helipad (or high at the district edge);
+## below three it goes home and is freed when it lands.
+func _step_helicopter(target: Node3D) -> void:
+	if wanted.stars >= 3 and helicopter == null:
+		helicopter = PoliceHelicopter.new()
+		helicopter.name = "PoliceHelicopter"
+		var pad: Variant = null
+		for h in helipads:
+			if pad == null or h.at.distance_to(target.global_position) < pad.at.distance_to(target.global_position):
+				pad = h
+		var home: Vector3 = pad.at if pad != null else target.global_position + Vector3(260.0, 0.0, 0.0)
+		holder.add_child(helicopter)
+		helicopter.home = home
+		if pad != null and home.distance_to(target.global_position) <= HELI_FAR_PAD_M:
+			helicopter.global_position = home  # lifts off from the pad
+		else:
+			# A far pad: it is already on its way, coming in from the pad's side at cruise height.
+			var from := home - target.global_position
+			from.y = 0.0
+			from = from.normalized() * HELI_ARRIVE_M if from.length() > 1.0 else Vector3(HELI_ARRIVE_M, 0.0, 0.0)
+			helicopter.global_position = target.global_position + from + Vector3.UP * PoliceHelicopter.CRUISE_M
+			helicopter.state = PoliceHelicopter.State.CHASE
+		helicopter.landed.connect(_on_helicopter_landed)
+	if helicopter == null:
+		wanted.helicopter_sees = false
+		return
+	helicopter.target = target
+	helicopter.night = night
+	if wanted.stars < 3:
+		helicopter.go_home()
+		if helicopter.global_position.distance_to(target.global_position) > HELI_FAR_PAD_M:
+			_on_helicopter_landed()  # well out of sight on its way home
+			return
+	wanted.helicopter_sees = helicopter.sees_target()
+
+
+func _on_helicopter_landed() -> void:
+	if helicopter != null:
+		helicopter.queue_free()
+		helicopter = null
+
+
 func _remove_car(car: VehicleBody3D) -> void:
 	cars.erase(car)
 	_plans.erase(car)
@@ -391,6 +449,11 @@ func _clear_all() -> void:
 func reset() -> void:
 	_clear_all()
 	_busted_s = 0.0
+	if helicopter != null:
+		helicopter.queue_free()
+		helicopter = null
+	if wanted != null:
+		wanted.helicopter_sees = false
 
 
 func _fill_siren() -> void:
@@ -419,3 +482,23 @@ func _fill_siren() -> void:
 	pb.push_buffer(buf)
 	if _siren_phase > 1000.0 * TAU:
 		_siren_phase = fmod(_siren_phase, TAU)
+
+
+## The helicopter's rotor: a low noise thump at about 18 beats a second, louder as it nears.
+func _fill_rotor() -> void:
+	var pb := _rotor_voice.get_stream_playback() as AudioStreamGeneratorPlayback
+	if pb == null or helicopter == null or player == null:
+		return
+	var gain := clampf(1.0 - helicopter.global_position.distance_to(player.global_position) / 250.0, 0.0, 1.0)
+	var frames := pb.get_frames_available()
+	var buf := PackedVector2Array()
+	buf.resize(frames)
+	var dt := 1.0 / Synth.MIX_RATE
+	for i in range(frames):
+		_rotor_t += dt
+		var beat := pow(maxf(sin(_rotor_t * TAU * 18.0), 0.0), 3.0)
+		var s := Synth.noise(_noise_state) * beat * 0.5 * gain
+		buf[i] = Vector2(s, s)
+	pb.push_buffer(buf)
+	if _rotor_t > 1000.0:
+		_rotor_t = fmod(_rotor_t, 1.0)
