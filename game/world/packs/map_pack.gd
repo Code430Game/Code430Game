@@ -58,6 +58,8 @@ var garage_chunks: Dictionary = {}  # chunk -> ChunkTriangles (ramps, doors, gar
 var garage_light_chunks: Dictionary = {}
 var garage_material: Material
 var garage_light_material: Material
+var vegetation_chunks: Dictionary = {}  # chunk -> {"trees", "bushes"} rows, priority order
+var green_areas: Array = []  # for the maps
 var parking_lots: Array[ParkingLotBuilder.Lot] = []
 var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
 
@@ -112,6 +114,9 @@ func load(dir: String) -> bool:
 	parking_chunks = ParkingLotBuilder.by_chunk(parking_lots, RoadGeometry.CHUNK_SIZE_M)
 	# Garages after the surface lots' chunks: their stalls join parking_lots (for parked cars)
 	# but are drawn by GarageBuilder at floor height, not draped on the terrain.
+	vegetation_chunks = VegetationBuilder.load_by_chunk(dir, RoadGeometry.CHUNK_SIZE_M)
+	VegetationBuilder.read_preset()
+	green_areas = VegetationBuilder.load_areas(dir)
 	garages = GarageBuilder.load_garages(dir, graph)
 	var built := GarageBuilder.build(garages)
 	garage_chunks = built["structure"]
@@ -252,6 +257,10 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 		var mbar: ArrayMesh = barrier_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("barriers_lod0", mbar, barrier_material, 0.0, ROAD_LOD0_END_M))
 		collision_meshes.append(mbar)
+	if vegetation_chunks.has(coord):
+		var trunks := VegetationBuilder.add_to_chunk(chunk, vegetation_chunks[coord], near)
+		if trunks != null:
+			collision_meshes.append(trunks)
 	if near and garage_chunks.has(coord):
 		var mg: ArrayMesh = garage_chunks[coord].to_mesh()
 		chunk.add_child(_mesh_instance("garages_lod0", mg, garage_material, 0.0, ROAD_LOD0_END_M))
@@ -379,13 +388,17 @@ static func shape_from_faces(faces: PackedVector3Array) -> CollisionShape3D:
 
 ## Drops the NEAR-only children (LOD0 meshes, collision, wading floor) from a built chunk.
 static func downgrade_chunk(node: Node3D) -> void:
+	var veg := node.get_node_or_null("vegetation")
+	if veg != null:
+		downgrade_chunk(veg)  # its LOD0 MultiMeshes go, LOD1 takes over from the chunk's middle
 	for child in node.get_children():
-		if child.name in NEAR_ROLES:
+		var n := String(child.name)
+		if n in NEAR_ROLES or (n.begins_with("veg_") and n.ends_with("_lod0")):
 			node.remove_child(child)
 			child.queue_free()
-		elif child is MeshInstance3D and (child as MeshInstance3D).visibility_range_begin > 0.0 and (child as MeshInstance3D).visibility_range_begin < TERRAIN_LOD1_END_M:
-			(child as MeshInstance3D).visibility_range_begin = 0.0  # the far mesh now stands in for LOD0
-			(child as MeshInstance3D).visibility_range_begin_margin = 0.0
+		elif child is GeometryInstance3D and (child as GeometryInstance3D).visibility_range_begin > 0.0 and (child as GeometryInstance3D).visibility_range_begin < TERRAIN_LOD1_END_M:
+			(child as GeometryInstance3D).visibility_range_begin = 0.0  # the far mesh now stands in for LOD0
+			(child as GeometryInstance3D).visibility_range_begin_margin = 0.0
 
 
 ## Materials keyed by role family, for chunk importers running off the main thread.
