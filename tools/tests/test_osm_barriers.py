@@ -168,6 +168,24 @@ def test_output_validates_and_is_deterministic():
     assert build_barriers(g, FlatSource(5.0), None, CFG).to_dict() == a
 
 
+def test_barrier_ids_name_their_edge_and_survive_a_change_elsewhere():
+    """Review fix: ids were a running count, so one new barrier anywhere renumbered every
+    barrier after it and each re-export rewrote the whole file."""
+    deck = {"highway": "primary", "bridge": "yes", "layer": "1", "width": "12"}
+    one = [(1, [(-200, 0), (200, 0)], deck)]
+    two = [(2, [(-200, -100), (200, -100)], deck), *one]  # a second bridge, built first
+    ids_one = [
+        b.id
+        for b in build_barriers(
+            graph_for(one, FlatSource(10.0)), FlatSource(10.0), None, CFG
+        ).barriers
+    ]
+    r_two = build_barriers(graph_for(two, FlatSource(10.0)), FlatSource(10.0), None, CFG)
+    assert ids_one == ["b:parapet:w1.0:0", "b:parapet:w1.0:1"]
+    assert [b.id for b in r_two.barriers if b.edge_id == "w1.0"] == ids_one
+    assert len({b.id for b in r_two.barriers}) == len(r_two.barriers)
+
+
 def test_street_with_sidewalk_gets_a_curb_on_that_side():
     from osm_import.graph import PedestrianWay
 

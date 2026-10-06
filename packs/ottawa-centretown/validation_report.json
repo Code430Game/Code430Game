@@ -10292,6 +10292,9 @@
  "elevation": {
   "anchorless_spans": 0,
   "bound_conflicts": 18,
+  "clearance_raised": [],
+  "clearance_short": [],
+  "clearance_shortfalls": [],
   "contaminated_vertices": 187,
   "edges_over_grade": [
    "w107633331.0",
@@ -10314,8 +10317,10 @@
   "max_shared_step": 0.792,
   "max_y": 81.189,
   "min_y": 41.519,
+  "share_rounds_exhausted": true,
   "shared_deck_vertices": 82,
   "shared_ground_vertices": 60,
+  "shared_step_left": 0.571,
   "vertices_clamped": 428
  },
  "junction_clusters": [
@@ -12454,7 +12459,7 @@
  "summary": {
   "barriers": {
    "curb": 3533,
-   "guardrail": 39,
+   "guardrail": 40,
    "median": 25,
    "parapet": 78,
    "roadblock": 147,

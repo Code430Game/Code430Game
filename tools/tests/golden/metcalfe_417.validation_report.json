@@ -528,6 +528,9 @@
  "elevation": {
   "anchorless_spans": 0,
   "bound_conflicts": 3,
+  "clearance_raised": [],
+  "clearance_short": [],
+  "clearance_shortfalls": [],
   "contaminated_vertices": 39,
   "edges_over_grade": [
    "w690930740.0",
@@ -543,8 +546,10 @@
   "max_shared_step": 0.785,
   "max_y": 77.853,
   "min_y": 54.89,
+  "share_rounds_exhausted": true,
   "shared_deck_vertices": 20,
   "shared_ground_vertices": 7,
+  "shared_step_left": 0.931,
   "vertices_clamped": 11
  },
  "junction_clusters": [

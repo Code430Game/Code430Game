@@ -76159,7 +76159,7 @@
    "polyline": [
     [
      160.758,
-     72.805,
+     71.918,
      1306.185
     ],
     [
@@ -160433,12 +160433,12 @@
    "polyline": [
     [
      129.278,
-     72.812,
+     72.811,
      1326.612
     ],
     [
      160.758,
-     72.805,
+     71.918,
      1306.185
     ]
    ],
@@ -168151,7 +168151,7 @@
     ],
     [
      128.177,
-     72.188,
+     72.187,
      1307.304
     ]
    ],
@@ -178618,12 +178618,12 @@
    "polyline": [
     [
      128.177,
-     72.188,
+     72.187,
      1307.304
     ],
     [
      124.178,
-     72.808,
+     72.806,
      1310.003
     ],
     [
@@ -181947,7 +181947,7 @@
     ],
     [
      129.278,
-     72.812,
+     72.811,
      1326.612
     ]
    ],
@@ -228224,7 +228224,7 @@
     0.373,
     0.453
    ],
-   "id": "gore:w108234133.0:w76726658.0",
+   "id": "gore:w108234133.0:w76726658.0:l0",
    "points": [
     [
      776.53,
@@ -228252,7 +228252,7 @@
     0.849,
     0.906
    ],
-   "id": "gore:w76418898.0:w86980158.0",
+   "id": "gore:w76418898.0:w86980158.0:l0",
    "points": [
     [
      -94.812,
@@ -228317,7 +228317,7 @@
     1.459,
     1.626
    ],
-   "id": "gore:w76419951.0:w76420930.0",
+   "id": "gore:w76419951.0:w76420930.0:r0",
    "points": [
     [
      -315.304,
@@ -228343,7 +228343,7 @@
     1.139,
     1.431
    ],
-   "id": "gore:w76444358.0:w76445996.0",
+   "id": "gore:w76444358.0:w76445996.0:r0",
    "points": [
     [
      1410.34,
@@ -228372,7 +228372,7 @@
     1.165,
     1.071
    ],
-   "id": "gore:w76444534.0:w76726678.0",
+   "id": "gore:w76444534.0:w76726678.0:l0",
    "points": [
     [
      763.34,
@@ -228425,7 +228425,7 @@
     3.811,
     4.121
    ],
-   "id": "gore:w76444540.0:w76726713.0",
+   "id": "gore:w76444540.0:w76726713.0:l0",
    "points": [
     [
      650.472,
@@ -228615,7 +228615,7 @@
     0.401,
     0.451
    ],
-   "id": "gore:w76445048.0:w76726681.0",
+   "id": "gore:w76445048.0:w76726681.0:r0",
    "points": [
     [
      1260.005,
@@ -228661,7 +228661,7 @@
     2.312,
     2.413
    ],
-   "id": "gore:w76445289.0:w76446222.0",
+   "id": "gore:w76445289.0:w76446222.0:r0",
    "points": [
     [
      1432.169,
@@ -228801,7 +228801,7 @@
     0.578,
     0.426
    ],
-   "id": "gore:w76445893.0:w76726680.0",
+   "id": "gore:w76445893.0:w76726680.0:r0",
    "points": [
     [
      1490.238,
@@ -228875,7 +228875,7 @@
     0.526,
     0.354
    ],
-   "id": "gore:w76446222.0:w76727001.0",
+   "id": "gore:w76446222.0:w76727001.0:l0",
    "points": [
     [
      1489.651,
@@ -228895,7 +228895,7 @@
     2.004,
     2.237
    ],
-   "id": "gore:w76726670.0:w76726863.0",
+   "id": "gore:w76726670.0:w76726863.0:r0",
    "points": [
     [
      747.829,
@@ -228986,9 +228986,106 @@
     "fetched_at": "2026-10-01T01:19:35+00:00",
     "generator": "Overpass API 0.7.62.11 87bfad18",
     "kind": "overpass",
+    "layer": "roads",
     "license": "ODbL-1.0",
     "osm_base_timestamp": "2026-10-01T01:17:10Z",
     "query": "[out:json][timeout:180];(way[\"highway\"](45.405,-75.715,45.435,-75.675););out body;>;out body qt;",
+    "url": "https://overpass-api.de/api/interpreter"
+   },
+   {
+    "attribution": "© OpenStreetMap contributors",
+    "bbox": [
+     45.405,
+     -75.715,
+     45.435,
+     -75.675
+    ],
+    "fetched_at": "2026-09-30T17:05:00+00:00",
+    "kind": "overpass",
+    "layer": "water",
+    "license": "ODbL-1.0",
+    "osm_base_timestamp": "2026-09-30T18:20:02Z",
+    "query": "[out:json][timeout:180];(way[\"natural\"=\"water\"](45.405,-75.715,45.435,-75.675);relation[\"natural\"=\"water\"](45.405,-75.715,45.435,-75.675);way[\"waterway\"=\"riverbank\"](45.405,-75.715,45.435,-75.675);relation[\"waterway\"=\"riverbank\"](45.405,-75.715,45.435,-75.675););out body geom;",
+    "url": "https://overpass-api.de/api/interpreter"
+   },
+   {
+    "attribution": "© OpenStreetMap contributors",
+    "bbox": [
+     45.405,
+     -75.715,
+     45.435,
+     -75.675
+    ],
+    "fetched_at": "2026-09-30T18:20:00+00:00",
+    "kind": "overpass",
+    "layer": "buildings",
+    "license": "ODbL-1.0",
+    "osm_base_timestamp": "2026-09-30T19:09:41Z",
+    "query": "[out:json][timeout:240];(way[\"building\"](45.405,-75.715,45.435,-75.675);relation[\"building\"](45.405,-75.715,45.435,-75.675););out body geom;",
+    "url": "https://overpass-api.de/api/interpreter"
+   },
+   {
+    "attribution": "© OpenStreetMap contributors",
+    "bbox": [
+     45.405,
+     -75.715,
+     45.435,
+     -75.675
+    ],
+    "fetched_at": "2026-10-06T17:11:50+00:00",
+    "kind": "overpass",
+    "layer": "bridges",
+    "license": "ODbL-1.0",
+    "osm_base_timestamp": "2026-10-06T17:10:41Z",
+    "query": "[out:json][timeout:180];(way[\"man_made\"=\"bridge\"](45.405,-75.715,45.435,-75.675);relation[\"man_made\"=\"bridge\"](45.405,-75.715,45.435,-75.675););out body geom;",
+    "url": "https://overpass-api.de/api/interpreter"
+   },
+   {
+    "attribution": "© OpenStreetMap contributors",
+    "bbox": [
+     45.405,
+     -75.715,
+     45.435,
+     -75.675
+    ],
+    "fetched_at": "2026-10-06T17:11:56+00:00",
+    "kind": "overpass",
+    "layer": "parking",
+    "license": "ODbL-1.0",
+    "osm_base_timestamp": "2026-10-06T17:10:41Z",
+    "query": "[out:json][timeout:180];(way[\"amenity\"=\"parking\"](45.405,-75.715,45.435,-75.675);relation[\"amenity\"=\"parking\"](45.405,-75.715,45.435,-75.675););out body geom;",
+    "url": "https://overpass-api.de/api/interpreter"
+   },
+   {
+    "attribution": "© OpenStreetMap contributors",
+    "bbox": [
+     45.405,
+     -75.715,
+     45.435,
+     -75.675
+    ],
+    "fetched_at": "2026-10-06T17:12:16+00:00",
+    "kind": "overpass",
+    "layer": "vegetation",
+    "license": "ODbL-1.0",
+    "osm_base_timestamp": "2026-10-06T17:10:41Z",
+    "query": "[out:json][timeout:180];(node[\"natural\"=\"tree\"](45.405,-75.715,45.435,-75.675);way[\"natural\"=\"tree_row\"](45.405,-75.715,45.435,-75.675);way[\"natural\"~\"^(wood|scrub)$\"](45.405,-75.715,45.435,-75.675);relation[\"natural\"~\"^(wood|scrub)$\"](45.405,-75.715,45.435,-75.675);way[\"landuse\"~\"^(forest|grass)$\"](45.405,-75.715,45.435,-75.675);relation[\"landuse\"~\"^(forest|grass)$\"](45.405,-75.715,45.435,-75.675);way[\"leisure\"~\"^(park|garden)$\"](45.405,-75.715,45.435,-75.675);relation[\"leisure\"~\"^(park|garden)$\"](45.405,-75.715,45.435,-75.675););out body geom;",
+    "url": "https://overpass-api.de/api/interpreter"
+   },
+   {
+    "attribution": "© OpenStreetMap contributors",
+    "bbox": [
+     45.405,
+     -75.715,
+     45.435,
+     -75.675
+    ],
+    "fetched_at": "2026-10-06T17:12:39+00:00",
+    "kind": "overpass",
+    "layer": "services",
+    "license": "ODbL-1.0",
+    "osm_base_timestamp": "2026-10-06T17:10:41Z",
+    "query": "[out:json][timeout:120];(nwr[\"amenity\"~\"^(police|hospital|fire_station|clinic)$\"](45.405,-75.715,45.435,-75.675);nwr[\"aeroway\"~\"^(helipad|heliport)$\"](45.405,-75.715,45.435,-75.675);nwr[\"emergency\"=\"ambulance_station\"](45.405,-75.715,45.435,-75.675););out center tags;",
     "url": "https://overpass-api.de/api/interpreter"
    }
   ],
@@ -270418,7 +270515,7 @@
    ],
    "position": [
     160.758,
-    72.805,
+    71.918,
     1306.185
    ]
   },
@@ -275556,7 +275653,7 @@
    ],
    "position": [
     128.177,
-    72.188,
+    72.187,
     1307.304
    ]
   },
@@ -275934,7 +276031,7 @@
    ],
    "position": [
     129.278,
-    72.812,
+    72.811,
     1326.612
    ]
   },

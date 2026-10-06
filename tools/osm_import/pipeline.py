@@ -14,6 +14,7 @@ from osm_import.elevation import (
     ElevationStats,
     apply_elevation,
     apply_pedestrian_elevation,
+    clearance_shortfalls,
 )
 from osm_import.export import dump_json, graph_to_dict
 from osm_import.filter import FilterResult, filter_ways
@@ -98,6 +99,18 @@ def run_pipeline(
     if elev_stats is not None:
         report.elevation = elev_stats.to_dict()
         report.elevation["inferred_bridges"] = crossings.to_list() if crossings else []
+        # Deck over road on the final heights: every stage that moved a height has run.
+        report.elevation["clearance_shortfalls"] = clearance_shortfalls(graph, cfg)
+        for sf in report.elevation["clearance_shortfalls"]:
+            log.warning(
+                "clearance: %s over %s at (%.0f, %.0f) has %.2f m, %.2f m short",
+                sf["deck"],
+                sf["road"],
+                sf["x"],
+                sf["z"],
+                sf["clearance_m"],
+                sf["missing_m"],
+            )
     sources = [dict(sorted(data.source.items()))]
     gd = graph_to_dict(graph, bbox, proj.frame, sources, config_name, elev_meta)
     return PipelineResult(graph, report, fr, stats, gd, elev_stats)

@@ -1,6 +1,10 @@
 """Bridges: grouping, walkways on decks, piers clear of what is below, abutments (add-bridge-structures 1.1, 1.2)."""
 
 import math
+import os
+import subprocess
+import sys
+from pathlib import Path
 
 from osm_import.bridges import build_bridges, edge_distance
 from osm_import.cluster import cluster_junctions
@@ -254,3 +258,36 @@ def test_ground_under_a_deck_is_lowered_below_the_soffit_and_nowhere_else():
     assert h(0, 0) <= soffit - 0.3 + 1e-3  # mid-span: under the soffit
     assert h(0, 40) == deck_y - 0.5  # well beside the bridge: untouched
     assert h(-120, 0) == deck_y - 0.5  # along the approach: untouched
+
+
+def _tie_owner() -> str:
+    """The first edge of the bridge that takes a walkway running exactly between two decks."""
+    deck = {"highway": "primary", "bridge": "yes", "layer": "1", "width": "10"}
+    ways = [
+        (1, [(-40, 0), (40, 0)], deck),
+        (2, [(40, 16), (-40, 16)], deck),  # 6 m between the deck edges: two bridges
+        (3, [(-40, 8), (40, 8)], {"highway": "footway", "bridge": "yes", "layer": "1"}),
+    ]
+    g = graph_for(ways)
+    walk = next(w for w in g.pedestrian if w.osm_way_id == 3)
+    owner = next(b for b in build_bridges(g, ground, CFG.bridges).bridges if walk.id in b.walkways)
+    return owner.edges[0]
+
+
+def test_a_walkway_between_two_decks_joins_the_same_one_whatever_the_hash_seed():
+    """Review fix: the tie between two equally near decks went to whichever group a set of
+    strings listed first, which changes with PYTHONHASHSEED; the output must not."""
+    tools = Path(__file__).resolve().parents[1]
+    script = "from tests.test_osm_bridges import _tie_owner; print(_tie_owner())"
+    owners = {
+        subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=tools,
+            env={**os.environ, "PYTHONHASHSEED": str(seed)},
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        for seed in range(6)
+    }
+    assert owners == {"w1.0"}

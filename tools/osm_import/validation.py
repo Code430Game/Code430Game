@@ -411,6 +411,23 @@ def render_markdown(report: ValidationReport, title: str) -> str:
         ]
         if el["edges_over_grade"]:
             lines.append("  " + ", ".join(el["edges_over_grade"][:20]))
+        lines.append(
+            f"- Shared heights: {el.get('shared_deck_vertices', 0)} deck and"
+            f" {el.get('shared_ground_vertices', 0)} ground vertices; largest step before"
+            f" {el.get('max_shared_step', 0)} m, left after {el.get('shared_step_left', 0)} m"
+            + ("; ran out of rounds" if el.get("share_rounds_exhausted") else "")
+        )
+        raised = el.get("clearance_raised", [])
+        lines.append(f"- Span chains raised again for clearance after sharing: {len(raised)}")
+        if raised:
+            lines.append("  " + ", ".join(raised[:20]))
+        shortfalls = el.get("clearance_shortfalls", [])
+        lines.append(f"- Decks short of their clearance over a road: {len(shortfalls)}")
+        for sf in shortfalls[:30]:
+            lines.append(
+                f"  - {sf['deck']} over {sf['road']} at ({sf['x']}, {sf['z']}):"
+                f" {sf['clearance_m']} m, {sf['missing_m']} m short"
+            )
         inferred = el.get("inferred_bridges", [])
         lines.append(f"- Bridges inferred from untagged crossings: {len(inferred)}")
         for ib in inferred[:30]:

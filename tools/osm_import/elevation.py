@@ -255,6 +255,10 @@ class ElevationStats:
     shared_deck_vertices: int = 0
     shared_ground_vertices: int = 0
     max_shared_step: float = 0.0
+    shared_step_left: float = 0.0
+    share_rounds_exhausted: bool = False
+    clearance_raised: list[str] = field(default_factory=list)
+    clearance_short: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -271,6 +275,10 @@ class ElevationStats:
             "shared_deck_vertices": self.shared_deck_vertices,
             "shared_ground_vertices": self.shared_ground_vertices,
             "max_shared_step": round(self.max_shared_step, 3),
+            "shared_step_left": round(self.shared_step_left, 3),
+            "share_rounds_exhausted": self.share_rounds_exhausted,
+            "clearance_raised": self.clearance_raised,
+            "clearance_short": self.clearance_short,
         }
 
 
@@ -464,6 +472,136 @@ def _all_index(
     return idx
 
 
+def _span_chains(graph: RoadGraph) -> list[list[str]]:
+    """Bridge and tunnel chains: connected span edges of one sign, continuing through junctions
+    where ramps join the deck. Each chain is sorted, and chains come in order of their root."""
+    inc = graph.incident()
+    sign_of = {eid: _span_sign(e) for eid, e in graph.edges.items()}
+    span_edges = sorted(eid for eid, sg in sign_of.items() if sg != 0)
+    parent: dict[str, str] = {eid: eid for eid in span_edges}
+
+    def find(a: str) -> str:
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    for eids in inc.values():
+        spans = [x for x in eids if sign_of[x] != 0]
+        if len(spans) > 1:  # spans continue through this node, whatever else joins here
+            for x in spans[1:]:
+                if sign_of[x] == sign_of[spans[0]]:
+                    ra, rb = find(spans[0]), find(x)
+                    if ra != rb:
+                        parent[max(ra, rb)] = min(ra, rb)
+    chains: dict[str, list[str]] = {}
+    for eid in span_edges:
+        chains.setdefault(find(eid), []).append(eid)
+    return [sorted(chains[root]) for root in sorted(chains)]
+
+
+def _chain_clearance(graph: RoadGraph, eids: list[str], cfg: ImportConfig) -> float:
+    """Clearance a chain keeps over (or under) what it crosses: one per layer of its highest edge."""
+    return max(max(1, abs(graph.edges[x].layer)) for x in eids) * cfg.bridge_clearance_m
+
+
+def _recheck_clearance(
+    graph: RoadGraph,
+    cfg: ImportConfig,
+    y: dict[str, float],
+    vertex_keys: dict[str, list[str]],
+    positions: dict[str, tuple[float, float]],
+) -> dict[str, float]:
+    """Each span chain's clearance shortfall on the current heights, by its first edge.
+
+    Shared heights blend into the roads around them after the spans were placed, so a road
+    under a deck can come up into its clearance (or one over a tunnel come down onto it)."""
+    all_idx = _all_index(graph, vertex_keys, positions)
+    short: dict[str, float] = {}
+    for eids in _span_chains(graph):
+        sg = _span_sign(graph.edges[eids[0]])
+        need = _crossing_need(
+            graph,
+            eids,
+            vertex_keys,
+            positions,
+            y,
+            y,
+            all_idx,
+            _chain_clearance(graph, eids, cfg),
+            sg,
+        )
+        if need > SMOOTHING_EPSILON:
+            short[eids[0]] = need
+    return short
+
+
+def clearance_shortfalls(
+    graph: RoadGraph, cfg: ImportConfig, tolerance: float = 0.05
+) -> list[dict]:
+    """Places where a deck sits closer than its clearance over a road it crosses, on the graph's
+    final heights (validation). Roads joining the deck's own chain are its approaches, not
+    crossings. Each entry names the deck and road edges, where they cross and how much is missing."""
+    vertex_keys: dict[str, list[str]] = {}
+    positions: dict[str, tuple[float, float]] = {}
+    y: dict[str, float] = {}
+    for eid in sorted(graph.edges):
+        e = graph.edges[eid]
+        keys = []
+        for i, p in enumerate(e.polyline):
+            if i == 0:
+                key = f"n:{e.from_node}"
+            elif i == len(e.polyline) - 1:
+                key = f"n:{e.to_node}"
+            else:
+                key = f"e:{eid}:{i}"
+            keys.append(key)
+            positions[key] = (p[0], p[2])
+            y[key] = p[1]
+        vertex_keys[eid] = keys
+    all_idx = _all_index(graph, vertex_keys, positions)
+    out: list[dict] = []
+    for eids in _span_chains(graph):
+        if _span_sign(graph.edges[eids[0]]) <= 0:
+            continue
+        clearance = _chain_clearance(graph, eids, cfg)
+        chain_set = set(eids)
+        chain_keys = {k for eid in eids for k in vertex_keys[eid]}
+        for eid in eids:
+            keys = vertex_keys[eid]
+            layer = graph.edges[eid].layer
+            for i in range(len(keys) - 1):
+                a, b = positions[keys[i]], positions[keys[i + 1]]
+                mid = ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+                for c, d, (oeid, ka, kb) in all_idx.near(
+                    mid[0], mid[1], math.dist(a, b) / 2.0 + CELL_M
+                ):
+                    if oeid in chain_set or ka in chain_keys or kb in chain_keys:
+                        continue
+                    if graph.edges[oeid].layer >= layer:
+                        continue
+                    hit = _seg_intersect(a, b, c, d)
+                    if hit is None:
+                        continue
+                    t, u = hit
+                    deck = y[keys[i]] + (y[keys[i + 1]] - y[keys[i]]) * t
+                    under = y[ka] + (y[kb] - y[ka]) * u
+                    missing = clearance - (deck - under)
+                    if missing > tolerance:
+                        out.append(
+                            {
+                                "deck": eid,
+                                "road": oeid,
+                                "x": round(a[0] + (b[0] - a[0]) * t, 1),
+                                "z": round(a[1] + (b[1] - a[1]) * t, 1),
+                                "clearance_m": round(deck - under, 3),
+                                "missing_m": round(missing, 3),
+                            }
+                        )
+    out.sort(key=lambda r: (r["deck"], r["road"], r["x"], r["z"]))
+    return out
+
+
 def _span_heights(
     graph: RoadGraph,
     cfg: ImportConfig,
@@ -487,34 +625,12 @@ def _span_heights(
     """
     inc = graph.incident()
     sign_of = {eid: _span_sign(e) for eid, e in graph.edges.items()}
-    span_edges = sorted(eid for eid, sg in sign_of.items() if sg != 0)
-    parent: dict[str, str] = {eid: eid for eid in span_edges}
-
-    def find(a: str) -> str:
-        while parent[a] != a:
-            parent[a] = parent[parent[a]]
-            a = parent[a]
-        return a
-
-    for eids in inc.values():
-        spans = [x for x in eids if sign_of[x] != 0]
-        if len(spans) > 1:  # spans continue through this node, whatever else joins here
-            for x in spans[1:]:
-                if sign_of[x] == sign_of[spans[0]]:
-                    ra, rb = find(spans[0]), find(x)
-                    if ra != rb:
-                        parent[max(ra, rb)] = min(ra, rb)
-    chains: dict[str, list[str]] = {}
-    for eid in span_edges:
-        chains.setdefault(find(eid), []).append(eid)
-
     all_idx = _all_index(graph, vertex_keys, positions)
     fixed: dict[str, float] = {}
     anchorless = 0
-    for root in sorted(chains):
-        eids = sorted(chains[root])
+    for eids in _span_chains(graph):
         sg = sign_of[eids[0]]
-        clearance = max(max(1, abs(graph.edges[x].layer)) for x in eids) * cfg.bridge_clearance_m
+        clearance = _chain_clearance(graph, eids, cfg)
         adj: dict[str, list[tuple[str, float]]] = {}
         chain_keys: set[str] = set()
         for eid in eids:
@@ -651,7 +767,7 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         y[key] = clamped
 
     _smooth(y, fixed, lower, upper, adj)
-    shared = _share_heights(
+    shared, beside = _share_heights(
         graph, cfg, y, vertex_keys, positions, adj, stats, contaminated, set(fixed)
     )
     if shared:
@@ -665,13 +781,25 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         for k in sorted(shared):
             if k not in fixed and y[k] < lower[k] - SMOOTHING_EPSILON:
                 y[k] = pinned[k] = lower[k]
-        lower = _propagate(pinned, adj, sign=-1)
-        upper = _propagate(pinned, adj, sign=+1)
-        for key, val in y.items():
-            if key not in pinned:
-                lo, hi = lower.get(key, -math.inf), upper.get(key, math.inf)
-                y[key] = (lo + hi) / 2.0 if lo > hi + SMOOTHING_EPSILON else min(max(val, lo), hi)
-        _smooth(y, pinned, lower, upper, adj)
+        _regrade(y, pinned, adj)
+        # The blend and the regrade can lift a road under a deck into its clearance (the spans
+        # were placed before sharing): such a chain rises again, like a crossing in _span_heights.
+        short = _recheck_clearance(graph, cfg, y, vertex_keys, positions)
+        if short:
+            chains = {eids[0]: eids for eids in _span_chains(graph)}
+            for first in sorted(short):
+                sg = _span_sign(graph.edges[first])
+                for k in {k for eid in chains[first] for k in vertex_keys[eid]}:
+                    y[k] += sg * short[first]
+                    pinned[k] = y[k]
+            stats.clearance_raised = sorted(short)
+            _regrade(y, pinned, adj)
+            stats.clearance_short = sorted(
+                _recheck_clearance(graph, cfg, y, vertex_keys, positions)
+            )
+            for first in stats.clearance_short:
+                log.warning("elevation: span chain %s still short of its clearance", first)
+    stats.shared_step_left = _shared_step_left(y, beside)
 
     # Write back and measure residual grades.
     for nid, node in graph.nodes.items():
@@ -715,7 +843,7 @@ def _share_heights(
     stats: ElevationStats,
     under_decks: set[str] = frozenset(),
     spans: set[str] = frozenset(),
-) -> dict[str, float]:
+) -> tuple[dict[str, float], dict[str, list[tuple[str, str, float]]]]:
     """One height for carriageways whose ribbons touch (update-shared-deck-heights).
 
     Each carriageway gets its height from its own anchors, so two decks of one bridge, or two
@@ -732,7 +860,8 @@ def _share_heights(
     Under a deck (`under_decks`) ground roads take the lowest instead, so the clearance there
     never shrinks. No span vertex (`spans`) is ever lowered and no tunnel vertex moved. Every other vertex within `blend_m` along the network
     of a shared one takes that change, fading linearly, so approaches and side streets meet
-    the new heights without a kink. Returns the shared vertices and their new heights.
+    the new heights without a kink. Returns the shared vertices with their new heights, and
+    who is beside whom (vertex -> [(ka, kb, t)] per partner) for measuring what step is left.
     """
     rules = dict(SHARED_DEFAULTS)
     rules.update(cfg.shared_heights)
@@ -749,7 +878,7 @@ def _share_heights(
 
     kinds = {eid: k for eid, e in graph.edges.items() if (k := kind_of(e)) is not None}
     if len(kinds) < 2:
-        return {}
+        return {}, {}
     idx = _SegmentIndex()
     widest = 0.0
     for eid in kinds:
@@ -798,11 +927,22 @@ def _share_heights(
             beside[k] = [(ka, kb, t) for _d, ka, kb, t in partners.values()]
             on_deck[k] = any(kinds[eid] == "deck" for eid in own)
     if not beside:
-        return {}
+        return {}, {}
 
     # Each vertex takes the highest (under a deck the lowest) of its own and its partners'
     # heights, repeated until nothing moves, so a change reaches a third carriageway beside the
-    # second (a motorway raised to a deck end, then the on-ramp beside the motorway).
+    # second (a motorway raised to a deck end, then the on-ramp beside the motorway). The rule
+    # belongs to the pair, not the vertex: a ground vertex takes the lowest when it or any of its
+    # partners lies under a deck, so two partners never pick opposite rules and swap the step.
+    def low(k: str) -> bool:
+        return k in under_decks and not any(kinds[eid] == "deck" for eid in edges_at.get(k, ()))
+
+    # A partner counts as under a deck by the end of its segment nearest this vertex, so the two
+    # sides of a pair switch rule at the same place where the deck's footprint ends.
+    take_min = {
+        k: not on_deck[k] and (low(k) or any(low(ka if t < 0.5 else kb) for ka, kb, t in ps))
+        for k, ps in beside.items()
+    }
     for k, ps in beside.items():
         heights = [y[k]] + [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in ps]
         stats.max_shared_step = max(stats.max_shared_step, max(heights) - min(heights))
@@ -811,18 +951,27 @@ def _share_heights(
         else:
             stats.shared_ground_vertices += 1
     work = dict(y)
+    settled = False
     for _ in range(SHARE_ROUNDS):
         new = {}
         for k in sorted(beside):
             heights = [work[k]] + [work[ka] + (work[kb] - work[ka]) * t for ka, kb, t in beside[k]]
-            new[k] = min(heights) if k in under_decks and not on_deck[k] else max(heights)
+            new[k] = min(heights) if take_min[k] else max(heights)
         moved = max(abs(new[k] - work[k]) for k in new)
         work.update(new)
         if moved < SMOOTHING_EPSILON:
+            settled = True
             break
+    if not settled:
+        stats.share_rounds_exhausted = True
+        log.warning(
+            "shared heights: still moving after %d rounds (last move %.3f m); steps may remain",
+            SHARE_ROUNDS,
+            moved,
+        )
     delta = {k: work[k] - y[k] for k in beside}
     if not delta:
-        return {}
+        return {}, beside
 
     # Fade each change out along the network: nearest shared vertex wins.
     blend = rules["blend_m"]
@@ -846,7 +995,31 @@ def _share_heights(
         if k in tunnels or (k in spans and change < 0.0):
             continue  # never lower a deck into its clearance, nor move a tunnel
         y[k] += change
-    return {k: y[k] for k in delta}
+    return {k: y[k] for k in delta}, beside
+
+
+def _shared_step_left(
+    y: dict[str, float], beside: dict[str, list[tuple[str, str, float]]]
+) -> float:
+    """The largest step still left between a shared vertex and its partners."""
+    worst = 0.0
+    for k, ps in beside.items():
+        heights = [y[k]] + [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in ps]
+        worst = max(worst, max(heights) - min(heights))
+    return worst
+
+
+def _regrade(
+    y: dict[str, float], pinned: dict[str, float], adj: dict[str, list[tuple[str, float, float]]]
+) -> None:
+    """Clamp every free vertex to the grade bounds of the pinned ones, then smooth."""
+    lower = _propagate(pinned, adj, sign=-1)
+    upper = _propagate(pinned, adj, sign=+1)
+    for key, val in y.items():
+        if key not in pinned:
+            lo, hi = lower.get(key, -math.inf), upper.get(key, math.inf)
+            y[key] = (lo + hi) / 2.0 if lo > hi + SMOOTHING_EPSILON else min(max(val, lo), hi)
+    _smooth(y, pinned, lower, upper, adj)
 
 
 def _propagate(
