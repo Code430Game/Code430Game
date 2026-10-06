@@ -12,8 +12,8 @@ game/export/
 game/android/
 *.tmp
 
-# Exports / builds
-build/
+# Exports / builds (repo-root build/ only; game/world/build/ holds the pack builder scripts)
+/build/
 dist/
 *.pck
 !packs/**/*.pck
@@ -60,3 +60,6 @@ tools/report_relay/.wrangler/
 tools/report_relay/python_modules/
 tools/report_relay/pylock.toml
 tools/report_relay/.venv-workers/
+
+# Claude Code agent worktrees
+.claude/worktrees/
