@@ -12456,7 +12456,7 @@
    "curb": 3571,
    "guardrail": 38,
    "median": 24,
-   "parapet": 92,
+   "parapet": 91,
    "roadblock": 147,
    "soundwall": 18
   },
@@ -12471,7 +12471,7 @@
    },
    "piers": 98,
    "piers_skipped": 7,
-   "walkways_lifted": 12,
+   "walkways_lifted": 11,
    "walkways_on_decks": 55
   },
   "buildings": {
@@ -12545,9 +12545,9 @@
   },
   "terrain": {
    "cells_carved": 6750,
-   "cells_flattened": 386720,
+   "cells_flattened": 387118,
    "cells_lowered_for_water": 58750,
-   "cells_lowered_under_decks": 22659,
+   "cells_lowered_under_decks": 22526,
    "cells_under_buildings": 160487,
    "chunks": 196,
    "underpasses": {
@@ -12558,20 +12558,20 @@
   "total_length_km": 247.578,
   "vegetation": {
    "areas": 393,
-   "bushes": 37174,
+   "bushes": 37129,
    "chunks_over_400_trees": 1,
    "max_trees_in_a_chunk": 456,
    "skipped": {
-    "edge on a road, sidewalk, building or water": 1344,
-    "frontage on a road, sidewalk, building or water": 31807,
+    "edge on a road, sidewalk, building or water": 1345,
+    "frontage on a road, sidewalk, building or water": 31851,
     "outside the district": 269,
-    "scatter on a road, sidewalk, building or water": 1572,
+    "scatter on a road, sidewalk, building or water": 1573,
     "tagged on a road, sidewalk, building or water": 270
    },
-   "trees": 18998,
+   "trees": 18997,
    "trees_by_source": {
     "row": 64,
-    "scatter": 7348,
+    "scatter": 7347,
     "tagged": 11586
    }
   },

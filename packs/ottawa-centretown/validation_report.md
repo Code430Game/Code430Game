@@ -958,7 +958,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Barriers
 
-- curb 3571, parapet 92, guardrail 38, median 24, soundwall 18, roadblock 147
+- curb 3571, parapet 91, guardrail 38, median 24, soundwall 18, roadblock 147
 
 ## Buildings
 
