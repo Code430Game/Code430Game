@@ -30,6 +30,8 @@ var look_behind: bool = false
 ## While true (aim held with a weapon) the camera pulls in over the right shoulder and the
 ## character faces where it looks.
 var aiming: bool = false
+## The camera holds still while the weapon wheel is open (add-weapon-selector).
+var look_locked: bool = false
 ## Seconds left held in place (a police net in clean): no moving, no weapons.
 var stuck_s: float = 0.0
 ## Health in modes with lethal weapons (add-police); the scene handles reaching zero.
@@ -117,7 +119,9 @@ func _physics_process(delta: float) -> void:
 
 func _orbit(delta: float) -> void:
 	look_behind = Input.is_action_pressed("look_behind") and not get_tree().paused
-	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	var look := Vector2.ZERO if look_locked else Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if look_locked:
+		_mouse_look = Vector2.ZERO
 	_yaw -= look.x * config.camera_orbit_speed_rad_s * delta + _mouse_look.x
 	_pitch = clampf(_pitch + look.y * config.camera_orbit_speed_rad_s * delta + _mouse_look.y, deg_to_rad(config.camera_pitch_min_deg), deg_to_rad(config.camera_pitch_max_deg))
 	_mouse_look = Vector2.ZERO

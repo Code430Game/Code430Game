@@ -12,6 +12,12 @@ extends Node
 ## go through `hit()` with the `fist` impact: where the tone allows violence the third punch
 ## on one person inside `combo_window_s`, or one kick, knocks them down; otherwise a hit is a
 ## shove that makes them stumble and run off.
+##
+## Choosing (add-weapon-selector): a tap of LB / Tab steps to the next slot; held past the
+## wheel's `hold_s` it opens the `WeaponWheel`, and the release takes what the stick or mouse
+## points at. Keys 1 to 9 pick by position. While the wheel is open the camera does not turn and
+## fire, aim and reload do nothing; time never changes. The idle tile shows what is in hand and
+## flashes on a change.
 
 signal fired(weapon: Dictionary)
 ## A weapon hit a person; `downed` when it knocked them down (the police hear about it).
@@ -31,6 +37,10 @@ var reticle: Control
 var held: HeldWeapon
 ## Aim as if the aim control were held (testbed screenshots).
 var hold_aim: bool = false
+## The weapon wheel and the idle tile (add-weapon-selector); either may be null.
+var wheel: WeaponWheel
+var tile: WeaponTile
+var page: WeaponPage
 var _cooldown: float = 0.0
 var _reload_left: float = 0.0
 var _balls: Array[RigidBody3D] = []
@@ -40,6 +50,8 @@ var _fist_hold: float = -1.0  # seconds fire has been held with empty hands, or 
 var _punch_side: int = 0
 var _streaks: Dictionary = {}  # Pedestrian -> [punches in a row, _clock at the last]
 var _clock: float = 0.0
+var _next_held: float = -1.0  # seconds LB / Tab has been held, or < 0
+var _last_slot: int = 0
 
 
 func _ready() -> void:
@@ -49,6 +61,10 @@ func _ready() -> void:
 		var caps: Dictionary = weapons.config.get("decal_cap", {})
 		effects.cap = int(caps.get(Settings.current_preset_name, caps.get("deck", 48)))
 	ContentMode.mode_changed.connect(_on_mode_changed)
+	page = WeaponPage.new(weapons)
+	if wheel != null and wheel.pages.is_empty():
+		wheel.pages.append(page)
+	_show_slot(false)
 
 
 func _on_mode_changed(_id: String) -> void:
@@ -57,6 +73,7 @@ func _on_mode_changed(_id: String) -> void:
 		weapons.slot = 0
 	if effects != null:
 		effects.clear_marks()
+	_show_slot(false)
 	_update_hud()
 
 
@@ -72,18 +89,37 @@ func _physics_process(delta: float) -> void:
 	_ensure_held()
 	if held != null:
 		held.set_weapon(weapons.current() if player != null and not player.is_driving() else {})
+	if tile != null:
+		tile.visible = player != null and not player.is_driving()
 	if not active:
+		if wheel != null:
+			wheel.close(false)
+		_next_held = -1.0
 		if player != null:
 			player.aiming = false
+			player.look_locked = false
 		if held != null:
 			held.aiming = false
 		_drop_fists()
 		_show_reticle(false)
 		return
-	if Input.is_action_just_pressed("weapon_next"):
-		weapons.cycle()
-		_reload_left = 0.0
+	step_next(delta, Input.is_action_pressed("weapon_next"))
+	for i in range(9):
+		if Input.is_action_just_pressed("weapon_slot_%d" % (i + 1)):
+			pick_position(i)
+	_sync_slot()
+	var choosing := wheel != null and wheel.is_open()
+	player.look_locked = choosing
+	if choosing or (wheel != null and wheel.just_closed()):
+		if choosing:
+			wheel.steer(Input.get_vector("look_left", "look_right", "look_up", "look_down"))
+		player.aiming = false
+		if held != null:
+			held.aiming = false
 		_drop_fists()
+		_show_reticle(false)
+		_update_hud()
+		return
 	var w := weapons.current()
 	player.aiming = not w.is_empty() and (Input.is_action_pressed("aim") or hold_aim)
 	_show_reticle(player.aiming and w.get("mechanic", "") != "melee")
@@ -97,6 +133,60 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_pressed("fire"):
 			pull_trigger()
 	_update_hud()
+
+
+## LB / Tab, one physics step: released before the wheel's `hold_s` it steps to the next slot;
+## held past it the wheel opens, and the release takes what the wheel points at.
+func step_next(delta: float, pressed: bool) -> void:
+	var hold := float(WeaponWheel.tunables().get("hold_s", 0.2))
+	if pressed:
+		_next_held = 0.0 if _next_held < 0.0 else _next_held + delta
+		if wheel != null and not wheel.is_open() and _next_held >= hold:
+			wheel.open_wheel()
+		return
+	if _next_held < 0.0:
+		return
+	var held_for := _next_held
+	_next_held = -1.0
+	var before := weapons.slot
+	if wheel != null and wheel.is_open():
+		wheel.close(true)
+	elif held_for < hold or wheel == null:
+		weapons.cycle()
+	if weapons.slot != before:
+		_switched()
+
+
+## Picks the `index`th slot the tone fills (keys 1 to 9). Returns true when it did.
+func pick_position(index: int) -> bool:
+	var slots := weapons.available()
+	var before := weapons.slot
+	if index < 0 or index >= slots.size() or not weapons.pick(slots[index]):
+		return false
+	if weapons.slot != before:
+		_switched()
+	return true
+
+
+## The player switched weapons: no reload carries over, the fists let go, the tile flashes.
+func _switched() -> void:
+	_reload_left = 0.0
+	_drop_fists()
+	_show_slot(true)
+
+
+## Keeps the idle tile on what is in hand, however the slot changed (the testbed sets it).
+func _sync_slot() -> void:
+	if weapons.slot != _last_slot:
+		_show_slot(true)
+
+
+func _show_slot(flash: bool) -> void:
+	_last_slot = weapons.slot
+	if tile != null:
+		tile.show_icon(WeaponIcons.texture(weapons.icon_names(weapons.slot)))
+		if flash:
+			tile.flash()
 
 
 ## Fires or swings once if the weapon is ready. Returns true when it did.

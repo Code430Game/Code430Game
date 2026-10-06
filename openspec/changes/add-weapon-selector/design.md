@@ -60,8 +60,11 @@ Picking is by direction (right stick or mouse) and a release, like most wheels.
   magazine.
 - Past `max_segments` (default 8), the extra slots go on an outer ring at 1.6 times the
   radius.
-- The idle tile is 40 px at the bottom left, above the weapon and ammo line, clear of the
-  minimap (bottom right) and the wanted stars, at 70 % opacity.
+- The idle tile is 40 px at the top right, under the weapon and ammo line and the wanted
+  stars, at 70 % opacity. (Built 2026-10-06: the HUD has the minimap at the bottom left and
+  the weapon line at the top right, so the tile sits with the weapon line.)
+- The wheel sits on its own canvas layer added after the pause menu, so its `_input` sees
+  B / Esc first and Esc closes the wheel rather than opening the menu.
 
 ## Icons
 - Each icon is one closed silhouette on a 64x64 viewBox with a 4 px safe margin and no

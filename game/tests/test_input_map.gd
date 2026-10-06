@@ -26,6 +26,8 @@ func test_required_actions_exist() -> void:
 ## Keyboard shortcuts for things a controller reaches another way (named, with the way).
 const KEYBOARD_SHORTCUTS: PackedStringArray = [
 	"report_open",  # F8; controllers use the pause menu's "Report a problem" or hold Menu
+	"weapon_slot_1", "weapon_slot_2", "weapon_slot_3", "weapon_slot_4", "weapon_slot_5",
+	"weapon_slot_6", "weapon_slot_7", "weapon_slot_8", "weapon_slot_9",  # 1 to 9; controllers use the weapon wheel
 ]
 
 

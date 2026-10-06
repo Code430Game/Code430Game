@@ -53,6 +53,43 @@ func cycle() -> void:
 			return
 
 
+## The slots the active tone puts something in, in cycle order; 0 (empty hands) first.
+func available() -> Array[int]:
+	var out: Array[int] = [0]
+	for i in range(defs.size()):
+		if not resolve(defs[i]).is_empty():
+			out.append(i + 1)
+	return out
+
+
+## Puts slot `to` in hand when the tone allows it. Returns true when it did.
+func pick(to: int) -> bool:
+	if not available().has(to):
+		return false
+	slot = to
+	return true
+
+
+## Icon names to try for slot `s`, best first (add-weapon-selector): the variant's `icon`, its
+## `model`, the generic icon for its mechanic, then the missing tile. Slot 0 is the fists.
+func icon_names(s: int) -> PackedStringArray:
+	if s <= 0 or s > defs.size():
+		return PackedStringArray(["fists", "missing"])
+	return icon_names_for(resolve(defs[s - 1]))
+
+
+## The icon names to try for a resolved weapon, best first.
+static func icon_names_for(w: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	for key: String in ["icon", "model"]:
+		if str(w.get(key, "")) != "":
+			out.append(str(w[key]))
+	if str(w.get("mechanic", "")) != "":
+		out.append("generic_" + str(w["mechanic"]))
+	out.append("missing")
+	return out
+
+
 ## Full magazines for every weapon (a tone change swaps what they are, so they start full).
 func refill() -> void:
 	for d in defs:

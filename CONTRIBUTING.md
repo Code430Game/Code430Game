@@ -46,7 +46,7 @@ with only the proposal. The maintainer approves the direction before code is wri
   - `--spawn=x,z`, `--time=HH`, `--tone=clean|gritty|dystopia`
   - `--traffic=0 --peds=0` to clear the streets
   - `--wanted=N` (plus `--police-log`) for chases
-  - `--weapon=1|2 --shoot=N` for weapons
+  - `--weapon=1|2 --shoot=N` for weapons, `--wheel=N` for the weapon wheel open on entry N
   - `--knockdown-every=S` (plus `--ambulance-log`) for ambulances
 - **Performance:** the Steam Deck is the baseline (`AGENTS.md`, performance budget). Run
   `--benchmark=40 --autodrive --preset=deck` on main and on your branch, back to back on the

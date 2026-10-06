@@ -6,6 +6,10 @@ the device in use, and A (or Enter) on an action rebinds it with the next press;
 already used by another action at the same time is refused and names that action. The last
 row puts every control back to the defaults. Rebinds are saved in `user://settings.cfg`.
 
+On foot, a tap of LB (Tab) steps to the next weapon; holding it opens the weapon wheel: point
+with the right stick (or the mouse) and let go to take it, or press B (Esc) to keep what you
+have. The game keeps running while the wheel is open. Keys 1 to 9 pick a weapon directly.
+
 R3 does two things while driving: a tap looks behind, and holding it for a second resets a
 stuck car (a ring on the HUD fills while you hold). The debug buttons work while View / Back
 is held; their keys work alone.
@@ -26,7 +30,8 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | look behind | R3 | C |
 | aim | LT | right click |
 | fire or swing | RT | left click |
-| next weapon (hands, melee, gun) | LB | Tab |
+| next weapon (tap), weapon wheel (hold, point, let go) | LB | Tab |
+| pick a weapon by number | - | 1 to 9 |
 | reload | B | R |
 | map | View | M |
 | pause menu | Menu | Esc |

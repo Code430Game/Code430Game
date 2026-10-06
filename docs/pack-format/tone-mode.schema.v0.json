@@ -25,6 +25,13 @@
         "sex_work_services": {"type": "boolean"}
       }
     },
-    "variant_key": {"type": "string", "minLength": 1}
+    "variant_key": {"type": "string", "minLength": 1},
+    "hud": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accent": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "description": "The HUD accent: the chosen segment of the weapon wheel and the idle tile's flash."}
+      }
+    }
   }
 }
