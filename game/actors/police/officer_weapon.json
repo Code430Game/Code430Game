@@ -9,8 +9,8 @@
   "range_m": 22.0,
   "spread_deg": 0.0,
   "variants": {
-    "fallback": {"name": "Pistol", "impact": "bullet", "lethal": true, "descriptors": {"violence": "strong"}},
-    "dystopia": {"name": "Blaster", "impact": "energy", "lethal": true, "descriptors": {"violence": "strong", "dystopia_tech": "mild"}},
-    "clean": {"name": "Net gun", "impact": "paint", "lethal": false, "descriptors": {"violence": "mild"}}
+    "fallback": {"name": "Pistol", "model": "pistol", "impact": "bullet", "lethal": true, "descriptors": {"violence": "strong"}},
+    "dystopia": {"name": "Blaster", "model": "blaster", "impact": "energy", "lethal": true, "descriptors": {"violence": "strong", "dystopia_tech": "mild"}},
+    "clean": {"name": "Net gun", "model": "net_gun", "impact": "paint", "lethal": false, "descriptors": {"violence": "mild"}}
   }
 }

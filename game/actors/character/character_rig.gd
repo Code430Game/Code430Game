@@ -12,6 +12,10 @@ var skeleton: Skeleton3D
 var mesh_instance: MeshInstance3D
 var phase: float = 0.0
 var amount: float = 0.0
+## Bone name -> Quaternion that replaces the walk pose on that bone, blended in by
+## `override_weight` (a held weapon's aim and swing poses the weapon arm).
+var bone_override: Dictionary = {}
+var override_weight: float = 0.0
 
 
 func _ready() -> void:
@@ -62,6 +66,11 @@ static func step_walk(phase_in: float, amount_in: float, delta: float, speed: fl
 	return Vector2(p, a)
 
 
+## Re-applies the pose (after changing `bone_override`) without stepping the walk.
+func repose() -> void:
+	_pose()
+
+
 ## Sets the pose directly (previews and tests).
 func set_walk(p: float, a: float) -> void:
 	phase = p
@@ -75,6 +84,9 @@ func _pose() -> void:
 	var pose := CharacterMesh.walk_pose(phase, amount)
 	for i in range(CharacterMesh.BONES.size()):
 		var name: String = CharacterMesh.BONES[i][0]
-		skeleton.set_bone_pose_rotation(i, Quaternion(Vector3.RIGHT, float(pose.get(name, 0.0))))
+		var q := Quaternion(Vector3.RIGHT, float(pose.get(name, 0.0)))
+		if override_weight > 0.0 and bone_override.has(name):
+			q = q.slerp(bone_override[name], clampf(override_weight, 0.0, 1.0))
+		skeleton.set_bone_pose_rotation(i, q)
 	var hips := CharacterMesh.bone_index("hips")
 	skeleton.set_bone_pose_position(hips, skeleton.get_bone_rest(hips).origin + Vector3(0.0, float(pose.get("hips_bob", 0.0)), 0.0))

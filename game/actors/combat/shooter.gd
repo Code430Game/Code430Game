@@ -21,6 +21,10 @@ var effects: CombatEffects
 var weapons: WeaponSet
 var hud: Label
 var reticle: Control
+## The weapon in the player's hand (2.6), made once the body's rig exists.
+var held: HeldWeapon
+## Aim as if the aim control were held (testbed screenshots).
+var hold_aim: bool = false
 var _cooldown: float = 0.0
 var _reload_left: float = 0.0
 var _balls: Array[RigidBody3D] = []
@@ -54,17 +58,24 @@ func _physics_process(delta: float) -> void:
 		if _reload_left <= 0.0:
 			weapons.reload()
 	var active := player != null and not player.is_driving() and not get_tree().paused and player.stuck_s <= 0.0
+	_ensure_held()
+	if held != null:
+		held.set_weapon(weapons.current() if player != null and not player.is_driving() else {})
 	if not active:
 		if player != null:
 			player.aiming = false
+		if held != null:
+			held.aiming = false
 		_show_reticle(false)
 		return
 	if Input.is_action_just_pressed("weapon_next"):
 		weapons.cycle()
 		_reload_left = 0.0
 	var w := weapons.current()
-	player.aiming = not w.is_empty() and Input.is_action_pressed("aim")
+	player.aiming = not w.is_empty() and (Input.is_action_pressed("aim") or hold_aim)
 	_show_reticle(player.aiming and w.get("mechanic", "") != "melee")
+	if held != null:
+		held.aiming = player.aiming and w.get("mechanic", "") != "melee"
 	if not w.is_empty():
 		if Input.is_action_just_pressed("reload") and int(w.get("magazine", 0)) > 0:
 			_reload_left = float(w.get("reload_s", 1.0))
@@ -88,10 +99,16 @@ func pull_trigger() -> bool:
 	var imp := weapons.impact(str(w.get("impact", "")))
 	match str(w.get("mechanic", "")):
 		"melee":
+			if held != null:
+				held.swing()
 			_swing(w)
 		"projectile":
+			if held != null:
+				held.recoil()
 			_launch(w)
 		_:
+			if held != null:
+				held.recoil()
 			_shoot(w)
 	if effects != null:
 		effects.sound(str(imp.get("sound", "")))
@@ -110,6 +127,8 @@ func _aim_ray(range_m: float, spread_deg: float) -> Array:
 
 
 func _muzzle() -> Vector3:
+	if held != null and held.muzzle() != Vector3.INF:
+		return held.muzzle()  # the barrel's end in the hand
 	var cam := player.camera()
 	return player.global_position + Vector3.UP * MUZZLE_UP_M + cam.global_basis.x * 0.35 - cam.global_basis.z * 0.5
 
@@ -251,6 +270,15 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 	if effects != null and collider is StaticBody3D:
 		_paint_index = (_paint_index + 1) % 4
 		effects.mark(str(imp.get("decal", "")), pos, normal, _paint_index)
+
+
+func _ensure_held() -> void:
+	if held != null or player == null or player.rig() == null:
+		return
+	held = HeldWeapon.new()
+	held.name = "HeldWeapon"
+	held.rig = player.rig()
+	player.add_child(held)
 
 
 func _show_reticle(on: bool) -> void:

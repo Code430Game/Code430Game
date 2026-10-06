@@ -81,6 +81,11 @@ func is_driving() -> bool:
 
 
 ## Makes this player's camera the active one.
+## The body's rig (a held weapon poses its arm), or null before the body is built.
+func rig() -> CharacterRig:
+	return _rig
+
+
 ## The player's own camera (weapons aim through it).
 func camera() -> Camera3D:
 	return _camera
