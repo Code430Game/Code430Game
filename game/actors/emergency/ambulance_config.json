@@ -1,0 +1,20 @@
+{
+  "_comment": "Ambulance response (add-ambulance-response). Distances in metres, speeds km/h unless named, times seconds.",
+  "call_delay_s": 3.0,
+  "merge_m": 14.0,
+  "max_out": 2,
+  "hold_max_s": 150.0,
+  "base_reach_m": 900.0,
+  "spawn_min_m": 130.0,
+  "spawn_max_m": 220.0,
+  "cruise_kph": 75.0,
+  "stop_m": 9.0,
+  "stall_windows": 4,
+  "walk_up_m": 45.0,
+  "tend_s": 5.0,
+  "medic_speed_mps": 3.2,
+  "leave_m": 280.0,
+  "home_m": 15.0,
+  "siren_hear_m": 200.0,
+  "ram_kph": 15.0
+}

@@ -623,6 +623,53 @@
      }
     }
    }
+  },
+  {
+   "id": "ambulance",
+   "name": "Ambulance",
+   "body_class": "van",
+   "dims": {
+    "length_m": 5.3,
+    "width_m": 2.0,
+    "height_m": 2.3,
+    "wheelbase_m": 3.3,
+    "track_m": 1.72,
+    "wheel_radius_m": 0.35,
+    "front_overhang_m": 0.85,
+    "cabin_start_m": 0.65,
+    "roof_length_m": 4.0
+   },
+   "mass_kg": 2400,
+   "engine_force": 5600,
+   "brake_force": 110,
+   "grip": 2.5,
+   "top_speed_kph": 140,
+   "steer_max_rad": 0.55,
+   "seats": 3,
+   "colors": [
+    [
+     0.95,
+     0.95,
+     0.95
+    ]
+   ],
+   "spawn": {
+    "weight": 0.0,
+    "roads": {
+     "motorway": 0.0,
+     "arterial": 0.0,
+     "local": 0.0
+    },
+    "hours": []
+   },
+   "liveries": {
+    "variants": {
+     "fallback": {
+      "stripe": "ambulance",
+      "light_bar": true
+     }
+    }
+   }
   }
  ]
 }

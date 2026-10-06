@@ -131,6 +131,7 @@ static func brake_material() -> StandardMaterial3D:
 
 
 const POLICE_BLUE := Color(0.08, 0.18, 0.6)
+const AMBULANCE_RED := Color(0.75, 0.08, 0.1)
 
 
 class _Builder:
@@ -478,6 +479,14 @@ class _Builder:
 			for side: float in [-1.0, 1.0]:
 				var x := side * (hw + PROUD_M)
 				box(1, Vector3(x, hb - 0.2, (zf + zr) * 0.5), Vector3(0.012, 0.16, (zr - zf) * 0.86), POLICE_BLUE)
+		if str(livery.get("stripe", "none")) == "ambulance":
+			# A red band along each side with a cross on the box behind the cab.
+			var mid := zf + (zr - zf) * 0.62
+			for side: float in [-1.0, 1.0]:
+				var x := side * (hw + PROUD_M)
+				box(1, Vector3(x, hb * 0.42, (zf + zr) * 0.5), Vector3(0.012, 0.2, (zr - zf) * 0.9), AMBULANCE_RED)
+				box(1, Vector3(x, hb * 0.72, mid), Vector3(0.014, 0.62, 0.2), AMBULANCE_RED)
+				box(1, Vector3(x, hb * 0.72, mid), Vector3(0.014, 0.2, 0.62), AMBULANCE_RED)
 		if str(livery.get("stripe", "none")) == "check":
 			for side: float in [-1.0, 1.0]:
 				var x := side * (hw + PROUD_M)

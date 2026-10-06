@@ -279,7 +279,8 @@
             "none",
             "check",
             "band",
-            "police"
+            "police",
+            "ambulance"
           ]
         },
         "roof_sign": {
