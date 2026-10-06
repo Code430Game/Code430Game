@@ -52,6 +52,7 @@ func _await_render(r: Radio, track_id: String) -> void:
 		if r.stream_for(track_id) != null:
 			return
 		await get_tree().process_frame
+	assert_object(r.stream_for(track_id)).override_failure_message("%s never rendered in 300 frames" % track_id).is_not_null()
 
 
 func test_cycle_is_five_stations_then_off() -> void:
@@ -230,3 +231,4 @@ func test_one_render_at_a_time_and_the_playing_station_first() -> void:
 		if not _radio.rendering():
 			break
 		await get_tree().process_frame
+	assert_bool(_radio.rendering()).override_failure_message("renders still running after 1200 frames").is_false()

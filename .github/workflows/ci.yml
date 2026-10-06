@@ -45,6 +45,18 @@ jobs:
       - run: uv sync --frozen
       - run: uv run python -m pack_tools ../packs
 
+  openspec:
+    name: OpenSpec (validate --strict --all)
+    timeout-minutes: 10  # a hang must not burn the month's runner minutes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install -g "@fission-ai/openspec@$(cat .openspec-version)"
+      - run: openspec validate --strict --all --no-interactive
+
   gdunit:
     name: gdUnit4 (headless)
     timeout-minutes: 20  # a hang must not burn the month's runner minutes
@@ -73,13 +85,14 @@ jobs:
       - name: Import project
         run: ~/godot/godot --headless --path game --import --quit
       - name: Run tests
-        # gdUnit exits 101 when every test passed but some left orphan nodes: a warning, not a failure.
+        # gdUnit exits 101 when every test passed but some left orphan nodes. That fails the run:
+        # orphans once piled up to 2,197 while CI stayed green.
         run: |
           set +e
           ~/godot/godot --headless --path game -s -d --remote-debug tcp://127.0.0.1:0 \
             res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
           status=$?
-          if [ "$status" -eq 101 ]; then echo "gdUnit: passed with orphan nodes (warning)"; exit 0; fi
+          if [ "$status" -eq 101 ]; then echo "gdUnit: tests passed but left orphan nodes; free them (auto_free)"; fi
           exit "$status"
       - name: Upload test report
         if: always()
@@ -95,7 +108,7 @@ jobs:
     timeout-minutes: 30  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
-    needs: [tools, packs, gdunit]
+    needs: [tools, packs, openspec, gdunit]
     steps:
       - uses: actions/checkout@v4
       - name: Read pinned Godot version

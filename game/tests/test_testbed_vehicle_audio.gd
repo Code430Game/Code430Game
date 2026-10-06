@@ -16,6 +16,8 @@ func before() -> void:
 		var player: Variant = _bed.get("_player")
 		if player != null and player.is_driving():
 			break
+	var started: Variant = _bed.get("_player")
+	assert_bool(started != null and started.is_driving()).override_failure_message("the testbed never put the player in the car (600 frames)").is_true()
 
 
 ## Land whatever the streamer still has queued: queued meshes are outside the tree, and gdUnit
@@ -47,6 +49,8 @@ func after() -> void:
 		if radio == null or not radio.rendering():
 			break
 		await get_tree().process_frame
+	if radio != null and radio.rendering():
+		push_warning("radio renders still running after 1200 frames; freeing the testbed anyway")
 	_bed.queue_free()
 	await get_tree().process_frame
 
