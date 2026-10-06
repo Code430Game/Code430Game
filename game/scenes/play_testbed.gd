@@ -778,8 +778,8 @@ func _spawn_on_edge(hit: Dictionary) -> Transform3D:
 	forward = forward.normalized()
 	# Sit in the first forward lane (right of the divider), not on the centreline.
 	var lanes_total := e.lanes_forward + e.lanes_backward
-	var lane_w := e.width_m / maxf(lanes_total, 1)
-	var divider := e.width_m * 0.5 - e.lanes_forward * lane_w
+	var lane_w := e.carriageway_m() / maxf(lanes_total, 1)
+	var divider := e.carriageway_offset() + e.carriageway_m() * 0.5 - e.lanes_forward * lane_w
 	var right := Vector3(-forward.z, 0.0, forward.x)
 	var offset := right * (divider + 0.5 * lane_w)
 	return Transform3D(Basis.looking_at(forward, Vector3.UP), hit["point"] + offset + Vector3.UP * 1.0)

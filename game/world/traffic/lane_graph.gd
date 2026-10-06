@@ -89,8 +89,8 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> LaneGraph:
 			continue
 		var normals := RoadGeometry.miter_normals(pl)
 		var lanes_total := edge.lanes_forward + edge.lanes_backward
-		var lane_w := edge.width_m / maxf(lanes_total, 1)
-		var divider := edge.width_m * 0.5 - edge.lanes_forward * lane_w
+		var lane_w := edge.carriageway_m() / maxf(lanes_total, 1)
+		var divider := edge.carriageway_offset() + edge.carriageway_m() * 0.5 - edge.lanes_forward * lane_w  # lanes keep off the shoulders
 		for k in range(edge.lanes_forward):
 			var offset := divider + (k + 0.5) * lane_w
 			var lp := lg._add_lane(edge, k, _offset_polyline(pl, normals, offset), edge.from_node, edge.to_node)

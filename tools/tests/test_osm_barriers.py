@@ -371,3 +371,105 @@ def test_side_by_side_bridge_carriageways_share_one_pair_of_parapets():
     z2 = g.edges["w2.0"].polyline[0][2]
     sides = sorted(sum(p[2] for p in b.points) / len(b.points) for b in parapets)
     assert sides[0] < min(z1, z2) and sides[1] > max(z1, z2)  # one outside each deck, none between
+
+
+def test_motorway_gets_shoulders_and_its_parapets_stand_outside_them():
+    """add-road-shoulders: lanes plus a 1 m left and a 2.5 m right shoulder; the deck's
+    parapets at the paved edge."""
+    g = graph_for(
+        [
+            (
+                1,
+                [(-200, 0), (200, 0)],
+                {
+                    "highway": "motorway",
+                    "oneway": "yes",
+                    "lanes": "2",
+                    "bridge": "yes",
+                    "layer": "1",
+                },
+            )
+        ],
+        FlatSource(10.0),
+    )
+    e = g.edges["w1.0"]
+    assert (e.shoulder_left_m, e.shoulder_right_m) == (1.0, 2.5)
+    assert abs(e.width_m - (2 * CFG.lane_width_m + 3.5)) < 1e-6
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    offsets = sorted(
+        abs(b.points[0][2] - e.polyline[0][2]) for b in r.barriers if b.kind == "parapet"
+    )
+    assert all(abs(o - (e.width_m / 2 - 0.25)) < 0.3 for o in offsets), offsets
+
+
+def test_a_tagged_width_gets_no_extra_shoulder_and_streets_get_none():
+    g = graph_for(
+        [
+            (1, [(-200, 0), (200, 0)], {"highway": "motorway", "oneway": "yes", "width": "9"}),
+            (2, [(-200, 80), (200, 80)], {"highway": "primary"}),
+        ],
+        FlatSource(10.0),
+    )
+    assert g.edges["w1.0"].width_m == 9.0 and g.edges["w1.0"].shoulder_right_m == 0.0
+    assert g.edges["w2.0"].shoulder_left_m == 0.0 and g.edges["w2.0"].shoulder_right_m == 0.0
+
+
+def test_a_sidewalk_passing_under_a_deck_does_not_push_its_parapet_out():
+    """The 417 over Metcalfe: the street's sidewalks run under the deck 6 m down; the parapet
+    took them for deck walkways and bent out around them."""
+    from osm_import.graph import PedestrianWay
+
+    g = graph_for(
+        [
+            (
+                1,
+                [(-30, 0), (30, 0)],
+                {"highway": "primary", "bridge": "yes", "layer": "1", "width": "12"},
+            )
+        ],
+        FlatSource(10.0),
+    )
+    deck_y = g.edges["w1.0"].polyline[0][1]
+    under = PedestrianWay(
+        "p1",
+        [(3.0, deck_y - 6.0, -20.0), (3.0, deck_y - 6.0, 20.0)],
+        "footway",
+        1,
+        None,
+        "sidewalk",
+        2.0,
+    )
+    g.pedestrian = [under]
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    a, c = g.edges["w1.0"].polyline[0], g.edges["w1.0"].polyline[-1]
+    dx, dz = c[0] - a[0], c[2] - a[2]
+    length = math.hypot(dx, dz)
+    for b in r.barriers:
+        if b.kind == "parapet":
+            off = [abs((p[0] - a[0]) * dz - (p[2] - a[2]) * dx) / length for p in b.points]
+            assert max(off) < 6.0 + 0.1, off  # at the deck edge all along, no bulge
+
+
+def test_a_shoulder_over_a_ramp_at_another_height_is_dropped():
+    """Through an interchange a ramp runs alongside on the shoulder side, a little lower:
+    the shoulder would stand up as a step in it, so that side loses its shoulder."""
+    from osm_import.shoulders import trim_shoulders
+
+    g = graph_for(
+        [
+            (1, [(-200, 0), (200, 0)], {"highway": "motorway", "oneway": "yes", "lanes": "2"}),
+            (2, [(-200, 50), (200, 50)], {"highway": "motorway", "oneway": "yes", "lanes": "2"}),
+        ],
+        FlatSource(10.0),
+    )
+    main, alone = g.edges["w1.0"], g.edges["w2.0"]
+    # A ramp 6.5 m to the right of the first, 0.6 m lower (+z is right of travel along +x).
+    ramp = type(main)(**{**main.__dict__, "id": "w9.0", "road_class": "motorway_link"})
+    ramp.polyline = [(p[0], p[1] - 0.6, p[2] + 6.5) for p in main.polyline]
+    ramp.width_m, ramp.shoulder_left_m, ramp.shoulder_right_m = 5.6, 0.6, 1.5
+    g.edges["w9.0"] = ramp
+    before = main.width_m
+    trim_shoulders(g)
+    assert main.shoulder_right_m == 0.0 and main.shoulder_left_m == 1.0
+    assert abs(main.width_m - (before - 2.5)) < 1e-6
+    assert alone.shoulder_right_m == 2.5  # nothing beside it

@@ -528,7 +528,7 @@
  "elevation": {
   "anchorless_spans": 0,
   "bound_conflicts": 3,
-  "contaminated_vertices": 38,
+  "contaminated_vertices": 39,
   "edges_over_grade": [
    "w76421801.0",
    "w76424094.0",

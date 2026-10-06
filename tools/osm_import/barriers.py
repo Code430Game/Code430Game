@@ -224,8 +224,12 @@ def build_barriers(
             if w.kind == "sidewalk":
                 sw_index.add((a[0], a[2]), (b[0], b[2]), (w.id, i))
             if w.kind in walkway_kinds:
-                walk_index.add((a[0], a[2]), (b[0], b[2]), (w.id, i, w.width_m))
+                walk_index.add(
+                    (a[0], a[2]), (b[0], b[2]), (w.id, i, w.width_m, (a[1] + b[1]) / 2.0)
+                )
     walk_range = float(rules.get("parapet_walkway_range_m", 8.0))
+    walk_level_m = float(rules.get("parapet_walkway_level_m", 2.5))
+    walk_along_cos = math.cos(math.radians(float(rules.get("parapet_walkway_along_deg", 40.0))))
     # Every carriageway, for keeping walls out of other roads (ramps at forks, decks at splits).
     road_index = _SegmentIndex()
     for eid in sorted(graph.edges):
@@ -346,7 +350,13 @@ def build_barriers(
                     nx, nz = -dz * side, dx * side
                     ex, ez = x + nx * hw, z + nz * hw
                     outer = hw  # deck edge measured from the centreline
-                    for a, b, (_wid, _i, ww) in walk_index.near(ex, ez, walk_range + 4.0):
+                    for a, b, (_wid, _i, ww, wy) in walk_index.near(ex, ez, walk_range + 4.0):
+                        if abs(wy - y) > walk_level_m:
+                            continue  # a street's sidewalk passing under (or over) the deck
+                        wdx, wdz = b[0] - a[0], b[1] - a[1]
+                        wl = math.hypot(wdx, wdz)
+                        if wl > 0 and abs(wdx * dx + wdz * dz) / wl < walk_along_cos:
+                            continue  # crossing the deck's line, not riding along it
                         d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
                         mx, mz = (a[0] + b[0]) / 2.0 - x, (a[1] + b[1]) / 2.0 - z
                         if (mx * nx + mz * nz) <= 0 or d - hw > walk_range:
@@ -415,6 +425,7 @@ def build_barriers(
         for side in (-1.0, 1.0):
             rail_pts, rail_keep = [], []
             wall_pts, wall_keep = [], []
+            shoulder = e.shoulder_right_m if side > 0 else e.shoulder_left_m
             for si, (x, y, z, dx, dz) in enumerate(samples):
                 nx, nz = -dz * side, dx * side
                 edge_x, edge_z = x + nx * hw, z + nz * hw
@@ -435,8 +446,9 @@ def build_barriers(
                     and at_grade
                     and clear_of_roads(edge_x + nx * 2.0, y, edge_z + nz * 2.0, eid)
                     and houses_near(
-                        edge_x + nx * 20.0,
-                        edge_z + nz * 20.0,
+                        # From the lanes' edge, so a shoulder doesn't pull houses into range.
+                        edge_x + nx * (20.0 - shoulder),
+                        edge_z + nz * (20.0 - shoulder),
                         float(rules.get("soundwall_building_range_m", 45.0)),
                     )
                 )
