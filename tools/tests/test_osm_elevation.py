@@ -234,6 +234,32 @@ def test_sidewalks_follow_roads_on_their_own_layer():
     assert under_deck[1] < below_y + 1.0, at_street.polyline
 
 
+def test_a_sidewalk_does_not_climb_onto_a_road_overhead_on_its_own_layer():
+    """The 417 over Metcalfe: the motorway's approach segments are layer 0 like the street, but
+    6 m above it, and nearer to the sidewalk under them than the street is. The sidewalk keeps
+    to the street's level rather than jumping up to theirs."""
+    from osm_import.elevation import apply_pedestrian_elevation
+    from osm_import.graph import PedestrianWay
+
+    g, _ = build(
+        [
+            (1, [(0, -300), (0, 300)], {"highway": "secondary", "name": "Street"}),
+            (2, [(-300, 0), (300, 0)], {"highway": "motorway", "name": "Overhead"}),
+        ],
+        FlatSource(10.0),
+    )
+    over = [e for e in g.edges.values() if e.name == "Overhead"]
+    for e in over:
+        e.polyline = [(x, 16.0, z) for x, _y, z in e.polyline]
+    walk = PedestrianWay(
+        "p1", [(7.0, 0.0, float(z)) for z in range(-40, 41, 5)], "footway", 1, None, "sidewalk", 2.0
+    )
+    g.pedestrian = [walk]
+    apply_pedestrian_elevation(g, FlatSource(10.0), CFG)
+    ys = [p[1] for p in walk.polyline]
+    assert max(ys) < 11.0, walk.polyline
+
+
 def test_bridge_tag_puts_a_pedestrian_way_on_layer_one():
     g, _ = build(
         [
