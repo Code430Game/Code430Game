@@ -11,8 +11,8 @@ extends RefCounted
 
 const RAMP_WIDTH_M := 6.0
 const WALL_M := 0.3
-const COPING_M := 3.2  # coping strip past the wall top: covers the 4 m terrain cut's ragged edge
-const HOLE_PAD_M := 0.8
+const COPING_M := 3.2  # coping strip past the wall top, over the terrain cut's edge
+const HOLE_PAD_M := 0.8  # the cut's edge lies this far past the ramp's side: behind the wall, under the coping
 const DOOR_W_M := 4.6
 const DOOR_H_M := 2.6
 const PORTAL_ABOVE_M := 0.9  # portal wall rises this far above the street
@@ -24,6 +24,8 @@ const STALL_DEPTH_M := 5.3
 const AISLE_M := 6.5
 const LANDING_M := 12.0  # kept clear past a ramp's foot: room to drive off it and turn into an aisle
 const MODULE_M := STALL_DEPTH_M * 2.0 + AISLE_M  # one aisle with a row of stalls each side
+const RAMP_TOP_M := 4.0  # level_at: the top of a ramp still counts as the street
+const LEVEL_BELOW_CEILING_M := 0.5  # level_at: a body this far under the ceiling is on the level (the street can be 0.3 m above it)
 const FLOOR_COLOR := Color(0.33, 0.33, 0.33)
 const WALL_COLOR := Color(0.55, 0.55, 0.53)
 const CEILING_COLOR := Color(0.42, 0.42, 0.41)
@@ -196,6 +198,30 @@ static func _near_ramp(g: Garage, p: Vector2, reach: float, landing: bool = fals
 	return false
 
 
+## The garage-tier garage whose level `p` is on, or null: inside the outline below the
+## ceiling, or on one of its ramps more than RAMP_TOP_M down from the street (so the minimap
+## switches back near the top of the ramp, where the street comes into view).
+static func level_at(garages: Array[Garage], p: Vector3) -> Garage:
+	var q := Vector2(p.x, p.z)
+	for g in garages:
+		if g.tier != "garage" or g.outer.size() < 3:
+			continue
+		if p.y < g.ceiling_y - LEVEL_BELOW_CEILING_M and p.y > g.floor_y - 2.0 and Geometry2D.is_point_in_polygon(q, g.outer):
+			return g
+		for r in g.ramps:
+			var a := Vector2(r.start.x, r.start.z)
+			var b := Vector2(r.end.x, r.end.z)
+			var ab := b - a
+			if ab.length_squared() < 0.01:
+				continue
+			var t := (q - a).dot(ab) / ab.length_squared()
+			if t < 0.0 or t > 1.0 or q.distance_to(a + ab * t) > RAMP_WIDTH_M * 0.5 + WALL_M:
+				continue
+			if t * ab.length() > RAMP_TOP_M and p.y < r.start.y + 2.0 and p.y > r.end.y - 2.0:
+				return g
+	return null
+
+
 ## Drops surface-lot stalls that would stand on a ramp's cut (a lot outline drawn over the
 ## driveway put a parked car on top of the portal).
 static func clear_ramps(lots: Array[ParkingLotBuilder.Lot], garages: Array[Garage]) -> void:
@@ -222,13 +248,14 @@ static func clear_ramps(lots: Array[ParkingLotBuilder.Lot], garages: Array[Garag
 		lot.stalls = kept
 
 
-## chunk -> [{"a", "b", "half"}]: the terrain cut over each ramp.
+## chunk -> [{"a", "b", "half", "clip"}]: the terrain cut over each ramp, clipped to the strip
+## (TerrainBuilder) so it ends under the wall and coping, not on whole 4 m terrain cells.
 static func holes_by_chunk(garages: Array[Garage]) -> Dictionary:
 	var out := {}
 	for g in garages:
 		for r in g.ramps:
 			var half := RAMP_WIDTH_M * 0.5 + HOLE_PAD_M
-			var hole := {"a": Vector2(r.start.x, r.start.z), "b": Vector2(r.end.x, r.end.z), "half": half}
+			var hole := {"a": Vector2(r.start.x, r.start.z), "b": Vector2(r.end.x, r.end.z), "half": half, "clip": true}
 			var lo := RoadGeometry.chunk_of(Vector3(minf(r.start.x, r.end.x) - half, 0.0, minf(r.start.z, r.end.z) - half))
 			var hi := RoadGeometry.chunk_of(Vector3(maxf(r.start.x, r.end.x) + half, 0.0, maxf(r.start.z, r.end.z) + half))
 			for cx in range(lo.x, hi.x + 1):
