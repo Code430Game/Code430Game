@@ -9,6 +9,10 @@ extends Node
 ## at a time after it, and each render is cached under user://radio_cache/ keyed by the track's
 ## data, so later sessions load it at once. The station and the Music volume are remembered in
 ## settings.cfg. Getting in resumes the station where it paused; getting out pauses it.
+##
+## Each drivable car keeps its own station in its `radio_station` field: getting in tunes to the
+## car's station, and changing station writes it back. A car with none yet (the player's own) takes
+## the player's last choice; taken and emergency cars are handed one by `pick_for_car`.
 
 signal tuned(name: String, tagline: String)
 
@@ -18,6 +22,10 @@ const SECTION := "radio"
 const KEY_STATION := "station"
 const KEY_VOLUME := "music_volume_db"
 const OFF := "off"
+## The talk station emergency vehicles have on, when they have anything on.
+const CHATTER := "code430.base.chatter"
+## How often a taken car's radio is off.
+const OFF_CHANCE := 0.2
 const TOAST_S := 3.0
 const CACHE_DIR := "user://radio_cache"
 ## Bump when the synth's output changes, so old cached loops are not reused.
@@ -31,6 +39,8 @@ var cache_dir: String = CACHE_DIR
 var stations: Array = []  # station dictionaries from radio.v0.json, in cycle order
 var tracks: Dictionary = {}  # track id -> track dictionary
 var station_id: String = ""  # current station id, or OFF
+var chosen_id: String = ""  # the player's last choice (saved); a car with no station yet takes it
+var car: Node  # the car being driven, whose `radio_station` follows the dial
 var driving: bool = false
 var music_volume_db: float = -4.0
 var _streams: Dictionary = {}  # track id -> AudioStreamWAV, once rendered
@@ -82,6 +92,8 @@ func load_data(stations_path: String = STATIONS_PATH, music_path: String = MUSIC
 			tracks[t["id"]] = t
 	if station_id == "" and not stations.is_empty():
 		station_id = stations[0]["id"]
+	if chosen_id == "":
+		chosen_id = station_id
 
 
 ## The cycle: every station id, then Off.
@@ -108,12 +120,16 @@ func cycle(delta: int = 1) -> void:
 	select(ids[posmod(i + delta, ids.size())])
 
 
-## Tunes to a station id (or OFF), saves it, and plays it if driving.
+## Tunes to a station id (or OFF), saves it as the player's choice, writes it to the car being
+## driven, and plays it if driving.
 func select(id: String) -> void:
 	if id != OFF and variant(id).is_empty():
 		return
 	_pause_current()
 	station_id = id
+	chosen_id = id
+	if car != null and is_instance_valid(car) and "radio_station" in car:
+		car.set("radio_station", id)
 	save()
 	if id == OFF:
 		_show_toast("Radio off", "")
@@ -124,9 +140,19 @@ func select(id: String) -> void:
 		_play_current()
 
 
-## The local player got into a car.
-func car_entered() -> void:
+## The local player got into a car: tunes to its station, or gives it the player's choice when it
+## has none (or one that no longer exists).
+func car_entered(entered: Node = null) -> void:
 	driving = true
+	car = entered
+	if car != null and "radio_station" in car:
+		var own := str(car.get("radio_station"))
+		if own != OFF and variant(own).is_empty():
+			own = chosen_id
+			car.set("radio_station", own)
+		if own != station_id:
+			_pause_current()
+			station_id = own
 	if station_id != OFF:
 		var v := variant(station_id)
 		_show_toast(str(v.get("name", "")), str(v.get("tagline", "")))
@@ -137,7 +163,35 @@ func car_entered() -> void:
 ## The local player got out.
 func car_exited() -> void:
 	driving = false
+	car = null
 	_pause_current()
+
+
+## A station for a car the player did not tune: a taken traffic or parked car plays a random station
+## (sometimes off), an emergency vehicle Chatter AM or off. `car_seed` names the car, so the same car
+## always gets the same answer (and every co-op peer the one the host picked).
+static func pick_for_car(car_seed: int, emergency: bool = false) -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = car_seed
+	if emergency:
+		return CHATTER if rng.randf() < 0.5 else OFF
+	var ids := station_ids()
+	if ids.is_empty() or rng.randf() < OFF_CHANCE:
+		return OFF
+	return ids[rng.randi() % ids.size()]
+
+
+static var _station_ids: Array = []
+
+
+## The station ids in radio.v0.json (no Off), read once.
+static func station_ids() -> Array:
+	if _station_ids.is_empty():
+		var st: Variant = JSON.parse_string(FileAccess.get_file_as_string(STATIONS_PATH))
+		if st is Dictionary:
+			for s in (st as Dictionary).get("stations", []):
+				_station_ids.append(str(s["id"]))
+	return _station_ids
 
 
 ## True while a station's loop is audible.
@@ -320,6 +374,7 @@ func load_saved() -> void:
 	var saved := str(cfg.get_value(SECTION, KEY_STATION, station_id))
 	if saved == OFF or not variant(saved).is_empty():
 		station_id = saved
+		chosen_id = saved
 	music_volume_db = float(cfg.get_value(SECTION, KEY_VOLUME, music_volume_db))
 
 
@@ -327,6 +382,6 @@ func load_saved() -> void:
 func save() -> Error:
 	var cfg := ConfigFile.new()
 	cfg.load(settings_path)
-	cfg.set_value(SECTION, KEY_STATION, station_id)
+	cfg.set_value(SECTION, KEY_STATION, chosen_id)
 	cfg.set_value(SECTION, KEY_VOLUME, music_volume_db)
 	return cfg.save(settings_path)

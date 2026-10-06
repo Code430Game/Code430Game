@@ -185,6 +185,7 @@ func _dispatch(c: Call) -> bool:
 	holder.add_child(car)
 	car.global_position = start + Vector3.UP * 0.6
 	car.call("set_body_color", VEHICLE_WHITE)
+	car.set("radio_station", Radio.pick_for_car(hash(start.snapped(Vector3.ONE)), true))
 	var look := Vector3(facing.x, car.global_position.y, facing.z)
 	if look.distance_to(car.global_position) > 0.5:
 		car.look_at(look, Vector3.UP)
