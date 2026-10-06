@@ -9,6 +9,8 @@
 - [x] 2.5 Mac screenshots: paintball gun in `clean`, pistol in `gritty`, blaster and sabre in `dystopia`
   - 2026-10-05: gun shots shared for clean (paint blobs, "Paintball gun 12 / 20") and dystopia (scorch marks, "Blaster 8 / 16"); `--weapon=1|2 --shoot=N` holds a weapon and fires for screenshots. Marks are flat blobs (paint, blood) or discs (holes, scorch), not textured decals. Punching and kicking are a follow-up (human: "that could be a different ticket"); empty hands stay in the cycle
 
+- [ ] 2.6 From the human's first try on the Deck ("I tried to stab and there was no real motion, I don't feel there was a weapon"): the player holds the current weapon (a low-poly knife, pistol, sabre, blaster, brush or paintball gun, per tone) in the right hand; a melee swing plays an arm swing with a short trail, and aiming raises the gun arm. Officers hold their tone weapon too. Tests
+
 ## 3. Verification
 - [x] 3.1 Deck benchmark: 30 s of firing on a busy street with the decal pool full; frame avg and p99 against main
   - 2026-10-05, idle Deck, deck preset: route avg 13.11 ms, p99 17.78. 30 s firing from the start in gritty (`--weapon=2 --shoot=120`, mark pool full) avg 12.47, p99 17.50; the same in clean with paintballs avg 12.47, p99 17.52. No cost from weapons
