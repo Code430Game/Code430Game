@@ -13,5 +13,5 @@ Notes (2026-10-05):
 - [x] 2.1 Road and bridge meshes draw shoulders (they follow `width_m`); collision follows; terrain carved under; before and after screenshots at the 417 over Metcalfe
 
 ## 3. Verification
-- [ ] 3.1 Deck benchmark against main
+- [x] 3.1 Deck benchmark against main (2026-10-05, idle Deck, `--benchmark=40 --autodrive --preset=deck`, two runs each: before avg 12.64 / 12.58 ms, p99 25.0 / 23.7; after 12.63 / 12.90 ms, p99 25.0 / 25.0. Within run-to-run noise.)
 - [ ] 3.2 Human drives the 417 and walks under it on the Deck
