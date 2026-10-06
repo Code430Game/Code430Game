@@ -37,6 +37,7 @@ class ImportConfig:
     parking: dict
     bridges: dict
     shoulders: dict
+    shared_heights: dict
     implied_oneway_classes: frozenset[str]
     major_classes: frozenset[str]
     likely_real_dead_end_classes: frozenset[str]
@@ -70,6 +71,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> ImportConfig:
         parking=dict(raw.get("parking", {})),
         bridges=dict(raw.get("bridges", {})),
         shoulders=dict(raw.get("shoulders", {})),
+        shared_heights=dict(raw.get("shared_heights", {})),
         implied_oneway_classes=frozenset(raw["implied_oneway_classes"]),
         major_classes=frozenset(raw["major_classes"]),
         likely_real_dead_end_classes=frozenset(raw["likely_real_dead_end_classes"]),

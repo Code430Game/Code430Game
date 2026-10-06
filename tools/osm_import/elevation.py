@@ -17,6 +17,10 @@ Approach:
    max_grade x distance. Fixed vertices propagate lower and upper bounds to free
    vertices (a Dijkstra-like relaxation), free vertices are clamped, and a few
    smoothing passes handle steep natural terrain between free vertices.
+5. Touching carriageways share one height (`_share_heights`): where two decks of one layer, or
+   two ground motorway carriageways, run with their ribbons touching, each vertex takes the
+   higher of their heights (the lower one for ground roads under a deck), and the change
+   fades out along every connected road over `blend_m`.
 Shared nodes are one vertex, so profiles stay continuous across junctions.
 """
 
@@ -248,6 +252,9 @@ class ElevationStats:
     vertices_clamped: int = 0
     max_residual_grade: float = 0.0
     edges_over_grade: list[str] = field(default_factory=list)
+    shared_deck_vertices: int = 0
+    shared_ground_vertices: int = 0
+    max_shared_step: float = 0.0
 
     def to_dict(self) -> dict:
         return {
@@ -261,6 +268,9 @@ class ElevationStats:
             "vertices_clamped": self.vertices_clamped,
             "max_residual_grade": round(self.max_residual_grade, 4),
             "edges_over_grade": self.edges_over_grade[:50],
+            "shared_deck_vertices": self.shared_deck_vertices,
+            "shared_ground_vertices": self.shared_ground_vertices,
+            "max_shared_step": round(self.max_shared_step, 3),
         }
 
 
@@ -641,6 +651,27 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         y[key] = clamped
 
     _smooth(y, fixed, lower, upper, adj)
+    shared = _share_heights(
+        graph, cfg, y, vertex_keys, positions, adj, stats, contaminated, set(fixed)
+    )
+    if shared:
+        # The shared vertices are pinned like the spans; the grade limits run again so the
+        # roads blending into them stay within their class's grade.
+        pinned = {k: y[k] for k in fixed}
+        pinned.update(shared)
+        # Two shared vertices next to each other can disagree (one beside a deck end, the other
+        # beside the ground road there); the lower one rises to the grade from the higher.
+        lower = _propagate(pinned, adj, sign=-1)
+        for k in sorted(shared):
+            if k not in fixed and y[k] < lower[k] - SMOOTHING_EPSILON:
+                y[k] = pinned[k] = lower[k]
+        lower = _propagate(pinned, adj, sign=-1)
+        upper = _propagate(pinned, adj, sign=+1)
+        for key, val in y.items():
+            if key not in pinned:
+                lo, hi = lower.get(key, -math.inf), upper.get(key, math.inf)
+                y[key] = (lo + hi) / 2.0 if lo > hi + SMOOTHING_EPSILON else min(max(val, lo), hi)
+        _smooth(y, pinned, lower, upper, adj)
 
     # Write back and measure residual grades.
     for nid, node in graph.nodes.items():
@@ -663,6 +694,159 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
     ys = list(y.values())
     stats.min_y, stats.max_y = (min(ys), max(ys)) if ys else (0.0, 0.0)
     return stats
+
+
+SHARE_ROUNDS = 8
+SHARED_DEFAULTS = {
+    "ground_gap_m": 0.25,
+    "ground_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
+    "max_step_m": 0.8,
+    "blend_m": 30.0,
+}
+
+
+def _share_heights(
+    graph: RoadGraph,
+    cfg: ImportConfig,
+    y: dict[str, float],
+    vertex_keys: dict[str, list[str]],
+    positions: dict[str, tuple[float, float]],
+    adj: dict[str, list[tuple[str, float, float]]],
+    stats: ElevationStats,
+    under_decks: set[str] = frozenset(),
+    spans: set[str] = frozenset(),
+) -> dict[str, float]:
+    """One height for carriageways whose ribbons touch (update-shared-deck-heights).
+
+    Each carriageway gets its height from its own anchors, so two decks of one bridge, or two
+    carriageways of a motorway on the ground, can sit a little apart where they touch, and the
+    side face of the higher one shows as a step. Carriageways here are bridge decks and ground
+    roads of `ground_classes`. A vertex is shared when another carriageway runs within the gap
+    of its ribbon and within `max_step_m` of its height; a larger difference is a real level
+    change (a ramp climbing away) and is kept. Decks of different layers never pair. Where a
+    deck is involved the gap is the parapets' shared-deck gap (decks with no wall between them
+    must not show a step either); between ground roads it is `ground_gap_m`. A shared vertex
+    rises to the highest of them, so no deck drops into the clearance over the road below, and
+    three carriageways side by side (two decks and a ramp, a motorway and its on-ramp) all end
+    at the same height; one rule for all of them, since mixing rules left steps between them.
+    Under a deck (`under_decks`) ground roads take the lowest instead, so the clearance there
+    never shrinks. No span vertex (`spans`) is ever lowered and no tunnel vertex moved. Every other vertex within `blend_m` along the network
+    of a shared one takes that change, fading linearly, so approaches and side streets meet
+    the new heights without a kink. Returns the shared vertices and their new heights.
+    """
+    rules = dict(SHARED_DEFAULTS)
+    rules.update(cfg.shared_heights)
+    # Decks this close are one deck to the parapets (no wall between them), so one height too.
+    deck_gap = float(cfg.barriers.get("parapet_shared_deck_gap_m", 3.5))
+    ground_classes = set(rules["ground_classes"])
+
+    def kind_of(e) -> str | None:
+        if e.tunnel:
+            return None
+        if e.bridge:
+            return "deck"
+        return "ground" if e.road_class in ground_classes else None
+
+    kinds = {eid: k for eid, e in graph.edges.items() if (k := kind_of(e)) is not None}
+    if len(kinds) < 2:
+        return {}
+    idx = _SegmentIndex()
+    widest = 0.0
+    for eid in kinds:
+        keys = vertex_keys[eid]
+        widest = max(widest, graph.edges[eid].width_m)
+        for i in range(len(keys) - 1):
+            idx.add(positions[keys[i]], positions[keys[i + 1]], (eid, keys[i], keys[i + 1]))
+    edges_at: dict[str, list[str]] = {}
+    for eid in sorted(kinds):
+        for k in vertex_keys[eid]:
+            edges_at.setdefault(k, []).append(eid)
+
+    # Who is beside whom is decided once, on the heights as they come in.
+    beside: dict[str, list[tuple[str, str, float]]] = {}  # vertex -> [(ka, kb, t)] per partner
+    on_deck: dict[str, bool] = {}
+    for k in sorted(edges_at):
+        x, z = positions[k]
+        own = edges_at[k]
+        own_nodes = {
+            f"n:{n}" for eid in own for n in (graph.edges[eid].from_node, graph.edges[eid].to_node)
+        }
+        partners: dict[str, tuple[float, str, str, float]] = {}  # edge -> (d, ka, kb, t), closest
+        for eid in own:
+            e = graph.edges[eid]
+            for a, b, (oid, ka, kb) in idx.near(x, z, e.width_m / 2.0 + widest / 2.0 + deck_gap):
+                if oid in own:
+                    continue
+                o = graph.edges[oid]
+                decks = (kinds[eid] == "deck") + (kinds[oid] == "deck")
+                if decks == 2 and o.layer != e.layer:
+                    continue
+                gap = deck_gap if decks else rules["ground_gap_m"]
+                dx, dz = b[0] - a[0], b[1] - a[1]
+                l2 = dx * dx + dz * dz
+                t = 0.0 if l2 == 0 else max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / l2))
+                if (t <= 0.0 and ka in own_nodes) or (t >= 1.0 and kb in own_nodes):
+                    continue  # nearest at a node of this carriageway: a continuation, not beside it
+                d = math.hypot(x - a[0] - dx * t, z - a[1] - dz * t)
+                if d - e.width_m / 2.0 - o.width_m / 2.0 > gap:
+                    continue
+                if abs(y[ka] + (y[kb] - y[ka]) * t - y[k]) > rules["max_step_m"]:
+                    continue
+                if d < partners.get(oid, (math.inf,))[0]:
+                    partners[oid] = (d, ka, kb, t)
+        if partners:
+            beside[k] = [(ka, kb, t) for _d, ka, kb, t in partners.values()]
+            on_deck[k] = any(kinds[eid] == "deck" for eid in own)
+    if not beside:
+        return {}
+
+    # Each vertex takes the highest (under a deck the lowest) of its own and its partners'
+    # heights, repeated until nothing moves, so a change reaches a third carriageway beside the
+    # second (a motorway raised to a deck end, then the on-ramp beside the motorway).
+    for k, ps in beside.items():
+        heights = [y[k]] + [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in ps]
+        stats.max_shared_step = max(stats.max_shared_step, max(heights) - min(heights))
+        if on_deck[k]:
+            stats.shared_deck_vertices += 1
+        else:
+            stats.shared_ground_vertices += 1
+    work = dict(y)
+    for _ in range(SHARE_ROUNDS):
+        new = {}
+        for k in sorted(beside):
+            heights = [work[k]] + [work[ka] + (work[kb] - work[ka]) * t for ka, kb, t in beside[k]]
+            new[k] = min(heights) if k in under_decks and not on_deck[k] else max(heights)
+        moved = max(abs(new[k] - work[k]) for k in new)
+        work.update(new)
+        if moved < SMOOTHING_EPSILON:
+            break
+    delta = {k: work[k] - y[k] for k in beside}
+    if not delta:
+        return {}
+
+    # Fade each change out along the network: nearest shared vertex wins.
+    blend = rules["blend_m"]
+    dist: dict[str, float] = {k: 0.0 for k in delta}
+    source: dict[str, str] = {k: k for k in delta}
+    heap = [(0.0, k) for k in sorted(delta)]
+    heapq.heapify(heap)
+    while heap:
+        d, k = heapq.heappop(heap)
+        if d > dist[k]:
+            continue
+        for other, seg, _g in adj[k]:
+            nd = d + seg
+            if nd < blend and nd < dist.get(other, math.inf):
+                dist[other] = nd
+                source[other] = source[k]
+                heapq.heappush(heap, (nd, other))
+    tunnels = {k for eid, e in graph.edges.items() if e.tunnel for k in vertex_keys[eid]}
+    for k, d in dist.items():
+        change = delta[k] if k in delta else delta[source[k]] * (1.0 - d / blend)
+        if k in tunnels or (k in spans and change < 0.0):
+            continue  # never lower a deck into its clearance, nor move a tunnel
+        y[k] += change
+    return {k: y[k] for k in delta}
 
 
 def _propagate(

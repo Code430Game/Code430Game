@@ -75,6 +75,26 @@ def test_close_opposing_carriageways_get_one_median():
         assert lo - 0.6 <= z <= hi + 0.6  # inside the 3 m gap between the 10 m ribbons
 
 
+def test_overlapping_inner_shoulders_still_get_a_median():
+    # 10.5 m ribbons (7 m of lanes, 1 m inner and 2.5 m outer shoulder) 9.5 m apart: the inner
+    # shoulders overlap by 1 m, the lanes are 2.5 m apart (update-shared-deck-heights).
+    tags = {"highway": "motorway", "oneway": "yes", "lanes": "2"}
+    ways = [(1, [(300, -4.75), (-300, -4.75)], tags), (2, [(-300, 4.75), (300, 4.75)], tags)]
+    g = graph_for(ways, FlatSource(10.0))
+    assert g.edges["w1.0"].width_m == 10.5 and g.edges["w1.0"].shoulder_left_m == 1.0
+    r = build_barriers(g, FlatSource(10.0), None, CFG)
+    medians = [b for b in r.barriers if b.kind == "median"]
+    assert len(medians) == 1
+
+    def z_on(edge_id, x):
+        pl = g.edges[edge_id].polyline
+        a, b = (pl[0], pl[-1]) if pl[0][0] < pl[-1][0] else (pl[-1], pl[0])
+        return a[2] + (b[2] - a[2]) * (x - a[0]) / (b[0] - a[0])
+
+    for x, _y, z in medians[0].points:
+        assert abs(z - (z_on("w1.0", x) + z_on("w2.0", x)) / 2.0) < 0.6  # on the mid-line
+
+
 def test_far_apart_carriageways_get_no_median():
     ways = [
         (1, [(-300, 0), (300, 0)], {"highway": "motorway", "oneway": "yes", "width": "10"}),

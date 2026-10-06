@@ -24,6 +24,13 @@
     "depth_max_m": 1.8,
     "end_clear_m": 4.0
   },
+  "shared_heights": {
+    "_comment": "update-shared-deck-heights: carriageways whose ribbons touch share one height (see elevation._share_heights). Decks of one layer within barriers.parapet_shared_deck_gap_m (the gap the parapets treat as one deck, so where no parapet stands between two decks there is no step either); ground carriageways of ground_classes within ground_gap_m. Steps larger than max_step_m are real level differences and are kept. The change blends into the connected roads over blend_m.",
+    "ground_gap_m": 0.25,
+    "ground_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
+    "max_step_m": 0.8,
+    "blend_m": 30.0
+  },
   "shoulders": {
     "_comment": "Paved shoulder outside the outer lanes, [left, right] of the direction of travel in metres; a two-way road gets the right width on both sides. Only where the width is not tagged.",
     "by_class": {"motorway": [1.0, 2.5], "trunk": [1.0, 2.5], "motorway_link": [0.6, 1.5], "trunk_link": [0.6, 1.5]}
