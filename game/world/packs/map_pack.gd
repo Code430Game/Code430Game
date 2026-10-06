@@ -137,20 +137,30 @@ func load(dir: String) -> bool:
 	return terrain_index.size() > 0
 
 
-## SHA-256 over pack.json plus every file's relative path and size, for co-op pack checks.
+## SHA-256 over pack.json plus every file's relative path and contents, for co-op pack
+## checks: two regenerated packs with the same file sizes still differ.
 static func content_hash(dir: String) -> String:
 	var ctx := HashingContext.new()
 	ctx.start(HashingContext.HASH_SHA256)
 	ctx.update(FileAccess.get_file_as_bytes(dir.path_join("pack.json")))
+	for rel in pack_files(dir):
+		var bytes := FileAccess.get_file_as_bytes(dir.path_join(rel))
+		ctx.update(("%s:%d\n" % [rel, bytes.size()]).to_utf8_buffer())
+		ctx.update(bytes)
+	return ctx.finish().hex_encode()
+
+
+## Every file of a pack folder, relative and sorted, leaving out the GLB chunk cache (generated
+## locally, it differs per machine).
+static func pack_files(dir: String) -> Array[String]:
 	var entries: Array[String] = []
 	_collect_files(dir, "", entries)
 	entries.sort()
+	var out: Array[String] = []
 	for rel in entries:
-		if rel.begins_with("chunks/"):
-			continue  # the GLB cache is generated locally and differs per machine
-		var size := FileAccess.get_file_as_bytes(dir.path_join(rel)).size()
-		ctx.update(("%s:%d\n" % [rel, size]).to_utf8_buffer())
-	return ctx.finish().hex_encode()
+		if not rel.begins_with("chunks/"):
+			out.append(rel)
+	return out
 
 
 static func _collect_files(root: String, rel_dir: String, out: Array[String]) -> void:

@@ -6,17 +6,17 @@ extends RefCounted
 
 
 const BUILD_MANIFEST := "build.json"
-const INPUT_FILES := ["road_graph.v0.json", "terrain.json", "water.v0.json", "buildings.v0.json", "barriers.v0.json"]
 ## Bump whenever mesh generation changes, so chunks built by older code are rebuilt.
 const GENERATOR_VERSION := 9
 
 
-## Hash of the pack files the chunks are generated from, so stale chunks can be detected.
+## Hash of every pack file but the chunks themselves, so stale chunks can be detected. Chunks
+## are built from many files (road graph, terrain and its images, water, buildings, barriers,
+## bridges, parking, vegetation), and a list of them went stale when a new one was added.
 static func inputs_hash(pack_dir: String) -> String:
 	var parts := PackedStringArray([str(GENERATOR_VERSION)])
-	for name in INPUT_FILES:
-		var path := pack_dir.path_join(name)
-		parts.append(FileAccess.get_md5(path) if FileAccess.file_exists(path) else "-")
+	for rel in MapPack.pack_files(pack_dir):
+		parts.append("%s=%s" % [rel, FileAccess.get_md5(pack_dir.path_join(rel))])
 	return "|".join(parts).md5_text()
 
 
