@@ -104,6 +104,7 @@ var _bumps: bool = false
 var _last_vy: float = 0.0
 const BUMP_THRESHOLD_MPS2 := 90.0
 var _spawn_override: Vector3 = Vector3.INF
+var _spawn_on_foot_at: Vector3 = Vector3.INF  # --spawn=x,y,z: the player starts on foot exactly here (a garage floor)
 var _car_id: String = ""  # --car=<vehicle id>: start in this catalogue vehicle (default: the catalogue's)
 var _road_label: String = ""
 var _road_label_next: float = 0.0
@@ -203,6 +204,8 @@ func _ready() -> void:
 	Session.local_profile = _player.profile
 	add_child(_player)
 	_player.global_position = spawn.origin + spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+	if _spawn_on_foot_at != Vector3.INF:
+		_player.global_position = _spawn_on_foot_at
 	_player.entered_vehicle.connect(_on_entered_vehicle)
 	_player.exited_vehicle.connect(_on_exited_vehicle)
 	_player.take_vehicle_requested.connect(_on_take_vehicle_requested)
@@ -749,6 +752,7 @@ func _setup_maps() -> void:
 	_map_renderer.set_bounds(b)
 	_minimap.renderer = _map_renderer
 	_minimap.player = Players.local_controlled_body()
+	_minimap.garages = _pack.garages
 	_overview.renderer = _map_renderer
 	_overview.graph = _pack.graph
 	_overview.player = Players.local_controlled_body()
@@ -891,6 +895,9 @@ func _parse_args() -> void:
 			var parts := arg.get_slice("=", 1).split(",")
 			if parts.size() == 2:
 				_spawn_override = Vector3(float(parts[0]), 0.0, float(parts[1]))
+			elif parts.size() == 3:
+				_spawn_override = Vector3(float(parts[0]), 0.0, float(parts[2]))
+				_spawn_on_foot_at = Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
 
 
 ## Remembers which device the player last used so the hints match it; captures the mouse
