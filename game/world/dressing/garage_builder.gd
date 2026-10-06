@@ -22,6 +22,7 @@ const LIGHT_GRID_M := 8.0
 const STALL_WIDTH_M := 2.6
 const STALL_DEPTH_M := 5.3
 const AISLE_M := 6.5
+const LANDING_M := 12.0  # kept clear past a ramp's foot: room to drive off it and turn into an aisle
 const MODULE_M := STALL_DEPTH_M * 2.0 + AISLE_M  # one aisle with a row of stalls each side
 const FLOOR_COLOR := Color(0.33, 0.33, 0.33)
 const WALL_COLOR := Color(0.55, 0.55, 0.53)
@@ -157,7 +158,7 @@ static func _layout(g: Garage, along: Vector2) -> Array[ParkingLotBuilder.Stall]
 
 
 static func _keep_point(g: Garage, into: PackedVector2Array, p: Vector2, clearance: float) -> void:
-	if Geometry2D.is_point_in_polygon(p, g.outer) and _clear_of_edges(p, g.outer, clearance) and not _near_ramp(g, p, RAMP_WIDTH_M * 0.5 + 1.5):
+	if Geometry2D.is_point_in_polygon(p, g.outer) and _clear_of_edges(p, g.outer, clearance) and not _near_ramp(g, p, RAMP_WIDTH_M * 0.5 + 1.5, true):
 		into.append(p)
 
 
@@ -165,7 +166,7 @@ static func _stall_fits(g: Garage, s: ParkingLotBuilder.Stall) -> bool:
 	for c in ParkingLotBuilder.stall_corners(s):
 		if not Geometry2D.is_point_in_polygon(c, g.outer) or not _clear_of_edges(c, g.outer, 0.4):
 			return false
-	return not _near_ramp(g, s.centre, RAMP_WIDTH_M * 0.5 + STALL_DEPTH_M * 0.5 + 0.5)
+	return not _near_ramp(g, s.centre, RAMP_WIDTH_M * 0.5 + STALL_DEPTH_M * 0.5 + 0.5, true)
 
 
 static func _long_axis(poly: PackedVector2Array) -> Array:
@@ -179,12 +180,19 @@ static func _long_axis(poly: PackedVector2Array) -> Array:
 	return [best.x, best.y]
 
 
-static func _near_ramp(g: Garage, p: Vector2, reach: float) -> bool:
+## True within `reach` of a ramp. With `landing`, also of the strip LANDING_M on past the
+## ramp's foot, where a car comes off it onto the floor (issue #60: stalls and columns there
+## blocked the way in).
+static func _near_ramp(g: Garage, p: Vector2, reach: float, landing: bool = false) -> bool:
 	for r in g.ramps:
 		var a := Vector2(r.start.x, r.start.z)
 		var b := Vector2(r.end.x, r.end.z)
 		if Geometry2D.get_closest_point_to_segment(p, a, b).distance_to(p) <= reach:
 			return true
+		if landing and (b - a).length() > 0.01:
+			var c := b + (b - a).normalized() * LANDING_M
+			if Geometry2D.get_closest_point_to_segment(p, b, c).distance_to(p) <= reach:
+				return true
 	return false
 
 

@@ -17,6 +17,7 @@ const HIGH_HEIGHT_M := 160.0
 @export var orbit_return_speed: float = 3.0
 
 var _orbit: float = 0.0
+const EDGE_PROBE_M := 0.45  # the second ray's height above the first
 const CAMERA_CLEARANCE_M := 0.35
 var mode: int = Mode.CHASE
 ## When positive, top-down modes use this height (the testbed's --topdown=<m> for screenshots).
@@ -78,22 +79,37 @@ func _process(delta: float) -> void:
 
 ## Pulls the camera in front of the first solid world surface between the car and it (a garage
 ## ceiling, a bridge deck, a wall): from above a ceiling it saw straight through (#43). Cars,
-## people and other moving bodies are looked past.
+## people and other moving bodies are looked past. A second ray, EDGE_PROBE_M higher, catches
+## a ceiling edge the centre ray slips past (an opening over a ramp), which left the camera
+## half above the ceiling, seeing both sides (#59).
 func _clear_of_world(focus: Vector3, wanted: Vector3) -> Vector3:
 	var space := get_world_3d().direct_space_state if is_inside_tree() else null
 	if space == null:
 		return wanted
+	var length := focus.distance_to(wanted)
+	if length < 0.001:
+		return wanted
+	var best := length
+	for lift in [0.0, EDGE_PROBE_M]:
+		var up := Vector3.UP * float(lift)
+		best = minf(best, _static_hit_distance(space, focus + up, wanted + up))
+	if best >= length:
+		return wanted
+	return focus + (wanted - focus) / length * maxf(best - CAMERA_CLEARANCE_M, 0.0)
+
+
+## Distance from `from` toward `to` to the first static body, or INF.
+func _static_hit_distance(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3) -> float:
 	var exclude: Array[RID] = []
 	if target is CollisionObject3D:
 		exclude.append((target as CollisionObject3D).get_rid())
 	for i in range(4):
-		var q := PhysicsRayQueryParameters3D.create(focus, wanted)
+		var q := PhysicsRayQueryParameters3D.create(from, to)
 		q.exclude = exclude
 		var hit := space.intersect_ray(q)
 		if hit.is_empty():
-			return wanted
+			return INF
 		if hit["collider"] is StaticBody3D:
-			var back: Vector3 = (focus - hit["position"]).normalized()
-			return hit["position"] + back * CAMERA_CLEARANCE_M
+			return from.distance_to(hit["position"])
 		exclude.append(hit["rid"])
-	return wanted
+	return INF
