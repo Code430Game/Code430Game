@@ -9,23 +9,12 @@ Updated 2026-10-06.
 
 ## Ready to build
 
-Small and self-contained:
-
-| Change | What | Depends on | Touches |
-|---|---|---|---|
-| `update-radio-per-car` | each car keeps its own station | nothing | radio, car, testbed enter/exit |
-| `update-garage-polish` | minimap inside garages, clean ramp terrain cuts | nothing | minimap, garage builder |
-| `add-unarmed-combat` | punches and kicks for empty hands | nothing | shooter, held weapon, character rig |
-| `add-weapon-selector` | a belt of weapon icons on the HUD, D-pad and number-key picks | merges after `add-unarmed-combat` | weapon set, shooter, weapons schema, mode files, controls |
-| `update-shared-deck-heights` | one height for touching bridge carriageways | nothing | importer elevation, golden, pack |
-
 Medium:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
 | `update-junction-surfaces` | point-like junctions, curbs inside junctions, terrain through | the maintainer's junction locations help | importer cluster/forks/barriers/pack, junction builder, lane graph |
 | `update-parking` | lot layout passes, street-side parking lanes | the maintainer's lot screenshots for the layout half | importer parking, lot builder, lanes and markings |
-| `add-road-shoulders` 1.4 | concrete infill between carriageways, paved gores | `update-shared-deck-heights` first | importer bridges/barriers, golden, pack |
 | `add-district-edge` | proper closures and a fog fade at the map edge | nothing | importer barriers, edge builder, traffic |
 | `add-underpass-interiors` | lights, retaining walls, tone-gated shelters | nothing | underpass builder, pedestrians, content modes |
 | `add-skywalks-and-building-parts` | footbridges and buildings over roads | nothing | importer pedestrian/buildings, building builder |
@@ -49,12 +38,11 @@ Large:
 
 Coordinate (or land one before the other) when two changes share these:
 
-- `game/actors/character/character_rig.gd`: `add-unarmed-combat`, `add-two-wheelers`,
-  `add-character-features`.
-- `tools/osm_import/elevation.py`, `barriers.py`, `bridges.py` and the golden fixture:
-  `update-shared-deck-heights`, `add-road-shoulders` 1.4, `update-junction-surfaces`,
-  `add-district-edge`, `add-skywalks-and-building-parts`. Any of these re-exports the pack, so
-  merge them one at a time and rebase.
+- `game/actors/character/character_rig.gd`: `add-two-wheelers`, `add-character-features`.
+- `tools/osm_import/elevation.py`, `barriers.py`, `bridges.py`, `pack.py` and the golden
+  fixture: `update-junction-surfaces`, `add-district-edge`, `add-skywalks-and-building-parts`,
+  `update-parking`, `add-bus-routes`, `add-rail`. Any of these re-exports the pack, so build
+  one at a time, rebase, and regenerate the pack and golden last.
 - `game/world/traffic/lane_graph.gd` and `marking_builder.gd`: `update-parking`,
   `update-junction-surfaces`, `add-two-wheelers`, `add-bus-routes`.
 - `game/scenes/play_testbed.gd`: almost everything; keep edits small and rebase often.
@@ -67,8 +55,13 @@ Built and merged; each is archived once it has been played on the Deck:
 - `add-police-helicopter` 2.2
 - `add-emergency-services` 3.1
 - `add-ambulance-response` 2.2
-- `add-road-shoulders` 3.2
+- `add-road-shoulders` 3.2 (now with the 1.4 infill and gores)
 - `add-character-detail` 2.2 and 2.3
+- `update-radio-per-car` 2.1
+- `update-garage-polish` 2.1 (`--spawn=97,62.6,-377` starts on the NAC garage floor)
+- `add-unarmed-combat` 2.1 and 2.2
+- `add-weapon-selector` 2.1 and 2.2
+- `update-shared-deck-heights` 2.1
 
 `add-coop-multiplayer` still needs:
 - the tone sent on join (1.3);
@@ -78,7 +71,6 @@ Built and merged; each is archived once it has been played on the Deck:
 
 ## Small fixes (no proposal needed, open a `fix/` PR)
 
-- The README's pack-builder command points at a file that does not exist.
 - The high preset's fog hides the city beyond about 50 m at noon (check the volumetric fog
   density).
 - More in `docs/backlog.md`; the junction and parking items there now have proposals.

@@ -2,7 +2,16 @@
 
 A free, open-source, AI-built open-world crime game framework in the spirit of GTA III–IV, set on real city road networks from OpenStreetMap. Codename Code 430. Read `VISION.md` for the why and `AGENTS.md` for the rules. Want to help? See `CONTRIBUTING.md` and the list of ready work in `docs/open-work.md`.
 
-Status: Phase 0 (foundations). The project boots to an empty testbed with a controller-driven camera.
+Status (2026-10-06): a playable sandbox in one district, central Ottawa, built from OpenStreetMap and NRCan elevation. It has:
+- roads, bridges, buildings, water, parking and garages;
+- traffic and pedestrians, with a day-night cycle;
+- an on-foot player with a character creator, and cars to drive or take, each with a radio;
+- weapons and fists in three tone modes, with a weapon wheel;
+- police with a wanted level and a helicopter, and ambulances;
+- an in-game issue reporter;
+- LAN co-op (in progress).
+
+Not yet built: the pack loader for third-party packs, missions, and an economy. `docs/open-work.md` lists what is next.
 
 ## Requirements
 - Godot `4.7.2-stable` (see `.godot-version`). macOS: `brew install --cask godot`. Others: https://godotengine.org/download.
@@ -14,9 +23,7 @@ godot --path game --editor
 ```
 Or open `game/project.godot` from the Godot project manager. Press F5 to run the play testbed: it loads the Ottawa map pack from `packs/`, builds the city, and puts you on foot beside a car on the Queensway.
 
-On foot: left stick walks, L3 runs, A jumps, right stick orbits the camera, Y gets into a nearby car. In the car, Y gets out again when you are slower than 18 km/h.
-
-Driving: right trigger accelerates, left trigger brakes or reverses from a stop, left stick steers, RB is the handbrake, right stick orbits the camera. A minimap sits in the corner. Back opens the full map (left stick pans, right stick moves a cursor that names the road under it, triggers zoom, Back closes). Back+Y puts the car back on the nearest road, Back+B draws the road graph, Back+X shows frame stats, Start quits. Keyboard: W/S/A/D, Space handbrake, M map, R reset, F4 graph, F3 stats.
+Controls for controller and keyboard are in `docs/controls.md`, generated from the game's input map; the pause menu's Controls tab shows the same list and rebinds them.
 
 Benchmark from the command line (vsync off, prints a frame-time summary and quits):
 ```
@@ -84,12 +91,21 @@ Manual route:
 ## Repo layout
 ```
 game/                 Godot project (res:// root)
-  core/               settings, input, debug overlay
-  scenes/             testbed
+  core/               audio, content modes, input, net (co-op), settings, streaming, debug, report
+  world/              packs loader, roads, terrain, buildings, water, barriers, dressing,
+                      traffic, pedestrians, vegetation, services, sky; build/ holds the pack builder
+  actors/             player, character, vehicles, combat, police, emergency
+  ui/                 HUD, maps, pause menu, character creator, report form
+  scenes/             the play testbed
   tests/              gdUnit4 tests
-tools/                Python tools (uv project): pack validator, later OSM import
-packs/                first-party packs
-docs/pack-format/     pack manifest schema and docs
+tools/                Python tools (uv project): osm_import, pack_tools, report_relay,
+                      region_picker, controls_doc.py; tests/ with the golden fixture
+packs/                first-party packs (the Ottawa map pack)
+regions/              region definitions for the importer
+scripts/              CI, Linux packaging, Steam Deck deploy and shortcut, build stamp
+docs/                 controls, backlog, open work, graphics presets, licensing
+  pack-format/        pack schemas and docs
+  report-format/      issue report format
 openspec/             specs and changes
 .github/workflows/    CI
 ```
@@ -101,4 +117,4 @@ Three-way split, see `docs/licensing-options.md` for the reasoning:
 - Map data derived from OpenStreetMap: ODbL 1.0, credited "© OpenStreetMap contributors". Elevation from Natural Resources Canada under the Open Government Licence – Canada.
 
 ## Run the CI checks locally
-`scripts/ci-local.sh` runs the same steps as `.github/workflows/ci.yml` on this machine: ruff, pytest, pack validation, gdUnit4, and optionally the Linux export (`--export`, needs the export templates installed).
+`scripts/ci-local.sh` runs the same steps as `.github/workflows/ci.yml` on this machine: ruff, pytest, pack validation, `openspec validate --strict --all` (skipped with a note if the OpenSpec CLI isn't installed; the version CI uses is in `.openspec-version`), gdUnit4 (orphan nodes fail the run), and optionally the Linux export (`--export`, needs the export templates installed).
