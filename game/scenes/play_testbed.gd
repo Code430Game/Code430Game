@@ -631,7 +631,7 @@ func _setup_billboards() -> void:
 	_billboards.name = "Billboards"
 	_billboards.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_world.add_child(_billboards)
-	_billboards.setup(_pack.graph.edges.values(), _pack.ads, SESSION_SEED)
+	_billboards.setup(_pack.graph.edges.values(), _pack.ads, SESSION_SEED, Billboards.obstacles_from_pack(_pack))
 	var first: Vector3 = _billboards.sites[0]["transform"].origin if _billboards.count() > 0 else Vector3.ZERO
 	print("billboards: %d boards from %d ads, tone %s, first at (%.0f, %.1f, %.0f)" % [_billboards.count(), _pack.ads.size(), ContentMode.current, first.x, first.y, first.z])
 	var warning := _tone_warning()
