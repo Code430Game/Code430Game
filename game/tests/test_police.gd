@@ -216,3 +216,22 @@ func test_a_taken_patrol_car_is_handed_over_not_freed() -> void:
 	await get_tree().physics_frame
 	assert_bool(is_instance_valid(car) and not car.is_queued_for_deletion()).is_true()
 	auto_free(car)
+
+
+## Human, 2026-10-06: the minimap showed neither the police nor the helicopter.
+func test_the_police_report_their_cars_and_helicopter_for_the_minimap() -> void:
+	var pm := _setup()
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]
+	assert_array(pm.markers()).is_empty()
+	var cop: VehicleBody3D = auto_free(PoliceManager.CAR_SCENE.instantiate())
+	pm.holder.add_child(cop)
+	cop.global_position = Vector3(30, 0.6, 0)
+	pm.cars.append(cop)
+	pm.wanted.set_stars(3)
+	for i in range(3):
+		await get_tree().physics_frame
+	var kinds: Array = pm.markers().map(func(m: Dictionary) -> String: return m["kind"])
+	assert_array(kinds).contains(["car", "helicopter"])
+	for m: Dictionary in pm.markers():
+		if m["kind"] == "car":
+			assert_float((m["at"] as Vector3).distance_to(cop.global_position)).is_less(0.01)
