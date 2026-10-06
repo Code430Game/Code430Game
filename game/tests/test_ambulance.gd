@@ -167,3 +167,22 @@ func test_walkers_wait_at_a_crossing_for_an_ambulance_coming_at_it() -> void:
 	assert_bool(am.peds.crossing_open(path)).is_false()
 	van.look_at(Vector3(200, 0, 0), Vector3.UP)  # driving away
 	assert_bool(am.peds.crossing_open(path)).is_true()
+
+
+func test_a_taken_ambulance_is_handed_over_not_freed() -> void:
+	# Issue #69: getting in did not let the player drive, and the car was later freed with
+	# the player inside.
+	var am := _setup("n10")
+	_downed(am, Vector3(100, 0, 3))
+	await _frames(15)
+	assert_int(am.runs.size()).is_equal(1)
+	var car: VehicleBody3D = am.runs[0].car
+	var got := [null]
+	am.taken.connect(func(c: VehicleBody3D) -> void: got[0] = c)
+	car.set("driver_peer_id", Players.LOCAL_PEER_ID)
+	await _frames(3)
+	for r in am.runs:
+		assert_bool(r.car == car).is_false()  # let go (the open call may send another)
+	assert_bool(is_instance_valid(car) and not car.is_queued_for_deletion()).is_true()
+	assert_bool(got[0] == car).is_true()
+	auto_free(car)
