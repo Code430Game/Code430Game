@@ -16,6 +16,10 @@ var amount: float = 0.0
 ## `override_weight` (a held weapon's aim and swing poses the weapon arm).
 var bone_override: Dictionary = {}
 var override_weight: float = 0.0
+## The same for the legs, blended by its own weight (a kick, add-unarmed-combat), so a leg
+## move and an arm pose can run together.
+var leg_override: Dictionary = {}
+var leg_weight: float = 0.0
 
 
 func _ready() -> void:
@@ -87,6 +91,8 @@ func _pose() -> void:
 		var q := Quaternion(Vector3.RIGHT, float(pose.get(name, 0.0)))
 		if override_weight > 0.0 and bone_override.has(name):
 			q = q.slerp(bone_override[name], clampf(override_weight, 0.0, 1.0))
+		if leg_weight > 0.0 and leg_override.has(name):
+			q = q.slerp(leg_override[name], clampf(leg_weight, 0.0, 1.0))
 		skeleton.set_bone_pose_rotation(i, q)
 	var hips := CharacterMesh.bone_index("hips")
 	skeleton.set_bone_pose_position(hips, skeleton.get_bone_rest(hips).origin + Vector3(0.0, float(pose.get("hips_bob", 0.0)), 0.0))

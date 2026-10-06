@@ -8,6 +8,10 @@ extends Node3D
 ## Bone space: a bone's -Y runs down the arm, and a rotation about +X swings its lower end
 ## toward -Z, the way the body faces, so +PI/2 on the upper arm raises it straight ahead. The
 ## weapon arm is the one on the body's right (+X while facing -Z); its bones are named "_l".
+##
+## Empty hands (add-unarmed-combat): a jab on either arm with the other up in guard, and a
+## front kick on the body's left leg ("_r" bones) through the rig's leg override, drawn up
+## (chambered) while fire is held for it. Each move fades in and out over its own length.
 
 const UPPER := "upper_arm_l"
 const FORE := "forearm_l"
@@ -18,6 +22,20 @@ const RECOIL_RAD := 0.35
 const BLEND_RATE := 8.0  # how fast the arm takes up or lets go of the weapon pose
 const TRAIL_LIFE_S := 0.16
 const TRAIL_POINTS := 14
+const UPPER_R := "upper_arm_r"
+const FORE_R := "forearm_r"
+const THIGH := "thigh_r"
+const SHIN := "shin_r"
+const PUNCH_S := 0.28
+const KICK_S := 0.5
+const GUARD_UPPER := 0.55  # fists up by the chin
+const GUARD_FORE := 1.9
+const JAB_UPPER := 1.45  # arm out at shoulder height ...
+const JAB_FORE := 0.08  # ... and straight
+const JAB_INWARD := 0.28  # toward the body's centre line, radians
+const KICK_THIGH := 1.45  # thigh raised nearly level
+const CHAMBER_THIGH := 1.2
+const CHAMBER_SHIN := -1.7  # knee bent, foot drawn under
 
 var rig: CharacterRig
 var model_id: String = ""
@@ -32,6 +50,15 @@ var _weight: float = 0.0
 var _trail: MeshInstance3D
 var _trail_pts: Array = []  # [base: Vector3, tip: Vector3, age: float]
 var _trail_color := Color(1, 1, 1)
+## Fire held long enough for a kick: the leg draws up and waits.
+var chamber: bool = false
+## Pins a move part-way ("punch" or "kick", at `hold_t` 0..1) for screenshots.
+var hold_move: String = ""
+var hold_t: float = 0.5
+var _punch_t: float = -1.0
+var _punch_side: int = 0  # 0 the weapon arm (body's right), 1 the other
+var _kick_t: float = -1.0
+var _chamber_w: float = 0.0
 
 
 func _ready() -> void:
@@ -94,6 +121,26 @@ func swinging() -> bool:
 	return _swing_t >= 0.0
 
 
+## A jab with arm `side` (0 the body's right, 1 the left).
+func punch(side: int) -> void:
+	_punch_t = 0.0
+	_punch_side = side
+
+
+## A front kick; it starts from the chambered leg if fire was held for it.
+func kick() -> void:
+	_kick_t = KICK_S * 0.3 * _chamber_w  # from as far up as the leg was drawn
+	chamber = false
+
+
+func punching() -> bool:
+	return _punch_t >= 0.0
+
+
+func kicking() -> bool:
+	return _kick_t >= 0.0
+
+
 ## The barrel's end in world space (shots and flashes start there), or INF without a gun.
 func muzzle() -> Vector3:
 	return _muzzle.global_position if _muzzle != null and _model != null else Vector3.INF
@@ -113,8 +160,32 @@ func _process(delta: float) -> void:
 		if _recoil_t > RECOIL_S:
 			_recoil_t = -1.0
 	var pose := arm_pose(aiming, _swing_t / SWING_S if _swing_t >= 0.0 else -1.0, _recoil_t / RECOIL_S if _recoil_t >= 0.0 else -1.0)
+	var weight := _weight
+	if hold_move == "punch":
+		_punch_t = hold_t * PUNCH_S
+	elif hold_move == "kick":
+		_kick_t = hold_t * KICK_S
+	if _punch_t >= 0.0:
+		_punch_t += 0.0 if hold_move != "" else delta
+		if _punch_t > PUNCH_S:
+			_punch_t = -1.0
+	if _kick_t >= 0.0:
+		_kick_t += 0.0 if hold_move != "" else delta
+		if _kick_t > KICK_S:
+			_kick_t = -1.0
+	_chamber_w = move_toward(_chamber_w, 1.0 if chamber else 0.0, BLEND_RATE * delta)
+	if _model == null:
+		# Empty hands: a jab, or the guard while kicking or drawing a kick.
+		var p := _punch_t / PUNCH_S if _punch_t >= 0.0 else -1.0
+		var k := _kick_t / KICK_S if _kick_t >= 0.0 else -1.0
+		pose = jab_pose(_punch_side, maxf(p, 0.0))
+		weight = maxf(move_weight(p), maxf(move_weight(k), _chamber_w))
+		rig.leg_override = kick_pose(k if k >= 0.0 else 0.3)
+		rig.leg_weight = maxf(move_weight(k), _chamber_w)
+	else:
+		rig.leg_weight = 0.0
 	rig.bone_override = pose
-	rig.override_weight = _weight
+	rig.override_weight = weight
 	rig.repose()
 	_step_trail(delta)
 
@@ -139,6 +210,41 @@ static func arm_pose(aim: bool, swing: float, kick: float) -> Dictionary:
 		var k := (1.0 - clampf(kick, 0.0, 1.0)) * RECOIL_RAD
 		fore = fore * Quaternion(Vector3.RIGHT, -k)  # muzzle up
 	return {UPPER: upper, FORE: fore}
+
+
+## Both arms with empty hands: arm `side` jabs (`t` 0..1 out and back) while the other stays
+## up in guard. At t = 0 and 1 both arms are in guard.
+static func jab_pose(side: int, t: float) -> Dictionary:
+	var out := smoothstep(0.0, 0.35, t) * (1.0 - smoothstep(0.5, 1.0, t))
+	var out_l := out if side == 0 else 0.0
+	var out_r := out if side == 1 else 0.0
+	# A positive turn about Y brings the body's right arm in toward the centre; the left arm
+	# turns the other way.
+	return {
+		UPPER: Quaternion(Vector3.UP, JAB_INWARD) * Quaternion(Vector3.RIGHT, lerpf(GUARD_UPPER, JAB_UPPER, out_l)),
+		FORE: Quaternion(Vector3.RIGHT, lerpf(GUARD_FORE, JAB_FORE, out_l)),
+		UPPER_R: Quaternion(Vector3.UP, -JAB_INWARD) * Quaternion(Vector3.RIGHT, lerpf(GUARD_UPPER, JAB_UPPER, out_r)),
+		FORE_R: Quaternion(Vector3.RIGHT, lerpf(GUARD_FORE, JAB_FORE, out_r)),
+	}
+
+
+## The kicking leg over a kick (`t` 0..1): drawn up with the knee bent (0.3), snapped out
+## straight at hip height (0.5 to 0.65), then back down.
+static func kick_pose(t: float) -> Dictionary:
+	var c := smoothstep(0.0, 0.3, t)
+	var e := smoothstep(0.3, 0.5, t)
+	var back := 1.0 - smoothstep(0.65, 1.0, t)
+	var thigh := lerpf(lerpf(0.0, CHAMBER_THIGH, c), KICK_THIGH, e) * back
+	var shin := lerpf(lerpf(0.0, CHAMBER_SHIN, c), -0.05, e) * back
+	return {THIGH: Quaternion(Vector3.RIGHT, thigh), SHIN: Quaternion(Vector3.RIGHT, shin)}
+
+
+## How much a move at `t` (0..1, negative when not happening) takes over the walk pose: in
+## quickly, out over the last quarter.
+static func move_weight(t: float) -> float:
+	if t < 0.0:
+		return 0.0
+	return smoothstep(0.0, 0.12, t) * (1.0 - smoothstep(0.8, 1.0, t))
 
 
 func _step_trail(delta: float) -> void:
