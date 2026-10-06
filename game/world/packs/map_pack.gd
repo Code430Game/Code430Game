@@ -527,8 +527,8 @@ func spawn_transform() -> Transform3D:
 	var forward := (q - p)
 	forward.y = 0.0
 	forward = forward.normalized()
-	var lane_w := best.width_m / maxf(best.lanes_forward + best.lanes_backward, 1)
-	var divider := best.width_m * 0.5 - best.lanes_forward * lane_w
+	var lane_w := best.carriageway_m() / maxf(best.lanes_forward + best.lanes_backward, 1)
+	var divider := best.carriageway_offset() + best.carriageway_m() * 0.5 - best.lanes_forward * lane_w
 	var right := Vector3(-forward.z, 0.0, forward.x)
 	var basis := Basis.looking_at(forward, Vector3.UP)
 	return Transform3D(basis, p + right * (divider + 0.5 * lane_w) + Vector3(0.0, 1.0, 0.0))

@@ -66,6 +66,10 @@ class RoadEdge:
     control_from: str = "none"  # the same for traffic arriving at from_node
     bus: str = ""  # "only": the whole edge is for buses; "lane": one forward lane is (bus_lane)
     bus_lane: int = -1  # forward lane index reserved for buses (0 = nearest the centre line)
+    shoulder_left_m: float = (
+        0.0  # paved shoulder left of the lanes (direction of travel), inside width_m
+    )
+    shoulder_right_m: float = 0.0  # and right of them
 
     @property
     def is_link(self) -> bool:
@@ -217,6 +221,10 @@ def _edge_from_segment(
         else:
             width = (lanes_f + lanes_b) * cfg.lane_width_m
         defaulted.append("width")
+        sl, sr = _shoulders(road_class, lanes_b > 0, cfg)
+        width += sl + sr
+    else:
+        sl, sr = 0.0, 0.0
     speed = T.parse_maxspeed_kph(tags.get("maxspeed"))
     if speed is None:
         speed = cfg.for_class(road_class).speed_kph
@@ -247,7 +255,19 @@ def _edge_from_segment(
         control_from=control_from,
         bus=bus,
         bus_lane=bus_lane,
+        shoulder_left_m=sl,
+        shoulder_right_m=sr,
     )
+
+
+def _shoulders(road_class: str, two_way: bool, cfg: ImportConfig) -> tuple[float, float]:
+    """Paved shoulder widths (left, right of the direction of travel) for a class; a two-way
+    road has its outer (right) shoulder on both sides."""
+    pair = (cfg.shoulders.get("by_class", {}) or {}).get(road_class)
+    if not pair:
+        return 0.0, 0.0
+    left, right = float(pair[0]), float(pair[1])
+    return (right, right) if two_way else (left, right)
 
 
 def _bus_lanes(tags: dict, lanes_f: int, reversed_way: bool) -> tuple[str, int]:

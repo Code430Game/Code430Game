@@ -21,6 +21,7 @@ from osm_import.forks import shape_forks
 from osm_import.graph import RoadGraph, build_graph
 from osm_import.osm_data import BBox, OsmData
 from osm_import.projection import Projector
+from osm_import.shoulders import trim_shoulders
 from osm_import.validation import ValidationReport, render_markdown, validate
 
 log = logging.getLogger(__name__)
@@ -76,6 +77,7 @@ def run_pipeline(
     if elevation is not None:
         crossings = infer_bridges(graph, elevation.sample)
         elev_stats = apply_elevation(graph, elevation, cfg)
+        trim_shoulders(graph)  # compares heights; before anything reads the final widths
         apply_pedestrian_elevation(graph, elevation, cfg)
         elev_meta = dict(sorted(elevation.describe().items()))
         elev_meta["bridge_clearance_m"] = cfg.bridge_clearance_m

@@ -67,6 +67,8 @@ def graph_to_dict(
                 "control_from": e.control_from,
                 "bus": e.bus,
                 "bus_lane": e.bus_lane,
+                "shoulder_left_m": round(e.shoulder_left_m, 2),
+                "shoulder_right_m": round(e.shoulder_right_m, 2),
             }
         )
     pedestrian = pedestrian_to_list(graph)

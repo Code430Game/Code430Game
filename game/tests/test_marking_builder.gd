@@ -91,3 +91,42 @@ func test_markings_respect_junction_trims() -> void:
 		for v in buckets[chunk].vertices:
 			min_x = minf(min_x, v.x)
 	assert_float(min_x).is_greater_equal(20.0 - 1e-3)
+
+
+## add-road-shoulders: a one-way motorway with 2 lanes, a 1 m left and a 2.5 m right shoulder
+## (10.5 m paved): the lane line and the edge lines sit on the lanes, not the paved middle.
+func test_motorway_lines_keep_to_the_lanes_inside_the_shoulders() -> void:
+	var b := _builder()
+	var g := _edge("motorway", 2, 0, 10.5)
+	var e: RoadGraph.RoadEdge = g.edges["w1.0"]
+	e.shoulder_left_m = 1.0
+	e.shoulder_right_m = 2.5
+	assert_float(e.carriageway_m()).is_equal_approx(7.0, 1e-6)
+	assert_float(e.carriageway_offset()).is_equal_approx(-0.75, 1e-6)
+	var lines := b.lines_for(e)
+	var dashed := lines.filter(func(l: Dictionary) -> bool: return l["style"] == "dashed")
+	assert_int(dashed.size()).is_equal(1)
+	assert_float(dashed[0]["offset"]).is_equal_approx(-0.75, 1e-6)  # between the two lanes
+	var solid := lines.filter(func(l: Dictionary) -> bool: return l["style"] == "solid")
+	var edges := []
+	for l in solid:
+		edges.append(snappedf(l["offset"], 0.01))
+	edges.sort()
+	var lw := float(b.rules["line_width_m"])
+	assert_float(edges[0]).is_equal_approx(-0.75 - 3.5 - lw * 0.5, 0.01)  # out on the left shoulder
+	assert_float(edges[1]).is_equal_approx(-0.75 + 3.5 + lw * 0.5, 0.01)  # and the right
+	assert_float(edges[1]).is_less(5.25 - 2.0)  # well inside the paved edge
+
+
+func test_lanes_run_inside_the_shoulders() -> void:
+	var g := _edge("motorway", 2, 0, 10.5)
+	var e: RoadGraph.RoadEdge = g.edges["w1.0"]
+	e.shoulder_left_m = 1.0
+	e.shoulder_right_m = 2.5
+	var lanes := LaneGraph.build(g, {})
+	var offsets := []
+	for lp in lanes.paths:
+		if not lp.is_connector:
+			offsets.append(snappedf(lp.points[0].z, 0.01))  # +z is right of travel along +x
+	offsets.sort()
+	assert_array(offsets).is_equal([-2.5, 1.0])
