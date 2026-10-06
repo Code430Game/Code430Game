@@ -9,6 +9,8 @@
 - [x] 2.5 Mac screenshots: a 2-star chase, a net gun in clean, busted
   - 2026-10-05: chase screenshots from the start position shared; the chase is easier to judge from `--police-log` (each second: stars, cars, officers, distance and speed per car), which showed two cars closing from 140 m to 25 m, an officer getting out, and a bust about 14 s in. `--wanted=N` starts a chase. First-pass limits: officers walk straight at the player and follow their height (they float up to a deck), and police cars ignore one-way rules
 
+- [x] 2.6 From the human's first chase on the Deck ("I expected some officers to get out of the vehicle but they did not"): officers also get out when the player's own car is stopped (under 8 km/h) near a patrol car, walk to the driver's door, and an officer there counts toward busted. Patrol cars pull up beside a stopped car instead of ramming it. Officers left 90 m behind are dropped. Patrol cars told to stop had been reversing away (braking at a standstill reverses), so they never stopped beside a player on foot; fixed by `override_hold` in #61. Tests
+
 ## 3. Verification
 - [x] 3.1 Deck benchmark during a 3-star chase against main
   - 2026-10-05, idle Deck, deck preset: route with no chase avg 12.96 ms, p99 18.21. A 3-star chase on foot at the start (`--wanted=3`, 4 police cars) avg 13.81, p99 18.66, physics mean 14.3. About 0.85 ms for four chasing cars
