@@ -44,6 +44,7 @@ const POOLS := 8  # distinct body looks; agents are spread across them
 const STARTLE_S := 1.5  # how long a walker stops to look at a horn
 const FLEE_S := 6.0  # how long a painted or frightened walker runs
 const FLEE_SPEED_MPS := 3.4
+const STUMBLE_LEAN_RAD := 0.3  # how far a shoved walker rocks back
 var _pools: Array[MultiMeshInstance3D] = []
 var pool_profiles: Array[Dictionary] = []
 var _last_snapshot_ms: int = 0
@@ -289,6 +290,16 @@ func _animate(a: Pedestrian, before: Vector3, delta: float) -> void:
 func _move_agent(a: Pedestrian, delta: float) -> void:
 	var path: WalkGraph.WalkPath = walk.paths[a.path_id]
 	var pace := 1.0
+	if a.stumble > 0.0:
+		# Shoved: facing whoever did it and rocking back, then running (the flee waits).
+		a.stumble -= delta
+		var to_them := a.stumble_from - a.position()
+		to_them.y = 0.0
+		if to_them.length_squared() > 0.01:
+			var face := Basis.looking_at(to_them.normalized(), Vector3.UP)
+			var lean := STUMBLE_LEAN_RAD * minf(a.stumble * 2.0, 1.0)
+			a.transform = Transform3D(face * Basis(Vector3.RIGHT, lean), a.position())
+		return
 	if a.fleeing > 0.0:
 		a.fleeing -= delta
 		a.startled = 0.0
@@ -651,6 +662,18 @@ func paint(a: Pedestrian, palette_index: int, from: Vector3, seconds: float = FL
 		return
 	a.paint_index = palette_index + 1
 	a.paint_amount = minf(a.paint_amount + 0.45, 0.95)
+	a.fleeing = seconds
+	a.flee_from = from
+
+
+## A shove (fists where nobody goes down): the walker stumbles back from `from` for
+## `stumble_s`, then runs off for `seconds`.
+func shove(a: Pedestrian, from: Vector3, stumble_s: float, seconds: float = FLEE_S) -> void:
+	if a.state != Pedestrian.State.WALKING:
+		return
+	a.stumble = stumble_s
+	a.stumble_from = from
+	a.startled = 0.0
 	a.fleeing = seconds
 	a.flee_from = from
 

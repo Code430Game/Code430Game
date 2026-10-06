@@ -3,7 +3,7 @@ extends Node3D
 ## What a hit leaves and how a shot looks and sounds (add-weapons-and-combat 2.3): a pool of
 ## marks on world surfaces (paint splats, bullet holes, scorch marks) recycled oldest first
 ## past the preset's cap, a muzzle flash, a glowing tracer for energy bolts, and synthesised
-## shot, zap, swish and pop voices.
+## shot, zap, swish, pop and thud voices.
 
 const MARK_SIZE := {"splat": 0.55, "hole": 0.12, "scorch": 0.4, "blood": 0.9}
 const MARK_COLOR := {"hole": Color(0.08, 0.08, 0.08), "scorch": Color(0.1, 0.07, 0.05), "blood": Color(0.32, 0.02, 0.02)}
@@ -134,7 +134,7 @@ func tracer(a: Vector3, b: Vector3) -> void:
 	get_tree().create_timer(0.09, false).timeout.connect(mi.queue_free)
 
 
-## Queues a voice: "shot", "zap", "swish" or "pop".
+## Queues a voice: "shot", "zap", "swish", "pop" or "thud" (a punch or kick landing).
 func sound(kind: String) -> void:
 	if kind != "":
 		_events.append([kind, 0.0])
@@ -171,4 +171,6 @@ func _sample(kind: String, t: float) -> float:
 			return Synth.noise(_noise) * sin(clampf(t / 0.16, 0.0, 1.0) * PI) * 0.35
 		"pop":
 			return sin(t * TAU * 140.0) * exp(-t * 40.0) * 0.6 + Synth.noise(_noise) * exp(-t * 90.0) * 0.4
+		"thud":
+			return sin(t * TAU * 70.0) * exp(-t * 28.0) * 0.7 + Synth.noise(_noise) * exp(-t * 60.0) * 0.25
 	return 0.0

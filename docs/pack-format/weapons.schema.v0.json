@@ -34,7 +34,7 @@
               "properties": {
                 "name": {"type": "string"},
                 "model": {"enum": ["knife", "sabre", "brush", "pistol", "blaster", "paintball_gun", "net_gun"]},
-                "impact": {"enum": ["blade", "bullet", "energy", "paint"]},
+                "impact": {"enum": ["blade", "bullet", "energy", "paint", "fist"]},
                 "lethal": {"type": "boolean"},
                 "mechanic": {"enum": ["melee", "hitscan", "projectile"]},
                 "magazine": {"type": "integer", "minimum": 0},
