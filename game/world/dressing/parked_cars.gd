@@ -336,6 +336,7 @@ func take(body: Node) -> VehicleBody3D:
 	var car: VehicleBody3D = TrafficManager.DRIVABLE_CAR_SCENE.instantiate()
 	car.set("body_color", c.color)
 	car.set("vehicle_id", c.vehicle_id)
+	car.set("radio_station", Radio.pick_for_car(hash(c.key)))
 	var holder: Node = get_parent() if get_parent() != null else self
 	holder.add_child(car)
 	car.global_transform = t.translated_local(Vector3(0.0, 0.1, 0.0))
@@ -350,12 +351,12 @@ func take(body: Node) -> VehicleBody3D:
 
 
 ## Host: empties the stall `key` for a guest who takes its car. Returns {"transform", "color",
-## "vehicle"}, or {} when the stall holds no car (already taken, or not occupied this hour).
+## "vehicle", "station"}, or {} when the stall holds no car (already taken, or not occupied this hour).
 func release_key(key: String) -> Dictionary:
 	var c: Parked = _by_key.get(key)
 	if c == null:
 		return {}
-	var out := {"transform": c.body.global_transform if c.body != null else c.transform(), "color": c.color, "vehicle": c.vehicle_id}
+	var out := {"transform": c.body.global_transform if c.body != null else c.transform(), "color": c.color, "vehicle": c.vehicle_id, "station": Radio.pick_for_car(hash(c.key))}
 	mark_taken(key)
 	stall_taken.emit(key)
 	return out

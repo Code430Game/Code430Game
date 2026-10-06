@@ -206,6 +206,7 @@ func test_a_taken_patrol_car_is_handed_over_not_freed() -> void:
 		await get_tree().physics_frame
 	assert_int(pm.cars.size()).is_equal(1)
 	var car := pm.cars[0]
+	assert_array([Radio.CHATTER, Radio.OFF]).contains([str(car.get("radio_station"))])  # talk radio or nothing
 	car.set("driver_peer_id", Players.LOCAL_PEER_ID)
 	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]  # no replacement for this test
 	await get_tree().physics_frame

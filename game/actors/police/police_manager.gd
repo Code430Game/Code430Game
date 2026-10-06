@@ -176,6 +176,7 @@ func _spawn_car(around: Vector3) -> bool:
 	holder.add_child(car)
 	car.call("set_body_color", Color(0.95, 0.95, 0.97))  # the catalogue's white, not the default red
 	car.global_position = best.position + Vector3.UP * 0.6
+	car.set("radio_station", Radio.pick_for_car(hash(best.position.snapped(Vector3.ONE)), true))
 	car.look_at(Vector3(around.x, car.global_position.y, around.z), Vector3.UP)
 	if car.has_method("add_headlights"):
 		car.add_headlights(false)

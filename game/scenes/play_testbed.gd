@@ -264,7 +264,7 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 	if _vehicle_audio != null:
 		_vehicle_audio.attach(car)  # the engine follows the player into whichever car they take
 	if _radio != null:
-		_radio.car_entered()
+		_radio.car_entered(car)  # tunes to the car's own station
 	_camera.target = car
 	_camera.global_position = car.global_position + car.global_basis.z * 7.5 + Vector3.UP * 3.0
 	_camera.current = true
@@ -293,10 +293,11 @@ func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
 		_player.enter_vehicle(car)
 
 
-func _on_take_granted(t: Transform3D, color: Color, vehicle_id: String) -> void:
+func _on_take_granted(t: Transform3D, color: Color, vehicle_id: String, station: String) -> void:
 	var car: VehicleBody3D = TrafficManager.DRIVABLE_CAR_SCENE.instantiate()
 	car.set("body_color", color)
 	car.set("vehicle_id", vehicle_id)
+	car.set("radio_station", station)  # the host's pick, so the car plays the same on every peer
 	add_child(car)
 	car.global_transform = t.translated_local(Vector3(0.0, 0.1, 0.0))
 	car.set_spawn(car.global_transform)
@@ -347,7 +348,7 @@ func _setup_audio() -> void:
 	if _radio_start != "":
 		_radio.select(_radio_start if _radio_start == Radio.OFF or _radio_start.contains(".") else "code430.base." + _radio_start)
 	if _player != null and _player.is_driving():
-		_radio.car_entered()
+		_radio.car_entered(_player.vehicle)
 	if _record_music != "":
 		_music_recorder = AudioEffectRecord.new()
 		AudioServer.add_bus_effect(AudioServer.get_bus_index("Music"), _music_recorder)

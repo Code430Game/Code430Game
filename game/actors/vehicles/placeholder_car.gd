@@ -45,6 +45,9 @@ var recover_callback: Callable
 ## VehicleCatalogue entry the car is built from; set before _ready, or call apply_entry.
 ## Empty: the catalogue's default player car.
 @export var vehicle_id: String = ""
+## Radio station this car is tuned to (a station id or Radio.OFF); empty until it is first driven
+## or handed one (Radio.pick_for_car), and kept when the player gets out.
+var radio_station: String = ""
 const COM_HEIGHT_FRACTION := 0.07  # of body height: 0.10 m for a sedan, 0.23 m for a box truck
 ## Length of the current body, for the chase camera's framing.
 var length_m: float = 4.6

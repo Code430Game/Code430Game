@@ -177,6 +177,7 @@ func test_a_taken_ambulance_is_handed_over_not_freed() -> void:
 	await _frames(15)
 	assert_int(am.runs.size()).is_equal(1)
 	var car: VehicleBody3D = am.runs[0].car
+	assert_array([Radio.CHATTER, Radio.OFF]).contains([str(car.get("radio_station"))])  # talk radio or nothing
 	var got := [null]
 	am.taken.connect(func(c: VehicleBody3D) -> void: got[0] = c)
 	car.set("driver_peer_id", Players.LOCAL_PEER_ID)
