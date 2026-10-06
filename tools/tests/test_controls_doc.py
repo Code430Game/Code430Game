@@ -23,3 +23,14 @@ def test_only_the_marked_block_is_rewritten():
         controls_doc.render(doc, "new")
         == f"intro\n{controls_doc.BEGIN}\nnew\n{controls_doc.END}\noutro\n"
     )
+
+
+def test_unknown_arguments_are_refused_without_writing(monkeypatch, capsys):
+    written = []
+    monkeypatch.setattr(
+        type(controls_doc.DOC), "write_text", lambda self, text: written.append(text)
+    )
+    assert controls_doc.main(["--help"]) == 2
+    assert controls_doc.main(["--chek"]) == 2
+    assert written == []
+    assert "unknown argument --help" in capsys.readouterr().err
