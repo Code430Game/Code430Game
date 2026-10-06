@@ -1,32 +1,41 @@
 class_name PoliceHelicopter
 extends Node3D
 ## The police helicopter (add-police-helicopter). It lifts off from its helipad (or arrives
-## high from the district edge), climbs to CRUISE_M, flies to the player and circles at
-## ORBIT_M, and keeps the police watching for as long as it can see them: anything solid
-## between it and the player (a bridge deck, a garage ceiling, a building) hides them. At
-## night a searchlight follows the player. Out of sight (under cover, or more than SIGHT_M
-## away) for LOST_S, it circles where it last saw them and sweeps the light there; it picks
-## them up again only by seeing them. Told to go home, it flies back and lands, then reports
-## `landed` so the manager can free it.
+## high from the district edge), climbs to `cruise_m`, flies to the player and circles at
+## `orbit_m`, and keeps the police watching for as long as it can see them: anything solid
+## between it and the player (a bridge deck, a garage ceiling, a building) or dense tree
+## canopy (`canopy`, update-police-pursuit) hides them. At night a searchlight follows the
+## player. Out of sight (under cover, or more than `sight_m` away) for `lost_s`, it circles
+## where it last saw them and sweeps the light there; it picks them up again only by seeing
+## them. It flies at `speed_mps`, slower than a fast car, so a player can also outrun it in
+## the open. Told to go home, it flies back and lands, then reports `landed` so the manager can
+## free it. Tunables come from the `helicopter` block of police_config.json (`config`).
 
 signal landed
 
 enum State { TAKEOFF, CHASE, SEARCH, RETURN }
 
-const CRUISE_M := 55.0
-const ORBIT_M := 38.0
-const ORBIT_RAD_S := 0.35
-const SPEED_MPS := 45.0
-const CLIMB_MPS := 9.0
-const SIGHT_M := 150.0  # how far the crew can pick someone out
-const LOST_S := 2.0  # out of sight this long: off to search where they were last seen
-const SEARCH_RADIUS_M := 70.0
-const SEARCH_RAD_S := 0.25
+## Used when police_config.json leaves a key out.
+const DEFAULTS := {
+	"cruise_m": 55.0,
+	"orbit_m": 38.0,
+	"orbit_rad_s": 0.35,
+	"speed_mps": 35.0,
+	"climb_mps": 9.0,
+	"sight_m": 150.0,  # how far the crew can pick someone out
+	"lost_s": 2.0,  # out of sight this long: off to search where they were last seen
+	"search_radius_m": 70.0,
+	"search_rad_s": 0.25,
+}
 const BODY_COLOR := Color(0.12, 0.14, 0.2)
 const STRIPE_COLOR := Color(0.92, 0.92, 0.95)
 
 var target: Node3D
 var home: Vector3
+## The `helicopter` block of police_config.json; missing keys fall back to DEFAULTS.
+var config: Dictionary = {}
+## Dense tree canopy that hides the target from the crew (null: trees never hide anyone).
+var canopy: CanopyCover
 var state: int = State.TAKEOFF
 var night: float = 0.0  # 0 day .. 1 night, set by the manager each frame
 var _angle: float = 0.0
@@ -50,6 +59,16 @@ func sees_target() -> bool:
 	return _sees and state == State.CHASE
 
 
+## Circling where it lost the target.
+func searching() -> bool:
+	return state == State.SEARCH
+
+
+## A tunable from `config`, or its default.
+func tun(key: String) -> float:
+	return float(config.get(key, DEFAULTS[key]))
+
+
 ## Ground units have the target at `pos`: a search moves there.
 func tip(pos: Vector3) -> void:
 	last_seen = pos
@@ -65,14 +84,14 @@ func _physics_process(delta: float) -> void:
 	_tail_rotor.rotate_x(delta * 40.0)
 	match state:
 		State.TAKEOFF:
-			global_position.y += CLIMB_MPS * delta
-			if global_position.y >= home.y + CRUISE_M * 0.6:
+			global_position.y += tun("climb_mps") * delta
+			if global_position.y >= home.y + tun("cruise_m") * 0.6:
 				state = State.CHASE
 		State.CHASE:
 			if target == null:
 				go_home()
 				return
-			_angle += ORBIT_RAD_S * delta
+			_angle += tun("orbit_rad_s") * delta
 			var t := target.global_position
 			_sees = _can_see(t)
 			if _sees:
@@ -80,19 +99,19 @@ func _physics_process(delta: float) -> void:
 				_unseen_s = 0.0
 			else:
 				_unseen_s += delta
-				if _unseen_s >= LOST_S:
+				if _unseen_s >= tun("lost_s"):
 					state = State.SEARCH  # lost them: circle where they were
 			# While it still has them (or only just lost them) it follows them.
 			var centre := t if _sees else last_seen
-			var goal := centre + Vector3(cos(_angle) * ORBIT_M, CRUISE_M, sin(_angle) * ORBIT_M)
+			var goal := centre + Vector3(cos(_angle) * tun("orbit_m"), tun("cruise_m"), sin(_angle) * tun("orbit_m"))
 			_fly_to(goal, delta)
 			_face(centre)
 		State.SEARCH:
 			if target == null:
 				go_home()
 				return
-			_angle += SEARCH_RAD_S * delta
-			var goal := last_seen + Vector3(cos(_angle) * SEARCH_RADIUS_M, CRUISE_M, sin(_angle) * SEARCH_RADIUS_M)
+			_angle += tun("search_rad_s") * delta
+			var goal := last_seen + Vector3(cos(_angle) * tun("search_radius_m"), tun("cruise_m"), sin(_angle) * tun("search_radius_m"))
 			_fly_to(goal, delta)
 			_face(last_seen)
 			_sees = _can_see(target.global_position)
@@ -101,12 +120,12 @@ func _physics_process(delta: float) -> void:
 				last_seen = target.global_position
 				_unseen_s = 0.0
 		State.RETURN:
-			var above := home + Vector3.UP * CRUISE_M * 0.6
+			var above := home + Vector3.UP * tun("cruise_m") * 0.6
 			if Vector2(global_position.x - home.x, global_position.z - home.z).length() > 3.0:
 				_fly_to(above, delta)
 				_face(above)
 			else:
-				global_position.y -= CLIMB_MPS * delta
+				global_position.y -= tun("climb_mps") * delta
 				if global_position.y <= home.y + 0.3:
 					landed.emit()
 	_update_light()
@@ -114,7 +133,7 @@ func _physics_process(delta: float) -> void:
 
 func _fly_to(goal: Vector3, delta: float) -> void:
 	var to := goal - global_position
-	var step := SPEED_MPS * delta
+	var step := tun("speed_mps") * delta
 	global_position += to.normalized() * minf(step, to.length())
 
 
@@ -125,9 +144,11 @@ func _face(point: Vector3) -> void:
 		rotate_object_local(Vector3.RIGHT, -0.12)  # nose down in forward flight
 
 
-## In range and nothing solid in the way.
+## In range, nothing solid in the way and no dense canopy over the line.
 func _can_see(t: Vector3) -> bool:
-	return global_position.distance_to(t) <= SIGHT_M and _clear_line(t)
+	if global_position.distance_to(t) > tun("sight_m") or not _clear_line(t):
+		return false
+	return canopy == null or not canopy.blocks(global_position, t + Vector3.UP * 1.0)
 
 
 func _clear_line(t: Vector3) -> bool:

@@ -10,6 +10,10 @@ extends Node3D
 ## top level elsewhere), or fists at arm's length when the tone allows no officer weapon
 ## (add-unarmed-combat). Held still with an officer beside them for `busted_s`, the player is
 ## busted. Officers left far behind are dropped; cars and officers leave when the level clears.
+## A patrol car whose officer is out stays parked; when the player drives off, the officer
+## runs back and gets in, and an officer left far behind takes the empty car with them
+## (update-police-pursuit). Each unit sees the player within `police_sight_m`, which the
+## minimap shows (`markers`).
 
 signal busted
 signal net_hit(seconds: float)
@@ -33,6 +37,8 @@ var holder: Node3D  # where cars and officers live (the world)
 var stations: Array = []  # Services.Place of kind police: the first car leaves from one in range
 var helipads: Array = []  # Services.Place of kind helipad: where the helicopter lives
 var helicopter: PoliceHelicopter
+## Dense canopy that hides the player from the helicopter (set by the scene; null: none).
+var canopy: CanopyCover
 ## 0 day .. 1 night (the scene's day-night clock), for the helicopter's searchlight.
 var night: float = 0.0
 var _rotor_voice: AudioStreamPlayer
@@ -107,9 +113,9 @@ func _physics_process(delta: float) -> void:
 			officers.erase(o)
 			continue
 		if o.global_position.distance_to(target.global_position) > float(cfg("officer_lost_m", 90.0)):
-			officers.erase(o)  # left far behind (the player drove off)
-			_officer_cooldown.erase(o)
-			o.queue_free()
+			_drop_officer(o)  # left far behind (the player drove off): their empty car goes too
+			continue
+		if _officer_boards(o, delta):
 			continue
 		_step_officer(o, delta)
 		positions.append(o.global_position)
@@ -226,6 +232,12 @@ func _light_bar(car: VehicleBody3D) -> Node3D:
 
 
 func _drive(car: VehicleBody3D, target: Node3D, delta: float) -> void:
+	if car.has_meta("officer_out"):
+		# Nobody at the wheel: parked, handbrake on, until the officer is back.
+		car.set("override_throttle", 0.0)
+		car.set("override_steer", 0.0)
+		car.set("override_hold", true)
+		return
 	var goal := target.global_position
 	var d := car.global_position.distance_to(goal)
 	var aim := goal
@@ -293,8 +305,51 @@ func _maybe_let_out(target: Node3D) -> void:
 			continue
 		if car.global_position.distance_to(target.global_position) < float(cfg("officer_get_out_m", 25.0)) and absf(float(car.call("speed_kph"))) < 6.0:
 			car.set_meta("officer_out", true)
-			officers.append(_make_officer(car.global_position + car.global_basis.x * 1.6))
+			var o := _make_officer(car.global_position + car.global_basis.x * 1.6)
+			o.set_meta("car", car)
+			officers.append(o)
 			return
+
+
+## The officer's patrol car, or null when it is gone or someone took it (`hand_over`).
+func _car_of(o: Node3D) -> VehicleBody3D:
+	var car: Variant = o.get_meta("car", null)
+	if not is_instance_valid(car) or not car is VehicleBody3D:
+		return null
+	return car if (car as VehicleBody3D).has_meta("police") else null
+
+
+## The player drove off: the officer runs back to their car and, at its door, gets in (the
+## officer goes and the car drives again). Returns true while heading back or once aboard.
+func _officer_boards(o: Node3D, delta: float) -> bool:
+	var car := _car_of(o)
+	if car == null or not player.is_driving():
+		return false
+	if absf(float(_target().call("speed_kph"))) <= float(cfg("officer_car_stopped_kph", 8.0)):
+		return false  # still stopped: keep going for the driver's door
+	var to := car.global_position - o.global_position
+	to.y = 0.0
+	if to.length() <= float(cfg("officer_board_m", 2.5)):
+		officers.erase(o)
+		_officer_cooldown.erase(o)
+		o.queue_free()
+		car.remove_meta("officer_out")
+		return true
+	var speed := float(cfg("officer_speed_mps", 4.2))
+	o.global_position += to.normalized() * minf(speed * delta, to.length())
+	o.look_at(Vector3(car.global_position.x, o.global_position.y, car.global_position.z), Vector3.UP)
+	(o.get_meta("rig") as CharacterRig).advance(delta, speed)
+	return true
+
+
+## An officer left far behind: gone, and their empty car with them.
+func _drop_officer(o: Node3D) -> void:
+	var car := _car_of(o)
+	officers.erase(o)
+	_officer_cooldown.erase(o)
+	o.queue_free()
+	if car != null and car.has_meta("officer_out"):
+		_remove_car(car)
 
 
 func _make_officer(at: Vector3) -> Node3D:
@@ -407,6 +462,8 @@ func _step_helicopter(target: Node3D) -> void:
 	if wanted.stars >= 3 and helicopter == null:
 		helicopter = PoliceHelicopter.new()
 		helicopter.name = "PoliceHelicopter"
+		helicopter.config = cfg("helicopter", {})
+		helicopter.canopy = canopy
 		var pad: Variant = null
 		for h in helipads:
 			if pad == null or h.at.distance_to(target.global_position) < pad.at.distance_to(target.global_position):
@@ -422,7 +479,7 @@ func _step_helicopter(target: Node3D) -> void:
 			var from := home - target.global_position
 			from.y = 0.0
 			from = from.normalized() * HELI_ARRIVE_M if from.length() > 1.0 else Vector3(HELI_ARRIVE_M, 0.0, 0.0)
-			helicopter.global_position = target.global_position + from + Vector3.UP * PoliceHelicopter.CRUISE_M
+			helicopter.global_position = target.global_position + from + Vector3.UP * helicopter.tun("cruise_m")
 			helicopter.state = PoliceHelicopter.State.CHASE
 		helicopter.landed.connect(_on_helicopter_landed)
 	if helicopter == null:
@@ -440,18 +497,27 @@ func _step_helicopter(target: Node3D) -> void:
 	wanted.helicopter_sees = helicopter.sees_target()
 
 
-## Where the police are, for the minimap: [{"at": Vector3, "kind": "car" | "officer" | "helicopter"}].
+## Where the police are, for the minimap: [{"at": Vector3, "kind": "car" | "officer" |
+## "helicopter", "sees": bool, "searching": bool}]. `sees`: that unit has the player now
+## (ground units within `police_sight_m`, the helicopter by its own sight); `searching`: the
+## helicopter is circling where it lost them.
 func markers() -> Array:
 	var out: Array = []
+	var target := _target()
+	var sight := float(cfg("police_sight_m", 55.0))
 	for car in cars:
 		if is_instance_valid(car):
-			out.append({"at": car.global_position, "kind": "car"})
+			out.append({"at": car.global_position, "kind": "car", "sees": _within(car, target, sight), "searching": false})
 	for officer in officers:
 		if is_instance_valid(officer):
-			out.append({"at": officer.global_position, "kind": "officer"})
+			out.append({"at": officer.global_position, "kind": "officer", "sees": _within(officer, target, sight), "searching": false})
 	if helicopter != null and is_instance_valid(helicopter):
-		out.append({"at": helicopter.global_position, "kind": "helicopter"})
+		out.append({"at": helicopter.global_position, "kind": "helicopter", "sees": helicopter.sees_target(), "searching": helicopter.searching()})
 	return out
+
+
+static func _within(unit: Node3D, target: Node3D, metres: float) -> bool:
+	return target != null and unit.global_position.distance_to(target.global_position) <= metres
 
 
 func _on_helicopter_landed() -> void:

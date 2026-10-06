@@ -53,6 +53,7 @@ var _shooter: Shooter
 var _combat_effects: CombatEffects
 var _wanted: Wanted
 var _stars_label: Label
+var _seen_badge: SeenBadge
 var _police: PoliceManager
 var _ambulances: AmbulanceManager
 var _ambulance_log: bool = false  # --ambulance-log: print calls and ambulances each second
@@ -548,6 +549,14 @@ func _setup_wanted() -> void:
 	_stars_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
 	_stars_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 	$HUD.add_child(_stars_label)
+	# Whether the police can see the player, beside the weapon tile under the stars
+	# (update-police-pursuit).
+	_seen_badge = SeenBadge.new()
+	_seen_badge.name = "SeenBadge"
+	_seen_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_seen_badge.position = Vector2(-20.0 - 40.0 - 10.0 - _seen_badge.size.x, 84.0)
+	_seen_badge.visible = false
+	$HUD.add_child(_seen_badge)
 	_wanted.stars_changed.connect(func(_n: int) -> void: _update_stars())
 	_police = PoliceManager.new()
 	_police.name = "Police"
@@ -559,6 +568,7 @@ func _setup_wanted() -> void:
 	_police.stations = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind == "police")
 	_police.helipads = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind == "helipad")
 	_police.log_chase = _police_log
+	_police.canopy = CanopyCover.from_chunks(_pack.vegetation_chunks, _wanted.config.get("canopy", {}))
 	add_child(_police)
 	_police.busted.connect(func() -> void: _caught("busted"))
 	_police.net_hit.connect(func(seconds: float) -> void: _player.stuck_s = maxf(_player.stuck_s, seconds))
@@ -1137,8 +1147,10 @@ func _process(delta: float) -> void:
 				blips.append({"at": at, "color": Color(0.9, 0.15, 0.2)})
 		if _police != null:
 			for m: Dictionary in _police.markers():
-				blips.append({"at": m["at"], "shape": "helicopter" if m["kind"] == "helicopter" else "dot", "flash": m["kind"] != "officer"})
+				blips.append({"at": m["at"], "shape": "helicopter" if m["kind"] == "helicopter" else "dot", "flash": m["kind"] != "officer", "seen": m["sees"], "searching": m["searching"]})
 		_minimap.blips = blips
+	if _seen_badge != null and _wanted != null:
+		_seen_badge.show_wanted(_wanted.stars, _wanted.helicopter_sees, _wanted.ground_sees, _wanted.hidden_progress())
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
 		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():

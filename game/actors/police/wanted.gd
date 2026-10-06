@@ -19,6 +19,8 @@ var police_positions := PackedVector3Array()
 var target: Node3D
 ## True while the police helicopter can see the target (set each frame by the PoliceManager).
 var helicopter_sees: bool = false
+## True while a police car or officer has the target in sight (updated each frame while wanted).
+var ground_sees: bool = false
 
 
 func _init() -> void:
@@ -76,15 +78,36 @@ func _set_stars(n: int) -> void:
 
 func _process(delta: float) -> void:
 	if stars <= 0 or get_tree().paused:
+		ground_sees = false
 		return
-	if target != null and (helicopter_sees or police_sees(target.global_position)):
+	ground_sees = target != null and police_sees(target.global_position)
+	if target != null and seen():
 		unseen_s = 0.0
 		return
 	unseen_s += delta
-	var lose: Array = config.get("lose_s", [0.0, 12.0, 18.0, 25.0])
-	if unseen_s >= float(lose[clampi(stars, 0, lose.size() - 1)]):
+	if unseen_s >= lose_s():
 		unseen_s = 0.0
 		_set_stars(stars - 1)
+
+
+## True while wanted and somebody in the police (a car, an officer, the helicopter) sees the
+## target (update-police-pursuit 1.1).
+func seen() -> bool:
+	return stars > 0 and (helicopter_sees or ground_sees)
+
+
+## Seconds out of sight the current level needs to drop a star.
+func lose_s() -> float:
+	var lose: Array = config.get("lose_s", [0.0, 12.0, 18.0, 25.0])
+	return float(lose[clampi(stars, 0, lose.size() - 1)])
+
+
+## How far the hidden player is toward losing the current star: 0 when seen or not wanted,
+## up to 1 as the time unseen reaches `lose_s()`.
+func hidden_progress() -> float:
+	if stars <= 0 or seen():
+		return 0.0
+	return clampf(unseen_s / maxf(lose_s(), 0.001), 0.0, 1.0)
 
 
 ## "★★☆" for the HUD.
