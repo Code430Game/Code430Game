@@ -12,5 +12,5 @@ Notes from building it (2026-10-05):
 - Co-op: ambulances run on the host only for now, like the police.
 
 ## 2. Verification
-- [ ] 2.1 Deck benchmark with two calls open
+- [x] 2.1 Deck benchmark with two calls open (2026-10-05, idle Deck, deck preset, standing at the start: `--knockdown-every=8` kept two ambulances out, avg 14.16 ms, p99 18.53, physics mean 12.33 ms, max frame 80 ms; the same run without knockdowns, so no ambulances, was avg 13.20, p99 16.67, physics 10.43. The difference includes the ragdolls from the knockdowns.)
 - [ ] 2.2 Human knocks someone down on the Deck and watches the ambulance arrive
