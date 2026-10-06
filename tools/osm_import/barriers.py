@@ -403,7 +403,12 @@ def build_barriers(
                     if (px - x) * nx + (pz - z) * nz <= 0:
                         continue  # the other carriageway is on the other side
                     gap = d - hw - o.width_m / 2.0
-                    if 0.0 <= gap <= max_gap and (best is None or d < best[0]):
+                    # Measured from the lanes: inner shoulders may overlap where the
+                    # carriageways are drawn close (an opposing carriageway's median is its left).
+                    shoulders = (e.shoulder_right_m if side > 0 else e.shoulder_left_m) + (
+                        o.shoulder_left_m
+                    )
+                    if -shoulders <= gap <= max_gap and (best is None or d < best[0]):
                         best = (d, gap, oid)
                 if best is not None:
                     median_side[side][si] = True

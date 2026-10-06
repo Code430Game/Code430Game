@@ -10298,24 +10298,24 @@
    "w133420275.0",
    "w137483257.0",
    "w399144346.0",
-   "w432336467.6",
    "w76419763.0",
+   "w76419866.0",
    "w76420697.0",
-   "w76421113.0",
-   "w76423269.0",
+   "w76422506.0",
    "w76423834.0",
-   "w76424318.0",
+   "w76445665.0",
    "w76726964.0",
-   "w895111372.0",
-   "w895111373.0",
-   "w895111373.1"
+   "w895111372.0"
   ],
   "fixed_vertices": 231,
   "free_vertices": 12083,
   "inferred_bridges": [],
   "max_residual_grade": 0.19,
+  "max_shared_step": 0.792,
   "max_y": 81.189,
   "min_y": 41.519,
+  "shared_deck_vertices": 82,
+  "shared_ground_vertices": 60,
   "vertices_clamped": 428
  },
  "junction_clusters": [
@@ -12454,8 +12454,8 @@
  "summary": {
   "barriers": {
    "curb": 3533,
-   "guardrail": 36,
-   "median": 26,
+   "guardrail": 39,
+   "median": 25,
    "parapet": 90,
    "roadblock": 147,
    "soundwall": 18
@@ -12544,10 +12544,10 @@
    "security": 2
   },
   "terrain": {
-   "cells_carved": 6898,
-   "cells_flattened": 387409,
+   "cells_carved": 6933,
+   "cells_flattened": 387462,
    "cells_lowered_for_water": 58754,
-   "cells_lowered_under_decks": 23036,
+   "cells_lowered_under_decks": 23081,
    "cells_under_buildings": 160487,
    "chunks": 196,
    "underpasses": {
@@ -12558,20 +12558,20 @@
   "total_length_km": 247.578,
   "vegetation": {
    "areas": 393,
-   "bushes": 37107,
+   "bushes": 37109,
    "chunks_over_400_trees": 1,
    "max_trees_in_a_chunk": 456,
    "skipped": {
-    "edge on a road, sidewalk, building or water": 1345,
+    "edge on a road, sidewalk, building or water": 1341,
     "frontage on a road, sidewalk, building or water": 31851,
     "outside the district": 269,
-    "scatter on a road, sidewalk, building or water": 1598,
+    "scatter on a road, sidewalk, building or water": 1599,
     "tagged on a road, sidewalk, building or water": 270
    },
-   "trees": 18994,
+   "trees": 18995,
    "trees_by_source": {
     "row": 64,
-    "scatter": 7344,
+    "scatter": 7345,
     "tagged": 11586
    }
   },
