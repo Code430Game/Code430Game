@@ -1,0 +1,9 @@
+{
+  "_comment": "Billboard placement (game/world/dressing/billboards.gd). Distances in metres. A site is tried at each side offset (beyond the host road's half width) and each shift along the road, in order; the first spot whose post and panel stand clear of every road ribbon, the path kinds listed here, junctions, buildings and water is used, else the board is dropped. Sidewalks are not listed: a post may stand on one, as sign posts do.",
+  "clearance_m": 0.75,
+  "junction_clear_m": 20.0,
+  "junction_min_degree": 3,
+  "blocking_path_kinds": ["crossing", "cycleway"],
+  "side_offsets_m": [3.5, 6.0],
+  "shifts_m": [0.0, 15.0, -15.0, 30.0, -30.0]
+}
