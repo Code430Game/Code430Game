@@ -146,7 +146,14 @@ def build() -> str:
     return render(DOC.read_text(), tables(controls, bindings))
 
 
+USAGE = "usage: uv run python controls_doc.py [--check]"
+
+
 def main(argv: list[str]) -> int:
+    unknown = [a for a in argv if a != "--check"]
+    if unknown:
+        print(f"unknown argument {' '.join(unknown)}; {USAGE}", file=sys.stderr)
+        return 2
     new = build()
     if "--check" in argv:
         if new != DOC.read_text():
