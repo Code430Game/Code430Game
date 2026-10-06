@@ -13,6 +13,8 @@ extends Node3D
 
 ## A car hit the ambulance hard (the scene decides whether it was the player and an offence).
 signal rammed(by: Node3D, at: Vector3)
+## Someone got in and took an ambulance (#69): it is theirs now, an ordinary car.
+signal taken(car: VehicleBody3D)
 
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const CONFIG_PATH := "res://actors/emergency/ambulance_config.json"
@@ -278,6 +280,9 @@ func _step_run(r: Run, delta: float) -> void:
 	if not is_instance_valid(r.car):
 		_free_run(r)
 		return
+	if int(r.car.get("driver_peer_id")) != 0:
+		_hand_over(r)
+		return
 	match r.phase:
 		Phase.DRIVE:
 			var goal := r.call.at
@@ -430,6 +435,18 @@ func _go_home(r: Run) -> void:
 	var bar: Node3D = r.car.get_node_or_null("LightBar") if is_instance_valid(r.car) else null
 	if bar != null:
 		bar.visible = false
+
+
+## A player took the wheel: the crew and the call let it go, and it is never freed under them.
+func _hand_over(r: Run) -> void:
+	var car := r.car
+	r.car = null
+	var bar: Node3D = car.get_node_or_null("LightBar")
+	if bar != null:
+		bar.visible = false
+	car.remove_meta("ambulance")
+	_free_run(r)  # paramedics and stretcher go; the car does not (r.car is cleared)
+	taken.emit(car)
 
 
 func _free_run(r: Run) -> void:
