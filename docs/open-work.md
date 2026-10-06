@@ -16,6 +16,7 @@ Small and self-contained:
 | `update-radio-per-car` | each car keeps its own station | nothing | radio, car, testbed enter/exit |
 | `update-garage-polish` | minimap inside garages, clean ramp terrain cuts | nothing | minimap, garage builder |
 | `add-unarmed-combat` | punches and kicks for empty hands | nothing | shooter, held weapon, character rig |
+| `add-weapon-selector` | a belt of weapon icons on the HUD, D-pad and number-key picks | merges after `add-unarmed-combat` | weapon set, shooter, weapons schema, mode files, controls |
 | `update-shared-deck-heights` | one height for touching bridge carriageways | nothing | importer elevation, golden, pack |
 
 Medium:
