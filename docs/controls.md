@@ -33,6 +33,7 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | next weapon (tap), weapon wheel (hold, point, let go) | LB | Tab |
 | pick a weapon by number | - | 1 to 9 |
 | reload | B | R |
+| back to the start (when stuck) | hold R3 | hold R |
 | map | View | M |
 | pause menu | Menu | Esc |
 
