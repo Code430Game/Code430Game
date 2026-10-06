@@ -4,18 +4,24 @@ extends Node3D
 ## high from the district edge), climbs to CRUISE_M, flies to the player and circles at
 ## ORBIT_M, and keeps the police watching for as long as it can see them: anything solid
 ## between it and the player (a bridge deck, a garage ceiling, a building) hides them. At
-## night a searchlight follows the player. Told to go home, it flies back and lands, then
-## reports `landed` so the manager can free it.
+## night a searchlight follows the player. Out of sight (under cover, or more than SIGHT_M
+## away) for LOST_S, it circles where it last saw them and sweeps the light there; it picks
+## them up again only by seeing them. Told to go home, it flies back and lands, then reports
+## `landed` so the manager can free it.
 
 signal landed
 
-enum State { TAKEOFF, CHASE, RETURN }
+enum State { TAKEOFF, CHASE, SEARCH, RETURN }
 
 const CRUISE_M := 55.0
 const ORBIT_M := 38.0
 const ORBIT_RAD_S := 0.35
 const SPEED_MPS := 45.0
 const CLIMB_MPS := 9.0
+const SIGHT_M := 150.0  # how far the crew can pick someone out
+const LOST_S := 2.0  # out of sight this long: off to search where they were last seen
+const SEARCH_RADIUS_M := 70.0
+const SEARCH_RAD_S := 0.25
 const BODY_COLOR := Color(0.12, 0.14, 0.2)
 const STRIPE_COLOR := Color(0.92, 0.92, 0.95)
 
@@ -28,6 +34,8 @@ var _rotor: Node3D
 var _tail_rotor: Node3D
 var _light: SpotLight3D
 var _sees: bool = false
+var last_seen: Vector3  # where the crew last had the target, the centre of a search
+var _unseen_s: float = 0.0
 var _beam: MeshInstance3D
 var _strobes: Array[MeshInstance3D] = []
 var _strobe_t: float = 0.0
@@ -40,6 +48,11 @@ func _ready() -> void:
 ## True when nothing solid stands between the helicopter and its target.
 func sees_target() -> bool:
 	return _sees and state == State.CHASE
+
+
+## Ground units have the target at `pos`: a search moves there.
+func tip(pos: Vector3) -> void:
+	last_seen = pos
 
 
 func go_home() -> void:
@@ -61,10 +74,32 @@ func _physics_process(delta: float) -> void:
 				return
 			_angle += ORBIT_RAD_S * delta
 			var t := target.global_position
-			var goal := t + Vector3(cos(_angle) * ORBIT_M, CRUISE_M, sin(_angle) * ORBIT_M)
+			_sees = _can_see(t)
+			if _sees:
+				last_seen = t
+				_unseen_s = 0.0
+			else:
+				_unseen_s += delta
+				if _unseen_s >= LOST_S:
+					state = State.SEARCH  # lost them: circle where they were
+			# While it still has them (or only just lost them) it follows them.
+			var centre := t if _sees else last_seen
+			var goal := centre + Vector3(cos(_angle) * ORBIT_M, CRUISE_M, sin(_angle) * ORBIT_M)
 			_fly_to(goal, delta)
-			_face(t)
-			_sees = _clear_line(t)
+			_face(centre)
+		State.SEARCH:
+			if target == null:
+				go_home()
+				return
+			_angle += SEARCH_RAD_S * delta
+			var goal := last_seen + Vector3(cos(_angle) * SEARCH_RADIUS_M, CRUISE_M, sin(_angle) * SEARCH_RADIUS_M)
+			_fly_to(goal, delta)
+			_face(last_seen)
+			_sees = _can_see(target.global_position)
+			if _sees:
+				state = State.CHASE
+				last_seen = target.global_position
+				_unseen_s = 0.0
 		State.RETURN:
 			var above := home + Vector3.UP * CRUISE_M * 0.6
 			if Vector2(global_position.x - home.x, global_position.z - home.z).length() > 3.0:
@@ -90,6 +125,11 @@ func _face(point: Vector3) -> void:
 		rotate_object_local(Vector3.RIGHT, -0.12)  # nose down in forward flight
 
 
+## In range and nothing solid in the way.
+func _can_see(t: Vector3) -> bool:
+	return global_position.distance_to(t) <= SIGHT_M and _clear_line(t)
+
+
 func _clear_line(t: Vector3) -> bool:
 	var space := get_world_3d().direct_space_state
 	var q := PhysicsRayQueryParameters3D.create(global_position, t + Vector3.UP * 1.0)
@@ -108,10 +148,11 @@ func _clear_line(t: Vector3) -> bool:
 
 
 func _update_light() -> void:
-	_light.visible = night > 0.3 and state == State.CHASE and target != null
+	_light.visible = night > 0.3 and state in [State.CHASE, State.SEARCH] and target != null
 	_beam.visible = _light.visible
 	if _light.visible:
-		var t := target.global_position
+		# On them while it has them; sweeping the ground where they were while it searches.
+		var t := target.global_position if _sees else last_seen + Vector3(sin(_strobe_t * 0.7) * 25.0, 0.0, cos(_strobe_t * 0.9) * 25.0)
 		_light.look_at(t, Vector3.UP)
 		# A faint cone down to the player: no fog on the deck preset to show the beam itself.
 		var from := _light.global_position

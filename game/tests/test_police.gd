@@ -152,3 +152,48 @@ func test_a_ceiling_hides_the_player_from_the_helicopter() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	assert_bool(heli.sees_target()).is_false()
+
+
+func test_an_officer_gets_out_at_the_players_stopped_car_and_busts_them() -> void:
+	var pm := _setup()
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]
+	var car: VehicleBody3D = auto_free(PoliceManager.CAR_SCENE.instantiate())
+	pm.holder.add_child(car)
+	car.global_position = Vector3(0, 0.6, 0)
+	pm.player.enter_vehicle(car)
+	var caught := [0]
+	pm.busted.connect(func() -> void: caught[0] += 1)
+	pm.wanted.set_stars(1)
+	# A patrol car stopped 12 m away: too far to count by itself.
+	var cop: VehicleBody3D = auto_free(PoliceManager.CAR_SCENE.instantiate())
+	pm.holder.add_child(cop)
+	cop.global_position = Vector3(12, 0.6, 0)
+	pm.cars.append(cop)
+	await get_tree().create_timer(0.5).timeout
+	assert_int(pm.officers.size()).is_equal(1)
+	await get_tree().create_timer(4.0).timeout  # walks up to the door, then the 2 s hold
+	assert_int(caught[0]).is_greater_equal(1)
+
+
+func test_the_helicopter_searches_where_it_lost_the_player_and_finds_them_by_sight() -> void:
+	var pm := _setup()
+	var heli: PoliceHelicopter = auto_free(PoliceHelicopter.new())
+	pm.holder.add_child(heli)
+	heli.state = PoliceHelicopter.State.CHASE
+	heli.target = pm.player
+	heli.global_position = pm.player.global_position + Vector3(0, 55, 0)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert_bool(heli.sees_target()).is_true()
+	# The player slips away out of sight range: it circles the last place it saw them.
+	pm.player.global_position = Vector3(390, 1, 0)
+	await get_tree().create_timer(PoliceHelicopter.LOST_S + 0.3).timeout
+	assert_int(heli.state).is_equal(PoliceHelicopter.State.SEARCH)
+	assert_bool(heli.sees_target()).is_false()
+	assert_float(heli.last_seen.x).is_less(10.0)
+	# A tip from the ground moves the search; in sight again, the chase is back on.
+	heli.tip(pm.player.global_position)
+	heli.global_position = pm.player.global_position + Vector3(0, 55, 0)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert_int(heli.state).is_equal(PoliceHelicopter.State.CHASE)

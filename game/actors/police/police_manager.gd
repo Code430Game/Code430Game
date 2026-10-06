@@ -4,10 +4,11 @@ extends Node3D
 ## patrol cars chasing the player: they spawn out of view on a road node `spawn_min_m` to
 ## `spawn_max_m` away, follow a road-graph path toward the player (re-planned every couple of
 ## seconds) and drive straight at them once close, light bars flashing and a siren wailing.
-## A stopped car near a player on foot lets an officer out who runs at them and uses the
-## officer weapon the tone gives (a net that holds the player in `clean`, a pistol or blaster
-## at the top level elsewhere). Held still with an officer beside them for `busted_s`, the
-## player is busted. Cars and officers leave when the level clears.
+## A stopped car near a player on foot, or near the player's own stopped car, lets an officer
+## out who runs at them (or to the driver's door) and, at a player on foot, uses the officer
+## weapon the tone gives (a net that holds the player in `clean`, a pistol or blaster at the
+## top level elsewhere). Held still with an officer beside them for `busted_s`, the player is
+## busted. Officers left far behind are dropped; cars and officers leave when the level clears.
 
 signal busted
 signal net_hit(seconds: float)
@@ -98,6 +99,11 @@ func _physics_process(delta: float) -> void:
 		if not is_instance_valid(o):
 			officers.erase(o)
 			continue
+		if o.global_position.distance_to(target.global_position) > float(cfg("officer_lost_m", 90.0)):
+			officers.erase(o)  # left far behind (the player drove off)
+			_officer_cooldown.erase(o)
+			o.queue_free()
+			continue
 		_step_officer(o, delta)
 		positions.append(o.global_position)
 	_step_helicopter(target)
@@ -113,7 +119,7 @@ func _physics_process(delta: float) -> void:
 			for car in cars:
 				line += " | d %.0f y %.1f v %.0f" % [car.global_position.distance_to(target.global_position), car.global_position.y, float(car.call("speed_kph"))]
 			if helicopter != null:
-				line += " | heli d %.0f alt %.0f sees %s" % [helicopter.global_position.distance_to(target.global_position), helicopter.global_position.y - target.global_position.y, helicopter.sees_target()]
+				line += " | heli %s d %.0f alt %.0f sees %s" % [PoliceHelicopter.State.keys()[helicopter.state], helicopter.global_position.distance_to(target.global_position), helicopter.global_position.y - target.global_position.y, helicopter.sees_target()]
 			print(line)
 
 
@@ -231,9 +237,10 @@ func _drive(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 	var limit := 95.0 if d > DIRECT_M else clampf(d * 2.0, 15.0, 70.0)
 	if wanted.stars >= 2 and d < DIRECT_M:
 		limit = 70.0  # ram and box in
-	if d < 7.0 and not player.is_driving():
+	var stopped_car := player.is_driving() and absf(float(target.call("speed_kph"))) <= float(cfg("officer_car_stopped_kph", 8.0))
+	if d < 7.0 and (not player.is_driving() or stopped_car):
 		car.set("override_throttle", 0.0)
-		car.set("override_hold", true)  # pull up beside a player on foot (brake alone would reverse)
+		car.set("override_hold", true)  # pull up beside a player on foot or a stopped car (brake alone would reverse)
 	else:
 		car.set("override_throttle", 1.0 if speed < limit else 0.0)
 
@@ -257,8 +264,10 @@ func _unstick(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 
 
 func _maybe_let_out(target: Node3D) -> void:
-	if player.is_driving() or officers.size() >= cars.size():
+	if officers.size() >= cars.size():
 		return
+	if player.is_driving() and absf(float(target.call("speed_kph"))) > float(cfg("officer_car_stopped_kph", 8.0)):
+		return  # a car still moving: they stay in and chase
 	for car in cars:
 		if car.has_meta("officer_out"):
 			continue
@@ -289,15 +298,18 @@ func _make_officer(at: Vector3) -> Node3D:
 
 
 func _step_officer(o: Node3D, delta: float) -> void:
-	var goal := player.global_position
+	var target := _target()
+	var goal := target.global_position
 	var to := goal - o.global_position
 	to.y = 0.0
 	var d := to.length()
 	var speed := 0.0
-	if d > float(cfg("busted_m", 3.0)) * 0.6:
+	# Up to a player on foot, or to the driver's door of a stopped car.
+	var stop := float(cfg("busted_m", 3.0)) * 0.6 if not player.is_driving() else float(cfg("officer_at_car_m", 2.4))
+	if d > stop:
 		speed = float(cfg("officer_speed_mps", 4.2))
 		o.global_position += to.normalized() * speed * delta
-	o.global_position.y = lerpf(o.global_position.y, player.global_position.y, clampf(delta * 6.0, 0.0, 1.0))
+	o.global_position.y = lerpf(o.global_position.y, target.global_position.y, clampf(delta * 6.0, 0.0, 1.0))
 	if d > 0.1:
 		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)
 		o.rotate_y(PI)
@@ -324,9 +336,14 @@ func _step_officer(o: Node3D, delta: float) -> void:
 func _check_busted(delta: float) -> void:
 	var near := false
 	var target := _target()
+	var at_car_m := float(cfg("officer_at_car_m", 2.4)) + 1.0
 	for o in officers:
-		if is_instance_valid(o) and o.global_position.distance_to(player.global_position) <= float(cfg("busted_m", 3.0)):
+		if not is_instance_valid(o):
+			continue
+		if not player.is_driving() and o.global_position.distance_to(player.global_position) <= float(cfg("busted_m", 3.0)):
 			near = true
+		if player.is_driving() and o.global_position.distance_to(target.global_position) <= at_car_m:
+			near = near or absf(float(target.call("speed_kph"))) < float(cfg("busted_speed_kph", 2.0))  # at the door
 	if player.is_driving():
 		for car in cars:
 			if is_instance_valid(car) and car.global_position.distance_to(target.global_position) < 6.0:
@@ -354,6 +371,7 @@ func _step_helicopter(target: Node3D) -> void:
 		var home: Vector3 = pad.at if pad != null else target.global_position + Vector3(260.0, 0.0, 0.0)
 		holder.add_child(helicopter)
 		helicopter.home = home
+		helicopter.last_seen = target.global_position  # where the call came from
 		if pad != null and home.distance_to(target.global_position) <= HELI_FAR_PAD_M:
 			helicopter.global_position = home  # lifts off from the pad
 		else:
@@ -369,6 +387,8 @@ func _step_helicopter(target: Node3D) -> void:
 		return
 	helicopter.target = target
 	helicopter.night = night
+	if wanted.police_sees(target.global_position):
+		helicopter.tip(target.global_position)  # a car or officer has them: search there
 	if wanted.stars < 3:
 		helicopter.go_home()
 		if helicopter.global_position.distance_to(target.global_position) > HELI_FAR_PAD_M:
