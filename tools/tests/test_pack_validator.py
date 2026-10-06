@@ -113,6 +113,50 @@ def test_map_pack_valid(tmp_path: Path) -> None:
     assert errors_for(tmp_path) == []
 
 
+MAP_MANIFEST = {
+    **GOOD,
+    "type": "map",
+    "license": "ODbL-1.0",
+    "attribution": [OSM_CREDIT],
+    "map": {
+        "crs": "EPSG:32618",
+        "origin": {"easting": 445000.0, "northing": 5028000.0, "lat": 45.42, "lon": -75.695},
+        "bbox": [45.405, -75.715, 45.435, -75.675],
+    },
+}
+
+
+def _barriers(*ids: str) -> bytes:
+    wall = {"kind": "curb", "height_m": 0.12, "edge_id": "w1.0", "points": [[0, 0, 0], [1, 0, 0]]}
+    doc = {"schema_version": 0, "units": "m", "barriers": [{**wall, "id": i} for i in ids]}
+    return json.dumps(doc).encode()
+
+
+def test_generated_files_are_checked_against_their_schemas(tmp_path: Path) -> None:
+    """Review fix: barriers, road graph, buildings and water were never schema-checked."""
+    write_pack(tmp_path, "map", MAP_MANIFEST, {"barriers.v0.json": _barriers("wall-1")})
+    errors = errors_for(tmp_path)
+    assert any(e.startswith("barriers.v0.json: barriers/0/id") for e in errors), errors
+
+
+def test_duplicate_ids_in_a_generated_file_are_errors(tmp_path: Path) -> None:
+    ids = ("b:curb:w1.0:0", "b:curb:w1.0:1", "b:curb:w1.0:0")
+    write_pack(tmp_path, "map", MAP_MANIFEST, {"barriers.v0.json": _barriers(*ids)})
+    errors = errors_for(tmp_path)
+    assert errors == ["barriers.v0.json: barriers/id: 'b:curb:w1.0:0' is not unique"]
+
+
+def test_duplicate_deck_sources_across_bridges_are_errors(tmp_path: Path) -> None:
+    deck = {"source": "infill:w1.0:w2.0", "points": [], "left_m": [], "right_m": []}
+    doc = {"bridges": [{"id": "bridge0", "decks": [deck]}, {"id": "bridge1", "decks": [deck]}]}
+    from pack_tools.validate import duplicate_ids
+
+    errors = duplicate_ids(
+        "bridges.v0.json", doc, [("bridges", "id"), ("bridges", "decks", "source")]
+    )
+    assert errors == ["bridges.v0.json: bridges/decks/source: 'infill:w1.0:w2.0' is not unique"]
+
+
 def test_invalid_json_reported(tmp_path: Path) -> None:
     pack = tmp_path / "broken"
     pack.mkdir()

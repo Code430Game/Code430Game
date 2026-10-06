@@ -117,3 +117,16 @@ def test_a_ramp_splitting_from_a_deck_is_floored_up_to_the_limit():
     for s in strips:
         for half in s.left_m:
             assert half <= limit / 2.0 + CFG.bridges["infill_overlap_m"] + 1e-6
+
+
+def test_two_runs_of_floor_between_the_same_decks_have_their_own_ids():
+    """Review fix: every strip between one pair of decks had the same id (Ottawa's pack held
+    `infill:w228627163.0:w76422627.0` twice). The second deck bows away in the middle, so the
+    gap closes in two runs."""
+    ways = two_decks(15.0)
+    ways[1] = (2, [(60, 15), (12, 15), (6, 32), (-6, 32), (-12, 15), (-60, 15)], DECK)
+    strips = infill(build_bridges(graph_for(ways), ground, CFG.bridges))
+    ids = [s.source for s in strips]
+    assert len(ids) >= 2, ids
+    assert len(set(ids)) == len(ids)
+    assert all(i.startswith(f"{INFILL_PREFIX}w1.0:w2.0:") for i in ids)

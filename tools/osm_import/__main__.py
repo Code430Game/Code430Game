@@ -36,6 +36,14 @@ from osm_import.vegetation import build_vegetation, vegetation_query
 from osm_import.water import build_water, water_query
 
 
+def _source(layer: str, meta: dict | None, path: Path | None = None) -> dict:
+    """Where one layer's data came from, for the road graph's meta (AGENTS.md: record the
+    source URL and timestamp in the generated output). Every query is its own snapshot."""
+    if path is not None:
+        return {"kind": "file", "layer": layer, "path": path.name}
+    return dict(sorted({**(meta or {}), "layer": layer}.items()))
+
+
 def _import(args: argparse.Namespace) -> int:
     if args.region is not None:
         region = json.loads(args.region.read_text(encoding="utf-8"))
@@ -66,12 +74,16 @@ def _import(args: argparse.Namespace) -> int:
         if elevation is None:
             parser_error("--pack-out needs an elevation source (use --dem flat for a test pack)")
         proj = Projector.for_bbox(bbox)
+        sources = result.graph_dict["meta"]["sources"]
+        sources[:] = [_source("roads", src) for src in sources]
         water = None
         if args.water:
             if args.water_json:
                 water_payload = json.loads(args.water_json.read_text(encoding="utf-8"))
+                sources.append(_source("water", None, args.water_json))
             else:
-                water_payload, _meta = fetch_query(water_query(bbox), bbox, args.cache_dir)
+                water_payload, meta = fetch_query(water_query(bbox), bbox, args.cache_dir)
+                sources.append(_source("water", meta))
             water = build_water(water_payload, bbox, proj, elevation)
             result.report.summary["water"] = {
                 "polygons": len(water.polygons),
@@ -81,8 +93,10 @@ def _import(args: argparse.Namespace) -> int:
         if args.buildings:
             if args.buildings_json:
                 b_payload = json.loads(args.buildings_json.read_text(encoding="utf-8"))
+                sources.append(_source("buildings", None, args.buildings_json))
             else:
-                b_payload, _meta = fetch_query(buildings_query(bbox), bbox, args.cache_dir)
+                b_payload, meta = fetch_query(buildings_query(bbox), bbox, args.cache_dir)
+                sources.append(_source("buildings", meta))
             buildings = build_buildings(b_payload, bbox, proj, elevation, cfg.buildings)
             result.report.summary["buildings"] = {
                 "footprints": len(buildings.buildings),
@@ -94,7 +108,8 @@ def _import(args: argparse.Namespace) -> int:
         )
         # Bridges after the terrain (pier feet stand on it); they lift deck walkways, so the
         # pedestrian ways are re-exported after them.
-        outlines, _meta = fetch_query(bridges_query(bbox), bbox, args.cache_dir)
+        outlines, meta = fetch_query(bridges_query(bbox), bbox, args.cache_dir)
+        sources.append(_source("bridges", meta))
         bridges = build_bridges(
             result.graph, ChunkSampler(chunks).sample, cfg.bridges, outlines, proj, water
         )
@@ -112,8 +127,10 @@ def _import(args: argparse.Namespace) -> int:
         if args.parking:
             if args.parking_json:
                 p_payload = json.loads(args.parking_json.read_text(encoding="utf-8"))
+                sources.append(_source("parking", None, args.parking_json))
             else:
-                p_payload, _meta = fetch_query(parking_query(bbox), bbox, args.cache_dir)
+                p_payload, meta = fetch_query(parking_query(bbox), bbox, args.cache_dir)
+                sources.append(_source("parking", meta))
             # After the terrain: lots take their ground height from the built (graded) terrain.
             parking = build_parking(p_payload, bbox, proj, result.graph, ChunkSampler(chunks), data)
             parking.garages = build_garages(
@@ -128,12 +145,14 @@ def _import(args: argparse.Namespace) -> int:
             result.report.summary["parking"] = parking.counts()
         # Vegetation last: it keeps off the final roads, sidewalks, buildings and water, and
         # stands on the finished terrain.
-        v_payload, _meta = fetch_query(vegetation_query(bbox), bbox, args.cache_dir)
+        v_payload, meta = fetch_query(vegetation_query(bbox), bbox, args.cache_dir)
+        sources.append(_source("vegetation", meta))
         vegetation = build_vegetation(
             v_payload, bbox, proj, result.graph, buildings, water, ChunkSampler(chunks)
         )
         result.report.summary["vegetation"] = vegetation.counts()
-        s_payload, _meta = fetch_query(services_query(bbox), bbox, args.cache_dir)
+        s_payload, meta = fetch_query(services_query(bbox), bbox, args.cache_dir)
+        sources.append(_source("services", meta))
         services = build_services(s_payload, bbox, proj, result.graph, ChunkSampler(chunks))
         result.report.summary["services"] = services.counts()
         result.report.summary["terrain"] = tstats

@@ -35,6 +35,34 @@ WEAPONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "weapons.schema.v0.js
 WEAPONS_NAME = "weapons.v0.json"
 SERVICES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "services.schema.v0.json"
 SERVICES_NAME = "services.v0.json"
+FORMAT_DIR = REPO_ROOT / "docs" / "pack-format"
+# Files the importer generates: (file, schema, where the ids are). An id path is the list key
+# then the id field, or list, nested list and field for ids inside items (a bridge's decks).
+GENERATED = [
+    (
+        "road_graph.v0.json",
+        FORMAT_DIR / "road_graph.schema.v0.json",
+        [
+            ("nodes", "id"),
+            ("edges", "id"),
+            ("gores", "id"),
+            ("pedestrian_ways", "id"),
+            ("bus_stops", "id"),
+        ],
+    ),
+    ("barriers.v0.json", FORMAT_DIR / "barriers.schema.v0.json", [("barriers", "id")]),
+    (
+        BRIDGES_NAME,
+        BRIDGES_SCHEMA_PATH,
+        [("bridges", "id"), ("bridges", "decks", "source")],
+    ),
+    ("buildings.v0.json", FORMAT_DIR / "buildings.schema.v0.json", [("buildings", "id")]),
+    ("water.v0.json", FORMAT_DIR / "water.schema.v0.json", [("polygons", "id")]),
+    (PARKING_NAME, PARKING_SCHEMA_PATH, [("lots", "id"), ("garages", "id")]),
+    (VEGETATION_NAME, VEGETATION_SCHEMA_PATH, [("areas", "id")]),
+    (SERVICES_NAME, SERVICES_SCHEMA_PATH, [("places", "id")]),
+]
+MAX_ERRORS_PER_FILE = 20
 MODES_DIR = REPO_ROOT / "game" / "core" / "content" / "modes"
 
 
@@ -214,6 +242,54 @@ def validate_ads(
     return errors, warnings
 
 
+def duplicate_ids(name: str, data: dict, paths: list[tuple[str, ...]]) -> list[str]:
+    """Errors for ids that appear more than once at any of `paths` in a generated file."""
+    errors = []
+    for path in paths:
+        values: list = []
+        if len(path) == 2:
+            values = [item.get(path[1]) for item in data.get(path[0], [])]
+        else:
+            values = [
+                inner.get(path[2])
+                for item in data.get(path[0], [])
+                for inner in item.get(path[1], [])
+            ]
+        seen: set = set()
+        dupes: set = set()
+        for v in values:
+            if v is None:
+                continue
+            if v in seen:
+                dupes.add(v)
+            seen.add(v)
+        for v in sorted(dupes, key=str)[:MAX_ERRORS_PER_FILE]:
+            errors.append(f"{name}: {'/'.join(path)}: '{v}' is not unique")
+    return errors
+
+
+def validate_generated(pack_dir: Path) -> list[str]:
+    """Schema and id-uniqueness errors for the importer's files present in a pack."""
+    errors: list[str] = []
+    for name, schema_path, id_paths in GENERATED:
+        path = pack_dir / name
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"{name}: invalid JSON: {exc}")
+            continue
+        for found, err in enumerate(load_schema(schema_path).iter_errors(data), start=1):
+            where = "/".join(str(p) for p in err.path) or "(root)"
+            errors.append(f"{name}: {where}: {err.message}")
+            if found >= MAX_ERRORS_PER_FILE:
+                break
+        if isinstance(data, dict):
+            errors.extend(duplicate_ids(name, data, id_paths))
+    return errors
+
+
 def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport:
     """Validate one pack folder."""
     report = PackReport(path=pack_dir)
@@ -252,39 +328,6 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
             report.errors.append(f"{VEHICLES_NAME}: invalid JSON: {exc}")
             return report
         report.errors.extend(validate_vehicles(vehicles, desc, load_schema(VEHICLES_SCHEMA_PATH)))
-    parking_path = pack_dir / PARKING_NAME
-    if parking_path.is_file():
-        try:
-            parking = json.loads(parking_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{PARKING_NAME}: invalid JSON: {exc}")
-            return report
-        validator = load_schema(PARKING_SCHEMA_PATH)
-        for err in sorted(validator.iter_errors(parking), key=lambda e: list(e.path)):
-            where = "/".join(str(p) for p in err.path) or "(root)"
-            report.errors.append(f"{PARKING_NAME}: {where}: {err.message}")
-    bridges_path = pack_dir / BRIDGES_NAME
-    if bridges_path.is_file():
-        try:
-            bridges = json.loads(bridges_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{BRIDGES_NAME}: invalid JSON: {exc}")
-            return report
-        validator = load_schema(BRIDGES_SCHEMA_PATH)
-        for err in sorted(validator.iter_errors(bridges), key=lambda e: list(e.path)):
-            where = "/".join(str(p) for p in err.path) or "(root)"
-            report.errors.append(f"{BRIDGES_NAME}: {where}: {err.message}")
-    services_path = pack_dir / SERVICES_NAME
-    if services_path.is_file():
-        try:
-            services = json.loads(services_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{SERVICES_NAME}: invalid JSON: {exc}")
-            return report
-        validator = load_schema(SERVICES_SCHEMA_PATH)
-        for err in sorted(validator.iter_errors(services), key=lambda e: list(e.path)):
-            where = "/".join(str(p) for p in err.path) or "(root)"
-            report.errors.append(f"{SERVICES_NAME}: {where}: {err.message}")
     weapons_path = pack_dir / WEAPONS_NAME
     if weapons_path.is_file():
         try:
@@ -293,19 +336,7 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
             report.errors.append(f"{WEAPONS_NAME}: invalid JSON: {exc}")
             return report
         report.errors.extend(validate_weapons(weapons, load_schema(WEAPONS_SCHEMA_PATH)))
-    veg_path = pack_dir / VEGETATION_NAME
-    if veg_path.is_file():
-        try:
-            veg = json.loads(veg_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{VEGETATION_NAME}: invalid JSON: {exc}")
-            return report
-        validator = load_schema(VEGETATION_SCHEMA_PATH)
-        for err in sorted(validator.iter_errors(veg), key=lambda e: list(e.path)):
-            where = "/".join(str(p) for p in err.path) or "(root)"
-            report.errors.append(f"{VEGETATION_NAME}: {where}: {err.message}")
-            if len(report.errors) > 20:
-                break
+    report.errors.extend(validate_generated(pack_dir))
     return report
 
 

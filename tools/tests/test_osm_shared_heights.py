@@ -8,7 +8,7 @@ import pytest
 
 from osm_import.cluster import cluster_junctions
 from osm_import.config import load_config
-from osm_import.elevation import apply_elevation
+from osm_import.elevation import apply_elevation, clearance_shortfalls
 from osm_import.filter import filter_ways
 from osm_import.graph import build_graph
 from osm_import.projection import Projector
@@ -86,6 +86,7 @@ def test_touching_decks_with_a_half_metre_step_meet_at_one_height():
         assert height_at(a, x) == pytest.approx(10.5, abs=0.01)  # the higher deck sets it
     assert stats.shared_deck_vertices == 10
     assert stats.max_shared_step == pytest.approx(0.5, abs=0.01)
+    assert stats.shared_step_left < 0.01  # measured again after sharing
 
 
 def test_the_change_blends_into_the_approaches():
@@ -205,3 +206,47 @@ def test_ground_carriageways_under_a_deck_take_the_lower_height():
     assert height_at(a, 0.0) == pytest.approx(10.0, abs=0.01)  # both at the lower one
     assert height_at(b, 0.0) == pytest.approx(10.0, abs=0.01)
     assert height_at(a, 200.0) == pytest.approx(10.3, abs=0.01)  # the higher away from the deck
+
+
+def test_partners_on_either_side_of_a_deck_footprint_meet_instead_of_swapping():
+    """Review fix: the rule belongs to the pair. The north carriageway lies under a parallel deck
+    (its vertices take the lowest), the south one doesn't; before, the north dropped to the south's
+    height while the south rose to the north's, and the step stayed, swapped."""
+    over = {"highway": "secondary", "name": "Over"}
+    ways = [
+        *motorway_pair(9.5),
+        (3, [(-300.0, -18.0), (-60.0, -18.0)], over),
+        (4, [(-60.0, -18.0), (60.0, -18.0)], {**over, "bridge": "yes", "layer": "1"}),
+        (5, [(60.0, -18.0), (300.0, -18.0)], over),
+    ]
+    g, stats = build(ways, Step(10.6, 10.0))  # the north carriageway (z < 0) is the higher
+    a, b = g.edges["w1.0"], g.edges["w2.0"]
+    assert stats.shared_ground_vertices > 0
+    for x in range(-200, 201, 20):  # one height all along, switching where the footprint ends
+        assert height_at(a, x) == pytest.approx(height_at(b, x), abs=0.01), x
+    assert height_at(a, 0.0) == pytest.approx(10.0, abs=0.01)  # the lower: never into a clearance
+    assert height_at(a, 200.0) == pytest.approx(10.6, abs=0.01)  # the higher away from the deck
+    assert not stats.share_rounds_exhausted
+
+
+def test_a_street_lifted_by_the_blend_keeps_its_clearance_under_a_deck():
+    """Review fix: the north deck rises 0.5 m to its partner; the blend lifts its east approach
+    and the street that leaves it 15 m from the deck end, which passes under another deck 11 m
+    further on. That deck was set to exactly its clearance before sharing; it rises again."""
+    ways = two_decks(7.5)
+    n = -3.75
+    tags = ways[2][2]
+    ways[2] = (3, [(40.0, n), (55.0, n), (300.0, n)], tags)
+    street = {"highway": "residential", "name": "Side"}
+    over = {"highway": "secondary", "name": "Cross"}
+    ways += [
+        (7, [(55.0, n), *((55.0, n - d) for d in range(5, 100, 5))], street),
+        (8, [(-300.0, -15.0), (45.0, -15.0)], over),
+        (9, [(45.0, -15.0), (100.0, -15.0)], {**over, "bridge": "yes", "layer": "1"}),
+        (10, [(100.0, -15.0), (300.0, -15.0)], over),
+    ]
+    g, stats = build(ways, Step())
+    assert stats.shared_deck_vertices > 0
+    assert stats.clearance_raised  # the scenario does lift the street
+    assert not stats.clearance_short
+    assert clearance_shortfalls(g, CFG) == []

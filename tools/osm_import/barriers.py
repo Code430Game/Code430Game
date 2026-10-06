@@ -180,13 +180,15 @@ def build_barriers(
         return result
     highway = set(rules.get("highway_classes", []))
     step = float(rules.get("sample_step_m", 8.0))
-    seq = 0
+    runs: dict[tuple[str, str], int] = {}
 
     def add(kind: str, height: float, edge_id: str, pts: list) -> None:
-        nonlocal seq
-        result.barriers.append(Barrier(f"b{seq}", kind, height, edge_id, pts))
+        # Stable id: the kind, the edge and the run's number along that edge, so regenerating
+        # the pack only changes the ids of barriers that changed.
+        n = runs.get((kind, edge_id), 0)
+        runs[(kind, edge_id)] = n + 1
+        result.barriers.append(Barrier(f"b:{kind}:{edge_id}:{n}", kind, height, edge_id, pts))
         result.counts[kind] = result.counts.get(kind, 0) + 1
-        seq += 1
 
     # Index highway segments for the median search and building centroids for sound walls.
     hw_index = _SegmentIndex()

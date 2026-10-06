@@ -433,9 +433,9 @@ def build_bridges(
                     d, _h, _i, _side = _nearest_on(e.polyline, x, z)
                     if d - e.width_m / 2.0 <= rules["walkway_range_m"]:
                         hit.add(u.find(eid))
-                for g in hit:
+                for g in sorted(hit):
                     share_by_group[g] = share_by_group.get(g, 0) + 1
-            for g, n in share_by_group.items():
+            for g, n in sorted(share_by_group.items()):  # ties go to the first group id
                 share = n / max(len(pts), 1)
                 if share > best_share:
                     best_group, best_share = g, share
@@ -583,14 +583,20 @@ def _add_infill(bridges: list[Bridge], bridge_edges: dict, rules: dict, result) 
 
 
 def _infill(
-    a: DeckStrip, b: DeckStrip, rules: dict, same_direction: bool = False
+    a: DeckStrip,
+    b: DeckStrip,
+    rules: dict,
+    same_direction: bool = False,
+    prefix: str = INFILL_PREFIX,
 ) -> list[DeckStrip]:
     """Infill strips in the gap between strip `a` (walked) and strip `b`; with
     `same_direction`, only where both run the same way (a ramp beside its road, not the
-    opposing carriageway across a median)."""
+    opposing carriageway across a median). Each strip's id is `prefix`, the two sources in
+    order, then the side of `a` (l or r) and the run's number on that side, so it is unique
+    and stays the same when the pack is regenerated."""
     out: list[DeckStrip] = []
     step, gap_max, gap_min = rules["infill_step_m"], rules["infill_max_m"], rules["infill_min_m"]
-    source = f"{INFILL_PREFIX}{min(a.source, b.source)}:{max(a.source, b.source)}"
+    pair = f"{prefix}{min(a.source, b.source)}:{max(a.source, b.source)}"
     for side in (1.0, -1.0):  # left, then right of travel along a
         runs: list[list[tuple[tuple[float, float, float], float]]] = [[]]
         for x, y, z, dx, dz, lw, rw in _strip_samples(a, step):
@@ -612,10 +618,11 @@ def _infill(
             mid = wa + gap / 2.0
             half = gap / 2.0 + rules["infill_overlap_m"]
             runs[-1].append(((x + nx * mid, (y + yb) / 2.0, z + nz * mid), half))
-        for run in runs:
-            if len(run) >= 2:
-                halves = [h for _p, h in run]
-                out.append(DeckStrip(source, [p for p, _h in run], halves, list(halves)))
+        kept = [run for run in runs if len(run) >= 2]
+        for n, run in enumerate(kept):
+            halves = [h for _p, h in run]
+            source = f"{pair}:{'l' if side > 0 else 'r'}{n}"
+            out.append(DeckStrip(source, [p for p, _h in run], halves, list(halves)))
     return out
 
 

@@ -16,7 +16,7 @@
         "additionalProperties": false,
         "required": ["id", "kind", "height_m", "edge_id", "points"],
         "properties": {
-          "id": {"type": "string", "pattern": "^b[0-9]+$"},
+          "id": {"type": "string", "pattern": "^b([0-9]+|:[a-z]+:.+:[0-9]+)$", "description": "b:<kind>:<edge id>:<run number on that edge> (older packs: b<n>)"},
           "kind": {"enum": ["parapet", "median", "guardrail", "soundwall", "curb", "roadblock"]},
           "height_m": {"type": "number", "exclusiveMinimum": 0},
           "edge_id": {"type": "string"},

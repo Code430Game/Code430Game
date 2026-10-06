@@ -56,9 +56,7 @@ def build_gores(graph: RoadGraph, cfg: ImportConfig) -> list[DeckStrip]:
         a, b = ribbons[a_id], ribbons[b_id]
         if graph.edges[a_id].length_m < graph.edges[b_id].length_m:
             a, b = b, a
-        for strip in _infill(a, b, rules, same_direction=True):
-            strip.source = f"gore:{a_id}:{b_id}"
-            out.append(strip)
+        out.extend(_infill(a, b, rules, same_direction=True, prefix="gore:"))
     graph.gores = out
     log.info("gores: %d paved between ramps and their roads", len(out))
     return out
