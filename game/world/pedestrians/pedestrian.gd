@@ -21,6 +21,7 @@ var kerb_wait: float = 0.0  # seconds spent waiting to step onto a crossing
 var waiting_to_cross: bool = false
 var state: int = State.WALKING
 var timer: float = 0.0  # HIT: physics window left; DOWN: time until removal
+var held: bool = false  # DOWN: an ambulance is on its way, so not removed when the timer runs out
 var color: Color = Color.WHITE
 var pool: int = -1  # body pool (PedestrianManager.POOLS), chosen from the colour when unset
 var transform: Transform3D = Transform3D.IDENTITY

@@ -232,7 +232,8 @@ var _segment_index: Dictionary = {}  # Vector2i cell -> Array of [edge id, segme
 
 ## Nearest edge to a position in the xz plane. Returns {"edge": RoadEdge, "distance": float,
 ## "point": Vector3, "t": float along the polyline in metres}, or {} when nothing is within `radius`.
-func nearest_edge(position: Vector3, radius: float = 60.0) -> Dictionary:
+## `max_dy` skips roads more than that far above or below `position` (other levels).
+func nearest_edge(position: Vector3, radius: float = 60.0, max_dy: float = INF) -> Dictionary:
 	if _segment_index.is_empty():
 		_build_segment_index()
 	var p := Vector2(position.x, position.z)
@@ -250,9 +251,11 @@ func nearest_edge(position: Vector3, radius: float = 60.0) -> Dictionary:
 				var q := Geometry2D.get_closest_point_to_segment(p, a, b)
 				var d := q.distance_to(p)
 				if d < best_d:
-					best_d = d
 					var t := a.distance_to(q)
 					var y := lerpf(e.polyline[i].y, e.polyline[i + 1].y, t / maxf(a.distance_to(b), 0.001))
+					if absf(y - position.y) > max_dy:
+						continue  # a road on another level (a deck above, a road below)
+					best_d = d
 					best = {"edge": e, "distance": d, "point": Vector3(q.x, y, q.y), "segment": i, "t": t}
 	return best
 

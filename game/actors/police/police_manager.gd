@@ -160,6 +160,7 @@ func _spawn_car(around: Vector3) -> bool:
 	var car: VehicleBody3D = CAR_SCENE.instantiate()
 	car.set("vehicle_id", "police")
 	holder.add_child(car)
+	car.call("set_body_color", Color(0.95, 0.95, 0.97))  # the catalogue's white, not the default red
 	car.global_position = best.position + Vector3.UP * 0.6
 	car.look_at(Vector3(around.x, car.global_position.y, around.z), Vector3.UP)
 	if car.has_method("add_headlights"):
@@ -232,61 +233,14 @@ func _drive(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 		limit = 70.0  # ram and box in
 	if d < 7.0 and not player.is_driving():
 		car.set("override_throttle", 0.0)
-		car.set("override_brake", 1.0)  # pull up beside a player on foot
+		car.set("override_hold", true)  # pull up beside a player on foot (brake alone would reverse)
 	else:
 		car.set("override_throttle", 1.0 if speed < limit else 0.0)
 
 
-## Road-graph route from `from` to `to`: node positions along the cheapest path (police ignore
-## one-way rules), ending at `to`. Empty when either end is off the network.
+## Road-graph route from `from` to `to` (see RoadRoute.find).
 func route(from: Vector3, to: Vector3) -> PackedVector3Array:
-	var start := _nearest_node(from)
-	var goal := _nearest_node(to)
-	var out := PackedVector3Array()
-	if start == "" or goal == "":
-		return out
-	var dist := {start: 0.0}
-	var prev := {}
-	var open: Array = [[0.0, start]]
-	var goal_pos: Vector3 = graph.nodes[goal].position
-	var steps := 0
-	while not open.is_empty() and steps < 4000:
-		steps += 1
-		var best := 0
-		for k in range(open.size()):
-			if float(open[k][0]) < float(open[best][0]):
-				best = k
-		var cur: String = open[best][1]
-		open.remove_at(best)
-		if cur == goal:
-			break
-		for eid: String in graph.incident(cur):
-			var e: RoadGraph.RoadEdge = graph.edges[eid]
-			var nxt := e.to_node if e.from_node == cur else e.from_node
-			var nd := float(dist[cur]) + e.length_m
-			if nd < float(dist.get(nxt, INF)):
-				dist[nxt] = nd
-				prev[nxt] = cur
-				open.append([nd + (graph.nodes[nxt] as RoadGraph.RoadNode).position.distance_to(goal_pos), nxt])
-	if not prev.has(goal) and start != goal:
-		return out
-	var chain: Array[String] = [goal]
-	while chain[0] != start:
-		chain.push_front(prev[chain[0]])
-	for nid in chain:
-		out.append((graph.nodes[nid] as RoadGraph.RoadNode).position)
-	out.append(to)
-	return out
-
-
-func _nearest_node(p: Vector3) -> String:
-	var hit := graph.nearest_edge(p, 80.0)
-	if hit.is_empty():
-		return ""
-	var e: RoadGraph.RoadEdge = hit["edge"]
-	var a: Vector3 = graph.nodes[e.from_node].position
-	var b: Vector3 = graph.nodes[e.to_node].position
-	return e.from_node if a.distance_to(p) < b.distance_to(p) else e.to_node
+	return RoadRoute.find(graph, from, to)
 
 
 ## A car that has barely moved for STUCK_S while far from the player (wedged on a kerb, a

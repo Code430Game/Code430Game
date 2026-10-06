@@ -53,6 +53,8 @@ var _combat_effects: CombatEffects
 var _wanted: Wanted
 var _stars_label: Label
 var _police: PoliceManager
+var _ambulances: AmbulanceManager
+var _ambulance_log: bool = false  # --ambulance-log: print calls and ambulances each second
 var _banner: Label
 var _lit_car: VehicleBody3D  # the car whose headlights the lights setting drives: the one driven last
 var _radio: Radio
@@ -405,6 +407,8 @@ func _caught(how: String) -> void:
 	_banner.visible = true
 	get_tree().create_timer(3.0).timeout.connect(func() -> void: _banner.visible = false)
 	_police.reset()
+	if _ambulances != null:
+		_ambulances.reset()
 	_wanted.clear()
 	if _player.is_driving():
 		_player.try_exit_vehicle()
@@ -502,6 +506,19 @@ func _setup_wanted() -> void:
 		_peds.struck_by_vehicle.connect(func(a: Pedestrian, vehicle: Node3D) -> void:
 			if vehicle == _driven_car() and _player.is_driving():
 				_wanted.report("assault_down", a.position()))
+		_ambulances = AmbulanceManager.new()
+		_ambulances.name = "Ambulances"
+		_ambulances.process_mode = Node.PROCESS_MODE_PAUSABLE
+		_ambulances.peds = _peds
+		_ambulances.graph = _pack.graph
+		_ambulances.holder = _world
+		_ambulances.player = _player
+		_ambulances.bases = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind in ["ambulance", "hospital"])
+		_ambulances.log_runs = _ambulance_log
+		add_child(_ambulances)
+		_ambulances.rammed.connect(func(by: Node3D, at: Vector3) -> void:
+			if by == _driven_car() and _player.is_driving():
+				_wanted.report("assault", at))
 
 
 func _setup_net() -> void:
@@ -808,6 +825,8 @@ func _parse_args() -> void:
 			_open_creator_at_start = true
 		elif arg == "--police-log":
 			_police_log = true
+		elif arg == "--ambulance-log":
+			_ambulance_log = true
 		elif arg.begins_with("--wanted="):
 			_wanted_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--weapon="):
@@ -935,10 +954,13 @@ func _process(delta: float) -> void:
 			_traffic.anchors = anchors
 			if _day_night != null:
 				_traffic.hour = _day_night.hour
+			if _ambulances != null:
+				obstacles.append_array(_ambulances.bodies())  # traffic stops for them
 			_traffic.obstacles = obstacles
 		if _peds != null:
 			_peds.anchors = anchors
 			_peds.obstacles = obstacles
+			_peds.emergency = _ambulances.calling_bodies() if _ambulances != null else ([] as Array[Node3D])
 			if _traffic != null:
 				_traffic.obstacle_points = _peds.crossing_positions()
 			if _knockdown_every > 0.0 and _bench_elapsed > BENCH_WARMUP_S and not anchors.is_empty():
@@ -1018,6 +1040,11 @@ func _process(delta: float) -> void:
 		_wanted.target = Players.local_controlled_body()
 	if _police != null and _day_night != null:
 		_police.night = _day_night.night_factor()
+	if _ambulances != null and _minimap != null:
+		var blips: Array = []
+		for at in _ambulances.positions():
+			blips.append({"at": at, "color": Color(0.9, 0.15, 0.2)})
+		_minimap.blips = blips
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
 		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
