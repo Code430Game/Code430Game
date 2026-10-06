@@ -26,3 +26,7 @@ Lanes reserved for buses in the map data SHALL be marked and painted, cars SHALL
 #### Scenario: Bus cannot be taken
 - **WHEN** the player presses interact next to a bus
 - **THEN** nothing happens; the player's vehicle is always a car
+
+#### Scenario: Bus at a stop
+- **WHEN** a bus on a lane with a stop reaches the stop
+- **THEN** it stands for the dwell time and then drives on

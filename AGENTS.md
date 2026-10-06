@@ -99,3 +99,4 @@ openspec/             specs and changes
 ## Commits and PRs
 - Conventional Commits (`feat:`, `fix:`, `chore:` …), referencing the OpenSpec change id.
 - AI-authored contributions are welcome and expected. PRs are judged on specs, tests, and CI, not on who or what wrote them.
+- How to claim work, test it and open a PR: `CONTRIBUTING.md`. Ready work: `docs/open-work.md`.
