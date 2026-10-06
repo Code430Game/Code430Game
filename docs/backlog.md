@@ -5,23 +5,23 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-05
 
-- **Punching and kicking** (human, 2026-10-05, while planning weapons: "another could be punching and kicking. Or that could be a different ticket"). Empty hands are already a slot in the weapon cycle; fists and kicks would fill it, with a non-lethal shove in clean.
-- **Side-by-side bridge carriageways at different heights** (issue #45, Mackenzie King Bridge at x 517, z -523): the 2-lane way runs about 0.48 m above the 3-lane one where their ribbons touch, so the step shows as a low strip (the deck's side face) between them. The parapets that stood in that gap were removed in the #45 fix. Proper fix: the elevation stage should give touching carriageways of one bridge a shared height, blending into the approaches.
+- **Punching and kicking** → proposal `add-unarmed-combat` (human, 2026-10-05, while planning weapons: "another could be punching and kicking. Or that could be a different ticket"). Empty hands are already a slot in the weapon cycle; fists and kicks would fill it, with a non-lethal shove in clean.
+- **Side-by-side bridge carriageways at different heights** → proposal `update-shared-deck-heights` (issue #45, Mackenzie King Bridge at x 517, z -523): the 2-lane way runs about 0.48 m above the 3-lane one where their ribbons touch, so the step shows as a low strip (the deck's side face) between them. The parapets that stood in that gap were removed in the #45 fix. Proper fix: the elevation stage should give touching carriageways of one bridge a shared height, blending into the approaches.
 
 ## 2026-10-04
 
-- **Radio per car (human, 2026-10-04, Deck drive for `add-car-radio`).** Today the radio follows
+- **Radio per car** → proposal `update-radio-per-car` (human, 2026-10-04, Deck drive for `add-car-radio`).** Today the radio follows
   the player into any car. Idea: the player's own car keeps their chosen station, and a stolen or
   taken car plays whatever station its owner had on (a random one). Not started.
 
 ## 2026-10-03
 
-- **Curb inside a junction at a curved road join (human, 2026-10-03, Deck drive for
+- **Curb inside a junction at a curved road join** → proposal `update-junction-surfaces` (human, 2026-10-03, Deck drive for
   `update-cluster-junction-arms`).** A curb stands on the interior of the junction where a
   curved road joins; not the clustered-X issue, which the drive confirmed fixed. Location not
   recorded yet; get x,z from the HUD next time. Likely the barrier importer's curb lines
   (`barriers.py`, `curb_classes`) not being cut back to the junction polygon at curved arms.
-- **Grass through road surfaces (human, 2026-10-03).** `update-cluster-junction-arms` fans
+- **Grass through road surfaces** → proposal `update-junction-surfaces` (human, 2026-10-03). `update-cluster-junction-arms` fans
   junction surfaces from their node (167 junctions sagging > 5 cm on main, 14 after), but
   terrain can still show through ribbons and the remaining ear-clipped junctions. Fold into a
   small proposal with road surface textures: flatten terrain under junction polygons in the
@@ -43,7 +43,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   raised parts become ground blocks); a footprint spanning a sunken road floats on its median
   ground: Place du Centre over Maisonneuve (x -1463, z -825) 10.8 m up, the NAC over Lawrence
   Freiman Lane (x 91, z -411) 9.1 m up. Proposal `add-skywalks-and-building-parts`.
-- **Audio polish is a later focused project (human, 2026-10-02: "I'd rather leave this until we
+- **Audio polish is a later focused project** → proposal `update-audio-pass` (human, 2026-10-02: "I'd rather leave this until we
   want to improve the audio across the board").** Sound archived as good. When that project
   comes: engine character per vehicle class, positional traffic audio, horns and sirens,
   pedestrian voices, reverb in underpasses, radio from `add-car-radio`.
@@ -75,7 +75,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   a pedestrian trench.
 - **Bus signs (human, 2026-10-02).** Number on the back, number plus route name on the front
   like modern transit; folded into `add-bus-routes`. Buses and day-night stop gates ticked.
-- **Two-wheelers (human asked 2026-10-02 whether to add motorcycles and bicycles).** Own
+- **Two-wheelers** → proposal `add-two-wheelers` (human asked 2026-10-02 whether to add motorcycles and bicycles).** Own
   change after `add-vehicle-variety`: bicycles on the imported cycleways, a motorcycle class
   with lane filtering, rider bodies from the character pipeline, a lean model on a capsule
   rather than four-wheel physics, both takeable. Design note from the human: they enjoy using
@@ -103,9 +103,9 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   (around x 185, z -505) looks sane from above. Needs the HUD x,z from the Deck to find
   the exact spot; suspect a steep grade difference between adjacent carriageways leaving
   a terrain step between them.
-- **Garage follow-ups** (add-underground-parking, 2026-10-05): the minimap should show the garage floor while the player is inside; beside some ramps the 4 m terrain cut leaves black triangles past the coping (the museum ramp), so cut the terrain to the ramp strip itself or widen the coping per cell.
-- **Parking lot fill needs more passes** (human, 2026-10-05 Deck round: "we probably need to do some more passes with the fill in algorithm"). They will send screenshots of the lots that look wrong; start from those (stall layout in `parking_lot_builder.gd`: rows, aisles, `_row_only`, `_clear_of_streets`).
-- **Street-side parking bays are exported but not populated** (add-parking-lots, 2026-10-04):
+- **Garage follow-ups** → proposal `update-garage-polish` (add-underground-parking, 2026-10-05): the minimap should show the garage floor while the player is inside; beside some ramps the 4 m terrain cut leaves black triangles past the coping (the museum ramp), so cut the terrain to the ramp strip itself or widen the coping per cell.
+- **Parking lot fill needs more passes** → proposal `update-parking` (human, 2026-10-05 Deck round: "we probably need to do some more passes with the fill in algorithm"). They will send screenshots of the lots that look wrong; start from those (stall layout in `parking_lot_builder.gd`: rows, aisles, `_row_only`, `_clear_of_streets`).
+- **Street-side parking bays are exported but not populated** → proposal `update-parking` (add-parking-lots, 2026-10-04):
   256 bays in `parking.v0.json`, but road meshes and traffic lanes have no parking lane, so a
   kerbside car would sit in the travel lane. Needs road widths that include the parking lane
   (or a lane offset for traffic) before bays get cars.
@@ -115,7 +115,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   under the headless renderer, and collision shapes are made on the main thread everywhere
   (the physics server isn't thread-safe either). The rarer abort (signal 11) after
   `test_testbed_menus` was the audio mixer, fixed in #25 (see the entry above).
-- **Junctions where terrain still shows through** (add-surface-detail 1.2, 2026-10-04): 16 of 915
+- **Junctions where terrain still shows through** → proposal `update-junction-surfaces` (add-surface-detail 1.2, 2026-10-04): 16 of 915
   by `test_junction_terrain.gd`, including n14141327481 (+10.5 m), n472497779 (+10.7 m),
   n472558217 (+2.9 m), n4991525553 (+0.4 m), n2609373961 (+0.18 m), c1236845823 (+0.17 m).
   The big ones look like junctions in cuttings or at tunnel mouths, not the corner problem.
