@@ -294,6 +294,12 @@ func _make_officer(at: Vector3) -> Node3D:
 	o.set_meta("rig", rig)
 	holder.add_child(o)
 	o.global_position = at
+	var held := HeldWeapon.new()  # the tone's officer weapon in hand (add-weapons-and-combat 2.6)
+	held.name = "HeldWeapon"
+	held.rig = rig
+	o.add_child(held)
+	held.set_weapon(WeaponSet.resolve(_officer_weapon))
+	o.set_meta("held", held)
 	return o
 
 
@@ -311,21 +317,22 @@ func _step_officer(o: Node3D, delta: float) -> void:
 		o.global_position += to.normalized() * speed * delta
 	o.global_position.y = lerpf(o.global_position.y, target.global_position.y, clampf(delta * 6.0, 0.0, 1.0))
 	if d > 0.1:
-		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)
-		o.rotate_y(PI)
+		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)  # bodies face -Z
 	(o.get_meta("rig") as CharacterRig).advance(delta, speed)
 	# The tone's officer weapon.
 	var cool := float(_officer_cooldown.get(o, 0.0)) - delta
 	_officer_cooldown[o] = cool
-	if cool > 0.0 or player.is_driving():
-		return
 	var w := WeaponSet.resolve(_officer_weapon)
-	if w.is_empty():
-		return
 	var lethal := bool(w.get("lethal", false))
-	if lethal and wanted.stars < int(cfg("fire_min_stars", 3)):
+	var may_fire := not w.is_empty() and not player.is_driving() and not (lethal and wanted.stars < int(cfg("fire_min_stars", 3)))
+	var held: HeldWeapon = o.get_meta("held", null)
+	if held != null:
+		held.aiming = may_fire and d <= float(cfg("officer_fire_m", 22.0))  # raised while in range
+	if cool > 0.0 or not may_fire:
 		return
 	if d <= float(cfg("officer_fire_m", 22.0)):
+		if held != null:
+			held.recoil()
 		_officer_cooldown[o] = float(cfg("officer_rate_s", 1.1)) * (3.0 if not lethal else 1.0)
 		if lethal:
 			shot_at.emit(float(cfg("officer_damage", 9.0)))

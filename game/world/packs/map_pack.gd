@@ -517,7 +517,7 @@ func spawn_edge() -> RoadGraph.RoadEdge:
 	return best
 
 
-## A sensible spawn on the highway, 20 m into the spawn edge, facing along it.
+## A sensible spawn on the highway, 20 m into the spawn edge, in the outer lane, facing along it.
 func spawn_transform() -> Transform3D:
 	var best := spawn_edge()
 	if best == null:
@@ -531,4 +531,5 @@ func spawn_transform() -> Transform3D:
 	var divider := best.carriageway_offset() + best.carriageway_m() * 0.5 - best.lanes_forward * lane_w
 	var right := Vector3(-forward.z, 0.0, forward.x)
 	var basis := Basis.looking_at(forward, Vector3.UP)
-	return Transform3D(basis, p + right * (divider + 0.5 * lane_w) + Vector3(0.0, 1.0, 0.0))
+	# The outer (right-hand) lane, beside the shoulder: the player starts on foot on the shoulder.
+	return Transform3D(basis, p + right * (divider + (float(best.lanes_forward) - 0.5) * lane_w) + Vector3(0.0, 1.0, 0.0))

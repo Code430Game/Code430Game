@@ -570,8 +570,7 @@ func _ground(p: Vector3, fallback: float) -> float:
 static func _face(m: Node3D, point: Vector3) -> void:
 	var flat := Vector3(point.x, m.global_position.y, point.z)
 	if flat.distance_to(m.global_position) > 0.1:
-		m.look_at(flat, Vector3.UP)
-		m.rotate_y(PI)
+		m.look_at(flat, Vector3.UP)  # bodies face -Z
 
 
 func _make_medic(at: Vector3, k: int) -> Node3D:

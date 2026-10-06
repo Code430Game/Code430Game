@@ -202,7 +202,7 @@ func _ready() -> void:
 	_player.profile = CharacterStore.last_or_random()
 	Session.local_profile = _player.profile
 	add_child(_player)
-	_player.global_position = spawn.origin - spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+	_player.global_position = spawn.origin + spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
 	_player.entered_vehicle.connect(_on_entered_vehicle)
 	_player.exited_vehicle.connect(_on_exited_vehicle)
 	_player.take_vehicle_requested.connect(_on_take_vehicle_requested)
@@ -361,6 +361,7 @@ func _setup_audio() -> void:
 ## --weapon / --shoot: holds a weapon, aims and fires a few times for screenshots.
 func _demo_fire() -> void:
 	_shooter.weapons.slot = _weapon_at_start
+	_shooter.hold_aim = _shots_at_start > 0 and _weapon_at_start != 1  # melee swings without aiming
 	for i in range(_shots_at_start):
 		_player.aiming = true
 		_shooter._cooldown = 0.0
@@ -658,7 +659,7 @@ func _on_joined(_info: Dictionary) -> void:
 	_car.linear_velocity = Vector3.ZERO
 	_car.set_spawn(t)
 	if not _player.is_driving():
-		_player.global_position = t.origin - t.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+		_player.global_position = t.origin + t.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
 	_refresh_session_status()
 
 

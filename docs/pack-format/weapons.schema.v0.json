@@ -33,6 +33,7 @@
               "required": ["name", "impact", "lethal"],
               "properties": {
                 "name": {"type": "string"},
+                "model": {"enum": ["knife", "sabre", "brush", "pistol", "blaster", "paintball_gun", "net_gun"]},
                 "impact": {"enum": ["blade", "bullet", "energy", "paint"]},
                 "lethal": {"type": "boolean"},
                 "mechanic": {"enum": ["melee", "hitscan", "projectile"]},
