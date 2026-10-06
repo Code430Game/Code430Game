@@ -142,14 +142,16 @@ def motorway_pair(spacing: float):
     ]
 
 
-def test_overlapping_motorway_carriageways_share_the_higher_height_on_the_ground():
+def test_overlapping_motorway_carriageways_merge_down_to_the_lower_height_on_the_ground():
+    """Merge-down fix: ground carriageways take the lower height (they used to take the higher,
+    which lifted the ends of merges and bowed the road between)."""
     g, stats = build(motorway_pair(9.5), Step(10.0, 10.3))
     a, b = g.edges["w1.0"], g.edges["w2.0"]
     assert a.width_m == pytest.approx(10.5)  # 7 m of lanes, 1 m left and 2.5 m right shoulder
     assert stats.shared_ground_vertices == 2 * 21
     for x in (-200.0, -100.0, 0.0, 100.0, 200.0):
-        assert height_at(a, x) == pytest.approx(10.3, abs=0.01)
-        assert height_at(b, x) == pytest.approx(10.3, abs=0.01)
+        assert height_at(a, x) == pytest.approx(10.0, abs=0.01)
+        assert height_at(b, x) == pytest.approx(10.0, abs=0.01)
 
 
 def test_shoulders_dropped_only_for_the_step_come_back():
@@ -205,7 +207,8 @@ def test_ground_carriageways_under_a_deck_take_the_lower_height():
     assert stats.shared_ground_vertices > 0
     assert height_at(a, 0.0) == pytest.approx(10.0, abs=0.01)  # both at the lower one
     assert height_at(b, 0.0) == pytest.approx(10.0, abs=0.01)
-    assert height_at(a, 200.0) == pytest.approx(10.3, abs=0.01)  # the higher away from the deck
+    # Away from the deck too: ground carriageways merge down (merge-down fix; was the higher).
+    assert height_at(a, 200.0) == pytest.approx(10.0, abs=0.01)
 
 
 def test_partners_on_either_side_of_a_deck_footprint_meet_instead_of_swapping():
@@ -230,7 +233,8 @@ def test_partners_on_either_side_of_a_deck_footprint_meet_instead_of_swapping():
     # lost; a deck crossing over is covered by the test above).
     deck = g.edges["w4.0"]
     assert height_at(a, 0.0) == pytest.approx(height_at(deck, 0.0), abs=0.01)
-    assert height_at(a, 200.0) == pytest.approx(10.6, abs=0.01)  # the higher away from the deck
+    # Away from the deck the ground carriageways merge down (merge-down fix; was the higher).
+    assert height_at(a, 200.0) == pytest.approx(10.0, abs=0.01)
     assert not stats.share_rounds_exhausted
 
 
@@ -334,3 +338,63 @@ def test_the_grade_pass_keeps_shared_carriageways_tied():
         assert _step_between(north, south, x) < 0.02, x
     assert stats.shared_step_left < 0.05
     assert not stats.clearance_short
+
+
+def test_a_merge_on_the_ground_meets_low_and_lifts_nothing_above_its_ground():
+    """Merge-down fix: a ramp runs beside the motorway for 240 m and splits away at both ends,
+    on ground 0.3 m higher. They meet at the lower height, and no vertex of either road ends
+    above its own ground: taking the higher lifted the motorway where they met and left it bowed
+    between the raised ends once the raise faded out over blend_m."""
+    tags = {"highway": "motorway", "oneway": "yes", "lanes": "2"}
+    n, s = -4.75, 4.75
+    xs = [float(x) for x in range(-300, 301, 20)]
+    ramp = [(-300.0, 60.0), (-200.0, 30.0)] + [(float(x), s) for x in range(-120, 121, 20)]
+    ramp += [(200.0, 30.0), (300.0, 60.0)]
+    ways = [(1, [(x, n) for x in reversed(xs)], tags), (2, ramp, tags)]
+    ground = Step(10.0, 10.3)
+    g, stats = build(ways, ground)
+    a, b = g.edges["w1.0"], g.edges["w2.0"]
+    assert stats.shared_ground_vertices > 0
+    for x in range(-100, 101, 20):
+        assert height_at(a, float(x)) == pytest.approx(10.0, abs=0.01), x
+        assert _step_between(a, b, float(x)) < 0.02, x
+    for e in g.edges.values():
+        for p in e.polyline:
+            assert p[1] <= ground.sample(p[0], p[2]) + 1e-6, (e.id, p)
+    limit = CFG.for_class("motorway").max_grade
+    for e in g.edges.values():
+        assert max(grades(e)) <= limit + 1e-6, e.id
+
+
+def test_three_ground_carriageways_merge_down_together_and_settle():
+    """Three motorway carriageways side by side on ground 10.0, 10.15 and 10.3 end at the lowest,
+    without running out of rounds."""
+    tags = {"highway": "motorway", "oneway": "yes", "lanes": "2"}
+    ways = [
+        (1, [(float(x), -10.0) for x in range(-200, 201, 20)], tags),
+        (2, [(float(x), 0.0) for x in range(200, -201, -23)] + [(-200.0, 0.0)], tags),
+        (3, [(float(x), 10.0) for x in range(-200, 201, 31)] + [(200.0, 10.0)], tags),
+    ]
+    g, stats = build(ways, Bands())
+    assert not stats.share_rounds_exhausted
+    for x in (-100.0, 0.0, 100.0):
+        for e in g.edges.values():
+            assert height_at(e, x) == pytest.approx(10.0, abs=0.02), (e.id, x)
+
+
+def test_a_deck_never_drops_to_meet_a_ground_carriageway_beside_it():
+    """Merge-down applies to ground carriageways only: beside a deck end the ground road still
+    rises to the deck, and the deck keeps at least the height it has without the neighbour."""
+    s = 5.75
+    ways = two_decks(11.5, cls="motorway")
+    tags = ways[3][2]
+    ways[3] = (4, [(300.0, s), (20.0, s)], tags)
+    ways[4] = (5, [(20.0, s), (0.0, s), (-40.0, s)], {**tags, "bridge": "yes", "layer": "1"})
+    alone = [w for w in ways if w[0] in (1, 2, 3)]
+    g_alone, _ = build(alone, Step())
+    g, _stats = build(ways, Step())
+    deck, deck_alone = g.edges["w2.0"], g_alone.edges["w2.0"]
+    for x in (-20.0, 0.0, 20.0, 40.0):
+        assert height_at(deck, x) >= height_at(deck_alone, x) - 1e-6, x
+    for x in (25.0, 30.0, 40.0):
+        assert height_at(g.edges["w4.0"], x) == pytest.approx(height_at(deck, x), abs=0.01), x

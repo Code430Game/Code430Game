@@ -1057,12 +1057,13 @@ def _share_heights(
     of its ribbon and within `max_step_m` of its height; a larger difference is a real level
     change (a ramp climbing away) and is kept. Decks of different layers never pair. Where a
     deck is involved the gap is the parapets' shared-deck gap (decks with no wall between them
-    must not show a step either); between ground roads it is `ground_gap_m`. A shared vertex
-    rises to the highest of them, so no deck drops into the clearance over the road below, and
-    three carriageways side by side (two decks and a ramp, a motorway and its on-ramp) all end
-    at the same height; one rule for all of them, since mixing rules left steps between them.
-    Under a deck (`under_decks`) ground roads take the lowest instead, so the clearance there
-    never shrinks. No span vertex (`spans`) is ever lowered and no tunnel vertex moved. Every other vertex within `blend_m` along the network
+    must not show a step either); between ground roads it is `ground_gap_m`. Where a deck is
+    involved a shared vertex rises to the highest of them, so no deck drops into the clearance
+    over the road below. Ground carriageways beside each other (a motorway and its on-ramp)
+    merge down to the lowest instead: raising them lifted the ends of a merge and left the road
+    between bowed once the raise faded out. Under a deck (`under_decks`) ground roads take the
+    lowest too, so the clearance there never shrinks. The rule belongs to the group, so the
+    members of one cross-section never pick opposite rules. No span vertex (`spans`) is ever lowered and no tunnel vertex moved. Every other vertex within `blend_m` along the network
     of a shared one takes that change, fading linearly, so approaches and side streets meet
     the new heights without a kink.
 
@@ -1136,9 +1137,23 @@ def _share_heights(
 
     # A partner counts as under a deck by the end of its segment nearest this vertex, so the two
     # sides of a pair switch rule at the same place where the deck's footprint ends.
-    take_min = {
+    def partner_on_deck(ps: list[tuple[str, str, float]]) -> bool:
+        return any(
+            kinds.get(eid) == "deck"
+            for ka, kb, _t in ps
+            for eid in set(edges_at.get(ka, ())) & set(edges_at.get(kb, ()))
+        )
+
+    # Only a deck pulls a carriageway up (it can't go down without losing its clearance).
+    # Carriageways on the ground beside each other merge down to the lower one, nearer the
+    # terrain: raising them instead lifted the ends of a ramp or merge where they meet and left
+    # the road between bowed, once the raise faded out along `blend_m`.
+    under = {
         k: not on_deck[k] and (low(k) or any(low(ka if t < 0.5 else kb) for ka, kb, t in ps))
         for k, ps in beside.items()
+    }
+    take_min = {
+        k: under[k] or (not on_deck[k] and not partner_on_deck(ps)) for k, ps in beside.items()
     }
     for k, ps in beside.items():
         heights = [y[k]] + [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in ps]
@@ -1213,10 +1228,16 @@ def _share_heights(
     groups = [g for _r, g in sorted(members.items()) if len(g) > 1]
     group_of = {m: i for i, g in enumerate(groups) for m in g}
     stats.shared_groups = len(groups)
-    # One rule per group: a group with a span vertex never goes down (the deck keeps its
-    # clearance), otherwise a group with a ground vertex under a deck takes the lowest.
+    # One rule per group: a group with a span or deck vertex never goes down (the deck keeps its
+    # clearance), nor one beside a deck unless it runs under one; a group of ground carriageways
+    # only takes the lowest (merges down).
     group_min = [
-        not any(m in spans for m in g) and any(take_min.get(m, low(m)) for m in g) for g in groups
+        not any(m in spans or on_deck.get(m, False) for m in g)
+        and (
+            any(under.get(m, low(m)) for m in g)
+            or not any(partner_on_deck(beside.get(m, [])) for m in g)
+        )
+        for g in groups
     ]
 
     work = dict(y)
