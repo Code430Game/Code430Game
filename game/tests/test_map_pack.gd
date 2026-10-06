@@ -143,6 +143,45 @@ func test_stale_chunks_are_detected() -> void:
 	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
 
 
+func _write(path: String, text: String) -> void:
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string(text)
+	f.close()
+
+
+func test_chunks_go_stale_when_any_pack_file_changes() -> void:
+	# Review fix: the cache key covered five files, so a bridges-only (or terrain image) change
+	# loaded the old chunks as current.
+	var tmp := ProjectSettings.globalize_path("user://stale_inputs_%d" % Time.get_ticks_usec())
+	_write(tmp.path_join("road_graph.v0.json"), "{}")
+	_write(tmp.path_join("bridges.v0.json"), "{\"bridges\": []}")
+	_write(tmp.path_join("terrain").path_join("chunk_0_0.png"), "png")
+	_write(tmp.path_join("chunks").path_join(GlbChunks.BUILD_MANIFEST), JSON.stringify({"inputs_hash": GlbChunks.inputs_hash(tmp)}))
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	_write(tmp.path_join("chunks").path_join("chunk_0_0.glb"), "glb")  # the cache itself: no effect
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	_write(tmp.path_join("bridges.v0.json"), "{\"bridges\": [1]}")
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
+	_write(tmp.path_join("chunks").path_join(GlbChunks.BUILD_MANIFEST), JSON.stringify({"inputs_hash": GlbChunks.inputs_hash(tmp)}))
+	_write(tmp.path_join("terrain").path_join("chunk_0_0.png"), "PNG")
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
+
+
+func test_content_hash_reads_the_bytes_not_just_the_sizes() -> void:
+	# Review fix: two regenerated packs with equal file sizes passed the co-op check.
+	var base := ProjectSettings.globalize_path("user://content_hash_%d" % Time.get_ticks_usec())
+	for side in ["a", "b"]:
+		_write(base.path_join(side).path_join("pack.json"), "{\"id\": \"t\"}")
+		_write(base.path_join(side).path_join("chunks").path_join("chunk_0_0.glb"), side)
+	_write(base.path_join("a").path_join("road_graph.v0.json"), "{\"y\": 1}")
+	_write(base.path_join("b").path_join("road_graph.v0.json"), "{\"y\": 2}")
+	assert_str(MapPack.content_hash(base.path_join("a"))).is_not_equal(MapPack.content_hash(base.path_join("b")))
+	_write(base.path_join("b").path_join("road_graph.v0.json"), "{\"y\": 1}")
+	# Same contents; the local GLB caches differ and don't count.
+	assert_str(MapPack.content_hash(base.path_join("a"))).is_equal(MapPack.content_hash(base.path_join("b")))
+
+
 func test_parking_lots_load_and_build_in_their_chunks() -> void:
 	assert_int(_pack.parking_lots.size()).is_greater(600)  # surface and street-side lots
 	var stalls := 0
