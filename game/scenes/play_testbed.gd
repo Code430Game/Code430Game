@@ -48,6 +48,7 @@ var _keyboard: bool = false  # last input came from keyboard or mouse: show thos
 var _day_night: DayNight
 var _vehicle_audio: VehicleAudio
 var _reset_ring: HoldRing
+var _foot_reset_s: float = 0.0  # seconds reset has been held on foot; -1 once it fired
 var _shooter: Shooter
 var _combat_effects: CombatEffects
 var _wanted: Wanted
@@ -435,13 +436,37 @@ func _caught(how: String) -> void:
 	_wanted.clear()
 	if _player.is_driving():
 		_player.try_exit_vehicle()
-	_player.global_position = arrive_at + Vector3.UP * 1.0
-	_player.velocity = Vector3.ZERO
+	_place_player(arrive_at)
 	_player.stuck_s = 0.0
 	_player.health = float(_wanted.config.get("player_health", 100.0))
 	_shooter.reset()
 	_shooter.weapons.refill()
 	_update_stars()
+
+
+## Puts the player on foot 1 m above `at`, building the ground there first: after a jump across
+## the map the chunk's collision may not have streamed in yet, and the player fell through it.
+func _place_player(at: Vector3) -> void:
+	_streamer.build_now(at)
+	_player.global_position = at + Vector3.UP * 1.0
+	_player.velocity = Vector3.ZERO
+
+
+## On foot, holding reset (R3 / R, like a stuck car) for the hold time takes the player back to
+## the start, so a player stuck somewhere needn't restart the game. Returns the hold's progress
+## (0..1) for the HUD ring.
+func _step_foot_reset(held: bool, delta: float) -> float:
+	if not held:
+		_foot_reset_s = 0.0
+		return 0.0
+	if _foot_reset_s < 0.0:
+		return 0.0  # already reset on this hold
+	_foot_reset_s += delta
+	if _foot_reset_s < Controls.hold_s():
+		return _foot_reset_s / Controls.hold_s()
+	_foot_reset_s = -1.0
+	_place_player(_pack.spawn_transform().origin)
+	return 0.0
 
 
 ## Shows `text` on the banner for `banner_s`; a newer banner restarts the time.
@@ -1094,7 +1119,8 @@ func _process(delta: float) -> void:
 		_headlights = (_headlights + 1) % 3
 	var driving := _player != null and _player.is_driving()
 	_camera.look_behind = in_play and driving and Input.is_action_pressed("look_behind")
-	_reset_ring.progress = _driven_car().reset_progress() if driving else 0.0
+	var on_foot := in_play and _player != null and not driving
+	_reset_ring.progress = _driven_car().reset_progress() if driving else _step_foot_reset(on_foot and Input.is_action_pressed("reset_vehicle"), delta)
 	if _wanted != null:
 		_wanted.target = Players.local_controlled_body()
 	if _police != null and _day_night != null:

@@ -169,3 +169,34 @@ func test_a_catch_resets_the_weapons_and_a_second_catch_keeps_its_banner() -> vo
 	assert_bool(banner.visible).override_failure_message("the first catch's timer hid the second banner").is_true()
 	await get_tree().create_timer(0.35).timeout
 	assert_bool(banner.visible).is_false()
+
+
+## Human, 2026-10-06: on foot there was no way back from being stuck short of closing the game.
+## Holding reset for the hold time takes the player to the start, standing on built ground.
+func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
+	var player: Variant = _bed.get("_player")
+	if player.is_driving():
+		player.try_exit_vehicle()
+		await get_tree().physics_frame
+	var pack: MapPack = _bed.get("_pack")
+	var start: Vector3 = pack.spawn_transform().origin
+	var away := start + Vector3(400.0, 0.0, 300.0)
+	player.global_position = away + Vector3.UP * 50.0
+	player.velocity = Vector3.ZERO
+	var half := Controls.hold_s() * 0.6
+	var progress: float = _bed.call("_step_foot_reset", true, half)
+	assert_float(progress).is_greater(0.0)
+	assert_float(player.global_position.distance_to(start)).is_greater(100.0)
+	_bed.call("_step_foot_reset", true, half)
+	assert_float(Vector2(player.global_position.x - start.x, player.global_position.z - start.z).length()).is_less(0.5)
+	# A long hold resets once; letting go arms it again.
+	player.global_position = away + Vector3.UP * 50.0
+	assert_float(_bed.call("_step_foot_reset", true, half)).is_equal(0.0)
+	assert_float(player.global_position.distance_to(start)).is_greater(100.0)
+	_bed.call("_step_foot_reset", false, half)
+	_bed.call("_step_foot_reset", true, half)
+	_bed.call("_step_foot_reset", true, half)
+	for i in range(60):
+		await get_tree().physics_frame
+	assert_bool(player.is_on_floor()).override_failure_message("the player fell through the ground at the start").is_true()
+	assert_float(absf(player.global_position.y - start.y)).is_less(3.0)

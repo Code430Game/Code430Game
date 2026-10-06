@@ -9,7 +9,8 @@
   "hold_s": 1.0,
   "tap_s": 0.3,
   "shared": [
-    ["look_behind", "reset_vehicle"]
+    ["look_behind", "reset_vehicle"],
+    ["reload", "reset_vehicle"]
   ],
   "rows": [
     {"context": "foot", "label": "walk", "actions": ["move_forward", "move_back", "move_left", "move_right"], "pad": "left stick", "key": "W A S D"},
@@ -24,6 +25,7 @@
     {"context": "foot", "label": "pick a weapon by number", "actions": ["weapon_slot_1", "weapon_slot_2", "weapon_slot_3", "weapon_slot_4", "weapon_slot_5", "weapon_slot_6", "weapon_slot_7", "weapon_slot_8", "weapon_slot_9"], "pad": "-", "key": "1 to 9"},
     {"context": "foot", "label": "weapon wheel: next page", "action": "wheel_page", "reserved": true},
     {"context": "foot", "label": "reload", "action": "reload"},
+    {"context": "foot", "label": "back to the start (when stuck)", "action": "reset_vehicle", "hold": true},
     {"context": "foot", "label": "map", "action": "map_toggle"},
     {"context": "foot", "label": "pause menu", "action": "pause"},
 
