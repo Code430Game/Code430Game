@@ -487,6 +487,7 @@ func _setup_wanted() -> void:
 	_police.busted.connect(func() -> void: _caught("busted"))
 	_police.net_hit.connect(func(seconds: float) -> void: _player.stuck_s = maxf(_player.stuck_s, seconds))
 	_police.shot_at.connect(_hurt)
+	_police.taken.connect(func(car: VehicleBody3D) -> void: _wanted.report("theft", car.global_position))
 	_banner = Label.new()
 	_banner.name = "Banner"
 	_banner.set_anchors_preset(Control.PRESET_CENTER)
@@ -517,6 +518,7 @@ func _setup_wanted() -> void:
 		_ambulances.bases = _pack.services.filter(func(p: Services.Place) -> bool: return p.kind in ["ambulance", "hospital"])
 		_ambulances.log_runs = _ambulance_log
 		add_child(_ambulances)
+		_ambulances.taken.connect(func(car: VehicleBody3D) -> void: _wanted.report("theft", car.global_position))
 		_ambulances.rammed.connect(func(by: Node3D, at: Vector3) -> void:
 			if by == _driven_car() and _player.is_driving():
 				_wanted.report("assault", at))

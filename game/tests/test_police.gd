@@ -197,3 +197,21 @@ func test_the_helicopter_searches_where_it_lost_the_player_and_finds_them_by_sig
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	assert_int(heli.state).is_equal(PoliceHelicopter.State.CHASE)
+
+
+func test_a_taken_patrol_car_is_handed_over_not_freed() -> void:
+	var pm := _setup()
+	pm.wanted.set_stars(1)
+	for i in range(5):
+		await get_tree().physics_frame
+	assert_int(pm.cars.size()).is_equal(1)
+	var car := pm.cars[0]
+	car.set("driver_peer_id", Players.LOCAL_PEER_ID)
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]  # no replacement for this test
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert_bool(pm.cars.has(car)).is_false()
+	pm.wanted.clear()
+	await get_tree().physics_frame
+	assert_bool(is_instance_valid(car) and not car.is_queued_for_deletion()).is_true()
+	auto_free(car)

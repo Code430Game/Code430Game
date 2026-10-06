@@ -13,6 +13,8 @@ extends Node3D
 signal busted
 signal net_hit(seconds: float)
 signal shot_at(damage: float)
+## Someone got in and took a patrol car (#69): it is theirs now.
+signal taken(car: VehicleBody3D)
 
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const REPLAN_S := 2.0
@@ -88,6 +90,12 @@ func _physics_process(delta: float) -> void:
 	for car in cars.duplicate():
 		if not is_instance_valid(car):
 			cars.erase(car)
+			continue
+		if int(car.get("driver_peer_id")) != 0:
+			cars.erase(car)  # taken: no more steering it, and never freed with the thief inside
+			_plans.erase(car)
+			car.remove_meta("police")
+			taken.emit(car)
 			continue
 		if car.global_position.distance_to(target.global_position) > float(cfg("despawn_m", 260.0)):
 			_remove_car(car)
