@@ -35,6 +35,18 @@ class RoadEdge:
 	var name: String
 	var osm_way_id: int
 	var length_m: float
+	## Paved shoulders outside the lanes, left and right of the direction of travel, inside
+	## width_m (add-road-shoulders).
+	var shoulder_left_m: float = 0.0
+	var shoulder_right_m: float = 0.0
+
+	## Width of the lanes alone: width_m less the shoulders.
+	func carriageway_m() -> float:
+		return maxf(width_m - shoulder_left_m - shoulder_right_m, 0.5)
+
+	## Offset of the lanes' centre from the centreline (positive = right of travel).
+	func carriageway_offset() -> float:
+		return (shoulder_left_m - shoulder_right_m) * 0.5
 
 
 class PedestrianWay:
@@ -100,6 +112,8 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 		edge.width_m = float(e["width_m"])
 		edge.bus = str(e.get("bus", ""))
 		edge.bus_lane = int(e.get("bus_lane", -1))
+		edge.shoulder_left_m = float(e.get("shoulder_left_m", 0.0))
+		edge.shoulder_right_m = float(e.get("shoulder_right_m", 0.0))
 		edge.layer = int(e["layer"])
 		edge.bridge = bool(e["bridge"])
 		edge.tunnel = bool(e["tunnel"])

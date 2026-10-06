@@ -75,6 +75,8 @@
           "lanes_forward": {"type": "integer", "minimum": 1},
           "bus": {"enum": ["", "only", "lane"]},
           "bus_lane": {"type": "integer", "minimum": -1},
+          "shoulder_left_m": {"type": "number", "minimum": 0},
+          "shoulder_right_m": {"type": "number", "minimum": 0},
           "lanes_backward": {"type": "integer", "minimum": 0},
           "oneway": {"type": "boolean"},
           "speed_kph": {"type": "integer", "minimum": 1},

@@ -42,11 +42,12 @@ func lines_for(edge: RoadGraph.RoadEdge) -> Array[Dictionary]:
 	var lanes_total := edge.lanes_forward + edge.lanes_backward
 	if lanes_total <= 0:
 		return out
-	var lane_w := edge.width_m / lanes_total
-	var half := edge.width_m * 0.5
+	var lane_w := edge.carriageway_m() / lanes_total
+	var half := edge.carriageway_m() * 0.5
+	var mid := edge.carriageway_offset()  # the lanes' centre; off the centreline when the shoulders differ
 	var lw: float = rules["line_width_m"]
 	var rule := class_rule(edge.road_class)
-	var divider := half - edge.lanes_forward * lane_w  # boundary between directions (or the left edge when one-way)
+	var divider := mid + half - edge.lanes_forward * lane_w  # boundary between directions (or the left edge when one-way)
 	if edge.lanes_backward > 0:
 		match rule["centre_style"]:
 			"single_solid":
@@ -62,8 +63,11 @@ func lines_for(edge: RoadGraph.RoadEdge) -> Array[Dictionary]:
 	for k in range(1, edge.lanes_backward):
 		out.append({"offset": divider - k * lane_w, "style": "dashed", "color": "white"})
 	if rule["edge_lines"]:
-		out.append({"offset": half - lw, "style": "solid", "color": "white"})
-		out.append({"offset": -half + lw, "style": "solid", "color": "white"})
+		# At the lanes' edge: just inside the road edge, or just out on a shoulder.
+		var right := mid + half + (lw * 0.5 if edge.shoulder_right_m > 0.0 else -lw)
+		var left := mid - half - (lw * 0.5 if edge.shoulder_left_m > 0.0 else -lw)
+		out.append({"offset": right, "style": "solid", "color": "white"})
+		out.append({"offset": left, "style": "solid", "color": "white"})
 	return out
 
 
@@ -93,8 +97,8 @@ func build(graph: RoadGraph, junctions: Dictionary) -> Dictionary:
 		if edge.bus != "":
 			# Bus lanes get a red tint ribbon down the middle of each reserved lane.
 			var lanes_total := edge.lanes_forward + edge.lanes_backward
-			var lane_w := edge.width_m / maxf(lanes_total, 1)
-			var div := base_hw - edge.lanes_forward * lane_w
+			var lane_w := edge.carriageway_m() / maxf(lanes_total, 1)
+			var div := edge.carriageway_offset() + edge.carriageway_m() * 0.5 - edge.lanes_forward * lane_w
 			for k in range(edge.lanes_forward):
 				if edge.bus == "only" or k == edge.bus_lane:
 					lines.append({"offset": div + (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})

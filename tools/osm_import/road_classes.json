@@ -24,6 +24,10 @@
     "depth_max_m": 1.8,
     "end_clear_m": 4.0
   },
+  "shoulders": {
+    "_comment": "Paved shoulder outside the outer lanes, [left, right] of the direction of travel in metres; a two-way road gets the right width on both sides. Only where the width is not tagged.",
+    "by_class": {"motorway": [1.0, 2.5], "trunk": [1.0, 2.5], "motorway_link": [0.6, 1.5], "trunk_link": [0.6, 1.5]}
+  },
   "barriers": {
     "highway_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
     "parapet_height_m": 1.0,

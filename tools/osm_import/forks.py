@@ -73,7 +73,9 @@ def shape_forks(graph: RoadGraph, cfg: ImportConfig) -> ForkStats:
             continue  # too sharp to be a ramp
         link = graph.edges[link_eid]
         through = graph.edges[along[0]]
-        hw_t, hw_l = through.width_m / 2.0, link.width_m / 2.0
+        # Lanes to lanes: the ramp lane continues the outer lane, shoulders aside.
+        hw_t = (through.width_m - through.shoulder_left_m - through.shoulder_right_m) / 2.0
+        hw_l = (link.width_m - link.shoulder_left_m - link.shoulder_right_m) / 2.0
         if hw_l >= hw_t - 0.05:
             continue  # not narrower than the road it leaves: not a ramp
         tx, tz = along[1]
