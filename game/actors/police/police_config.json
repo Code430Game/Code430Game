@@ -26,5 +26,27 @@
   "player_health": 100.0,
   "banner_s": 3.0,
   "crash_damage_per_mps": 2.0,
-  "crash_min_mps": 9.0
+  "crash_min_mps": 9.0,
+  "officer_board_m": 2.5,
+  "helicopter": {
+    "_comment": "update-police-pursuit: slower than a fast car (35 m/s is about 126 km/h; fast cars top out at 150-190), so it can be outrun in the open as well as lost under cover.",
+    "speed_mps": 35.0,
+    "climb_mps": 9.0,
+    "cruise_m": 55.0,
+    "orbit_m": 38.0,
+    "orbit_rad_s": 0.35,
+    "sight_m": 150.0,
+    "lost_s": 2.0,
+    "search_radius_m": 70.0,
+    "search_rad_s": 0.25
+  },
+  "canopy": {
+    "_comment": "update-police-pursuit: dense canopy hides the player from the helicopter. A tree counts when at least min_trees trees (itself included) stand within group_m; street-tree rows have about 3. The sight ray must pass min_depth_m through such crowns.",
+    "group_m": 12.0,
+    "min_trees": 5,
+    "min_depth_m": 1.5,
+    "sample_m": 0.75,
+    "crown_mid": 0.62,
+    "crown_half_height": 0.28
+  }
 }

@@ -187,7 +187,7 @@ func test_the_helicopter_searches_where_it_lost_the_player_and_finds_them_by_sig
 	assert_bool(heli.sees_target()).is_true()
 	# The player slips away out of sight range: it circles the last place it saw them.
 	pm.player.global_position = Vector3(390, 1, 0)
-	await get_tree().create_timer(PoliceHelicopter.LOST_S + 0.3).timeout
+	await get_tree().create_timer(float(PoliceHelicopter.DEFAULTS["lost_s"]) + 0.3).timeout
 	assert_int(heli.state).is_equal(PoliceHelicopter.State.SEARCH)
 	assert_bool(heli.sees_target()).is_false()
 	assert_float(heli.last_seen.x).is_less(10.0)

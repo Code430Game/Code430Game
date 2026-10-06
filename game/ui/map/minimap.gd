@@ -20,6 +20,7 @@ const POLICE_BLUE := Color(0.2, 0.45, 1.0)
 const POLICE_RED := Color(1.0, 0.18, 0.2)
 const POLICE_FLASH_S := 0.25  # half a red-blue flash cycle
 const BLIP_EDGE_PX := 6.0  # markers keep this far inside the border
+const DASHES := 6  # dashes in the searching helicopter's ring
 
 var renderer: MapRenderer
 var player: Node3D
@@ -27,6 +28,9 @@ var player: Node3D
 ## "flash": bool}]. Shapes: "cross" (the default; ambulances on a call), "dot" (police cars and
 ## officers) and "helicopter" (a ring round a dot). Police colours flash red and blue when
 ## `flash` is set; a police marker off the edge is pinned to the edge so the chase reads.
+## `seen` (default true): a police dot is solid while that unit sees the player and hollow
+## otherwise; `searching`: the helicopter's ring is dashed while it circles where it lost them
+## (update-police-pursuit 1.3).
 var blips: Array = []
 ## The pack's garages (MapPack.garages), for the floor view while the player is inside one.
 var garages: Array[GarageBuilder.Garage] = []
@@ -81,13 +85,22 @@ func _draw() -> void:
 			continue
 		px = pin_to_edge(px, centre, inner)
 		var colour := POLICE_RED if bool(b.get("flash", false)) and flash_red else POLICE_BLUE
+		var sees := bool(b.get("seen", true))
 		if shape == "helicopter":
-			draw_circle(px, 7.0, Color(1, 1, 1, 0.9), false, 2.0)
-			draw_circle(px, 5.5, colour, false, 2.0)
-			draw_circle(px, 2.5, colour)
-		else:
+			if bool(b.get("searching", false)):
+				_draw_dashed_ring(px, 7.0, Color(1, 1, 1, 0.9))  # circling where it lost them
+				_draw_dashed_ring(px, 5.5, colour)
+			else:
+				draw_circle(px, 7.0, Color(1, 1, 1, 0.9), false, 2.0)
+				draw_circle(px, 5.5, colour, false, 2.0)
+			if sees:
+				draw_circle(px, 2.5, colour)
+		elif sees:
 			draw_circle(px, 4.5, Color(1, 1, 1, 0.9))
 			draw_circle(px, 3.2, colour)
+		else:
+			draw_circle(px, 4.5, Color(1, 1, 1, 0.9), false, 1.5)  # hollow: this unit has lost sight
+			draw_circle(px, 3.0, colour, false, 1.5)
 	var tip := centre + Vector2(0, -PLAYER_MARKER_PX)
 	var left := centre + Vector2(-PLAYER_MARKER_PX * 0.7, PLAYER_MARKER_PX * 0.7)
 	var right := centre + Vector2(PLAYER_MARKER_PX * 0.7, PLAYER_MARKER_PX * 0.7)
@@ -98,6 +111,13 @@ func _draw() -> void:
 
 ## `px` if it lies inside `inner`, else the point where the line from `centre` towards it
 ## leaves `inner`, so a marker beyond the map's edge sits on the edge in its direction.
+## A ring of DASHES short arcs around `c`.
+func _draw_dashed_ring(c: Vector2, radius: float, colour: Color) -> void:
+	for i in range(DASHES):
+		var a0 := TAU * float(i) / DASHES
+		draw_arc(c, radius, a0, a0 + TAU / DASHES * 0.55, 4, colour, 2.0, true)
+
+
 static func pin_to_edge(px: Vector2, centre: Vector2, inner: Rect2) -> Vector2:
 	if inner.has_point(px):
 		return px

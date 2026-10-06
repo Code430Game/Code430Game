@@ -16,5 +16,13 @@
     "size_px": 40.0,
     "opacity": 0.7,
     "flash_s": 0.6
+  },
+  "seen_badge": {
+    "_doc": "update-police-pursuit: the eye beside the wanted stars. blink_s is half a blink cycle while hidden; hidden_alpha the dim half.",
+    "size_px": 44.0,
+    "mark_px": 20.0,
+    "blink_s": 0.45,
+    "hidden_alpha": 0.35,
+    "ring_px": 3.0
   }
 }

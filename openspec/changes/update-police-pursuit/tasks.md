@@ -1,16 +1,23 @@
 ## 1. Read the chase
-- [ ] 1.1 `Wanted` exposes who sees the player (helicopter, ground units) and the hidden progress (`unseen_s / lose_s[stars]`); tests at each star level
-- [ ] 1.2 Seen badge beside the stars: solid eye with who-has-you marks while seen, blinking hollow eye with a filling ring while hidden, hidden while not wanted; accent colour; tests on the states and the ring
-- [ ] 1.3 Minimap: police markers solid while that unit sees the player, hollow otherwise; the helicopter's ring dashed while it searches; tests on the marker states
+- [x] 1.1 `Wanted` exposes who sees the player (helicopter, ground units) and the hidden progress (`unseen_s / lose_s[stars]`); tests at each star level
+  - 2026-10-06: `Wanted.ground_sees` (updated each frame while wanted), `seen()`, `lose_s()` and `hidden_progress()`; the star-drop clock uses the same `seen()`. Tests: progress is half at half of each level's lose time (1-3 stars); a car in range or the helicopter empties it and names who sees.
+- [x] 1.2 Seen badge beside the stars: solid eye with who-has-you marks while seen, blinking hollow eye with a filling ring while hidden, hidden while not wanted; accent colour; tests on the states and the ring
+  - 2026-10-06: `game/ui/hud/seen_badge.gd`, drawn in code (an almond eye, the iris in the tone's accent): seen is a solid eye with a car and/or helicopter mark on dark discs to its left; hidden is a hollow eye closed with a line, blinking (`blink_s` 0.45, dim half at 0.35), with an accent ring filling clockwise from the top. A change of state restarts the blink so being spotted reads at once. Placed at the top right left of the weapon tile, under the stars. Tunables in `hud_config.json` (`seen_badge`). Tests: off/seen/hidden from stars and who sees, the ring only while hidden, the blink.
+- [x] 1.3 Minimap: police markers solid while that unit sees the player, hollow otherwise; the helicopter's ring dashed while it searches; tests on the marker states
+  - 2026-10-06: `PoliceManager.markers()` adds `sees` (ground units within `police_sight_m`, the helicopter by its own sight) and `searching`; the minimap draws hollow dots and a six-dash ring. Test: a car at 30 m sees, one at 120 m doesn't; a searching helicopter is marked searching and not seeing.
 
 ## 2. Escape the helicopter
-- [ ] 2.1 Helicopter tunables to `police_config.json`; speed 35 m/s by default; lost in the open beyond sight range for `lost_s`; tests (a car at a fast car's speed in a straight line gets away; one standing still in the open does not)
-- [ ] 2.2 Dense tree canopy blocks the helicopter's sight (a canopy query, not physics bodies); street-tree rows don't; tests
+- [x] 2.1 Helicopter tunables to `police_config.json`; speed 35 m/s by default; lost in the open beyond sight range for `lost_s`; tests (a car at a fast car's speed in a straight line gets away; one standing still in the open does not)
+  - 2026-10-06: a `helicopter` block in `police_config.json` (speed 35 m/s, climb 9, cruise 55, orbit 38 at 0.35 rad/s, sight 150, lost 2 s, search radius 70 at 0.25 rad/s); `PoliceHelicopter.tun()` reads it with `DEFAULTS` as the fallback. Losing a player in the open already followed from the sight range; the lower speed is what makes it reachable. Tests step the helicopter by hand: a target at 50 m/s (180 km/h; the catalogue's fastest cars reach it) is lost within 16 s (at the old 45 m/s it isn't); a target standing still is kept.
+- [x] 2.2 Dense tree canopy blocks the helicopter's sight (a canopy query, not physics bodies); street-tree rows don't; tests
+  - 2026-10-06: `game/world/vegetation/canopy_cover.gd`: the pack's drawn trees (capped like the chunks) in an 8 m grid; the sight ray is sampled every 0.75 m over the stretch low enough to reach a crown, and 1.5 m through crowns of trees with at least 5 trees within 12 m blocks it. On Ottawa's trees that density is met by about two thirds of scattered (park and wood) trees and under a fifth of individually mapped ones; a street row has about 3. Tunables in `police_config.json` (`canopy`). Tests: a park clump blocks the view from above, open ground and a row of street trees don't, and the helicopter loses a player under the clump.
 
 ## 3. Patrol cars
-- [ ] 3.1 A patrol car whose officer is out parks (handbrake, no steering) until the officer is back or the chase ends; test that it doesn't move when the player drives off
+- [x] 3.1 A patrol car whose officer is out parks (handbrake, no steering) until the officer is back or the chase ends; test that it doesn't move when the player drives off
+  - 2026-10-06: `_drive` holds a car marked `officer_out` with the handbrake. Officers remember their car: when the player drives off, the officer runs back and gets in (`officer_board_m` 2.5), and the car drives again; an officer left far behind is dropped with their empty car, so a fresh car can come. A taken patrol car (`hand_over`) is no longer the officer's. Test: the empty car stays within 0.5 m while the player drives away, then the officer boards and the car is free to drive.
 
 ## 4. Check
-- [ ] 4.1 Mac screenshots: the badge seen (helicopter, ground units), hidden mid-ring, and the minimap marker states; day and night
+- [x] 4.1 Mac screenshots: the badge seen (helicopter, ground units), hidden mid-ring, and the minimap marker states; day and night
+  - 2026-10-06: seen by day at three stars (car and helicopter marks, solid eye; near cars solid and far ones hollow on the minimap); hidden under the 417 at x 767, z 911 by day at one star (hollow eye, ring about half at 6 s of 12); the same spot at night at three stars (hidden, the helicopter's ring dashed while it searches, cars hollow). Mac benchmark (deck preset, 40 s autodrive): render CPU 0.35 ms, physics mean 3.97 ms; with `--wanted=3`: 0.39 ms and 4.03 ms.
 - [ ] 4.2 Deck benchmark: no change while not wanted; a 3-star chase within budget
 - [ ] 4.3 Human plays a chase on the Deck by day and by night and says whether the badge reads, whether hiding and outrunning feel fair, and whether a daytime helicopter cue is still needed
