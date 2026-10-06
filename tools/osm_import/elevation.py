@@ -742,19 +742,26 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
             a, b = e.polyline[i], e.polyline[i + 1]
             idx.add((a[0], a[2]), (b[0], b[2]), (eid, i))
     ramp = float(ped.get("curb_ramp_m", 0.4))
+    along_cos = math.cos(math.radians(float(ped.get("sidewalk_along_road_deg", 50.0))))
     count = 0
     for w in graph.pedestrian:
         if not w.covered:
             w.polyline = _split_at_ribbon_edges(w, graph, idx, ramp)
         pts = []
         nearest_class = None
-        for p in w.polyline:
+        poly = w.polyline
+        for k, p in enumerate(poly):
             x, z = p[0], p[2]
+            # The way's direction here, for telling its own street from one crossing over it.
+            pa, pb = poly[max(k - 1, 0)], poly[min(k + 1, len(poly) - 1)]
+            wdx, wdz = pb[0] - pa[0], pb[2] - pa[2]
+            wl = math.hypot(wdx, wdz)
             # The nearest road on the way's own layer wins; only when none is in reach does any
             # road count (issue #14: a bridge's sidewalk right above the street below took the
             # street's height and lay across it).
             same = [math.inf, None, 0.0, None]
             other = [math.inf, None, 0.0, None]
+            across = [math.inf, None, 0.0, None]
             for a, b, (eid, i) in (
                 () if w.covered else idx.near(x, z, follow + 20.0)
             ):  # covered ways pass under roads: terrain only
@@ -763,6 +770,15 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                     continue  # paths do not ride on decks; they pass under them
                 d = _seg_dist(x, z, a[0], a[1], b[0], b[1])
                 pick = same if e.layer == w.layer else other
+                if w.kind == "sidewalk" and wl > 0.0:
+                    # A sidewalk runs along its street. A road crossing it at a wide angle is
+                    # one it passes under or over (the 417 over Metcalfe is layer 0 too), so it
+                    # only counts when nothing running alongside is in reach.
+                    rl = math.hypot(b[0] - a[0], b[1] - a[1])
+                    if rl > 0.0:
+                        cos = abs(wdx * (b[0] - a[0]) + wdz * (b[1] - a[1])) / (wl * rl)
+                        if cos < along_cos:
+                            pick = across
                 if d < pick[0] and d <= e.width_m / 2.0 + follow:
                     dx, dz = b[0] - a[0], b[1] - a[1]
                     l2 = dx * dx + dz * dz
@@ -775,7 +791,9 @@ def apply_pedestrian_elevation(graph: RoadGraph, source: ElevationSource, cfg: I
                     pick[1] = e.polyline[i][1] + (e.polyline[i + 1][1] - e.polyline[i][1]) * t
                     pick[2] = e.width_m / 2.0
                     pick[3] = e.road_class
-            best_d, best_y, best_hw, cls = same if same[1] is not None else other
+            best_d, best_y, best_hw, cls = (
+                same if same[1] is not None else other if other[1] is not None else across
+            )
             if cls is not None:
                 nearest_class = cls
             inside_ribbon = best_y is not None and best_d <= best_hw
