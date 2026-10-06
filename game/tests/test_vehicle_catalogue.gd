@@ -12,7 +12,7 @@ func _catalogue() -> Node:
 
 func test_base_set_has_the_nine_classes_and_a_fallback() -> void:
 	var c := _catalogue()
-	assert_int(c.ids().size()).is_equal(10)  # nine classes plus the police car (sedan body)
+	assert_int(c.ids().size()).is_equal(11)  # nine classes plus the police car and the ambulance
 	for cls: String in CatalogueScript.BODY_CLASSES:
 		var found := false
 		for id in c.ids():
@@ -39,8 +39,8 @@ func test_pack_entries_merge_after_the_base_set() -> void:
 	assert_bool(c.has("pack.limo")).is_true()
 	assert_bool(c.has("pack.hover")).is_false()
 	assert_float(float(c.entry("coupe")["top_speed_kph"])).is_equal(260.0)  # same id replaces
-	assert_int(c.ids().size()).is_equal(11)
-	assert_int(c.index_of("pack.limo")).is_equal(10)  # appended: base indices stay stable
+	assert_int(c.ids().size()).is_equal(12)
+	assert_int(c.index_of("pack.limo")).is_equal(11)  # appended: base indices stay stable
 
 
 func test_road_groups() -> void:

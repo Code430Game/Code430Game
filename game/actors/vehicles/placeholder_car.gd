@@ -23,6 +23,7 @@ extends VehicleBody3D
 var override_throttle: float = -1.0
 var override_steer: float = 0.0
 var override_brake: float = -1.0  # 0..1 for one physics frame (labs and scripted drives), like override_throttle
+var override_hold: bool = false  # handbrake on for one physics frame: stopped and staying put (brake alone reverses when still)
 
 ## Seconds the car may stay upside down (or below the world floor) before it is put back on the road.
 @export var recover_after_s: float = 3.0
@@ -246,6 +247,10 @@ func _physics_process(delta: float) -> void:
 		brake = brake_force_max * brk
 	if driven and Input.is_action_pressed("handbrake"):
 		brake = handbrake_force
+	if override_hold:
+		engine_force = 0.0
+		brake = handbrake_force
+		override_hold = false
 	set_braking(brake > 0.0 and forward_speed() > -reverse_threshold_mps)
 	_step_reset_hold(driven and Input.is_action_pressed("reset_vehicle"), delta)
 	var upside_down := global_basis.y.y < 0.0

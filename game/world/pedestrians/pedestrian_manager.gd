@@ -12,6 +12,8 @@ extends Node3D
 
 ## A vehicle knocked a walker down (the police hear about it if someone saw).
 signal struck_by_vehicle(agent: Pedestrian, vehicle: Node3D)
+## Someone was knocked down, by anything (ambulances answer it).
+signal downed(agent: Pedestrian)
 
 const BODY_SCENE := preload("res://world/pedestrians/pedestrian_body.tscn")
 const WALK_SHADER := preload("res://world/pedestrians/pedestrian_walk.gdshader")
@@ -33,6 +35,9 @@ var mirror: bool = false
 var anchors: PackedVector3Array = PackedVector3Array()
 ## Player bodies pedestrians stop for. Set each frame by the scene.
 var obstacles: Array[Node3D] = []
+## Emergency vehicles on a call (lights and siren): nobody steps onto a crossing they are
+## bearing down on. Set each frame by the scene.
+var emergency: Array[Node3D] = []
 var _spawn_timer: float = 0.0
 var _frame: int = 0
 const POOLS := 8  # distinct body looks; agents are spread across them
@@ -97,6 +102,15 @@ func _link_crossings() -> void:
 func crossing_open(path: WalkGraph.WalkPath) -> bool:
 	if path.kind != "crossing" or path.crossed_edge == "":
 		return true
+	if not emergency.is_empty():
+		var at := path.position_at(path.length * 0.5)
+		var reach := float(config.get("emergency_gap_m", 45.0))
+		for v in emergency:
+			if not is_instance_valid(v):
+				continue
+			var rel := at - v.global_position
+			if rel.length() < reach and rel.dot(-v.global_basis.z) > 0.0:
+				return false  # lights and siren coming: wait (even on a green)
 	if path.signal_node != "" and traffic != null:
 		return traffic.signals.light(path.signal_node, path.crossed_edge) == TrafficManager.Signals.Light.RED
 	if traffic == null:
@@ -228,7 +242,7 @@ func step(delta: float) -> void:
 		var a := agents[i]
 		if a.state != Pedestrian.State.WALKING:
 			_step_struck(a, delta)
-			if a.state == Pedestrian.State.DOWN and a.timer <= 0.0:
+			if a.state == Pedestrian.State.DOWN and a.timer <= 0.0 and not a.held:
 				_drop(a)
 				agents.remove_at(i)
 			continue
@@ -572,6 +586,48 @@ func knock_down(a: Pedestrian, impulse: Vector3, point: Vector3, spread: float =
 	elif a.body != null:
 		a.body.make_dynamic(Vector3.ZERO)
 		a.body.apply_impulse(impulse, point - a.body.global_position)
+	downed.emit(a)
+
+
+## Stands a downed person back up where they lie and sends them on their way along their
+## path (an ambulance in the clean tone).
+func revive(a: Pedestrian) -> void:
+	if a.state == Pedestrian.State.WALKING or not agents.has(a):
+		return
+	var at := a.position()
+	_drop(a)
+	a.state = Pedestrian.State.WALKING
+	a.timer = 0.0
+	a.held = false
+	a.wait_time = 0.0
+	if walk != null and a.path_id >= 0 and a.path_id < walk.paths.size():
+		var path := walk.paths[a.path_id]
+		a.distance = closest_distance(path, at)
+		_place(a, path, path.direction_at(a.distance) * (1.0 if a.forward else -1.0))
+
+
+## Takes a downed person out of the world (carried off on a stretcher, lifted by a drone).
+func carry_off(a: Pedestrian) -> void:
+	if not agents.has(a):
+		return
+	_drop(a)
+	agents.erase(a)
+
+
+## Distance along `path` of the point on it nearest `p`.
+static func closest_distance(path: WalkGraph.WalkPath, p: Vector3) -> float:
+	var best := 0.0
+	var best_d := INF
+	for i in range(path.points.size() - 1):
+		var a := path.points[i]
+		var seg := path.points[i + 1] - a
+		var len2 := seg.length_squared()
+		var t := clampf((p - a).dot(seg) / len2, 0.0, 1.0) if len2 > 0.0 else 0.0
+		var d := p.distance_to(a + seg * t)
+		if d < best_d:
+			best_d = d
+			best = path.cumulative[i] + t * sqrt(len2)
+	return best
 
 
 ## Knocks down the walking pedestrian nearest `around` within `radius`, pushed with `impulse`
@@ -649,7 +705,7 @@ func _take_ragdoll() -> CharacterRagdoll:
 			return rd
 	var oldest: Pedestrian = null
 	for a in agents:
-		if a.ragdoll != null and a.state == Pedestrian.State.DOWN and (oldest == null or a.timer < oldest.timer):
+		if a.ragdoll != null and a.state == Pedestrian.State.DOWN and not a.held and (oldest == null or a.timer < oldest.timer):
 			oldest = a
 	if oldest == null:
 		return null  # every ragdoll is mid-fall: this one tumbles as a capsule
