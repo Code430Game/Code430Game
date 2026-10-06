@@ -1,6 +1,9 @@
 extends GdUnitTestSuite
 ## The full testbed: D-pad presses that navigate menus must not reach the driving hotkeys
-## (D-pad down cycles the camera, D-pad right the headlights), human report 2026-10-03.
+## (D-pad down cycles the camera, D-pad right the headlights), human report 2026-10-03. Also
+## the review fixes that live in the testbed: the clock before the parked cars, and busted or
+## wasted resetting the weapons with one banner timer. Starts at 10:00 (a parked-car hour block
+## other than the default noon's).
 
 const TESTBED := preload("res://scenes/play_testbed.tscn")
 
@@ -10,6 +13,7 @@ var _bed: Node
 func before() -> void:
 	_bed = TESTBED.instantiate()
 	_bed.set("_start_in_car", true)
+	_bed.set("_start_hour", 10.0)
 	add_child(_bed)
 	for i in range(600):
 		await get_tree().process_frame
@@ -139,3 +143,29 @@ func test_dpad_on_the_map_leaves_camera_and_lights_alone() -> void:
 	await _assert_dpad_leaves_driving_alone("map")
 	map.close()
 	await get_tree().process_frame
+
+
+# --- review fixes (2026-10-06); last, since a catch takes the player out of the car ---
+
+
+func test_parked_cars_fill_for_the_start_hour() -> void:
+	var parked: ParkedCars = _bed.get("_parked")
+	assert_float(parked.setup_hour).is_equal_approx(10.0, 0.01)  # not the default 12:00 first
+
+
+func test_a_catch_resets_the_weapons_and_a_second_catch_keeps_its_banner() -> void:
+	var shooter: Shooter = _bed.get("_shooter")
+	var banner: Label = _bed.get("_banner")
+	var wanted: Wanted = _bed.get("_wanted")
+	wanted.config["banner_s"] = 0.4
+	_bed.call("_caught", "busted")  # out of the car, so the wheel can open on foot
+	await get_tree().process_frame
+	shooter.wheel.open_wheel()
+	assert_bool(shooter.wheel.is_open()).is_true()
+	await get_tree().create_timer(0.25).timeout
+	_bed.call("_caught", "wasted")
+	assert_bool(shooter.wheel.is_open()).override_failure_message("the wheel stayed open through a catch").is_false()
+	await get_tree().create_timer(0.25).timeout  # past the first banner's time, inside the second's
+	assert_bool(banner.visible).override_failure_message("the first catch's timer hid the second banner").is_true()
+	await get_tree().create_timer(0.35).timeout
+	assert_bool(banner.visible).is_false()

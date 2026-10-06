@@ -92,8 +92,16 @@ func cfg(key: String, fallback: Variant) -> Variant:
 	return config.get(key, fallback)
 
 
+## What the crew does for the active tone (`outcomes.ambulance` in the mode file): "revive"
+## (they get up), "drone" (lifted away) or "stretcher" (carried off, the default).
+static func outcome() -> String:
+	return ContentMode.outcome("ambulance", "stretcher")
+
+
 ## A person is down: joins the open call nearby, or opens one.
 func report(a: Pedestrian) -> void:
+	if a.held:
+		return  # already on a call
 	a.held = true
 	var merge := float(cfg("merge_m", 14.0))
 	for c in calls:
@@ -363,7 +371,7 @@ func _step_tend(r: Run, delta: float) -> void:
 			r.t += delta
 			for m in r.medics:
 				(m.get_meta("rig") as CharacterRig).position.y = -0.45  # kneeling
-			if r.carried == null and ContentMode.current == "dystopia":
+			if r.carried == null and outcome() == "drone":
 				r.carried = _make_drone(at)
 			if r.t >= float(cfg("tend_s", 5.0)):
 				_finish_tending(r)
@@ -385,11 +393,11 @@ func _finish_tending(r: Run) -> void:
 	var c := r.call
 	if c == null:
 		return
-	match ContentMode.current:
-		"clean":
+	match outcome():
+		"revive":
 			for a in c.people.duplicate():
 				peds.revive(a)
-		"dystopia":
+		"drone":
 			for a in c.people.duplicate():
 				peds.carry_off(a)
 			if r.carried != null:

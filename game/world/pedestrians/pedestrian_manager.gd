@@ -417,6 +417,8 @@ func _despawn_far() -> void:
 	var far := float(config["despawn_radius_m"])
 	for i in range(agents.size() - 1, -1, -1):
 		var a := agents[i]
+		if a.held:
+			continue  # an ambulance is on its way; it takes them away itself
 		if _distance_to_anchors(a.position()) > far:
 			_drop(a)
 			agents.remove_at(i)

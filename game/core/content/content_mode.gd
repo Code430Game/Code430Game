@@ -94,6 +94,12 @@ func flag(name: String) -> bool:
 	return bool(mode().get("flags", {}).get(name, false))
 
 
+## How a system resolves things in the active mode (`outcomes.<system>` in the mode file, for
+## example what paramedics do), or `fallback` when the mode does not say.
+func outcome(system: String, fallback: String) -> String:
+	return str(mode().get("outcomes", {}).get(system, fallback))
+
+
 ## The active mode's HUD accent colour (`hud.accent`), white when the mode has none.
 func hud_accent() -> Color:
 	var hex := str(mode().get("hud", {}).get("accent", ""))

@@ -81,6 +81,9 @@ func set_weapon(w: Dictionary) -> void:
 	if id == model_id and (_model != null) == (id != ""):
 		return
 	model_id = id
+	_swing_t = -1.0  # a swing or kick-up in progress belongs to the weapon put away
+	_recoil_t = -1.0
+	_trail_pts.clear()
 	if _model != null:
 		_model.queue_free()
 		_model = null

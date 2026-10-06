@@ -24,6 +24,7 @@
   "officer_punch_damage": 5.0,
   "fire_min_stars": 3,
   "player_health": 100.0,
+  "banner_s": 3.0,
   "crash_damage_per_mps": 2.0,
   "crash_min_mps": 9.0
 }

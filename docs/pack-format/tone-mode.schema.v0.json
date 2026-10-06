@@ -26,6 +26,14 @@
       }
     },
     "variant_key": {"type": "string", "minLength": 1},
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How systems resolve things in this mode, so gameplay code never branches on a mode id.",
+      "properties": {
+        "ambulance": {"enum": ["revive", "stretcher", "drone"], "description": "What paramedics do once they have tended a downed person: they get up, are carried off on a stretcher, or are lifted away by a drone."}
+      }
+    },
     "hud": {
       "type": "object",
       "additionalProperties": false,

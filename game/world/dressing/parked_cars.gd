@@ -50,6 +50,8 @@ var lots: Array = []  # ParkingLotBuilder.Lot
 var anchors: PackedVector3Array = PackedVector3Array()
 ## Clock hour (0..24), set by the scene; occupancy follows it in blocks of `hour_bucket`.
 var hour: float = 12.0
+## The hour the stalls were first filled for (set the clock before `setup`).
+var setup_hour: float = -1.0
 ## Pins the share of occupied stalls (screenshots, `--parking-occupancy=`); negative: use the table.
 var occupancy_override: float = -1.0
 var per_chunk_cap: int = 120
@@ -76,6 +78,7 @@ func _ready() -> void:
 ## Takes the pack's lots and builds the meshes and body pool.
 func setup(pack_lots: Array) -> void:
 	lots = pack_lots
+	setup_hour = hour
 	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
 	per_chunk_cap = int(preset.get("parked_cars_per_chunk", per_chunk_cap))
 	bodies_max = int(preset.get("parked_car_bodies", bodies_max))
@@ -348,6 +351,14 @@ func take(body: Node) -> VehicleBody3D:
 	render()
 	stall_taken.emit(c.key)
 	return car
+
+
+## Where the car in stall `key` stands, or Vector3.INF when the stall holds no car.
+func position_of(key: String) -> Vector3:
+	var c: Parked = _by_key.get(key)
+	if c == null:
+		return Vector3.INF
+	return c.body.global_position if c.body != null else c.transform().origin
 
 
 ## Host: empties the stall `key` for a guest who takes its car. Returns {"transform", "color",

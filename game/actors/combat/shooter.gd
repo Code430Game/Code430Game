@@ -51,6 +51,7 @@ var _punch_side: int = 0
 var _streaks: Dictionary = {}  # Pedestrian -> [punches in a row, _clock at the last]
 var _clock: float = 0.0
 var _next_held: float = -1.0  # seconds LB / Tab has been held, or < 0
+var _wheel_this_press: bool = false  # the wheel already opened during this LB / Tab press
 var _last_slot: int = 0
 
 
@@ -128,8 +129,8 @@ func _physics_process(delta: float) -> void:
 	if w.is_empty():
 		step_fists(delta, Input.is_action_pressed("fire"))
 	else:
-		if Input.is_action_just_pressed("reload") and int(w.get("magazine", 0)) > 0:
-			_reload_left = float(w.get("reload_s", 1.0))
+		if Input.is_action_just_pressed("reload"):
+			start_reload()
 		if Input.is_action_pressed("fire"):
 			pull_trigger()
 	_update_hud()
@@ -140,9 +141,15 @@ func _physics_process(delta: float) -> void:
 func step_next(delta: float, pressed: bool) -> void:
 	var hold := float(WeaponWheel.tunables().get("hold_s", 0.2))
 	if pressed:
-		_next_held = 0.0 if _next_held < 0.0 else _next_held + delta
-		if wheel != null and not wheel.is_open() and _next_held >= hold:
+		if _next_held < 0.0:
+			_next_held = 0.0
+			_wheel_this_press = false
+		else:
+			_next_held += delta
+		# One wheel per press: a wheel cancelled with B / Esc stays shut until LB is let go.
+		if wheel != null and not wheel.is_open() and _next_held >= hold and not _wheel_this_press:
 			wheel.open_wheel()
+			_wheel_this_press = true
 		return
 	if _next_held < 0.0:
 		return
@@ -219,6 +226,37 @@ func pull_trigger() -> bool:
 		effects.sound(str(imp.get("sound", "")))
 	fired.emit(w)
 	return true
+
+
+## Starts a reload of the weapon in hand, unless it has no magazine, the magazine is full or a
+## reload is already running. Returns true when it started one.
+func start_reload() -> bool:
+	var w := weapons.current()
+	var mag := int(w.get("magazine", 0))
+	if mag <= 0 or _reload_left > 0.0 or weapons.rounds() >= mag:
+		return false
+	_reload_left = float(w.get("reload_s", 1.0))
+	return true
+
+
+## Puts the weapons back to rest (busted, wasted): wheel shut, no reload, cooldown, held fire,
+## LB hold or punch streaks carried over. The slot and the rounds stay.
+func reset() -> void:
+	if wheel != null:
+		wheel.close(false)
+	_next_held = -1.0
+	_wheel_this_press = false
+	_reload_left = 0.0
+	_cooldown = 0.0
+	_streaks.clear()
+	_drop_fists()
+	if player != null:
+		player.aiming = false
+		player.look_locked = false
+	if held != null:
+		held.aiming = false
+	_show_reticle(false)
+	_update_hud()
 
 
 ## The empty-hands tunables from combat_config.json.
@@ -337,7 +375,8 @@ func _swing(w: Dictionary) -> void:
 	q.exclude = [player.get_rid()]
 	for r in player.get_world_3d().direct_space_state.intersect_shape(q, 8):
 		var body: Object = r["collider"]
-		if peds != null and peds.agent_of(body as Node) != null:
+		var who: Pedestrian = peds.agent_of(body as Node) if peds != null and body is Node else null
+		if who != null and who.state == Pedestrian.State.WALKING:
 			hit(w, body, centre, -fwd, player.global_position)
 			return
 	# Nobody there: a paint brush still daubs the wall it touches.
@@ -426,6 +465,8 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 	var kind := str(w.get("impact", ""))
 	var imp := weapons.impact(kind)
 	var a: Pedestrian = peds.agent_of(collider as Node) if peds != null and collider is Node else null
+	if a != null and a.state != Pedestrian.State.WALKING:
+		return  # already down or falling: nothing more happens, and no new crime is reported
 	if a != null and kind == "fist":
 		_fist_hit(a, w, pos, from)
 		return
