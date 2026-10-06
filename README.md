@@ -1,6 +1,6 @@
 # Code 430
 
-A free, open-source, AI-built open-world crime game framework in the spirit of GTA III–IV, set on real city road networks from OpenStreetMap. Codename Code 430. Read `VISION.md` for the why and `AGENTS.md` for the rules.
+A free, open-source, AI-built open-world crime game framework in the spirit of GTA III–IV, set on real city road networks from OpenStreetMap. Codename Code 430. Read `VISION.md` for the why and `AGENTS.md` for the rules. Want to help? See `CONTRIBUTING.md` and the list of ready work in `docs/open-work.md`.
 
 Status: Phase 0 (foundations). The project boots to an empty testbed with a controller-driven camera.
 

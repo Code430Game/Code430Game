@@ -15,6 +15,10 @@ The import tool SHALL write `buildings.v0.json` with every building footprint in
 - **WHEN** a footprint spans a road whose surface is more than the span threshold below the footprint's median ground
 - **THEN** the footprint is exported with `spans_road` true and a `clearance_y` above the road
 
+#### Scenario: Levels only
+- **WHEN** a building has `building:levels=3` and no height
+- **THEN** its height is 3 times the configured storey height
+
 ### Requirement: Extruded Buildings
 The game SHALL extrude each footprint into walls and a flat roof at its ground height, one mesh per chunk, with collision, in both presets; raised parts SHALL start at their minimum height with an underside, and a building that spans a road SHALL leave a covered opening above the road with collision only above the clearance height.
 
