@@ -96,6 +96,70 @@ func test_plays_on_entry_pauses_on_exit_and_resumes() -> void:
 	assert_bool(_radio.is_playing()).is_true()
 
 
+## A stand-in for a drivable car: only the field the radio reads and writes.
+class FakeCar:
+	extends Node
+	var radio_station: String = ""
+
+
+func test_the_first_car_takes_the_players_choice_and_the_dial_writes_back() -> void:
+	_radio.select("code430.base.quest")
+	var mine: FakeCar = auto_free(FakeCar.new())
+	_radio.car_entered(mine)
+	assert_str(mine.radio_station).is_equal("code430.base.quest")
+	_radio.cycle(1)
+	assert_str(mine.radio_station).is_equal("code430.base.crypt")
+	_radio.car_exited()
+	_radio.cycle(1)  # not driving: the car keeps what it had
+	assert_str(mine.radio_station).is_equal("code430.base.crypt")
+
+
+func test_swapping_cars_keeps_each_cars_station() -> void:
+	_radio.select("code430.base.redline")
+	var mine: FakeCar = auto_free(FakeCar.new())
+	_radio.car_entered(mine)
+	_radio.car_exited()
+	var taken: FakeCar = auto_free(FakeCar.new())
+	taken.radio_station = "code430.base.hilltop"  # its owner's station
+	_radio.car_entered(taken)
+	assert_str(_radio.station_id).is_equal("code430.base.hilltop")
+	assert_str(_make().station_id).is_equal("code430.base.redline")  # getting in is not a choice: not saved
+	_radio.car_exited()
+	_radio.car_entered(mine)
+	assert_str(_radio.station_id).is_equal("code430.base.redline")
+	assert_str(taken.radio_station).is_equal("code430.base.hilltop")
+
+
+func test_a_car_left_off_stays_off_and_an_unknown_station_falls_back() -> void:
+	_radio.select("code430.base.crypt")
+	var quiet: FakeCar = auto_free(FakeCar.new())
+	quiet.radio_station = Radio.OFF
+	_radio.car_entered(quiet)
+	assert_str(_radio.station_id).is_equal(Radio.OFF)
+	assert_bool(_radio.is_playing()).is_false()
+	_radio.car_exited()
+	var stale: FakeCar = auto_free(FakeCar.new())
+	stale.radio_station = "gone.station"  # from a pack no longer loaded
+	_radio.car_entered(stale)
+	assert_str(stale.radio_station).is_equal("code430.base.crypt")
+
+
+func test_picks_are_seeded_sometimes_off_and_emergency_is_talk_or_nothing() -> void:
+	var ids := Radio.station_ids()
+	assert_int(ids.size()).is_equal(5)
+	var seen := {}
+	for i in range(200):
+		var got := Radio.pick_for_car(i)
+		assert_str(got).is_equal(Radio.pick_for_car(i))  # the same car, the same station
+		assert_bool(got == Radio.OFF or ids.has(got)).is_true()
+		seen[got] = true
+	assert_int(seen.size()).is_equal(6)  # every station and off turn up
+	var emergency := {}
+	for i in range(100):
+		emergency[Radio.pick_for_car(i, true)] = true
+	assert_array(emergency.keys()).contains_exactly_in_any_order([Radio.CHATTER, Radio.OFF])
+
+
 func test_off_is_silent() -> void:
 	_use_short_loop(_radio)
 	await _await_render(_radio, "test_loop")

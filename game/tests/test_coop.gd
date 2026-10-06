@@ -81,6 +81,7 @@ func test_host_releases_and_retires_agents_near_a_point() -> void:
 	assert_dict(m.release_near(Vector3(400, 0, 0))).is_empty()  # nothing within reach
 	var got := m.release_near(Vector3(52, 0, 0))
 	assert_object(got["color"]).is_equal(Color.GREEN)
+	assert_str(str(got["station"])).is_equal(Radio.pick_for_car(TrafficManager.station_seed(a)))  # the host's pick rides along
 	assert_int(m.agents.size()).is_equal(1)
 	assert_bool(m.hit_near(Vector3(301, 0, 0), Vector3(10, 0, 0))).is_true()
 	assert_bool(b.retired).is_true()

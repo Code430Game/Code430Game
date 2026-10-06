@@ -761,6 +761,7 @@ func take_car(body: TrafficCar) -> VehicleBody3D:
 	var car: VehicleBody3D = DRIVABLE_CAR_SCENE.instantiate()
 	car.set("body_color", a.color)
 	car.set("vehicle_id", a.vehicle_id)
+	car.set("radio_station", Radio.pick_for_car(station_seed(a)))
 	var holder: Node = get_parent() if get_parent() != null else self
 	holder.add_child(car)
 	car.global_transform = a.transform.translated_local(Vector3(0.0, 0.1, 0.0))
@@ -796,8 +797,13 @@ func hit_near(position: Vector3, velocity: Vector3, reach: float = 4.0) -> bool:
 	return true
 
 
+## Seeds a taken car's radio station: its model and where it was taken.
+static func station_seed(a: TrafficAgent) -> int:
+	return hash("%s %s" % [a.vehicle_id, a.position().snapped(Vector3.ONE)])
+
+
 ## Host: removes the nearest live agent within `reach` of `position` for a guest to take.
-## Returns {"transform", "color", "vehicle"} or an empty Dictionary.
+## Returns {"transform", "color", "vehicle", "station"} or an empty Dictionary.
 func release_near(position: Vector3, reach: float = 4.0) -> Dictionary:
 	var best: TrafficAgent = null
 	var best_d := reach
@@ -808,7 +814,7 @@ func release_near(position: Vector3, reach: float = 4.0) -> Dictionary:
 			best = a
 	if best == null:
 		return {}
-	var out := {"transform": best.transform, "color": best.color, "vehicle": best.vehicle_id}
+	var out := {"transform": best.transform, "color": best.color, "vehicle": best.vehicle_id, "station": Radio.pick_for_car(station_seed(best))}
 	_leave_junction(best)
 	_release_body(best)
 	agents.erase(best)

@@ -37,7 +37,7 @@ func _process(delta: float) -> void:
 
 
 ## Guest: asks the host for the traffic car at `position`; the answer spawns a car via `take_granted`.
-signal take_granted(transform: Transform3D, color: Color, vehicle_id: String)
+signal take_granted(transform: Transform3D, color: Color, vehicle_id: String, station: String)
 
 
 func request_take(position: Vector3) -> void:
@@ -51,12 +51,12 @@ func _request_take(position: Vector3) -> void:
 	var got := traffic.release_near(position)
 	if got.is_empty():
 		return
-	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"], got["vehicle"])
+	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"], got["vehicle"], got["station"])
 
 
 @rpc("authority", "reliable")
-func _grant_take(transform: Transform3D, color: Color, vehicle_id: String) -> void:
-	take_granted.emit(transform, color, vehicle_id)
+func _grant_take(transform: Transform3D, color: Color, vehicle_id: String, station: String = "") -> void:
+	take_granted.emit(transform, color, vehicle_id, station)
 
 
 ## Guest: asks the host for the parked car in stall `key` (parked cars are the same on every
@@ -72,7 +72,7 @@ func _request_take_parked(key: String) -> void:
 	var got := parked.release_key(key)  # also tells every peer the stall is empty (stall_taken)
 	if got.is_empty():
 		return
-	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"], got["vehicle"])
+	_grant_take.rpc_id(multiplayer.get_remote_sender_id(), got["transform"], got["color"], got["vehicle"], got["station"])
 
 
 ## Host: tells the guests that a stall was emptied (by anyone), so their copies match.

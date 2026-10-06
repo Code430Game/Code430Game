@@ -92,6 +92,7 @@ func test_a_taken_car_leaves_its_stall_empty_for_the_session() -> void:
 	var key := first.key
 	var car := p.take(first.body)
 	auto_free(car)
+	assert_str(str(car.get("radio_station"))).is_equal(Radio.pick_for_car(hash(key)))  # its owner's station, the same on every peer
 	assert_str(str(car.get("vehicle_id"))).is_equal(first.vehicle_id)
 	p.fill()  # a new hour block
 	for c in p.cars:
@@ -136,6 +137,7 @@ func test_a_guest_take_empties_the_stall_on_every_peer() -> void:
 	host.stall_taken.connect(func(k: String) -> void: announced.append(k))
 	var got := host.release_key(key)
 	assert_str(str(got["vehicle"])).is_not_empty()
+	assert_str(str(got["station"])).is_equal(Radio.pick_for_car(hash(key)))  # rides with the grant
 	assert_array(announced).contains_exactly([key])  # the host tells the others
 	guest.mark_taken(key)  # what _stall_taken does on each guest
 	assert_int(guest.cars.size()).is_equal(host.cars.size())

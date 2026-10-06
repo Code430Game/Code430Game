@@ -194,9 +194,11 @@ func test_take_car_spawns_a_drivable_car_in_the_agent_colour() -> void:
 	var body: TrafficCar = m._bodies[0]
 	a.body = body
 	body.agent = a
+	var seed_before := TrafficManager.station_seed(a)
 	var car := m.take_car(body)
 	assert_object(car).is_not_null()
 	assert_bool(car.is_in_group("vehicles")).is_true()
+	assert_str(str(car.get("radio_station"))).is_equal(Radio.pick_for_car(seed_before))
 	assert_int(m.agents.size()).is_equal(0)
 	assert_object(body.agent).is_null()
 	assert_float(car.global_position.distance_to(m.lanes.paths[0].position_at(50.0))).is_less(1.0)
