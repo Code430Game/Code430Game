@@ -3,6 +3,66 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-06
+
+Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun".
+
+- **Three-way splits make a blob junction** → `update-junction-surfaces` (issues #78, #79). The
+  "ball" junction, but for a T or Y: where a lane leaves the main road three ways, the junction
+  asphalt is a rounded hull that bulges into the grass, and the lane lines stop short of it.
+  - #78: Colonel By Drive, x 998, z 1041, junction `n901218147`: "junction turns into ball".
+  - #79: a parking entrance off a street, x 1098, z 935, junction `n6020506072`. A ragged wedge
+    of asphalt where the driveway meets the sidewalk, and a sign standing inside it.
+  - The X-intersection case was fixed earlier (`update-cluster-junction-arms`, fa34b3d). The
+    three-arm case wasn't covered. The importer review (2026-10-06) also found clusters with no
+    size limit (`cluster.py:113-151`, up to 8 nodes and arm offsets of 21 m): start there.
+- **Signs in the middle of roads** (human, 2026-10-06; one in #78's screenshot, another in the
+  underpass under the 417 by the Museum of Nature). `game/world/dressing/billboards.gd:28-60`
+  puts a board every 220 m, 3.5 m out from every trunk, primary or secondary road. It checks
+  nothing else, so boards land:
+  - on side streets, in junctions and on sidewalks;
+  - on the road under an overpass;
+  - in mid-air beside bridge decks.
+
+  Fix (a `fix/`): skip bridge roads, keep clear of junctions, drop any site whose post lands on
+  a road or sidewalk ribbon, and test that no board stands on a road.
+- **The report form's text box can't be typed on the Deck** (#79 went in without a
+  description). The form only focuses the text box and relies on Steam to show its keyboard,
+  which Steam does only for games that ask through Steamworks. Steam + X didn't bring it up
+  either. When the human pressed the Steam button, the keyboard flashed as it hid behind the
+  Steam menu, so it had opened but stayed behind the game. The co-op Join address box has the
+  same problem. Options:
+  - a small built-in on-screen keyboard (no new dependency);
+  - Steamworks through GodotSteam (a new dependency; the human decides).
+- **Driverless patrol car**: when an officer gets out, the car is marked `officer_out`
+  (`police_manager.gd:295`), but `_drive` never checks the mark, so the empty car keeps chasing
+  once the player moves. Fix: park it with the handbrake on until the officer is back or the
+  chase ends.
+- **The helicopter can't be shaken off** (human: "I still think it might be impossible to drive
+  away from the copter"). It flies at 45 m/s (about 160 km/h, `helicopter.gd:19`) in a straight
+  line and sees 150 m. The only escape is cover, and nothing in the game says so.
+  - Make it slower than a fast car (about 35 m/s).
+  - Let it lose a player who gets past its sight range in the open.
+  - Add a "find cover" hint.
+  - Move its constants into config.
+- **Shooting the police** (human: "I don't think I can shoot them to get away"). Officers can't
+  be hit; the police change never covered it. This needs a proposal: officer reactions by tone,
+  more stars, backup arriving.
+- **R3 hold resets the car mid-chase** (human: "It was the R3 trap, it's fine for now"). Holding
+  R3 to look behind for a second resets the car, which can drop it at the start. Keep it for now;
+  later, consider no reset while wanted or moving, or a different gesture.
+- **A reset keeps the wanted level.** After an R3 reset to the start (by Catherine Street and the
+  417), new patrol cars spawned around the player there. Decide whether a stuck-car reset should
+  clear or keep the wanted level.
+- **Weapon wheel: hold not yet tried.** The human tapped LB to cycle and didn't open the wheel.
+  Holding LB for more than 0.2 s opens it; confirm on the Deck.
+- **Fell under the floor after being busted.** Probably the respawn landed before that area's
+  ground had loaded. f555839 now builds the ground at the arrival point first. Unconfirmed,
+  because the place wasn't recorded; watch for it.
+- **Fixed during the session:**
+  - hold R3 on foot goes back to the start (f555839);
+  - the police and the helicopter show on the minimap (ed2ee5a).
+
 ## 2026-10-05
 
 - **Punching and kicking** → proposal `add-unarmed-combat` (human, 2026-10-05, while planning weapons: "another could be punching and kicking. Or that could be a different ticket"). Empty hands are already a slot in the weapon cycle; fists and kicks would fill it, with a non-lethal shove in clean.
