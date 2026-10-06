@@ -18,4 +18,5 @@ Notes (2026-10-06):
 
 ## 2. Verification
 - [ ] 2.1 Deck benchmark on the usual route: no change
-- [ ] 2.2 Human opens the wheel on the Deck in each tone and says whether the icons read at a glance and the stick picks feel right
+- [x] 2.2 Human opens the wheel on the Deck in each tone and says whether the icons read at a glance and the stick picks feel right
+  - 2026-10-06 Deck (aa69377): "weapon wheel is good." Tried in dystopia; clean and gritty not called out separately.
