@@ -25,9 +25,16 @@ step "Python tools: ruff + pytest"
 step "Pack manifests"
 ( cd "$ROOT/tools" && uv run python -m pack_tools ../packs )
 
+step "OpenSpec (validate --strict --all)"
+if command -v openspec >/dev/null 2>&1; then
+  ( cd "$ROOT" && openspec validate --strict --all --no-interactive )
+else
+  echo "SKIPPED: openspec is not installed (npm install -g @fission-ai/openspec@$(cat "$ROOT/.openspec-version")); CI runs this step"
+fi
+
 step "gdUnit4 (headless)"
-# gdUnit exits 0 on success, 101 when tests passed but left orphan nodes (a warning we
-# report and accept), and 100 or higher otherwise for failures.
+# gdUnit exits 0 on success, 101 when tests passed but left orphan nodes, and 100 or higher
+# otherwise for failures. Orphans fail the run: they once piled up to 2,197 unnoticed.
 ( cd "$ROOT/game" && "$GODOT" --headless --path . --import --quit >/dev/null 2>&1 )
 set +e
 GD_OUT="$(cd "$ROOT/game" && "$GODOT" --headless --path . -s -d --remote-debug tcp://127.0.0.1:0 \
@@ -37,7 +44,7 @@ set -e
 printf "%s\n" "$GD_OUT" | grep -vE "remote port number|Remote Debugger" | grep -E "Overall Summary|FAILED|ERROR|Executed test" || true
 case "$GD_STATUS" in
   0) ;;
-  101) echo "gdUnit: tests passed with orphan nodes (warning)" ;;
+  101) echo "gdUnit: tests passed but left orphan nodes; free them (auto_free) and rerun"; exit 101 ;;
   *) echo "gdUnit failed with exit code $GD_STATUS"; exit "$GD_STATUS" ;;
 esac
 
