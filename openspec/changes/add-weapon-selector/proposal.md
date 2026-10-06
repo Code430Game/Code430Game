@@ -90,8 +90,11 @@ from the mode's `hud` block. A tone change rebuilds the wheel and the idle tile.
   - `game/core/input/controls.json`, `game/project.godot`, `docs/controls.md`
   - `game/scenes/play_testbed.gd` (adds the wheel and the tile; a small edit)
   - tests
-- Builds on `add-weapons-and-combat` (merged). It reads slot 0's name ("Fists") from
-  `add-unarmed-combat`, so it merges after that change. Both edit `weapons.schema.v0.json` and
+- Builds on `add-weapons-and-combat` (merged) and comes after `add-unarmed-combat`.
+  `add-unarmed-combat` keeps fists out of `weapons.v0.json`: slot 0 is still "nothing in
+  hand", and `Shooter.fist_weapon()` builds the fist's hit data. The weapon page therefore
+  adds slot 0 itself, named "Fists" with the fists icon. It doesn't read slot 0 from the
+  weapon list. So this change merges after `add-unarmed-combat`. Both edit `weapons.schema.v0.json` and
   `weapons.v0.json`; rebase on whichever lands first.
 - Performance: the wheel draws only while open. The idle tile redraws only on a slot change.
 - Content policy: original icons and an original wheel design. Nothing copies another game's
