@@ -105,10 +105,13 @@ func test_near_parallel_arms_share_a_slot_and_leave_no_sliver() -> void:
 	var graph := RoadGraph.from_dict({"meta": {}, "nodes": nodes, "edges": edges, "pedestrian_ways": []})
 	var j: JunctionBuilder.Junction = JunctionBuilder.build_one(graph, "n_c")
 	assert_bool(j.fallback_hull).is_false()
-	# Two slots in the walk: 2 caps + fillet per slot.
-	assert_int(j.polygon_xz.size()).is_equal(2 * (2 + JunctionBuilder.FILLET_STEPS))
+	# Two slots in the walk, and the road runs straight through on both sides: 2 caps per slot,
+	# joined along the road's edges through the node (update-junction-surfaces: a fillet there
+	# bulged off the road).
+	assert_int(j.polygon_xz.size()).is_less_equal(6)
 	for p in j.polygon_xz:
 		assert_float(p.length()).override_failure_message("vertex %s is far from the node" % p).is_less(20.0)
+		assert_float(absf(p.y)).override_failure_message("vertex %s is off the road's edges" % p).is_less_equal(7.01)
 	assert_float(j.trims["wb.0"]).is_equal_approx(j.trims["wa.0"], 1e-4)
 
 
@@ -184,12 +187,14 @@ func test_offset_arms_keep_each_carriageway_on_its_own_line() -> void:
 		assert_float(j.trims[eid]).is_equal_approx(4.0 + JunctionBuilder.TRIM_MARGIN_M, 1e-3)
 	for eid in ["x_s", "x_n"]:
 		assert_float(j.trims[eid]).is_equal_approx(6.0 + 3.5 + JunctionBuilder.TRIM_MARGIN_M, 1e-3)
-	# Each carriageway's cap sits across its own line, not across the node.
+	# Each carriageway's cap sits across its own line, not across the node: its corners lie on
+	# the outline (a flat median's cap corners in line with each other need not be vertices).
 	for cap in [Vector2(7, -9.5), Vector2(7, -2.5), Vector2(-7, 2.5), Vector2(-7, 9.5), Vector2(-7, -2.5), Vector2(7, 2.5)]:
 		var found := false
-		for p in j.polygon_xz:
-			found = found or p.distance_to(cap) < 1e-3
-		assert_bool(found).override_failure_message("no cap vertex at %s" % cap).is_true()
+		for k in range(j.polygon_xz.size()):
+			var q := Geometry2D.get_closest_point_to_segment(cap, j.polygon_xz[k], j.polygon_xz[(k + 1) % j.polygon_xz.size()])
+			found = found or q.distance_to(cap) < 1e-3
+		assert_bool(found).override_failure_message("no cap corner on the outline at %s" % cap).is_true()
 	# The cross street is paved through the median; the median beyond the junction is not.
 	assert_bool(Geometry2D.is_point_in_polygon(Vector2(3.9, 0.0), j.polygon_xz)).is_true()
 	assert_bool(Geometry2D.is_point_in_polygon(Vector2(-3.9, 0.0), j.polygon_xz)).is_true()

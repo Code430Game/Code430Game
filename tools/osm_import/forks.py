@@ -93,6 +93,80 @@ def shape_forks(graph: RoadGraph, cfg: ImportConfig) -> ForkStats:
     return stats
 
 
+@dataclass
+class SplitStats:
+    splits: int = 0
+    skipped_sides: int = 0  # carriageway pairs drawn on the wrong sides for right-hand traffic
+
+
+def shape_splits(graph: RoadGraph, cfg: ImportConfig) -> SplitStats:
+    """Lines up a two-way road's end with the one-way carriageways it splits into.
+
+    A node with three roads, one two-way and two one-way carriageways leaving the same way
+    within `max_split_angle_deg` of each other, one carrying traffic away from the node and one
+    toward it, and the pair roughly opposite the two-way road (`min_through_angle_deg`), is
+    where a road divides (#78, Colonel By Drive). OSM draws both carriageways from the two-way
+    road's centreline, so their ribbons start on top of each other and the road pinches to one
+    carriageway's width at the split. Each carriageway's end moves sideways onto its own side
+    of the two-way road, the one carrying traffic away on the right, so their outer edges
+    continue the two-way road's edges; the move fades out over `blend_m`. Returns counts.
+    """
+    rules = cfg.forks
+    stats = SplitStats()
+    if not rules:
+        return stats
+    cos_split = math.cos(math.radians(float(rules.get("max_split_angle_deg", 35.0))))
+    cos_through = math.cos(math.radians(float(rules.get("min_through_angle_deg", 140.0))))
+    blend = float(rules.get("blend_m", 40.0))
+    inc = graph.incident()
+    for nid in sorted(graph.nodes):
+        eids = inc[nid]
+        if len(eids) != 3:
+            continue
+        two_way = [eid for eid in eids if not graph.edges[eid].oneway]
+        one_way = sorted(eid for eid in eids if graph.edges[eid].oneway)
+        if len(two_way) != 1 or len(one_way) != 2:
+            continue
+        trunk = graph.edges[two_way[0]]
+        a, b = (graph.edges[eid] for eid in one_way)
+        if (a.from_node == nid) == (b.from_node == nid):
+            continue  # both leave or both arrive: not the two halves of one road
+        da = _unit_from_node(a.polyline, a.from_node == nid)
+        db = _unit_from_node(b.polyline, b.from_node == nid)
+        if da[0] * db[0] + da[1] * db[1] < cos_split:
+            continue  # too far apart to be one road dividing
+        mx, mz = da[0] + db[0], da[1] + db[1]
+        m = math.hypot(mx, mz)
+        if m < 1e-9:
+            continue
+        ux, uz = mx / m, mz / m  # the way the divided road leaves the node
+        dt = _unit_from_node(trunk.polyline, trunk.from_node == nid)
+        if dt[0] * ux + dt[1] * uz > cos_through:
+            continue  # the two-way road does not continue straight into the pair
+        rx, rz = -uz, ux  # right of travel along u (x east, z south)
+        leaving, arriving = (a, b) if a.from_node == nid else (b, a)
+        d_leave = da if leaving is a else db
+        d_arrive = db if leaving is a else da
+        # Right-hand traffic: the carriageway carrying traffic away from the node is the one on
+        # the right of u. A pair drawn the other way round is left alone.
+        side_leave = d_leave[0] * rx + d_leave[1] * rz
+        side_arrive = d_arrive[0] * rx + d_arrive[1] * rz
+        if side_leave < side_arrive:
+            stats.skipped_sides += 1
+            continue
+        hw_t = trunk.width_m / 2.0
+        for edge, sign in ((leaving, 1.0), (arriving, -1.0)):
+            shift = max(hw_t - edge.width_m / 2.0, 0.0)
+            _shift_end(edge, edge.from_node == nid, rx * sign * shift, rz * sign * shift, blend)
+        stats.splits += 1
+    log.info(
+        "splits: %d roads dividing shaped (%d drawn on the wrong sides, left)",
+        stats.splits,
+        stats.skipped_sides,
+    )
+    return stats
+
+
 def _shift_end(edge, at_start: bool, sx: float, sz: float, blend: float) -> None:
     """Moves the end vertex by (sx, sz) and fades the move out over `blend` metres."""
     pl = list(edge.polyline)

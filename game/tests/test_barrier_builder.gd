@@ -70,3 +70,69 @@ func test_ottawa_pack_loads_barriers() -> void:
 		kinds[b.kind] = true
 	assert_array(kinds.keys()).contains(["parapet", "median", "guardrail", "soundwall", "curb"])
 	assert_int(pack.barrier_chunks.size()).is_greater(50)
+
+
+func _depth_inside(p: Vector2, poly: PackedVector2Array) -> float:
+	var best := INF
+	for i in range(poly.size()):
+		var q := Geometry2D.get_closest_point_to_segment(p, poly[i], poly[(i + 1) % poly.size()])
+		best = minf(best, p.distance_to(q))
+	return best
+
+
+## update-junction-surfaces (backlog 2026-10-03, "a curb inside a junction where a curved road
+## joins"): a curb crossing a junction surface is cut back to its outline, keeping its heights.
+func test_a_curb_crossing_a_junction_is_cut_back_to_its_outline() -> void:
+	var j := JunctionBuilder.Junction.new()
+	j.node_id = "n"
+	j.polygon_xz = PackedVector2Array([Vector2(-5, -5), Vector2(5, -5), Vector2(5, 5), Vector2(-5, 5)])
+	var curb := BarrierBuilder.Barrier.new()
+	curb.id = "b:curb:e:0"
+	curb.kind = "curb"
+	curb.height_m = 0.12
+	curb.edge_id = "e"
+	curb.points = PackedVector3Array([Vector3(-20, 0, 0), Vector3(20, 4, 0)])
+	var rail := BarrierBuilder.Barrier.new()
+	rail.id = "b:guardrail:e:0"
+	rail.kind = "guardrail"
+	rail.points = curb.points
+	var out := BarrierBuilder.clip_curbs([curb, rail] as Array[BarrierBuilder.Barrier], {"n": j})
+	var curbs := out.filter(func(b: BarrierBuilder.Barrier) -> bool: return b.kind == "curb")
+	assert_int(curbs.size()).is_equal(2)
+	for c: BarrierBuilder.Barrier in curbs:
+		for p in c.points:
+			assert_bool(absf(p.x) < 4.99).override_failure_message("curb point %s inside the junction" % p).is_false()
+			assert_float(p.y).is_equal_approx((p.x + 20.0) / 10.0, 1e-3)  # heights kept along the slope
+	# Other kinds are not touched.
+	assert_int(out.filter(func(b: BarrierBuilder.Barrier) -> bool: return b.kind == "guardrail").size()).is_equal(1)
+
+
+func test_no_curb_stands_inside_a_junction_on_the_ottawa_pack() -> void:
+	var pack := MapPack.new()
+	assert_bool(pack.load(PackLocator.find_pack("code430.ottawa-centretown"))).is_true()
+	var cell := 40.0
+	var grid := {}  # Vector2i cell -> junctions whose outline touches it
+	for k in pack.junctions:
+		var j: JunctionBuilder.Junction = pack.junctions[k]
+		var seen := {}
+		for p in j.polygon_xz:
+			var c := Vector2i(floori(p.x / cell), floori(p.y / cell))
+			if not seen.has(c):
+				seen[c] = true
+				if not grid.has(c):
+					grid[c] = []
+				grid[c].append(j)
+	var inside: Array[String] = []
+	for b in pack.barriers:
+		if b.kind != "curb":
+			continue
+		for i in range(b.points.size() - 1):
+			var mid := (b.points[i] + b.points[i + 1]) * 0.5
+			var at := Vector2(mid.x, mid.z)
+			for j: JunctionBuilder.Junction in grid.get(Vector2i(floori(at.x / cell), floori(at.y / cell)), []):
+				# A curb along the outline itself is where a road runs straight on past the
+				# junction: the curb stands on the road's edge, which the outline follows.
+				if Geometry2D.is_point_in_polygon(at, j.polygon_xz) and _depth_inside(at, j.polygon_xz) > 0.2:
+					inside.append("%s in %s" % [b.id, j.node_id])
+					break
+	assert_array(inside).override_failure_message("curbs inside junctions: %s" % [inside.slice(0, 8)]).is_empty()
