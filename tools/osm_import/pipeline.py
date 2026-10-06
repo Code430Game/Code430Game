@@ -18,7 +18,7 @@ from osm_import.elevation import (
 )
 from osm_import.export import dump_json, graph_to_dict
 from osm_import.filter import FilterResult, filter_ways
-from osm_import.forks import shape_forks
+from osm_import.forks import shape_forks, shape_splits
 from osm_import.gores import build_gores
 from osm_import.graph import RoadGraph, build_graph
 from osm_import.osm_data import BBox, OsmData
@@ -65,6 +65,7 @@ def run_pipeline(
         stats.edges_removed,
     )
     fork_stats = shape_forks(graph, cfg)
+    split_stats = shape_splits(graph, cfg)
     graph.notes = {
         "filter_dropped": dict(sorted(fr.dropped.items())),
         "junction_clusters": stats.clusters,
@@ -72,6 +73,7 @@ def run_pipeline(
         "edges_removed_in_clusters": stats.edges_removed,
         "forks": fork_stats.forks,
         "merges": fork_stats.merges,
+        "splits": split_stats.splits,
     }
     elev_stats: ElevationStats | None = None
     elev_meta: dict | None = None

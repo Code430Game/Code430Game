@@ -106,7 +106,7 @@ func load(dir: String) -> bool:
 	underpass_chunks = UnderpassBuilder.build(graph.pedestrian)
 	terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
 	barrier_material = BarrierBuilder.material()
-	barriers = BarrierBuilder.load_barriers(dir)
+	barriers = BarrierBuilder.clip_curbs(BarrierBuilder.load_barriers(dir), junctions)
 	barrier_chunks = BarrierBuilder.build(barriers)
 	bridge_material = BridgeBuilder.material()
 	bridges = BridgeBuilder.load_bridges(dir)

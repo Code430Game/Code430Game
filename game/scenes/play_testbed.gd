@@ -92,6 +92,7 @@ var _wheel_at_start: int = -2  # --wheel=N: open the weapon wheel pointing at en
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
+var _junction_report := false  # --junction-report: print bulging, gapped and hull junctions with x, z once loaded
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
 var _fixed_cam: Camera3D = null
 var _bus_share_override: float = -1.0  # --bus-share=0..1: fraction of traffic spawned as buses (screenshots)
@@ -176,6 +177,8 @@ func _ready() -> void:
 	add_child(_streamer)
 	_streamer.setup(_pack, _world)
 	print("testbed: streamer ready (%d chunks indexed, glb cache %s) in %d ms" % [_pack.chunk_coords().size(), _streamer.use_glb, Time.get_ticks_msec() - t0])
+	if _junction_report:
+		print(JunctionReport.format(JunctionReport.analyse(_pack)))
 	_graph_view.set_graph(_pack.graph)
 	_car = CAR_SCENE.instantiate()
 	_car.set("vehicle_id", _car_id)
@@ -933,6 +936,8 @@ func _parse_args() -> void:
 				_free_camera.append(float(v))
 		elif arg == "--telemetry":
 			_telemetry = true
+		elif arg == "--junction-report":
+			_junction_report = true
 		elif arg == "--bumps":
 			_bumps = true
 		elif arg.begins_with("--topdown"):

@@ -13,6 +13,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -140,7 +141,97 @@ def _road_footprints(
         for i in range(len(e.polyline) - 1):
             a, b = e.polyline[i], e.polyline[i + 1]
             target.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, FLAT_MARGIN_M))
+    ground.extend(_junction_corners(graph))
     return ground, bridges
+
+
+JUNCTION_CORNER_HW_M = 0.5  # half width of a corner's flattening line; FLAT_MARGIN_M is added
+JUNCTION_CORNER_MAX_HW = 3.0  # a corner reaches at most this many of its widest arm's half widths
+
+
+def _junction_corners(graph: RoadGraph) -> list[tuple]:
+    """Ground segments into each corner of every junction on the ground (update-junction-surfaces).
+
+    A junction's surface fills its corners out to where its roads' edges meet (the game's
+    JunctionBuilder), past the ribbons the edge segments flatten under. In a cutting the terrain
+    stood above those corners. Each corner between neighbouring arms less than a half turn apart
+    gets a segment from the node toward that meeting point, at most JUNCTION_CORNER_MAX_HW of
+    its widest arm's half widths out, its far end at the two arms' mean height that far out.
+    Forks and merges (no surface), and junctions with a bridge or tunnel arm, are left out.
+    """
+    out: list[tuple] = []
+    inc = graph.incident()
+    for nid in sorted(graph.nodes):
+        node = graph.nodes[nid]
+        eids = inc.get(nid, [])
+        if len(eids) < 3 or node.junction_type in ("fork", "merge"):
+            continue
+        arms = []
+        for eid in sorted(eids):
+            e = graph.edges[eid]
+            if e.bridge or e.tunnel:
+                arms = []
+                break
+            pl = e.polyline if e.from_node == nid else list(reversed(e.polyline))
+            dx, dz = pl[1][0] - pl[0][0], pl[1][2] - pl[0][2]
+            length = math.hypot(dx, dz)
+            if length < 1e-6:
+                continue
+            arms.append((math.atan2(dz, dx), (dx / length, dz / length), e.width_m / 2.0, pl))
+        if len(arms) < 3:
+            continue
+        arms.sort(key=lambda arm: arm[0])
+        nx_, ny_, nz_ = node.position
+        for i, a in enumerate(arms):
+            b = arms[(i + 1) % len(arms)]
+            gap = (b[0] - a[0]) % (2.0 * math.pi)
+            if gap <= 0.0 or gap >= math.pi * 0.95:
+                continue  # a road running straight on: its own ribbons cover that side
+            reach = _corner_reach(a[1], a[2], b[1], b[2], JUNCTION_CORNER_MAX_HW * max(a[2], b[2]))
+            half = gap / 2.0
+            bx = a[1][0] * math.cos(half) - a[1][1] * math.sin(half)
+            bz = a[1][0] * math.sin(half) + a[1][1] * math.cos(half)
+            y_far = (_height_at(a[3], reach) + _height_at(b[3], reach)) / 2.0
+            out.append(
+                (
+                    nx_,
+                    nz_,
+                    nx_ + bx * reach,
+                    nz_ + bz * reach,
+                    ny_,
+                    y_far,
+                    JUNCTION_CORNER_HW_M,
+                    FLAT_MARGIN_M,
+                )
+            )
+    return out
+
+
+def _corner_reach(da: tuple, ha: float, db: tuple, hb: float, cap: float) -> float:
+    """Distance from the node to where arm a's left edge meets arm b's right edge, capped."""
+    # a's counter-clockwise edge: ha * na + s * da; b's clockwise edge: -hb * nb + t * db.
+    na = (-da[1], da[0])
+    nb = (-db[1], db[0])
+    px, pz = ha * na[0], ha * na[1]
+    qx, qz = -hb * nb[0], -hb * nb[1]
+    det = da[0] * (-db[1]) - da[1] * (-db[0])
+    if abs(det) < 1e-9:
+        return cap
+    s = ((qx - px) * (-db[1]) - (qz - pz) * (-db[0])) / det
+    x, z = px + s * da[0], pz + s * da[1]
+    return min(math.hypot(x, z), cap)
+
+
+def _height_at(polyline: list, distance: float) -> float:
+    """Road height `distance` metres along `polyline` from its start (its end height past it)."""
+    walked = 0.0
+    for a, b in pairwise(polyline):
+        seg = math.hypot(b[0] - a[0], b[2] - a[2])
+        if walked + seg >= distance and seg > 0.0:
+            t = (distance - walked) / seg
+            return a[1] + (b[1] - a[1]) * t
+        walked += seg
+    return polyline[-1][1]
 
 
 def _segments_near(

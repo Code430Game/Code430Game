@@ -29,7 +29,7 @@ Benchmark from the command line (vsync off, prints a frame-time summary and quit
 ```
 godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/shot.png   # --drive starts in the car without autodrive
 ```
-More testbed flags: `--traffic=N` caps traffic cars (0 disables), `--spawn=x,z` starts on the nearest road to a local coordinate (`--spawn=x,y,z` puts the player on foot exactly there, such as a garage floor), `--topdown=<height>` looks straight down, `--graph` shows the road graph overlay, `--telemetry` prints the car state every second.
+More testbed flags: `--traffic=N` caps traffic cars (0 disables), `--spawn=x,z` starts on the nearest road to a local coordinate (`--spawn=x,y,z` puts the player on foot exactly there, such as a garage floor), `--topdown=<height>` looks straight down, `--graph` shows the road graph overlay, `--telemetry` prints the car state every second, `--junction-report` prints junctions whose surface bulges into the grass, leaves part of a road uncovered, falls back to a hull or has terrain above it, with x, z (headless: `godot --headless --path game -s res://world/build/junction_report.gd`).
 
 ## Build the map pack
 ```
