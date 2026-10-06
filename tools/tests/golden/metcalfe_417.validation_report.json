@@ -526,31 +526,35 @@
   "suspicious": []
  },
  "elevation": {
+  "aligned_dropped": 2,
+  "aligned_vertices": 12,
   "anchorless_spans": 0,
-  "bound_conflicts": 3,
+  "bound_conflicts": 1,
   "clearance_raised": [],
   "clearance_short": [],
   "clearance_shortfalls": [],
-  "contaminated_vertices": 39,
+  "contaminated_vertices": 42,
   "edges_over_grade": [
-   "w690930740.0",
    "w76421801.0",
    "w76424094.0",
    "w76726906.0",
-   "w76726915.0"
+   "w76726915.0",
+   "w79571589.0"
   ],
-  "fixed_vertices": 26,
-  "free_vertices": 608,
+  "fixed_vertices": 30,
+  "free_vertices": 616,
   "inferred_bridges": [],
-  "max_residual_grade": 0.1067,
-  "max_shared_step": 0.785,
-  "max_y": 77.853,
+  "max_residual_grade": 0.1676,
+  "max_shared_step": 0.702,
+  "max_y": 77.358,
   "min_y": 54.89,
   "share_rounds_exhausted": true,
-  "shared_deck_vertices": 20,
-  "shared_ground_vertices": 7,
-  "shared_step_left": 0.931,
-  "vertices_clamped": 11
+  "shared_deck_vertices": 26,
+  "shared_ground_vertices": 14,
+  "shared_groups": 17,
+  "shared_step_left": 0.529,
+  "tie_rounds": 2,
+  "vertices_clamped": 21
  },
  "junction_clusters": [
   {

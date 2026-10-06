@@ -224,7 +224,12 @@ def test_partners_on_either_side_of_a_deck_footprint_meet_instead_of_swapping():
     assert stats.shared_ground_vertices > 0
     for x in range(-200, 201, 20):  # one height all along, switching where the footprint ends
         assert height_at(a, x) == pytest.approx(height_at(b, x), abs=0.01), x
-    assert height_at(a, 0.0) == pytest.approx(10.0, abs=0.01)  # the lower: never into a clearance
+    # The parallel deck runs beside the north carriageway at its height, within the shared-deck
+    # gap, so it joins the same groups: a group with a deck never goes down, and the whole cross
+    # section takes the deck's height (it is beside the road, not over it, so no clearance is
+    # lost; a deck crossing over is covered by the test above).
+    deck = g.edges["w4.0"]
+    assert height_at(a, 0.0) == pytest.approx(height_at(deck, 0.0), abs=0.01)
     assert height_at(a, 200.0) == pytest.approx(10.6, abs=0.01)  # the higher away from the deck
     assert not stats.share_rounds_exhausted
 
@@ -250,3 +255,82 @@ def test_a_street_lifted_by_the_blend_keeps_its_clearance_under_a_deck():
     assert stats.clearance_raised  # the scenario does lift the street
     assert not stats.clearance_short
     assert clearance_shortfalls(g, CFG) == []
+
+
+class Slope:
+    """Ground rising `grade` along x, plus `step` metres more south of z = 0."""
+
+    def __init__(self, grade: float = 0.02, step: float = 0.4) -> None:
+        self.grade, self.step = grade, step
+
+    def sample(self, x: float, z: float) -> float:
+        return 10.0 + self.grade * x + (self.step if z > 0 else 0.0)
+
+    def describe(self) -> dict:
+        return {"kind": "slope"}
+
+
+class Bands:
+    """Three bands of ground across z: 10.0 north, 10.15 in the middle, 10.3 south."""
+
+    def sample(self, x: float, z: float) -> float:
+        return 10.0 + (0.3 if z > 5 else 0.15 if z > -5 else 0.0)
+
+    def describe(self) -> dict:
+        return {"kind": "bands"}
+
+
+def _step_between(a, b, x: float) -> float:
+    return abs(height_at(a, x) - height_at(b, x))
+
+
+def test_carriageways_drawn_with_vertices_at_different_stations_meet_and_settle():
+    """Shared-height-steps fix: partners compared by interpolation crept up round after round and
+    never settled. With vertices aligned to matching stations, sharing pairs vertex with vertex,
+    settles at once and leaves no step, on a slope too."""
+    tags = {"highway": "motorway", "oneway": "yes", "lanes": "2"}
+    n, s = -5.0, 5.0
+    ways = [  # north drawn every 20 m, south every 27 m: few vertices line up across
+        (1, [(float(x), n) for x in range(-200, 201, 20)], tags),
+        (2, [(float(x), s) for x in range(200, -201, -27)] + [(-200.0, s)], tags),
+    ]
+    g, stats = build(ways, Slope())
+    a, b = g.edges["w1.0"], g.edges["w2.0"]
+    assert stats.aligned_vertices > 0
+    assert not stats.share_rounds_exhausted
+    for x in range(-160, 161, 7):
+        assert _step_between(a, b, float(x)) < 0.05, x  # pairs snap within pair_snap_m
+    assert stats.shared_step_left < 0.05
+
+
+def test_sharing_never_creeps_above_the_highest_input():
+    """Three carriageways side by side at different heights end at the highest of them, not above
+    it (the interpolated rounds used to ratchet upwards)."""
+    tags = {"highway": "motorway", "oneway": "yes", "lanes": "2"}
+    ways = [
+        (1, [(float(x), -10.0) for x in range(-200, 201, 20)], tags),
+        (2, [(float(x), 0.0) for x in range(200, -201, -23)] + [(-200.0, 0.0)], tags),
+        (3, [(float(x), 10.0) for x in range(-200, 201, 31)] + [(200.0, 10.0)], tags),
+    ]
+    g, stats = build(ways, Bands())
+    assert not stats.share_rounds_exhausted
+    limit = CFG.for_class("motorway").max_grade
+    for e in g.edges.values():
+        assert max(p[1] for p in e.polyline) <= 10.3 + 1e-6, e.id
+        assert max(grades(e)) <= limit + 1e-6, e.id
+
+
+def test_the_grade_pass_keeps_shared_carriageways_tied():
+    """A deck end pins one carriageway high and the grade limit lifts the road beside it. Before,
+    only that road rose and the step to its partner reopened; now the partner rises with it."""
+    ways = two_decks(11.5, cls="motorway")
+    tags = ways[3][2]
+    s = 5.75
+    ways[3] = (4, [(300.0, s), (20.0, s)], tags)  # the south deck starts 20 m later
+    ways[4] = (5, [(20.0, s), (0.0, s), (-40.0, s)], {**tags, "bridge": "yes", "layer": "1"})
+    g, stats = build(ways, Slope(grade=0.0, step=-0.6))  # the south ground 0.6 m lower
+    north, south = g.edges["w2.0"], g.edges["w4.0"]
+    for x in (25.0, 30.0, 40.0):
+        assert _step_between(north, south, x) < 0.02, x
+    assert stats.shared_step_left < 0.05
+    assert not stats.clearance_short
