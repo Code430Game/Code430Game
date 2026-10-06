@@ -126,6 +126,11 @@ def _road_footprints(
         for i in range(len(w.polyline) - 1):
             a, b = w.polyline[i], w.polyline[i + 1]
             ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, margin, shoulder))
+    for g in graph.gores:  # paved gores (add-road-shoulders 1.4): flat like the roads beside them
+        for i in range(len(g.points) - 1):
+            a, b = g.points[i], g.points[i + 1]
+            hw = max(g.left_m[i], g.left_m[i + 1])
+            ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, FLAT_MARGIN_M))
     for eid in sorted(graph.edges):
         e = graph.edges[eid]
         hw = e.width_m / 2.0

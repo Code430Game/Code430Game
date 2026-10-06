@@ -13,7 +13,7 @@
     "blend_m": 40.0
   },
   "bridges": {
-    "_comment": "add-bridge-structures: grouping, walkways on decks, piers and abutments (see bridges.py).",
+    "_comment": "add-bridge-structures: grouping, walkways on decks, piers and abutments (see bridges.py). infill_*: add-road-shoulders 1.4, a concrete floor in gaps up to infill_max_m between road decks of one layer and level (within infill_level_m), overlapping each deck by infill_overlap_m.",
     "merge_gap_m": 3.0,
     "walkway_range_m": 4.0,
     "pier_spacing_m": 25.0,
@@ -22,7 +22,12 @@
     "depth_per_span": 0.06,
     "depth_min_m": 0.8,
     "depth_max_m": 1.8,
-    "end_clear_m": 4.0
+    "end_clear_m": 4.0,
+    "infill_max_m": 8.0,
+    "infill_min_m": 0.05,
+    "infill_step_m": 2.0,
+    "infill_level_m": 0.3,
+    "infill_overlap_m": 0.3
   },
   "shared_heights": {
     "_comment": "update-shared-deck-heights: carriageways whose ribbons touch share one height (see elevation._share_heights). Decks of one layer within barriers.parapet_shared_deck_gap_m (the gap the parapets treat as one deck, so where no parapet stands between two decks there is no step either); ground carriageways of ground_classes within ground_gap_m. Steps larger than max_step_m are real level differences and are kept. The change blends into the connected roads over blend_m.",
@@ -33,7 +38,8 @@
   },
   "shoulders": {
     "_comment": "Paved shoulder outside the outer lanes, [left, right] of the direction of travel in metres; a two-way road gets the right width on both sides. Only where the width is not tagged.",
-    "by_class": {"motorway": [1.0, 2.5], "trunk": [1.0, 2.5], "motorway_link": [0.6, 1.5], "trunk_link": [0.6, 1.5]}
+    "by_class": {"motorway": [1.0, 2.5], "trunk": [1.0, 2.5], "motorway_link": [0.6, 1.5], "trunk_link": [0.6, 1.5]},
+    "gore_classes": ["motorway", "trunk", "motorway_link", "trunk_link"]
   },
   "barriers": {
     "highway_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],

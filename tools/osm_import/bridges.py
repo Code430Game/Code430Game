@@ -47,6 +47,11 @@ DEFAULTS = {
     "depth_min_m": 0.8,
     "depth_max_m": 1.8,
     "end_clear_m": 4.0,
+    "infill_max_m": 8.0,
+    "infill_min_m": 0.05,
+    "infill_step_m": 2.0,
+    "infill_level_m": 0.3,
+    "infill_overlap_m": 0.3,
     "sidewalk_tag_width_m": 1.8,
 }
 
@@ -153,6 +158,7 @@ class BridgesResult:
     bridges: list[Bridge] = field(default_factory=list)
     walkways_lifted: int = 0
     piers_skipped: int = 0
+    infill_strips: int = 0
 
     def reset_pier_feet(self, sample_ground) -> None:
         """Stands every pier on the ground again (after the terrain under decks was lowered)."""
@@ -172,7 +178,12 @@ class BridgesResult:
             "piers": sum(len(b.piers) for b in self.bridges),
             "piers_skipped": self.piers_skipped,
             "abutments": sum(len(b.ends) for b in self.bridges),
+            "infill_strips": self.infill_strips,
         }
+
+    def infill(self) -> list[DeckStrip]:
+        """Every infill strip of every bridge (the barriers keep their parapets off them)."""
+        return [d for b in self.bridges for d in b.decks if d.source.startswith(INFILL_PREFIX)]
 
     def to_dict(self) -> dict:
         return {
@@ -460,6 +471,7 @@ def build_bridges(
         )
         b.ends = _ends(edges, graph, set(ids))
         result.bridges.append(b)
+    _add_infill(result.bridges, bridge_edges, rules, result)
     for w in lone_walks:
         span = _length(w.polyline)
         mid = _point_at(w.polyline, span / 2.0)
@@ -480,6 +492,131 @@ def build_bridges(
         result.bridges.append(b)
     log.info("bridges: %s", result.counts())
     return result
+
+
+INFILL_PREFIX = "infill:"
+SAME_DIRECTION_COS = 0.7
+
+
+def _strip_samples(d: DeckStrip, step: float):
+    """(x, y, z, dx, dz, left_m, right_m) every `step` metres along a deck strip, ends included."""
+    pts = d.points
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        seg = math.dist((a[0], a[2]), (b[0], b[2]))
+        if seg <= 0:
+            continue
+        dx, dz = (b[0] - a[0]) / seg, (b[2] - a[2]) / seg
+        n = max(1, math.ceil(seg / step))
+        last = i == len(pts) - 2
+        for k in range(n + 1 if last else n):
+            t = k / n
+            yield (
+                a[0] + (b[0] - a[0]) * t,
+                a[1] + (b[1] - a[1]) * t,
+                a[2] + (b[2] - a[2]) * t,
+                dx,
+                dz,
+                d.left_m[i] + (d.left_m[i + 1] - d.left_m[i]) * t,
+                d.right_m[i] + (d.right_m[i + 1] - d.right_m[i]) * t,
+            )
+
+
+def _nearest_strip(d: DeckStrip, x: float, z: float):
+    """(centreline distance, height, (x, z) there, half-width on the side facing (x, z),
+    at an end of the strip, unit direction there) for the closest point of a deck strip."""
+    pts = d.points
+    best = None
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        dx, dz = b[0] - a[0], b[2] - a[2]
+        l2 = dx * dx + dz * dz
+        t = 0.0 if l2 == 0 else max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[2]) * dz) / l2))
+        px, pz = a[0] + dx * t, a[2] + dz * t
+        dist = math.hypot(x - px, z - pz)
+        if best is None or dist < best[0]:
+            left = (dx * (z - a[2]) - dz * (x - a[0])) < 0
+            widths = d.left_m if left else d.right_m
+            at_end = (i == 0 and t <= 0.0) or (i == len(pts) - 2 and t >= 1.0)
+            w = widths[i] + (widths[i + 1] - widths[i]) * t
+            seg = math.sqrt(l2) or 1.0
+            best = (dist, a[1] + (b[1] - a[1]) * t, (px, pz), w, at_end, (dx / seg, dz / seg))
+    return best
+
+
+def _add_infill(bridges: list[Bridge], bridge_edges: dict, rules: dict, result) -> None:
+    """Concrete floor between road decks (add-road-shoulders 1.4).
+
+    Where two road decks of the same layer and level run with a gap between their deck edges
+    (up to `infill_max_m`), a strip down the middle of the gap covers it, overlapping each deck
+    by `infill_overlap_m`: side-by-side decks, and a ramp splitting from or merging into the
+    through deck, are one floor instead of walled holes. Pairs are found across bridge groups
+    (the grouping only joins decks within `merge_gap_m`) and the strip joins the bridge of the
+    longer deck. Walked along the longer deck of each pair; a gap that only opens past the
+    other deck's end is not filled.
+    """
+    decks: list[tuple[DeckStrip, RoadEdge, Bridge]] = []
+    for b in bridges:
+        for d in b.decks:
+            if d.source in bridge_edges:
+                decks.append((d, bridge_edges[d.source], b))
+    index = _SegmentIndex()
+    for n, (d, _e, _b) in enumerate(decks):
+        for a, c in itertools.pairwise(d.points):
+            index.add((a[0], a[2]), (c[0], c[2]), n)
+    reach = rules["infill_max_m"] + 2.0 * max(
+        (max(*d.left_m, *d.right_m) for d, _e, _b in decks), default=0.0
+    )
+    pairs: set[tuple[int, int]] = set()
+    for n, (d, e, _b) in enumerate(decks):
+        for x, _y, z, _dx, _dz, _s in _samples(d.points, 8.0):
+            for _a, _c, m in index.near(x, z, reach):
+                if m != n and decks[m][1].layer == e.layer:
+                    pairs.add((min(n, m), max(n, m)))
+    for n, m in sorted(pairs):
+        (da, _ea, ba), (db, _eb, bb) = decks[n], decks[m]
+        if _length(da.points) < _length(db.points):
+            da, db, ba = db, da, bb
+        strips = _infill(da, db, rules)
+        ba.decks.extend(strips)
+        result.infill_strips += len(strips)
+
+
+def _infill(
+    a: DeckStrip, b: DeckStrip, rules: dict, same_direction: bool = False
+) -> list[DeckStrip]:
+    """Infill strips in the gap between strip `a` (walked) and strip `b`; with
+    `same_direction`, only where both run the same way (a ramp beside its road, not the
+    opposing carriageway across a median)."""
+    out: list[DeckStrip] = []
+    step, gap_max, gap_min = rules["infill_step_m"], rules["infill_max_m"], rules["infill_min_m"]
+    source = f"{INFILL_PREFIX}{min(a.source, b.source)}:{max(a.source, b.source)}"
+    for side in (1.0, -1.0):  # left, then right of travel along a
+        runs: list[list[tuple[tuple[float, float, float], float]]] = [[]]
+        for x, y, z, dx, dz, lw, rw in _strip_samples(a, step):
+            nx, nz = (dz, -dx) if side > 0 else (-dz, dx)  # left of travel: (dz, -dx)
+            wa = lw if side > 0 else rw
+            _d, yb, (qx, qz), wb, at_end, (bdx, bdz) = _nearest_strip(b, x + nx * wa, z + nz * wa)
+            across = (qx - x) * nx + (qz - z) * nz  # b's centreline beyond a's edge?
+            gap = across - wa - wb
+            if (
+                at_end
+                or (same_direction and bdx * dx + bdz * dz < SAME_DIRECTION_COS)
+                or across <= wa
+                or not (gap_min < gap <= gap_max)
+                or abs(yb - y) > rules["infill_level_m"]
+            ):
+                if runs[-1]:
+                    runs.append([])
+                continue
+            mid = wa + gap / 2.0
+            half = gap / 2.0 + rules["infill_overlap_m"]
+            runs[-1].append(((x + nx * mid, (y + yb) / 2.0, z + nz * mid), half))
+        for run in runs:
+            if len(run) >= 2:
+                halves = [h for _p, h in run]
+                out.append(DeckStrip(source, [p for p, _h in run], halves, list(halves)))
+    return out
 
 
 def _kind(edges, surfaces: _Surfaces, own: set[str], water_polys) -> str:

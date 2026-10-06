@@ -93,6 +93,14 @@ def graph_to_dict(
             {"id": s["id"], "position": _pt(s["position"]), "edge": s["edge"]}
             for s in graph.bus_stops
         ],
+        "gores": [
+            {
+                "id": g.source,
+                "points": [_pt(p) for p in g.points],
+                "half_m": [round(h, 3) for h in g.left_m],
+            }
+            for g in graph.gores
+        ],
     }
 
 

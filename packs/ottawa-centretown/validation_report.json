@@ -12456,13 +12456,14 @@
    "curb": 3533,
    "guardrail": 39,
    "median": 25,
-   "parapet": 90,
+   "parapet": 78,
    "roadblock": 147,
    "soundwall": 18
   },
   "bridges": {
    "abutments": 95,
    "bridges": 27,
+   "infill_strips": 32,
    "kinds": {
     "footbridge": 3,
     "over_ground": 3,
@@ -12547,7 +12548,7 @@
    "cells_carved": 6933,
    "cells_flattened": 387462,
    "cells_lowered_for_water": 58754,
-   "cells_lowered_under_decks": 23081,
+   "cells_lowered_under_decks": 24272,
    "cells_under_buildings": 160487,
    "chunks": 196,
    "underpasses": {
