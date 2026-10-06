@@ -97,3 +97,20 @@ func test_no_surface_stall_sits_on_a_ramp() -> void:
 			for g in _pack.garages:
 				assert_bool(GarageBuilder._near_ramp(g, s.centre, GarageBuilder.RAMP_WIDTH_M * 0.5)).override_failure_message(
 					"stall %s#%d on %s's ramp" % [lot.id, s.index, g.id]).is_false()
+
+
+## Issue #60: parked cars and a column stood where the ramp meets the floor.
+func test_the_floor_past_each_ramp_is_clear_of_stalls_and_columns() -> void:
+	for g in _pack.garages:
+		if g.tier != "garage":
+			continue
+		for r in g.ramps:
+			var foot := Vector2(r.end.x, r.end.z)
+			var on := (foot - Vector2(r.start.x, r.start.z)).normalized()
+			for k in range(1, 9):  # the first 8 m off the ramp
+				var p := foot + on * float(k)
+				for s in g.lot.stalls:
+					var corners := ParkingLotBuilder.stall_corners(s)
+					assert_bool(Geometry2D.is_point_in_polygon(p, corners)).override_failure_message("%s: stall %d on the landing at %s" % [g.id, s.index, p]).is_false()
+				for c in g.columns:
+					assert_float(c.distance_to(p)).override_failure_message("%s: column on the landing at %s" % [g.id, p]).is_greater(GarageBuilder.RAMP_WIDTH_M * 0.5)
