@@ -6,6 +6,12 @@ extends Node
 ## pooled bodies with gravity; melee sweeps a short sphere in front of the player. Every hit
 ## goes through `hit()`: a mark on world surfaces, and on a person a knock-down for a lethal
 ## variant or paint and a run for a non-lethal one. Gunshots send walkers in earshot running.
+##
+## Empty hands (add-unarmed-combat): a tap of fire is a punch on release, alternating hands;
+## fire held `kick_hold_s` (the leg draws up) and released is a kick with more reach. Fists
+## go through `hit()` with the `fist` impact: where the tone allows violence the third punch
+## on one person inside `combo_window_s`, or one kick, knocks them down; otherwise a hit is a
+## shove that makes them stumble and run off.
 
 signal fired(weapon: Dictionary)
 ## A weapon hit a person; `downed` when it knocked them down (the police hear about it).
@@ -30,6 +36,10 @@ var _reload_left: float = 0.0
 var _balls: Array[RigidBody3D] = []
 var _ball_age: Dictionary = {}  # RigidBody3D -> seconds alive
 var _paint_index: int = 0
+var _fist_hold: float = -1.0  # seconds fire has been held with empty hands, or < 0
+var _punch_side: int = 0
+var _streaks: Dictionary = {}  # Pedestrian -> [punches in a row, _clock at the last]
+var _clock: float = 0.0
 
 
 func _ready() -> void:
@@ -52,6 +62,7 @@ func _on_mode_changed(_id: String) -> void:
 
 func _physics_process(delta: float) -> void:
 	_cooldown = maxf(_cooldown - delta, 0.0)
+	_clock += delta
 	_step_balls(delta)
 	if _reload_left > 0.0:
 		_reload_left -= delta
@@ -66,17 +77,21 @@ func _physics_process(delta: float) -> void:
 			player.aiming = false
 		if held != null:
 			held.aiming = false
+		_drop_fists()
 		_show_reticle(false)
 		return
 	if Input.is_action_just_pressed("weapon_next"):
 		weapons.cycle()
 		_reload_left = 0.0
+		_drop_fists()
 	var w := weapons.current()
 	player.aiming = not w.is_empty() and (Input.is_action_pressed("aim") or hold_aim)
 	_show_reticle(player.aiming and w.get("mechanic", "") != "melee")
 	if held != null:
 		held.aiming = player.aiming and w.get("mechanic", "") != "melee"
-	if not w.is_empty():
+	if w.is_empty():
+		step_fists(delta, Input.is_action_pressed("fire"))
+	else:
 		if Input.is_action_just_pressed("reload") and int(w.get("magazine", 0)) > 0:
 			_reload_left = float(w.get("reload_s", 1.0))
 		if Input.is_action_pressed("fire"):
@@ -114,6 +129,74 @@ func pull_trigger() -> bool:
 		effects.sound(str(imp.get("sound", "")))
 	fired.emit(w)
 	return true
+
+
+## The empty-hands tunables from combat_config.json.
+func fists() -> Dictionary:
+	return weapons.config.get("fists", {})
+
+
+## Fists as a weapon for the hit path: `move` is "punch" or "kick".
+func fist_weapon(move: String) -> Dictionary:
+	var f := fists()
+	return {
+		"id": "fists", "name": "Fists", "mechanic": "melee", "impact": "fist", "lethal": false, "move": move,
+		"range_m": float(f.get(move + "_range_m", 1.3)), "rate_s": float(f.get(move + "_rate_s", 0.35)),
+	}
+
+
+## Empty hands, one physics step: fire `pressed` or not. Released before `kick_hold_s` it is a
+## punch, after it a kick; past the threshold the leg draws up.
+func step_fists(delta: float, pressed: bool) -> void:
+	var kick_at := float(fists().get("kick_hold_s", 0.4))
+	if pressed:
+		_fist_hold = 0.0 if _fist_hold < 0.0 else _fist_hold + delta
+		if held != null:
+			held.chamber = _fist_hold >= kick_at
+		return
+	if _fist_hold < 0.0:
+		return
+	var long := _fist_hold >= kick_at
+	_fist_hold = -1.0
+	if long:
+		kick()
+	else:
+		punch()
+
+
+## A punch with the next hand, if ready. Returns true when it was thrown.
+func punch() -> bool:
+	if _cooldown > 0.0:
+		return false
+	var w := fist_weapon("punch")
+	_cooldown = float(w["rate_s"])
+	if held != null:
+		held.punch(_punch_side)
+	_punch_side = 1 - _punch_side
+	_swing(w)
+	fired.emit(w)
+	return true
+
+
+## A kick, if ready. Returns true when it was thrown.
+func kick() -> bool:
+	if held != null:
+		held.chamber = false
+	if _cooldown > 0.0:
+		return false
+	var w := fist_weapon("kick")
+	_cooldown = float(w["rate_s"])
+	if held != null:
+		held.kick()
+	_swing(w)
+	fired.emit(w)
+	return true
+
+
+func _drop_fists() -> void:
+	_fist_hold = -1.0
+	if held != null:
+		held.chamber = false
 
 
 func _aim_ray(range_m: float, spread_deg: float) -> Array:
@@ -253,6 +336,9 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 	var kind := str(w.get("impact", ""))
 	var imp := weapons.impact(kind)
 	var a: Pedestrian = peds.agent_of(collider as Node) if peds != null and collider is Node else null
+	if a != null and kind == "fist":
+		_fist_hit(a, w, pos, from)
+		return
 	if a != null:
 		if bool(w.get("lethal", false)) and ContentMode.flag("lethal_weapons"):
 			var push := (pos - from)
@@ -270,6 +356,40 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 	if effects != null and collider is StaticBody3D:
 		_paint_index = (_paint_index + 1) % 4
 		effects.mark(str(imp.get("decal", "")), pos, normal, _paint_index)
+
+
+## A punch or kick landing on a walker: a knock-down for a kick or the punch that completes a
+## streak where the tone allows violence, otherwise a shove (stumble, then run off).
+func _fist_hit(a: Pedestrian, w: Dictionary, pos: Vector3, from: Vector3) -> void:
+	var f := fists()
+	var kicked := str(w.get("move", "")) == "kick"
+	var downed := false
+	if ContentMode.flag("violence"):
+		if kicked:
+			downed = true
+		else:
+			var last: Array = _streaks.get(a, [0, -INF])
+			var n := int(last[0]) + 1 if _clock - float(last[1]) <= float(f.get("combo_window_s", 2.5)) else 1
+			_streaks[a] = [n, _clock]
+			downed = n >= int(f.get("punches_to_down", 3))
+	_forget_old_streaks(float(f.get("combo_window_s", 2.5)))
+	if downed:
+		_streaks.erase(a)
+		var push := pos - from
+		push.y = 0.0
+		var strength := float(f.get("kick_push", 300.0)) if kicked else float(weapons.impact("fist").get("lethal_push", 180.0))
+		peds.knock_down(a, push.normalized() * strength + Vector3.UP * 40.0, pos)
+	else:
+		peds.shove(a, from, float(f.get("stumble_s", 0.6)), float(weapons.config.get("flee_s", 6.0)))
+	if effects != null:
+		effects.sound(str(weapons.impact("fist").get("sound", "")))
+	hit_person.emit(a, w, downed)
+
+
+func _forget_old_streaks(window: float) -> void:
+	for p: Pedestrian in _streaks.keys():
+		if _clock - float(_streaks[p][1]) > window:
+			_streaks.erase(p)
 
 
 func _ensure_held() -> void:

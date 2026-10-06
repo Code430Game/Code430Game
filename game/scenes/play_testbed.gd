@@ -85,6 +85,7 @@ var _police_log: bool = false  # --police-log: print the chase each second
 var _wanted_at_start: int = 0  # --wanted=N: start with N stars (screenshots, chases on demand)
 var _weapon_at_start: int = 0  # --weapon=1|2: hold the melee weapon or the gun from the start (screenshots)
 var _shots_at_start: int = 0  # --shoot=N: aim and fire N times once the world is up (screenshots)
+var _fists_at_start: String = ""  # --fists=punch|kick: hold a punch or kick mid-move (screenshots)
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
@@ -226,6 +227,11 @@ func _ready() -> void:
 		get_tree().create_timer(1.0).timeout.connect(func() -> void: _wanted.set_stars(_wanted_at_start))
 	if _weapon_at_start > 0 and _shooter != null:
 		get_tree().create_timer(1.2).timeout.connect(_demo_fire)
+	if _fists_at_start != "" and _shooter != null:
+		get_tree().create_timer(1.2).timeout.connect(func() -> void:
+			if _shooter.held != null:
+				_shooter.held.hold_move = _fists_at_start
+				_shooter.held.hold_t = 0.45 if _fists_at_start == "punch" else 0.58)
 	if _menu_at_start != "":
 		get_tree().create_timer(1.5).timeout.connect(func() -> void:
 			_pause_menu.open()
@@ -836,6 +842,8 @@ func _parse_args() -> void:
 			_weapon_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--shoot="):
 			_shots_at_start = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--fists="):
+			_fists_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--menu="):
 			_menu_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--record-music="):

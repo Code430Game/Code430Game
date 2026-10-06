@@ -7,11 +7,13 @@ extends Node3D
 ## A stopped car near a player on foot, or near the player's own stopped car, lets an officer
 ## out who runs at them (or to the driver's door) and, at a player on foot, uses the officer
 ## weapon the tone gives (a net that holds the player in `clean`, a pistol or blaster at the
-## top level elsewhere). Held still with an officer beside them for `busted_s`, the player is
+## top level elsewhere), or fists at arm's length when the tone allows no officer weapon
+## (add-unarmed-combat). Held still with an officer beside them for `busted_s`, the player is
 ## busted. Officers left far behind are dropped; cars and officers leave when the level clears.
 
 signal busted
 signal net_hit(seconds: float)
+## The player on foot was shot or punched by an officer.
 signal shot_at(damage: float)
 ## Someone got in and took a patrol car (#69): it is theirs now.
 signal taken(car: VehicleBody3D)
@@ -331,6 +333,9 @@ func _step_officer(o: Node3D, delta: float) -> void:
 	var cool := float(_officer_cooldown.get(o, 0.0)) - delta
 	_officer_cooldown[o] = cool
 	var w := WeaponSet.resolve(_officer_weapon)
+	if w.is_empty():
+		_officer_fists(o, d, cool)
+		return
 	var lethal := bool(w.get("lethal", false))
 	var may_fire := not w.is_empty() and not player.is_driving() and not (lethal and wanted.stars < int(cfg("fire_min_stars", 3)))
 	var held: HeldWeapon = o.get_meta("held", null)
@@ -346,6 +351,19 @@ func _step_officer(o: Node3D, delta: float) -> void:
 			shot_at.emit(float(cfg("officer_damage", 9.0)))
 		else:
 			net_hit.emit(float(cfg("net_s", 3.0)))
+
+
+## No tone weapon for officers: a jab at a player on foot within reach, hands alternating.
+func _officer_fists(o: Node3D, d: float, cool: float) -> void:
+	if cool > 0.0 or player.is_driving() or d > float(cfg("officer_punch_m", 2.0)):
+		return
+	var held: HeldWeapon = o.get_meta("held", null)
+	if held != null:
+		var side := int(o.get_meta("jab", 0))
+		held.punch(side)
+		o.set_meta("jab", 1 - side)
+	_officer_cooldown[o] = float(cfg("officer_punch_rate_s", 0.8))
+	shot_at.emit(float(cfg("officer_punch_damage", 5.0)))
 
 
 func _check_busted(delta: float) -> void:
