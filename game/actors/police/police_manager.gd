@@ -440,6 +440,20 @@ func _step_helicopter(target: Node3D) -> void:
 	wanted.helicopter_sees = helicopter.sees_target()
 
 
+## Where the police are, for the minimap: [{"at": Vector3, "kind": "car" | "officer" | "helicopter"}].
+func markers() -> Array:
+	var out: Array = []
+	for car in cars:
+		if is_instance_valid(car):
+			out.append({"at": car.global_position, "kind": "car"})
+	for officer in officers:
+		if is_instance_valid(officer):
+			out.append({"at": officer.global_position, "kind": "officer"})
+	if helicopter != null and is_instance_valid(helicopter):
+		out.append({"at": helicopter.global_position, "kind": "helicopter"})
+	return out
+
+
 func _on_helicopter_landed() -> void:
 	if helicopter != null:
 		helicopter.queue_free()

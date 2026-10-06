@@ -1125,10 +1125,14 @@ func _process(delta: float) -> void:
 		_wanted.target = Players.local_controlled_body()
 	if _police != null and _day_night != null:
 		_police.night = _day_night.night_factor()
-	if _ambulances != null and _minimap != null:
+	if _minimap != null:
 		var blips: Array = []
-		for at in _ambulances.positions():
-			blips.append({"at": at, "color": Color(0.9, 0.15, 0.2)})
+		if _ambulances != null:
+			for at in _ambulances.positions():
+				blips.append({"at": at, "color": Color(0.9, 0.15, 0.2)})
+		if _police != null:
+			for m: Dictionary in _police.markers():
+				blips.append({"at": m["at"], "shape": "helicopter" if m["kind"] == "helicopter" else "dot", "flash": m["kind"] != "officer"})
 		_minimap.blips = blips
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
 		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
