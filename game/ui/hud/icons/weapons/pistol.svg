@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Code 430 weapon icon (CC BY-SA 4.0): a plain pistol -->
+<g fill="#fff">
+<rect x="6" y="15" width="52" height="11" rx="2"/>
+<rect x="56" y="17" width="4" height="5" rx="1"/>
+<path d="M8 26 L24 26 L22 53 Q21 56 17 56 L8 56 Q5 56 6 52 Z"/>
+<path d="M24 26 L38 26 L38 29 Q38 37 31 37 L23.5 37 L23.7 33 L30 33 Q34 33 34 29 L24 29 Z"/>
+<rect x="27" y="26" width="3" height="7" rx="1"/>
+</g>
+</svg>

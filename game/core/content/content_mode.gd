@@ -94,6 +94,12 @@ func flag(name: String) -> bool:
 	return bool(mode().get("flags", {}).get(name, false))
 
 
+## The active mode's HUD accent colour (`hud.accent`), white when the mode has none.
+func hud_accent() -> Color:
+	var hex := str(mode().get("hud", {}).get("accent", ""))
+	return Color.html(hex) if Color.html_is_valid(hex) else Color.WHITE
+
+
 ## The variant of `item` to show: the active mode's when present and allowed, else the
 ## fallback when allowed, else {} (hidden; warned once per item id).
 func pick_variant(item: Dictionary) -> Dictionary:

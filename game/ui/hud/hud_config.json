@@ -1,0 +1,20 @@
+{
+  "_doc": "HUD tunables (add-weapon-selector). Pixel sizes are at 1280x800 and scale with the window height.",
+  "wheel": {
+    "hold_s": 0.2,
+    "deadzone": 0.45,
+    "mouse_px": 40.0,
+    "radius_px": 150.0,
+    "tile_px": 64.0,
+    "hub_px": 110.0,
+    "max_segments": 8,
+    "outer_scale": 1.6,
+    "outer_stick": 0.95,
+    "selected_scale": 1.15
+  },
+  "tile": {
+    "size_px": 40.0,
+    "opacity": 0.7,
+    "flash_s": 0.6
+  }
+}

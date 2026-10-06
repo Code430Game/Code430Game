@@ -34,6 +34,7 @@
               "properties": {
                 "name": {"type": "string"},
                 "model": {"enum": ["knife", "sabre", "brush", "pistol", "blaster", "paintball_gun", "net_gun"]},
+                "icon": {"type": "string", "pattern": "^([a-z0-9_]+|[A-Za-z0-9_./-]+\\.png)$", "description": "The wheel icon: a first-party icon name, or a PNG path in a pack. Defaults to the model, then a generic icon for the mechanic."},
                 "impact": {"enum": ["blade", "bullet", "energy", "paint", "fist"]},
                 "lethal": {"type": "boolean"},
                 "mechanic": {"enum": ["melee", "hitscan", "projectile"]},

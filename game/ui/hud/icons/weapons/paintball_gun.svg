@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Code 430 weapon icon (CC BY-SA 4.0): a paintball marker with its hopper and air tank -->
+<g fill="#fff">
+<ellipse cx="28" cy="14" rx="12" ry="9"/>
+<rect x="25" y="21" width="6" height="6"/>
+<rect x="14" y="26" width="32" height="9" rx="2"/>
+<rect x="45" y="28" width="17" height="5" rx="2"/>
+<rect x="1" y="26" width="12" height="10" rx="5"/>
+<path d="M20 35 L30 35 L27 55 Q26 57 23 57 L18 57 Q15 57 16 54 Z"/>
+<path d="M30 35 L40 35 L40 37 Q40 43 34 43 L29 43 L29.4 40 L33 40 Q37 40 37 37 L30 37 Z"/>
+</g>
+</svg>
