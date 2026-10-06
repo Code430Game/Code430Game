@@ -554,6 +554,15 @@ func _despawn_far() -> void:
 			agents.remove_at(i)
 
 
+## Removes every agent, handing their bodies back to the pool and leaving junctions free (co-op
+## clients switching to the host's traffic).
+func clear_agents() -> void:
+	for a in agents:
+		_leave_junction(a)
+		_release_body(a)
+	agents.clear()
+
+
 ## Lane paths within radius of a position, via the cell index.
 func lanes_near(position: Vector3, radius: float) -> Array[LaneGraph.LanePath]:
 	var out: Array[LaneGraph.LanePath] = []
@@ -808,6 +817,8 @@ func release_near(position: Vector3, reach: float = 4.0) -> Dictionary:
 	var best: TrafficAgent = null
 	var best_d := reach
 	for a in agents:
+		if a.retired:
+			continue  # crashed: not a car anyone drives away (hit_near skips them too)
 		var d := a.position().distance_to(position)
 		if d < best_d:
 			best_d = d

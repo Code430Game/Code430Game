@@ -56,6 +56,7 @@ var _police: PoliceManager
 var _ambulances: AmbulanceManager
 var _ambulance_log: bool = false  # --ambulance-log: print calls and ambulances each second
 var _banner: Label
+var _banner_shown: int = 0  # counts banners, so only the latest one's timer hides it
 var _lit_car: VehicleBody3D  # the car whose headlights the lights setting drives: the one driven last
 var _radio: Radio
 var _radio_start: String = ""  # --radio=<station id|off>: tune to it at start
@@ -218,8 +219,8 @@ func _ready() -> void:
 	_setup_maps()
 	_setup_traffic()
 	_setup_pedestrians()
+	_setup_day_night()  # before the parked cars, which fill their stalls for the clock's hour
 	_setup_parked_cars()
-	_setup_day_night()
 	_setup_audio()
 	_setup_combat()
 	_setup_net()
@@ -287,14 +288,13 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 
 
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
-	if _wanted != null and _wanted.police_sees(traffic_body.global_position):
-		_wanted.report("theft", traffic_body.global_position)  # only a theft the police see counts
 	if _parked != null and traffic_body.has_meta("parked_key"):
 		if Session.is_client():
 			_world_sync.request_take_parked(str(traffic_body.get_meta("parked_key")))  # the host answers via _on_take_granted
 			return
 		var parked_car := _parked.take(traffic_body)
 		if parked_car != null:
+			_report_theft(parked_car.global_position)
 			_player.enter_vehicle(parked_car)
 		return
 	if _traffic == null or not (traffic_body is TrafficCar):
@@ -304,7 +304,14 @@ func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
 		return
 	var car := _traffic.take_car(traffic_body as TrafficCar)
 	if car != null:
+		_report_theft(car.global_position)
 		_player.enter_vehicle(car)
+
+
+## A car was taken at `at`: a theft, if the police see it.
+func _report_theft(at: Vector3) -> void:
+	if _wanted != null and _wanted.police_sees(at):
+		_wanted.report("theft", at)
 
 
 func _on_take_granted(t: Transform3D, color: Color, vehicle_id: String, station: String) -> void:
@@ -315,7 +322,9 @@ func _on_take_granted(t: Transform3D, color: Color, vehicle_id: String, station:
 	add_child(car)
 	car.global_transform = t.translated_local(Vector3(0.0, 0.1, 0.0))
 	car.set_spawn(car.global_transform)
-	_player.enter_vehicle(car)
+	_report_theft(car.global_position)
+	if not _player.is_driving():
+		_player.enter_vehicle(car)
 
 
 func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
@@ -419,9 +428,7 @@ func _caught(how: String) -> void:
 		text = "CAUGHT! Fined for mischief"
 	if place != null and place.name != "":
 		text += "\n" + place.name
-	_banner.text = text
-	_banner.visible = true
-	get_tree().create_timer(3.0).timeout.connect(func() -> void: _banner.visible = false)
+	_show_banner(text)
 	_police.reset()
 	if _ambulances != null:
 		_ambulances.reset()
@@ -432,8 +439,20 @@ func _caught(how: String) -> void:
 	_player.velocity = Vector3.ZERO
 	_player.stuck_s = 0.0
 	_player.health = float(_wanted.config.get("player_health", 100.0))
+	_shooter.reset()
 	_shooter.weapons.refill()
 	_update_stars()
+
+
+## Shows `text` on the banner for `banner_s`; a newer banner restarts the time.
+func _show_banner(text: String) -> void:
+	_banner.text = text
+	_banner.visible = true
+	_banner_shown += 1
+	var shown := _banner_shown
+	get_tree().create_timer(float(_wanted.config.get("banner_s", 3.0))).timeout.connect(func() -> void:
+		if shown == _banner_shown:
+			_banner.visible = false)
 
 
 func _setup_combat() -> void:
@@ -699,7 +718,7 @@ func _set_mirror(on: bool) -> void:
 	if _traffic != null:
 		_traffic.mirror = on
 		if on:
-			_traffic.agents.clear()
+			_traffic.clear_agents()
 	if _peds != null:
 		_peds.mirror = on
 		if on:

@@ -94,10 +94,7 @@ func _physics_process(delta: float) -> void:
 			cars.erase(car)
 			continue
 		if int(car.get("driver_peer_id")) != 0:
-			cars.erase(car)  # taken: no more steering it, and never freed with the thief inside
-			_plans.erase(car)
-			car.remove_meta("police")
-			taken.emit(car)
+			hand_over(car)
 			continue
 		if car.global_position.distance_to(target.global_position) > float(cfg("despawn_m", 260.0)):
 			_remove_car(car)
@@ -131,6 +128,18 @@ func _physics_process(delta: float) -> void:
 			if helicopter != null:
 				line += " | heli %s d %.0f alt %.0f sees %s" % [PoliceHelicopter.State.keys()[helicopter.state], helicopter.global_position.distance_to(target.global_position), helicopter.global_position.y - target.global_position.y, helicopter.sees_target()]
 			print(line)
+
+
+## A player took patrol car `car`: no more steering it, never freed with the thief inside, and
+## its light bar goes dark (as an ambulance's does); it is an ordinary car now.
+func hand_over(car: VehicleBody3D) -> void:
+	cars.erase(car)
+	_plans.erase(car)
+	car.remove_meta("police")
+	var bar: Node3D = car.get_node_or_null("LightBar")
+	if bar != null:
+		bar.visible = false
+	taken.emit(car)
 
 
 func _process(_delta: float) -> void:
