@@ -1,3 +1,5 @@
+> **History.** The note that started the project on 2026-09-30, kept for the record. New contributors start at `CONTRIBUTING.md`.
+
 # HANDOFF — Start Here (for the local agent)
 
 You are starting a new project from zero. A human planned it with Claude in chat; this file hands it to you.
