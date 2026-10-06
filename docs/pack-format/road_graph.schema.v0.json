@@ -107,6 +107,20 @@
         }
       }
     },
+    "gores": {
+      "description": "Optional (add-road-shoulders 1.4). Paved gores: strips down the middle of the gap where a ramp runs beside its road the same way, with the half-width at each point. The game draws them as asphalt; the terrain is flat under them.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "points", "half_m"],
+        "properties": {
+          "id": {"type": "string"},
+          "points": {"type": "array", "minItems": 2, "items": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}},
+          "half_m": {"type": "array", "items": {"type": "number", "minimum": 0}}
+        }
+      }
+    },
     "pedestrian_ways": {
       "type": "array",
       "items": {

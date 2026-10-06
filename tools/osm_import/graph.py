@@ -104,6 +104,7 @@ class RoadGraph:
     pedestrian: list[PedestrianWay]
     notes: dict = field(default_factory=dict)
     bus_stops: list[dict] = field(default_factory=list)  # {"id", "position", "edge"}
+    gores: list = field(default_factory=list)  # bridges.DeckStrip, set by gores.build_gores
 
     def incident(self) -> dict[str, list[str]]:
         """Node id -> ids of edges touching it."""

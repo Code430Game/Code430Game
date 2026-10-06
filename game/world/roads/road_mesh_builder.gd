@@ -33,6 +33,10 @@ const CLASS_COLORS := {
 	"parking": Color(0.36, 0.36, 0.37),  # near the lot asphalt, so aisles do not read as pale stripes
 }
 const JUNCTION_COLOR := Color(0.33, 0.33, 0.35)
+## Paved gores (add-road-shoulders 1.4) sit just under the ribbons they meet, so their overlap
+## with the road edges never z-fights; asphalt like the ramp beside them.
+const GORE_LIFT_M := 0.005
+const GORE_COLOR := Color(0.25, 0.25, 0.27)
 
 
 ## Accumulates triangles for one chunk.
@@ -140,7 +144,24 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> Result:
 	for nid in junctions.keys():
 		var j: JunctionBuilder.Junction = junctions[nid]
 		_add_junction(j, result)
+	for gore: Dictionary in graph.gores:
+		_add_gore(gore["points"], gore["half_m"], result.roads, result)
+		_add_gore(gore["points"], gore["half_m"], result.roads_lod1, result)
 	return result
+
+
+## A paved gore: a strip with its own half-width at each point, split at chunk bounds like a ribbon.
+static func _add_gore(points: PackedVector3Array, half_m: PackedFloat32Array, buckets: Dictionary, result: Result) -> void:
+	if points.size() < 2:
+		return
+	var normals := RoadGeometry.miter_normals(points)
+	for i in range(points.size() - 1):
+		var a := points[i] + Vector3(0.0, GORE_LIFT_M, 0.0)
+		var b := points[i + 1] + Vector3(0.0, GORE_LIFT_M, 0.0)
+		var na := normals[i] * half_m[i]
+		var nb := normals[i + 1] * half_m[i + 1]
+		var bucket := result.get_bucket(buckets, RoadGeometry.chunk_of_segment(points[i], points[i + 1]))
+		bucket.add_quad(a - Vector3(na.x, 0.0, na.y), a + Vector3(na.x, 0.0, na.y), b - Vector3(nb.x, 0.0, nb.y), b + Vector3(nb.x, 0.0, nb.y), GORE_COLOR)
 
 
 ## Half-width targets at each end when the neighbour across a pass-through node is narrower:

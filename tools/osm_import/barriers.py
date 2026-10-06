@@ -170,7 +170,10 @@ def build_barriers(
     buildings: BuildingsResult | None,
     cfg: ImportConfig,
     bounds: tuple[float, float, float, float] | None = None,
+    infill: list | None = None,
 ) -> BarriersResult:
+    """Every barrier for the graph. `infill` is the bridges' infill strips (DeckStrip): a deck
+    edge that faces one has floor beyond it, not a drop, so no parapet stands there."""
     rules = cfg.barriers
     result = BarriersResult()
     if not rules:
@@ -255,6 +258,20 @@ def build_barriers(
             if abs(y - (ya + (yb - ya) * t)) < overlap_height:
                 return False
         return True
+
+    infill_index = _SegmentIndex()
+    for strip in infill or []:
+        for i in range(len(strip.points) - 1):
+            a, b = strip.points[i], strip.points[i + 1]
+            half = max(strip.left_m[i], strip.left_m[i + 1])
+            infill_index.add((a[0], a[2]), (b[0], b[2]), (half, a[1], b[1]))
+
+    def on_infill(x: float, y: float, z: float) -> bool:
+        """True when (x, z) is on an infill floor at about the same level (add-road-shoulders)."""
+        for a, b, (half, ya, yb) in infill_index.near(x, z, 12.0):
+            if _seg_dist(x, z, a[0], a[1], b[0], b[1]) <= half and abs(y - (ya + yb) / 2.0) < 1.0:
+                return True
+        return False
 
     shared_gap = float(rules.get("parapet_shared_deck_gap_m", 3.5))
 
@@ -364,7 +381,12 @@ def build_barriers(
                         outer = max(outer, d + ww / 2.0)
                     px, pz = x + nx * (outer - inset), z + nz * (outer - inset)
                     pts.append((px, y, pz))
-                    keep.append(clear_of_roads(px, y, pz, eid) and not shared_deck(px, y, pz, eid))
+                    beyond = (x + nx * (outer + 0.1), z + nz * (outer + 0.1))  # just off the edge
+                    keep.append(
+                        clear_of_roads(px, y, pz, eid)
+                        and not shared_deck(px, y, pz, eid)
+                        and not on_infill(beyond[0], y, beyond[1])
+                    )
                     curb_pts.append((ex, y, ez))
                     curb_keep.append(
                         outer > hw + 0.5

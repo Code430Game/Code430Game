@@ -82,3 +82,21 @@ func test_wider_edge_tapers_to_the_narrower_neighbour() -> void:
 				seam_z.append(snappedf(absf(v.z), 0.01))
 	assert_array(seam_z).contains([3.5])
 	assert_bool(seam_z.has(7.0)).is_false()
+
+
+func test_a_paved_gore_is_drawn_facing_up_just_under_the_ribbons() -> void:
+	var data := {"meta": {}, "nodes": [], "edges": [], "pedestrian_ways": [], "gores": [
+		{"id": "gore:w1.0:w2.0", "points": [[10, 5, 10], [30, 5, 12], [50, 5, 16]], "half_m": [0.5, 2.0, 4.3]},
+	]}
+	var g := RoadGraph.from_dict(data)
+	assert_int(g.gores.size()).is_equal(1)
+	var result := RoadMeshBuilder.build(g, {})
+	var tri: RoadMeshBuilder.ChunkTriangles = result.roads[Vector2i(0, 0)]
+	assert_int(tri.vertices.size()).is_equal(12)  # two quads
+	for i in range(0, tri.vertices.size(), 3):
+		var a := tri.vertices[i]
+		var face := (tri.vertices[i + 2] - a).cross(tri.vertices[i + 1] - a)
+		assert_float(face.y).is_greater(0.0)  # Godot: clockwise is the front, facing up
+		assert_float(a.y).is_equal_approx(5.0 + RoadMeshBuilder.GORE_LIFT_M, 1e-4)
+		assert_bool(tri.colors[i] == RoadMeshBuilder.GORE_COLOR).is_true()
+	assert_bool(result.roads_lod1.has(Vector2i(0, 0))).is_true()

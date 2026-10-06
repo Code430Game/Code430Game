@@ -104,7 +104,9 @@ def _import(args: argparse.Namespace) -> int:
         # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
         result.graph_dict["pedestrian_ways"] = pedestrian_to_list(result.graph)
         # Barriers use final pedestrian heights (curbs), so they come after the terrain.
-        barriers = build_barriers(result.graph, elevation, buildings, cfg, proj.bbox_local(bbox))
+        barriers = build_barriers(
+            result.graph, elevation, buildings, cfg, proj.bbox_local(bbox), bridges.infill()
+        )
         result.report.summary["barriers"] = barriers.counts
         parking = None
         if args.parking:

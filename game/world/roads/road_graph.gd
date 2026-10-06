@@ -67,6 +67,7 @@ var nodes: Dictionary = {}  # id -> RoadNode
 var edges: Dictionary = {}  # id -> RoadEdge
 var pedestrian: Array[PedestrianWay] = []
 var bus_stops: Array = []  # [{"id", "position": Vector3, "edge"}]
+var gores: Array = []  # [{"id", "points": PackedVector3Array, "half_m": PackedFloat32Array}] (add-road-shoulders 1.4)
 var _incident: Dictionary = {}  # node id -> Array[String] of edge ids
 
 
@@ -145,6 +146,11 @@ static func from_dict(data: Dictionary) -> RoadGraph:
 	for st in data.get("bus_stops", []):
 		var pos: Array = st["position"]
 		g.bus_stops.append({"id": str(st["id"]), "position": Vector3(float(pos[0]), float(pos[1]), float(pos[2])), "edge": str(st["edge"])})
+	for gore: Dictionary in data.get("gores", []):
+		var pts := PackedVector3Array()
+		for pt in gore["points"]:
+			pts.append(_vec(pt))
+		g.gores.append({"id": str(gore["id"]), "points": pts, "half_m": PackedFloat32Array(gore["half_m"])})
 	return g
 
 

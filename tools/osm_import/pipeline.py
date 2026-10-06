@@ -18,6 +18,7 @@ from osm_import.elevation import (
 from osm_import.export import dump_json, graph_to_dict
 from osm_import.filter import FilterResult, filter_ways
 from osm_import.forks import shape_forks
+from osm_import.gores import build_gores
 from osm_import.graph import RoadGraph, build_graph
 from osm_import.osm_data import BBox, OsmData
 from osm_import.projection import Projector
@@ -78,6 +79,7 @@ def run_pipeline(
         crossings = infer_bridges(graph, elevation.sample)
         elev_stats = apply_elevation(graph, elevation, cfg)
         trim_shoulders(graph)  # compares heights; before anything reads the final widths
+        build_gores(graph, cfg)  # on the final ribbons
         apply_pedestrian_elevation(graph, elevation, cfg)
         elev_meta = dict(sorted(elevation.describe().items()))
         elev_meta["bridge_clearance_m"] = cfg.bridge_clearance_m
