@@ -2,6 +2,8 @@
 
 **Status: proposed 2026-10-06 from the backlog (human, 2026-10-02: "I'd rather leave this until we want to improve the audio across the board"). Written now so it is ready; start it when the human asks for an audio round.**
 
+**Widened 2026-10-06 (human, after a Deck chase with `update-police-pursuit`): "The sounds would be wicked too. Maybe all items can get sounds in one feature ticket."** The audio round should give every moving thing a sound placed in the world: traffic, buses, police cars, ambulances, the helicopter's rotor (so you can hear where it is), officers and pedestrians. The minimap stays the main way to locate the helicopter.
+
 ## Why
 Sound is synthesised and mostly global: engine and tyre voices for the driven car, a city
 bed, horn, sirens and rotor, and combat sounds. It works, but every car sounds the same and
