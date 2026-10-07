@@ -182,6 +182,15 @@ func test_content_hash_reads_the_bytes_not_just_the_sizes() -> void:
 	assert_str(MapPack.content_hash(base.path_join("a"))).is_equal(MapPack.content_hash(base.path_join("b")))
 
 
+func test_manifest_hash_is_computed_once_per_load() -> void:
+	# Review fix: the report form re-hashed every pack file on each open.
+	var a := _pack.manifest_summary()
+	var b := _pack.manifest_summary()
+	assert_str(a["hash"]).is_equal(b["hash"])
+	assert_str(a["hash"]).is_equal(MapPack.content_hash(_pack.pack_dir))
+	assert_int(_pack.content_hash_runs).is_equal(1)
+
+
 func test_parking_lots_load_and_build_in_their_chunks() -> void:
 	assert_int(_pack.parking_lots.size()).is_greater(600)  # surface and street-side lots
 	var stalls := 0
