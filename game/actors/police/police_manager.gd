@@ -66,7 +66,7 @@ var canopy: CanopyCover
 ## 0 day .. 1 night (the scene's day-night clock), for the helicopter's searchlight.
 var night: float = 0.0
 var _rotor_voice: AudioStreamPlayer
-var _rotor_t: float = 0.0
+var _rotor_phase: float = 0.0  # AI helicopter rotor beat phase, wrapped at TAU
 var _noise_state: Array = [0x1234567]
 var cars: Array[VehicleBody3D] = []
 var officers: Array[Node3D] = []
@@ -1105,12 +1105,10 @@ func _fill_rotor() -> void:
 	var frames := pb.get_frames_available()
 	var buf := PackedVector2Array()
 	buf.resize(frames)
-	var dt := 1.0 / Synth.MIX_RATE
+	var step := FlyableHelicopter.rotor_phase_step(18.0, 1.0 / Synth.MIX_RATE)
 	for i in range(frames):
-		_rotor_t += dt
-		var beat := pow(maxf(sin(_rotor_t * TAU * 18.0), 0.0), 3.0)
+		_rotor_phase = FlyableHelicopter.advance_phase(_rotor_phase, step)
+		var beat := pow(maxf(sin(_rotor_phase), 0.0), 3.0)
 		var s := Synth.noise(_noise_state) * beat * 0.5 * gain
 		buf[i] = Vector2(s, s)
 	pb.push_buffer(buf)
-	if _rotor_t > 1000.0:
-		_rotor_t = fmod(_rotor_t, 1.0)
