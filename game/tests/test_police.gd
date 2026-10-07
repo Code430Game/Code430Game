@@ -169,9 +169,15 @@ func test_an_officer_gets_out_at_the_players_stopped_car_and_busts_them() -> voi
 	pm.holder.add_child(cop)
 	cop.global_position = Vector3(12, 0.6, 0)
 	pm.cars.append(cop)
-	await get_tree().create_timer(0.5).timeout
+	for i in range(240):  # physics frames, not wall time (slow CI runners)
+		if not pm.officers.is_empty():
+			break
+		await get_tree().physics_frame
 	assert_int(pm.officers.size()).is_equal(1)
-	await get_tree().create_timer(4.0).timeout  # walks up to the door, then the 2 s hold
+	for i in range(600):  # walks up to the door, then the 2 s hold (up to 10 s of frames)
+		if caught[0] > 0:
+			break
+		await get_tree().physics_frame
 	assert_int(caught[0]).is_greater_equal(1)
 
 

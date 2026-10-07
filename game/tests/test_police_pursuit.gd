@@ -248,7 +248,12 @@ func test_a_patrol_car_stays_parked_while_its_officer_is_out_and_drives_once_the
 	cop.global_position = Vector3(12, 0.6, 0)
 	cop.set_meta("police", true)
 	pm.cars.append(cop)
-	await get_tree().create_timer(0.5).timeout
+	# In physics frames, not wall time: on a slow CI runner half a second of wall time held too
+	# few frames for the car to pull up and let its officer out.
+	for i in range(240):
+		if not pm.officers.is_empty():
+			break
+		await get_tree().physics_frame
 	assert_int(pm.officers.size()).is_equal(1)
 	assert_bool(cop.has_meta("officer_out")).is_true()
 	# The player drives off west: the empty car must not follow.
