@@ -150,3 +150,20 @@ def test_parking_dead_ends_are_counted_apart_from_streets():
     r = run(ways)
     assert len(r.dead_ends["parking"]) == 2
     assert len(r.dead_ends["suspicious"]) == 4  # the four real street ends, unchanged
+
+
+def test_report_says_when_shared_heights_ran_out_of_tie_rounds():
+    from osm_import.elevation import TIE_ROUNDS, ElevationStats
+
+    settled = ElevationStats()
+    settled.tie_rounds = TIE_ROUNDS - 1
+    assert settled.to_dict()["share_rounds_exhausted"] is False
+    stuck = ElevationStats()
+    stuck.tie_rounds = TIE_ROUNDS
+    stuck_dict = stuck.to_dict()
+    assert stuck_dict["share_rounds_exhausted"] is True
+    report = run(GRID)
+    report.elevation = stuck_dict
+    assert "ran out of rounds" in render_markdown(report, "test")
+    report.elevation = settled.to_dict()
+    assert "ran out of rounds" not in render_markdown(report, "test")

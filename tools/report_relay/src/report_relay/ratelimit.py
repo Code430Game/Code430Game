@@ -36,24 +36,39 @@ def sender_key(ip: str, salt: str) -> str:
     return hashlib.sha256(f"{salt}:{ip}".encode()).hexdigest()[:24]
 
 
-async def check_and_count(
-    store: Store, sender: str, now: float, limits: Limits = DEFAULT_LIMITS
-) -> float | None:
-    """Counts one report and returns None, or returns seconds to wait when a limit is reached."""
-    windows = [
+def _windows(sender: str, now: float, limits: Limits) -> list[tuple[str, int, int]]:
+    return [
         (f"h:{sender}:{int(now // HOUR)}", limits.per_hour, HOUR),
         (f"d:{sender}:{int(now // DAY)}", limits.per_day, DAY),
         (f"g:{int(now // DAY)}", limits.global_per_day, DAY),
     ]
-    counts = []
-    for key, limit, span in windows:
-        count = int(await store.get(key) or 0)
-        if count >= limit:
+
+
+async def check(
+    store: Store, sender: str, now: float, limits: Limits = DEFAULT_LIMITS
+) -> float | None:
+    """Seconds to wait when a limit is reached, else None. Reads only; nothing is counted."""
+    for key, limit, span in _windows(sender, now, limits):
+        if int(await store.get(key) or 0) >= limit:
             return float(span - (now % span))
-        counts.append(count)
-    for (key, _, span), count in zip(windows, counts, strict=True):
-        await store.put(key, str(count + 1), int(span - (now % span)) + 60)
     return None
+
+
+async def count(store: Store, sender: str, now: float, limits: Limits = DEFAULT_LIMITS) -> None:
+    """Counts one report in every window."""
+    for key, _, span in _windows(sender, now, limits):
+        current = int(await store.get(key) or 0)
+        await store.put(key, str(current + 1), int(span - (now % span)) + 60)
+
+
+async def check_and_count(
+    store: Store, sender: str, now: float, limits: Limits = DEFAULT_LIMITS
+) -> float | None:
+    """Counts one report and returns None, or returns seconds to wait when a limit is reached."""
+    wait = await check(store, sender, now, limits)
+    if wait is None:
+        await count(store, sender, now, limits)
+    return wait
 
 
 class MemoryStore:

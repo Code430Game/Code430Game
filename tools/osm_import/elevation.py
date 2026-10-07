@@ -287,6 +287,7 @@ class ElevationStats:
             "aligned_dropped": self.aligned_dropped,
             "shared_groups": self.shared_groups,
             "tie_rounds": self.tie_rounds,
+            "share_rounds_exhausted": self.tie_rounds >= TIE_ROUNDS,
             "clearance_raised": self.clearance_raised,
             "clearance_short": self.clearance_short,
         }

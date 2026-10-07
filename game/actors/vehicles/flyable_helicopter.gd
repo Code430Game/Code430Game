@@ -65,7 +65,7 @@ var _ground_known: bool = false  # the ray below found ground (it may not have s
 var _rotor: Node3D
 var _tail_rotor: Node3D
 var _rotor_voice: AudioStreamPlayer
-var _rotor_t: float = 0.0
+var _rotor_phase: float = 0.0  # rotor beat phase in radians, wrapped at TAU so it never clicks
 var _noise_state: Array = [0x7531]
 
 const DEFAULTS := {
@@ -430,12 +430,24 @@ func _fill_rotor() -> void:
 	var frames := pb.get_frames_available()
 	var buf := PackedVector2Array()
 	buf.resize(frames)
-	var dt := 1.0 / Synth.MIX_RATE
+	var step := rotor_phase_step(18.0 * maxf(engine, 0.3), 1.0 / Synth.MIX_RATE)
 	for i in range(frames):
-		_rotor_t += dt
-		var beat := pow(maxf(sin(_rotor_t * TAU * 18.0 * maxf(engine, 0.3)), 0.0), 3.0)
+		_rotor_phase = advance_phase(_rotor_phase, step)
+		var beat := pow(maxf(sin(_rotor_phase), 0.0), 3.0)
 		var s := Synth.noise(_noise_state) * beat * 0.5 * gain
 		buf[i] = Vector2(s, s)
 	pb.push_buffer(buf)
-	if _rotor_t > 1000.0:
-		_rotor_t = fmod(_rotor_t, 1.0)
+
+
+## Radians the rotor beat advances per sample at `beats_hz`.
+static func rotor_phase_step(beats_hz: float, dt: float) -> float:
+	return TAU * beats_hz * dt
+
+
+## The next phase, wrapped at a whole turn so the waveform stays continuous forever; the old
+## reset (fmod of elapsed seconds) cut mid-beat and clicked every ~1000 s.
+static func advance_phase(phase: float, step: float) -> float:
+	phase += step
+	if phase >= TAU:
+		phase -= TAU
+	return phase

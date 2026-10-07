@@ -373,3 +373,39 @@ func test_officers_dont_rise_to_a_helicopter_on_a_roof() -> void:
 	await get_tree().create_timer(3.0).timeout
 	assert_float(o.global_position.y).is_less(2.0)
 	assert_array(busted).is_empty()
+
+
+func test_the_rotor_beat_stays_continuous_across_the_phase_wrap() -> void:
+	# Advance past several whole turns at an awkward beat rate: no sample jumps more than one step.
+	var step := FlyableHelicopter.rotor_phase_step(18.0 * 0.37, 1.0 / Synth.MIX_RATE)
+	var phase := 0.0
+	var last := sin(phase)
+	var worst := 0.0
+	for i in range(int(4.0 * TAU / step) + 5):
+		phase = FlyableHelicopter.advance_phase(phase, step)
+		var v := sin(phase)
+		worst = maxf(worst, absf(v - last))
+		last = v
+	assert_float(phase).is_less(TAU)
+	assert_float(worst).is_less(step * 1.01)
+
+
+func test_a_guest_flying_the_helicopter_keeps_the_pad_empty_until_they_are_gone() -> void:
+	# The host frees its replica of a guest's stolen helicopter (WorldSync), so only the pilot
+	# peer id says it is still flown; a second police helicopter must not appear meanwhile.
+	var world := _world()
+	var pm := _police(world)
+	pm.wanted.config["air_return_s"] = 0.3
+	await _frames(2)
+	assert_object(pm.parked_helicopter).is_not_null()
+	pm.take_parked_helicopter()
+	pm.stolen_helicopter.queue_free()
+	pm.guest_pilot_peer = 2
+	await get_tree().create_timer(0.5).timeout
+	await _frames(2)
+	assert_object(pm.parked_helicopter).is_null()
+	# The guest leaves mid-flight: the helicopter is left where they were, the pad refills.
+	pm.leave_helicopter(Transform3D(Basis(), Vector3(80, 20, 0)))
+	assert_int(pm.guest_pilot_peer).is_equal(0)
+	await _frames(3)
+	assert_object(pm.parked_helicopter).is_not_null()

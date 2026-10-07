@@ -57,6 +57,9 @@ var parked_helicopter: FlyableHelicopter
 ## The helicopter a player took from the pad: no police air unit until a new one is back at
 ## the pad (`air_return_s` after the theft, and not while a player still flies the old one).
 var stolen_helicopter: FlyableHelicopter
+## The guest flying the stolen helicopter (co-op host only). The host frees its replica of a
+## guest's helicopter, so this is what keeps the air unit grounded until that guest leaves.
+var guest_pilot_peer: int = 0
 var _air_back_s: float = 0.0
 var _pad_marker: Node3D
 ## The map's extent on x and z, for the flyable helicopter's soft boundary.
@@ -66,7 +69,7 @@ var canopy: CanopyCover
 ## 0 day .. 1 night (the scene's day-night clock), for the helicopter's searchlight.
 var night: float = 0.0
 var _rotor_voice: AudioStreamPlayer
-var _rotor_t: float = 0.0
+var _rotor_phase: float = 0.0  # AI helicopter rotor beat phase, wrapped at TAU
 var _noise_state: Array = [0x1234567]
 var cars: Array[VehicleBody3D] = []
 var officers: Array[Node3D] = []
@@ -634,10 +637,10 @@ func _step_parked_helicopter(delta: float) -> void:
 		_pad_marker.global_position.y = parked_helicopter.global_position.y + 0.03  # on the ground it found
 	if _air_back_s > 0.0:
 		_air_back_s -= delta
-	var flown := stolen_helicopter != null and is_instance_valid(stolen_helicopter) and stolen_helicopter.driver_peer_id != 0
+	var flown := guest_pilot_peer != 0 or (stolen_helicopter != null and is_instance_valid(stolen_helicopter) and stolen_helicopter.driver_peer_id != 0)
 	if stolen_helicopter != null and _air_back_s <= 0.0 and not flown:
 		stolen_helicopter = null
-	if stolen_helicopter == null and parked_helicopter == null and helicopter == null and _air_back_s <= 0.0:
+	if not flown and stolen_helicopter == null and parked_helicopter == null and helicopter == null and _air_back_s <= 0.0:
 		park_helicopter()
 
 
@@ -668,6 +671,7 @@ func fly_granted_helicopter(t: Transform3D) -> FlyableHelicopter:
 ## A helicopter left at `t` by a pilot who is gone (a guest leaving mid-flight): it lands
 ## itself where it is and parks; anyone may take it. Not the police's.
 func leave_helicopter(t: Transform3D) -> FlyableHelicopter:
+	guest_pilot_peer = 0
 	var heli := FlyableHelicopter.new()
 	heli.name = "LeftHelicopter"
 	heli.bounds = air_bounds
@@ -1105,12 +1109,10 @@ func _fill_rotor() -> void:
 	var frames := pb.get_frames_available()
 	var buf := PackedVector2Array()
 	buf.resize(frames)
-	var dt := 1.0 / Synth.MIX_RATE
+	var step := FlyableHelicopter.rotor_phase_step(18.0, 1.0 / Synth.MIX_RATE)
 	for i in range(frames):
-		_rotor_t += dt
-		var beat := pow(maxf(sin(_rotor_t * TAU * 18.0), 0.0), 3.0)
+		_rotor_phase = FlyableHelicopter.advance_phase(_rotor_phase, step)
+		var beat := pow(maxf(sin(_rotor_phase), 0.0), 3.0)
 		var s := Synth.noise(_noise_state) * beat * 0.5 * gain
 		buf[i] = Vector2(s, s)
 	pb.push_buffer(buf)
-	if _rotor_t > 1000.0:
-		_rotor_t = fmod(_rotor_t, 1.0)

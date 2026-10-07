@@ -32,6 +32,8 @@ func _ready() -> void:
 	config = data if data is Dictionary else {}
 	Session.peer_joined.connect(_on_peer_joined)
 	Session.peer_left.connect(_on_peer_left)
+	if player_sync != null:
+		player_sync.remote_leaving.connect(_on_remote_leaving)
 
 
 func _process(delta: float) -> void:
@@ -215,6 +217,7 @@ func _request_take_helicopter() -> void:
 	var t := heli.global_transform
 	police.take_parked_helicopter()
 	police.stolen_helicopter.queue_free()  # the guest flies their own; here it is their replica
+	police.guest_pilot_peer = sender  # so no second helicopter is parked while they fly it
 	_helicopter_taken.rpc()
 	_grant_helicopter.rpc_id(sender, t)
 
@@ -238,10 +241,18 @@ func _grant_helicopter(transform: Transform3D) -> void:
 
 
 ## Host: a guest who was flying the helicopter left; it stays where they were, landing itself
-## (the replica's last place), and is anyone's to take.
-func _on_peer_left(id: int) -> void:
-	if not Session.is_host() or police == null or player_sync == null:
+## (the replica's last place), and is anyone's to take. PlayerSync raises this before it frees
+## the replica; Session.peer_left alone reached here after the replica was already gone.
+func _on_remote_leaving(id: int, r: RemotePlayer) -> void:
+	if not Session.is_host() or police == null:
 		return
-	var r: RemotePlayer = player_sync.remotes.get(id)
-	if r != null and r.driving and r.vehicle_id() == RemotePlayer.HELICOPTER_ID:
+	if r.driving and r.vehicle_id() == RemotePlayer.HELICOPTER_ID:
 		police.leave_helicopter(r.car_transform())
+	if police.guest_pilot_peer == id:
+		police.guest_pilot_peer = 0
+
+
+## Host: whatever the replica said, the leaving peer no longer flies anything.
+func _on_peer_left(id: int) -> void:
+	if Session.is_host() and police != null and police.guest_pilot_peer == id:
+		police.guest_pilot_peer = 0
