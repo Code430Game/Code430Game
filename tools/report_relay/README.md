@@ -34,6 +34,13 @@ with `nvm exec 22`, for example `nvm exec 22 uv run pywrangler deploy`.
 6. **Point the game at it:** put the Worker URL into `game/core/report/report_config.json`
    (`relay_url`).
 
+## Updating it
+- **Quick tags (2026-10-07)** added an optional `tags` field to the report (schema still version
+  1; a report without tags is unchanged). A relay deployed before that refuses tagged reports
+  as an unknown key, and the game then keeps them for the player to resend. So deploy the relay
+  (`uv run pywrangler deploy`) and re-run `scripts/setup-report-labels.sh` for the `tag:*`
+  labels before players get a game build with tags.
+
 ## Running it
 - **Switch off** without a game update: set `RELAY_ENABLED` to `false` and deploy (or edit the
   variable in the dashboard). Games keep reports queued and retry later.

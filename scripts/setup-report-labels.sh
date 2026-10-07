@@ -14,3 +14,8 @@ label severity:cosmetic e4e669 "Looks wrong, plays fine"
 label severity:annoying f9d0c4 "Gets in the way"
 label severity:blocks_play d93f0b "Cannot carry on"
 label severity:crash b60205 "The game crashed or froze"
+# Quick tags, from the form's list (game/ui/report/report_tags.json).
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+while IFS=$'\t' read -r id name; do
+  label "tag:$id" d4c5f9 "Quick tag: $name"
+done < <(python3 -c 'import json,sys; [print(t["id"] + "\t" + t["label"]) for t in json.load(open(sys.argv[1]))["tags"]]' "$ROOT/game/ui/report/report_tags.json")

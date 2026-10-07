@@ -66,10 +66,14 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   distance against `DIRECT_M` and `_unstick`'s "far" test when the player is under a deck.
 - **Report form on the Deck: quick tags and a keyboard test** (human, 2026-10-06: an on-screen
   keyboard is premature; "users expect" Steam's keyboard).
-  - Make the description optional, with a few tags picked with A ("looks wrong", "stuck",
-    "fell through", "car problem").
-  - Next Deck session, test why Steam's keyboard opened behind the game: Steam + X on the pause
-    menu against the report form, and a Steam shortcut against other launch methods.
+  - Done 2026-10-07 (`fix/report-quick-tags`): the description is optional, and six quick tags
+    are picked with Left / Right and A (or a click), from `game/ui/report/report_tags.json`.
+    Tags go into the report's optional `tags` field, the title ("· Stuck, Police"), the issue
+    body and `tag:<id>` labels. Redeploy the relay and re-run `scripts/setup-report-labels.sh`
+    before a build with tags reaches players (`tools/report_relay/README.md`).
+  - Still to do: next Deck session, test why Steam's keyboard opened behind the game. Try Steam
+    + X on the pause menu against the report form, and a Steam shortcut against other launch
+    methods.
   - Steamworks' gamepad text input (GodotSteam) is for the Steam release work.
 - **Map legend and places list** (human, 2026-10-06: "include a legend in the map and also a
   method of viewing items from each location ... a little more plain search engine and instead
