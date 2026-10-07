@@ -23,6 +23,8 @@ Large:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
+| `add-proving-ground` | small generated test district: ring-road track with a grid inside, one of everything, lap timer | nothing (rail stub waits on `add-rail`) | generator under `tools/proving_ground/`, importer file inputs, pack selection, HUD |
+| `add-hostile-gang` | first hostile faction with turf, patrols and gang heat; the antagonist for the story pack | `add-weapons-and-combat`, `add-police-combat` (merged); turf placement via `add-proving-ground` | factions data, pedestrian states, police, HUD |
 | `add-weather` | sky, rain, snow, fog, wet roads | nothing | sky shader, materials, traffic and grip factors |
 | `add-hover-cars` | dystopia flying cars | helicopter (merged) | new hover car, catalogue, controls, traffic, police |
 | `add-two-wheelers` | bicycles and motorcycles | nothing | importer bike lanes, traffic, vehicles, character rig |
