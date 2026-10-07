@@ -106,3 +106,82 @@ func test_placement_is_deterministic() -> void:
 	for i in range(one.count()):
 		assert_str(one.sites[i]["id"]).is_equal(two.sites[i]["id"])
 		assert_vector((one.sites[i]["transform"] as Transform3D).origin).is_equal((two.sites[i]["transform"] as Transform3D).origin)
+
+
+## Human, 2026-10-06: the board moved off the road under the 417 near (765, 910) clipped a
+## tree. Checked here against the pack's own tree rows, not the placement's index: no panel
+## overlaps a crown at its height, and no post stands on a trunk.
+func test_no_board_in_the_pack_clips_a_tree() -> void:
+	var no_trees := Billboards.obstacles_from_pack(_pack)
+	no_trees.trees = {}
+	var without: Billboards = auto_free(Billboards.new())
+	add_child(without)
+	without.setup(_pack.graph.edges.values(), _pack.ads, 430, no_trees)
+	var placed: Billboards = auto_free(Billboards.new())
+	add_child(placed)
+	placed.setup(_pack.graph.edges.values(), _pack.ads, 430, _obstacles)
+	var cfg := Billboards.config()
+	var mid := float(cfg.get("crown_mid", 0.62))
+	var half := float(cfg.get("crown_half_height", 0.28))
+	var rows: Array = []
+	for coord: Vector2i in _pack.vegetation_chunks:
+		rows.append_array((_pack.vegetation_chunks[coord] as Dictionary).get("trees", []))
+	var clips := [_clips(without, rows, mid, half), _clips(placed, rows, mid, half)]
+	var moved := 0
+	var by_id: Dictionary = {}
+	for s: Dictionary in without.sites:
+		by_id[s["id"]] = (s["transform"] as Transform3D).origin
+	for s: Dictionary in placed.sites:
+		if by_id.has(s["id"]) and (by_id[s["id"]] as Vector3).distance_to((s["transform"] as Transform3D).origin) > 0.01:
+			moved += 1
+	print("billboards: trees ignored %d boards, %d clip a tree; trees as obstacles %d boards (%d moved, %d dropped), %d clip" % [without.count(), clips[0], placed.count(), moved, without.count() - placed.count(), clips[1]])
+	assert_int(clips[1]).is_equal(0)
+	assert_int(placed.count()).is_greater(without.count() * 3 / 4)  # most boards still stand
+
+
+## Boards whose panel (POST_H_M to POST_H_M + PANEL_H_M up, PANEL_W_M across) passes through a
+## tree crown modelled as CanopyCover does, or whose post stands within a trunk.
+func _clips(boards: Billboards, rows: Array, mid: float, half: float) -> int:
+	var n := 0
+	for s: Dictionary in boards.sites:
+		var t: Transform3D = s["transform"]
+		var across := t.basis.x * (Billboards.PANEL_W_M * 0.5)
+		var a := Vector2((t.origin + across).x, (t.origin + across).z)
+		var b := Vector2((t.origin - across).x, (t.origin - across).z)
+		var post := Vector2(t.origin.x, t.origin.z)
+		var low := t.origin.y + Billboards.POST_H_M
+		var high := low + Billboards.PANEL_H_M
+		for row: Array in rows:
+			var at := Vector2(float(row[0]), float(row[2]))
+			if at.distance_to(post) > 20.0:
+				continue
+			var h := float(row[4])
+			var base := float(row[1])
+			var hit := at.distance_to(post) < VegetationBuilder.TRUNK_HALF_M
+			if not hit and base + h * (mid + half) >= low and base + h * (mid - half) <= high:
+				hit = Geometry2D.get_closest_point_to_segment(at, a, b).distance_to(at) < float(row[5])
+			if hit:
+				n += 1
+				break
+	return n
+
+
+func test_a_tree_at_the_site_moves_the_board() -> void:
+	var main := _edge("main", Vector3(0, 0, 0), Vector3(400, 0, 0), "primary", 14.0)
+	var o := Billboards.Obstacles.new()
+	o.add_ribbon(main.polyline, main.width_m * 0.5)
+	var plain := Billboards.place(main, Billboards.FIRST_AT_M, 400.0, o)
+	assert_str(Billboards.footprint_blocked(plain, o)).is_equal("")
+	# A 10 m broadleaf with a 3 m crown right where the first board's panel stands.
+	var cfg := Billboards.config()
+	o.add_tree([plain.origin.x + 1.0, 0.0, plain.origin.z, "broadleaf", 10.0, 3.0, 1, "row"], float(cfg.get("crown_mid", 0.62)), float(cfg.get("crown_half_height", 0.28)))
+	assert_str(Billboards.footprint_blocked(plain, o)).is_equal("tree")
+	var t := Billboards.place(main, Billboards.FIRST_AT_M, 400.0, o)
+	assert_bool(t != Transform3D()).is_true()
+	assert_str(Billboards.footprint_blocked(t, o)).is_equal("")
+	assert_float(t.origin.distance_to(plain.origin)).is_greater(1.0)
+	# A short tree whose crown stays below the panel does not move it.
+	var low := Billboards.Obstacles.new()
+	low.add_ribbon(main.polyline, main.width_m * 0.5)
+	low.add_tree([plain.origin.x + 2.0, 0.0, plain.origin.z, "bush_round", 2.5, 1.5, 2, "scatter"], float(cfg.get("crown_mid", 0.62)), float(cfg.get("crown_half_height", 0.28)))
+	assert_str(Billboards.footprint_blocked(plain, low)).is_equal("")
