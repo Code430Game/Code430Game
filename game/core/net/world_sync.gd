@@ -217,6 +217,7 @@ func _request_take_helicopter() -> void:
 	police.stolen_helicopter.queue_free()  # the guest flies their own; here it is their replica
 	_helicopter_taken.rpc()
 	_grant_helicopter.rpc_id(sender, t)
+	police.guest_pilot_peer = sender  # so no second helicopter is parked while they fly it
 
 
 ## Host to guests: the pad is empty (someone took the helicopter), so their copies match.

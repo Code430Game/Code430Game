@@ -57,6 +57,9 @@ var parked_helicopter: FlyableHelicopter
 ## The helicopter a player took from the pad: no police air unit until a new one is back at
 ## the pad (`air_return_s` after the theft, and not while a player still flies the old one).
 var stolen_helicopter: FlyableHelicopter
+## The guest flying the stolen helicopter (co-op host only). The host frees its replica of a
+## guest's helicopter, so this is what keeps the air unit grounded until that guest leaves.
+var guest_pilot_peer: int = 0
 var _air_back_s: float = 0.0
 var _pad_marker: Node3D
 ## The map's extent on x and z, for the flyable helicopter's soft boundary.
@@ -634,10 +637,10 @@ func _step_parked_helicopter(delta: float) -> void:
 		_pad_marker.global_position.y = parked_helicopter.global_position.y + 0.03  # on the ground it found
 	if _air_back_s > 0.0:
 		_air_back_s -= delta
-	var flown := stolen_helicopter != null and is_instance_valid(stolen_helicopter) and stolen_helicopter.driver_peer_id != 0
+	var flown := guest_pilot_peer != 0 or (stolen_helicopter != null and is_instance_valid(stolen_helicopter) and stolen_helicopter.driver_peer_id != 0)
 	if stolen_helicopter != null and _air_back_s <= 0.0 and not flown:
 		stolen_helicopter = null
-	if stolen_helicopter == null and parked_helicopter == null and helicopter == null and _air_back_s <= 0.0:
+	if not flown and stolen_helicopter == null and parked_helicopter == null and helicopter == null and _air_back_s <= 0.0:
 		park_helicopter()
 
 
@@ -668,6 +671,7 @@ func fly_granted_helicopter(t: Transform3D) -> FlyableHelicopter:
 ## A helicopter left at `t` by a pilot who is gone (a guest leaving mid-flight): it lands
 ## itself where it is and parks; anyone may take it. Not the police's.
 func leave_helicopter(t: Transform3D) -> FlyableHelicopter:
+	guest_pilot_peer = 0
 	var heli := FlyableHelicopter.new()
 	heli.name = "LeftHelicopter"
 	heli.bounds = air_bounds
