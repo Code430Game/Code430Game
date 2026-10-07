@@ -3,6 +3,22 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-07
+
+- **Ramp lane markings woven into the motorway's** (human: "I wonder if some of those off
+  ramps need to be laid under the main road way since the on ramp's lane markings are displayed
+  interwoven with the highways lane markings"; seen at the 417 merges, for example (842, 898)
+  and the fork at (279, 1229)).
+  - Fixed on `fix/ramp-markings-under-highway`.
+  - Cause: links sat 1.5 cm *above* every other road (`LINK_EXTRA_LIFT_M`, from the first
+    road import), so a ramp's ribbon lay over the motorway where OSM draws it from the
+    centreline. All markings also shared one height, so both sets of lines showed, crossed.
+  - Now links sit 1.5 cm *under* other roads (`RoadMeshBuilder.LINK_UNDER_M`; gores went under
+    them). A ramp's markings stop at the through road's ribbon edge, and the through road's
+    edge line turns to dashes across the ramp's mouth (`MarkingBuilder`, the `cover_*` rules).
+  - Ottawa: ramp-marking vertices on through roads went from 795 to 10. The 10 are single line
+    corners at a cover edge.
+
 ## 2026-10-06
 
 Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun".

@@ -11,8 +11,10 @@ const SURFACE_LIFT_M := 0.02
 ## When a road changes width at a pass-through node (lane count changes), the wider
 ## side narrows to the neighbour's width over this distance instead of stepping.
 const TAPER_LENGTH_M := 25.0
-## Links (ramps) sit slightly higher so their overlap with the road they merge into does not z-fight.
-const LINK_EXTRA_LIFT_M := 0.015
+## Links (ramps) sit this much lower than other roads, so where a ramp's ribbon overlaps the road
+## it leaves or joins, the through road's surface and markings win, and the overlap does not
+## z-fight. (Until 2026-10-07 links sat higher, which laid the ramp over the motorway.)
+const LINK_UNDER_M := 0.015
 const LOD1_TOLERANCE_M := 1.5
 
 const CLASS_COLORS := {
@@ -33,9 +35,9 @@ const CLASS_COLORS := {
 	"parking": Color(0.36, 0.36, 0.37),  # near the lot asphalt, so aisles do not read as pale stripes
 }
 const JUNCTION_COLOR := Color(0.33, 0.33, 0.35)
-## Paved gores (add-road-shoulders 1.4) sit just under the ribbons they meet, so their overlap
-## with the road edges never z-fights; asphalt like the ramp beside them.
-const GORE_LIFT_M := 0.005
+## Paved gores (add-road-shoulders 1.4) sit under the ribbons they meet, ramps included, so their
+## overlap with the road edges never z-fights; asphalt like the ramp beside them.
+const GORE_LIFT_M := -0.005
 const GORE_COLOR := Color(0.25, 0.25, 0.27)
 
 
@@ -133,7 +135,7 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> Result:
 		var dir_start := _continuation_dir(graph, edge, edge.from_node, junctions)
 		var dir_end := _continuation_dir(graph, edge, edge.to_node, junctions)
 		var color: Color = CLASS_COLORS.get(edge.road_class, Color(0.5, 0.5, 0.5))
-		var lift := SURFACE_LIFT_M + (LINK_EXTRA_LIFT_M if edge.road_class.ends_with("_link") else 0.0)
+		var lift := surface_lift(edge)
 		var taper := taper_for(graph, edge, junctions)
 		if float(taper["start"]) >= 0.0 or float(taper["end"]) >= 0.0:
 			pl = RoadGeometry.densify_ends(pl, TAPER_LENGTH_M, 5.0)
@@ -148,6 +150,16 @@ static func build(graph: RoadGraph, junctions: Dictionary) -> Result:
 		_add_gore(gore["points"], gore["half_m"], result.roads, result)
 		_add_gore(gore["points"], gore["half_m"], result.roads_lod1, result)
 	return result
+
+
+## True for ramps (`*_link` classes): their ribbons and markings give way to the road they meet.
+static func is_link(edge: RoadGraph.RoadEdge) -> bool:
+	return edge.road_class.ends_with("_link")
+
+
+## How far an edge's ribbon sits above its polyline: links lower than the roads they meet.
+static func surface_lift(edge: RoadGraph.RoadEdge) -> float:
+	return SURFACE_LIFT_M - (LINK_UNDER_M if is_link(edge) else 0.0)
 
 
 ## A paved gore: a strip with its own half-width at each point, split at chunk bounds like a ribbon.

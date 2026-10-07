@@ -5,6 +5,10 @@
   "dash_on_m": 3.0,
   "dash_off_m": 6.0,
   "lift_above_road_m": 0.012,
+  "_cover": "Ramps (links) give way to the road they meet: a ramp's markings stop where a through road's ribbon covers them, tested every cover_sample_m along the line, and a through road's edge line turns to dashes where a ramp's ribbon meets it. Ribbons more than cover_max_dy_m apart in height are on other levels and never cover each other.",
+  "cover_sample_m": 1.0,
+  "cover_max_dy_m": 0.6,
+  "cover_cell_m": 16.0,
   "visible_to_m": 350.0,
   "colors": {
     "yellow": [0.95, 0.78, 0.2],
