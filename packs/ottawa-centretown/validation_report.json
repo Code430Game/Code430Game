@@ -10290,40 +10290,39 @@
   "suspicious": []
  },
  "elevation": {
+  "aligned_dropped": 5,
+  "aligned_vertices": 68,
   "anchorless_spans": 0,
-  "bound_conflicts": 18,
+  "bound_conflicts": 17,
   "clearance_raised": [],
   "clearance_short": [],
   "clearance_shortfalls": [],
-  "contaminated_vertices": 187,
+  "contaminated_vertices": 194,
   "edges_over_grade": [
    "w107633331.0",
    "w133420275.0",
    "w137483257.0",
-   "w399144346.0",
    "w76419763.0",
-   "w76419866.0",
    "w76420697.0",
    "w76422506.0",
-   "w76423834.0",
-   "w76445665.0",
-   "w76726964.0",
-   "w895111372.0",
-   "w895111373.0",
-   "w895111373.1"
+   "w76726906.0",
+   "w76726915.0",
+   "w76726964.0"
   ],
   "fixed_vertices": 231,
-  "free_vertices": 12117,
+  "free_vertices": 12185,
   "inferred_bridges": [],
   "max_residual_grade": 0.19,
-  "max_shared_step": 0.792,
+  "max_shared_step": 0.989,
   "max_y": 81.189,
   "min_y": 41.519,
-  "share_rounds_exhausted": true,
-  "shared_deck_vertices": 82,
-  "shared_ground_vertices": 60,
-  "shared_step_left": 0.571,
-  "vertices_clamped": 432
+  "share_followers": 26,
+  "shared_deck_vertices": 88,
+  "shared_ground_vertices": 130,
+  "shared_groups": 88,
+  "shared_step_left": 0.355,
+  "tie_rounds": 3,
+  "vertices_clamped": 444
  },
  "junction_clusters": [
   {
@@ -12461,16 +12460,16 @@
  "summary": {
   "barriers": {
    "curb": 3539,
-   "guardrail": 40,
-   "median": 25,
-   "parapet": 78,
+   "guardrail": 34,
+   "median": 26,
+   "parapet": 80,
    "roadblock": 147,
    "soundwall": 18
   },
   "bridges": {
    "abutments": 95,
    "bridges": 27,
-   "infill_strips": 32,
+   "infill_strips": 31,
    "kinds": {
     "footbridge": 3,
     "over_ground": 3,
@@ -12552,10 +12551,10 @@
    "security": 2
   },
   "terrain": {
-   "cells_carved": 6933,
-   "cells_flattened": 387427,
-   "cells_lowered_for_water": 58754,
-   "cells_lowered_under_decks": 24310,
+   "cells_carved": 6938,
+   "cells_flattened": 387467,
+   "cells_lowered_for_water": 58755,
+   "cells_lowered_under_decks": 24472,
    "cells_under_buildings": 160487,
    "chunks": 196,
    "underpasses": {

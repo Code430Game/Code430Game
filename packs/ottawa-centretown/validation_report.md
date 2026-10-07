@@ -958,7 +958,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Barriers
 
-- curb 3539, parapet 78, guardrail 40, median 25, soundwall 18, roadblock 147
+- curb 3539, parapet 80, guardrail 34, median 26, soundwall 18, roadblock 147
 
 ## Buildings
 
@@ -967,12 +967,12 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 ## Elevation
 
 - Road height range: 41.519 m to 81.189 m
-- Bridge/tunnel (fixed) vertices: 231; approach vertices raised or lowered to meet them: 432
-- Conflicting bridge constraints: 18; bridge chains without a ground anchor: 0
-- Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 187
-- Worst residual grade: 0.19; edges still over their class limit: 14
-  w107633331.0, w133420275.0, w137483257.0, w399144346.0, w76419763.0, w76419866.0, w76420697.0, w76422506.0, w76423834.0, w76445665.0, w76726964.0, w895111372.0, w895111373.0, w895111373.1
-- Shared heights: 82 deck and 60 ground vertices; largest step before 0.792 m, left after 0.571 m; ran out of rounds
+- Bridge/tunnel (fixed) vertices: 231; approach vertices raised or lowered to meet them: 444
+- Conflicting bridge constraints: 17; bridge chains without a ground anchor: 0
+- Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 194
+- Worst residual grade: 0.19; edges still over their class limit: 9
+  w107633331.0, w133420275.0, w137483257.0, w76419763.0, w76420697.0, w76422506.0, w76726906.0, w76726915.0, w76726964.0
+- Shared heights: 88 deck and 130 ground vertices; largest step before 0.989 m, left after 0.355 m
 - Span chains raised again for clearance after sharing: 0
 - Decks short of their clearance over a road: 0
 - Bridges inferred from untagged crossings: 0

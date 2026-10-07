@@ -32,11 +32,16 @@
     "infill_overlap_m": 0.3
   },
   "shared_heights": {
-    "_comment": "update-shared-deck-heights: carriageways whose ribbons touch share one height (see elevation._share_heights). Decks of one layer within barriers.parapet_shared_deck_gap_m (the gap the parapets treat as one deck, so where no parapet stands between two decks there is no step either); ground carriageways of ground_classes within ground_gap_m. Steps larger than max_step_m are real level differences and are kept. The change blends into the connected roads over blend_m.",
+    "_comment": "update-shared-deck-heights: carriageways whose ribbons touch share one height (see elevation._share_heights). Decks of one layer within barriers.parapet_shared_deck_gap_m (the gap the parapets treat as one deck, so where no parapet stands between two decks there is no step either); ground carriageways of ground_classes within ground_gap_m. Steps larger than max_step_m are real level differences and are kept. The change blends into the connected roads over blend_m. Ground carriageways get vertices at their partners' stations (not within align_min_m of a vertex or align_node_m of an end; decks are never given vertices, it would move the span); partners within pair_snap_m of a vertex, or then within loose_snap_m, join one group (at most group_max_m across) that takes one height: the highest where a deck is in or beside it, else the lowest (ground merges down). Anything left follows its partners.",
     "ground_gap_m": 0.25,
     "ground_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
     "max_step_m": 0.8,
-    "blend_m": 30.0
+    "blend_m": 30.0,
+    "align_min_m": 2.0,
+    "align_node_m": 8.0,
+    "pair_snap_m": 2.0,
+    "loose_snap_m": 6.0,
+    "group_max_m": 30.0
   },
   "shoulders": {
     "_comment": "Paved shoulder outside the outer lanes, [left, right] of the direction of travel in metres; a two-way road gets the right width on both sides. Only where the width is not tagged.",
@@ -51,9 +56,11 @@
     "parapet_walkway_kinds": ["sidewalk", "cycleway"],
     "median_max_gap_m": 6.0,
     "median_height_m": 0.9,
+    "median_lanes_margin_m": 0.25,
     "guardrail_drop_m": 1.2,
     "guardrail_height_m": 0.8,
     "guardrail_probe_m": 3.0,
+    "guardrail_gore_probe_m": 1.0,
     "soundwall_height_m": 4.0,
     "soundwall_building_range_m": 45.0,
     "soundwall_trench_depth_m": 2.0,
