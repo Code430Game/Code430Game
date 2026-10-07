@@ -67,6 +67,8 @@ maintainer:
 - `update-police-pursuit` 4.2 and 4.3 (the human's first notes are in)
 - `add-police-combat` 3.2 and 3.3
 - `update-menu-design` 3.2
+- `add-map-legend` 3.1
+- `add-flyable-helicopter` 4.2 and 4.3
 - `update-shared-deck-heights` 2.1
 
 `add-coop-multiplayer` still needs:

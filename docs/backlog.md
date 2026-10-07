@@ -5,7 +5,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-07
 
-- **Relay needs a redeploy for report tags; do it from the other machine** (human, 2026-10-07:
+- **Relay needs a redeploy for report tags** (done 2026-10-07 from the Mac that has Cloudflare: deployed version fcb4e14b, `/health` ok, a tagged report now passes the schema, `tag:*` labels created; left for the human: resend from Saved reports on the Deck) (human, 2026-10-07:
   "I will have the other machine fix that later"). Tagged reports from the Deck fail with
   "refused 400 … unknown key tags": the deployed Worker predates the optional `tags` field
   (4db283b). The reports wait in the game's Saved reports queue. Cloudflare isn't logged in on
