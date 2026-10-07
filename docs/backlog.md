@@ -5,6 +5,15 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-07
 
+- **Relay needs a redeploy for report tags; do it from the other machine** (human, 2026-10-07:
+  "I will have the other machine fix that later"). Tagged reports from the Deck fail with
+  "refused 400 … unknown key tags": the deployed Worker predates the optional `tags` field
+  (4db283b). The reports wait in the game's Saved reports queue. Cloudflare isn't logged in on
+  the work Mac. On the machine that is:
+  1. `cd tools/report_relay && uv run pywrangler deploy` (use `nvm exec 22` if needed);
+  2. check `/health`;
+  3. run `scripts/setup-report-labels.sh` with the rjksn account (creates the `tag:*` labels);
+  4. resend from Saved reports on the Deck.
 - **Ramp lane markings woven into the motorway's** (human: "I wonder if some of those off
   ramps need to be laid under the main road way since the on ramp's lane markings are displayed
   interwoven with the highways lane markings"; seen at the 417 merges, for example (842, 898)
