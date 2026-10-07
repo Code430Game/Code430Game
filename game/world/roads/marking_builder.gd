@@ -8,12 +8,16 @@ extends RefCounted
 ## divider (yellow centre line) is at half width minus forward lanes times lane
 ## width. Same-direction dividers are white dashes; edge lines are white solid.
 ## Lines are built on an offset polyline with mitered normals; dashes walk that
-## polyline in metres. Rules come from marking_rules.json.
+## polyline in metres. Rules come from marking_rules.json. Ramps (links) give way
+## where their ribbons overlap a through road: their markings stop there, and the
+## through road's edge line breaks into dashes across the ramp's mouth.
 
 const RULES_PATH := "res://world/roads/marking_rules.json"
 const BUS_LANE_COLOR := Color(0.46, 0.13, 0.11)
 
 var rules: Dictionary = {}
+## Ramps give way to the roads they meet (see `build`); off only to measure what that changes.
+var clip_ramps := true
 
 
 ## Loads the rules file. Returns false and logs when it is missing or invalid.
@@ -36,7 +40,8 @@ func class_rule(road_class: String) -> Dictionary:
 
 
 ## Signed offsets (metres from the centreline, positive = right of travel) and styles
-## for one edge: [{"offset": float, "style": "solid"|"dashed", "color": "yellow"|"white"}].
+## for one edge: [{"offset": float, "style": "solid"|"dashed", "color": "yellow"|"white"}];
+## edge lines also carry "edge": true.
 func lines_for(edge: RoadGraph.RoadEdge) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var lanes_total := edge.lanes_forward + edge.lanes_backward
@@ -66,65 +71,253 @@ func lines_for(edge: RoadGraph.RoadEdge) -> Array[Dictionary]:
 		# At the lanes' edge: just inside the road edge, or just out on a shoulder.
 		var right := mid + half + (lw * 0.5 if edge.shoulder_right_m > 0.0 else -lw)
 		var left := mid - half - (lw * 0.5 if edge.shoulder_left_m > 0.0 else -lw)
-		out.append({"offset": right, "style": "solid", "color": "white"})
-		out.append({"offset": left, "style": "solid", "color": "white"})
+		out.append({"offset": right, "style": "solid", "color": "white", "edge": true})
+		out.append({"offset": left, "style": "solid", "color": "white", "edge": true})
 	return out
 
 
 ## Builds markings for every edge. Returns chunk -> RoadMeshBuilder.ChunkTriangles.
+## Ramps give way to the roads they meet (RoadMeshBuilder.is_link): a ramp's markings stop where
+## a through road's ribbon covers them, and a through road's edge line turns to dashes where a
+## ramp's ribbon meets it. Both tests sample the line every `cover_sample_m` against a grid of
+## the other kind's ribbon segments.
 func build(graph: RoadGraph, junctions: Dictionary) -> Dictionary:
 	var buckets := {}
-	var lift: float = RoadMeshBuilder.SURFACE_LIFT_M + RoadMeshBuilder.LINK_EXTRA_LIFT_M + float(rules["lift_above_road_m"])
+	var shapes: Array[Dictionary] = []
 	for eid in graph.sorted_edge_ids():
-		var edge: RoadGraph.RoadEdge = graph.edges[eid]
-		var trim_start := 0.0
-		var trim_end := 0.0
-		if junctions.has(edge.from_node):
-			trim_start = junctions[edge.from_node].trims.get(eid, 0.0)
-		if junctions.has(edge.to_node):
-			trim_end = junctions[edge.to_node].trims.get(eid, 0.0)
-		var pl := RoadGeometry.trim(edge.polyline, trim_start, trim_end)
-		if pl.size() < 2:
-			continue
-		var taper := RoadMeshBuilder.taper_for(graph, edge, junctions)
-		var tapered: bool = float(taper["start"]) >= 0.0 or float(taper["end"]) >= 0.0
-		if tapered:
-			pl = RoadGeometry.densify_ends(pl, RoadMeshBuilder.TAPER_LENGTH_M, 5.0)
-		var normals := RoadGeometry.miter_normals(pl)
-		var total := RoadGeometry.length_xz(pl)
-		var base_hw := edge.width_m * 0.5
-		var lines := lines_for(edge)
-		if edge.bus != "":
-			# Bus lanes get a red tint ribbon down the middle of each reserved lane.
-			var lanes_total := edge.lanes_forward + edge.lanes_backward
-			var lane_w := edge.carriageway_m() / maxf(lanes_total, 1)
-			var div := edge.carriageway_offset() + edge.carriageway_m() * 0.5 - edge.lanes_forward * lane_w
-			for k in range(edge.lanes_forward):
-				if edge.bus == "only" or k == edge.bus_lane:
-					lines.append({"offset": div + (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})
-			if edge.bus == "only":
-				for k in range(edge.lanes_backward):
-					lines.append({"offset": div - (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})
-		for line in lines:
-			var offset_pl := PackedVector3Array()
-			var walked := 0.0
-			for i in range(pl.size()):
-				if i > 0:
-					walked += Vector2(pl[i].x - pl[i - 1].x, pl[i].z - pl[i - 1].z).length()
-				var scale := 1.0
-				if tapered:
-					scale = RoadMeshBuilder.half_width_at(base_hw, walked, total, taper) / base_hw
-				var n := normals[i] * float(line["offset"]) * scale
-				offset_pl.append(pl[i] + Vector3(n.x, lift, n.y))
-			var c := color(line["color"])
-			if line["style"] == "bus":
-				_ribbon(offset_pl, float(line["width"]), BUS_LANE_COLOR, buckets)
-			elif line["style"] == "solid":
-				_ribbon(offset_pl, float(rules["line_width_m"]), c, buckets)
-			else:
-				_dashes(offset_pl, float(rules["line_width_m"]), float(rules["dash_on_m"]), float(rules["dash_off_m"]), c, buckets)
-	build_crossings(graph, buckets, lift, color("white"))
+		var shape := _shape(graph, graph.edges[eid], junctions)
+		if not shape.is_empty():
+			shapes.append(shape)
+	var through_cover := {}
+	var link_cover := {}
+	for shape: Dictionary in shapes:
+		_index_ribbon(shape, link_cover if RoadMeshBuilder.is_link(shape["edge"]) else through_cover)
+	for shape: Dictionary in shapes:
+		_build_edge(shape, through_cover, link_cover, buckets)
+	build_crossings(graph, buckets, marking_lift(null), color("white"))
 	return buckets
+
+
+## Height of an edge's markings above its polyline: just above its own ribbon. Through roads
+## (and `null`) keep the height they always had, clear of the crossing strips the import lays
+## 2 cm above the road; ramps sit lower, under the through road's surface where they overlap it.
+func marking_lift(edge: RoadGraph.RoadEdge) -> float:
+	var above := float(rules["lift_above_road_m"])
+	if edge != null and RoadMeshBuilder.is_link(edge):
+		return RoadMeshBuilder.surface_lift(edge) + above
+	return RoadMeshBuilder.SURFACE_LIFT_M + RoadMeshBuilder.LINK_UNDER_M + above
+
+
+## The edge's trimmed, tapered polyline and what the ribbon builder knows about its width:
+## {"edge", "pl", "taper", "tapered", "total", "base_hw"}, or {} when nothing is left after trims.
+func _shape(graph: RoadGraph, edge: RoadGraph.RoadEdge, junctions: Dictionary) -> Dictionary:
+	var trim_start := 0.0
+	var trim_end := 0.0
+	if junctions.has(edge.from_node):
+		trim_start = junctions[edge.from_node].trims.get(edge.id, 0.0)
+	if junctions.has(edge.to_node):
+		trim_end = junctions[edge.to_node].trims.get(edge.id, 0.0)
+	var pl := RoadGeometry.trim(edge.polyline, trim_start, trim_end)
+	if pl.size() < 2:
+		return {}
+	var taper := RoadMeshBuilder.taper_for(graph, edge, junctions)
+	var tapered: bool = float(taper["start"]) >= 0.0 or float(taper["end"]) >= 0.0
+	if tapered:
+		pl = RoadGeometry.densify_ends(pl, RoadMeshBuilder.TAPER_LENGTH_M, 5.0)
+	return {"edge": edge, "pl": pl, "taper": taper, "tapered": tapered, "total": RoadGeometry.length_xz(pl), "base_hw": edge.width_m * 0.5}
+
+
+## Half width of the shape's ribbon `walked` metres along it (tapers included).
+static func _half_width(shape: Dictionary, walked: float) -> float:
+	var base: float = shape["base_hw"]
+	if not shape["tapered"]:
+		return base
+	return RoadMeshBuilder.half_width_at(base, walked, shape["total"], shape["taper"])
+
+
+## Adds the shape's ribbon segments to `index` (grid cell -> [[a, b, half width at a, at b]]),
+## in every cell the segment's ribbon can reach.
+func _index_ribbon(shape: Dictionary, index: Dictionary) -> void:
+	var cell := float(rules.get("cover_cell_m", 16.0))
+	var pl: PackedVector3Array = shape["pl"]
+	var walked := 0.0
+	for i in range(pl.size() - 1):
+		var a := pl[i]
+		var b := pl[i + 1]
+		var seg := Vector2(b.x - a.x, b.z - a.z).length()
+		var hwa := _half_width(shape, walked)
+		var hwb := _half_width(shape, walked + seg)
+		walked += seg
+		var reach := maxf(hwa, hwb)
+		var item := [a, b, hwa, hwb]
+		for cx in range(int(floor((minf(a.x, b.x) - reach) / cell)), int(floor((maxf(a.x, b.x) + reach) / cell)) + 1):
+			for cz in range(int(floor((minf(a.z, b.z) - reach) / cell)), int(floor((maxf(a.z, b.z) + reach) / cell)) + 1):
+				var key := Vector2i(cx, cz)
+				if not index.has(key):
+					index[key] = []
+				index[key].append(item)
+
+
+## True when `p` (a point on a road, at its polyline height) lies on a ribbon in `index` at the
+## same level.
+func covered(index: Dictionary, p: Vector3) -> bool:
+	var cell := float(rules.get("cover_cell_m", 16.0))
+	var max_dy := float(rules.get("cover_max_dy_m", 0.6))
+	var q := Vector2(p.x, p.z)
+	for item: Array in index.get(Vector2i(int(floor(p.x / cell)), int(floor(p.z / cell))), []):
+		var a: Vector3 = item[0]
+		var b: Vector3 = item[1]
+		var a2 := Vector2(a.x, a.z)
+		var b2 := Vector2(b.x, b.z)
+		var l2 := a2.distance_squared_to(b2)
+		var t := 0.0 if l2 < 1e-9 else clampf((q - a2).dot(b2 - a2) / l2, 0.0, 1.0)
+		var hw := lerpf(float(item[2]), float(item[3]), t)
+		if q.distance_to(a2.lerp(b2, t)) < hw and absf(lerpf(a.y, b.y, t) - p.y) < max_dy:
+			return true
+	return false
+
+
+## True when any part of `pl` falls in a cell of `index`, so the per-sample test is worth doing.
+func _touches(index: Dictionary, pl: PackedVector3Array) -> bool:
+	if index.is_empty():
+		return false
+	var cell := float(rules.get("cover_cell_m", 16.0))
+	for i in range(pl.size() - 1):
+		var a := pl[i]
+		var b := pl[i + 1]
+		var steps := maxi(1, int(ceil(Vector2(b.x - a.x, b.z - a.z).length() / cell)))
+		for k in range(steps + 1):
+			var p := a.lerp(b, float(k) / steps)
+			if index.has(Vector2i(int(floor(p.x / cell)), int(floor(p.z / cell)))):
+				return true
+	return false
+
+
+## One edge's lines, clipped and broken where ramps and through roads meet.
+func _build_edge(shape: Dictionary, through_cover: Dictionary, link_cover: Dictionary, buckets: Dictionary) -> void:
+	var edge: RoadGraph.RoadEdge = shape["edge"]
+	var link := RoadMeshBuilder.is_link(edge)
+	var other: Dictionary = through_cover if link else link_cover
+	var pl: PackedVector3Array = shape["pl"]
+	# Ramps are few, so every ramp is tested; a through road only when a ramp's ribbon is near.
+	var test := clip_ramps and not other.is_empty() and (link or _touches(other, pl))
+	var corner := PackedByteArray()  # 1 for the road's own vertices, 0 for test samples between them
+	if test:
+		var dense := PackedVector3Array()
+		var step := float(rules.get("cover_sample_m", 1.0))
+		for i in range(pl.size() - 1):
+			dense.append(pl[i])
+			corner.append(1)
+			var parts := int(ceil(Vector2(pl[i + 1].x - pl[i].x, pl[i + 1].z - pl[i].z).length() / step))
+			for k in range(1, parts):
+				dense.append(pl[i].lerp(pl[i + 1], float(k) / parts))
+				corner.append(0)
+		dense.append(pl[pl.size() - 1])
+		corner.append(1)
+		pl = dense
+	var normals := RoadGeometry.miter_normals(pl)
+	var base_hw: float = shape["base_hw"]
+	var lift := marking_lift(edge)
+	var lines := lines_for(edge)
+	if edge.bus != "":
+		# Bus lanes get a red tint ribbon down the middle of each reserved lane.
+		var lanes_total := edge.lanes_forward + edge.lanes_backward
+		var lane_w := edge.carriageway_m() / maxf(lanes_total, 1)
+		var div := edge.carriageway_offset() + edge.carriageway_m() * 0.5 - edge.lanes_forward * lane_w
+		for k in range(edge.lanes_forward):
+			if edge.bus == "only" or k == edge.bus_lane:
+				lines.append({"offset": div + (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})
+		if edge.bus == "only":
+			for k in range(edge.lanes_backward):
+				lines.append({"offset": div - (k + 0.5) * lane_w, "style": "bus", "color": "white", "width": lane_w - 0.5})
+	var up := Vector3(0.0, lift, 0.0)
+	for line in lines:
+		var on_road := PackedVector3Array()  # the line's points at road height, for the cover test
+		var hit := PackedByteArray()
+		var walked := 0.0
+		var check := test and (link or bool(line.get("edge", false)))
+		for i in range(pl.size()):
+			if i > 0:
+				walked += Vector2(pl[i].x - pl[i - 1].x, pl[i].z - pl[i - 1].z).length()
+			var scale := _half_width(shape, walked) / base_hw if shape["tapered"] else 1.0
+			var n := normals[i] * float(line["offset"]) * scale
+			on_road.append(pl[i] + Vector3(n.x, 0.0, n.y))
+			hit.append(1 if check and covered(other, on_road[i]) else 0)
+		if not check:
+			var plain := on_road
+			if test:  # drop the test samples: the line keeps the road's own corners only
+				plain = PackedVector3Array()
+				for k in range(on_road.size()):
+					if corner[k] == 1:
+						plain.append(on_road[k])
+			_draw_line(_lifted(plain, up), line, buckets)
+			continue
+		# Runs of samples in the same state, each ending on the cover's edge (found by bisection)
+		# and keeping only the road's own corners in between, so the line has no more quads than
+		# before. A ramp's line stops under the through road; a through road's edge line turns to
+		# dashes across the ramp's mouth.
+		var i := 0
+		while i < on_road.size():
+			var j := i
+			while j + 1 < on_road.size() and hit[j + 1] == hit[i]:
+				j += 1
+			var run := PackedVector3Array()
+			if i > 0:
+				run.append(_cover_edge(other, on_road[i - 1], on_road[i]))
+			for k in range(i, j + 1):
+				if corner[k] == 1 or (k == i and i == 0) or (k == j and j == on_road.size() - 1):
+					_append_apart(run, on_road[k])
+			if j + 1 < on_road.size():
+				_append_apart(run, _cover_edge(other, on_road[j], on_road[j + 1]))
+			run = _lifted(run, up)
+			if hit[i] == 0:
+				_draw_line(run, line, buckets)
+			elif not link:
+				_draw_line(run, {"style": "dashed", "color": line["color"]}, buckets)
+			i = j + 1
+
+
+## Where the cover test changes between road points `a` and `b` (bisection, to a few centimetres).
+func _cover_edge(index: Dictionary, a: Vector3, b: Vector3) -> Vector3:
+	var start := covered(index, a)
+	var lo := 0.0
+	var hi := 1.0
+	for _k in range(6):
+		var mid := (lo + hi) * 0.5
+		if covered(index, a.lerp(b, mid)) == start:
+			lo = mid
+		else:
+			hi = mid
+	return a.lerp(b, (lo + hi) * 0.5)
+
+
+## Appends `p` unless it sits on the run's last point: a near-zero segment would give the line a
+## wild mitred corner. A last point that close is replaced, so a boundary still ends the run.
+static func _append_apart(run: PackedVector3Array, p: Vector3) -> void:
+	if run.size() > 0 and Vector2(p.x - run[run.size() - 1].x, p.z - run[run.size() - 1].z).length() < 0.1:
+		run[run.size() - 1] = p
+		return
+	run.append(p)
+
+
+static func _lifted(pl: PackedVector3Array, up: Vector3) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for p in pl:
+		out.append(p + up)
+	return out
+
+
+## Draws one line (solid, dashed or a bus-lane tint) along an offset polyline.
+func _draw_line(offset_pl: PackedVector3Array, line: Dictionary, buckets: Dictionary) -> void:
+	if offset_pl.size() < 2:
+		return
+	var c := color(line["color"])
+	if line["style"] == "bus":
+		_ribbon(offset_pl, float(line["width"]), BUS_LANE_COLOR, buckets)
+	elif line["style"] == "solid":
+		_ribbon(offset_pl, float(rules["line_width_m"]), c, buckets)
+	else:
+		_dashes(offset_pl, float(rules["line_width_m"]), float(rules["dash_on_m"]), float(rules["dash_off_m"]), c, buckets)
 
 
 const ZEBRA_BAR_M := 0.5  # bar thickness across the road; the gap between bars is the same
