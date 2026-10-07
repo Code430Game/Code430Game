@@ -48,7 +48,10 @@ Coordinate (or land one before the other) when two changes share these:
 
 ## Waiting on the maintainer's Deck try
 
-Built and merged; each is archived once it has been played on the Deck:
+Built and merged; each is archived once it has been played on the Deck. The Deck benchmark
+tasks among them can be run with `scripts/deck-bench.sh --change <id> --task <n.n>` (it needs
+the Deck on the network and the game closed); the "human tries it" tasks still need the
+maintainer:
 - `add-weapons-and-combat` 3.2
 - `add-police` 3.2
 - `add-police-helicopter` 2.2

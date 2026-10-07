@@ -1,0 +1,9 @@
+testbed: streamer ready (5120 chunks indexed, glb cache true) in 812 ms
+benchmark: radio: code430.base.hilltop, driving true, playing true, rendered 5, rendering 0, bus Music -4.0 dB
+benchmark: 4799 frames, avg 8.34 ms, p50 8.33 ms, p95 8.33 ms, p99 8.33 ms, max 12.41 ms, preset deck, deck detected true, autodrive, travelled 655 m, draw calls 719, AMD Custom GPU 0405 (RADV VANGOGH)
+benchmark: render cpu 2.05 ms gpu 5.71 ms (measured, pacing-independent)
+benchmark: traffic agents 150, physics process mean 6.40 ms max 14.10 ms
+benchmark: traffic cost spawn 0.06 step 0.72 bodies 0.06 render 0.23 ms
+benchmark: pedestrians 100, cost spawn 0.01 step 0.41 bodies 0.06 render 0.11 ms
+benchmark: chunks in scene 196, built 208, downgraded 8, freed 0, failed 0, first playable 1450 ms
+benchmark: streamer cost add max 6.6 ms (ema 0.00), shapes max 9.4 ms (ema 0.00), frames over 8 ms 1
