@@ -549,6 +549,7 @@
   "max_y": 77.358,
   "min_y": 54.89,
   "share_followers": 5,
+  "share_rounds_exhausted": false,
   "shared_deck_vertices": 21,
   "shared_ground_vertices": 14,
   "shared_groups": 13,
