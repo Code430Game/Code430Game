@@ -153,8 +153,17 @@ def _import(args: argparse.Namespace) -> int:
         result.report.summary["vegetation"] = vegetation.counts()
         s_payload, meta = fetch_query(services_query(bbox), bbox, args.cache_dir)
         sources.append(_source("services", meta))
-        services = build_services(s_payload, bbox, proj, result.graph, ChunkSampler(chunks))
+        services = build_services(
+            s_payload,
+            bbox,
+            proj,
+            result.graph,
+            ChunkSampler(chunks),
+            b_payload if args.buildings else None,
+            cfg.services,
+        )
         result.report.summary["services"] = services.counts()
+        result.report.summary["service_addresses"] = services.address_sources()
         result.report.summary["terrain"] = tstats
         paths = write_pack(
             args.pack_out,
@@ -180,7 +189,7 @@ def _import(args: argparse.Namespace) -> int:
         print(f"barriers: {barriers.counts}")
         print(f"bridges: {bridges.counts()}")
         print(f"vegetation: {vegetation.counts()}")
-        print(f"services: {services.counts()}")
+        print(f"services: {services.counts()}, addresses {services.address_sources()}")
         if buildings is not None:
             print(
                 f"buildings: {len(buildings.buildings)} footprints, heights {buildings.height_sources}"

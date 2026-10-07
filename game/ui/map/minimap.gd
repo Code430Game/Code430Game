@@ -32,6 +32,9 @@ var player: Node3D
 ## otherwise; `searching`: the helicopter's ring is dashed while it circles where it lost them
 ## (update-police-pursuit 1.3).
 var blips: Array = []
+## Fixed places (Services.Place: services and garages), drawn with PlaceIcons, upright, only
+## while inside the map (add-map-legend).
+var places: Array = []
 ## The pack's garages (MapPack.garages), for the floor view while the player is inside one.
 var garages: Array[GarageBuilder.Garage] = []
 ## The garage being drawn, or null for the street map; updated each frame.
@@ -68,6 +71,13 @@ func _draw() -> void:
 		draw_set_transform(centre, rot, Vector2(scale, scale))
 		draw_texture(renderer.texture, -player_px)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if garage == null:
+		var inner_places := Rect2(Vector2.ZERO, size).grow(-BLIP_EDGE_PX)
+		var r := PlaceIcons.num("minimap_radius_px", 7.0)
+		for pl: Services.Place in places:
+			var at_px := centre + ((renderer.world_to_pixel(pl.at.x, pl.at.z) - player_px) * scale).rotated(rot)
+			if inner_places.grow(-r).has_point(at_px):
+				PlaceIcons.draw(self, at_px, pl.kind, r)
 	var flash_red := fmod(Time.get_ticks_msec() / 1000.0, POLICE_FLASH_S * 2.0) < POLICE_FLASH_S
 	for b: Dictionary in blips:
 		var at: Vector3 = b["at"]

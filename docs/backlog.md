@@ -90,7 +90,7 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
     works is now written down in `docs/controls.md` ("Typing on the Steam Deck"), so later
     changes keep it working.
   - Steamworks' gamepad text input (GodotSteam) is for the Steam release work.
-- **Map legend and places list** (human, 2026-10-06: "include a legend in the map and also a
+- **Map legend and places list** → built 2026-10-07 as `add-map-legend` (human, 2026-10-06: "include a legend in the map and also a
   method of viewing items from each location ... a little more plain search engine and instead
   of toggling through we click in or back"). On the full map (`game/ui/map/overview_map.gd`),
   a legend panel lists each kind of place as its icon, then its name:

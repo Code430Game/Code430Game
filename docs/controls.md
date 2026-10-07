@@ -69,6 +69,13 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | road graph overlay | B | F4 |
 <!-- controls:end -->
 
+**The full map** (View or M) pans with the left stick, moves a cursor with the right stick and
+zooms with the triggers. The places panel on the right lists the kinds of place the map has
+(police, hospitals, fire stations, ambulance posts, security, the helipad, parking garages):
+Up / Down and A open a kind to list its places with their street addresses, nearest first, and
+A on one centres the map on it; B goes back, and closes the map from the kinds. With a mouse,
+click a row to open it and right click to go back.
+
 **Typing on the Steam Deck.** The game has no keyboard of its own. A text box (the report
 form's description, the co-op Join address) takes focus when the player starts typing, and
 Steam shows its own on-screen keyboard; Steam + X opens it by hand. While a text box has focus,
@@ -101,5 +108,6 @@ creator once the world is up, `--screenshot=path` saves a PNG when the benchmark
 `--radio=hilltop|redline|quest|crypt|chatter|off` tunes the car radio at start. `--record-music=path.wav` records the Music bus
 until the benchmark ends.
 `--menu=game|coop|controls|options|settings[,keyboard]` opens the pause menu on that tab once the world is up.
+`--map` opens the full map; `--map-pick=kind[,n]` also opens that kind in its legend (police, hospital, fire_station, ambulance, security, helipad, garage) and picks place n.
 `--report` opens "Report a problem" once the world is up, and `--report-send` also saves (and,
 with a relay configured, sends) the report.

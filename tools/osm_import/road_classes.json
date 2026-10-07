@@ -105,6 +105,11 @@
   "pedestrian_classes": ["footway", "path", "pedestrian", "steps", "cycleway", "living_street", "track"],
   "excluded_highway_values": ["construction", "proposed", "abandoned", "razed", "platform", "bus_stop", "elevator", "corridor"],
   "excluded_service_values": ["drive-through", "emergency_access"],
+  "services": {
+    "_comment": "add-map-legend: a place's address comes from its own addr:* tags, else the building it stands in (or the nearest within building_near_m), else 'on <street>' for the nearest named road within street_near_m.",
+    "building_near_m": 15.0,
+    "street_near_m": 120.0
+  },
   "parking": {
     "_comment": "service ways that become class parking: never chosen by traffic, driven freely by players",
     "service_values": ["parking_aisle", "driveway"],

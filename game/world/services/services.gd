@@ -1,17 +1,8 @@
 class_name Services
 extends RefCounted
 ## Emergency service places from services.v0.json (add-emergency-services): police stations,
-## security desks, hospitals, fire stations, ambulance posts and helipads.
-
-const ICON := {
-	"police": {"letter": "P", "color": Color(0.2, 0.4, 0.95)},
-	"security": {"letter": "S", "color": Color(0.4, 0.45, 0.6)},
-	"hospital": {"letter": "+", "color": Color(0.9, 0.2, 0.25)},
-	"fire_station": {"letter": "F", "color": Color(0.95, 0.5, 0.1)},
-	"ambulance": {"letter": "A", "color": Color(0.95, 0.35, 0.4)},
-	"helipad": {"letter": "H", "color": Color(0.85, 0.85, 0.9)},
-}
-
+## security desks, hospitals, fire stations, ambulance posts and helipads, each with a street
+## address where the data has one (add-map-legend). Their map icons are PlaceIcons.
 
 class Place:
 	extends RefCounted
@@ -20,6 +11,7 @@ class Place:
 	var name: String
 	var at: Vector3
 	var road_node: String
+	var address: String  # "474 Elgin Street", "on Bronson Avenue", or "" when unknown
 
 
 static func load_places(pack_dir: String) -> Array[Place]:
@@ -38,8 +30,50 @@ static func load_places(pack_dir: String) -> Array[Place]:
 		var a: Array = d["at"]
 		p.at = Vector3(float(a[0]), float(a[1]), float(a[2]))
 		p.road_node = str(d["road_node"]) if d["road_node"] != null else ""
+		p.address = str(d.get("address", "")) if d.get("address") != null else ""
 		out.append(p)
 	return out
+
+
+## Underground garages as places of kind "garage" for the map's legend and markers: the lot's
+## name (or "Parking garage"), the middle of its outline, and "on <street>" for the nearest
+## named road within `street_m`.
+static func garage_places(lots: Array, graph: RoadGraph, street_m: float = 120.0) -> Array[Place]:
+	var out: Array[Place] = []
+	for lot: ParkingLotBuilder.Lot in lots:
+		if lot.kind != "underground":
+			continue
+		var c := lot.bounds.get_center()
+		var p := Place.new()
+		p.id = lot.id
+		p.kind = "garage"
+		p.name = lot.name
+		p.at = Vector3(c.x, lot.ground_y, c.y)
+		p.road_node = ""
+		p.address = street_near(graph, p.at, street_m)
+		out.append(p)
+	return out
+
+
+## "on <name>" for the nearest named road within `within_m` of `at`, or "".
+static func street_near(graph: RoadGraph, at: Vector3, within_m: float) -> String:
+	if graph == null:
+		return ""
+	var best := ""
+	var best_d := within_m
+	for eid in graph.sorted_edge_ids():
+		var e: RoadGraph.RoadEdge = graph.edges[eid]
+		if e.name == "":
+			continue
+		for i in range(e.polyline.size() - 1):
+			var a := Vector2(e.polyline[i].x, e.polyline[i].z)
+			var b := Vector2(e.polyline[i + 1].x, e.polyline[i + 1].z)
+			var q := Geometry2D.get_closest_point_to_segment(Vector2(at.x, at.z), a, b)
+			var d := q.distance_to(Vector2(at.x, at.z))
+			if d < best_d:
+				best_d = d
+				best = e.name
+	return "on " + best if best != "" else ""
 
 
 ## The place of `kind` nearest `from`, or null.

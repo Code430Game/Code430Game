@@ -117,6 +117,7 @@ var _car_id: String = ""  # --car=<vehicle id>: start in this catalogue vehicle 
 var _road_label: String = ""
 var _road_label_next: float = 0.0
 var _open_map_on_start: bool = false
+var _map_pick: String = ""  # --map-pick=kind[,n]: open that kind in the legend and pick place n
 
 
 func _ready() -> void:
@@ -846,11 +847,22 @@ func _setup_maps() -> void:
 	_overview.renderer = _map_renderer
 	_overview.graph = _pack.graph
 	_overview.player = Players.local_controlled_body()
+	var places: Array = _pack.services.duplicate()
+	places.append_array(Services.garage_places(_pack.parking_lots, _pack.graph, PlaceIcons.num("garage_street_m", 120.0)))
+	_overview.places = places
+	_minimap.places = places
 	var t0 := Time.get_ticks_msec()
-	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas, _pack.services)
+	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas)
 	print("map texture %s rendered in %d ms" % [_map_renderer.size_px, Time.get_ticks_msec() - t0])
-	if _open_map_on_start:
+	if _open_map_on_start or _map_pick != "":
 		_overview.open()
+	if _map_pick != "":
+		var kinds := _overview.legend.kinds_present()
+		_overview.legend.select(maxi(kinds.find(_map_pick.get_slice(",", 0)), 0))
+		_overview.legend.accept()
+		if _map_pick.contains(","):
+			_overview.legend.select(int(_map_pick.get_slice(",", 1)))
+			_overview.legend.accept()
 
 
 ## Local-metre bounds of the loaded pack: min_x, min_z, max_x, max_z, from the terrain chunks.
@@ -969,6 +981,8 @@ func _parse_args() -> void:
 			_graph_view.visible = true
 		elif arg == "--map":
 			_open_map_on_start = true
+		elif arg.begins_with("--map-pick="):
+			_map_pick = arg.get_slice("=", 1)
 		elif arg == "--drive":
 			_start_in_car = true
 		elif arg.begins_with("--traffic="):

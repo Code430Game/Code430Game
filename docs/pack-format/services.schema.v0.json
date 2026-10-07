@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://code430.dev/schemas/services.schema.v0.json",
   "title": "Code 430 emergency services v0",
-  "description": "Optional file in a map pack. Police stations, security desks, hospitals, fire stations, ambulance posts and helipads with a position and the nearest road node.",
+  "description": "Optional file in a map pack. Police stations, security desks, hospitals, fire stations, ambulance posts and helipads with a position, the nearest road node and, where known, a street address.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "units", "places"],
@@ -20,7 +20,8 @@
           "kind": {"enum": ["police", "security", "hospital", "fire_station", "ambulance", "helipad"]},
           "name": {"type": ["string", "null"]},
           "at": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
-          "road_node": {"type": ["string", "null"]}
+          "road_node": {"type": ["string", "null"]},
+          "address": {"type": "string", "minLength": 1, "description": "Street address from OSM addr:* tags (the place's own, or the building it stands in), or \"on <street>\" for the nearest named road when the data has none. Optional (add-map-legend)."}
         }
       }
     }
