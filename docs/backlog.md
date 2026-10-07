@@ -59,6 +59,18 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
 - **Fell under the floor after being busted.** Probably the respawn landed before that area's
   ground had loaded. f555839 now builds the ground at the arrival point first. Unconfirmed,
   because the place wasn't recorded; watch for it.
+- **Patrol cars stop short and respawn** (seen by the `update-police-pursuit` agent on a Mac
+  night run, 2026-10-06). With the player on foot under a deck (the 417 underpass near x 767,
+  z 911), patrol cars stopped about 44–48 m away, then `_unstick` (far and slow) removed them
+  and sent them in again. It looks like police vanishing mid-chase. Check `_drive`'s stop
+  distance against `DIRECT_M` and `_unstick`'s "far" test when the player is under a deck.
+- **Report form on the Deck: quick tags and a keyboard test** (human, 2026-10-06: an on-screen
+  keyboard is premature; "users expect" Steam's keyboard).
+  - Make the description optional, with a few tags picked with A ("looks wrong", "stuck",
+    "fell through", "car problem").
+  - Next Deck session, test why Steam's keyboard opened behind the game: Steam + X on the pause
+    menu against the report form, and a Steam shortcut against other launch methods.
+  - Steamworks' gamepad text input (GodotSteam) is for the Steam release work.
 - **Map legend and places list** (human, 2026-10-06: "include a legend in the map and also a
   method of viewing items from each location ... a little more plain search engine and instead
   of toggling through we click in or back"). On the full map (`game/ui/map/overview_map.gd`),
