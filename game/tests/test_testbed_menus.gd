@@ -206,3 +206,24 @@ func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
 		await get_tree().physics_frame
 	assert_bool(player.is_on_floor()).override_failure_message("the player fell through the ground at the start").is_true()
 	assert_float(absf(player.global_position.y - start.y)).is_less(3.0)
+
+
+## update-menu-design: the HUD (minimap, position line, badges) steps back while a menu is open.
+func test_the_hud_hides_while_a_menu_is_open() -> void:
+	var hud: CanvasLayer = _bed.get_node("HUD")
+	var menu: PauseMenu = _bed.get("_pause_menu")
+	await get_tree().process_frame
+	assert_bool(hud.visible).is_true()
+	menu.open()
+	await get_tree().process_frame
+	assert_bool(hud.visible).override_failure_message("the HUD stayed up under the pause menu").is_false()
+	menu.close()
+	await get_tree().process_frame
+	assert_bool(hud.visible).is_true()
+	var map: OverviewMap = _bed.get("_overview")
+	map.open()
+	await get_tree().process_frame
+	assert_bool(hud.visible).is_false()
+	map.close()
+	await get_tree().process_frame
+	assert_bool(hud.visible).is_true()

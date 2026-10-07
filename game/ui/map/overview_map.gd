@@ -2,7 +2,8 @@ class_name OverviewMap
 extends CanvasLayer
 ## Full-screen map (the pause-menu map). Toggled with `map_toggle` (Back alone, or M).
 ## Pauses the game while open. Left stick pans, right stick moves the cursor,
-## triggers zoom, and the road under the cursor is highlighted and named.
+## triggers zoom, and the road under the cursor is highlighted and named. Its header and hover
+## label use MenuTheme (update-menu-design).
 
 signal opened
 signal closed
@@ -27,13 +28,15 @@ var _back_armed: bool = false
 
 @onready var _view: Control = $View
 @onready var _label: Label = $View/HoverLabel
-@onready var _title: Label = $View/Title
+@onready var _hint: HBoxContainer = $View/Header/Row/Hint
 
 
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_view.draw.connect(_draw_view)
+	_view.theme = MenuTheme.theme()
+	MenuTheme.hint_bar(_hint, [["L stick", "pan"], ["R stick", "cursor"], ["LT / RT", "zoom"], ["View / M", "close"]])
 
 
 func _input(event: InputEvent) -> void:
@@ -67,6 +70,7 @@ func open() -> void:
 	visible = true
 	pan = Vector2.ZERO
 	cursor = Vector2.ZERO
+	MenuTheme.refresh_accent()
 	get_tree().paused = true
 	_view.queue_redraw()
 	opened.emit()
@@ -119,6 +123,8 @@ func _update_hover() -> void:
 		_label.text = "%s%s" % [name, "  (one-way)" if hovered_edge.oneway else ""]
 	else:
 		_label.text = ""
+	_label.visible = _label.text != ""
+	_label.reset_size()
 	_label.position = _view.size * 0.5 + cursor + Vector2(16, -12)
 
 

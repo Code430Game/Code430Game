@@ -1,0 +1,60 @@
+{
+  "_doc": "update-menu-design: one look for every menu. Colours are hex (#rrggbb or #rrggbbaa); sizes are pixels at 1280x800. The accent colour is the tone's (ContentMode.hud_accent); selected rows and the active tab take it.",
+  "colors": {
+    "dim": "#000000a8",
+    "panel": "#15171cf5",
+    "border": "#3b404b",
+    "shadow": "#00000099",
+    "strip": "#0e1014",
+    "footer": "#0e1014",
+    "tab": "#22262e",
+    "tab_hover": "#2c313b",
+    "tab_active_text": "#111216",
+    "row_hover": "#ffffff10",
+    "text": "#eceef2",
+    "selected_text": "#ffffff",
+    "muted": "#a3a9b5",
+    "key_cap": "#262a33",
+    "key_cap_border": "#4a505c",
+    "field": "#0e1014",
+    "grabber": "#5a606c",
+    "grabber_hover": "#7b818d"
+  },
+  "spacing": {
+    "outer_padding": 24,
+    "row_padding_h": 14,
+    "row_padding_v": 6,
+    "compact_row_padding_v": 3,
+    "row_gap": 4,
+    "section_gap": 14,
+    "strip_padding": 6,
+    "footer_padding_h": 16,
+    "footer_padding_v": 10,
+    "tab_padding_h": 16,
+    "tab_padding_v": 6,
+    "tab_gap": 6,
+    "hint_gap": 18,
+    "key_cap_padding_h": 7,
+    "key_cap_padding_v": 2,
+    "scroll_gutter": 12,
+    "fade_px": 22
+  },
+  "shape": {
+    "radius": 12,
+    "row_radius": 6,
+    "border_px": 1,
+    "shadow_px": 18,
+    "selection_bar_px": 4,
+    "selection_alpha": 0.24,
+    "key_cap_radius": 5,
+    "scrollbar_px": 4
+  },
+  "fonts": {
+    "title": 28,
+    "tab": 18,
+    "row": 20,
+    "body": 18,
+    "small": 16,
+    "heading": 18
+  }
+}

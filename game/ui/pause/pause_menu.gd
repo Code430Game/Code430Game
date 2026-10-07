@@ -6,7 +6,9 @@ extends CanvasLayer
 ## own navigation in _input so it works while the tree is paused and with any controller
 ## mapping: up/down move the selection, left/right change a value, A activates, B or Menu
 ## resume. Holding Menu (or Escape) for REPORT_HOLD_S goes straight to "Report a problem".
-## Opening captures the frame under the menu and a frame-time snapshot for the report.
+## Opening captures the frame under the menu and a frame-time snapshot for the report. The look
+## comes from MenuTheme (update-menu-design): the selected row is filled with the tone's accent,
+## hints sit in a footer as key caps.
 
 signal resumed
 signal quit_requested
@@ -29,7 +31,6 @@ const HOST_ROW := 0
 const JOIN_ROW := 1
 ## Holding the pause button this long after it opened the menu opens the report form.
 const REPORT_HOLD_S := 1.0
-const ROW_FONT := 20
 const MUSIC_STEP_DB := 2.0
 const MUSIC_MIN_DB := -40.0
 const MUSIC_MAX_DB := 6.0
@@ -37,8 +38,8 @@ const PRESETS: PackedStringArray = ["auto", "deck", "high"]
 
 @onready var _address: LineEdit = $Panel/VBox/Pages/Coop/Address
 @onready var _players: Label = $Panel/VBox/Pages/Coop/Players
-@onready var _tab_bar: HBoxContainer = $Panel/VBox/Tabs
-@onready var _hint: Label = $Panel/VBox/Hint
+@onready var _tab_bar: HBoxContainer = $Panel/VBox/TabStrip/Tabs
+@onready var _hint: HBoxContainer = $Panel/VBox/Footer/Hint
 @onready var _pages_root: Control = $Panel/VBox/Pages
 
 var overview_map: OverviewMap
@@ -67,6 +68,7 @@ var _hold_s: float = -1.0  # time the pause button has been held since it opened
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	($Panel as Control).theme = MenuTheme.theme()
 	var game: Array[Button] = [$Panel/VBox/Pages/Game/Resume, $Panel/VBox/Pages/Game/Character, $Panel/VBox/Pages/Game/Report, $Panel/VBox/Pages/Game/Quit]
 	game[0].pressed.connect(close)
 	game[1].pressed.connect(func() -> void: character_requested.emit())
@@ -82,7 +84,7 @@ func _ready() -> void:
 		b.text = TABS[i]
 		b.toggle_mode = true
 		b.focus_mode = Control.FOCUS_NONE
-		b.add_theme_font_size_override("font_size", 18)
+		b.theme_type_variation = MenuTheme.TAB
 		b.pressed.connect(show_tab.bind(i))
 		_tab_bar.add_child(b)
 		_tab_labels.append(b)
@@ -189,16 +191,21 @@ func _note_device(event: InputEvent) -> void:
 
 
 func _update_hint() -> void:
-	var tabs := "LB / RB tabs" if showing_pad else "Q / E tabs"
-	var back := "B or Menu resume" if showing_pad else "Esc resume"
+	var tabs := ["LB / RB" if showing_pad else "Q / E", "tabs"]
+	var back := ["B" if showing_pad else "Esc", "resume"]
 	var accept := "A" if showing_pad else "Enter"
 	match tab:
 		CONTROLS_TAB:
-			_hint.text = "%s    %s rebind    %s" % [tabs, accept, back]
+			MenuTheme.hint_bar(_hint, [tabs, [accept, "rebind"], back])
 		OPTIONS_TAB, SETTINGS_TAB:
-			_hint.text = "%s    left / right change    %s" % [tabs, back]
+			MenuTheme.hint_bar(_hint, [tabs, ["Left / Right", "change"], back])
 		_:
-			_hint.text = "%s    %s select    %s    %s map" % [tabs, accept, back, "View" if showing_pad else "M"]
+			MenuTheme.hint_bar(_hint, [tabs, [accept, "select"], back, ["View" if showing_pad else "M", "map"]])
+
+
+## The footer's hints as plain text (tests).
+func hint_text() -> String:
+	return MenuTheme.hint_text(_hint)
 
 
 func _move(delta: int) -> void:
@@ -215,9 +222,7 @@ func _highlight() -> void:
 		return
 	_selected[tab] = clampi(_selected[tab], 0, row.size() - 1)
 	for i in range(row.size()):
-		var b: Button = row[i]
-		var base: String = b.get_meta("text", b.text.trim_prefix("> ").trim_prefix("   "))
-		b.text = ("> " if i == _selected[tab] else "   ") + base
+		MenuTheme.set_selected(row[i] as Button, i == _selected[tab])
 	var current: Button = row[_selected[tab]]
 	if visible and current.is_visible_in_tree():
 		current.grab_focus()
@@ -230,7 +235,7 @@ func _row_button(text: String) -> Button:
 	b.set_meta("text", text)
 	b.text = text
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.add_theme_font_size_override("font_size", ROW_FONT)
+	b.theme_type_variation = MenuTheme.ROW
 	return b
 
 
@@ -245,21 +250,24 @@ func _build_controls_page() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Controls"
 	page.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.add_theme_constant_override("separation", 6)
+	page.add_theme_constant_override("separation", 8)
 	_device_label = Label.new()
-	_device_label.add_theme_font_size_override("font_size", 15)
+	_device_label.theme_type_variation = MenuTheme.NOTE
 	_device_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	page.add_child(_device_label)
 	_controls_scroll = ScrollContainer.new()
-	_controls_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_controls_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	page.add_child(_controls_scroll)
+	page.add_child(MenuTheme.scroll_frame(_controls_scroll))
+	var gutter := MarginContainer.new()  # keeps the key caps clear of the scrollbar
+	gutter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gutter.add_theme_constant_override("margin_right", int(MenuTheme.num(MenuTheme.theme().get_meta("data", {}), "spacing", "scroll_gutter", 12)))
+	_controls_scroll.add_child(gutter)
 	_controls_list = VBoxContainer.new()
 	_controls_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_controls_list.add_theme_constant_override("separation", 2)
-	_controls_scroll.add_child(_controls_list)
+	gutter.add_child(_controls_list)
 	_controls_note = Label.new()
-	_controls_note.add_theme_font_size_override("font_size", 15)
+	_controls_note.theme_type_variation = MenuTheme.NOTE
 	_controls_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_controls_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(_controls_note)
@@ -281,8 +289,7 @@ func _rebuild_controls() -> void:
 	for ctx: String in ["foot", "drive", Controls.ANY, "debug"]:
 		var heading := Label.new()
 		heading.text = Controls.context_label(ctx)
-		heading.add_theme_font_size_override("font_size", 17)
-		heading.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+		heading.theme_type_variation = MenuTheme.HEADING
 		_controls_list.add_child(heading)
 		for row in Controls.rows(ctx):
 			var b := _binding_row(row)
@@ -298,14 +305,16 @@ func _rebuild_controls() -> void:
 
 func _binding_row(row: Dictionary) -> Button:
 	var b := _row_button(str(row["label"]))
-	b.custom_minimum_size = Vector2(0, 30)
-	b.add_theme_font_size_override("font_size", 17)
-	var binding := Label.new()
-	binding.text = Controls.row_text(row, showing_pad)
-	binding.add_theme_font_size_override("font_size", 17)
-	binding.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	binding.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	binding.set_anchors_preset(Control.PRESET_FULL_RECT)
+	b.add_theme_font_size_override("font_size", int(MenuTheme.num(MenuTheme.theme().get_meta("data", {}), "fonts", "body", 18)))
+	var binding := MenuTheme.key_cap(Controls.row_text(row, showing_pad))
+	# Pinned to the row's right edge, growing leftwards to fit its text.
+	binding.anchor_left = 1.0
+	binding.anchor_right = 1.0
+	binding.anchor_top = 0.5
+	binding.anchor_bottom = 0.5
+	binding.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	binding.grow_vertical = Control.GROW_DIRECTION_BOTH
+	binding.offset_left = -12.0
 	binding.offset_right = -12.0
 	binding.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(binding)
@@ -376,7 +385,7 @@ func _build_options_page() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Options"
 	page.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.add_theme_constant_override("separation", 12)
+	page.add_theme_constant_override("separation", 6)
 	_pages_root.add_child(page)
 	return page
 
@@ -402,6 +411,7 @@ func _cycle_tone(delta: int) -> void:
 	if ContentMode.locked:
 		return
 	ContentMode.cycle(delta)
+	MenuTheme.refresh_accent()
 	_rebuild_options()
 	_highlight()
 
@@ -426,7 +436,7 @@ func _build_settings_page() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Settings"
 	page.set_anchors_preset(Control.PRESET_FULL_RECT)
-	page.add_theme_constant_override("separation", 12)
+	page.add_theme_constant_override("separation", 6)
 	_pages_root.add_child(page)
 	return page
 
@@ -440,7 +450,7 @@ func _rebuild_settings() -> void:
 		page.add_child(graphics)
 		var note := Label.new()
 		note.name = "Note"
-		note.add_theme_font_size_override("font_size", 15)
+		note.theme_type_variation = MenuTheme.NOTE
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		page.add_child(note)
 		_rows[SETTINGS_TAB] = [graphics]
@@ -480,6 +490,7 @@ func open() -> void:
 	if overview_map != null and overview_map.visible:
 		overview_map.close()
 	capture()
+	MenuTheme.refresh_accent()
 	visible = true
 	_selected = PackedInt32Array([0, 0, 0, 0, 0])
 	_rebuild_options()
