@@ -28,5 +28,19 @@ Notes (2026-10-06):
   - Mackenzie King Bridge, looking west from the west deck: the raised side face between the decks is gone, flush after.
   - 417 over Metcalfe: unchanged, median continuous; its carriageways were already level there.
 
+Follow-up 2026-10-07 (`fix/shared-heights`, after the human saw ramps "bowed with just the ends
+elevated"):
+- **Rule:** ground carriageways merge down. Sharing is one pass, with no rounds to run out. Vertices
+  pair at matching stations, decks excluded, or snap within `loose_snap_m`; the rest follow their
+  partner through the grade pass.
+- **Guardrails:** none in paved gores, and medians are kept out of every carriageway's lanes.
+- **Ottawa against main** (857ac35):
+  - parallel steps over 10 cm: 65 → 29;
+  - importer step left: 0.571 → 0.355 m;
+  - edges over grade: 14 → 9;
+  - OSM vertices raised far from decks: 58 → 9;
+  - doubled guardrails at the 417 merge: 2 → 0;
+  - medians in lanes: 10 → 0.
+
 ## 2. Verification
 - [ ] 2.1 Human drives the Mackenzie King Bridge on the Deck

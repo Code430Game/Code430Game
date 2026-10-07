@@ -256,7 +256,13 @@ class ElevationStats:
     shared_ground_vertices: int = 0
     max_shared_step: float = 0.0
     shared_step_left: float = 0.0
-    share_rounds_exhausted: bool = False
+    share_followers: int = 0  # shared vertices left outside a group, set from their partners
+    aligned_vertices: int = (
+        0  # vertices inserted so side-by-side carriageways pair vertex to vertex
+    )
+    aligned_dropped: int = 0  # of those, the ones that didn't pair and were taken out again
+    shared_groups: int = 0
+    tie_rounds: int = 0  # rounds of the grade pass that kept shared groups tied
     clearance_raised: list[str] = field(default_factory=list)
     clearance_short: list[str] = field(default_factory=list)
 
@@ -276,7 +282,11 @@ class ElevationStats:
             "shared_ground_vertices": self.shared_ground_vertices,
             "max_shared_step": round(self.max_shared_step, 3),
             "shared_step_left": round(self.shared_step_left, 3),
-            "share_rounds_exhausted": self.share_rounds_exhausted,
+            "share_followers": self.share_followers,
+            "aligned_vertices": self.aligned_vertices,
+            "aligned_dropped": self.aligned_dropped,
+            "shared_groups": self.shared_groups,
+            "tie_rounds": self.tie_rounds,
             "clearance_raised": self.clearance_raised,
             "clearance_short": self.clearance_short,
         }
@@ -705,6 +715,15 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         adj.setdefault(a, []).append((b, d, g))
         adj.setdefault(b, []).append((a, d, g))
 
+    # Vertices added in one pass are projected back onto their partners in the next (a vertex
+    # inserted for a third carriageway beside the second); three passes cover every case seen.
+    stats_aligned = 0
+    inserted: dict[str, set[tuple[float, float]]] = {}
+    for _ in range(ALIGN_PASSES):
+        added = _align_partner_vertices(graph, cfg, inserted)
+        stats_aligned += added
+        if not added:
+            break
     for nid, node in graph.nodes.items():
         key = f"n:{nid}"
         ground[key] = source.sample(node.position[0], node.position[2])
@@ -747,6 +766,7 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         free_vertices=len(y) - len(fixed),
         anchorless_spans=anchorless,
         contaminated_vertices=len(contaminated),
+        aligned_vertices=stats_aligned,
     )
     for key, val in fixed.items():
         y[key] = val
@@ -767,7 +787,8 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         y[key] = clamped
 
     _smooth(y, fixed, lower, upper, adj)
-    shared, beside = _share_heights(
+    grouped: set[str] = set()
+    shared, beside, groups, followers = _share_heights(
         graph, cfg, y, vertex_keys, positions, adj, stats, contaminated, set(fixed)
     )
     if shared:
@@ -775,12 +796,16 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
         # roads blending into them stay within their class's grade.
         pinned = {k: y[k] for k in fixed}
         pinned.update(shared)
+        # Shared vertices outside a group are groups of one, except followers, which take their
+        # partners' height again after each grade pass (_follow) instead of being lifted alone.
+        grouped = {m for g in groups for m in g}
+        groups = groups + [[k] for k in sorted(shared) if k not in grouped and k not in followers]
         # Two shared vertices next to each other can disagree (one beside a deck end, the other
-        # beside the ground road there); the lower one rises to the grade from the higher.
-        lower = _propagate(pinned, adj, sign=-1)
-        for k in sorted(shared):
-            if k not in fixed and y[k] < lower[k] - SMOOTHING_EPSILON:
-                y[k] = pinned[k] = lower[k]
+        # beside the ground road there); the lower one rises to the grade from the higher, and
+        # the rest of its group rises with it so the carriageways stay level with each other.
+        stats.tie_rounds += _tie_groups(y, pinned, groups, adj, set(fixed))
+        _regrade(y, pinned, adj)
+        _follow(y, pinned, followers, set(fixed))
         _regrade(y, pinned, adj)
         # The blend and the regrade can lift a road under a deck into its clearance (the spans
         # were placed before sharing): such a chain rises again, like a crossing in _span_heights.
@@ -793,6 +818,10 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
                     y[k] += sg * short[first]
                     pinned[k] = y[k]
             stats.clearance_raised = sorted(short)
+            # A raised chain lifts the carriageways sharing its height too.
+            stats.tie_rounds += _tie_groups(y, pinned, groups, adj, set(fixed))
+            _regrade(y, pinned, adj)
+            _follow(y, pinned, followers, set(fixed))
             _regrade(y, pinned, adj)
             stats.clearance_short = sorted(
                 _recheck_clearance(graph, cfg, y, vertex_keys, positions)
@@ -809,11 +838,20 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
     for eid in sorted(graph.edges):
         e = graph.edges[eid]
         keys = vertex_keys[eid]
-        pts = [(p[0], y[k], p[2]) for p, k in zip(e.polyline, keys, strict=True)]
+        # A vertex added only to pair with a partner that didn't pair after all goes again: it
+        # would only show grade conflicts the longer segment spreads out.
+        drop = inserted.get(eid, set())
+        pts = [
+            (p[0], y[k], p[2])
+            for i, (p, k) in enumerate(zip(e.polyline, keys, strict=True))
+            if i in (0, len(keys) - 1) or k in grouped or (p[0], p[2]) not in drop
+        ]
+        stats.aligned_dropped += len(keys) - len(pts)
         e.polyline = pts
         limit = cfg.for_class(e.road_class).max_grade
         edge_worst = 0.0
-        for i, seg in enumerate(lengths[eid]):
+        for i in range(len(pts) - 1):
+            seg = max(math.dist(pts[i][::2], pts[i + 1][::2]), 0.01)
             edge_worst = max(edge_worst, abs(pts[i + 1][1] - pts[i][1]) / seg)
         if edge_worst > limit + 0.005:
             stats.edges_over_grade.append(eid)
@@ -824,13 +862,207 @@ def apply_elevation(graph: RoadGraph, source: ElevationSource, cfg: ImportConfig
     return stats
 
 
-SHARE_ROUNDS = 8
+TIE_ROUNDS = 20
+ALIGN_PASSES = 3
 SHARED_DEFAULTS = {
     "ground_gap_m": 0.25,
     "ground_classes": ["motorway", "trunk", "motorway_link", "trunk_link"],
     "max_step_m": 0.8,
     "blend_m": 30.0,
+    "align_min_m": 2.0,
+    "align_node_m": 8.0,
+    "pair_snap_m": 2.0,
+    "group_max_m": 30.0,
+    "loose_snap_m": 6.0,
 }
+
+
+def _point_box(p: tuple[float, float]) -> tuple[float, float, float, float]:
+    return (p[0], p[1], p[0], p[1])
+
+
+def _share_setup(graph: RoadGraph, cfg: ImportConfig) -> tuple[dict, float, dict[str, str]]:
+    """The sharing rules, the deck gap and which edges are carriageways (deck or ground)."""
+    rules = dict(SHARED_DEFAULTS)
+    rules.update(cfg.shared_heights)
+    # Decks this close are one deck to the parapets (no wall between them), so one height too.
+    deck_gap = float(cfg.barriers.get("parapet_shared_deck_gap_m", 3.5))
+    ground_classes = set(rules["ground_classes"])
+    kinds: dict[str, str] = {}
+    for eid, e in graph.edges.items():
+        if e.tunnel:
+            continue
+        if e.bridge:
+            kinds[eid] = "deck"
+        elif e.road_class in ground_classes:
+            kinds[eid] = "ground"
+    return rules, deck_gap, kinds
+
+
+def _pair_gap(e, o, kinds: dict[str, str], rules: dict, deck_gap: float) -> float | None:
+    """Largest gap between the ribbons of carriageways `e` and `o` that still pairs them, or
+    None when they never pair (decks of different layers)."""
+    decks = (kinds[e.id] == "deck") + (kinds[o.id] == "deck")
+    if decks == 2 and o.layer != e.layer:
+        return None
+    return deck_gap if decks else rules["ground_gap_m"]
+
+
+def _align_partner_vertices(
+    graph: RoadGraph, cfg: ImportConfig, inserted: dict[str, set[tuple[float, float]]] | None = None
+) -> int:
+    """Give side-by-side carriageways vertices at matching stations, before any height is set.
+
+    Sharing compares a vertex with the nearest point of its partner. When that point falls
+    between two of the partner's vertices its height is interpolated, and equalising one side
+    moves the interpolation the other side sees, so the two creep upwards round after round
+    and never settle. Here every vertex of a carriageway is projected onto each partner
+    carriageway in plan, and the partner gains a vertex there (on the straight segment, so the
+    road's shape doesn't change) unless one already lies within `align_min_m`. Sharing then
+    pairs vertex with vertex. The caller repeats it so inserted vertices get partners too.
+    Returns how many vertices were inserted; their plan positions go into `inserted` (edge ->
+    {(x, z)}) so the ones that end up unpaired can be dropped again.
+    """
+    rules, deck_gap, kinds = _share_setup(graph, cfg)
+    if len(kinds) < 2:
+        return 0
+    min_m = float(rules["align_min_m"])
+    node_m = float(rules["align_node_m"])
+    idx = _SegmentIndex()
+    widest = 0.0
+    for eid in sorted(kinds):
+        e = graph.edges[eid]
+        widest = max(widest, e.width_m)
+        pts = e.polyline
+        for i in range(len(pts) - 1):
+            idx.add((pts[i][0], pts[i][2]), (pts[i + 1][0], pts[i + 1][2]), (eid, i))
+    inserts: dict[str, dict[int, list[float]]] = {}  # edge -> segment -> [t]
+    for eid in sorted(kinds):
+        e = graph.edges[eid]
+        for p in e.polyline:
+            x, z = p[0], p[2]
+            best: dict[str, tuple[float, int, float]] = {}  # partner -> (d, segment, t)
+            for a, b, (oid, i) in idx.near(x, z, e.width_m / 2.0 + widest / 2.0 + deck_gap):
+                if oid == eid:
+                    continue
+                o = graph.edges[oid]
+                gap = _pair_gap(e, o, kinds, rules, deck_gap)
+                if gap is None:
+                    continue
+                dx, dz = b[0] - a[0], b[1] - a[1]
+                l2 = dx * dx + dz * dz
+                if l2 == 0.0:
+                    continue
+                t = max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / l2))
+                d = math.hypot(x - a[0] - dx * t, z - a[1] - dz * t)
+                if d - e.width_m / 2.0 - o.width_m / 2.0 > gap:
+                    continue
+                if d < best.get(oid, (math.inf,))[0]:
+                    best[oid] = (d, i, t)
+            for oid, (_d, i, t) in best.items():
+                if kinds[oid] == "deck":
+                    # A deck's profile is fitted through its own vertices (anchors, clearance
+                    # over what it crosses): an added vertex moves the whole span. Decks pair by
+                    # snapping or follow instead.
+                    continue
+                o = graph.edges[oid]
+                seg = math.dist(o.polyline[i][::2], o.polyline[i + 1][::2])
+                if t * seg < min_m or (1.0 - t) * seg < min_m:
+                    continue  # an existing vertex is close enough
+                # Not next to a junction or deck end, where the roads meeting there set heights
+                # of their own and a short segment would only turn a grade conflict into a cliff.
+                q = (
+                    o.polyline[i][0] + (o.polyline[i + 1][0] - o.polyline[i][0]) * t,
+                    o.polyline[i][2] + (o.polyline[i + 1][2] - o.polyline[i][2]) * t,
+                )
+                if (
+                    min(math.dist(q, o.polyline[0][::2]), math.dist(q, o.polyline[-1][::2]))
+                    < node_m
+                ):
+                    continue
+                inserts.setdefault(oid, {}).setdefault(i, []).append(t)
+    added = 0
+    for oid in sorted(inserts):
+        o = graph.edges[oid]
+        old = o.polyline
+        new: list = []
+        for i in range(len(old) - 1):
+            new.append(old[i])
+            seg = math.dist(old[i][::2], old[i + 1][::2])
+            last = 0.0
+            for t in sorted(inserts[oid].get(i, [])):
+                if (t - last) * seg < min_m or (1.0 - t) * seg < min_m:
+                    continue
+                a, b = old[i], old[i + 1]
+                q = tuple(a[c] + (b[c] - a[c]) * t for c in range(3))
+                new.append(q)
+                if inserted is not None:
+                    inserted.setdefault(oid, set()).add((q[0], q[2]))
+                last = t
+                added += 1
+        new.append(old[-1])
+        o.polyline = new
+    return added
+
+
+def _follow(
+    y: dict[str, float],
+    pinned: dict[str, float],
+    followers: dict[str, tuple[list[tuple[str, str, float]], bool]],
+    spans: set[str],
+) -> None:
+    """Set each follower (a shared vertex outside any group) to its partners' height again, by
+    its rule (the lowest, or the highest), after the grade pass may have moved the partners. A
+    span vertex only ever rises. Followers read their partners and never move them."""
+    for k in sorted(followers):
+        partners, rule_min = followers[k]
+        heights = [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in partners]
+        h = min(heights) if rule_min else max(heights)
+        if k in spans:
+            h = max(h, y[k])
+        y[k] = pinned[k] = h
+
+
+def _tie_groups(
+    y: dict[str, float],
+    pinned: dict[str, float],
+    groups: list[list[str]],
+    adj: dict[str, list[tuple[str, float, float]]],
+    fixed: set[str],
+) -> int:
+    """Keep each group of shared vertices at one height through the grade fix-up.
+
+    Each group first takes the highest of its members (a member may have been lifted alone, by
+    the clearance re-check). Then, where the grade limit from a neighbouring pinned vertex wants
+    a member higher, the whole group rises to it, not just that member, so the step between the
+    carriageways doesn't open again. Groups holding a span vertex stay put. Both moves only raise, and each raise is to a bound set
+    by another pinned vertex, so this settles; `TIE_ROUNDS` guards it. Returns the rounds used.
+    """
+    if not groups:
+        return 0
+    for rounds in range(1, TIE_ROUNDS + 1):
+        changed = False
+        lower = _propagate(pinned, adj, sign=-1)
+        for g in groups:
+            top = max(y[m] for m in g)
+            # A group holding a span vertex is anchored by the span's own profile; grade bounds
+            # don't lift it (that would lift the deck, and a conflict between two decks' fixed
+            # heights would pass along the network). It only levels to its highest member.
+            anchored = any(m in fixed for m in g)
+            need = (
+                -math.inf
+                if anchored
+                else max((lower.get(m, -math.inf) for m in g), default=-math.inf)
+            )
+            target = max(top, need)
+            for m in g:
+                if y[m] < target - SMOOTHING_EPSILON:
+                    y[m] = pinned[m] = target
+                    changed = True
+        if not changed:
+            return rounds
+    log.warning("shared heights: groups still moving after %d tie rounds", TIE_ROUNDS)
+    return TIE_ROUNDS
 
 
 def _share_heights(
@@ -843,7 +1075,12 @@ def _share_heights(
     stats: ElevationStats,
     under_decks: set[str] = frozenset(),
     spans: set[str] = frozenset(),
-) -> tuple[dict[str, float], dict[str, list[tuple[str, str, float]]]]:
+) -> tuple[
+    dict[str, float],
+    dict[str, list[tuple[str, str, float]]],
+    list[list[str]],
+    dict[str, tuple[list[tuple[str, str, float]], bool]],
+]:
     """One height for carriageways whose ribbons touch (update-shared-deck-heights).
 
     Each carriageway gets its height from its own anchors, so two decks of one bridge, or two
@@ -853,32 +1090,31 @@ def _share_heights(
     of its ribbon and within `max_step_m` of its height; a larger difference is a real level
     change (a ramp climbing away) and is kept. Decks of different layers never pair. Where a
     deck is involved the gap is the parapets' shared-deck gap (decks with no wall between them
-    must not show a step either); between ground roads it is `ground_gap_m`. A shared vertex
-    rises to the highest of them, so no deck drops into the clearance over the road below, and
-    three carriageways side by side (two decks and a ramp, a motorway and its on-ramp) all end
-    at the same height; one rule for all of them, since mixing rules left steps between them.
-    Under a deck (`under_decks`) ground roads take the lowest instead, so the clearance there
-    never shrinks. No span vertex (`spans`) is ever lowered and no tunnel vertex moved. Every other vertex within `blend_m` along the network
+    must not show a step either); between ground roads it is `ground_gap_m`. Where a deck is
+    involved a shared vertex rises to the highest of them, so no deck drops into the clearance
+    over the road below. Ground carriageways beside each other (a motorway and its on-ramp)
+    merge down to the lowest instead: raising them lifted the ends of a merge and left the road
+    between bowed once the raise faded out. Under a deck (`under_decks`) ground roads take the
+    lowest too, so the clearance there never shrinks. The rule belongs to the group, so the
+    members of one cross-section never pick opposite rules. No span vertex (`spans`) is ever
+    lowered and no tunnel vertex moved. Every other vertex within `blend_m` along the network
     of a shared one takes that change, fading linearly, so approaches and side streets meet
-    the new heights without a kink. Returns the shared vertices with their new heights, and
-    who is beside whom (vertex -> [(ka, kb, t)] per partner) for measuring what step is left.
+    the new heights without a kink.
+
+    Partners pair vertex with vertex where `_align_partner_vertices` gave them matching
+    stations (within `pair_snap_m`), or else with the nearer vertex within `loose_snap_m` (near
+    a junction or a deck end, where no vertex is inserted): such vertices join one group
+    (union-find) and the group takes one height in one pass. A vertex whose partner point is
+    still between two vertices follows it: it takes the partner's height but never moves the
+    partner, so nothing feeds back, nothing creeps and there are no rounds to run out.
+    Returns the shared vertices with their new heights, who is beside whom
+    (vertex -> [(ka, kb, t)] per partner) for measuring what step is left, the groups, which
+    the grade pass keeps tied (`_tie_groups`), and the followers (vertex -> (partners, takes
+    the lowest)), which `_follow` sets again after each grade pass.
     """
-    rules = dict(SHARED_DEFAULTS)
-    rules.update(cfg.shared_heights)
-    # Decks this close are one deck to the parapets (no wall between them), so one height too.
-    deck_gap = float(cfg.barriers.get("parapet_shared_deck_gap_m", 3.5))
-    ground_classes = set(rules["ground_classes"])
-
-    def kind_of(e) -> str | None:
-        if e.tunnel:
-            return None
-        if e.bridge:
-            return "deck"
-        return "ground" if e.road_class in ground_classes else None
-
-    kinds = {eid: k for eid, e in graph.edges.items() if (k := kind_of(e)) is not None}
+    rules, deck_gap, kinds = _share_setup(graph, cfg)
     if len(kinds) < 2:
-        return {}, {}
+        return {}, {}, [], {}
     idx = _SegmentIndex()
     widest = 0.0
     for eid in kinds:
@@ -907,10 +1143,9 @@ def _share_heights(
                 if oid in own:
                     continue
                 o = graph.edges[oid]
-                decks = (kinds[eid] == "deck") + (kinds[oid] == "deck")
-                if decks == 2 and o.layer != e.layer:
+                gap = _pair_gap(e, o, kinds, rules, deck_gap)
+                if gap is None:
                     continue
-                gap = deck_gap if decks else rules["ground_gap_m"]
                 dx, dz = b[0] - a[0], b[1] - a[1]
                 l2 = dx * dx + dz * dz
                 t = 0.0 if l2 == 0 else max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / l2))
@@ -927,21 +1162,33 @@ def _share_heights(
             beside[k] = [(ka, kb, t) for _d, ka, kb, t in partners.values()]
             on_deck[k] = any(kinds[eid] == "deck" for eid in own)
     if not beside:
-        return {}, {}
+        return {}, {}, [], {}
 
-    # Each vertex takes the highest (under a deck the lowest) of its own and its partners'
-    # heights, repeated until nothing moves, so a change reaches a third carriageway beside the
-    # second (a motorway raised to a deck end, then the on-ramp beside the motorway). The rule
-    # belongs to the pair, not the vertex: a ground vertex takes the lowest when it or any of its
-    # partners lies under a deck, so two partners never pick opposite rules and swap the step.
+    # The rule belongs to the pair, not the vertex: a ground vertex takes the lowest when it or
+    # any of its partners lies under a deck, so two partners never pick opposite rules and swap
+    # the step.
     def low(k: str) -> bool:
         return k in under_decks and not any(kinds[eid] == "deck" for eid in edges_at.get(k, ()))
 
     # A partner counts as under a deck by the end of its segment nearest this vertex, so the two
     # sides of a pair switch rule at the same place where the deck's footprint ends.
-    take_min = {
+    def partner_on_deck(ps: list[tuple[str, str, float]]) -> bool:
+        return any(
+            kinds.get(eid) == "deck"
+            for ka, kb, _t in ps
+            for eid in set(edges_at.get(ka, ())) & set(edges_at.get(kb, ()))
+        )
+
+    # Only a deck pulls a carriageway up (it can't go down without losing its clearance).
+    # Carriageways on the ground beside each other merge down to the lower one, nearer the
+    # terrain: raising them instead lifted the ends of a ramp or merge where they meet and left
+    # the road between bowed, once the raise faded out along `blend_m`.
+    under = {
         k: not on_deck[k] and (low(k) or any(low(ka if t < 0.5 else kb) for ka, kb, t in ps))
         for k, ps in beside.items()
+    }
+    take_min = {
+        k: under[k] or (not on_deck[k] and not partner_on_deck(ps)) for k, ps in beside.items()
     }
     for k, ps in beside.items():
         heights = [y[k]] + [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in ps]
@@ -950,28 +1197,118 @@ def _share_heights(
             stats.shared_deck_vertices += 1
         else:
             stats.shared_ground_vertices += 1
-    work = dict(y)
-    settled = False
-    for _ in range(SHARE_ROUNDS):
-        new = {}
-        for k in sorted(beside):
-            heights = [work[k]] + [work[ka] + (work[kb] - work[ka]) * t for ka, kb, t in beside[k]]
-            new[k] = min(heights) if take_min[k] else max(heights)
-        moved = max(abs(new[k] - work[k]) for k in new)
-        work.update(new)
-        if moved < SMOOTHING_EPSILON:
-            settled = True
-            break
-    if not settled:
-        stats.share_rounds_exhausted = True
-        log.warning(
-            "shared heights: still moving after %d rounds (last move %.3f m); steps may remain",
-            SHARE_ROUNDS,
-            moved,
+    # Partners join groups: one height per cross-section, set in one step, so nothing creeps.
+    # A partner point within pair_snap_m of a vertex joins that vertex's group; then a partner
+    # still between two vertices (near a junction or a deck end, where no vertex was inserted)
+    # snaps to the nearer one within loose_snap_m.
+    snap = float(rules["pair_snap_m"])
+    loose_snap = float(rules["loose_snap_m"])
+    parent: dict[str, str] = {}
+
+    def find(k: str) -> str:
+        while parent.get(k, k) != k:
+            parent[k] = parent.get(parent[k], parent[k])
+            k = parent[k]
+        return k
+
+    box: dict[str, tuple[float, float, float, float]] = {}  # group root -> plan extent
+    roads: dict[str, set[str]] = {}  # group root -> edges its non-node vertices lie on
+    low_y: dict[str, float] = {}  # group root -> lowest and highest height coming in
+    high_y: dict[str, float] = {}
+    group_max = float(rules["group_max_m"])
+
+    def on_roads(k: str) -> set[str]:
+        # A node vertex lies on every edge meeting there; counting those would stop a group
+        # crossing a junction or deck end at all, so only a mid-edge vertex claims its road.
+        return set() if k.startswith("n:") else set(edges_at.get(k, ()))
+
+    def union(a: str, b: str) -> bool:
+        """Joins the groups of `a` and `b` unless that would make a group stretch along a road
+        (more than group_max_m across, or one road twice) or span a real level change (more
+        than max_step_m between its heights). True when they are (now) one group."""
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return True
+        ba, bb = box.get(ra, _point_box(positions[ra])), box.get(rb, _point_box(positions[rb]))
+        merged = (min(ba[0], bb[0]), min(ba[1], bb[1]), max(ba[2], bb[2]), max(ba[3], bb[3]))
+        ea, eb = roads.get(ra, on_roads(ra)), roads.get(rb, on_roads(rb))
+        lo = min(low_y.get(ra, y[ra]), low_y.get(rb, y[rb]))
+        hi = max(high_y.get(ra, y[ra]), high_y.get(rb, y[rb]))
+        if (
+            math.hypot(merged[2] - merged[0], merged[3] - merged[1]) > group_max
+            or ea & eb
+            or hi - lo > rules["max_step_m"]
+        ):
+            return False
+        root, child = min(ra, rb), max(ra, rb)
+        parent[child] = root
+        box[root], roads[root] = merged, ea | eb
+        low_y[root], high_y[root] = lo, hi
+        return True
+
+    def nearest_end(ka: str, kb: str, t: float, within: float) -> str | None:
+        """The partner segment's end nearer the partner point, if it lies within `within`."""
+        seg = math.dist(positions[ka], positions[kb])
+        end, along = (ka, t * seg) if t <= 0.5 else (kb, (1.0 - t) * seg)
+        return end if along <= within else None
+
+    loose: dict[str, list[tuple[str, str, float]]] = {}  # partners left between two vertices
+    for within in (snap, loose_snap):
+        pending = loose if within == loose_snap else beside
+        loose = {}
+        for k in sorted(pending):
+            for ka, kb, t in pending[k]:
+                other = nearest_end(ka, kb, t, within)
+                if other is None or not union(k, other):
+                    loose.setdefault(k, []).append((ka, kb, t))
+    members: dict[str, list[str]] = {}
+    for k in sorted(set(beside) | set(parent)):
+        members.setdefault(find(k), []).append(k)
+    groups = [g for _r, g in sorted(members.items()) if len(g) > 1]
+    group_of = {m: i for i, g in enumerate(groups) for m in g}
+    stats.shared_groups = len(groups)
+    # One rule per group: a group with a span or deck vertex never goes down (the deck keeps its
+    # clearance), nor one whose height comes from a deck beside it (a loose deck partner: a deck
+    # within max_step_m in height is beside the road, not over it); one beside a deck otherwise
+    # takes the lowest only where it runs under one; ground carriageways alone take the lowest
+    # (merge down).
+    group_min = [
+        not any(m in spans or on_deck.get(m, False) for m in g)
+        and not any(partner_on_deck(loose.get(m, [])) for m in g)
+        and (
+            any(under.get(m, low(m)) for m in g)
+            or not any(partner_on_deck(beside.get(m, [])) for m in g)
         )
+        for g in groups
+    ]
+
+    # One pass, no rounds: each group takes one height from its members' heights as they came
+    # in (and from the partner points they still compare by interpolation); then a vertex left
+    # outside any group follows its partners. A follower reads its partners but never moves
+    # them, so there is nothing to iterate and nothing creeps.
+    work = dict(y)
+    for i, g in enumerate(groups):
+        heights = [y[m] for m in g]
+        for m in g:
+            heights += [y[ka] + (y[kb] - y[ka]) * t for ka, kb, t in loose.get(m, ())]
+        h = min(heights) if group_min[i] else max(heights)
+        for m in g:
+            work[m] = h
+    followers: dict[str, tuple[list[tuple[str, str, float]], bool]] = {}
+    for k in sorted(loose):
+        if k in group_of:
+            continue
+        heights = [work[ka] + (work[kb] - work[ka]) * t for ka, kb, t in loose[k]]
+        rule_min = take_min[k] and k not in spans and not partner_on_deck(loose[k])
+        work[k] = min(heights) if rule_min else max(heights + ([y[k]] if k in spans else []))
+        followers[k] = (loose[k], rule_min)
+    stats.share_followers = len(followers)
+    for g in groups:
+        for m in g:
+            beside.setdefault(m, [])
     delta = {k: work[k] - y[k] for k in beside}
     if not delta:
-        return {}, beside
+        return {}, beside, groups, followers
 
     # Fade each change out along the network: nearest shared vertex wins.
     blend = rules["blend_m"]
@@ -995,7 +1332,7 @@ def _share_heights(
         if k in tunnels or (k in spans and change < 0.0):
             continue  # never lower a deck into its clearance, nor move a tunnel
         y[k] += change
-    return {k: y[k] for k in delta}, beside
+    return {k: y[k] for k in delta}, beside, groups, followers
 
 
 def _shared_step_left(

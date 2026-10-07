@@ -173,7 +173,10 @@ def build_barriers(
     infill: list | None = None,
 ) -> BarriersResult:
     """Every barrier for the graph. `infill` is the bridges' infill strips (DeckStrip): a deck
-    edge that faces one has floor beyond it, not a drop, so no parapet stands there."""
+    edge that faces one has floor beyond it, not a drop, so no parapet stands there. The
+    graph's paved gores (`graph.gores`) count the same way for guardrails: a carriageway edge
+    with a gore beyond it at about its height has paving there, not a drop, so the motorway and
+    its ramp don't each put a rail into the gore between them."""
     rules = cfg.barriers
     result = BarriersResult()
     if not rules:
@@ -245,6 +248,21 @@ def build_barriers(
     overlap_margin = float(rules.get("overlap_margin_m", 0.2))
     overlap_height = float(rules.get("overlap_height_m", 2.5))
 
+    lanes_margin = float(rules.get("median_lanes_margin_m", 0.25))
+
+    def in_highway_lanes(x: float, y: float, z: float) -> bool:
+        """True when (x, z) lies in the lanes (the ribbon less its shoulders) of a highway
+        carriageway at about the same level."""
+        for a, b, (oid, i) in hw_index.near(x, z, 12.0):
+            o = graph.edges[oid]
+            lanes = o.width_m / 2.0 - max(o.shoulder_left_m, o.shoulder_right_m) - lanes_margin
+            if _seg_dist(x, z, a[0], a[1], b[0], b[1]) >= lanes:
+                continue
+            ya, yb = o.polyline[i][1], o.polyline[i + 1][1]
+            if abs(y - (ya + yb) / 2.0) < overlap_height:
+                return True
+        return False
+
     def clear_of_roads(x: float, y: float, z: float, own: str) -> bool:
         """False when (x, z) lies inside the ribbon of an edge from a different OSM way at
         about the same level; a deck crossing well above or below another road is clear."""
@@ -262,7 +280,7 @@ def build_barriers(
         return True
 
     infill_index = _SegmentIndex()
-    for strip in infill or []:
+    for strip in list(infill or []) + list(graph.gores):
         for i in range(len(strip.points) - 1):
             a, b = strip.points[i], strip.points[i + 1]
             half = max(strip.left_m[i], strip.left_m[i + 1])
@@ -437,12 +455,13 @@ def build_barriers(
                 if best is not None:
                     median_side[side][si] = True
                     d, gap, oid = best
+                    mx, mz = x + nx * (hw + gap / 2.0), z + nz * (hw + gap / 2.0)
+                    # Where carriageways converge at an angle, half the gap along this edge's
+                    # normal can land in a carriageway's lanes (the other one's, or a third's at a
+                    # split): no barrier there.
+                    in_lanes = in_highway_lanes(mx, y, mz)
                     # One barrier per pair: only the edge with the smaller id emits it.
-                    median_pts[side].append(
-                        (x + nx * (hw + gap / 2.0), y, z + nz * (hw + gap / 2.0))
-                        if eid < oid
-                        else None
-                    )
+                    median_pts[side].append((mx, y, mz) if eid < oid and not in_lanes else None)
                 else:
                     median_pts[side].append(None)
         for side in (-1.0, 1.0):
@@ -451,6 +470,7 @@ def build_barriers(
             for run in _runs([p if p is not None else (0.0, 0.0, 0.0) for p in pts], keep):
                 add("median", float(rules.get("median_height_m", 0.9)), eid, run)
         # Guardrails and sound walls on sides without a median.
+        gore_probe = float(rules.get("guardrail_gore_probe_m", 1.0))
         for side in (-1.0, 1.0):
             rail_pts, rail_keep = [], []
             wall_pts, wall_keep = [], []
@@ -463,10 +483,12 @@ def build_barriers(
                 drop = y - ground
                 has_median = median_side[side][si]
                 rail_pts.append((edge_x + nx * 0.3, y, edge_z + nz * 0.3))
+                beyond = (edge_x + nx * gore_probe, edge_z + nz * gore_probe)
                 rail_keep.append(
                     (not has_median)
                     and drop > float(rules.get("guardrail_drop_m", 1.2))
                     and clear_of_roads(edge_x + nx * 0.3, y, edge_z + nz * 0.3, eid)
+                    and not on_infill(beyond[0], y, beyond[1])
                 )
                 at_grade = drop > -float(rules.get("soundwall_trench_depth_m", 2.0))
                 wall_pts.append((edge_x + nx * 2.0, y, edge_z + nz * 2.0))

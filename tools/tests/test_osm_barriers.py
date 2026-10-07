@@ -10,6 +10,7 @@ from osm_import.cluster import cluster_junctions
 from osm_import.config import load_config
 from osm_import.elevation import FlatSource, apply_elevation
 from osm_import.filter import filter_ways
+from osm_import.gores import build_gores
 from osm_import.graph import build_graph
 from osm_import.projection import Projector
 from tests.osm_helpers import BBOX, make_data
@@ -511,3 +512,64 @@ def test_a_shoulder_over_a_ramp_at_another_height_is_dropped():
     assert main.shoulder_right_m == 0.0 and main.shoulder_left_m == 1.0
     assert abs(main.width_m - (before - 2.5)) < 1e-6
     assert alone.shoulder_right_m == 2.5  # nothing beside it
+
+
+def test_no_guardrails_face_each_other_across_a_paved_gore():
+    """Shared-heights pass: a motorway and its ramp run the same way 4 m apart on a ridge, and
+    each put a guardrail into the gore between them (two rails side by side at the 417 merge).
+    The gore is paved (gores.build_gores), so only the outer rails stand."""
+
+    class Gap:
+        def sample(self, x, z):
+            if abs(z) < 1.5:
+                return 15.0  # the gap between them is low, so the inner edges see a drop
+            return 20.0 if -12.0 < z < 12.0 else 15.0  # both roads on a ridge
+
+        def describe(self):
+            return {"kind": "gap"}
+
+    tags = {"highway": "motorway", "oneway": "yes", "width": "8"}
+    ways = [
+        (1, [(-300.0, -6.0), (300.0, -6.0)], tags),
+        (2, [(-300.0, 6.0), (300.0, 6.0)], tags),
+    ]
+    g = graph_for(ways, Gap())
+    without = build_barriers(g, Gap(), None, CFG)
+    assert kinds(without).count("guardrail") == 4  # outer and inner on each road
+    build_gores(g, CFG)
+    assert g.gores
+    with_gore = build_barriers(g, Gap(), None, CFG)
+    assert kinds(with_gore).count("guardrail") == 2  # the outer ones only
+
+
+def _seg_xz(p, a, b) -> float:
+    dx, dz = b[0] - a[0], b[2] - a[2]
+    l2 = dx * dx + dz * dz
+    t = 0.0 if l2 == 0 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[2] - a[2]) * dz) / l2))
+    return math.hypot(p[0] - a[0] - dx * t, p[2] - a[2] - dz * t)
+
+
+def test_no_median_in_the_ottawa_pack_stands_in_a_carriageways_lanes():
+    """Shared-heights pass: with the steps gone a shoulder came back on the 417 east of Lees, and
+    the median between two converging carriageways, placed half the gap along one edge's normal,
+    landed 1.6 m from the other's centre line, across its lanes. A median point lies outside the
+    lanes of every highway carriageway at its level."""
+    pack = Path(__file__).parents[2] / "packs" / "ottawa-centretown"
+    graph = json.loads((pack / "road_graph.v0.json").read_text(encoding="utf-8"))
+    barriers = json.loads((pack / "barriers.v0.json").read_text(encoding="utf-8"))["barriers"]
+    highway = set(CFG.barriers["highway_classes"])
+    edges = [e for e in graph["edges"] if e["class"] in highway and not e["tunnel"]]
+    bad = []
+    for b in barriers:
+        if b["kind"] != "median":
+            continue
+        for p in b["points"]:
+            for e in edges:
+                pl = e["polyline"]
+                if min(abs(q[1] - p[1]) for q in pl) > 3.0:
+                    continue  # a deck overhead or a road below, not beside
+                lanes = e["width_m"] / 2.0 - max(e["shoulder_left_m"], e["shoulder_right_m"])
+                d = min(_seg_xz(p, pl[i], pl[i + 1]) for i in range(len(pl) - 1))
+                if d < lanes - 0.25:
+                    bad.append((b["id"], e["id"], round(p[0]), round(p[2]), round(d, 2)))
+    assert bad == []
