@@ -10,7 +10,7 @@ script = ExtResource("1")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0, 0, 0, 0.55)
+color = Color(0, 0, 0, 0.66)
 
 [node name="Panel" type="PanelContainer" parent="."]
 anchors_preset = 8
@@ -18,44 +18,44 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -380.0
-offset_top = -330.0
-offset_right = 380.0
-offset_bottom = 330.0
+offset_left = -390.0
+offset_top = -345.0
+offset_right = 390.0
+offset_bottom = 345.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_type_variation = &"MenuTitle"
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="Tabs" type="HBoxContainer" parent="Panel/VBox"]
+[node name="TabStrip" type="PanelContainer" parent="Panel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"MenuStrip"
+
+[node name="Tabs" type="HBoxContainer" parent="Panel/VBox/TabStrip"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 8
-
-[node name="Hint" type="Label" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "LB / RB tabs    A select    B or Menu resume"
-horizontal_alignment = 1
+theme_override_constants/separation = 6
 
 [node name="Pages" type="Control" parent="Panel/VBox"]
-custom_minimum_size = Vector2(0, 520)
+custom_minimum_size = Vector2(0, 430)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="Game" type="VBoxContainer" parent="Panel/VBox/Pages"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 6
 
 [node name="Coop" type="VBoxContainer" parent="Panel/VBox/Pages"]
 visible = false
@@ -63,46 +63,59 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 6
 
 [node name="Resume" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"MenuRow"
 text = "Resume"
+alignment = 0
 
 [node name="Character" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"MenuRow"
 text = "Character"
+alignment = 0
 
 [node name="Host" type="Button" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"MenuRow"
 text = "Host co-op game"
+alignment = 0
 
 [node name="Join" type="Button" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"MenuRow"
 text = "Join game at address below"
+alignment = 0
 
 [node name="Address" type="LineEdit" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
 placeholder_text = "host address, e.g. 192.168.1.20"
 text = "127.0.0.1"
 
 [node name="Players" type="Label" parent="Panel/VBox/Pages/Coop"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"MenuNote"
 text = "offline"
 horizontal_alignment = 1
 
 [node name="Report" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"MenuRow"
 text = "Report a problem (hold Menu)"
+alignment = 0
 
 [node name="Quit" type="Button" parent="Panel/VBox/Pages/Game"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"MenuRow"
 text = "Quit to desktop"
+alignment = 0
+
+[node name="Footer" type="PanelContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"MenuFooter"
+
+[node name="Hint" type="HBoxContainer" parent="Panel/VBox/Footer"]
+layout_mode = 2
+alignment = 1

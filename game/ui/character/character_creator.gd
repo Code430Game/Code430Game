@@ -2,7 +2,9 @@ class_name CharacterCreator
 extends CanvasLayer
 ## Character creator: rows for each profile field, a preview, presets. Opened from the pause
 ## menu while the tree is paused; works with any controller mapping through the ui_* actions.
-## The live player follows every change (profile_changed); Done stores "last" and closes.
+## The live player follows every change (profile_changed); Done stores "last" and closes. The
+## look comes from MenuTheme (update-menu-design): rows are compact panels, the selected one
+## filled with the tone's accent.
 
 signal profile_changed(profile: Dictionary)
 signal closed(profile: Dictionary)
@@ -17,6 +19,7 @@ const ACTION_ROWS: Array = [
 	["delete", "Delete that preset"], ["done", "Done"],
 ]
 const PREVIEW_TURN_RAD_S := 0.6
+const NAME_COLUMN_PX := 170.0
 
 ## Where presets live; tests point this at a temp file.
 var store_path: String = CharacterStore.DEFAULT_PATH
@@ -24,12 +27,14 @@ var profile: Dictionary = {}
 
 @onready var _rows_box: VBoxContainer = $Panel/HBox/Left/Rows
 @onready var _status: Label = $Panel/HBox/Left/Status
+@onready var _hint: HBoxContainer = $Panel/HBox/Left/Footer/Hint
 @onready var _preview: Node3D = $Panel/HBox/ViewportContainer/Viewport/Body
 var _rig: CharacterRig = null
 @onready var _camera: Camera3D = $Panel/HBox/ViewportContainer/Viewport/Camera
 
 var _rows: Array[Label] = []  # value column
-var _names: Array[Label] = []  # name column, carries the selection marker
+var _names: Array[Label] = []  # name column
+var _lines: Array[PanelContainer] = []  # one row each, selected one filled
 var _selected: int = 0
 var _presets: Array = []
 var _preset_index: int = -1
@@ -38,18 +43,27 @@ var _preset_index: int = -1
 func _ready() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	($Panel as Control).theme = MenuTheme.theme()
 	for row: Array in FIELD_ROWS + ACTION_ROWS:
+		if row == ACTION_ROWS[0]:
+			var gap := Control.new()  # the actions read as their own group below the body rows
+			gap.custom_minimum_size.y = MenuTheme.num(MenuTheme.theme().get_meta("data", {}), "spacing", "section_gap", 14)
+			_rows_box.add_child(gap)
+		var panel := PanelContainer.new()
+		MenuTheme.set_selected(panel, false, true)
 		var line := HBoxContainer.new()
 		var n := Label.new()
-		n.add_theme_font_size_override("font_size", 17)
-		n.custom_minimum_size.x = 150.0
+		n.custom_minimum_size.x = NAME_COLUMN_PX
 		var l := Label.new()
-		l.add_theme_font_size_override("font_size", 17)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		line.add_child(n)
 		line.add_child(l)
-		_rows_box.add_child(line)
+		panel.add_child(line)
+		_rows_box.add_child(panel)
+		_lines.append(panel)
 		_names.append(n)
 		_rows.append(l)
+	MenuTheme.hint_bar(_hint, [["Up / Down", "row"], ["Left / Right", "change"], ["A", "select"], ["B", "done"]])
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color(0.13, 0.13, 0.15)
@@ -65,6 +79,7 @@ func open(start: Dictionary) -> void:
 	_preset_index = -1 if _presets.is_empty() else 0
 	_selected = 0
 	_status.text = ""
+	MenuTheme.refresh_accent()
 	visible = true
 	get_tree().paused = true
 	_apply()
@@ -85,7 +100,8 @@ func _refresh() -> void:
 	var rows: Array = FIELD_ROWS + ACTION_ROWS
 	for i in range(rows.size()):
 		var key: String = rows[i][0]
-		_names[i].text = ("> " if i == _selected else "   ") + str(rows[i][1])
+		_names[i].text = str(rows[i][1])
+		MenuTheme.set_selected(_lines[i], i == _selected, true)
 		var value := ""
 		if i < FIELD_ROWS.size():
 			value = "<  %s  >" % CharacterProfile.label(profile, key)

@@ -139,7 +139,7 @@ func test_saved_reports_page_deletes() -> void:
 	await _go_to("queue")
 	await _press(JOY_BUTTON_A)
 	assert_int(_form._page).is_equal(ReportForm.Page.QUEUE)
-	assert_str(_form._queue_list.text).contains("[queued]")
+	assert_str(_form.queue_text()).contains("[queued]")
 	for i in range(3):
 		if _form._queue_actions()[_form._queue_action] == "Delete":
 			break

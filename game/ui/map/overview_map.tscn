@@ -12,19 +12,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 clip_contents = true
 
-[node name="Title" type="Label" parent="View"]
+[node name="Header" type="PanelContainer" parent="View"]
 offset_left = 16.0
-offset_top = 12.0
-offset_right = 600.0
-offset_bottom = 40.0
-theme_override_font_sizes/font_size = 20
-text = "Map    left stick pan, right stick cursor, triggers zoom, Back close"
+offset_top = 16.0
+theme_type_variation = &"MenuFooter"
+
+[node name="Row" type="HBoxContainer" parent="View/Header"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="View/Header/Row"]
+layout_mode = 2
+text = "Map"
+vertical_alignment = 1
+
+[node name="Hint" type="HBoxContainer" parent="View/Header/Row"]
+layout_mode = 2
 
 [node name="HoverLabel" type="Label" parent="View"]
-offset_right = 400.0
-offset_bottom = 24.0
-theme_override_colors/font_color = Color(1, 0.92, 0.4, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"MenuTooltip"

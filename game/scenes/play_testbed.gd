@@ -1042,9 +1042,16 @@ func _controls_hint() -> String:
 	return _hint("Menu: pause, controls (LB / RB tabs)", "Esc: pause, controls (Q / E tabs)")
 
 
+## True while a menu covers play (pause menu, full map, character creator, report form): the
+## HUD (minimap, position line, badges) steps back for it (update-menu-design).
+func menu_open() -> bool:
+	return _pause_menu.visible or _overview.visible or _creator.visible or _report_form.visible
+
+
 func _process(delta: float) -> void:
 	if _player != null and (get_tree().paused or _player.is_driving() or not _keyboard) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	($HUD as CanvasLayer).visible = not menu_open()
 	if _car != null:
 		var body: Node3D = Players.local_controlled_body()
 		var anchors := PackedVector3Array([body.global_position])

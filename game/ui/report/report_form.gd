@@ -10,14 +10,13 @@ extends CanvasLayer
 ## form. Typing ends with B or Menu on a controller, or Enter (Shift+Enter is a new line) or Escape
 ## on a keyboard. The D-pad and A are left alone: the Deck's on-screen keyboard is driven with them,
 ## and the game sees those presses too. Sending goes through `sender` (RelayClient) when there is one; the
-## report is always saved first.
+## report is always saved first. The look comes from MenuTheme (update-menu-design).
 
 signal closed
 
 enum Page { MAIN, REVIEW, QUEUE }
 const ROWS := ["shot", "area", "severity", "description", "reporter", "review", "send", "queue", "cancel"]
 const THUMB_SIZE := Vector2(224, 140)
-const FONT := 17
 
 var store: ReportStore
 ## Sends saved reports: `send(id)` and `send_due()`, signal `report_state_changed(id, state)`. Optional.
@@ -49,8 +48,10 @@ var _status: Label
 var _review: ScrollContainer
 var _review_text: Label
 var _queue: VBoxContainer
-var _queue_list: Label
+var _queue_list: Label  # "No saved reports." while empty
+var _queue_rows: VBoxContainer
 var _queue_action_label: Label
+var _hint: HBoxContainer
 
 
 func _ready() -> void:
@@ -76,6 +77,7 @@ func open(screenshot: Image, diagnostics: Dictionary, log_tail: Array) -> void:
 	_thumb.texture = ImageTexture.create_from_image(screenshot) if screenshot != null else null
 	_show_page(Page.MAIN)
 	_selected = 0
+	MenuTheme.refresh_accent()
 	visible = true
 	get_tree().paused = true
 	_refresh()
@@ -264,7 +266,8 @@ func _refresh() -> void:
 		var row: String = ROWS[i]
 		var label: Label = _labels[row]
 		var value: String = values[row]
-		label.text = ("> " if i == _selected else "   ") + captions[row] + ("    " + value if value != "" else "")
+		label.text = captions[row] + ("    " + value if value != "" else "")
+		MenuTheme.set_selected(label, i == _selected, true)
 	_thumb.modulate = Color(1, 1, 1, 1.0 if _include_shot else 0.25)
 	_title.text = ReportStore.auto_title(ReportStore.AREAS[_area][0], ReportStore.SEVERITIES[_severity][0], _diagnostics.get("place", {}))
 
@@ -280,16 +283,29 @@ func _refresh_queue() -> void:
 	if store == null:
 		return
 	var rows := store.list()
-	var lines := PackedStringArray()
-	if rows.is_empty():
-		lines.append("No saved reports.")
+	_queue_list.text = "No saved reports." if rows.is_empty() else ""
+	_queue_list.visible = rows.is_empty()
+	for c in _queue_rows.get_children():
+		_queue_rows.remove_child(c)
+		c.free()
 	for i in range(rows.size()):
 		var r: Dictionary = rows[i]
-		lines.append("%s[%s] %s" % ["> " if i == _queue_selected else "   ", r["state"], r["title"]])
-	_queue_list.text = "\n".join(lines)
+		var line := Label.new()
+		line.text = "[%s] %s" % [r["state"], r["title"]]
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		MenuTheme.set_selected(line, i == _queue_selected, true)
+		_queue_rows.add_child(line)
 	var actions := _queue_actions()
 	_queue_action = clampi(_queue_action, 0, actions.size() - 1)
-	_queue_action_label.text = "A:  <  %s  >      B back" % actions[_queue_action]
+	_queue_action_label.text = "<  %s  >" % actions[_queue_action]
+
+
+## The saved-reports page as text, one report per line (tests).
+func queue_text() -> String:
+	var lines := PackedStringArray()
+	for l in _queue_rows.get_children():
+		lines.append((l as Label).text)
+	return "\n".join(lines) if not lines.is_empty() else _queue_list.text
 
 
 func _show_page(page: int) -> void:
@@ -297,6 +313,15 @@ func _show_page(page: int) -> void:
 	_main.visible = page == Page.MAIN
 	_review.visible = page == Page.REVIEW
 	_queue.visible = page == Page.QUEUE
+	if _hint == null:
+		return
+	match page:
+		Page.REVIEW:
+			MenuTheme.hint_bar(_hint, [["Up / Down", "scroll"], ["B", "back"]])
+		Page.QUEUE:
+			MenuTheme.hint_bar(_hint, [["Up / Down", "report"], ["Left / Right", "action"], ["A", "do it"], ["B", "back"]])
+		_:
+			MenuTheme.hint_bar(_hint, [["Up / Down", "move"], ["Left / Right", "change"], ["A", "select or type"], ["B", "done typing, then back"]])
 
 
 func _text_focused() -> bool:
@@ -328,65 +353,63 @@ func _can_open_browser() -> bool:
 
 func _build() -> void:
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.6)
+	dim.color = Color(0, 0, 0, 0.66)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	_panel = PanelContainer.new()
+	_panel.theme = MenuTheme.theme()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.custom_minimum_size = Vector2(720, 0)
+	_panel.custom_minimum_size = Vector2(760, 0)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	add_child(_panel)
 	var outer := VBoxContainer.new()
-	outer.add_theme_constant_override("separation", 4)
+	outer.add_theme_constant_override("separation", 10)
 	_panel.add_child(outer)
 	var heading := Label.new()
 	heading.text = "Report a problem"
-	heading.add_theme_font_size_override("font_size", 22)
+	heading.theme_type_variation = MenuTheme.TITLE
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(heading)
-	var hint := Label.new()
-	hint.text = "Up/down move    left/right change    A select or type    B done typing, then back"
-	hint.add_theme_font_size_override("font_size", 13)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	outer.add_child(hint)
 
 	_title = Label.new()
-	_title.add_theme_font_size_override("font_size", 15)
+	_title.theme_type_variation = MenuTheme.NOTE
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	outer.add_child(_title)
 	_main = VBoxContainer.new()
-	_main.add_theme_constant_override("separation", 2)
+	_main.add_theme_constant_override("separation", 0)
 	outer.add_child(_main)
 	_thumb = TextureRect.new()
 	_thumb.custom_minimum_size = THUMB_SIZE
 	_thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_main.add_child(_thumb)
+	var gap := Control.new()
+	gap.custom_minimum_size.y = 8.0
+	_main.add_child(gap)
 	for row in ROWS:
 		var label := Label.new()
-		label.add_theme_font_size_override("font_size", FONT)
+		MenuTheme.set_selected(label, false, true)
 		_labels[row] = label
 		_main.add_child(label)
 		match row:
 			"description":
 				_description = TextEdit.new()
-				_description.custom_minimum_size = Vector2(0, 96)
+				_description.custom_minimum_size = Vector2(0, 88)
 				_description.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
-				_description.add_theme_font_size_override("font_size", 16)
 				_description.placeholder_text = "What did you see, and what did you expect?"
 				_description.focus_mode = Control.FOCUS_CLICK
 				_main.add_child(_description)
 	_status = Label.new()
-	_status.add_theme_font_size_override("font_size", 15)
+	_status.theme_type_variation = MenuTheme.NOTE
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	outer.add_child(_status)
 
 	_review = ScrollContainer.new()
-	_review.custom_minimum_size = Vector2(0, 600)
+	_review.custom_minimum_size = Vector2(0, 520)
 	_review_text = Label.new()
-	_review_text.add_theme_font_size_override("font_size", 13)
+	_review_text.theme_type_variation = MenuTheme.NOTE
 	_review_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_review_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_review.add_child(_review_text)
@@ -394,12 +417,25 @@ func _build() -> void:
 
 	_queue = VBoxContainer.new()
 	_queue.custom_minimum_size = Vector2(0, 400)
+	_queue.add_theme_constant_override("separation", 8)
 	_queue_list = Label.new()
-	_queue_list.add_theme_font_size_override("font_size", 16)
-	_queue_list.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_queue_list.theme_type_variation = MenuTheme.NOTE
 	_queue.add_child(_queue_list)
+	_queue_rows = VBoxContainer.new()
+	_queue_rows.add_theme_constant_override("separation", 0)
+	_queue.add_child(_queue_rows)
+	var action := HBoxContainer.new()
+	action.add_theme_constant_override("separation", 10)
+	action.add_child(MenuTheme.key_cap("A"))
 	_queue_action_label = Label.new()
-	_queue_action_label.add_theme_font_size_override("font_size", FONT)
-	_queue.add_child(_queue_action_label)
+	action.add_child(_queue_action_label)
+	_queue.add_child(action)
 	outer.add_child(_queue)
+
+	var footer := PanelContainer.new()
+	footer.theme_type_variation = MenuTheme.FOOTER
+	_hint = HBoxContainer.new()
+	_hint.alignment = BoxContainer.ALIGNMENT_CENTER
+	footer.add_child(_hint)
+	outer.add_child(footer)
 	_show_page(Page.MAIN)
