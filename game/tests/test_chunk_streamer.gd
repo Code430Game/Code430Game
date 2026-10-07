@@ -111,3 +111,21 @@ func test_streamed_chunks_get_their_collision_over_frames() -> void:
 	while _streamer.is_busy():
 		_streamer.update()
 		await get_tree().process_frame
+
+
+## add-flyable-helicopter: a long jump (or flying fast) downgrades chunks whose meshes and
+## shapes are still queued; landing them must skip the freed chunk without an error (typing a
+## freed instance into a variable was one, 180 times on a jump to the helipad).
+func test_queued_pieces_of_a_freed_chunk_are_skipped() -> void:
+	var gone := StaticBody3D.new()
+	gone.free()
+	var gone_parent := Node3D.new()
+	gone_parent.free()
+	var child := MeshInstance3D.new()
+	_streamer._mesh_queue.append([gone_parent, child])
+	_streamer._shape_queue.append([gone, PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.FORWARD])])
+	_streamer._create_queued_shapes()
+	_streamer._create_queued_shapes()
+	assert_bool(_streamer._mesh_queue.is_empty()).is_true()
+	assert_bool(_streamer._shape_queue.is_empty()).is_true()
+	assert_bool(is_instance_valid(child)).override_failure_message("the orphaned mesh was left alive").is_false()

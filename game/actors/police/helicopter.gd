@@ -34,8 +34,6 @@ const DEFAULTS := {
 	"shadow_night_off": 0.5,
 	"shadow_ray_m": 300.0,
 }
-const BODY_COLOR := Color(0.12, 0.14, 0.2)
-const STRIPE_COLOR := Color(0.92, 0.92, 0.95)
 
 var target: Node3D
 var home: Vector3
@@ -253,37 +251,9 @@ func _update_light() -> void:
 
 
 func _build() -> void:
-	var body := _box(Vector3(2.2, 1.6, 4.2), BODY_COLOR)
-	body.position = Vector3(0, 1.4, 0)
-	add_child(body)
-	var stripe := _box(Vector3(2.25, 0.25, 3.0), STRIPE_COLOR)
-	stripe.position = Vector3(0, 1.3, 0.2)
-	add_child(stripe)
-	var glass := _box(Vector3(1.9, 0.9, 1.2), Color(0.35, 0.5, 0.65))
-	glass.position = Vector3(0, 1.75, -1.9)
-	add_child(glass)
-	var boom := _box(Vector3(0.4, 0.4, 4.5), BODY_COLOR)
-	boom.position = Vector3(0, 1.7, 4.3)
-	add_child(boom)
-	var fin := _box(Vector3(0.12, 1.2, 0.8), BODY_COLOR)
-	fin.position = Vector3(0, 2.3, 6.4)
-	add_child(fin)
-	for side: float in [-1.0, 1.0]:
-		var skid := _box(Vector3(0.12, 0.12, 3.6), Color(0.2, 0.2, 0.22))
-		skid.position = Vector3(side * 1.0, 0.1, 0)
-		add_child(skid)
-	_rotor = Node3D.new()
-	_rotor.position = Vector3(0, 2.45, 0)
-	add_child(_rotor)
-	for a in [0.0, PI * 0.5]:
-		var blade := _box(Vector3(0.3, 0.05, 9.0), Color(0.15, 0.15, 0.15))
-		blade.rotation.y = a
-		_rotor.add_child(blade)
-	_tail_rotor = Node3D.new()
-	_tail_rotor.position = Vector3(0.25, 2.3, 6.4)
-	add_child(_tail_rotor)
-	var tblade := _box(Vector3(0.05, 1.4, 0.18), Color(0.15, 0.15, 0.15))
-	_tail_rotor.add_child(tblade)
+	var parts := HelicopterModel.build(self)
+	_rotor = parts["rotor"]
+	_tail_rotor = parts["tail_rotor"]
 	# Belly lights so it reads at night, and the searchlight.
 	for side: float in [-1.0, 1.0]:
 		var lamp := OmniLight3D.new()
@@ -293,7 +263,7 @@ func _build() -> void:
 		lamp.position = Vector3(side * 0.9, 0.6, 0)
 		add_child(lamp)
 	for spec: Array in [[Vector3(-1.15, 1.4, 0), Color(1, 0.1, 0.1)], [Vector3(1.15, 1.4, 0), Color(0.15, 0.35, 1.0)], [Vector3(0, 2.9, 6.6), Color(1, 1, 1)]]:
-		var strobe := _box(Vector3(0.18, 0.18, 0.18), spec[1])
+		var strobe := HelicopterModel.box(Vector3(0.18, 0.18, 0.18), spec[1])
 		var mat := strobe.material_override as StandardMaterial3D
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.emission_enabled = true
@@ -357,15 +327,3 @@ func _build() -> void:
 	_light.position = Vector3(0, 0.6, -1.5)
 	_light.visible = false
 	add_child(_light)
-
-
-static func _box(size: Vector3, color: Color) -> MeshInstance3D:
-	var m := MeshInstance3D.new()
-	var b := BoxMesh.new()
-	b.size = size
-	m.mesh = b
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = 0.6
-	m.material_override = mat
-	return m

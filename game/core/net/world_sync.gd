@@ -16,6 +16,9 @@ const CONFIG_PATH := "res://core/net/net_config.json"
 var traffic: TrafficManager
 var peds: PedestrianManager
 var parked: ParkedCars
+## The police (add-flyable-helicopter): the host's parked helicopter, and where a guest's
+## stolen one is parked when they leave.
+var police: PoliceManager
 var player_sync: PlayerSync
 var day_night: DayNight
 var config: Dictionary = {}
@@ -28,6 +31,7 @@ func _ready() -> void:
 	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH))
 	config = data if data is Dictionary else {}
 	Session.peer_joined.connect(_on_peer_joined)
+	Session.peer_left.connect(_on_peer_left)
 
 
 func _process(delta: float) -> void:
@@ -188,3 +192,56 @@ func _signal_time(t: float, hour: float) -> void:
 		traffic.signals.time = t
 	if day_night != null and hour >= 0.0:
 		day_night.hour = hour
+
+
+## Guest: the host's helicopter is theirs, at `transform` (fly it from there).
+signal helicopter_granted(transform: Transform3D)
+
+
+## Guest: asks the host for the police helicopter on its pad (add-flyable-helicopter).
+func request_take_helicopter() -> void:
+	_take_pending = true
+	_request_take_helicopter.rpc_id(1)
+
+
+@rpc("any_peer", "reliable")
+func _request_take_helicopter() -> void:
+	if not Session.is_host() or police == null or police.parked_helicopter == null:
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	var heli := police.parked_helicopter
+	if not may_take(sender, heli.global_position):
+		return
+	var t := heli.global_transform
+	police.take_parked_helicopter()
+	police.stolen_helicopter.queue_free()  # the guest flies their own; here it is their replica
+	_helicopter_taken.rpc()
+	_grant_helicopter.rpc_id(sender, t)
+
+
+## Host to guests: the pad is empty (someone took the helicopter), so their copies match.
+@rpc("authority", "call_remote", "reliable")
+func _helicopter_taken() -> void:
+	if police != null and police.parked_helicopter != null:
+		var copy := police.take_parked_helicopter()
+		if copy != null:
+			copy.queue_free()
+		police.stolen_helicopter = null
+
+
+@rpc("authority", "reliable")
+func _grant_helicopter(transform: Transform3D) -> void:
+	if not _take_pending:
+		return
+	_take_pending = false
+	helicopter_granted.emit(transform)
+
+
+## Host: a guest who was flying the helicopter left; it stays where they were, landing itself
+## (the replica's last place), and is anyone's to take.
+func _on_peer_left(id: int) -> void:
+	if not Session.is_host() or police == null or player_sync == null:
+		return
+	var r: RemotePlayer = player_sync.remotes.get(id)
+	if r != null and r.driving and r.vehicle_id() == RemotePlayer.HELICOPTER_ID:
+		police.leave_helicopter(r.car_transform())

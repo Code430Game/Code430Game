@@ -7,7 +7,11 @@ extends CharacterBody3D
 signal entered_vehicle(vehicle: VehicleBody3D)
 signal exited_vehicle(vehicle: VehicleBody3D)
 ## Interact next to a traffic car with no player vehicle nearer: the scene turns it into a vehicle.
+## Also a guest's copy of the host's parked helicopter (`take_by_request`): the host decides.
 signal take_vehicle_requested(traffic_body: Node3D)
+## Get out was pressed but the vehicle won't let them out yet; `reason` "land_first" for an
+## aircraft in the air (add-flyable-helicopter).
+signal exit_refused(reason: String)
 
 @export var config: PlayerConfig
 @export var peer_id: int = 1
@@ -109,7 +113,9 @@ func _physics_process(delta: float) -> void:
 		_rig.advance(delta, Vector3(velocity.x, 0.0, velocity.z).length())
 	if Input.is_action_just_pressed("interact") and peer_id == Players.LOCAL_PEER_ID:
 		var car := nearest_vehicle()
-		if car != null:
+		if car != null and car.get("take_by_request") == true:
+			take_vehicle_requested.emit(car)
+		elif car != null:
 			enter_vehicle(car)
 		else:
 			var traffic_body := nearest_traffic_car()
@@ -234,7 +240,11 @@ func enter_vehicle(car: VehicleBody3D) -> void:
 func try_exit_vehicle() -> bool:
 	if vehicle == null:
 		return false
-	if vehicle.linear_velocity.length() > config.exit_max_speed_mps:
+	if vehicle.has_method("can_exit"):
+		if not vehicle.can_exit():
+			exit_refused.emit("land_first")  # an aircraft lets them out only landed or hovering low
+			return false
+	elif vehicle.linear_velocity.length() > config.exit_max_speed_mps:
 		return false
 	var spot := exit_position(vehicle)
 	if spot == Vector3.INF:

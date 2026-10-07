@@ -32,6 +32,8 @@ signal shot_at(damage: float)
 signal taken(car: VehicleBody3D)
 ## An officer went out of the fight at `at` (knocked down or tagged out).
 signal officer_down(at: Vector3)
+## Someone got into the police helicopter parked on its pad (add-flyable-helicopter).
+signal aircraft_taken(heli: FlyableHelicopter)
 
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const REPLAN_S := 2.0
@@ -48,6 +50,17 @@ var holder: Node3D  # where cars and officers live (the world)
 var stations: Array = []  # Services.Place of kind police: the first car leaves from one in range
 var helipads: Array = []  # Services.Place of kind helipad: where the helicopter lives
 var helicopter: PoliceHelicopter
+## The police helicopter standing on its pad while it isn't flying (add-flyable-helicopter):
+## the AI helicopter lifts off in its place and parks it again when it lands. Null while it is
+## up, or taken.
+var parked_helicopter: FlyableHelicopter
+## The helicopter a player took from the pad: no police air unit until a new one is back at
+## the pad (`air_return_s` after the theft, and not while a player still flies the old one).
+var stolen_helicopter: FlyableHelicopter
+var _air_back_s: float = 0.0
+var _pad_marker: Node3D
+## The map's extent on x and z, for the flyable helicopter's soft boundary.
+var air_bounds: Rect2 = Rect2()
 ## Dense canopy that hides the player from the helicopter (set by the scene; null: none).
 var canopy: CanopyCover
 ## 0 day .. 1 night (the scene's day-night clock), for the helicopter's searchlight.
@@ -101,6 +114,7 @@ func _physics_process(delta: float) -> void:
 	if wanted == null or player == null or get_tree().paused:
 		return
 	_clock += delta
+	_step_parked_helicopter(delta)
 	var target := _target()
 	var want: int = (cfg("police_per_star", [0, 1, 2, 4]) as Array)[clampi(wanted.stars, 0, 3)]
 	want = mini(want, int(cfg("max_police", 4)))
@@ -471,7 +485,8 @@ func _step_officer(o: Node3D, delta: float) -> void:
 	if step.length() > stop:
 		speed = float(cfg("officer_speed_mps", 4.2))
 		o.global_position += step.normalized() * minf(speed * delta, step.length())
-	o.global_position.y = lerpf(o.global_position.y, target.global_position.y, clampf(delta * 6.0, 0.0, 1.0))
+	if not (target is FlyableHelicopter):  # an aircraft on a roof or hovering: they stay on the ground
+		o.global_position.y = lerpf(o.global_position.y, target.global_position.y, clampf(delta * 6.0, 0.0, 1.0))
 	if d > 0.1:
 		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)  # bodies face -Z, toward the player
 	(o.get_meta("rig") as CharacterRig).advance(delta, speed)
@@ -537,10 +552,139 @@ func _check_busted(delta: float) -> void:
 		_busted_s = 0.0
 
 
+## The helicopter on its pad (add-flyable-helicopter): parked at the first helipad. A guest's
+## copy is taken through the host (`take_by_request`).
+func park_helicopter() -> FlyableHelicopter:
+	if helipads.is_empty() or holder == null or parked_helicopter != null:
+		return parked_helicopter
+	var pad: Services.Place = helipads[0]
+	if _pad_marker == null:
+		_pad_marker = pad_marker()
+		holder.add_child(_pad_marker)
+		_pad_marker.global_position = pad.at + Vector3.UP * 0.03
+	var heli := FlyableHelicopter.new()
+	heli.name = "ParkedHelicopter"
+	heli.bounds = air_bounds
+	heli.take_by_request = Session.is_client()
+	heli.radio_station = Radio.pick_for_car(hash(pad.id), true)
+	holder.add_child(heli)
+	heli.place_at(Transform3D(Basis(), pad.at + Vector3.UP * 0.05))
+	parked_helicopter = heli
+	return heli
+
+
+## A helipad's markings: a concrete disc with a white ring and an H, flat on the ground.
+static func pad_marker() -> Node3D:
+	var root := Node3D.new()
+	root.name = "HelipadMarking"
+	var disc := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 7.5
+	cyl.bottom_radius = 7.5
+	cyl.height = 0.06
+	cyl.radial_segments = 32
+	disc.mesh = cyl
+	var concrete := StandardMaterial3D.new()
+	concrete.albedo_color = Color(0.55, 0.55, 0.53)
+	concrete.roughness = 0.9
+	disc.material_override = concrete
+	root.add_child(disc)
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 5.9
+	torus.outer_radius = 6.3
+	ring.mesh = torus
+	ring.scale = Vector3(1.0, 0.05, 1.0)
+	ring.position.y = 0.04
+	ring.material_override = _paint()
+	root.add_child(ring)
+	for spec: Array in [[Vector3(-1.6, 0.04, 0), Vector3(0.7, 0.04, 5.0)], [Vector3(1.6, 0.04, 0), Vector3(0.7, 0.04, 5.0)], [Vector3(0, 0.04, 0), Vector3(2.5, 0.04, 0.7)]]:
+		var bar := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = spec[1]
+		bar.mesh = box
+		bar.position = spec[0]
+		bar.material_override = _paint()
+		root.add_child(bar)
+	return root
+
+
+static func _paint() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.95, 0.95, 0.92)
+	m.roughness = 0.8
+	return m
+
+
+## Whether the police have an air unit to send: one on its pad, or (with no helipad in the
+## pack) the one that comes in from the district edge.
+func air_unit_available() -> bool:
+	return helipads.is_empty() or parked_helicopter != null
+
+
+## Watches the parked helicopter: when someone gets in it is theirs (`aircraft_taken`), and a
+## new one is back at the pad `air_return_s` later, once no player still flies the old one.
+func _step_parked_helicopter(delta: float) -> void:
+	if parked_helicopter != null and not is_instance_valid(parked_helicopter):
+		parked_helicopter = null
+	if parked_helicopter != null and parked_helicopter.driver_peer_id != 0:
+		take_parked_helicopter()
+		aircraft_taken.emit(stolen_helicopter)
+	if parked_helicopter != null and parked_helicopter.settled and _pad_marker != null:
+		_pad_marker.global_position.y = parked_helicopter.global_position.y + 0.03  # on the ground it found
+	if _air_back_s > 0.0:
+		_air_back_s -= delta
+	var flown := stolen_helicopter != null and is_instance_valid(stolen_helicopter) and stolen_helicopter.driver_peer_id != 0
+	if stolen_helicopter != null and _air_back_s <= 0.0 and not flown:
+		stolen_helicopter = null
+	if stolen_helicopter == null and parked_helicopter == null and helicopter == null and _air_back_s <= 0.0:
+		park_helicopter()
+
+
+## The parked helicopter is taken (by the local player getting in, or by a guest through the
+## host): no longer the police's, and their air unit is gone until a new one is back.
+func take_parked_helicopter() -> FlyableHelicopter:
+	if parked_helicopter == null:
+		return null
+	stolen_helicopter = parked_helicopter
+	parked_helicopter = null
+	stolen_helicopter.name = "StolenHelicopter"
+	_air_back_s = float(cfg("air_return_s", 240.0))
+	return stolen_helicopter
+
+
+## A guest's grant from the host (add-flyable-helicopter): their own helicopter at `t`, stolen.
+func fly_granted_helicopter(t: Transform3D) -> FlyableHelicopter:
+	var heli := FlyableHelicopter.new()
+	heli.name = "StolenHelicopter"
+	heli.bounds = air_bounds
+	holder.add_child(heli)
+	heli.place_at(t)
+	stolen_helicopter = heli
+	_air_back_s = float(cfg("air_return_s", 240.0))
+	return heli
+
+
+## A helicopter left at `t` by a pilot who is gone (a guest leaving mid-flight): it lands
+## itself where it is and parks; anyone may take it. Not the police's.
+func leave_helicopter(t: Transform3D) -> FlyableHelicopter:
+	var heli := FlyableHelicopter.new()
+	heli.name = "LeftHelicopter"
+	heli.bounds = air_bounds
+	holder.add_child(heli)
+	heli.global_transform = t
+	heli.heading = t.basis.get_euler().y
+	return heli
+
+
 ## Three stars bring the helicopter from the nearest helipad (or high at the district edge);
-## below three it goes home and is freed when it lands.
+## below three it goes home and parks again when it lands. With its pad empty (the player took
+## it) there is no air unit.
 func _step_helicopter(target: Node3D) -> void:
-	if wanted.stars >= 3 and helicopter == null:
+	if wanted.stars >= 3 and helicopter == null and air_unit_available():
+		if parked_helicopter != null:
+			parked_helicopter.queue_free()  # it lifts off as the AI helicopter
+			parked_helicopter = null
 		helicopter = PoliceHelicopter.new()
 		helicopter.name = "PoliceHelicopter"
 		helicopter.config = cfg("helicopter", {})
@@ -867,7 +1011,7 @@ static func sit_pose() -> Dictionary:
 func markers() -> Array:
 	var out: Array = []
 	var target := _target()
-	var sight := float(cfg("police_sight_m", 55.0))
+	var sight := wanted.sight_m() if wanted != null else float(cfg("police_sight_m", 55.0))
 	for car in cars:
 		if is_instance_valid(car):
 			out.append({"at": car.global_position, "kind": "car", "sees": _within(car, target, sight), "searching": false})
@@ -887,6 +1031,8 @@ func _on_helicopter_landed() -> void:
 	if helicopter != null:
 		helicopter.queue_free()
 		helicopter = null
+	if stolen_helicopter == null:
+		park_helicopter()  # back on its pad, ready to be called out (or taken)
 
 
 func _remove_car(car: VehicleBody3D) -> void:
@@ -916,6 +1062,8 @@ func reset() -> void:
 	if helicopter != null:
 		helicopter.queue_free()
 		helicopter = null
+		if stolen_helicopter == null:
+			park_helicopter()
 	if wanted != null:
 		wanted.helicopter_sees = false
 

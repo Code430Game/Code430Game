@@ -26,7 +26,8 @@
     "vegetation_trees_per_chunk": 400,
     "vegetation_bushes_per_chunk": 600,
     "vegetation_lod0_m": 260.0,
-    "vegetation_sway": false
+    "vegetation_sway": false,
+    "aircraft_lookahead_m": 300.0
   },
   "high": {
     "label": "High (desktop)",
@@ -54,6 +55,7 @@
     "vegetation_trees_per_chunk": 1200,
     "vegetation_bushes_per_chunk": 2000,
     "vegetation_lod0_m": 400.0,
-    "vegetation_sway": true
+    "vegetation_sway": true,
+    "aircraft_lookahead_m": 600.0
   }
 }

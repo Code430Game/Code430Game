@@ -1,6 +1,7 @@
 class_name ChaseCamera
 extends Camera3D
-## Follows a target from behind with smoothing. Right stick orbits temporarily.
+## Follows a target from behind with smoothing. Right stick orbits temporarily. An aircraft
+## (add-flyable-helicopter) gives its own distance and height, further back as it speeds up.
 ## `mode` cycles chase, top-down (follows and turns with the car) and high top-down.
 ## `look_behind` (held R3) swings the chase view round to face backwards at once, and back on release.
 
@@ -68,10 +69,17 @@ func _process(delta: float) -> void:
 	var back := target.global_basis.z.rotated(Vector3.UP, PI if look_behind else _orbit)
 	back.y = 0.0
 	back = back.normalized()
-	# Long vehicles (vans, trucks, buses) get pulled back so they stay in frame.
+	# Long vehicles (vans, trucks, buses) get pulled back so they stay in frame. An aircraft sets
+	# its own distance and height (chase_distance_m, chase_height_m), pulling back with speed.
 	var extra := maxf(float(target.get("length_m")) - 4.6, 0.0) if target.get("length_m") != null else 0.0
-	var desired := target.global_position + back * (distance_m + extra) + Vector3.UP * (height_m + extra * 0.25)
-	global_position = desired if snap else global_position.lerp(desired, clampf(position_smoothing * delta, 0.0, 1.0))
+	var dist := distance_m + extra
+	var up := height_m + extra * 0.25
+	if target.get("chase_distance_m") != null:
+		dist = float(target.get("chase_distance_m"))
+		up = float(target.get("chase_height_m"))
+	var desired := target.global_position + back * dist + Vector3.UP * up
+	var smoothing := float(target.get("chase_smoothing")) if target.get("chase_smoothing") != null else position_smoothing
+	global_position = desired if snap else global_position.lerp(desired, clampf(smoothing * delta, 0.0, 1.0))
 	var focus := target.global_position + Vector3.UP * look_height_m
 	global_position = _clear_of_world(focus, global_position)
 	look_at(focus, Vector3.UP)

@@ -156,6 +156,18 @@ func _wanted_tier(coord: Vector2i) -> int:
 	return MapPack.Tier.NONE
 
 
+## A second anchor ahead of a fast or high anchor (an aircraft, add-flyable-helicopter): `pos`
+## moved along the horizontal `velocity` by `seconds` of travel plus `per_height` metres per
+## metre of `height` above the ground (higher sees further), capped at `max_m` (the preset's
+## `aircraft_lookahead_m`, small on deck). Standing still: `pos` itself.
+static func look_ahead(pos: Vector3, velocity: Vector3, height: float, seconds: float, per_height: float, max_m: float) -> Vector3:
+	var flat := Vector3(velocity.x, 0.0, velocity.z)
+	if flat.length() < 0.5:
+		return pos
+	var reach := minf(flat.length() * seconds + maxf(height, 0.0) * per_height, max_m)
+	return pos + flat.normalized() * reach
+
+
 func _distance_to_anchors(coord: Vector2i) -> float:
 	var best := INF
 	for a in anchors:
@@ -305,12 +317,14 @@ func _create_queued_shapes() -> void:
 	var added := 0
 	while added < MESHES_PER_FRAME and not _mesh_queue.is_empty():
 		var item: Array = _mesh_queue.pop_front()
+		# Check before typing: assigning a freed chunk to a typed variable is itself an error
+		# (a long jump, or flying fast, downgrades chunks with meshes still queued).
+		if not is_instance_valid(item[0]) or not (item[0] as Node).is_inside_tree():
+			if is_instance_valid(item[1]):
+				(item[1] as Node).free()
+			continue
 		var parent: Node3D = item[0]
 		var child: Node = item[1]
-		if not is_instance_valid(parent) or not parent.is_inside_tree():
-			if is_instance_valid(child):
-				child.free()
-			continue
 		parent.add_child(child)
 		added += 1
 	if not _mesh_queue.is_empty():
@@ -318,9 +332,9 @@ func _create_queued_shapes() -> void:
 	var made := 0
 	while made < SHAPES_PER_FRAME and not _shape_queue.is_empty():
 		var item: Array = _shape_queue.pop_front()
-		var body: StaticBody3D = item[0]
-		if not is_instance_valid(body) or not body.is_inside_tree():
+		if not is_instance_valid(item[0]) or not (item[0] as Node).is_inside_tree():
 			continue  # the chunk was freed or downgraded before its shapes arrived
+		var body: StaticBody3D = item[0]
 		var shape := MapPack.shape_from_faces(item[1])
 		if shape != null:
 			body.add_child(shape)

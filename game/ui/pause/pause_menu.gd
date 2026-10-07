@@ -286,7 +286,7 @@ func _rebuild_controls() -> void:
 		c.queue_free()
 	_device_label.text = "Showing the %s layout (switches with the last thing you pressed)" % ("controller" if showing_pad else "keyboard and mouse")
 	var buttons: Array[Button] = []
-	for ctx: String in ["foot", "drive", Controls.ANY, "debug"]:
+	for ctx: String in ["foot", "drive", "fly", Controls.ANY, "debug"]:
 		var heading := Label.new()
 		heading.text = Controls.context_label(ctx)
 		heading.theme_type_variation = MenuTheme.HEADING
