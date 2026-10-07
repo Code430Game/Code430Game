@@ -168,6 +168,24 @@ func test_chunks_go_stale_when_any_pack_file_changes() -> void:
 	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
 
 
+func test_chunks_stay_current_when_only_non_geometry_files_change() -> void:
+	# Review fix: a regenerated validation report or an ad edit rebuilt every chunk.
+	var tmp := ProjectSettings.globalize_path("user://stale_report_%d" % Time.get_ticks_usec())
+	_write(tmp.path_join("road_graph.v0.json"), "{}")
+	_write(tmp.path_join("pack.json"), "{\"id\": \"t\"}")
+	_write(tmp.path_join("validation_report.json"), "{\"runs\": 1}")
+	_write(tmp.path_join("ads.v0.json"), "{\"ads\": []}")
+	_write(tmp.path_join("chunks").path_join(GlbChunks.BUILD_MANIFEST), JSON.stringify({"inputs_hash": GlbChunks.inputs_hash(tmp)}))
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	_write(tmp.path_join("validation_report.json"), "{\"runs\": 2}")
+	_write(tmp.path_join("validation_report.md"), "# report")
+	_write(tmp.path_join("pack.json"), "{\"id\": \"t\", \"attribution\": [\"x\"]}")
+	_write(tmp.path_join("ads.v0.json"), "{\"ads\": [1]}")
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	_write(tmp.path_join("road_graph.v0.json"), "{\"changed\": true}")
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
+
+
 func test_content_hash_reads_the_bytes_not_just_the_sizes() -> void:
 	# Review fix: two regenerated packs with equal file sizes passed the co-op check.
 	var base := ProjectSettings.globalize_path("user://content_hash_%d" % Time.get_ticks_usec())
@@ -180,6 +198,15 @@ func test_content_hash_reads_the_bytes_not_just_the_sizes() -> void:
 	_write(base.path_join("b").path_join("road_graph.v0.json"), "{\"y\": 1}")
 	# Same contents; the local GLB caches differ and don't count.
 	assert_str(MapPack.content_hash(base.path_join("a"))).is_equal(MapPack.content_hash(base.path_join("b")))
+
+
+func test_manifest_hash_is_computed_once_per_load() -> void:
+	# Review fix: the report form re-hashed every pack file on each open.
+	var a := _pack.manifest_summary()
+	var b := _pack.manifest_summary()
+	assert_str(a["hash"]).is_equal(b["hash"])
+	assert_str(a["hash"]).is_equal(MapPack.content_hash(_pack.pack_dir))
+	assert_int(_pack.content_hash_runs).is_equal(1)
 
 
 func test_parking_lots_load_and_build_in_their_chunks() -> void:
