@@ -7,6 +7,9 @@ const SEND_HZ := 20.0
 
 ## A remote peer started sounding their horn at `position` (the host startles its pedestrians).
 signal remote_horn(position: Vector3)
+## A peer is leaving and its replica is still valid: the last state it showed (driving, which
+## vehicle, where) is readable here; it is freed right after.
+signal remote_leaving(id: int, remote: RemotePlayer)
 
 var player: Player
 var remote_parent: Node3D
@@ -40,6 +43,7 @@ func _on_peer_profile_changed(id: int, profile: Dictionary) -> void:
 func _on_peer_left(id: int) -> void:
 	var r: RemotePlayer = remotes.get(id)
 	if r != null:
+		remote_leaving.emit(id, r)
 		r.queue_free()
 		remotes.erase(id)
 
