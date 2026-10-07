@@ -45,8 +45,10 @@ One-time setup:
    Resources limited to this account, Zone Resources none needed (the relay runs on
    `workers.dev`). Give it an expiry and roll it now and then.
 2. **The GitHub environment** `relay-production` (Settings → Environments) is limited to the
-   `main` branch. Put the token there as the secret `CLOUDFLARE_API_TOKEN`: on the Mac, run
-   `gh secret set CLOUDFLARE_API_TOKEN --env relay-production` and paste it at the prompt.
+   `main` branch. Put the token there as the secret `CLOUDFLARE_API_TOKEN`: in the browser,
+   Settings → Environments → relay-production → Add environment secret (works from a tablet), or
+   `gh secret set CLOUDFLARE_API_TOKEN --env relay-production` and paste it at the prompt. Until
+   it is set, the workflow skips the deploy with a notice.
 3. Optional: add yourself as a required reviewer on the environment, so every deploy waits for a
    click.
 
