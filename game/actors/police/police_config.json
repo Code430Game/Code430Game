@@ -11,6 +11,9 @@
   "spawn_max_m": 160.0,
   "despawn_m": 260.0,
   "officer_get_out_m": 25.0,
+  "officer_out_blocked_m": 70.0,
+  "blocked_s": 1.5,
+  "pull_up_m": 7.0,
   "officer_speed_mps": 4.2,
   "busted_m": 3.0,
   "busted_s": 2.0,
@@ -50,7 +53,7 @@
     "body_height_m": 1.8
   },
   "helicopter": {
-    "_comment": "update-police-pursuit: slower than a fast car (35 m/s is about 126 km/h; fast cars top out at 150-190), so it can be outrun in the open as well as lost under cover.",
+    "_comment": "update-police-pursuit: slower than a fast car (35 m/s is about 126 km/h; fast cars top out at 150-190), so it can be outrun in the open as well as lost under cover. shadow_*: a soft blob on the ground below it by day (no real-time shadow reaches 55 m up on the deck preset); it fades out with height between fade_from and fade_to, and by night_off it is gone (the searchlight shows where it is).",
     "speed_mps": 35.0,
     "climb_mps": 9.0,
     "cruise_m": 55.0,
@@ -59,7 +62,14 @@
     "sight_m": 150.0,
     "lost_s": 2.0,
     "search_radius_m": 70.0,
-    "search_rad_s": 0.25
+    "search_rad_s": 0.25,
+    "shadow_size_m": 7.0,
+    "shadow_grow_per_m": 0.008,
+    "shadow_alpha": 0.7,
+    "shadow_fade_from_m": 30.0,
+    "shadow_fade_to_m": 160.0,
+    "shadow_night_off": 0.5,
+    "shadow_ray_m": 300.0
   },
   "canopy": {
     "_comment": "update-police-pursuit: dense canopy hides the player from the helicopter. A tree counts when at least min_trees trees (itself included) stand within group_m; street-tree rows have about 3. The sight ray must pass min_depth_m through such crowns.",

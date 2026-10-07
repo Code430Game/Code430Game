@@ -59,11 +59,6 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
 - **Fell under the floor after being busted.** Probably the respawn landed before that area's
   ground had loaded. f555839 now builds the ground at the arrival point first. Unconfirmed,
   because the place wasn't recorded; watch for it.
-- **Patrol cars stop short and respawn** (seen by the `update-police-pursuit` agent on a Mac
-  night run, 2026-10-06). With the player on foot under a deck (the 417 underpass near x 767,
-  z 911), patrol cars stopped about 44–48 m away, then `_unstick` (far and slow) removed them
-  and sent them in again. It looks like police vanishing mid-chase. Check `_drive`'s stop
-  distance against `DIRECT_M` and `_unstick`'s "far" test when the player is under a deck.
 - **Report form on the Deck: quick tags and a keyboard test** (human, 2026-10-06: an on-screen
   keyboard is premature; "users expect" Steam's keyboard).
   - Done 2026-10-07 (`fix/report-quick-tags`): the description is optional, and six quick tags
@@ -96,13 +91,21 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
     street>" from the road graph. OSM addresses are ODbL like the rest of the map data.
   - The minimap's icons and the legend's should be the same set.
   - Later: parking garages, shops and mission markers in the same list.
-- **A ground shadow for the helicopter** (human: "ideally a shadow would be wicked too"). By
-  day, the minimap is the only reliable way to place it. At 55 m up, its real shadow falls
-  outside the deck preset's shadow distance. A soft blob decal on the ground below it, faded by
-  height, sun angle and time of day, would show where it is without costly shadows. A small
-  `fix/` or a task on a later police change.
 - **Every moving thing gets a sound** (human: "Maybe all items can get sounds in one feature
   ticket"). Folded into `update-audio-pass`, which already planned positional sirens and rotor.
+- **Fixed (fix/police-stop-and-shadow, 2026-10-07):**
+  - **Patrol cars stopped short and respawned.** A route ended at the player, so from its last
+    node the car drove straight at them and hit a pier or wall under the deck, stopping about
+    40–55 m short. `_unstick` (far and slow) then took it away. Cars spawned facing the player
+    rather than along the road could wedge at once too. Now:
+    - routes end on the road nearest the player;
+    - a car blocked within `officer_out_blocked_m` (70 m) of a player on foot or stopped lets
+      its officer out instead of vanishing;
+    - a car parked on purpose (officer out, or pulled up) is never taken away;
+    - cars spawn facing along their route.
+  - **The helicopter casts a ground shadow by day:** a soft blob on the first solid surface below
+    it, sized and faded by height and gone at night (the searchlight's job), tuned in
+    `police_config.json`'s `helicopter` block.
 - **Fixed during the session:**
   - hold R3 on foot goes back to the start (f555839);
   - the police and the helicopter show on the minimap (ed2ee5a).

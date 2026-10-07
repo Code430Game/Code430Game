@@ -235,3 +235,54 @@ func test_the_police_report_their_cars_and_helicopter_for_the_minimap() -> void:
 	for m: Dictionary in pm.markers():
 		if m["kind"] == "car":
 			assert_float((m["at"] as Vector3).distance_to(cop.global_position)).is_less(0.01)
+
+
+## Backlog 2026-10-06: under a deck, patrol cars stopped 44-48 m short (a pier or wall in the
+## straight line from the last route node to the player), and `_unstick` took them away as
+## stuck, so police vanished mid-chase. A car that can't get closer now lets its officer out.
+func test_a_blocked_car_near_a_player_on_foot_lets_its_officer_out_and_stays() -> void:
+	var pm := _setup()
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]
+	pm.wanted.set_stars(1)
+	var cop: VehicleBody3D = auto_free(PoliceManager.CAR_SCENE.instantiate())
+	pm.holder.add_child(cop)
+	cop.global_position = Vector3(50, 0.6, 0)
+	cop.freeze = true  # wedged: it can't move however it steers
+	cop.set_meta("police", true)
+	pm.cars.append(cop)
+	await get_tree().create_timer(2.5).timeout
+	assert_int(pm.officers.size()).override_failure_message("the blocked car's officer never got out").is_equal(1)
+	await get_tree().create_timer(2.0).timeout  # past STUCK_S
+	assert_bool(pm.cars.has(cop)).override_failure_message("the blocked car was taken away").is_true()
+
+
+## A car parked on purpose (its officer out chasing on foot) is never taken away as stuck,
+## however far the chase goes from it.
+func test_a_parked_car_with_its_officer_out_is_never_taken_away() -> void:
+	var pm := _setup()
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]
+	pm.wanted.set_stars(1)
+	var cop: VehicleBody3D = auto_free(PoliceManager.CAR_SCENE.instantiate())
+	pm.holder.add_child(cop)
+	cop.global_position = Vector3(80, 0.6, 0)
+	cop.set_meta("police", true)
+	cop.set_meta("officer_out", true)
+	pm.cars.append(cop)
+	await get_tree().create_timer(PoliceManager.STUCK_S + 1.0).timeout
+	assert_bool(pm.cars.has(cop)).is_true()
+
+
+## The route ends on the road nearest the player, not at the player: from the last node, a
+## straight line to someone off the road can run into a pier or a wall.
+func test_the_route_ends_on_the_road_nearest_the_player() -> void:
+	var pm := _setup()
+	pm.wanted.config["police_per_star"] = [0, 0, 0, 0]
+	pm.player.global_position = Vector3(200, 1, 30)
+	var cop: VehicleBody3D = auto_free(PoliceManager.CAR_SCENE.instantiate())
+	pm.holder.add_child(cop)
+	cop.global_position = Vector3(0, 0.6, 0)
+	pm.cars.append(cop)
+	pm.call("_drive", cop, pm.player, 0.016)
+	var pts: PackedVector3Array = (pm.get("_plans") as Dictionary)[cop]["points"]
+	var last := pts[pts.size() - 1]
+	assert_float(Vector2(last.x - 200.0, last.z).length()).is_less(0.5)

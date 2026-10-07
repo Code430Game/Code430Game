@@ -26,6 +26,13 @@ const DEFAULTS := {
 	"lost_s": 2.0,  # out of sight this long: off to search where they were last seen
 	"search_radius_m": 70.0,
 	"search_rad_s": 0.25,
+	"shadow_size_m": 7.0,
+	"shadow_grow_per_m": 0.008,
+	"shadow_alpha": 0.7,
+	"shadow_fade_from_m": 30.0,
+	"shadow_fade_to_m": 160.0,
+	"shadow_night_off": 0.5,
+	"shadow_ray_m": 300.0,
 }
 const BODY_COLOR := Color(0.12, 0.14, 0.2)
 const STRIPE_COLOR := Color(0.92, 0.92, 0.95)
@@ -48,6 +55,7 @@ var _unseen_s: float = 0.0
 var _beam: MeshInstance3D
 var _strobes: Array[MeshInstance3D] = []
 var _strobe_t: float = 0.0
+var _shadow: MeshInstance3D
 
 
 func _ready() -> void:
@@ -129,6 +137,61 @@ func _physics_process(delta: float) -> void:
 				if global_position.y <= home.y + 0.3:
 					landed.emit()
 	_update_light()
+	update_shadow()
+
+
+## The blob shadow under the helicopter: on the first solid ground (or deck) straight below,
+## sized and faded by height (`shadow_alpha_at`), gone at night. One ray per physics frame.
+func update_shadow() -> void:
+	var alpha := shadow_alpha_at(-1.0, night)
+	if alpha <= 0.0 or not is_inside_tree():
+		_shadow.visible = false
+		return
+	var ground := _ground_below()
+	if ground == Vector3.INF:
+		_shadow.visible = false
+		return
+	var height := global_position.y - ground.y
+	alpha = shadow_alpha_at(height, night)
+	_shadow.visible = alpha > 0.0
+	if not _shadow.visible:
+		return
+	var size := shadow_size_at(height)
+	_shadow.global_transform = Transform3D(Basis.from_scale(Vector3(size, 1.0, size)), ground + Vector3.UP * 0.06)
+	(_shadow.material_override as StandardMaterial3D).albedo_color.a = alpha
+
+
+## The blob's opacity at `height` above the ground and `night_f` (0 day .. 1 night): full
+## `shadow_alpha` up to `shadow_fade_from_m`, fading to nothing at `shadow_fade_to_m`, and scaled
+## down to nothing as the night factor reaches `shadow_night_off`. A negative height checks the
+## night alone.
+func shadow_alpha_at(height: float, night_f: float) -> float:
+	var day := clampf(1.0 - night_f / maxf(tun("shadow_night_off"), 0.001), 0.0, 1.0)
+	if height < 0.0:
+		return tun("shadow_alpha") * day
+	var fade := 1.0 - clampf((height - tun("shadow_fade_from_m")) / maxf(tun("shadow_fade_to_m") - tun("shadow_fade_from_m"), 0.001), 0.0, 1.0)
+	return tun("shadow_alpha") * day * fade
+
+
+## The blob's width at `height`: the rotor's size, a little wider (and softer) the higher it is.
+func shadow_size_at(height: float) -> float:
+	return tun("shadow_size_m") * (1.0 + maxf(height, 0.0) * tun("shadow_grow_per_m"))
+
+
+## The first static surface straight below (ground, deck, roof), or Vector3.INF.
+func _ground_below() -> Vector3:
+	var space := get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(global_position, global_position + Vector3.DOWN * tun("shadow_ray_m"))
+	var exclude: Array[RID] = []
+	for i in range(4):
+		q.exclude = exclude
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return Vector3.INF
+		if hit["collider"] is StaticBody3D:
+			return hit["position"]
+		exclude.append(hit["rid"])  # a car or a person: the blob lies on the ground under them
+	return Vector3.INF
 
 
 func _fly_to(goal: Vector3, delta: float) -> void:
@@ -258,7 +321,34 @@ func _build() -> void:
 	_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_beam.top_level = true
 	_beam.visible = false
+	_shadow = MeshInstance3D.new()
+	_shadow.name = "Shadow"
+	var quad := PlaneMesh.new()
+	quad.size = Vector2.ONE
+	_shadow.mesh = quad
+	var blob := GradientTexture2D.new()
+	blob.fill = GradientTexture2D.FILL_RADIAL
+	blob.fill_from = Vector2(0.5, 0.5)
+	blob.fill_to = Vector2(1.0, 0.5)
+	blob.width = 64
+	blob.height = 64
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	g.add_point(0.45, Color(1, 1, 1, 0.85))
+	blob.gradient = g
+	var sm := StandardMaterial3D.new()
+	sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	sm.albedo_color = Color(0.02, 0.03, 0.05, tun("shadow_alpha"))
+	sm.albedo_texture = blob
+	sm.render_priority = 1
+	_shadow.material_override = sm
+	_shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_shadow.top_level = true
+	_shadow.visible = false
 	add_child(_beam)
+	add_child(_shadow)
 	_light = SpotLight3D.new()
 	_light.light_energy = 12.0
 	_light.spot_range = 120.0
