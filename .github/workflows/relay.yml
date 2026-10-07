@@ -1,0 +1,122 @@
+name: Report relay
+
+# Deploys the Cloudflare Worker that files in-game reports (tools/report_relay) when it changes
+# on main, so any machine that can push can ship it; nobody needs a local Cloudflare login.
+#
+# Keeping the token safe:
+# - Only the `deploy` job sees CLOUDFLARE_API_TOKEN. It is an environment secret of
+#   `relay-production`, which only the main branch may use, so a workflow edited on another
+#   branch or in a pull request cannot read it.
+# - Tests and anything else that runs project code happen in `test`, which has no secrets.
+#   `deploy` only installs the locked deploy tools and runs the deploy.
+# - Third-party actions are pinned to commit SHAs; the default token is read-only.
+# - With no token set, the deploy steps are skipped with a notice and the run stays green.
+# - The token itself is scoped to editing Workers on one account (see tools/report_relay/README.md),
+#   so a leak can't touch anything else, and it can be rolled in the Cloudflare dashboard.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/report_relay/**
+      - tools/tests/test_report_relay.py
+      - game/ui/report/report_tags.json
+      - scripts/setup-report-labels.sh
+      - .github/workflows/relay.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: report-relay
+  cancel-in-progress: false  # never cut a deploy off halfway
+
+env:
+  UV_VERSION: "0.12.19"
+  RELAY_URL: https://code430-report-relay.report-relay.workers.dev
+
+jobs:
+  test:
+    name: Relay tests
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --frozen
+      - run: uv run ruff check report_relay && uv run ruff format --check report_relay
+      - run: uv run pytest -q tests/test_report_relay.py
+
+  deploy:
+    name: Deploy to Cloudflare
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    environment:
+      name: relay-production
+      url: ${{ env.RELAY_URL }}/health
+    defaults:
+      run:
+        working-directory: tools/report_relay
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: "22"  # wrangler needs Node 22
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - name: Token present
+        id: token
+        env:
+          HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          # No token yet (or on purpose): skip the deploy quietly instead of failing the run.
+          echo "set=$HAS_TOKEN" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN is not set on relay-production; the deploy was skipped (tools/report_relay/README.md, Deploying from CI)"
+          fi
+      - if: steps.token.outputs.set == 'true'
+        run: uv sync --frozen
+      - name: Deploy
+        if: steps.token.outputs.set == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 6859e3fc23812567e49deacb7e4423e3  # not a secret: an account id
+        run: uv run pywrangler deploy
+      - name: Health check
+        if: steps.token.outputs.set == 'true'
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsS -m 10 "$RELAY_URL/health" | grep -q '"ok": true'; then exit 0; fi
+            sleep 6
+          done
+          echo "relay /health did not answer ok" >&2
+          exit 1
+
+  labels:
+    name: Report labels
+    needs: deploy
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write  # labels are created through the issues API
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/setup-report-labels.sh "${{ github.repository }}"

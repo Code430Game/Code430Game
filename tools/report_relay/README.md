@@ -34,6 +34,27 @@ with `nvm exec 22`, for example `nvm exec 22 uv run pywrangler deploy`.
 6. **Point the game at it:** put the Worker URL into `game/core/report/report_config.json`
    (`relay_url`).
 
+## Deploying from CI
+`.github/workflows/relay.yml` deploys the relay whenever it changes on main (and on demand from
+the Actions tab), then checks `/health` and re-runs the label script. Any machine that can push
+to main can ship it; nobody needs a Cloudflare login.
+
+One-time setup:
+1. **A Cloudflare API token** for CI, separate from anyone's login: Cloudflare dashboard → My
+   Profile → API Tokens → Create Token → the "Edit Cloudflare Workers" template, Account
+   Resources limited to this account, Zone Resources none needed (the relay runs on
+   `workers.dev`). Give it an expiry and roll it now and then.
+2. **The GitHub environment** `relay-production` (Settings → Environments) is limited to the
+   `main` branch. Put the token there as the secret `CLOUDFLARE_API_TOKEN`: in the browser,
+   Settings → Environments → relay-production → Add environment secret (works from a tablet), or
+   `gh secret set CLOUDFLARE_API_TOKEN --env relay-production` and paste it at the prompt. Until
+   it is set, the workflow skips the deploy with a notice.
+3. Optional: add yourself as a required reviewer on the environment, so every deploy waits for a
+   click.
+
+Only the deploy job gets the token. Tests run in a job without it, so nothing from a pull
+request or another branch can read it.
+
 ## Updating it
 - **Quick tags (2026-10-07)** added an optional `tags` field to the report (schema still version
   1; a report without tags is unchanged). A relay deployed before that refuses tagged reports
