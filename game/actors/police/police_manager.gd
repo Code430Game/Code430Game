@@ -212,7 +212,14 @@ func _spawn_car(around: Vector3, backup_to: Vector3 = Vector3.INF) -> bool:
 	car.call("set_body_color", Color(0.95, 0.95, 0.97))  # the catalogue's white, not the default red
 	car.global_position = best.position + Vector3.UP * 0.6
 	car.set("radio_station", Radio.pick_for_car(hash(best.position.snapped(Vector3.ONE)), true))
-	car.look_at(Vector3(around.x, car.global_position.y, around.z), Vector3.UP)
+	# Facing along the road it will take, not straight at the player (through whatever is between).
+	var path := route(best.position, around)
+	var ahead := around
+	for q in path:
+		if Vector2(q.x - best.position.x, q.z - best.position.z).length() > 1.0:
+			ahead = q
+			break
+	car.look_at(Vector3(ahead.x, car.global_position.y, ahead.z), Vector3.UP)
 	if car.has_method("add_headlights"):
 		car.add_headlights(false)
 		car.set_headlights(1.0)
@@ -273,6 +280,11 @@ func _drive(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 		var age := float(plan.get("age", REPLAN_S)) + delta
 		if age >= REPLAN_S:
 			var pts_new := route(car.global_position, goal)
+			# The route ends at the goal itself; from the last node that is a straight line that can
+			# run into a pier or a wall (a player under a deck). End on the road nearest the goal.
+			var on_road := _road_point(goal)
+			if pts_new.size() > 1 and on_road != Vector3.INF:
+				pts_new[pts_new.size() - 1] = on_road
 			# Start past the route point nearest the car, or it turns back to it every re-plan.
 			var nearest := 0
 			for k in range(pts_new.size()):
@@ -297,7 +309,7 @@ func _drive(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 	if wanted.stars >= 2 and d < DIRECT_M:
 		limit = 70.0  # ram and box in
 	var stopped_car := player.is_driving() and absf(float(target.call("speed_kph"))) <= float(cfg("officer_car_stopped_kph", 8.0))
-	if d < 7.0 and (not player.is_driving() or stopped_car):
+	if d < float(cfg("pull_up_m", 7.0)) and (not player.is_driving() or stopped_car):
 		car.set("override_throttle", 0.0)
 		car.set("override_hold", true)  # pull up beside a player on foot or a stopped car (brake alone would reverse)
 	else:
@@ -309,17 +321,35 @@ func route(from: Vector3, to: Vector3) -> PackedVector3Array:
 	return RoadRoute.find(graph, from, to)
 
 
-## A car that has barely moved for STUCK_S while far from the player (wedged on a kerb, a
-## wall, a deck it cannot leave) is taken away and sent in again from a fresh spot.
+## The point on the road nearest `p` at about its height (a player under a deck is reached
+## from the road below), or Vector3.INF when no road is near.
+func _road_point(p: Vector3) -> Vector3:
+	if graph == null:
+		return Vector3.INF
+	var hit := graph.nearest_edge(p, 80.0, RoadRoute.SAME_LEVEL_M)
+	return hit["point"] if not hit.is_empty() else Vector3.INF
+
+
+## A car that has barely moved for a while is blocked: a pier, a wall, a kerb it can't climb.
+## Close enough for the officer to go on foot (the player on foot or stopped, within
+## `officer_out_blocked_m`), the officer gets out after `blocked_s` and the car stays put; farther
+## off, after STUCK_S, it is taken away and sent in again from a fresh spot. A car parked on
+## purpose (its officer out or about to be, or pulled up beside the player) is never moved.
 func _unstick(car: VehicleBody3D, target: Node3D, delta: float) -> void:
-	var far := car.global_position.distance_to(target.global_position) > DIRECT_M
-	if far and absf(float(car.call("speed_kph"))) < 3.0:
-		var t := float(car.get_meta("stuck_s", 0.0)) + delta
-		car.set_meta("stuck_s", t)
-		if t >= STUCK_S:
-			_remove_car(car)
-	else:
+	var d := car.global_position.distance_to(target.global_position)
+	var parked := car.has_meta("officer_out") or car.has_meta("ready_out") or d < float(cfg("pull_up_m", 7.0))
+	if parked or absf(float(car.call("speed_kph"))) >= 3.0:
 		car.set_meta("stuck_s", 0.0)
+		return
+	var t := float(car.get_meta("stuck_s", 0.0)) + delta
+	car.set_meta("stuck_s", t)
+	var player_still := not player.is_driving() or absf(float(target.call("speed_kph"))) <= float(cfg("officer_car_stopped_kph", 8.0))
+	if player_still and d <= float(cfg("officer_out_blocked_m", 70.0)) and t >= float(cfg("blocked_s", 1.5)):
+		car.set_meta("ready_out", true)  # can't get closer: the officer goes on foot from here
+		car.set_meta("stuck_s", 0.0)
+		return
+	if d > DIRECT_M and t >= STUCK_S:
+		_remove_car(car)
 
 
 func _maybe_let_out(target: Node3D) -> void:
