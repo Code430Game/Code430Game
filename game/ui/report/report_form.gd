@@ -40,6 +40,7 @@ var _reporter_id: String = ""
 var _queue_selected: int = 0
 var _queue_action: int = 0
 var _tag_table: Array = []  # ReportStore.tags(): [{"id", "label"}]
+var _saved_rows: Array = []  # store.list(), refreshed when the store changes, not per keypress
 var _tags: Array = []  # picked tag ids
 var _tag_cursor: int = 0
 var _tag_chips: Array[Button] = []
@@ -88,6 +89,7 @@ func open(screenshot: Image, diagnostics: Dictionary, log_tail: Array) -> void:
 	MenuTheme.refresh_accent()
 	visible = true
 	get_tree().paused = true
+	_refresh_saved_rows()
 	_refresh()
 	if sender != null and store != null:
 		sender.send_due()
@@ -135,6 +137,7 @@ func send() -> String:
 		return _sent_id
 	var report := preview()
 	_sent_id = store.save(report, _screenshot if report["has_screenshot"] else null)
+	_refresh_saved_rows()
 	if sender != null:
 		_status.text = "Saved. Sending..."
 		sender.send(_sent_id)
@@ -195,7 +198,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _queue_input(event: InputEvent) -> void:
-	var rows := store.list()
+	var rows := _saved_rows
 	var actions := _queue_actions()
 	if event.is_action_pressed("ui_down") and not rows.is_empty():
 		_queue_selected = (_queue_selected + 1) % rows.size()
@@ -215,6 +218,7 @@ func _queue_input(event: InputEvent) -> void:
 			"Delete":
 				store.delete(id)
 				_queue_selected = maxi(0, _queue_selected - 1)
+		_refresh_saved_rows()
 	_refresh_queue()
 
 
@@ -285,7 +289,7 @@ func _refresh() -> void:
 		"severity": "<  %s  >" % ReportStore.SEVERITIES[_severity][1],
 		"tags": ("%d picked" % _tags.size()) if not _tags.is_empty() else "",
 		"description": "", "reporter": ("<  included: %s  >" % _reporter_id) if _include_reporter else "<  not included  >",
-		"review": "", "send": _send_state(), "queue": "%d saved" % (store.list().size() if store != null else 0), "cancel": "",
+		"review": "", "send": _send_state(), "queue": "%d saved" % _saved_rows.size(), "cancel": "",
 	}
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity",
@@ -300,7 +304,7 @@ func _refresh() -> void:
 		label.text = captions[row] + ("    " + value if value != "" else "")
 		MenuTheme.set_selected(label, i == _selected, true)
 	_thumb.modulate = Color(1, 1, 1, 1.0 if _include_shot else 0.25)
-	_title.text = ReportStore.auto_title(ReportStore.AREAS[_area][0], ReportStore.SEVERITIES[_severity][0], _diagnostics.get("place", {}), picked_tags())
+	_title.text = ReportStore.auto_title(ReportStore.AREAS[_area][0], ReportStore.SEVERITIES[_severity][0], _diagnostics.get("place", {}), picked_tags(), _tag_table)
 	_refresh_chips()
 
 
@@ -339,7 +343,8 @@ func _send_state() -> String:
 func _refresh_queue() -> void:
 	if store == null:
 		return
-	var rows := store.list()
+	_refresh_saved_rows()
+	var rows := _saved_rows
 	_queue_list.text = "No saved reports." if rows.is_empty() else ""
 	_queue_list.visible = rows.is_empty()
 	for c in _queue_rows.get_children():
@@ -363,6 +368,12 @@ func queue_text() -> String:
 	for l in _queue_rows.get_children():
 		lines.append((l as Label).text)
 	return "\n".join(lines) if not lines.is_empty() else _queue_list.text
+
+
+## Re-reads the saved reports from disk. Called when the store changes (open, save, delete, the
+## queue page) rather than on every navigation keypress, which scanned every report twice.
+func _refresh_saved_rows() -> void:
+	_saved_rows = store.list() if store != null else []
 
 
 func _show_page(page: int) -> void:

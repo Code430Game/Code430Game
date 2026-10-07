@@ -10,12 +10,23 @@ const BUILD_MANIFEST := "build.json"
 const GENERATOR_VERSION := 9
 
 
-## Hash of every pack file but the chunks themselves, so stale chunks can be detected. Chunks
-## are built from many files (road graph, terrain and its images, water, buildings, barriers,
-## bridges, parking, vegetation), and a list of them went stale when a new one was added.
+## Pack files that never feed chunk geometry: the manifest, ads, service places, importer
+## overrides and the validation report. Editing one must not throw the chunk cache away.
+const NON_GEOMETRY_FILES: PackedStringArray = [
+	"pack.json", "ads.v0.json", "services.v0.json", "overrides.json", "validation_report.json", "validation_report.md",
+]
+
+
+## Hash of every geometry input in the pack (road graph, terrain and its images, water,
+## buildings, barriers, bridges, parking, vegetation, and any file added later), so stale
+## chunks can be detected. Everything but the known non-geometry files counts, so a new input
+## file is covered without a list going stale, while a regenerated validation report or an ad
+## edit keeps the cache.
 static func inputs_hash(pack_dir: String) -> String:
 	var parts := PackedStringArray([str(GENERATOR_VERSION)])
 	for rel in MapPack.pack_files(pack_dir):
+		if rel in NON_GEOMETRY_FILES or rel.ends_with(".md"):
+			continue
 		parts.append("%s=%s" % [rel, FileAccess.get_md5(pack_dir.path_join(rel))])
 	return "|".join(parts).md5_text()
 

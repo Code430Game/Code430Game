@@ -65,9 +65,14 @@ var parking_lots: Array[ParkingLotBuilder.Lot] = []
 var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
 
 
+var _content_hash: String = ""  # cached per load: the pack files cannot change underneath a loaded pack
+var content_hash_runs: int = 0  # how many times the files were hashed, for tests
+
+
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
 func load(dir: String) -> bool:
 	pack_dir = dir
+	_content_hash = ""
 	var manifest_path := dir.path_join("pack.json")
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
 	if typeof(parsed) != TYPE_DICTIONARY:
@@ -184,7 +189,16 @@ static func _collect_files(root: String, rel_dir: String, out: Array[String]) ->
 
 ## Manifest summary for co-op pack checks: id, version and content hash.
 func manifest_summary() -> Dictionary:
-	return {"id": str(manifest.get("id", "")), "version": str(manifest.get("version", "")), "hash": content_hash(pack_dir)}
+	return {"id": str(manifest.get("id", "")), "version": str(manifest.get("version", "")), "hash": cached_content_hash()}
+
+
+## The loaded pack's content hash, computed on first use and reused. Hashing 27 MB of pack
+## files on the main thread was a visible hitch every time the report form opened.
+func cached_content_hash() -> String:
+	if _content_hash == "":
+		_content_hash = content_hash(pack_dir)
+		content_hash_runs += 1
+	return _content_hash
 
 
 ## Chunk coordinates present in the terrain index.
