@@ -8,9 +8,10 @@ extends Node3D
 ## Placement: a site every SPACING_M along trunk, primary and secondary roads (not bridges or
 ## tunnels). Given `Obstacles` (`obstacles_from_pack`), each site is tried at the configured
 ## side offsets and shifts along the road, and the first spot whose post and panel stand clear
-## of every road ribbon (decks above included), crossing, cycleway, junction, building and
-## water wins; a site with no clear spot is dropped. A post may stand on a sidewalk, as sign
-## posts do. Without obstacles every site stands as computed.
+## of every road ribbon (decks above included), crossing, cycleway, junction, building, water
+## and tree (trunk at the post, crown at the panel's height) wins; a site with no clear spot is
+## dropped. A post may stand on a sidewalk, as sign posts do. Without obstacles every site
+## stands as computed.
 
 const CLASSES: PackedStringArray = ["trunk", "primary", "secondary"]
 const SPACING_M := 220.0
@@ -36,13 +37,14 @@ var _labels: Array[Label3D] = []
 
 
 ## What a board must stand clear of, indexed by cell: road and path ribbons, junction
-## nodes, building outlines and water triangles (x, z).
+## nodes, building outlines and water triangles (x, z), and trees (trunk and crown).
 class Obstacles:
 	extends RefCounted
 	var ribbons: Dictionary = {}  # Vector2i -> Array of [Vector2 a, Vector2 b, float half_m]
 	var areas: Array[PackedVector2Array] = []
 	var area_cells: Dictionary = {}  # Vector2i -> Array[int] into areas
 	var junctions: Dictionary = {}  # Vector2i -> PackedVector2Array of junction node positions
+	var trees: Dictionary = {}  # Vector2i -> Array of [Vector2 at, float crown_low_y, float crown_high_y, float crown_r]
 
 	## Adds a ribbon `half_m` either side of `polyline`.
 	func add_ribbon(polyline: PackedVector3Array, half_m: float, kind: String = "road") -> void:
@@ -73,6 +75,39 @@ class Obstacles:
 		if not junctions.has(c):
 			junctions[c] = PackedVector2Array()
 		junctions[c].append(at)
+
+	## Adds a tree from a vegetation row [x, y, z, archetype, height, crown radius, ...]: its
+	## crown is the band from `crown_mid - crown_half` to `crown_mid + crown_half` of its height
+	## (as CanopyCover models it), `crown_r` across.
+	func add_tree(row: Array, crown_mid: float, crown_half: float) -> void:
+		var at := Vector2(float(row[0]), float(row[2]))
+		var h := float(row[4])
+		var r := float(row[5])
+		var base := float(row[1])
+		for c in Obstacles.cells(Rect2(at, Vector2.ZERO).grow(r + MAX_CLEARANCE_M)):
+			if not trees.has(c):
+				trees[c] = []
+			trees[c].append([at, base + h * (crown_mid - crown_half), base + h * (crown_mid + crown_half), r])
+
+	## "tree" when a trunk stands within `trunk_clear_m` of the post at `post`, or a crown
+	## reaches within `crown_clear_m` of the panel from `a` to `b` (x, z) while overlapping its
+	## height band `low_y`..`high_y`; "" otherwise.
+	func tree_blocked(post: Vector2, a: Vector2, b: Vector2, low_y: float, high_y: float, trunk_clear_m: float, crown_clear_m: float) -> String:
+		var seen: Dictionary = {}
+		for c in Obstacles.cells(Rect2(a, Vector2.ZERO).expand(b).expand(post)):
+			for item: Array in trees.get(c, []):
+				var at: Vector2 = item[0]
+				if seen.has(at):
+					continue
+				seen[at] = true
+				if at.distance_to(post) < trunk_clear_m:
+					return "tree"
+				if float(item[2]) < low_y or float(item[1]) > high_y:
+					continue  # the crown is wholly above or below the panel
+				var q := Geometry2D.get_closest_point_to_segment(at, a, b)
+				if q.distance_to(at) < float(item[3]) + crown_clear_m:
+					return "tree"
+		return ""
 
 	## Why `p` is not clear ("road", "junction", "area"), or "" when it is: within
 	## `clearance_m` of a ribbon's edge, within `junction_clear_m` of a junction, or inside an area.
@@ -109,7 +144,9 @@ class Obstacles:
 ## Everything in `pack` a board must keep off: every road ribbon (bridges included, so no
 ## board stands under or beside a deck), uncovered paths of the configured
 ## `blocking_path_kinds` (crossings and cycleways; sidewalks may carry a post), junction nodes
-## where `junction_min_degree` or more roads meet, buildings and water.
+## where `junction_min_degree` or more roads meet, buildings, water, and every tree in the
+## pack (all of them, not a preset's capped share, so a board is clear of trees on every preset
+## and stands in the same place on each).
 static func obstacles_from_pack(pack: MapPack) -> Obstacles:
 	var cfg := config()
 	var o := Obstacles.new()
@@ -133,6 +170,13 @@ static func obstacles_from_pack(pack: MapPack) -> Obstacles:
 	for wp in pack.water_polygons:
 		for t in range(0, wp.triangles.size() - 2, 3):
 			o.add_area(PackedVector2Array([wp.vertices[wp.triangles[t]], wp.vertices[wp.triangles[t + 1]], wp.vertices[wp.triangles[t + 2]]]))
+	var mid := float(cfg.get("crown_mid", 0.62))
+	var half := float(cfg.get("crown_half_height", 0.28))
+	var coords: Array = pack.vegetation_chunks.keys()
+	coords.sort()
+	for coord: Vector2i in coords:
+		for row: Array in (pack.vegetation_chunks[coord] as Dictionary).get("trees", []):
+			o.add_tree(row, mid, half)
 	return o
 
 
@@ -199,12 +243,14 @@ static func place(e: RoadGraph.RoadEdge, at: float, length: float, obstacles: Ob
 
 
 ## Why the board at `t` is blocked ("" when clear). The post keeps `clearance_m` from every
-## ribbon and `junction_clear_m` from junctions. The panel faces approaching drivers, so it
-## spans across the verge (local X) POST_H_M up: its two ends may come up to a ribbon's edge
-## but not over it, nor into a building or water.
+## ribbon, `junction_clear_m` from junctions and `trunk_clear_m` from tree trunks. The panel
+## faces approaching drivers, so it spans across the verge (local X) POST_H_M up: its two ends
+## may come up to a ribbon's edge but not over it, nor into a building or water, and no tree
+## crown at the panel's height comes within `crown_clear_m` of it.
 static func footprint_blocked(t: Transform3D, obstacles: Obstacles) -> String:
 	var cfg := config()
-	var why := obstacles.blocked(Vector2(t.origin.x, t.origin.z), float(cfg.get("clearance_m", 0.75)), float(cfg.get("junction_clear_m", 20.0)))
+	var post := Vector2(t.origin.x, t.origin.z)
+	var why := obstacles.blocked(post, float(cfg.get("clearance_m", 0.75)), float(cfg.get("junction_clear_m", 20.0)))
 	if why != "":
 		return why
 	var across := t.basis.x * (PANEL_W_M * 0.5)
@@ -212,7 +258,10 @@ static func footprint_blocked(t: Transform3D, obstacles: Obstacles) -> String:
 		why = obstacles.blocked(Vector2(p.x, p.z), 0.0, 0.0)
 		if why != "":
 			return why
-	return ""
+	var a := t.origin + across
+	var b := t.origin - across
+	return obstacles.tree_blocked(post, Vector2(a.x, a.z), Vector2(b.x, b.z), t.origin.y + POST_H_M, t.origin.y + POST_H_M + PANEL_H_M,
+		float(cfg.get("trunk_clear_m", 0.75)), float(cfg.get("crown_clear_m", 0.5)))
 
 
 ## The spot `at` metres along `e`, `side_m` beyond its half width on the right of travel.
