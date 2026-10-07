@@ -49,11 +49,14 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   be hit; the police change never covered it. This needs a proposal: officer reactions by tone,
   more stars, backup arriving.
 - **R3 hold resets the car mid-chase** (human: "It was the R3 trap, it's fine for now"). Holding
-  R3 to look behind for a second resets the car, which can drop it at the start. Keep it for now;
-  later, consider no reset while wanted or moving, or a different gesture.
+  R3 to look behind for a second resets the car, which can drop it at the start.
+  - Decided 2026-10-07, no change: "It's not an issue for now… eventually though we should
+    hopefully have less cases where we NEED the reset button. So lets not worry if it's game
+    breaking or anything right now."
+  - The aim is fewer places where a reset is needed (stuck spots, falling through), not
+    changing the button.
 - **A reset keeps the wanted level.** After an R3 reset to the start (by Catherine Street and the
-  417), new patrol cars spawned around the player there. Decide whether a stuck-car reset should
-  clear or keep the wanted level.
+  417), new patrol cars spawned around the player there. Left as is, under the same decision.
 - **Weapon wheel: hold not yet tried.** The human tapped LB to cycle and didn't open the wheel.
   Holding LB for more than 0.2 s opens it; confirm on the Deck.
 - **Fell under the floor after being busted.** Probably the respawn landed before that area's
@@ -66,9 +69,10 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
     Tags go into the report's optional `tags` field, the title ("· Stuck, Police"), the issue
     body and `tag:<id>` labels. Redeploy the relay and re-run `scripts/setup-report-labels.sh`
     before a build with tags reaches players (`tools/report_relay/README.md`).
-  - Still to do: next Deck session, test why Steam's keyboard opened behind the game. Try Steam
-    + X on the pause menu against the report form, and a Steam shortcut against other launch
-    methods.
+  - Keyboard: no debugging needed. The human, 2026-10-07: "The steam deck's keyboard did open
+    fine the last time I loaded the game. So maybe it was an isolated issue." How text entry
+    works is now written down in `docs/controls.md` ("Typing on the Steam Deck"), so later
+    changes keep it working.
   - Steamworks' gamepad text input (GodotSteam) is for the Steam release work.
 - **Map legend and places list** (human, 2026-10-06: "include a legend in the map and also a
   method of viewing items from each location ... a little more plain search engine and instead
