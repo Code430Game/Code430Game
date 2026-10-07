@@ -74,6 +74,7 @@ With SSH enabled on the Deck and your key installed, `scripts/package-linux.sh &
 ```
 ssh deck@steamdeck.local 'cd ~/Games/code430 && DISPLAY=:0 ./code430.x86_64 -- --benchmark=40 --autodrive --preset=deck'
 ```
+Or let `scripts/deck-bench.sh` do all of it: package, deploy, run the benchmark N times in Game Mode (it outlives the SSH session through `systemd-run`) and print the measured render times, with medians. It can compare two refs (`--ref main --ref change/x`) and note the result under a task (`--change <id> --task 3.1`). `--dry-run` shows what it would do, and `--help` lists the flags. It won't start while the game is running on the Deck.
 To get it into the Game Mode library without Desktop Mode, `uv run scripts/deck-add-shortcut.py` writes the non-Steam shortcut over SSH; restart the Deck afterwards and it shows up under the Non-Steam tab.
 
 Manual route:

@@ -53,6 +53,15 @@ with only the proposal. The maintainer approves the direction before code is wri
   same machine, and quote both in the PR. If you have a Deck, say so and include its numbers;
   otherwise the maintainer runs the Deck pass before the change closes. Ignore baseline
   numbers written in older `tasks.md` files.
+  With a Deck on the network, `scripts/deck-bench.sh` does the Deck pass in one command:
+  - it packages and deploys, runs the benchmark in Game Mode, and prints the measured render
+    times (the line to quote; frame times on the Deck sit on gamescope's pacing steps);
+  - `--ref main --ref <branch>` compares two builds back to back;
+  - `--change <id> --task <n.n>` writes the medians under that task in `tasks.md` without
+    ticking it;
+  - `--dry-run` shows the plan.
+
+  It refuses while the game is running on the Deck.
 - **Map data:** changes under `tools/osm_import` mean re-exporting the Ottawa pack (command in
   the README) and regenerating the golden fixture in `tools/tests/golden/`. Overpass can be
   slow or fail. Set `CODE430_OSM_CACHE` to a directory of your choice to cache its responses
