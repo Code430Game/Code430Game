@@ -60,6 +60,85 @@ static func icon_name(kind: String) -> String:
 	return n if n != "" and _load(n) != null else "missing"
 
 
+## The legend's second line for `kind`'s places when the kind names them by title ("Underground
+## · heli cover"), or "".
+static func note(kind: String) -> String:
+	return str(_entry(kind).get("note", ""))
+
+
+## `street` shortened the way a sign would: "Kent Street" -> "Kent St", "Laurier Avenue West"
+## -> "Laurier Ave W". Only a trailing suffix (and a direction after it) is shortened, so French
+## names ("Rue Kent") stay as they are.
+static func abbreviate(street: String) -> String:
+	var words := street.strip_edges().split(" ", false)
+	if words.is_empty():
+		return street.strip_edges()
+	var suffixes: Dictionary = data().get("street_suffixes", {})
+	var directions: Dictionary = data().get("street_directions", {})
+	var last := words.size() - 1
+	if words.size() >= 3 and directions.has(words[last]) and suffixes.has(words[last - 1]):
+		words[last - 1] = str(suffixes[words[last - 1]])
+		words[last] = str(directions[words[last]])
+	elif words.size() >= 2 and suffixes.has(words[last]):
+		words[last] = str(suffixes[words[last]])
+	return " ".join(words)
+
+
+## `street` without its suffix and direction, for a short mention: "Laurier Avenue West" ->
+## "Laurier", "Slater Street" -> "Slater". A name that is only a suffix stays as it is.
+static func bare(street: String) -> String:
+	var words := street.strip_edges().split(" ", false)
+	var suffixes: Dictionary = data().get("street_suffixes", {})
+	var directions: Dictionary = data().get("street_directions", {})
+	if words.size() >= 3 and directions.has(words[words.size() - 1]) and suffixes.has(words[words.size() - 2]):
+		words.resize(words.size() - 2)
+	elif words.size() >= 2 and suffixes.has(words[words.size() - 1]):
+		words.resize(words.size() - 1)
+	return " ".join(words)
+
+
+## Sets `title` on every place whose kind has a title template ("{street} Parking"), from its
+## nearest street. Two with the same title get their cross street by `cross_format` ("Kent St
+## Parking (Slater)"); any still alike are numbered in id order ("... 2"). Places of other kinds
+## keep "".
+static func assign_titles(places: Array) -> void:
+	var sorted := places.duplicate()
+	sorted.sort_custom(func(a: Services.Place, b: Services.Place) -> bool: return a.id < b.id)
+	var titled: Array = []
+	for p: Services.Place in sorted:
+		var template := str(_entry(p.kind).get("title", ""))
+		if template == "":
+			p.title = ""
+			continue
+		p.title = template.format({"street": abbreviate(p.street)}) if p.street != "" else label(p.kind)
+		titled.append(p)
+	var cross_format := str(data().get("cross_format", "{title} ({cross})"))
+	for p: Services.Place in _alike(titled):
+		if p.cross != "":
+			p.title = cross_format.format({"title": p.title, "cross": bare(p.cross)})
+	var seen: Dictionary = {}
+	for p: Services.Place in titled:
+		var n := int(seen.get(p.title, 0)) + 1
+		seen[p.title] = n
+		if n > 1:
+			p.title += " %d" % n
+
+
+## The places of `titled` whose title another one shares.
+static func _alike(titled: Array) -> Array:
+	var count: Dictionary = {}
+	for p: Services.Place in titled:
+		count[p.title] = int(count.get(p.title, 0)) + 1
+	return titled.filter(func(p: Services.Place) -> bool: return int(count[p.title]) > 1)
+
+
+## The name the maps show for `place`: its title, else its name, else its kind's name.
+static func display_name(place: Services.Place) -> String:
+	if place.title != "":
+		return place.title
+	return place.name if place.name != "" else label(place.kind)
+
+
 ## The white icon texture for `kind`.
 static func texture(kind: String) -> Texture2D:
 	return _load(icon_name(kind))
