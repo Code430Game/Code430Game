@@ -5,6 +5,6 @@
  "max": {"violence": "strong", "gore": "strong", "drugs": "strong", "sex_work": "strong", "profanity": "strong", "crime": "strong", "horror": "strong", "dystopia_tech": "strong"},
  "flags": {"violence": true, "lethal_weapons": true, "drug_use": true, "sex_work_services": true},
  "variant_key": "dystopia",
- "outcomes": {"ambulance": "drone", "officer": "knock_down"},
+ "outcomes": {"ambulance": "drone", "officer": "knock_down", "aircraft": "damage"},
  "hud": {"accent": "#3ff0ff"}
 }

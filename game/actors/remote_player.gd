@@ -20,6 +20,10 @@ var _car_mesh: MeshInstance3D
 var _car_shape: CollisionShape3D
 var horn: Horn  # on the replica car, sounding while the peer holds theirs
 var _vehicle_id: String = ""
+var _heli_model: Node3D
+## The replica's vehicle id while a peer flies the helicopter (sent as HELICOPTER_INDEX).
+const HELICOPTER_ID := "helicopter"
+const HELICOPTER_INDEX := -2
 var _car_color: Color = Color.WHITE
 var _samples: Array = []  # [{"t": float, "driving": bool, "body": Transform3D, "car": Transform3D}]
 var _clock: float = 0.0
@@ -45,12 +49,26 @@ func setup(id: int, tint: Color, profile: Dictionary = {}) -> void:
 	set_vehicle(VehicleCatalogue.default_player, tint)
 
 
-## Builds the replica car as `vehicle_id` in `car_color` (only when either changed).
+## Builds the replica car as `vehicle_id` in `car_color` (only when either changed). The
+## helicopter (HELICOPTER_ID, add-flyable-helicopter) gets the helicopter's body instead.
 func set_vehicle(vehicle_id: String, car_color: Color) -> void:
 	if vehicle_id == _vehicle_id and car_color == _car_color:
 		return
 	_vehicle_id = vehicle_id
 	_car_color = car_color
+	if _heli_model != null:
+		_heli_model.queue_free()
+		_heli_model = null
+	if vehicle_id == HELICOPTER_ID:
+		_car_mesh.mesh = null
+		_heli_model = Node3D.new()
+		HelicopterModel.build(_heli_model)
+		_car.add_child(_heli_model)
+		var hbox := BoxShape3D.new()
+		hbox.size = HelicopterModel.FUSELAGE_SIZE
+		_car_shape.shape = hbox
+		_car_shape.position.y = HelicopterModel.FUSELAGE_Y
+		return
 	var e := VehicleCatalogue.entry(vehicle_id)
 	_car_mesh.mesh = VehicleMesh.build(e, VehicleMesh.Lod.LOD0, true, VehicleCatalogue.livery(vehicle_id))
 	_car_mesh.set_surface_override_material(0, VehicleMesh.body_material(car_color))
@@ -58,6 +76,11 @@ func set_vehicle(vehicle_id: String, car_color: Color) -> void:
 	box.size = VehicleMesh.box_size(e)
 	_car_shape.shape = box
 	_car_shape.position.y = box.size.y * 0.5 + 0.1
+
+
+## Where the replica's car (or helicopter) is now.
+func car_transform() -> Transform3D:
+	return _car.global_transform
 
 
 ## The vehicle the replica currently shows.

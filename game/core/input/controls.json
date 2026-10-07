@@ -3,6 +3,7 @@
   "contexts": {
     "foot": "On foot",
     "drive": "Driving",
+    "fly": "Flying (the helicopter)",
     "debug": "Debug (hold View / Back)",
     "any": "Anywhere"
   },
@@ -42,6 +43,19 @@
     {"context": "drive", "label": "radio: next station", "action": "radio_cycle"},
     {"context": "drive", "label": "map", "action": "map_toggle"},
     {"context": "drive", "label": "pause menu", "action": "pause"},
+
+    {"context": "fly", "label": "fly forward, back and sideways", "actions": ["move_forward", "move_back", "move_left", "move_right"], "pad": "left stick", "key": "W A S D"},
+    {"context": "fly", "label": "look around", "actions": ["look_up", "look_down", "look_left", "look_right"], "pad": "right stick", "key": "mouse"},
+    {"context": "fly", "label": "climb", "action": "fly_up"},
+    {"context": "fly", "label": "descend", "action": "fly_down"},
+    {"context": "fly", "label": "turn left", "action": "fly_yaw_left"},
+    {"context": "fly", "label": "turn right", "action": "fly_yaw_right"},
+    {"context": "fly", "label": "look behind", "action": "look_behind"},
+    {"context": "fly", "label": "get out (landed, or hovering low)", "action": "interact"},
+    {"context": "fly", "label": "camera: chase, top-down, high", "action": "camera_cycle"},
+    {"context": "fly", "label": "radio: next station", "action": "radio_cycle"},
+    {"context": "fly", "label": "map", "action": "map_toggle"},
+    {"context": "fly", "label": "pause menu", "action": "pause"},
 
     {"context": "any", "label": "report a problem", "action": "report_open", "pad": "hold Menu / Start for 1 s, or \"Report a problem\" in the pause menu"},
     {"context": "debug", "label": "debug overlay", "action": "debug_toggle"},

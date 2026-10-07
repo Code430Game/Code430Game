@@ -110,7 +110,10 @@ static func assign_titles(places: Array) -> void:
 		if template == "":
 			p.title = ""
 			continue
-		p.title = template.format({"street": abbreviate(p.street)}) if p.street != "" else label(p.kind)
+		if not template.contains("{street}"):
+			p.title = template  # a fixed title ("Police helipad")
+		else:
+			p.title = template.format({"street": abbreviate(p.street)}) if p.street != "" else label(p.kind)
 		titled.append(p)
 	var cross_format := str(data().get("cross_format", "{title} ({cross})"))
 	for p: Services.Place in _alike(titled):

@@ -1,9 +1,11 @@
 {
   "_comment": "add-police. Stars added per witnessed crime; distances in metres, times in seconds.",
-  "crimes": {"assault": 1, "assault_down": 2, "gunfire": 1, "theft": 1, "hit_police": 1, "assault_officer": 1, "officer_down": 1},
+  "crimes": {"assault": 1, "assault_down": 2, "gunfire": 1, "theft": 1, "hit_police": 1, "assault_officer": 1, "officer_down": 1, "aircraft_theft": 2},
   "max_stars": 3,
   "witness_m": 30.0,
   "police_sight_m": 55.0,
+  "aircraft_sight_m": 150.0,
+  "air_return_s": 240.0,
   "lose_s": [0.0, 12.0, 18.0, 25.0],
   "police_per_star": [0, 1, 2, 4],
   "max_police": 4,

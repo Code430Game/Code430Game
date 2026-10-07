@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 	var car_color := Color.WHITE
 	if player.is_driving():
 		car_t = player.vehicle.global_transform
-		vehicle = VehicleCatalogue.index_of(str(player.vehicle.get("vehicle_id")))
+		vehicle = RemotePlayer.HELICOPTER_INDEX if player.vehicle is FlyableHelicopter else VehicleCatalogue.index_of(str(player.vehicle.get("vehicle_id")))
 		car_color = player.vehicle.get("body_color")
 	var horn := player.is_driving() and Input.is_action_pressed("horn") and not get_tree().paused
 	_state.rpc(player.is_driving(), player.global_transform, car_t, vehicle, car_color, horn)
@@ -83,7 +83,7 @@ func _state(is_driving: bool, body_t: Transform3D, car_t: Transform3D, vehicle: 
 		return
 	r.push_state(is_driving, body_t, car_t)
 	if is_driving:
-		r.set_vehicle(VehicleCatalogue.id_at(vehicle), car_color)
+		r.set_vehicle(RemotePlayer.HELICOPTER_ID if vehicle == RemotePlayer.HELICOPTER_INDEX else VehicleCatalogue.id_at(vehicle), car_color)
 	var sounding := horn and is_driving
 	if sounding and not r.horn.sounding:
 		remote_horn.emit(car_t.origin)

@@ -40,8 +40,10 @@ func witnessed(pos: Vector3) -> bool:
 	return false
 
 
-func police_sees(pos: Vector3) -> bool:
-	var r := float(config.get("police_sight_m", 55.0))
+## True when a police car or officer is within sight of `pos` (`sight` metres; -1: the usual
+## `police_sight_m`).
+func police_sees(pos: Vector3, sight: float = -1.0) -> bool:
+	var r := sight if sight > 0.0 else float(config.get("police_sight_m", 55.0))
 	for p in police_positions:
 		if p.distance_to(pos) <= r:
 			return true
@@ -82,7 +84,7 @@ func _process(delta: float) -> void:
 	if stars <= 0 or get_tree().paused:
 		ground_sees = false
 		return
-	ground_sees = target != null and police_sees(target.global_position)
+	ground_sees = target != null and police_sees(target.global_position, sight_m())
 	if target != null and seen():
 		unseen_s = 0.0
 		return
@@ -96,6 +98,14 @@ func _process(delta: float) -> void:
 ## target (update-police-pursuit 1.1).
 func seen() -> bool:
 	return stars > 0 and (helicopter_sees or ground_sees)
+
+
+## How far ground units see the target: `aircraft_sight_m` while it flies an aircraft off the
+## ground (add-flyable-helicopter), else `police_sight_m`.
+func sight_m() -> float:
+	if target is FlyableHelicopter and (target as FlyableHelicopter).airborne():
+		return float(config.get("aircraft_sight_m", 150.0))
+	return float(config.get("police_sight_m", 55.0))
 
 
 ## Seconds out of sight the current level needs to drop a star.

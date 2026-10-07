@@ -22,6 +22,7 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | Parked cars per chunk (`parked_cars_per_chunk`) | 120 | 300 | parked cars: the stalls farthest from any player stay empty above this |
 | Parked car bodies (`parked_car_bodies`) | 8 | 16 | parked cars: how many of the nearest get physics bodies |
 | Surface detail (`surface_detail_px`, `surface_detail_macro`) | 512 px, one sample | 1024 px, plus a large-scale sample against tiling | ground materials (asphalt, concrete, paint) via `SurfaceDetail` |
+| Aircraft look-ahead (`aircraft_lookahead_m`) | 300 m | 600 m | streaming: a second anchor this far at most ahead of a flying helicopter, so the city ahead is built in time (add-flyable-helicopter) |
 
 ## Adding a feature
 1. Add the key to both presets in `presets.json`.

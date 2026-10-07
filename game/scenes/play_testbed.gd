@@ -90,6 +90,10 @@ var _weapon_at_start: int = 0  # --weapon=1|2: hold the melee weapon or the gun 
 var _shots_at_start: int = 0  # --shoot=N: aim and fire N times once the world is up (screenshots)
 var _fists_at_start: String = ""  # --fists=punch|kick: hold a punch or kick mid-move (screenshots)
 var _officer_at_start: String = ""  # --officer=stagger|down|tagged: an officer in front, hit into that state (screenshots)
+var _fly_at_start: bool = false  # --fly: start in the police helicopter on its pad (add-flyable-helicopter)
+var _fly_at: Vector3 = Vector3.INF  # --fly-at=x,y,z: start flying it there instead (screenshots)
+var _fly_input: Dictionary = {}  # --fly-input=x,z,climb,yaw: hold these controls (screenshots)
+var _land_first_s: float = 0.0  # seconds the "Land first" hint still shows
 var _wheel_at_start: int = -2  # --wheel=N: open the weapon wheel pointing at entry N (-1: none) (screenshots)
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
@@ -246,6 +250,8 @@ func _ready() -> void:
 			_shooter.wheel.select(_wheel_at_start))
 	if _officer_at_start != "" and _police != null:
 		get_tree().create_timer(1.5).timeout.connect(func() -> void: _police.demo_officer(_officer_at_start, _player))
+	if _fly_at_start and _police != null:
+		get_tree().create_timer(1.2).timeout.connect(_start_flying)
 	if _fists_at_start != "" and _shooter != null:
 		get_tree().create_timer(1.2).timeout.connect(func() -> void:
 			if _shooter.held != null:
@@ -288,8 +294,8 @@ func _ready() -> void:
 
 
 func _on_entered_vehicle(car: VehicleBody3D) -> void:
-	if _vehicle_audio != null:
-		_vehicle_audio.attach(car)  # the engine follows the player into whichever car they take
+	if _vehicle_audio != null and not (car is FlyableHelicopter):
+		_vehicle_audio.attach(car)  # the engine follows the player into whichever car they take (the helicopter has its rotor)
 	if _radio != null:
 		_radio.car_entered(car)  # tunes to the car's own station
 	_camera.target = car
@@ -300,6 +306,9 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 
 
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
+	if traffic_body is FlyableHelicopter:
+		_world_sync.request_take_helicopter()  # a guest's copy of the host's helicopter: the host answers
+		return
 	if _parked != null and traffic_body.has_meta("parked_key"):
 		if Session.is_client():
 			_world_sync.request_take_parked(str(traffic_body.get_meta("parked_key")))  # the host answers via _on_take_granted
@@ -318,6 +327,31 @@ func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
 	if car != null:
 		_report_theft(car.global_position)
 		_player.enter_vehicle(car)
+
+
+## --fly / --fly-at: into the police helicopter (taken from its pad, or placed in the air at
+## `_fly_at`), out of the start car first.
+func _start_flying() -> void:
+	var heli := _police.park_helicopter()
+	if heli == null:
+		return
+	if _fly_at != Vector3.INF:
+		heli.place_at(Transform3D(Basis(), _fly_at))
+	_streamer.build_now(heli.global_position)
+	if _player.is_driving() and not _player.try_exit_vehicle():
+		_player.vehicle.driver_peer_id = 0
+		_player.vehicle = null
+	_player.enter_vehicle(heli)
+	heli.test_input = _fly_input
+
+
+## Guest: the host gave them its helicopter (add-flyable-helicopter): theirs, from where it stood.
+func _on_helicopter_granted(t: Transform3D) -> void:
+	if _police == null or _player.is_driving():
+		return
+	var heli := _police.fly_granted_helicopter(t)
+	_wanted.report("aircraft_theft", heli.global_position, true)
+	_player.enter_vehicle(heli)
 
 
 ## A car was taken at `at`: a theft, if the police see it.
@@ -582,6 +616,10 @@ func _setup_wanted() -> void:
 	_police.net_hit.connect(func(seconds: float) -> void: _player.stuck_s = maxf(_player.stuck_s, seconds))
 	_police.shot_at.connect(_hurt)
 	_police.taken.connect(func(car: VehicleBody3D) -> void: _wanted.report("theft", car.global_position))
+	var b := Projector_bounds()
+	_police.air_bounds = Rect2(b.x, b.y, b.z - b.x, b.w - b.y)
+	_police.aircraft_taken.connect(func(heli: FlyableHelicopter) -> void: _wanted.report("aircraft_theft", heli.global_position, true))
+	_player.exit_refused.connect(func(_reason: String) -> void: _land_first_s = 2.0)
 	_banner = Label.new()
 	_banner.name = "Banner"
 	_banner.set_anchors_preset(Control.PRESET_CENTER)
@@ -636,6 +674,8 @@ func _setup_net() -> void:
 	_world_sync.player_sync = _player_sync
 	_world_sync.day_night = _day_night
 	_world_sync.take_granted.connect(_on_take_granted)
+	_world_sync.police = _police
+	_world_sync.helicopter_granted.connect(_on_helicopter_granted)
 	if _traffic != null:
 		_traffic.mirror_hit.connect(func(p: Vector3, v: Vector3) -> void: _world_sync.report_hit(p, v))
 	add_child(_world_sync)
@@ -947,6 +987,17 @@ func _parse_args() -> void:
 			_fists_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--officer="):
 			_officer_at_start = arg.get_slice("=", 1)
+		elif arg == "--fly":
+			_fly_at_start = true
+		elif arg.begins_with("--fly-input="):
+			var fi := arg.get_slice("=", 1).split(",")
+			if fi.size() == 4:
+				_fly_input = {"move": Vector2(float(fi[0]), float(fi[1])), "climb": float(fi[2]), "yaw": float(fi[3])}
+		elif arg.begins_with("--fly-at="):
+			var f := arg.get_slice("=", 1).split(",")
+			if f.size() == 3:
+				_fly_at_start = true
+				_fly_at = Vector3(float(f[0]), float(f[1]), float(f[2]))
 		elif arg.begins_with("--wheel="):
 			_wheel_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--menu="):
@@ -1075,6 +1126,10 @@ func _process(delta: float) -> void:
 	if _car != null:
 		var body: Node3D = Players.local_controlled_body()
 		var anchors := PackedVector3Array([body.global_position])
+		if body is FlyableHelicopter:
+			var heli := body as FlyableHelicopter
+			var reach := float((Settings.presets.get(Settings.current_preset_name, {}) as Dictionary).get("aircraft_lookahead_m", 300.0))
+			anchors.append(ChunkStreamer.look_ahead(heli.global_position, heli.linear_velocity, heli.altitude_m(), heli.tun("lookahead_s"), heli.tun("lookahead_per_height"), reach))
 		var obstacles: Array[Node3D] = [body]
 		if Session.is_host() and _player_sync != null:
 			anchors.append_array(_player_sync.remote_positions())
@@ -1127,11 +1182,13 @@ func _process(delta: float) -> void:
 			if _headlights != Headlights.AUTO:
 				net += "  |  lights %s" % ("on" if _headlights == Headlights.ON else "off")
 		if _player.is_driving():
-			_hud.text = "%d km/h%s\nx %.0f  y %.1f  z %.0f     %s" % [
-				int(_driven_car().speed_kph()), net, body.global_position.x, body.global_position.y, body.global_position.z,
+			var alt := "  |  alt %d m" % int(_driven_car().altitude_m()) if _driven_car().has_method("altitude_m") else ""
+			_hud.text = "%d km/h%s%s\nx %.0f  y %.1f  z %.0f     %s" % [
+				int(_driven_car().speed_kph()), alt, net, body.global_position.x, body.global_position.y, body.global_position.z,
 				_controls_hint(),
 			]
-			_prompt.text = ""
+			_land_first_s = maxf(_land_first_s - delta, 0.0)
+			_prompt.text = "Land first" if _land_first_s > 0.0 else ""
 		else:
 			_hud.text = "on foot%s\nx %.0f  y %.1f  z %.0f     %s" % [
 				net, body.global_position.x, body.global_position.y, body.global_position.z,
