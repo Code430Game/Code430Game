@@ -59,6 +59,27 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
 - **Fell under the floor after being busted.** Probably the respawn landed before that area's
   ground had loaded. f555839 now builds the ground at the arrival point first. Unconfirmed,
   because the place wasn't recorded; watch for it.
+- **Map legend and places list** (human, 2026-10-06: "include a legend in the map and also a
+  method of viewing items from each location ... a little more plain search engine and instead
+  of toggling through we click in or back"). On the full map (`game/ui/map/overview_map.gd`),
+  a legend panel lists each kind of place as its icon, then its name:
+
+  ```
+  [hospital icon] Hospital
+  [police icon]   Police
+     -> 2125 Bronson Ave
+     -> 134 St Other Street
+  ```
+
+  - A (or click) on a kind opens its list of places; B goes back.
+  - Picking a place centres the map on it. A waypoint or route there could follow later.
+  - No cycling through places with a button, unlike GTA's map.
+  - Addresses should be real. `services.v0.json` has names but no addresses today (6 kinds:
+    ambulance 3, fire_station 2, police 2, hospital 2, security 2, helipad 1). The importer
+    should keep OSM's `addr:housenumber` and `addr:street`, and fall back to "on <nearest
+    street>" from the road graph. OSM addresses are ODbL like the rest of the map data.
+  - The minimap's icons and the legend's should be the same set.
+  - Later: parking garages, shops and mission markers in the same list.
 - **A ground shadow for the helicopter** (human: "ideally a shadow would be wicked too"). By
   day, the minimap is the only reliable way to place it. At 55 m up, its real shadow falls
   outside the deck preset's shadow distance. A soft blob decal on the ground below it, faded by
