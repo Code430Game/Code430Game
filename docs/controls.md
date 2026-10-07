@@ -69,6 +69,14 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | road graph overlay | B | F4 |
 <!-- controls:end -->
 
+**Typing on the Steam Deck.** The game has no keyboard of its own. A text box (the report
+form's description, the co-op Join address) takes focus when the player starts typing, and
+Steam shows its own on-screen keyboard; Steam + X opens it by hand. While a text box has focus,
+the D-pad and A drive Steam's keyboard and the game must not act on them (`report_form.gd`
+leaves them alone; `test_report_form.gd` checks it). Keep both when changing menus or input.
+Asking Steam for the keyboard directly (Steamworks' gamepad text input) is for the Steam
+release work.
+
 **Options and Settings.** The Options tab also sets the music volume; the Settings tab picks
 the graphics preset (Auto, Deck or High; Auto picks Deck on a Steam Deck).
 
