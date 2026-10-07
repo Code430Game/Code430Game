@@ -5,7 +5,7 @@ Every change below is ready to pick up: an OpenSpec change in `openspec/changes/
 `CONTRIBUTING.md` first, then the change's folder. Claim a change before starting
 (`CONTRIBUTING.md`, Claiming work).
 
-Updated 2026-10-06.
+Updated 2026-10-07.
 
 ## Ready to build
 
@@ -13,7 +13,6 @@ Medium:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
-| `update-junction-surfaces` | point-like junctions, curbs inside junctions, terrain through | the maintainer's junction locations help | importer cluster/forks/barriers/pack, junction builder, lane graph |
 | `update-parking` | lot layout passes, street-side parking lanes | the maintainer's lot screenshots for the layout half | importer parking, lot builder, lanes and markings |
 | `add-district-edge` | proper closures and a fog fade at the map edge | nothing | importer barriers, edge builder, traffic |
 | `add-underpass-interiors` | lights, retaining walls, tone-gated shelters | nothing | underpass builder, pedestrians, content modes |
@@ -60,7 +59,11 @@ Built and merged; each is archived once it has been played on the Deck:
 - `update-radio-per-car` 2.1
 - `update-garage-polish` 2.1 (`--spawn=97,62.6,-377` starts on the NAC garage floor)
 - `add-unarmed-combat` 2.1 and 2.2
-- `add-weapon-selector` 2.1 and 2.2
+- `add-weapon-selector` 2.1 (Deck benchmark; the human's try is in)
+- `update-junction-surfaces` 3.1 and 3.2
+- `update-police-pursuit` 4.2 and 4.3 (the human's first notes are in)
+- `add-police-combat` 3.2 and 3.3
+- `update-menu-design` 3.2
 - `update-shared-deck-heights` 2.1
 
 `add-coop-multiplayer` still needs:
@@ -71,4 +74,9 @@ Built and merged; each is archived once it has been played on the Deck:
 
 ## Small fixes (no proposal needed, open a `fix/` PR)
 
-- More in `docs/backlog.md`; the junction and parking items there now have proposals.
+- **Signs (billboards) in the middle of roads:** check the rule from `19d8c7f` holds wherever
+  the human reports more.
+- **On-screen keyboard on the Deck:** the report form and the co-op Join box can't be typed
+  into, because Steam's keyboard only opens for Steamworks games. The choices are a built-in
+  keyboard (no dependency) or GodotSteam (a new dependency, so the maintainer decides first).
+- More in `docs/backlog.md`.

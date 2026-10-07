@@ -16,7 +16,7 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   - The X-intersection case was fixed earlier (`update-cluster-junction-arms`, fa34b3d). The
     three-arm case wasn't covered. The importer review (2026-10-06) also found clusters with no
     size limit (`cluster.py:113-151`, up to 8 nodes and arm offsets of 21 m): start there.
-- **Signs in the middle of roads** (human, 2026-10-06; one in #78's screenshot, another in the
+- **Signs in the middle of roads** (fixed in `19d8c7f`: boards keep off roads, junctions and bridges) (human, 2026-10-06; one in #78's screenshot, another in the
   underpass under the 417 by the Museum of Nature). `game/world/dressing/billboards.gd:28-60`
   puts a board every 220 m, 3.5 m out from every trunk, primary or secondary road. It checks
   nothing else, so boards land:
@@ -34,18 +34,18 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   same problem. Options:
   - a small built-in on-screen keyboard (no new dependency);
   - Steamworks through GodotSteam (a new dependency; the human decides).
-- **Driverless patrol car**: when an officer gets out, the car is marked `officer_out`
+- **Driverless patrol car** (fixed in `update-police-pursuit`, `aa69377`: parked empty cars): when an officer gets out, the car is marked `officer_out`
   (`police_manager.gd:295`), but `_drive` never checks the mark, so the empty car keeps chasing
   once the player moves. Fix: park it with the handbrake on until the officer is back or the
   chase ends.
-- **The helicopter can't be shaken off** (human: "I still think it might be impossible to drive
+- **The helicopter can't be shaken off** → `update-police-pursuit` (`aa69377`: escapable helicopter, canopy cover, seen badge) (human: "I still think it might be impossible to drive
   away from the copter"). It flies at 45 m/s (about 160 km/h, `helicopter.gd:19`) in a straight
   line and sees 150 m. The only escape is cover, and nothing in the game says so.
   - Make it slower than a fast car (about 35 m/s).
   - Let it lose a player who gets past its sight range in the open.
   - Add a "find cover" hint.
   - Move its constants into config.
-- **Shooting the police** (human: "I don't think I can shoot them to get away"). Officers can't
+- **Shooting the police** → `add-police-combat` (`86131f1`) (human: "I don't think I can shoot them to get away"). Officers can't
   be hit; the police change never covered it. This needs a proposal: officer reactions by tone,
   more stars, backup arriving.
 - **R3 hold resets the car mid-chase** (human: "It was the R3 trap, it's fine for now"). Holding
