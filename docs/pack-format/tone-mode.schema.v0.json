@@ -31,7 +31,8 @@
       "additionalProperties": false,
       "description": "How systems resolve things in this mode, so gameplay code never branches on a mode id.",
       "properties": {
-        "ambulance": {"enum": ["revive", "stretcher", "drone"], "description": "What paramedics do once they have tended a downed person: they get up, are carried off on a stretcher, or are lifted away by a drone."}
+        "ambulance": {"enum": ["revive", "stretcher", "drone"], "description": "What paramedics do once they have tended a downed person: they get up, are carried off on a stretcher, or are lifted away by a drone."},
+        "officer": {"enum": ["knock_down", "tag_out"], "description": "What happens to a police officer the player has beaten (add-police-combat): knocked down until the chase ends, or tagged out (sits with hands up, then walks back to the car). A mode without violence never knocks down."}
       }
     },
     "hud": {

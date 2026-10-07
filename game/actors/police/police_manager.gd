@@ -14,6 +14,15 @@ extends Node3D
 ## runs back and gets in, and an officer left far behind takes the empty car with them
 ## (update-police-pursuit). Each unit sees the player within `police_sight_m`, which the
 ## minimap shows (`markers`).
+##
+## Fighting back (add-police-combat): each officer carries an `OfficerBody` the player's weapons
+## reach, and `hit_officer` takes it from there. A hit costs the officer toughness by the
+## weapon's impact (`officer_combat.damage`), which comes back after `recover_s` without hits;
+## until it runs out they stagger and then take cover by their car. Spent, they go out of the
+## fight the way the tone's mode data says (`outcomes.officer`): knocked down as a ragdoll, or
+## tagged out (sitting, hands up, then walking back to the car). Fists follow the unarmed
+## rules: no violence, no harm, only a stagger. Hitting an officer is `assault_officer`, always
+## seen; one out of the fight is `officer_down`, and backup drives to where it happened.
 
 signal busted
 signal net_hit(seconds: float)
@@ -21,6 +30,8 @@ signal net_hit(seconds: float)
 signal shot_at(damage: float)
 ## Someone got in and took a patrol car (#69): it is theirs now.
 signal taken(car: VehicleBody3D)
+## An officer went out of the fight at `at` (knocked down or tagged out).
+signal officer_down(at: Vector3)
 
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const REPLAN_S := 2.0
@@ -46,6 +57,10 @@ var _rotor_t: float = 0.0
 var _noise_state: Array = [0x1234567]
 var cars: Array[VehicleBody3D] = []
 var officers: Array[Node3D] = []
+## Officers out of the fight (down, or tagged out and walking back): they neither move on the
+## player nor see them, and stay until the chase ends.
+var downed: Array[Node3D] = []
+var _clock: float = 0.0
 var _plans: Dictionary = {}  # car -> {"points": PackedVector3Array, "i": int, "age": float}
 var _flash: float = 0.0
 var _busted_s: float = 0.0
@@ -85,6 +100,7 @@ func _target() -> Node3D:
 func _physics_process(delta: float) -> void:
 	if wanted == null or player == null or get_tree().paused:
 		return
+	_clock += delta
 	var target := _target()
 	var want: int = (cfg("police_per_star", [0, 1, 2, 4]) as Array)[clampi(wanted.stars, 0, 3)]
 	want = mini(want, int(cfg("max_police", 4)))
@@ -119,6 +135,8 @@ func _physics_process(delta: float) -> void:
 			continue
 		_step_officer(o, delta)
 		positions.append(o.global_position)
+	for o in downed.duplicate():
+		_step_out_of_action(o, delta)
 	_step_helicopter(target)
 	wanted.police_positions = positions
 	_maybe_let_out(target)
@@ -161,8 +179,8 @@ func _process(_delta: float) -> void:
 	_fill_rotor()
 
 
-func _spawn_car(around: Vector3) -> bool:
-	if graph == null:
+func _spawn_car(around: Vector3, backup_to: Vector3 = Vector3.INF) -> bool:
+	if graph == null or graph.nodes.is_empty():
 		return false
 	var lo := float(cfg("spawn_min_m", 90.0))
 	var hi := float(cfg("spawn_max_m", 160.0))
@@ -200,6 +218,8 @@ func _spawn_car(around: Vector3) -> bool:
 		car.set_headlights(1.0)
 	car.add_child(_light_bar(car))
 	car.set_meta("police", true)
+	if backup_to != Vector3.INF:
+		car.set_meta("backup_to", backup_to)
 	cars.append(car)
 	return true
 
@@ -239,6 +259,13 @@ func _drive(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 		car.set("override_hold", true)
 		return
 	var goal := target.global_position
+	if car.has_meta("backup_to"):
+		# Backup heads for where an officer went down; once there it lets its officer out.
+		goal = car.get_meta("backup_to")
+		if car.global_position.distance_to(goal) <= float(combat("backup_arrive_m", 15.0)):
+			car.remove_meta("backup_to")
+			car.set_meta("ready_out", true)
+			goal = target.global_position
 	var d := car.global_position.distance_to(goal)
 	var aim := goal
 	if d > DIRECT_M:
@@ -296,6 +323,14 @@ func _unstick(car: VehicleBody3D, target: Node3D, delta: float) -> void:
 
 
 func _maybe_let_out(target: Node3D) -> void:
+	for car in cars:
+		if car.has_meta("ready_out") and not car.has_meta("officer_out") and absf(float(car.call("speed_kph"))) < 6.0:
+			car.remove_meta("ready_out")  # backup at the scene: out at once
+			car.set_meta("officer_out", true)
+			var ready := _make_officer(car.global_position + car.global_basis.x * 1.6)
+			ready.set_meta("car", car)
+			officers.append(ready)
+			return
 	if officers.size() >= cars.size():
 		return
 	if player.is_driving() and absf(float(target.call("speed_kph"))) > float(cfg("officer_car_stopped_kph", 8.0)):
@@ -313,7 +348,9 @@ func _maybe_let_out(target: Node3D) -> void:
 
 ## The officer's patrol car, or null when it is gone or someone took it (`hand_over`).
 func _car_of(o: Node3D) -> VehicleBody3D:
-	var car: Variant = o.get_meta("car", null)
+	if not o.has_meta("car"):
+		return null
+	var car: Variant = o.get_meta("car")
 	if not is_instance_valid(car) or not car is VehicleBody3D:
 		return null
 	return car if (car as VehicleBody3D).has_meta("police") else null
@@ -375,24 +412,38 @@ func _make_officer(at: Vector3) -> Node3D:
 	o.add_child(held)
 	held.set_weapon(WeaponSet.resolve(_officer_weapon))
 	o.set_meta("held", held)
+	var body := OfficerBody.new(float(combat("body_radius_m", 0.32)), float(combat("body_height_m", 1.8)))
+	body.officer = o
+	o.add_child(body)
+	o.set_meta("body", body)
 	return o
 
 
 func _step_officer(o: Node3D, delta: float) -> void:
 	var target := _target()
+	if _step_stagger(o, delta):
+		return
 	var goal := target.global_position
 	var to := goal - o.global_position
 	to.y = 0.0
 	var d := to.length()
 	var speed := 0.0
-	# Up to a player on foot, or to the driver's door of a stopped car.
+	# Up to a player on foot, or to the driver's door of a stopped car; a hit officer goes to
+	# cover behind their car first.
 	var stop := float(cfg("busted_m", 3.0)) * 0.6 if not player.is_driving() else float(cfg("officer_at_car_m", 2.4))
-	if d > stop:
+	var move_to := goal
+	var cover := cover_point(o)
+	if cover != Vector3.INF:
+		move_to = cover
+		stop = 0.4
+	var step := move_to - o.global_position
+	step.y = 0.0
+	if step.length() > stop:
 		speed = float(cfg("officer_speed_mps", 4.2))
-		o.global_position += to.normalized() * speed * delta
+		o.global_position += step.normalized() * minf(speed * delta, step.length())
 	o.global_position.y = lerpf(o.global_position.y, target.global_position.y, clampf(delta * 6.0, 0.0, 1.0))
 	if d > 0.1:
-		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)  # bodies face -Z
+		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)  # bodies face -Z, toward the player
 	(o.get_meta("rig") as CharacterRig).advance(delta, speed)
 	# The tone's officer weapon.
 	var cool := float(_officer_cooldown.get(o, 0.0)) - delta
@@ -497,6 +548,288 @@ func _step_helicopter(target: Node3D) -> void:
 	wanted.helicopter_sees = helicopter.sees_target()
 
 
+## A tunable from `officer_combat` in the police config.
+func combat(key: String, fallback: Variant) -> Variant:
+	return (cfg("officer_combat", {}) as Dictionary).get(key, fallback)
+
+
+## What happens to an officer whose toughness runs out, from the mode data
+## (`outcomes.officer`): "knock_down" or "tag_out". A tone without violence never knocks down.
+static func outcome() -> String:
+	var o := ContentMode.outcome("officer", "knock_down")
+	return o if o == "tag_out" or ContentMode.flag("violence") else "tag_out"
+
+
+## Puts an officer on foot at `at` (tests, the testbed's --officer).
+func place_officer(at: Vector3) -> Node3D:
+	var o := _make_officer(at)
+	officers.append(o)
+	return o
+
+
+## Screenshots (the testbed's --officer): an officer 5 m in front of the camera, facing it, hit
+## with the tone's gun into `state` ("stagger" held, "down" or "tagged").
+func demo_officer(state: String, by: Node3D) -> void:
+	if wanted != null and wanted.stars == 0:
+		wanted.set_stars(1)
+	var cam: Camera3D = (by as Player).camera() if by is Player else get_viewport().get_camera_3d()
+	var fwd := -cam.global_basis.z if cam != null else Vector3.FORWARD
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	# Ahead and a little to the side, so the player's own body doesn't hide them.
+	var side := Vector3(-fwd.z, 0.0, fwd.x)
+	var o := place_officer(by.global_position + fwd * 5.0 + side * 1.6)
+	o.look_at(Vector3(by.global_position.x, o.global_position.y, by.global_position.z), Vector3.UP)
+	print("police: demo officer %s at %s (player at %s)" % [state, o.global_position, by.global_position])
+	var ws := WeaponSet.new()
+	ws.slot = 2
+	var w := ws.current()
+	var from := by.global_position + Vector3.UP
+	var tries := 0
+	while in_fight(o) and tries < 10:
+		var r := hit_officer(o, w, o.global_position + Vector3.UP, from)
+		tries += 1
+		if state == "stagger" and r == "stagger":
+			o.set_meta("stagger_t", 3600.0)  # held for the picture
+			return
+
+
+## True while `o` is an officer still in the fight (not down, not tagged out).
+func in_fight(o: Node3D) -> bool:
+	return officers.has(o)
+
+
+## The player's weapon `w` hit officer `o` at `pos`, fired from `from`. Always counts as
+## `assault_officer`; returns what happened: "stagger", "down", "tagged" or "" (not in the fight).
+func hit_officer(o: Node3D, w: Dictionary, pos: Vector3, from: Vector3) -> String:
+	if not in_fight(o):
+		return ""
+	if wanted != null:
+		wanted.report("assault_officer", o.global_position, true)
+	var kind := str(w.get("impact", ""))
+	var key := "kick" if str(w.get("move", "")) == "kick" else kind
+	if kind == "fist" and not ContentMode.flag("violence"):
+		_stagger(o, from)  # a shove: fists never harm where the tone has no violence
+		return "stagger"
+	var toughness := float(combat("toughness", 100.0))
+	var hp := float(o.get_meta("hp", toughness))
+	if _clock - float(o.get_meta("last_hit", -INF)) > float(combat("recover_s", 3.0)):
+		hp = toughness
+	hp -= float((combat("damage", {}) as Dictionary).get(key, combat("default_damage", 34.0)))
+	o.set_meta("hp", hp)
+	o.set_meta("last_hit", _clock)
+	if hp > 0.0:
+		_stagger(o, from)
+		return "stagger"
+	var at := o.global_position
+	var result := "tagged"
+	if outcome() == "tag_out":
+		_tag_out(o)
+	else:
+		var push := pos - from
+		push.y = 0.0
+		push = push.normalized() * float(combat("down_push", 350.0)) + Vector3.UP * 50.0
+		_knock_down(o, push, pos)
+		result = "down"
+	if wanted != null:
+		wanted.report("officer_down", at, true)
+	_call_backup(at)
+	officer_down.emit(at)
+	return result
+
+
+## A hit that doesn't finish them: they reel back a little, then go to cover by their car.
+func _stagger(o: Node3D, from: Vector3) -> void:
+	var away := o.global_position - from
+	away.y = 0.0
+	if away.length() > 0.01:
+		o.global_position += away.normalized() * float(combat("stagger_push_m", 0.5))
+	o.set_meta("stagger_t", float(combat("stagger_s", 0.5)))
+	o.set_meta("cover_until", _clock + float(combat("stagger_s", 0.5)) + float(combat("cover_s", 3.0)))
+	_hold_pose(o, stagger_pose(), {})
+
+
+## While staggering: no moving, no firing. Returns true while it lasts.
+func _step_stagger(o: Node3D, delta: float) -> bool:
+	var t := float(o.get_meta("stagger_t", 0.0))
+	if t <= 0.0:
+		return false
+	t -= delta
+	o.set_meta("stagger_t", t)
+	if t <= 0.0:
+		_release_pose(o)
+	return true
+
+
+## Where a hit officer shelters: beside their car on the side away from the player, while
+## `cover_s` lasts; Vector3.INF when they aren't taking cover (or have no car).
+func cover_point(o: Node3D) -> Vector3:
+	if _clock >= float(o.get_meta("cover_until", -INF)):
+		return Vector3.INF
+	var car := _car_of(o)
+	var target := _target()
+	if car == null or target == null:
+		return Vector3.INF
+	var away := car.global_position - target.global_position
+	away.y = 0.0
+	if away.length() < 0.01:
+		return Vector3.INF
+	return car.global_position + away.normalized() * float(combat("cover_m", 2.0))
+
+
+## Down as a ragdoll where the tone allows it; stays down until the chase ends.
+func _knock_down(o: Node3D, impulse: Vector3, point: Vector3) -> void:
+	_leave_fight(o, "down")
+	var rig: CharacterRig = o.get_meta("rig")
+	var rd := CharacterRagdoll.new()
+	rd.name = "Ragdoll"
+	o.add_child(rd)
+	rd.begin(rig.profile, rig.global_transform, rig.phase, rig.amount)
+	rd.apply_impulse(impulse, point, float(combat("down_spread", 0.6)))
+	rig.visible = false
+	o.set_meta("ragdoll", rd)
+	o.set_meta("settle_t", float(combat("down_settle_s", 3.0)))
+
+
+## Tagged out (no violence): sits on the ground with their hands up for `tag_out_s`, then walks
+## back to their car.
+func _tag_out(o: Node3D) -> void:
+	_leave_fight(o, "tagged")
+	var rig: CharacterRig = o.get_meta("rig")
+	rig.position.y = -float(combat("sit_drop_m", 0.72)) * float(rig.profile.get("height", 1.0))
+	_hold_pose(o, hands_up_pose(), sit_pose())
+	o.set_meta("tag_t", float(combat("tag_out_s", 8.0)))
+
+
+## Out of the fight: off the officers list (no moving on the player, no seeing them, no
+## busting), the body can't be hit again and the weapon is put away.
+func _leave_fight(o: Node3D, state: String) -> void:
+	officers.erase(o)
+	_officer_cooldown.erase(o)
+	downed.append(o)
+	o.set_meta("state", state)
+	o.set_meta("stagger_t", 0.0)
+	var body: OfficerBody = o.get_meta("body") if o.has_meta("body") else null
+	if body != null:
+		body.disable()
+	var held: HeldWeapon = o.get_meta("held") if o.has_meta("held") else null
+	if held != null:
+		held.set_weapon({})
+		held.aiming = false
+
+
+## One step for an officer out of the fight: a ragdoll settles; a tagged-out officer waits,
+## then walks back to the car and gets in (or leaves when the car is gone).
+func _step_out_of_action(o: Node3D, delta: float) -> void:
+	if not is_instance_valid(o):
+		downed.erase(o)
+		return
+	match str(o.get_meta("state", "")):
+		"down":
+			var t := float(o.get_meta("settle_t", 0.0)) - delta
+			o.set_meta("settle_t", t)
+			var rd: CharacterRagdoll = o.get_meta("ragdoll") if o.has_meta("ragdoll") else null
+			if t <= 0.0 and rd != null and not rd.is_settled():
+				rd.settle()
+		"tagged":
+			var t := float(o.get_meta("tag_t", 0.0)) - delta
+			o.set_meta("tag_t", t)
+			if t <= 0.0:
+				var rig: CharacterRig = o.get_meta("rig")
+				rig.position.y = 0.0
+				_release_pose(o)
+				o.set_meta("state", "returning")
+		"returning":
+			_walk_back(o, delta)
+
+
+## A tagged-out officer back on their feet walks to their car and gets in (or leaves when the
+## car is gone); the car drives again.
+func _walk_back(o: Node3D, delta: float) -> void:
+	var car := _car_of(o)
+	if car == null:
+		downed.erase(o)
+		o.queue_free()
+		return
+	var to := car.global_position - o.global_position
+	to.y = 0.0
+	if to.length() <= float(cfg("officer_board_m", 2.5)):
+		downed.erase(o)
+		o.queue_free()
+		car.remove_meta("officer_out")
+		return
+	var speed := float(cfg("officer_speed_mps", 4.2)) * float(combat("return_speed", 0.5))
+	o.global_position += to.normalized() * minf(speed * delta, to.length())
+	o.look_at(Vector3(car.global_position.x, o.global_position.y, car.global_position.z), Vector3.UP)
+	(o.get_meta("rig") as CharacterRig).advance(delta, speed)
+
+
+## Another patrol car, sent to where an officer went out of the fight (up to `backup_extra`
+## over the usual count).
+func _call_backup(at: Vector3) -> void:
+	var cap := int(cfg("max_police", 4)) + int(combat("backup_extra", 1))
+	if cars.size() < cap:
+		_spawn_car(at, at)
+
+
+## Holds a pose on an officer's rig: arms from `arms`, legs from `legs` (either may be empty).
+## The held weapon stops posing the arms until `_release_pose`.
+func _hold_pose(o: Node3D, arms: Dictionary, legs: Dictionary) -> void:
+	var held: HeldWeapon = o.get_meta("held") if o.has_meta("held") else null
+	if held != null:
+		held.process_mode = Node.PROCESS_MODE_DISABLED
+	var rig: CharacterRig = o.get_meta("rig")
+	rig.bone_override = arms
+	rig.override_weight = 1.0 if not arms.is_empty() else 0.0
+	rig.leg_override = legs
+	rig.leg_weight = 1.0 if not legs.is_empty() else 0.0
+	rig.repose()
+
+
+func _release_pose(o: Node3D) -> void:
+	var rig: CharacterRig = o.get_meta("rig")
+	rig.override_weight = 0.0
+	rig.leg_weight = 0.0
+	rig.repose()
+	var held: HeldWeapon = o.get_meta("held") if o.has_meta("held") else null
+	if held != null:
+		held.process_mode = Node.PROCESS_MODE_INHERIT
+
+
+## Reeling from a hit: the body leans back (a positive turn about X tips the bone's top toward
+## +Z, behind the body, which faces -Z) and the arms fly out to the sides (about Z, outward on
+## each side).
+static func stagger_pose() -> Dictionary:
+	return {
+		"spine": Quaternion(Vector3.RIGHT, 0.32),
+		"head": Quaternion(Vector3.RIGHT, 0.22),
+		"upper_arm_l": Quaternion(Vector3.BACK, 0.75) * Quaternion(Vector3.RIGHT, 0.35),
+		"upper_arm_r": Quaternion(Vector3.BACK, -0.75) * Quaternion(Vector3.RIGHT, 0.35),
+		"forearm_l": Quaternion(Vector3.RIGHT, 0.5),
+		"forearm_r": Quaternion(Vector3.RIGHT, 0.5),
+	}
+
+
+## Hands up: both upper arms raised overhead, forearms bent a little.
+static func hands_up_pose() -> Dictionary:
+	return {
+		"upper_arm_l": Quaternion(Vector3.RIGHT, 2.85),
+		"upper_arm_r": Quaternion(Vector3.RIGHT, 2.85),
+		"forearm_l": Quaternion(Vector3.RIGHT, 0.35),
+		"forearm_r": Quaternion(Vector3.RIGHT, 0.35),
+	}
+
+
+## Sitting on the ground: thighs forward and level, shins out in front.
+static func sit_pose() -> Dictionary:
+	return {
+		"thigh_l": Quaternion(Vector3.RIGHT, 1.5),
+		"thigh_r": Quaternion(Vector3.RIGHT, 1.5),
+		"shin_l": Quaternion(Vector3.RIGHT, -0.15),
+		"shin_r": Quaternion(Vector3.RIGHT, -0.15),
+	}
+
+
 ## Where the police are, for the minimap: [{"at": Vector3, "kind": "car" | "officer" |
 ## "helicopter", "sees": bool, "searching": bool}]. `sees`: that unit has the player now
 ## (ground units within `police_sight_m`, the helicopter by its own sight); `searching`: the
@@ -539,6 +872,10 @@ func _clear_all() -> void:
 		if is_instance_valid(o):
 			o.queue_free()
 	officers.clear()
+	for o in downed:
+		if is_instance_valid(o):
+			o.queue_free()
+	downed.clear()
 	_officer_cooldown.clear()
 
 

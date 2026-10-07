@@ -48,10 +48,12 @@ func police_sees(pos: Vector3) -> bool:
 	return false
 
 
-## A crime of `kind` (see `crimes` in the config) at `pos`. Returns true when it counted.
-func report(kind: String, pos: Vector3) -> bool:
+## A crime of `kind` (see `crimes` in the config) at `pos`. `seen`: the police saw it
+## themselves (an officer was hit), so it counts without a witness check. Returns true when it
+## counted.
+func report(kind: String, pos: Vector3, seen: bool = false) -> bool:
 	var add := int((config.get("crimes", {}) as Dictionary).get(kind, 0))
-	if add <= 0 or not witnessed(pos):
+	if add <= 0 or not (seen or witnessed(pos)):
 		return false
 	_set_stars(mini(stars + add, int(config.get("max_stars", 3))))
 	unseen_s = 0.0

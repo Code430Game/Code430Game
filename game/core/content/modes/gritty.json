@@ -5,6 +5,6 @@
  "max": {"violence": "strong", "gore": "strong", "drugs": "strong", "sex_work": "strong", "profanity": "strong", "crime": "strong", "horror": "strong", "dystopia_tech": "none"},
  "flags": {"violence": true, "lethal_weapons": true, "drug_use": true, "sex_work_services": true},
  "variant_key": "gritty",
- "outcomes": {"ambulance": "stretcher"},
+ "outcomes": {"ambulance": "stretcher", "officer": "knock_down"},
  "hud": {"accent": "#d9a441"}
 }

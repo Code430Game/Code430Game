@@ -89,6 +89,7 @@ var _wanted_at_start: int = 0  # --wanted=N: start with N stars (screenshots, ch
 var _weapon_at_start: int = 0  # --weapon=1|2: hold the melee weapon or the gun from the start (screenshots)
 var _shots_at_start: int = 0  # --shoot=N: aim and fire N times once the world is up (screenshots)
 var _fists_at_start: String = ""  # --fists=punch|kick: hold a punch or kick mid-move (screenshots)
+var _officer_at_start: String = ""  # --officer=stagger|down|tagged: an officer in front, hit into that state (screenshots)
 var _wheel_at_start: int = -2  # --wheel=N: open the weapon wheel pointing at entry N (-1: none) (screenshots)
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
@@ -241,6 +242,8 @@ func _ready() -> void:
 		get_tree().create_timer(1.2).timeout.connect(func() -> void:
 			_shooter.wheel.open_wheel()
 			_shooter.wheel.select(_wheel_at_start))
+	if _officer_at_start != "" and _police != null:
+		get_tree().create_timer(1.5).timeout.connect(func() -> void: _police.demo_officer(_officer_at_start, _player))
 	if _fists_at_start != "" and _shooter != null:
 		get_tree().create_timer(1.2).timeout.connect(func() -> void:
 			if _shooter.held != null:
@@ -570,6 +573,7 @@ func _setup_wanted() -> void:
 	_police.log_chase = _police_log
 	_police.canopy = CanopyCover.from_chunks(_pack.vegetation_chunks, _wanted.config.get("canopy", {}))
 	add_child(_police)
+	_shooter.police = _police
 	_police.busted.connect(func() -> void: _caught("busted"))
 	_police.net_hit.connect(func(seconds: float) -> void: _player.stuck_s = maxf(_player.stuck_s, seconds))
 	_police.shot_at.connect(_hurt)
@@ -925,6 +929,8 @@ func _parse_args() -> void:
 			_shots_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--fists="):
 			_fists_at_start = arg.get_slice("=", 1)
+		elif arg.begins_with("--officer="):
+			_officer_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--wheel="):
 			_wheel_at_start = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--menu="):

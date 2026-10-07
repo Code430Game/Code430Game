@@ -5,6 +5,6 @@
  "max": {"violence": "mild", "gore": "none", "drugs": "none", "sex_work": "none", "profanity": "none", "crime": "mild", "horror": "none", "dystopia_tech": "none"},
  "flags": {"violence": false, "lethal_weapons": false, "drug_use": false, "sex_work_services": false},
  "variant_key": "clean",
- "outcomes": {"ambulance": "revive"},
+ "outcomes": {"ambulance": "revive", "officer": "tag_out"},
  "hud": {"accent": "#ff4fa3"}
 }
