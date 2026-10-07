@@ -80,14 +80,14 @@ static func tag_labels(ids: Array, table: Array = tags()) -> PackedStringArray:
 ## "Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18) · Stuck, Police": every
 ## report's title, made from what the player chose and where they were. Tags go last, so a long
 ## title loses them before the place.
-static func auto_title(area: String, severity: String, place: Dictionary, tag_ids: Array = []) -> String:
+static func auto_title(area: String, severity: String, place: Dictionary, tag_ids: Array = [], table: Array = tags()) -> String:
 	var title := "Report: %s · %s" % [label_of(AREAS, area), label_of(SEVERITIES, severity)]
 	if str(place.get("mode", "none")) != "none":
 		var at := "x %d, z %d" % [roundi(float(place["x"])), roundi(float(place["z"]))]
 		var road := str(place.get("road", ""))
 		title += " · %s (%s)" % [road, at] if road != "" else " (%s)" % at
 	if not tag_ids.is_empty():
-		title += " · " + ", ".join(tag_labels(tag_ids))
+		title += " · " + ", ".join(tag_labels(tag_ids, table))
 	return title.substr(0, TITLE_MAX)
 
 

@@ -231,3 +231,29 @@ func test_a_click_on_a_chip_toggles_its_tag() -> void:
 	# A fresh open clears the tags.
 	_form.open(null, {}, [])
 	assert_array(_form.picked_tags()).is_empty()
+
+
+class CountingStore:
+	extends ReportStore
+	var list_calls: int = 0
+
+	func list() -> Array:
+		list_calls += 1
+		return super.list()
+
+
+func test_navigation_does_not_rescan_saved_reports() -> void:
+	# Review fix: every Up/Down re-read and parsed every saved report from disk.
+	var counting := CountingStore.new(_base)
+	_form.store = counting
+	var shot := Image.create(32, 32, false, Image.FORMAT_RGB8)
+	var place := Diagnostics.empty_place()
+	_form.open(shot, Diagnostics.collect(place, [], FrameTimes.new().stats()), [])
+	await get_tree().process_frame
+	var after_open := counting.list_calls
+	assert_int(after_open).is_greater_equal(1)
+	for i in range(4):
+		await _press(JOY_BUTTON_DPAD_DOWN)
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	await _press(JOY_BUTTON_DPAD_LEFT)
+	assert_int(counting.list_calls).is_equal(after_open)
