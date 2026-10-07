@@ -1,9 +1,10 @@
 """The relay's one endpoint: `POST /v1/report`, plus `GET /health` for deploy checks.
 
 Order matters: cheap refusals first (switch, method, size, parsing, schema, image), then the
-idempotency check, so a game resending a report that was already filed gets its issue back
-without counting against its limits, then the rate limit, then GitHub. Nothing from the report
-is logged or stored here.
+rate limit is read (a sender over it never reaches GitHub, so replaying one valid body cannot
+spend the App's API quota), then the idempotency check, so a game resending a report that was
+already filed gets its issue back without being counted, then the count, then GitHub. Nothing
+from the report is logged or stored here.
 """
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ from dataclasses import dataclass, field
 
 from report_relay import jpeg, multipart, render, validate
 from report_relay.github import GitHub, GitHubError
-from report_relay.ratelimit import Limits, Store, check_and_count, sender_key
+from report_relay.ratelimit import Limits, Store, check, count, sender_key
 
 MAX_BODY_BYTES = 2 * 1024 * 1024
 MAX_SHOT = (1920, 1200)
@@ -85,15 +86,17 @@ async def handle(req: Request, cfg: Config, github: GitHub, store: Store, now: f
             return _refuse(400, "screenshot is not a JPEG")
         if dims[0] > MAX_SHOT[0] or dims[1] > MAX_SHOT[1]:
             return _refuse(400, f"screenshot larger than {MAX_SHOT[0]}x{MAX_SHOT[1]}")
+    sender = sender_key(req.client_ip, cfg.salt)
+    wait = await check(store, sender, now, cfg.limits)
+    if wait is not None:
+        return Response(
+            429, {"error": "too many reports; try later"}, {"Retry-After": str(int(wait) + 1)}
+        )
     try:
         existing = await github.find_issue(report["id"], now)
         if existing:
             return Response(200, {"issue_url": existing, "report_id": report["id"]})
-        wait = await check_and_count(store, sender_key(req.client_ip, cfg.salt), now, cfg.limits)
-        if wait is not None:
-            return Response(
-                429, {"error": "too many reports; try later"}, {"Retry-After": str(int(wait) + 1)}
-            )
+        await count(store, sender, now, cfg.limits)
         shot_url = await github.put_screenshot(report["id"], shot, now) if shot else None
         url = await github.create_issue(
             render.title(report), render.body(report, shot_url), render.labels(report), now

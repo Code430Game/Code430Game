@@ -312,6 +312,7 @@ class FakeGitHub:
         self.tokens_minted = 0
         self.fail_create = False
         self.conflicts = 0  # how many screenshot commits answer 409 before one lands
+        self.lookups = 0  # issue listings, the call a replayed report must not reach
 
     async def __call__(self, method, url, headers, body):
         path = url.removeprefix("https://api.github.com")
@@ -329,6 +330,7 @@ class FakeGitHub:
         assert headers["Authorization"].startswith("Bearer ghs_"), path
         if path.startswith("/repos/rjksn/Code430/issues?"):
             assert "labels=in-game-report" in path
+            self.lookups += 1
             return ok(200, list(reversed(self.issues)))
         if path == "/repos/rjksn/Code430/issues" and method == "POST":
             if self.fail_create:
@@ -433,12 +435,26 @@ def test_branch_and_token_are_set_up_once():
 
 
 def test_resent_report_returns_the_same_issue_and_does_not_count():
-    relay = Relay(limits=Limits(per_hour=1))
+    relay = Relay(limits=Limits(per_hour=2))
     first = relay.post(EXAMPLE, tiny_jpeg(64, 40))
     again = relay.post(EXAMPLE, tiny_jpeg(64, 40))
     assert first.status == 201 and again.status == 200
     assert again.payload["issue_url"] == first.payload["issue_url"]
     assert len(relay.gh_fake.issues) == 1
+    # The resend was not counted: a second distinct report still fits under the limit of two.
+    assert relay.post(report_with_id(1)).status == 201
+
+
+def test_a_sender_over_the_limit_never_reaches_github():
+    # Replaying one valid body used to cost an authenticated issue listing per request before
+    # the limit was looked at, enough to burn the App's API quota from one address.
+    relay = Relay(limits=Limits(per_hour=1))
+    assert relay.post(EXAMPLE).status == 201
+    lookups = relay.gh_fake.lookups
+    for _ in range(5):
+        resp = relay.post(EXAMPLE)
+        assert resp.status == 429 and "Retry-After" in resp.headers
+    assert relay.gh_fake.lookups == lookups
 
 
 def test_sixth_report_in_an_hour_is_refused_with_retry_after():
