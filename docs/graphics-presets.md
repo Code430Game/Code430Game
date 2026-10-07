@@ -12,6 +12,7 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | SSAO | off | on | Environment |
 | SSIL | off | off | Environment |
 | Volumetric fog | off | on | Environment |
+| Volumetric fog density | 0 (unused) | 0.002 per metre, a light haze | Environment |
 | Glow | on | on | Environment |
 | Directional shadow atlas | 2048 | 4096 | RenderingServer |
 | Positional shadow atlas | 2048 | 4096 | viewport |

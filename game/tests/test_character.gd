@@ -181,6 +181,24 @@ func test_jacket_is_open_over_the_shirt() -> void:
 	assert_float(coat_outer).is_greater(shirt_outer)
 
 
+func test_jacket_front_opens_wide_enough_not_to_read_as_a_tie() -> void:
+	# An 8 cm gap between the fronts passed the test above but still read as a tie on the Deck
+	# (human, 2026-10-02): no jacket colour on the front within 10 cm of the centre line.
+	var profile := {"hair": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 1, "top": 0, "bottom": 5, "jacket_colour": 3, "height": 1.0, "build": 1.0}
+	var arrays := CharacterMesh.build(profile).surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var cols: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var coat: Color = CharacterProfile.CLOTH[3]
+	var nearest := INF
+	for i in range(verts.size()):
+		var v := verts[i]
+		# The fronts' outer face (z -0.14); the collar's front at -0.13 crosses the centre by design.
+		if v.z < -0.135 and v.y > 0.9 and v.y < 1.4 and _same_colour(cols[i], coat):
+			nearest = minf(nearest, absf(v.x))
+	assert_float(nearest).is_less(INF)
+	assert_float(nearest).is_greater_equal(0.10)
+
+
 ## Vertex colours come back quantised to 8 bits, so compare loosely.
 static func _same_colour(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) < 0.02 and absf(a.g - b.g) < 0.02 and absf(a.b - b.b) < 0.02

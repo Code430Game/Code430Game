@@ -85,6 +85,20 @@ func test_apply_to_environment_follows_preset() -> void:
 	assert_bool(env.sdfgi_enabled).is_true()
 
 
+## Godot's default volumetric fog density (0.05 per metre) whited out the high preset past
+## about 50 m at noon; the preset's own density is applied, light enough to keep the city.
+func test_volumetric_fog_density_comes_from_the_preset() -> void:
+	var s := _make(false)
+	s.apply_preset("high")
+	var env := Environment.new()
+	s.apply_to_environment(env)
+	var density := float(s.presets["high"]["volumetric_fog_density"])
+	assert_bool(env.volumetric_fog_enabled).is_true()
+	assert_float(env.volumetric_fog_density).is_equal_approx(density, 0.00001)
+	# Under 10 % of the light lost over 50 m of haze.
+	assert_float(exp(-density * 50.0)).is_greater(0.9)
+
+
 func _button(index: int) -> InputEventJoypadButton:
 	var b := InputEventJoypadButton.new()
 	b.button_index = index as JoyButton

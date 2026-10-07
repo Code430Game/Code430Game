@@ -160,6 +160,9 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   onesie").** Fixed: shirt capsule to the neck ending at the natural waist, trouser pelvis
   below it, open jacket as panels with a collar, hair caps with a hairline above the brows.
   Beard still jagged ("fine for now"); a nicer beard belongs in `add-character-features`.
+  2026-10-07: the 10-02 open jacket still showed the shirt as an 8 cm strip between the
+  fronts, which read as a tie. The fronts now stand 24 cm apart (`CharacterMesh.JACKET_FRONT`),
+  and a test keeps any jacket off the front within 10 cm of the centre line.
 - **Walk cycle knees bent backwards (human, Deck 2026-10-02: "walks a bit like a bird").**
   Fixed: shin and forearm rotation signs flipped in `walk_pose`; test pins heel behind the
   knee and hand in front of the elbow.
@@ -229,8 +232,10 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   points at a file that does not exist (and `build/` is gitignored, which also swallowed new
   files placed under `game/world/build/` once).
 - **High preset fog is very heavy:** on the Mac, the high preset's fog hides the city beyond
-  about 50 m at noon (every screenshot today used the deck preset to see anything). Check the
-  volumetric fog density.
+  about 50 m at noon (every screenshot today used the deck preset to see anything). Fixed
+  2026-10-07 (`fix/fog-and-jackets`). The preset turned volumetric fog on but never set its
+  density, so Godot's default of 0.05 per metre applied, leaving about 8 % visibility at 50 m.
+  The presets now carry `volumetric_fog_density`: 0.002 on high (a light haze), unused on deck.
 
 ## Done
 

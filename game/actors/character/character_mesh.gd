@@ -27,6 +27,9 @@ const BONES: Array = [
 const EYE_COLOR := Color(0.08, 0.07, 0.07)
 const FRAME_COLOR := Color(0.12, 0.12, 0.13)
 const MOUTH_COLOR := Color(0.55, 0.30, 0.28)
+## Jacket front panels as (centre x, width) in metres on the unscaled body: an open front
+## 24 cm wide, so the shirt reads as a shirt and not a tie.
+const JACKET_FRONT := Vector2(0.165, 0.09)
 
 static var _sphere_arrays: Array = []
 static var _capsule_arrays: Array = []
@@ -153,9 +156,10 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 	b.capsule(Vector3(0.0, 0.92, 0.0), 0.15, 0.12, bottom, "hips", Vector3(1.3, 1.0, 0.75))
 	if jacket:
 		b.box(Vector3(0.0, 1.17, 0.115), Vector3(0.44, 0.44, 0.05), sleeve, "spine")  # back
+		# The fronts stand 24 cm apart: an 8 cm gap read as a tie on the Deck (human, 2026-10-02).
 		for side: float in [-1.0, 1.0]:
 			b.box(Vector3(side * 0.215, 1.17, 0.0), Vector3(0.05, 0.44, 0.24), sleeve, "spine")  # sides
-			b.box(Vector3(side * 0.125, 1.17, -0.115), Vector3(0.17, 0.44, 0.05), sleeve, "spine")  # fronts
+			b.box(Vector3(side * JACKET_FRONT.x, 1.17, -0.115), Vector3(JACKET_FRONT.y, 0.44, 0.05), sleeve, "spine")  # fronts
 		b.box(Vector3(0.0, 1.41, 0.0), Vector3(0.30, 0.04, 0.26), sleeve, "spine")  # collar
 	b.cylinder(Vector3(0.0, 1.47, 0.0), 0.06, 0.10, skin, "spine")
 	# Arms and hands

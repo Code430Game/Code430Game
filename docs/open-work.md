@@ -71,6 +71,4 @@ Built and merged; each is archived once it has been played on the Deck:
 
 ## Small fixes (no proposal needed, open a `fix/` PR)
 
-- The high preset's fog hides the city beyond about 50 m at noon (check the volumetric fog
-  density).
 - More in `docs/backlog.md`; the junction and parking items there now have proposals.
