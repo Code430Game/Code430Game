@@ -12,6 +12,9 @@ class Place:
 	var at: Vector3
 	var road_node: String
 	var address: String  # "474 Elgin Street", "on Bronson Avenue", or "" when unknown
+	var street: String  # garages: the nearest named street ("Kent Street"), or ""
+	var cross: String  # garages: the nearest other named street, to tell two on one street apart
+	var title: String  # the name the maps show when the kind has a title (PlaceIcons.assign_titles)
 
 
 static func load_places(pack_dir: String) -> Array[Place]:
@@ -50,20 +53,29 @@ static func garage_places(lots: Array, graph: RoadGraph, street_m: float = 120.0
 		p.name = lot.name
 		p.at = Vector3(c.x, lot.ground_y, c.y)
 		p.road_node = ""
-		p.address = street_near(graph, p.at, street_m)
+		p.street = nearest_street(graph, p.at, street_m)
+		p.cross = nearest_street(graph, p.at, street_m, p.street)
+		p.address = "on " + p.street if p.street != "" else ""
 		out.append(p)
 	return out
 
 
 ## "on <name>" for the nearest named road within `within_m` of `at`, or "".
 static func street_near(graph: RoadGraph, at: Vector3, within_m: float) -> String:
+	var n := nearest_street(graph, at, within_m)
+	return "on " + n if n != "" else ""
+
+
+## The name of the nearest named road within `within_m` of `at` other than `except`, or "".
+## Bridges and tunnels don't count: a garage is on the street, not the deck passing over it.
+static func nearest_street(graph: RoadGraph, at: Vector3, within_m: float, except: String = "") -> String:
 	if graph == null:
 		return ""
 	var best := ""
 	var best_d := within_m
 	for eid in graph.sorted_edge_ids():
 		var e: RoadGraph.RoadEdge = graph.edges[eid]
-		if e.name == "":
+		if e.name == "" or e.name == except or e.bridge or e.tunnel:
 			continue
 		for i in range(e.polyline.size() - 1):
 			var a := Vector2(e.polyline[i].x, e.polyline[i].z)
@@ -73,7 +85,7 @@ static func street_near(graph: RoadGraph, at: Vector3, within_m: float) -> Strin
 			if d < best_d:
 				best_d = d
 				best = e.name
-	return "on " + best if best != "" else ""
+	return best
 
 
 ## The place of `kind` nearest `from`, or null.

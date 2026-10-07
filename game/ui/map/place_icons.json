@@ -1,10 +1,13 @@
 {
-  "_doc": "Kinds of place on the maps (add-map-legend): the legend's order, the name it shows, the marker's colour and the icon in ui/map/icons/places/ (white SVG, tinted by nothing: the disc carries the colour). A kind missing here gets the 'missing' icon and its id as the name.",
+  "_doc": "Kinds of place on the maps (add-map-legend): the legend's order, the name it shows, the marker's colour and the icon in ui/map/icons/places/ (white SVG, tinted by nothing: the disc carries the colour). A kind missing here gets the 'missing' icon and its id as the name. A kind with a `title` (\"{street} Parking\") names each place from its nearest street, shortened with street_suffixes and street_directions, instead of by its address; its `note` is the second line in the legend (one line: keep it short).",
   "marker_radius_px": 9.0,
   "minimap_radius_px": 7.0,
   "highlight_radius_px": 16.0,
   "highlight_pulse_s": 0.9,
   "garage_street_m": 120.0,
+  "street_suffixes": {"Street": "St", "Avenue": "Ave", "Road": "Rd", "Boulevard": "Blvd", "Drive": "Dr", "Place": "Pl", "Crescent": "Cres", "Parkway": "Pkwy", "Lane": "Ln", "Court": "Ct", "Terrace": "Terr", "Private": "Pvt"},
+  "street_directions": {"North": "N", "South": "S", "East": "E", "West": "W"},
+  "cross_format": "{title} ({cross})",
   "kinds": [
     {"kind": "police", "name": "Police", "color": "#3366f2", "icon": "police"},
     {"kind": "hospital", "name": "Hospital", "color": "#e5333f", "icon": "hospital"},
@@ -12,6 +15,6 @@
     {"kind": "ambulance", "name": "Ambulance post", "color": "#d9466b", "icon": "ambulance"},
     {"kind": "security", "name": "Security", "color": "#66739a", "icon": "security"},
     {"kind": "helipad", "name": "Helipad", "color": "#8a8fa3", "icon": "helipad"},
-    {"kind": "garage", "name": "Parking garage", "color": "#4a7fd9", "icon": "garage"}
+    {"kind": "garage", "name": "Parking garage", "color": "#4a7fd9", "icon": "garage", "title": "{street} Parking", "note": "Underground · heli cover"}
   ]
 }

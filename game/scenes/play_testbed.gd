@@ -849,6 +849,7 @@ func _setup_maps() -> void:
 	_overview.player = Players.local_controlled_body()
 	var places: Array = _pack.services.duplicate()
 	places.append_array(Services.garage_places(_pack.parking_lots, _pack.graph, PlaceIcons.num("garage_street_m", 120.0)))
+	PlaceIcons.assign_titles(places)
 	_overview.places = places
 	_minimap.places = places
 	var t0 := Time.get_ticks_msec()

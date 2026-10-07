@@ -188,3 +188,149 @@ func test_the_ottawa_pack_lists_police_with_real_addresses() -> void:
 	assert_bool(addresses.has("474 Elgin Street")).is_true()
 	var with_address := pack.services.filter(func(p: Services.Place) -> bool: return p.address != "")
 	assert_int(with_address.size()).is_greater_equal(pack.services.size() - 1)
+
+
+## Human, 2026-10-07: "Can we mention for the parking if it's underground? ... I wonder if we
+## just say Kent St Parking?"
+func test_street_names_shorten_like_a_sign() -> void:
+	assert_str(PlaceIcons.abbreviate("Kent Street")).is_equal("Kent St")
+	assert_str(PlaceIcons.abbreviate("Laurier Avenue West")).is_equal("Laurier Ave W")
+	assert_str(PlaceIcons.abbreviate("Colonel By Drive")).is_equal("Colonel By Dr")
+	assert_str(PlaceIcons.abbreviate("Rue Kent")).is_equal("Rue Kent")  # French: nothing at the end to shorten
+	assert_str(PlaceIcons.abbreviate("Street")).is_equal("Street")  # a lone word is a name, not a suffix
+	assert_str(PlaceIcons.abbreviate("North Avenue")).is_equal("North Ave")
+
+
+func _garage(id: String, street: String, cross: String) -> Services.Place:
+	var p := _place(id, "garage", "", Vector3.ZERO, "on " + street if street != "" else "")
+	p.street = street
+	p.cross = cross
+	return p
+
+
+func test_a_garage_is_named_for_its_street_and_marked_underground() -> void:
+	var g := _garage("g1", "Kent Street", "Slater Street")
+	var police := _place("p2", "police", "Ottawa Police Headquarters", Vector3.ZERO, "474 Elgin Street")
+	PlaceIcons.assign_titles([g, police])
+	assert_str(g.title).is_equal("Kent St Parking")
+	assert_str(PlaceIcons.display_name(g)).is_equal("Kent St Parking")
+	assert_str(police.title).is_equal("")  # other kinds keep their names and addresses
+	assert_str(PlaceIcons.display_name(police)).is_equal("Ottawa Police Headquarters")
+	assert_str(PlaceIcons.note("garage")).contains("Underground")
+	assert_str(PlaceIcons.note("police")).is_equal("")
+	var lone := _garage("g9", "", "")
+	PlaceIcons.assign_titles([lone])
+	assert_str(lone.title).is_equal("Parking garage")
+
+
+func test_two_garages_on_one_street_get_their_cross_streets_then_numbers() -> void:
+	var a := _garage("g2", "Kent Street", "Slater Street")
+	var b := _garage("g1", "Kent Street", "Laurier Avenue West")
+	var c := _garage("g3", "Bank Street", "Albert Street")
+	var d := _garage("g5", "Elgin Street", "")
+	var e := _garage("g4", "Elgin Street", "")
+	PlaceIcons.assign_titles([a, b, c, d, e])
+	assert_str(b.title).is_equal("Kent St Parking (Laurier)")
+	assert_str(a.title).is_equal("Kent St Parking (Slater)")
+	assert_str(PlaceIcons.bare("Laurier Avenue West")).is_equal("Laurier")
+	assert_str(c.title).is_equal("Bank St Parking")
+	assert_str(e.title).is_equal("Elgin St Parking")  # no cross street: numbered in id order
+	assert_str(d.title).is_equal("Elgin St Parking 2")
+
+
+func test_the_parking_list_reads_street_parking_with_the_underground_note() -> void:
+	var map: OverviewMap = auto_free(OVERVIEW.instantiate())
+	add_child(map)
+	var places: Array = [_garage("g1", "Kent Street", ""), _place("p2", "police", "HQ", Vector3(100, 0, 0), "474 Elgin Street")]
+	PlaceIcons.assign_titles(places)
+	map.places = places
+	map.open()
+	map.legend.places = places
+	map.legend.kind = "garage"
+	map.legend.level = MapLegend.Level.PLACES
+	map.legend.rebuild()
+	var texts := _texts(map.legend)
+	assert_bool(texts.has("Kent St Parking")).override_failure_message(str(texts)).is_true()
+	assert_bool(texts.has(PlaceIcons.note("garage"))).override_failure_message(str(texts)).is_true()
+	map.close()
+
+
+func _texts(n: Node) -> PackedStringArray:
+	var out := PackedStringArray()
+	if n is Label:
+		out.append((n as Label).text)
+	for c in n.get_children():
+		out.append_array(_texts(c))
+	return out
+
+
+func test_every_ottawa_garage_gets_its_own_street_parking_name() -> void:
+	var pack := MapPack.new()
+	assert_bool(pack.load(PackLocator.find_pack(PACK_ID))).is_true()
+	var garages := Services.garage_places(pack.parking_lots, pack.graph, PlaceIcons.num("garage_street_m", 120.0))
+	PlaceIcons.assign_titles(garages)
+	var titles: Array = garages.map(func(p: Services.Place) -> String: return p.title)
+	print("garage titles: ", "; ".join(PackedStringArray(titles)))
+	assert_int(garages.size()).is_greater(0)
+	for t: String in titles:
+		assert_str(t).contains("Parking")
+		assert_bool(t.contains(" on ")).is_false()
+	var unique := {}
+	for t: String in titles:
+		unique[t] = true
+	assert_int(unique.size()).is_equal(titles.size())
+
+
+## Human, 2026-10-07: "the dual areas, we have text across the top and then an expander on the
+## right for the listing. I wonder if we align those so the items are all on the right". The
+## title, the legend and the hints are one column on the right, inside the screen's padding, and
+## the legend never runs into the hints.
+func test_all_map_ui_is_one_column_on_the_right() -> void:
+	var map: OverviewMap = auto_free(OVERVIEW.instantiate())
+	add_child(map)
+	var view: Control = map.get_node("View")
+	view.set_anchors_preset(Control.PRESET_TOP_LEFT)  # the headless viewport is tiny: the Deck's screen instead
+	view.size = Vector2(1280, 800)
+	map.places = _places()
+	map.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var screen := Rect2(view.global_position, view.size)
+	var column: Control = map.get_node("View/Column")
+	var footer: Control = map.get_node("View/Column/Footer")
+	var col_rect := column.get_global_rect()
+	assert_bool(screen.grow(-15.0).encloses(col_rect)).override_failure_message("column %s outside %s" % [col_rect, screen]).is_true()
+	assert_float(col_rect.position.x).is_greater(screen.size.x * 0.5)  # on the right
+	assert_bool(map.has_node("View/Header")).is_false()  # no strip across the top any more
+	assert_object(map.legend.get_parent()).is_same(column)
+	var legend_rect := map.legend.get_global_rect()
+	assert_float(legend_rect.end.y).is_less_equal(footer.get_global_rect().position.y)
+	assert_float(footer.get_global_rect().end.y).is_less_equal(col_rect.end.y + 0.5)
+	var hints := map.hint_text()
+	for word in ["pan", "cursor", "zoom", "places", "open", "back", "close"]:
+		assert_str(hints).contains(word)
+	map.focus_on(map.places[2])
+	assert_float(map.focus_offset().x).is_less(0.0)  # a picked place sits left of the column
+	map.close()
+
+
+## The road label by the cursor never covers the column: near it, the label flips left.
+func test_the_road_label_stays_off_the_column() -> void:
+	var map: OverviewMap = auto_free(OVERVIEW.instantiate())
+	add_child(map)
+	var view: Control = map.get_node("View")
+	view.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	view.size = Vector2(1280, 800)
+	map.open()
+	await get_tree().process_frame
+	var label: Label = map.get_node("View/HoverLabel")
+	var column: Control = map.get_node("View/Column")
+	label.text = "Highway 417  (one-way)"
+	map.cursor = Vector2(column.position.x - 640.0 - 20.0, 0.0)  # just left of the column
+	map.call("_place_hover_label")
+	assert_float(label.size.x).is_greater(40.0)
+	assert_float(label.position.x + label.size.x).is_less_equal(column.position.x)
+	map.cursor = Vector2(-300.0, 0.0)  # well clear: the label sits right of the cursor as before
+	map.call("_place_hover_label")
+	assert_float(label.position.x).is_greater(640.0 - 300.0)
+	map.close()

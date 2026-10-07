@@ -14,7 +14,7 @@ signal back_out
 
 enum Level { KINDS, PLACES }
 
-const WIDTH_PX := 420.0
+const WIDTH_PX := 500.0
 const ICON_PX := 30.0
 
 var places: Array = []  # Services.Place
@@ -168,8 +168,11 @@ func rebuild() -> void:
 		for p: Services.Place in places_of(kind):
 			var main := p.address if p.address != "" else "No street address"
 			var sub := p.name if p.name != "" else PlaceIcons.label(p.kind)
+			if p.title != "":  # named by title ("Kent St Parking"): its kind's note underneath
+				main = p.title
+				sub = PlaceIcons.note(p.kind)
 			var dist := distance_text(_flat_distance(p.at, from)) if from != Vector3.INF else ""
-			_add_row(p.kind, main, sub, dist, p)
+			_add_row(p.kind, main, sub, dist, p, p.title == "")
 	fit_height()
 	fit_height.call_deferred()  # again once wrapped names know their width
 	select(selected)
@@ -197,7 +200,7 @@ static func _flat_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
 
-func _add_row(icon_kind: String, main: String, sub: String, right: String, entry: Variant) -> void:
+func _add_row(icon_kind: String, main: String, sub: String, right: String, entry: Variant, wrap_sub: bool = true) -> void:
 	var row := PanelContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
 	MenuTheme.set_selected(row, false)
@@ -228,7 +231,10 @@ func _add_row(icon_kind: String, main: String, sub: String, right: String, entry
 		var sub_label := Label.new()
 		sub_label.text = sub
 		sub_label.theme_type_variation = MenuTheme.NOTE
-		sub_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # long names wrap rather than cut
+		if wrap_sub:
+			sub_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # long names wrap rather than cut
+		else:
+			sub_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS  # a short note: one line
 		sub_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		texts.add_child(sub_label)
 	if right != "":

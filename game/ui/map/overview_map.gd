@@ -8,7 +8,8 @@ extends CanvasLayer
 ## Places (services and garages) are drawn at screen size with PlaceIcons, and the legend on
 ## the right lists them (add-map-legend): Up / Down and A open a kind and pick a place, which
 ## centres the map on it and highlights it; B goes back a level, and closes the map from the
-## kinds. A click works on the rows, a right click goes back.
+## kinds. A click works on the rows, a right click goes back. The title, legend and key-cap
+## hints share one column on the right; the road label stays by the cursor.
 
 signal opened
 signal closed
@@ -22,7 +23,13 @@ const HOVER_RADIUS_M := 40.0
 const PLAYER_MARKER_PX := 14.0
 const COMBO_ACTIONS := ["debug_toggle", "debug_graph", "reset_vehicle"]
 const LEGEND_MARGIN_PX := 16.0
-const LEGEND_TOP_PX := 84.0  # below the header strip
+## The map's key-cap hints, one row each in the column's footer (human, 2026-10-07: "I wonder
+## if we align those so the items are all on the right").
+const HINT_ROWS := [
+	[["L stick", "pan"], ["R stick", "cursor"]],
+	[["LT / RT", "zoom"], ["Up / Down", "places"]],
+	[["A", "open"], ["B", "back"], ["View / M", "close"]],
+]
 const LEGEND_ACTIONS := ["ui_up", "ui_down", "ui_accept", "ui_cancel"]
 
 var renderer: MapRenderer
@@ -52,7 +59,10 @@ var _hover_hidden: bool = false  # just picked a place: its label, not the road'
 
 @onready var _view: Control = $View
 @onready var _label: Label = $View/HoverLabel
-@onready var _hint: HBoxContainer = $View/Header/Row/Hint
+@onready var _column: VBoxContainer = $View/Column
+@onready var _title_bar: PanelContainer = $View/Column/TitleBar
+@onready var _footer: PanelContainer = $View/Column/Footer
+@onready var _hints: VBoxContainer = $View/Column/Footer/Hints
 
 
 func _ready() -> void:
@@ -60,18 +70,24 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_view.draw.connect(_draw_view)
 	_view.theme = MenuTheme.theme()
-	MenuTheme.hint_bar(_hint, [["L stick", "pan"], ["R stick", "cursor"], ["LT / RT", "zoom"], ["Up / Down", "places"], ["A", "open"], ["B", "back"], ["View / M", "close"]])
+	# All of the map's UI is one column on the right: title, legend, then the hints as its footer.
+	_column.offset_left = -MapLegend.WIDTH_PX - LEGEND_MARGIN_PX
+	_column.offset_right = -LEGEND_MARGIN_PX
+	_column.offset_top = LEGEND_MARGIN_PX
+	_column.offset_bottom = -LEGEND_MARGIN_PX
+	for pairs: Array in HINT_ROWS:
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		_hints.add_child(row)
+		MenuTheme.hint_bar(row, pairs)
 	legend = MapLegend.new()
 	legend.name = "Legend"
-	legend.anchor_left = 1.0
-	legend.anchor_right = 1.0
-	legend.offset_left = -MapLegend.WIDTH_PX - LEGEND_MARGIN_PX
-	legend.offset_right = -LEGEND_MARGIN_PX
-	legend.offset_top = LEGEND_TOP_PX
+	legend.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	legend.places = places
 	legend.place_chosen.connect(focus_on)
 	legend.back_out.connect(close)
-	_view.add_child(legend)
+	_column.add_child(legend)
+	_column.move_child(legend, _title_bar.get_index() + 1)
 
 
 func _input(event: InputEvent) -> void:
@@ -142,6 +158,22 @@ func focus_offset() -> Vector2:
 	return Vector2(-(MapLegend.WIDTH_PX + LEGEND_MARGIN_PX) * 0.5, 0.0)
 
 
+## The height the legend may take in the column: what's left after the title, the hints
+## footer and the gaps between them.
+func legend_room() -> float:
+	var gap := float(_column.get_theme_constant("separation"))
+	var column_h := _view.size.y - LEGEND_MARGIN_PX * 2.0
+	return maxf(column_h - _title_bar.get_combined_minimum_size().y - _footer.get_combined_minimum_size().y - gap * 3.0, 0.0)
+
+
+## The key-cap hints as plain text, one row per line (tests, logs).
+func hint_text() -> String:
+	var lines := PackedStringArray()
+	for row in _hints.get_children():
+		lines.append(MenuTheme.hint_text(row as HBoxContainer))
+	return "\n".join(lines)
+
+
 func toggle() -> void:
 	if visible:
 		close()
@@ -157,7 +189,7 @@ func open() -> void:
 	_focus_locked = false
 	if legend != null:
 		legend.origin = player
-		legend.max_height = _view.size.y - LEGEND_TOP_PX - LEGEND_MARGIN_PX
+		legend.max_height = legend_room()
 		legend.reset()
 	MenuTheme.refresh_accent()
 	get_tree().paused = true
@@ -218,8 +250,16 @@ func _update_hover() -> void:
 	else:
 		_label.text = ""
 	_label.visible = _label.text != ""
+	_place_hover_label()
+
+
+## Puts the road label by the cursor, flipped to its left when it would run into the column.
+func _place_hover_label() -> void:
 	_label.reset_size()
 	_label.position = _view.size * 0.5 + cursor + Vector2(16, -12)
+	var column_left := _column.position.x - LEGEND_MARGIN_PX
+	if _label.position.x + _label.size.x > column_left:
+		_label.position.x = maxf(_view.size.x * 0.5 + cursor.x - 16.0 - _label.size.x, LEGEND_MARGIN_PX)
 
 
 func _draw_view() -> void:
@@ -276,5 +316,5 @@ func _draw_places(centre: Vector2) -> void:
 	_view.draw_circle(f, ring + 4.0 * pulse, Color(accent, 0.25 + 0.2 * pulse))
 	_view.draw_arc(f, ring + 4.0 * pulse, 0.0, TAU, 40, accent, 2.5, true)
 	PlaceIcons.draw(_view, f, focused.kind, r * 1.25)
-	var title := focused.name if focused.name != "" else PlaceIcons.label(focused.kind)
+	var title := PlaceIcons.display_name(focused)
 	_view.draw_string(ThemeDB.fallback_font, f + Vector2(ring + 10.0, 6.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(1, 1, 1, 0.95))

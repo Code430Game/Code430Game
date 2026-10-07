@@ -12,22 +12,39 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 clip_contents = true
 
-[node name="Header" type="PanelContainer" parent="View"]
-offset_left = 16.0
+[node name="Column" type="VBoxContainer" parent="View"]
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -516.0
 offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+theme_override_constants/separation = 10
+
+[node name="TitleBar" type="PanelContainer" parent="View/Column"]
+layout_mode = 2
 theme_type_variation = &"MenuFooter"
 
-[node name="Row" type="HBoxContainer" parent="View/Header"]
+[node name="Title" type="Label" parent="View/Column/TitleBar"]
 layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="Title" type="Label" parent="View/Header/Row"]
-layout_mode = 2
+theme_type_variation = &"MenuTitle"
 text = "Map"
-vertical_alignment = 1
 
-[node name="Hint" type="HBoxContainer" parent="View/Header/Row"]
+[node name="Spacer" type="Control" parent="View/Column"]
 layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Footer" type="PanelContainer" parent="View/Column"]
+layout_mode = 2
+theme_type_variation = &"MenuFooter"
+
+[node name="Hints" type="VBoxContainer" parent="View/Column/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 6
 
 [node name="HoverLabel" type="Label" parent="View"]
 theme_type_variation = &"MenuTooltip"
