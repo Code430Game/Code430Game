@@ -168,6 +168,24 @@ func test_chunks_go_stale_when_any_pack_file_changes() -> void:
 	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
 
 
+func test_chunks_stay_current_when_only_non_geometry_files_change() -> void:
+	# Review fix: a regenerated validation report or an ad edit rebuilt every chunk.
+	var tmp := ProjectSettings.globalize_path("user://stale_report_%d" % Time.get_ticks_usec())
+	_write(tmp.path_join("road_graph.v0.json"), "{}")
+	_write(tmp.path_join("pack.json"), "{\"id\": \"t\"}")
+	_write(tmp.path_join("validation_report.json"), "{\"runs\": 1}")
+	_write(tmp.path_join("ads.v0.json"), "{\"ads\": []}")
+	_write(tmp.path_join("chunks").path_join(GlbChunks.BUILD_MANIFEST), JSON.stringify({"inputs_hash": GlbChunks.inputs_hash(tmp)}))
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	_write(tmp.path_join("validation_report.json"), "{\"runs\": 2}")
+	_write(tmp.path_join("validation_report.md"), "# report")
+	_write(tmp.path_join("pack.json"), "{\"id\": \"t\", \"attribution\": [\"x\"]}")
+	_write(tmp.path_join("ads.v0.json"), "{\"ads\": [1]}")
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_true()
+	_write(tmp.path_join("road_graph.v0.json"), "{\"changed\": true}")
+	assert_bool(GlbChunks.chunks_are_current(tmp)).is_false()
+
+
 func test_content_hash_reads_the_bytes_not_just_the_sizes() -> void:
 	# Review fix: two regenerated packs with equal file sizes passed the co-op check.
 	var base := ProjectSettings.globalize_path("user://content_hash_%d" % Time.get_ticks_usec())
