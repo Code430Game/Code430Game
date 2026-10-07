@@ -268,6 +268,37 @@ def test_labels_and_title():
     assert render.title(report) == "@\u200bteam broken"
 
 
+def test_tags_are_optional_and_become_labels_and_a_body_line():
+    # The example has no tags: labels and body are as before (an untagged report is unchanged).
+    assert "tags" not in EXAMPLE
+    assert "**Tags:**" not in render.body(EXAMPLE, None)
+    report = copy.deepcopy(EXAMPLE)
+    report["tags"] = ["stuck", "fell_through"]
+    report["description"] = ""
+    assert validate.errors(report) == []
+    assert render.labels(report)[-2:] == ["tag:stuck", "tag:fell_through"]
+    text = render.body(report, None)
+    assert "**Tags:** Stuck, Fell through" in text
+    # The tags line is its own paragraph, not run into the area line.
+    assert "\n\n**Tags:**" in text
+
+
+@pytest.mark.parametrize("tags", [["Stuck"], ["has space"], ["x" * 25], ["a"] * 9, "stuck"])
+def test_bad_tags_are_refused(tags):
+    report = copy.deepcopy(EXAMPLE)
+    report["tags"] = tags
+    assert list(Draft202012Validator(validate.load_schema()).iter_errors(report))
+    assert validate.errors(report)
+
+
+def test_game_tag_labels_follow_the_relay_rule():
+    table = json.loads(
+        (REPO_ROOT / "game" / "ui" / "report" / "report_tags.json").read_text(encoding="utf-8")
+    )
+    for tag in table["tags"]:
+        assert render.tag_name(tag["id"]) == tag["label"]
+
+
 # --- the endpoint, against a fake GitHub -----------------------------------------------------
 
 

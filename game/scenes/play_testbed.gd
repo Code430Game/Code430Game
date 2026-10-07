@@ -94,6 +94,7 @@ var _wheel_at_start: int = -2  # --wheel=N: open the weapon wheel pointing at en
 var _menu_at_start: String = ""  # --menu=game|coop|controls|options|settings[,keyboard]: open the pause menu on that tab (screenshots)
 var _report_at_start: String = ""  # --report: open the report form once loaded; --report-send: and save/send it
 var _report_title: String = ""  # --report-title=...: the title for --report-send (tests of the relay)
+var _report_tags: PackedStringArray = []  # --report-tags=stuck,police: quick tags picked on the opened form
 var _junction_report := false  # --junction-report: print bulging, gapped and hull junctions with x, z once loaded
 var _free_camera: PackedFloat64Array = PackedFloat64Array()  # --camera=px,py,pz,tx,ty,tz: fixed camera for screenshots
 var _fixed_cam: Camera3D = null
@@ -265,6 +266,8 @@ func _ready() -> void:
 			_open_report(false)
 			if _report_title != "":
 				_report_form._title.text = _report_title
+			for tag in _report_tags:
+				_report_form.toggle_tag(tag)
 			if _report_at_start == "send":
 				print("report: saved %s" % _report_form.send()))
 	if _free_camera.size() == 6:
@@ -939,6 +942,8 @@ func _parse_args() -> void:
 			_record_music = arg.get_slice("=", 1)
 		elif arg.begins_with("--radio="):
 			_radio_start = arg.get_slice("=", 1)
+		elif arg.begins_with("--report-tags="):
+			_report_tags = arg.get_slice("=", 1).split(",", false)
 		elif arg.begins_with("--report-title="):
 			_report_title = arg.get_slice("=", 1)
 		elif arg == "--report" or arg == "--report-send":

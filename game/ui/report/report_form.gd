@@ -1,8 +1,9 @@
 class_name ReportForm
 extends CanvasLayer
-## "Report a problem": screenshot, area and severity, what happened, whether to include this
-## install's reporter id, a review page listing everything that will be sent, and the queue. The
-## title is generated from the area, severity and place.
+## "Report a problem": screenshot, area and severity, quick tags (report_tags.json; Left / Right
+## and A, or a click), what happened (optional: tags alone are enough on a Deck with no keyboard),
+## whether to include this install's reporter id, a review page listing everything that will be
+## sent, and the queue. The title is generated from the area, severity, place and tags.
 ##
 ## Opened from the pause menu (any input device) or with F8, while the tree is paused. Handles its
 ## own navigation in _input like the pause menu: up/down move, left/right change a choice, A
@@ -15,8 +16,9 @@ extends CanvasLayer
 signal closed
 
 enum Page { MAIN, REVIEW, QUEUE }
-const ROWS := ["shot", "area", "severity", "description", "reporter", "review", "send", "queue", "cancel"]
-const THUMB_SIZE := Vector2(224, 140)
+const ROWS := ["shot", "area", "severity", "tags", "description", "reporter", "review", "send", "queue", "cancel"]
+const THUMB_SIZE := Vector2(176, 110)  # small enough that the form, tags row included, fits 1280x800
+const DESCRIPTION_HEIGHT := 64.0
 
 var store: ReportStore
 ## Sends saved reports: `send(id)` and `send_due()`, signal `report_state_changed(id, state)`. Optional.
@@ -37,6 +39,10 @@ var _include_reporter: bool = false
 var _reporter_id: String = ""
 var _queue_selected: int = 0
 var _queue_action: int = 0
+var _tag_table: Array = []  # ReportStore.tags(): [{"id", "label"}]
+var _tags: Array = []  # picked tag ids
+var _tag_cursor: int = 0
+var _tag_chips: Array[Button] = []
 
 var _panel: PanelContainer
 var _main: VBoxContainer
@@ -72,6 +78,8 @@ func open(screenshot: Image, diagnostics: Dictionary, log_tail: Array) -> void:
 	_sent_id = ""
 	_include_reporter = false
 	_reporter_id = ReportStore.reporter_id()
+	_tags = []
+	_tag_cursor = 0
 	_description.text = ""
 	_status.text = ""
 	_thumb.texture = ImageTexture.create_from_image(screenshot) if screenshot != null else null
@@ -97,7 +105,22 @@ func fields() -> Dictionary:
 	return {
 		"area": ReportStore.AREAS[_area][0], "severity": ReportStore.SEVERITIES[_severity][0],
 		"description": _description.text, "reporter_id": _reporter_id if _include_reporter else "",
+		"tags": ReportStore.ordered_tags(_tags, _tag_table),
 	}
+
+
+## Turns a quick tag on or off (A on the tags row, or a click on its chip).
+func toggle_tag(id: String) -> void:
+	if id in _tags:
+		_tags.erase(id)
+	else:
+		_tags.append(id)
+	_refresh()
+
+
+## The picked tag ids, in the list's order.
+func picked_tags() -> Array:
+	return ReportStore.ordered_tags(_tags, _tag_table)
 
 
 ## The report as it would be sent now (for the review page and tests).
@@ -215,6 +238,9 @@ func _change(row: String, delta: int) -> void:
 			_severity = posmod(_severity + delta, ReportStore.SEVERITIES.size())
 		"reporter":
 			_include_reporter = not _include_reporter
+		"tags":
+			if not _tag_table.is_empty():
+				_tag_cursor = posmod(_tag_cursor + delta, _tag_table.size())
 	_refresh()
 
 
@@ -222,6 +248,9 @@ func _activate(row: String) -> void:
 	match row:
 		"shot", "area", "severity", "reporter":
 			_change(row, 1)
+		"tags":
+			if not _tag_table.is_empty():
+				toggle_tag(str(_tag_table[_tag_cursor]["id"]))
 		"description":
 			_description.grab_focus()
 		"review":
@@ -254,12 +283,14 @@ func _refresh() -> void:
 		"shot": ("<  included  >" if _include_shot else "<  left out  >") if _screenshot != null else "none captured",
 		"area": "<  %s  >" % ReportStore.AREAS[_area][1],
 		"severity": "<  %s  >" % ReportStore.SEVERITIES[_severity][1],
+		"tags": ("%d picked" % _tags.size()) if not _tags.is_empty() else "",
 		"description": "", "reporter": ("<  included: %s  >" % _reporter_id) if _include_reporter else "<  not included  >",
 		"review": "", "send": _send_state(), "queue": "%d saved" % (store.list().size() if store != null else 0), "cancel": "",
 	}
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity",
-		"description": "What happened (A to type, B when done)", "reporter": "Reporter id", "review": "Review what will be sent",
+		"tags": "Tags (Left / Right, A to pick)",
+		"description": "What happened, optional (A to type, B when done)", "reporter": "Reporter id", "review": "Review what will be sent",
 		"send": "Send report", "queue": "Saved reports", "cancel": "Cancel",
 	}
 	for i in range(ROWS.size()):
@@ -269,7 +300,33 @@ func _refresh() -> void:
 		label.text = captions[row] + ("    " + value if value != "" else "")
 		MenuTheme.set_selected(label, i == _selected, true)
 	_thumb.modulate = Color(1, 1, 1, 1.0 if _include_shot else 0.25)
-	_title.text = ReportStore.auto_title(ReportStore.AREAS[_area][0], ReportStore.SEVERITIES[_severity][0], _diagnostics.get("place", {}))
+	_title.text = ReportStore.auto_title(ReportStore.AREAS[_area][0], ReportStore.SEVERITIES[_severity][0], _diagnostics.get("place", {}), picked_tags())
+	_refresh_chips()
+
+
+## Chips show which tags are on; while the tags row is selected, the cursor's chip gets an outline.
+func _refresh_chips() -> void:
+	var on_row: bool = _page == Page.MAIN and ROWS[_selected] == "tags"
+	var t := MenuTheme.theme()
+	var outline := t.get_color("font_hover_color", MenuTheme.TAB)
+	for i in range(_tag_chips.size()):
+		var chip := _tag_chips[i]
+		chip.set_pressed_no_signal(str(_tag_table[i]["id"]) in _tags)
+		for state in ["normal", "hover", "pressed", "hover_pressed"]:
+			chip.remove_theme_stylebox_override(state)
+		if on_row and i == _tag_cursor:
+			for state in ["normal", "hover", "pressed", "hover_pressed"]:
+				var box := t.get_stylebox(state, MenuTheme.TAB).duplicate() as StyleBox
+				if box is StyleBoxFlat:
+					(box as StyleBoxFlat).set_border_width_all(2)
+					(box as StyleBoxFlat).border_color = outline
+				chip.add_theme_stylebox_override(state, box)
+
+
+func _on_chip(i: int) -> void:
+	_selected = ROWS.find("tags")
+	_tag_cursor = i
+	toggle_tag(str(_tag_table[i]["id"]))
 
 
 ## "sent" once the relay confirmed, "saved" while it waits, nothing before Send.
@@ -394,9 +451,28 @@ func _build() -> void:
 		_labels[row] = label
 		_main.add_child(label)
 		match row:
+			"tags":
+				_tag_table = ReportStore.tags()
+				var flow := HFlowContainer.new()
+				flow.add_theme_constant_override("h_separation", 8)
+				flow.add_theme_constant_override("v_separation", 6)
+				for i in range(_tag_table.size()):
+					var chip := Button.new()
+					chip.text = str(_tag_table[i]["label"])
+					chip.theme_type_variation = MenuTheme.TAB
+					chip.toggle_mode = true
+					chip.focus_mode = Control.FOCUS_NONE
+					chip.pressed.connect(_on_chip.bind(i))
+					flow.add_child(chip)
+					_tag_chips.append(chip)
+				var pad := MarginContainer.new()
+				pad.add_theme_constant_override("margin_left", 18)
+				pad.add_theme_constant_override("margin_bottom", 4)
+				pad.add_child(flow)
+				_main.add_child(pad)
 			"description":
 				_description = TextEdit.new()
-				_description.custom_minimum_size = Vector2(0, 88)
+				_description.custom_minimum_size = Vector2(0, DESCRIPTION_HEIGHT)
 				_description.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 				_description.placeholder_text = "What did you see, and what did you expect?"
 				_description.focus_mode = Control.FOCUS_CLICK

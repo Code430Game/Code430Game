@@ -1,0 +1,11 @@
+{
+  "_doc": "Quick tags on the report form (human, 2026-10-06: type-free reports on the Deck). Picked with Left/Right and A, or a click; several can be on. Ids go into the report's optional `tags` field and become `tag:<id>` labels on the issue; ids must match the schema's pattern (lower case, underscores).",
+  "tags": [
+    {"id": "looks_wrong", "label": "Looks wrong"},
+    {"id": "stuck", "label": "Stuck"},
+    {"id": "fell_through", "label": "Fell through"},
+    {"id": "car_problem", "label": "Car problem"},
+    {"id": "police", "label": "Police"},
+    {"id": "other", "label": "Other"}
+  ]
+}

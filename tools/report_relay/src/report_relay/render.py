@@ -55,7 +55,13 @@ def labels(report: dict) -> list[str]:
         "needs-triage",
         f"area:{report['area']}",
         f"severity:{report['severity']}",
-    ]
+    ] + [f"tag:{t}" for t in report.get("tags", [])]
+
+
+def tag_name(tag_id: str) -> str:
+    """A tag id as words, fell_through as Fell through (the game's own labels follow this rule)."""
+    words = tag_id.replace("_", " ").strip()
+    return words[:1].upper() + words[1:]
 
 
 def marker(report_id: str) -> str:
@@ -149,6 +155,8 @@ def body(report: dict, screenshot_url: str | None) -> str:
         f"**Place:** {where}" + (f" ({ids})" if ids else ""),
         "",
     ]
+    if report.get("tags"):
+        head[1:1] = ["", "**Tags:** " + ", ".join(defuse(tag_name(t)) for t in report["tags"])]
     if report["description"].strip():
         head += [defuse(report["description"]), ""]
     if screenshot_url:

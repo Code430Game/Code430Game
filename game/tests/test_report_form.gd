@@ -190,3 +190,44 @@ func test_report_row_in_the_pause_menu() -> void:
 	await _press(JOY_BUTTON_A)
 	assert_int(requested[0]).is_equal(1)
 	menu.close()
+
+
+## Quick tags picked with the D-pad and A; a report with tags and no text can be sent.
+func test_tags_are_picked_with_the_controller_and_sent_without_text() -> void:
+	await _go_to("tags")
+	await _press(JOY_BUTTON_DPAD_RIGHT)  # cursor to the second tag, "Stuck"
+	await _press(JOY_BUTTON_A)
+	for i in range(3):
+		await _press(JOY_BUTTON_DPAD_RIGHT)  # on to "Police"
+	await _press(JOY_BUTTON_A)
+	assert_array(_form.picked_tags()).is_equal(["stuck", "police"])
+	await _press(JOY_BUTTON_A)  # A again turns "Police" off
+	assert_array(_form.picked_tags()).is_equal(["stuck"])
+	await _press(JOY_BUTTON_A)
+	assert_str(_form._title.text).ends_with("Stuck, Police")
+	await _go_to("send")
+	await _press(JOY_BUTTON_A)
+	var rows := _form.store.list()
+	assert_int(rows.size()).is_equal(1)
+	var report := _form.store.load_report(rows[0]["id"])
+	assert_array(report["tags"]).is_equal(["stuck", "police"])
+	assert_str(report["description"]).is_equal("")
+
+
+## The tags row made the form taller than the Deck's 800 px screen once; it must fit with room.
+func test_the_form_fits_a_deck_screen() -> void:
+	await get_tree().process_frame
+	assert_float(_form._panel.get_combined_minimum_size().y).is_less_equal(780.0)
+
+
+func test_a_click_on_a_chip_toggles_its_tag() -> void:
+	var chip: Button = _form._tag_chips[0]
+	chip.pressed.emit()
+	assert_array(_form.picked_tags()).is_equal(["looks_wrong"])
+	assert_bool(chip.button_pressed).is_true()
+	assert_str(ReportForm.ROWS[_form._selected]).is_equal("tags")
+	chip.pressed.emit()
+	assert_array(_form.picked_tags()).is_empty()
+	# A fresh open clears the tags.
+	_form.open(null, {}, [])
+	assert_array(_form.picked_tags()).is_empty()

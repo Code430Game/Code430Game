@@ -129,3 +129,27 @@ func test_handoff_url_is_prefilled_and_short() -> void:
 	# No description: no blank gap where it would go.
 	var empty := ReportStore.handoff_url("rjksn/Code430", _report()).uri_decode()
 	assert_str(empty).not_contains("\n\n\n")
+
+
+## Quick tags (human, 2026-10-06): optional, in list order, in the title and the hand-off, and
+## absent from untagged reports so those stay exactly as before.
+func test_tags_are_optional_ordered_and_fit_the_schema() -> void:
+	assert_bool(_report().has("tags")).override_failure_message("an untagged report gained a tags key").is_false()
+	var report := _report({"tags": ["police", "stuck", "made_up", "stuck"]})
+	assert_array(report["tags"]).is_equal(["stuck", "police"])
+	assert_array(ReportSchema.check(report, ReportSchema.schema())).is_empty()
+	assert_str(report["title"]).is_equal("Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18) · Stuck, Police")
+	assert_str(report["description"]).is_equal("")
+	var url := ReportStore.handoff_url("rjksn/Code430", report)
+	assert_str(url).contains("tag%3Astuck")
+	assert_str(url.uri_decode()).contains("**Tags:** Stuck, Police")
+
+
+func test_every_tag_id_fits_the_schema_pattern_and_names_follow_the_relay_rule() -> void:
+	var table := ReportStore.tags()
+	assert_int(table.size()).is_greater_equal(4)
+	var pattern := RegEx.create_from_string(str(ReportSchema.schema()["properties"]["tags"]["items"]["pattern"]))
+	for t: Dictionary in table:
+		assert_bool(pattern.search(t["id"]) != null).override_failure_message("tag id %s breaks the schema pattern" % t["id"]).is_true()
+		var words := str(t["id"]).replace("_", " ")
+		assert_str(t["label"]).is_equal(words.substr(0, 1).to_upper() + words.substr(1))

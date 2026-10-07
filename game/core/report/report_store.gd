@@ -27,6 +27,8 @@ const AREAS := [
 	["crash", "Crash or freeze"], ["other", "Other"],
 ]
 const SEVERITIES := [["cosmetic", "Cosmetic"], ["annoying", "Annoying"], ["blocks_play", "Blocks play"], ["crash", "Crash"]]
+## The quick tags the form offers, [{"id", "label"}] in display order.
+const TAGS_PATH := "res://ui/report/report_tags.json"
 
 var base: String
 
@@ -43,14 +45,49 @@ static func label_of(table: Array, id: String) -> String:
 	return id
 
 
-## "Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18)": every report's title,
-## made from what the player chose and where they were.
-static func auto_title(area: String, severity: String, place: Dictionary) -> String:
+## The quick tags from `TAGS_PATH`: [{"id", "label"}] in display order ([] when missing).
+static func tags(path: String = TAGS_PATH) -> Array:
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	var out := []
+	if data is Dictionary:
+		for t: Variant in (data as Dictionary).get("tags", []):
+			if t is Dictionary and str(t.get("id", "")) != "":
+				out.append({"id": str(t["id"]), "label": str(t.get("label", t["id"]))})
+	return out
+
+
+## `picked` as known tag ids in the list's order, each once; unknown ids are dropped.
+static func ordered_tags(picked: Array, table: Array = tags()) -> Array:
+	var out := []
+	for t: Dictionary in table:
+		if t["id"] in picked and not (t["id"] in out):
+			out.append(t["id"])
+	return out
+
+
+## Display labels for tag ids ("stuck" -> "Stuck"); an id not in the list shows as itself.
+static func tag_labels(ids: Array, table: Array = tags()) -> PackedStringArray:
+	var out := PackedStringArray()
+	for id: Variant in ids:
+		var label := str(id)
+		for t: Dictionary in table:
+			if t["id"] == str(id):
+				label = t["label"]
+		out.append(label)
+	return out
+
+
+## "Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18) · Stuck, Police": every
+## report's title, made from what the player chose and where they were. Tags go last, so a long
+## title loses them before the place.
+static func auto_title(area: String, severity: String, place: Dictionary, tag_ids: Array = []) -> String:
 	var title := "Report: %s · %s" % [label_of(AREAS, area), label_of(SEVERITIES, severity)]
 	if str(place.get("mode", "none")) != "none":
 		var at := "x %d, z %d" % [roundi(float(place["x"])), roundi(float(place["z"]))]
 		var road := str(place.get("road", ""))
 		title += " · %s (%s)" % [road, at] if road != "" else " (%s)" % at
+	if not tag_ids.is_empty():
+		title += " · " + ", ".join(tag_labels(tag_ids))
 	return title.substr(0, TITLE_MAX)
 
 
@@ -76,12 +113,14 @@ static func new_id(unix_time: float = Time.get_unix_time_from_system()) -> Strin
 
 
 ## Builds the report dictionary (schema version 1) from what the player chose and the diagnostics.
+## `tags` is present only when the player picked some, so an untagged report is exactly as before.
 static func build(fields: Dictionary, diagnostics: Dictionary, log_tail: Array, has_screenshot: bool, unix_time: float = Time.get_unix_time_from_system()) -> Dictionary:
 	var area := str(fields.get("area", "other"))
 	var severity := str(fields.get("severity", "annoying"))
-	var title := auto_title(area, severity, diagnostics.get("place", {}))
+	var picked := ordered_tags(fields.get("tags", []))
+	var title := auto_title(area, severity, diagnostics.get("place", {}), picked)
 	var t := Time.get_datetime_dict_from_unix_time(int(unix_time))
-	return {
+	var report := {
 		"version": 1,
 		"id": new_id(unix_time),
 		"created_at": "%04d-%02d-%02dT%02d:%02d:%02dZ" % [t.year, t.month, t.day, t.hour, t.minute, t.second],
@@ -94,6 +133,9 @@ static func build(fields: Dictionary, diagnostics: Dictionary, log_tail: Array, 
 		"diagnostics": diagnostics,
 		"log_tail": log_tail,
 	}
+	if not picked.is_empty():
+		report["tags"] = picked
+	return report
 
 
 ## Saves a report and its screenshot (downscaled, JPEG) as queued. Returns the report id.
@@ -221,7 +263,12 @@ static func handoff_url(repo: String, report: Dictionary) -> String:
 	if description != "":
 		lines.insert(3, description)
 		lines.insert(4, "")
+	var tag_ids: Array = report.get("tags", [])
+	if not tag_ids.is_empty():
+		lines.insert(1, "**Tags:** " + ", ".join(tag_labels(tag_ids)))
 	var labels := "in-game-report,needs-triage,area:%s,severity:%s" % [report["area"], report["severity"]]
+	for id: Variant in tag_ids:
+		labels += ",tag:%s" % id
 	var head := "https://github.com/%s/issues/new?labels=%s&title=%s&body=" % [repo, labels.uri_encode(), str(report["title"]).uri_encode()]
 	var body := "\n".join(lines)
 	while body.length() > 0 and (head + body.uri_encode()).length() > HANDOFF_URL_MAX:
