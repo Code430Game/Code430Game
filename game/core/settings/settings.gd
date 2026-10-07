@@ -190,6 +190,9 @@ func apply_to_environment(env: Environment) -> void:
 	env.ssao_enabled = bool(preset["ssao"])
 	env.ssil_enabled = bool(preset["ssil"])
 	env.volumetric_fog_enabled = bool(preset["volumetric_fog"])
+	# Godot's default density (0.05 per metre) whites the city out past about 50 m; the preset
+	# sets a light haze instead.
+	env.volumetric_fog_density = float(preset["volumetric_fog_density"])
 	env.glow_enabled = bool(preset["glow"])
 
 
