@@ -59,6 +59,13 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
 - **Fell under the floor after being busted.** Probably the respawn landed before that area's
   ground had loaded. f555839 now builds the ground at the arrival point first. Unconfirmed,
   because the place wasn't recorded; watch for it.
+- **A ground shadow for the helicopter** (human: "ideally a shadow would be wicked too"). By
+  day, the minimap is the only reliable way to place it. At 55 m up, its real shadow falls
+  outside the deck preset's shadow distance. A soft blob decal on the ground below it, faded by
+  height, sun angle and time of day, would show where it is without costly shadows. A small
+  `fix/` or a task on a later police change.
+- **Every moving thing gets a sound** (human: "Maybe all items can get sounds in one feature
+  ticket"). Folded into `update-audio-pass`, which already planned positional sirens and rotor.
 - **Fixed during the session:**
   - hold R3 on foot goes back to the start (f555839);
   - the police and the helicopter show on the minimap (ed2ee5a).
