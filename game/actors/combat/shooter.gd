@@ -29,6 +29,8 @@ const MUZZLE_UP_M := 1.35
 
 var player: Player
 var peds: PedestrianManager
+## The police, whose officers the weapons reach (add-police-combat); null: none.
+var police: PoliceManager
 var effects: CombatEffects
 var weapons: WeaponSet
 var hud: Label
@@ -375,6 +377,9 @@ func _swing(w: Dictionary) -> void:
 	q.exclude = [player.get_rid()]
 	for r in player.get_world_3d().direct_space_state.intersect_shape(q, 8):
 		var body: Object = r["collider"]
+		if body is OfficerBody and police != null and police.in_fight((body as OfficerBody).officer):
+			hit(w, body, centre, -fwd, player.global_position)
+			return
 		var who: Pedestrian = peds.agent_of(body as Node) if peds != null and body is Node else null
 		if who != null and who.state == Pedestrian.State.WALKING:
 			hit(w, body, centre, -fwd, player.global_position)
@@ -416,6 +421,8 @@ func _make_ball() -> RigidBody3D:
 	b.contact_monitor = true
 	b.max_contacts_reported = 1
 	b.continuous_cd = true
+	# The world, walkers' bodies and officers: a paintball has to land on people, not just walls.
+	b.collision_mask = 1 | PedestrianBody.LAYER | OfficerBody.LAYER
 	b.add_collision_exception_with(player)
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
@@ -464,6 +471,9 @@ func _retire(ball: RigidBody3D) -> void:
 func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: Vector3) -> void:
 	var kind := str(w.get("impact", ""))
 	var imp := weapons.impact(kind)
+	if collider is OfficerBody:
+		_hit_officer((collider as OfficerBody).officer, w, pos, from)
+		return
 	var a: Pedestrian = peds.agent_of(collider as Node) if peds != null and collider is Node else null
 	if a != null and a.state != Pedestrian.State.WALKING:
 		return  # already down or falling: nothing more happens, and no new crime is reported
@@ -487,6 +497,25 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 	if effects != null and collider is StaticBody3D:
 		_paint_index = (_paint_index + 1) % 4
 		effects.mark(str(imp.get("decal", "")), pos, normal, _paint_index)
+
+
+## A hit on a police officer (add-police-combat): the PoliceManager decides what it does; a
+## knock-down by a lethal weapon leaves blood where gore is allowed, and paint marks the ground
+## by a tagged-out officer.
+func _hit_officer(o: Node3D, w: Dictionary, pos: Vector3, from: Vector3) -> void:
+	if police == null or o == null:
+		return
+	var kind := str(w.get("impact", ""))
+	var result := police.hit_officer(o, w, pos, from)
+	if result == "" or effects == null:
+		return
+	if kind == "fist":
+		effects.sound(str(weapons.impact("fist").get("sound", "")))
+	if result == "down" and bool(w.get("lethal", false)) and ContentMode.allows("gore"):
+		effects.mark("blood", o.global_position + Vector3.UP * 0.02, Vector3.UP)
+	elif kind == "paint":
+		_paint_index = (_paint_index + 1) % 4
+		effects.mark(str(weapons.impact(kind).get("decal", "")), o.global_position + Vector3.UP * 0.02, Vector3.UP, _paint_index)
 
 
 ## A punch or kick landing on a walker: a knock-down for a kick or the punch that completes a
