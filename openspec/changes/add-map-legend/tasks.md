@@ -1,10 +1,14 @@
 ## 1. Data
-- [ ] 1.1 Importer keeps `addr:*` on service places; nearest-street fallback; optional `address` in the services schema; golden and pack re-exported; tests (an address kept, a fallback, schema)
+- [x] 1.1 Importer keeps `addr:*` on service places; nearest-street fallback; optional `address` in the services schema; golden and pack re-exported; tests (an address kept, a fallback, schema)
+  - 2026-10-07: `services.py` takes a place's own `addr:housenumber` + `addr:street` (+ `addr:unit`), else the building it stands in or the nearest within `building_near_m` (15 m) from the buildings payload already fetched, else "on <street>" for the nearest named road within `street_near_m` (120 m); settings in `road_classes.json` `services`. `address` is optional in `services.schema.v0.json` (v0, pre-release) and left out, not null, when unknown. A re-export of 0758bd7 from the cache was byte-identical before the change; after it only `services.v0.json` and the validation report change (the golden covers the road graph only and is unchanged). Ottawa: 8 addresses from the places' own tags, 3 from their building, 0 street fallbacks, 1 none (the helipad at x -939, z -1009 by the river: no named road within 150 m). Tests in `test_osm_service_addresses.py` (9).
 
 ## 2. Map
-- [ ] 2.1 Place icons (one flat set) shared by the legend, the full map and the minimap; tests on the icon lookup and a fallback
-- [ ] 2.2 Legend panel on the full map: kinds with icon and name; A or click opens a kind's places (name, address, nearest first); A centres and highlights; B goes back; tests on the navigation and the order
-- [ ] 2.3 Mac screenshots: legend, a kind opened, a place centred
+- [x] 2.1 Place icons (one flat set) shared by the legend, the full map and the minimap; tests on the icon lookup and a fallback
+  - 2026-10-07: `PlaceIcons` + `place_icons.json` (kind, name, colour, icon; sizes) and eight original white SVGs in `ui/map/icons/places/` (police badge, hospital plus, flame, ambulance van, security shield, helicopter, car under a roof, and `missing`), imported at 2x with mipmaps. Markers moved out of the baked map texture: both maps draw them at screen size (a disc of the kind's colour with the icon), so they stay sharp at any zoom; the old letter discs and the garage "P" are gone. Underground garages are places too (`Services.garage_places`, "on <street>" in the game).
+- [x] 2.2 Legend panel on the full map: kinds with icon and name; A or click opens a kind's places (name, address, nearest first); A centres and highlights; B goes back; tests on the navigation and the order
+  - 2026-10-07: `MapLegend` (MenuTheme panel, right of the map under the header). Kinds: icon, name, count. Places: icon, address (or "No street address"), name below (wraps), distance; nearest the player first. Up / Down (D-pad, arrows; not the sticks, which pan and move the cursor), A, B; a click opens, a right click goes back; B on the kinds closes the map. Picking centres the place left of the panel, rings it in the tone's accent with its name, keeps it centred through zoom until the player pans, and hides the road tooltip until the cursor moves. The panel sizes to its rows and scrolls past the screen. `--map-pick=kind[,n]` for screenshots. Tests in `test_map_legend.gd` (11).
+- [x] 2.3 Mac screenshots: legend, a kind opened, a place centred
+  - 2026-10-07: the kinds (Police 2, Hospital 2, Fire station 2, Ambulance post 3, Security 2, Helipad 1, Parking garage 16); Police opened (474 Elgin Street, Ottawa Police Headquarters, 140 m; 50 Rideau Street, 1.7 km); each picked and centred with its ring and name.
 
 ## 3. Check
 - [ ] 3.1 Human finds the police station from the map on the Deck

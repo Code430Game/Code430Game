@@ -15,7 +15,7 @@ const WATER := Color(0.16, 0.32, 0.45)
 const BUILDING := Color(0.20, 0.21, 0.24)
 const PARKING := Color(0.25, 0.26, 0.29)  # lots: a shade lighter than buildings, under them
 const GARAGE := Color(0.45, 0.62, 0.9)
-const GREEN := {"park": Color(0.17, 0.27, 0.17), "garden": Color(0.17, 0.27, 0.17), "grass": Color(0.16, 0.24, 0.16), "wood": Color(0.13, 0.23, 0.14), "scrub": Color(0.16, 0.24, 0.15)}  # underground garages: a dashed outline and a P, over the buildings
+const GREEN := {"park": Color(0.17, 0.27, 0.17), "garden": Color(0.17, 0.27, 0.17), "grass": Color(0.16, 0.24, 0.16), "wood": Color(0.13, 0.23, 0.14), "scrub": Color(0.16, 0.24, 0.15)}  # underground garages: a dashed outline over the buildings (their marker is a PlaceIcons garage)
 
 var metres_per_pixel: float = DEFAULT_METRES_PER_PIXEL
 var min_x: float = 0.0
@@ -48,7 +48,9 @@ static func road_width_px(road_class: String) -> float:
 
 
 ## Draws the map into `texture`. Must be called from a node in the tree; awaits one frame.
-func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = [], places: Array = []) -> void:
+## Place markers (services, garages) aren't baked in: the maps draw them with PlaceIcons at
+## screen size so they stay sharp at any zoom (add-map-legend).
+func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = []) -> void:
 	var viewport := SubViewport.new()
 	viewport.size = size_px
 	viewport.transparent_bg = false
@@ -61,7 +63,6 @@ func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon
 	canvas.buildings = buildings
 	canvas.lots = lots
 	canvas.green = green
-	canvas.places = places
 	viewport.add_child(canvas)
 	host.add_child(viewport)
 	await RenderingServer.frame_post_draw
@@ -79,7 +80,6 @@ class MapCanvas:
 	var buildings: Array[BuildingBuilder.Building] = []
 	var lots: Array = []  # ParkingLotBuilder.Lot
 	var green: Array = []  # {"kind", "vertices": PackedVector2Array, "triangles": PackedInt32Array}
-	var places: Array = []  # Services.Place
 
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(renderer.size_px)), BACKGROUND)
@@ -128,9 +128,6 @@ class MapCanvas:
 				ring.append(renderer.world_to_pixel(v.x, v.y))
 			for i in range(ring.size()):
 				draw_dashed_line(ring[i], ring[(i + 1) % ring.size()], GARAGE, 1.5, 4.0)
-			var centre := renderer.world_to_pixel(lot.bounds.get_center().x, lot.bounds.get_center().y)
-			draw_circle(centre, 7.0, GARAGE)
-			draw_string(ThemeDB.fallback_font, centre + Vector2(-4.0, 5.0), "P", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
 		for w in water:
 			var pts := PackedVector2Array()
 			for v in w.vertices:
@@ -149,10 +146,3 @@ class MapCanvas:
 				pts.append(renderer.world_to_pixel(p.x, p.z))
 			var color: Color = RoadGraphDebugView.DEBUG_COLORS.get(e.road_class, Color.WHITE)
 			draw_polyline(pts, color.darkened(0.25), MapRenderer.road_width_px(e.road_class), true)
-		# Emergency services on top of everything (add-emergency-services).
-		for pl in places:
-			var icon: Dictionary = Services.ICON.get(pl.kind, {"letter": "?", "color": Color.WHITE})
-			var c := renderer.world_to_pixel(pl.at.x, pl.at.z)
-			draw_circle(c, 7.0, Color(0, 0, 0, 0.7))
-			draw_circle(c, 6.0, icon["color"])
-			draw_string(ThemeDB.fallback_font, c + Vector2(-3.5, 4.5), str(icon["letter"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)

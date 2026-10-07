@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Code 430 place icon (CC BY-SA 4.0): an underground garage, a car under a roof -->
+<g fill="#fff">
+<path d="M4 26 L32 8 L60 26 V31 L32 13 L4 31 Z"/>
+<path fill-rule="evenodd" d="M16 38 L20 30 Q21 28 24 28 H40 Q43 28 44 30 L48 38 Q51 38 51 41 V49 Q51 51 49 51 H46 V54 Q46 56 44 56 H41 Q39 56 39 54 V51 H25 V54 Q25 56 23 56 H20 Q18 56 18 54 V51 H15 Q13 51 13 49 V41 Q13 38 16 38 Z M21 38 H43 L40.5 32 H23.5 Z"/>
+</g>
+</svg>

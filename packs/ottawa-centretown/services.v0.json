@@ -1,6 +1,7 @@
 {
  "places": [
   {
+   "address": "464 Metcalfe Street",
    "at": [
     535.64,
     68.39,
@@ -12,6 +13,7 @@
    "road_node": "n3946608913"
   },
   {
+   "address": "141 Louis-Pasteur Private",
    "at": [
     1158.55,
     68.52,
@@ -34,6 +36,7 @@
    "road_node": "n7294974019"
   },
   {
+   "address": "530 King Edward Avenue",
    "at": [
     911.96,
     69.25,
@@ -45,6 +48,7 @@
    "road_node": "n7132286907"
   },
   {
+   "address": "135 Preston Street",
    "at": [
     -1444.44,
     57.53,
@@ -56,6 +60,7 @@
    "road_node": "n1829214946"
   },
   {
+   "address": "474 Elgin Street",
    "at": [
     638.6,
     68.53,
@@ -67,6 +72,7 @@
    "road_node": "n6555326754"
   },
   {
+   "address": "60 Cambridge Street North",
    "at": [
     -1083.79,
     80.43,
@@ -78,6 +84,7 @@
    "road_node": "n12407480403"
   },
   {
+   "address": "384 St. Patrick Street",
    "at": [
     564.49,
     57.93,
@@ -89,6 +96,7 @@
    "road_node": "c901057972"
   },
   {
+   "address": "738 Gladstone Avenue",
    "at": [
     -758.37,
     69.89,
@@ -100,6 +108,7 @@
    "road_node": "n6586705262"
   },
   {
+   "address": "43 Bruyère Street",
    "at": [
     -143.31,
     58.13,
@@ -111,6 +120,7 @@
    "road_node": "n7787781207"
   },
   {
+   "address": "50 Rideau Street",
    "at": [
     314.49,
     64.74,
@@ -122,6 +132,7 @@
    "road_node": "n6809857764"
   },
   {
+   "address": "50 Rideau Street",
    "at": [
     412.18,
     65.02,

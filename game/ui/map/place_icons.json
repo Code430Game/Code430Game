@@ -1,0 +1,17 @@
+{
+  "_doc": "Kinds of place on the maps (add-map-legend): the legend's order, the name it shows, the marker's colour and the icon in ui/map/icons/places/ (white SVG, tinted by nothing: the disc carries the colour). A kind missing here gets the 'missing' icon and its id as the name.",
+  "marker_radius_px": 9.0,
+  "minimap_radius_px": 7.0,
+  "highlight_radius_px": 16.0,
+  "highlight_pulse_s": 0.9,
+  "garage_street_m": 120.0,
+  "kinds": [
+    {"kind": "police", "name": "Police", "color": "#3366f2", "icon": "police"},
+    {"kind": "hospital", "name": "Hospital", "color": "#e5333f", "icon": "hospital"},
+    {"kind": "fire_station", "name": "Fire station", "color": "#f2801a", "icon": "fire_station"},
+    {"kind": "ambulance", "name": "Ambulance post", "color": "#d9466b", "icon": "ambulance"},
+    {"kind": "security", "name": "Security", "color": "#66739a", "icon": "security"},
+    {"kind": "helipad", "name": "Helipad", "color": "#8a8fa3", "icon": "helipad"},
+    {"kind": "garage", "name": "Parking garage", "color": "#4a7fd9", "icon": "garage"}
+  ]
+}

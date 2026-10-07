@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Code 430 place icon (CC BY-SA 4.0): an ambulance post, a van with a plus on its side -->
+<path fill="#fff" fill-rule="evenodd" d="M5 18 Q5 15 8 15 H40 Q43 15 43 18 V22 H50 Q53 22 55 25 L59 33 Q60 35 60 37 V45 Q60 47 58 47 H55 A7 7 0 0 0 41 47 H24 A7 7 0 0 0 10 47 H7 Q5 47 5 45 Z M45 26 V34 H55 L51 26 Z M20 21 V26 H15 V32 H20 V37 H26 V32 H31 V26 H26 V21 Z"/>
+<circle fill="#fff" cx="17" cy="49" r="5"/>
+<circle fill="#fff" cx="48" cy="49" r="5"/>
+</svg>

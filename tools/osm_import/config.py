@@ -43,6 +43,7 @@ class ImportConfig:
     likely_real_dead_end_classes: frozenset[str]
     defaults: dict[str, ClassDefaults] = field(default_factory=dict)
     source_path: str = ""
+    services: dict = field(default_factory=dict)
 
     def for_class(self, road_class: str) -> ClassDefaults:
         """Defaults for a road class; raises KeyError for classes not in the table."""
@@ -77,6 +78,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> ImportConfig:
         likely_real_dead_end_classes=frozenset(raw["likely_real_dead_end_classes"]),
         defaults=defaults,
         source_path=str(path),
+        services=dict(raw.get("services", {})),
     )
     missing = [c for c in cfg.drivable_classes if c not in cfg.defaults]
     if missing:

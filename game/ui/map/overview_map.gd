@@ -4,6 +4,11 @@ extends CanvasLayer
 ## Pauses the game while open. Left stick pans, right stick moves the cursor,
 ## triggers zoom, and the road under the cursor is highlighted and named. Its header and hover
 ## label use MenuTheme (update-menu-design).
+##
+## Places (services and garages) are drawn at screen size with PlaceIcons, and the legend on
+## the right lists them (add-map-legend): Up / Down and A open a kind and pick a place, which
+## centres the map on it and highlights it; B goes back a level, and closes the map from the
+## kinds. A click works on the rows, a right click goes back.
 
 signal opened
 signal closed
@@ -16,15 +21,34 @@ const CURSOR_SPEED_PX := 700.0
 const HOVER_RADIUS_M := 40.0
 const PLAYER_MARKER_PX := 14.0
 const COMBO_ACTIONS := ["debug_toggle", "debug_graph", "reset_vehicle"]
+const LEGEND_MARGIN_PX := 16.0
+const LEGEND_TOP_PX := 84.0  # below the header strip
+const LEGEND_ACTIONS := ["ui_up", "ui_down", "ui_accept", "ui_cancel"]
 
 var renderer: MapRenderer
 var graph: RoadGraph
 var player: Node3D
-var zoom: float = 0.6
+var zoom: float = 0.6:
+	set(value):
+		zoom = value
+		if _focus_locked:
+			_centre_on_focus()  # zooming keeps a picked place in the middle
 var pan: Vector2 = Vector2.ZERO  # screen pixels offset from the player-centred view
 var cursor: Vector2 = Vector2.ZERO  # screen pixels relative to the view centre
 var hovered_edge: RoadGraph.RoadEdge
+## Fixed places to mark and list (Services.Place: services and garages).
+var places: Array = []:
+	set(value):
+		places = value
+		if legend != null:
+			legend.places = value
+			legend.rebuild()
+## The place picked in the legend, highlighted; the view stays centred on it until panned.
+var focused: Services.Place
+var legend: MapLegend
 var _back_armed: bool = false
+var _focus_locked: bool = false
+var _hover_hidden: bool = false  # just picked a place: its label, not the road's, until the cursor moves
 
 @onready var _view: Control = $View
 @onready var _label: Label = $View/HoverLabel
@@ -36,7 +60,18 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_view.draw.connect(_draw_view)
 	_view.theme = MenuTheme.theme()
-	MenuTheme.hint_bar(_hint, [["L stick", "pan"], ["R stick", "cursor"], ["LT / RT", "zoom"], ["View / M", "close"]])
+	MenuTheme.hint_bar(_hint, [["L stick", "pan"], ["R stick", "cursor"], ["LT / RT", "zoom"], ["Up / Down", "places"], ["A", "open"], ["B", "back"], ["View / M", "close"]])
+	legend = MapLegend.new()
+	legend.name = "Legend"
+	legend.anchor_left = 1.0
+	legend.anchor_right = 1.0
+	legend.offset_left = -MapLegend.WIDTH_PX - LEGEND_MARGIN_PX
+	legend.offset_right = -LEGEND_MARGIN_PX
+	legend.offset_top = LEGEND_TOP_PX
+	legend.places = places
+	legend.place_chosen.connect(focus_on)
+	legend.back_out.connect(close)
+	_view.add_child(legend)
 
 
 func _input(event: InputEvent) -> void:
@@ -57,6 +92,54 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.is_action_pressed("map_toggle"):
 		toggle()
 		get_viewport().set_input_as_handled()
+	elif visible and legend_input(event):
+		get_viewport().set_input_as_handled()
+
+
+## The legend's buttons: Up / Down, A and B from the D-pad, keys or actions (not the sticks,
+## which pan and move the cursor). Returns whether the event was used.
+func legend_input(event: InputEvent) -> bool:
+	if legend == null or event is InputEventJoypadMotion or event is InputEventMouse:
+		return false
+	for action: String in LEGEND_ACTIONS:
+		if event.is_action_pressed(action, true):
+			match action:
+				"ui_up":
+					legend.move(-1)
+				"ui_down":
+					legend.move(1)
+				"ui_accept":
+					legend.accept()
+				"ui_cancel":
+					legend.back()
+			return true
+	return false
+
+
+## Centres the view on `place`, highlights it and keeps it centred through zooming until the
+## player pans away.
+func focus_on(place: Services.Place) -> void:
+	focused = place
+	_focus_locked = true
+	_hover_hidden = true
+	_centre_on_focus()
+	cursor = focus_offset()  # the crosshair on the place, not over its name
+	_view.queue_redraw()
+
+
+func _centre_on_focus() -> void:
+	if focused == null or renderer == null:
+		return
+	var centre_px := renderer.world_to_pixel(player.global_position.x, player.global_position.z) if player != null else Vector2.ZERO
+	pan = -(renderer.world_to_pixel(focused.at.x, focused.at.z) - centre_px) * zoom + focus_offset()
+
+
+## Where a picked place sits relative to the view's centre: the middle of the map left of the
+## legend, so the panel doesn't cover it or its name.
+func focus_offset() -> Vector2:
+	if legend == null or not legend.visible:
+		return Vector2.ZERO
+	return Vector2(-(MapLegend.WIDTH_PX + LEGEND_MARGIN_PX) * 0.5, 0.0)
 
 
 func toggle() -> void:
@@ -70,6 +153,12 @@ func open() -> void:
 	visible = true
 	pan = Vector2.ZERO
 	cursor = Vector2.ZERO
+	focused = null
+	_focus_locked = false
+	if legend != null:
+		legend.origin = player
+		legend.max_height = _view.size.y - LEGEND_TOP_PX - LEGEND_MARGIN_PX
+		legend.reset()
 	MenuTheme.refresh_accent()
 	get_tree().paused = true
 	_view.queue_redraw()
@@ -90,8 +179,12 @@ func _process(delta: float) -> void:
 	if zoom_in > 0.0 or zoom_out > 0.0:
 		zoom = clampf(zoom * pow(ZOOM_SPEED, (zoom_in - zoom_out) * delta), ZOOM_MIN, ZOOM_MAX)
 	var pan_input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	if pan_input != Vector2.ZERO:
+		_focus_locked = false
 	pan -= pan_input * PAN_SPEED_PX * delta
 	var cursor_input := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if cursor_input != Vector2.ZERO:
+		_hover_hidden = false
 	cursor += cursor_input * CURSOR_SPEED_PX * delta
 	var half := _view.size * 0.5
 	cursor = cursor.clamp(-half, half)
@@ -112,8 +205,9 @@ func screen_to_world(screen: Vector2) -> Vector2:
 
 
 func _update_hover() -> void:
-	if graph == null:
+	if graph == null or _hover_hidden:
 		hovered_edge = null
+		_label.visible = false
 		return
 	var w := screen_to_world(cursor)
 	var hit := graph.nearest_edge(Vector3(w.x, 0.0, w.y), HOVER_RADIUS_M / zoom)
@@ -142,6 +236,7 @@ func _draw_view() -> void:
 		for p in hovered_edge.polyline:
 			pts.append(centre + world_to_screen(p.x, p.z))
 		_view.draw_polyline(pts, Color(1.0, 0.9, 0.2), maxf(3.0, MapRenderer.road_width_px(hovered_edge.road_class) * zoom + 2.0), true)
+	_draw_places(centre)
 	if player != null:
 		var heading := -player.global_basis.z
 		var angle := atan2(heading.x, -heading.z)  # 0 = north (up on the map)
@@ -159,3 +254,27 @@ func _draw_view() -> void:
 	_view.draw_arc(c, 9.0, 0.0, TAU, 24, Color(1, 1, 1, 0.9), 2.0, true)
 	_view.draw_line(c + Vector2(-14, 0), c + Vector2(14, 0), Color(1, 1, 1, 0.6), 1.0)
 	_view.draw_line(c + Vector2(0, -14), c + Vector2(0, 14), Color(1, 1, 1, 0.6), 1.0)
+
+
+## Every place at screen size, the focused one last with a pulsing ring in the tone's accent
+## and its name.
+func _draw_places(centre: Vector2) -> void:
+	var r := PlaceIcons.num("marker_radius_px", 9.0)
+	var bounds := Rect2(Vector2.ZERO, _view.size).grow(r)
+	for pl: Services.Place in places:
+		if pl == focused:
+			continue
+		var at := centre + world_to_screen(pl.at.x, pl.at.z)
+		if bounds.has_point(at):
+			PlaceIcons.draw(_view, at, pl.kind, r)
+	if focused == null:
+		return
+	var f := centre + world_to_screen(focused.at.x, focused.at.z)
+	var accent := ContentMode.hud_accent()
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * TAU / PlaceIcons.num("highlight_pulse_s", 0.9))
+	var ring := PlaceIcons.num("highlight_radius_px", 16.0)
+	_view.draw_circle(f, ring + 4.0 * pulse, Color(accent, 0.25 + 0.2 * pulse))
+	_view.draw_arc(f, ring + 4.0 * pulse, 0.0, TAU, 40, accent, 2.5, true)
+	PlaceIcons.draw(_view, f, focused.kind, r * 1.25)
+	var title := focused.name if focused.name != "" else PlaceIcons.label(focused.kind)
+	_view.draw_string(ThemeDB.fallback_font, f + Vector2(ring + 10.0, 6.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(1, 1, 1, 0.95))

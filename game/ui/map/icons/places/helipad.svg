@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Code 430 place icon (CC BY-SA 4.0): a helipad, a helicopter side on -->
+<g fill="#fff">
+<rect x="8" y="12" width="44" height="4" rx="2"/>
+<rect x="28" y="15" width="4" height="7"/>
+<path d="M14 30 Q14 22 24 22 H36 Q47 22 47 33 Q47 40 40 40 H22 Q14 40 14 33 Z"/>
+<path d="M45 28 H58 Q60 28 60 30 V31 Q60 33 58 33 H46 Z"/>
+<rect x="56" y="22" width="3" height="13" rx="1.5"/>
+<rect x="18" y="44" width="26" height="3" rx="1.5"/>
+<rect x="22" y="39" width="3" height="6"/>
+<rect x="37" y="39" width="3" height="6"/>
+</g>
+</svg>
