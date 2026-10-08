@@ -82,7 +82,5 @@ maintainer:
 
 - **Signs (billboards) in the middle of roads:** check the rule from `19d8c7f` holds wherever
   the human reports more.
-- **On-screen keyboard on the Deck (decided 2026-10-08: "we're using the Steam Deck keyboard, done"):** use Steam's own keyboard, which means the Steamworks integration (GodotSteam) as a new dependency, approved by the maintainer; a `fix/` that opens Steam's keyboard when the report form or the co-op Join box focuses, and falls back to the typed field elsewhere. Previously: the report form and the co-op Join box can't be typed
-  into, because Steam's keyboard only opens for Steamworks games. The choices are a built-in
-  keyboard (no dependency) or GodotSteam (a new dependency, so the maintainer decides first).
+- **On-screen keyboard on the Deck:** resolved 2026-10-08, the human reports Steam's keyboard now shows for the report form; no Steamworks dependency needed. Re-open only if it stops.
 - More in `docs/backlog.md`.
