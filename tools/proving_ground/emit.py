@@ -14,8 +14,11 @@ from pathlib import Path
 
 from proving_ground.layout import HALF_H, HALF_W, Area, District, Spot, Way
 
+# On UTM zone 18N's central meridian, so the projection's grid convergence is zero and the
+# generator's metres are the pack's metres (a fixed spawn or start line lands where it was
+# drawn); far enough south of Ottawa Centretown that the two never overlap.
 BASE_LAT = 45.0
-BASE_LON = -76.5
+BASE_LON = -75.0
 M_PER_DEG_LAT = 111320.0
 M_PER_DEG_LON = 111320.0 * math.cos(math.radians(BASE_LAT))
 GENERATOR = "code430 proving_ground"

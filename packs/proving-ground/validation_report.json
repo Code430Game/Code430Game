@@ -114,8 +114,8 @@
   "inferred_bridges": [],
   "max_residual_grade": 0.08,
   "max_shared_step": 0.665,
-  "max_y": 70.032,
-  "min_y": 56.544,
+  "max_y": 70.057,
+  "min_y": 56.595,
   "share_followers": 4,
   "share_rounds_exhausted": false,
   "shared_deck_vertices": 225,
@@ -127,7 +127,7 @@
  },
  "junction_clusters": [
   {
-   "max_arm_offset_m": 4.989,
+   "max_arm_offset_m": 4.988,
    "node_id": "c100597",
    "osm_node_ids": [
     100597,
@@ -230,34 +230,34 @@
    "police": 1
   },
   "terrain": {
-   "cells_carved": 6661,
-   "cells_flattened": 41440,
-   "cells_lowered_for_water": 7779,
-   "cells_lowered_under_decks": 23577,
-   "cells_under_buildings": 2737,
+   "cells_carved": 6756,
+   "cells_flattened": 41249,
+   "cells_lowered_for_water": 7789,
+   "cells_lowered_under_decks": 21708,
+   "cells_under_buildings": 2770,
    "chunks": 80,
    "underpasses": {
     "tunnels": 1,
     "uncovered": 0
    }
   },
-  "total_length_km": 35.976,
+  "total_length_km": 35.97,
   "vegetation": {
    "areas": 4,
    "bushes": 462,
-   "chunks_over_400_trees": 15,
-   "max_trees_in_a_chunk": 696,
+   "chunks_over_400_trees": 14,
+   "max_trees_in_a_chunk": 723,
    "skipped": {
     "edge on a road, sidewalk, building or water": 2,
     "frontage on a road, sidewalk, building or water": 16,
     "row on a road, sidewalk, building or water": 2,
-    "scatter on a road, sidewalk, building or water": 351,
+    "scatter on a road, sidewalk, building or water": 350,
     "tagged on a road, sidewalk, building or water": 1
    },
-   "trees": 10743,
+   "trees": 10663,
    "trees_by_source": {
     "row": 150,
-    "scatter": 10585,
+    "scatter": 10505,
     "tagged": 8
    }
   },

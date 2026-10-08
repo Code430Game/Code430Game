@@ -7,7 +7,7 @@
    "id": 50000,
    "center": {
     "lat": 45.0020212,
-    "lon": -76.5052722
+    "lon": -75.0052722
    },
    "tags": {
     "addr:housenumber": "1",
@@ -21,7 +21,7 @@
    "id": 50001,
    "center": {
     "lat": 45.0020661,
-    "lon": -76.5045099
+    "lon": -75.0045099
    },
    "tags": {
     "aeroway": "helipad",
@@ -33,7 +33,7 @@
    "id": 50002,
    "center": {
     "lat": 45.0030093,
-    "lon": -76.5032395
+    "lon": -75.0032395
    },
    "tags": {
     "addr:housenumber": "2",
@@ -47,7 +47,7 @@
    "id": 50003,
    "center": {
     "lat": 45.0030992,
-    "lon": -76.5024773
+    "lon": -75.0024773
    },
    "tags": {
     "emergency": "ambulance_station",
@@ -59,7 +59,7 @@
    "id": 50004,
    "center": {
     "lat": 45.0031441,
-    "lon": -76.496824
+    "lon": -74.996824
    },
    "tags": {
     "addr:housenumber": "3",

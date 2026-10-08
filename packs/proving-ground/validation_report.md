@@ -1,6 +1,6 @@
 # Road network validation: Double Cross
 
-- Nodes: 123, edges: 196, total length: 35.976 km
+- Nodes: 123, edges: 196, total length: 35.97 km
 - Connected components: 1 (largest has 123 nodes)
 - Largest strongly connected component: 123 nodes
 - Dead ends: bbox_edge 1, declared_noexit 0, likely_real 0, suspicious 0, parking 5
@@ -62,7 +62,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 ## Junction clusters
 
 - 2 merged junctions; each road keeps its own line through them. Largest arm offsets from the centroid:
-  - c100597 (OSM 100597, 100675): 4.989 m
+  - c100597 (OSM 100597, 100675): 4.988 m
   - c100407 (OSM 100407, 100445): 2.744 m
 
 ## Water
@@ -79,7 +79,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Elevation
 
-- Road height range: 56.544 m to 70.032 m
+- Road height range: 56.595 m to 70.057 m
 - Bridge/tunnel (fixed) vertices: 230; approach vertices raised or lowered to meet them: 54
 - Conflicting bridge constraints: 0; bridge chains without a ground anchor: 0
 - Vertices under a bridge footprint refilled from neighbours (DTM keeps decks): 23

@@ -928,7 +928,8 @@ def build_spawn(d: District) -> None:
     """Start line on the vertical straight just north of the centre bridge, heading south; the
     car spawns on the two-way street before the split."""
     d.start_line = ((0.0, -180.0), (0.0, 1.0))
-    d.spawn = (0.0, -340.0, 180.0)
+    # In the right-hand lane of the two-way street (heading south, the right is west).
+    d.spawn = (-1.75, -340.0, 180.0)
 
 
 def build() -> District:
