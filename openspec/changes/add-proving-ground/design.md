@@ -14,28 +14,31 @@
   underpass dig and the terrain flattening are all exercised; `FlatSource` is the escape hatch.
 - Determinism: the generator takes no clock or random input; the pack diff in CI is the test.
 
-## The loop: a figure eight from the sketch
-- Small lobe: `secondary`, `lanes=2`, `oneway=no`, 50 km/h, a teardrop of about 1.1 km
-  through the main city, with a `junction=roundabout` of 14 m radius on its west side where
-  it meets the city's main avenue. Avenues cross it at signals, streets at stops; junctions
-  only on its straights.
-- Big lobe: `motorway`, `lanes=2` each way as a one-way pair, 100 km/h, about 1.6 km,
-  elevated (`bridge=yes`, `layer=1`) from the crossing round the lower right and back; no
-  junctions except the two `motorway_link` exits in the lower right (one each direction),
-  each with a gore. It crosses the river once on its east side on its own deck.
-- The crossing: both straights pass over the river at the map centre; the street-level
-  straight is `bridge=yes layer=1`, the highway straight `bridge=yes layer=2`, the river
-  and a footbridge (`layer=1`) beneath. The bridge stage groups the decks; piers land on the
-  banks and on the island between the spans.
-- Lap direction: clockwise on the small lobe, which makes the big lobe anticlockwise; the
-  start line is on the small lobe's north straight. The timer is a `lap.v0.json` entry: a
+## The loop: a figure eight from the sketch (second pass, 2026-10-08)
+- Two straights at right angles. The highway (`motorway`, one-way pair, 100 km/h, at grade)
+  runs west to east along the river's north bank, 25 m north of the flatten margin so the
+  bank stays a bank. The vertical road crosses it and the river on one bridge at the map
+  centre (`bridge=yes`, `layer=1`, about 90 m of deck with piers on both banks and between
+  the highway and the water); a footbridge beside it.
+- Top lobe, street level: from the crossing the vertical road runs north as `secondary`,
+  `lanes=2`, `oneway=no`, 50 km/h, turns west along the top of the main city, drops into a
+  `junction=roundabout` of 14 m radius on the west side where it meets the city's main
+  avenue, and comes back east along the highway line to the crossing (that stretch is the
+  transition from street to motorway, with the merge and a gore). Avenues cross the lobe at
+  signals, streets at stops; junctions only on its straights.
+- Bottom lobe, motorway: from the crossing east along the river to the far right, a second
+  river bridge heading south, an elevated sweep (`bridge=yes`, `layer=1` where it runs over
+  residential streets) round the lower right and back north up the vertical straight. No
+  junctions except the two `motorway_link` exits with gores: one on the far-right descent,
+  one on the vertical ascent, both into the residential grid.
+- Lap direction: top lobe clockwise, bottom lobe anticlockwise; the start line sits on the
+  vertical straight just north of the centre bridge. The timer is a `lap.v0.json` entry: a
   point on the loop and a direction; it triggers on the car crossing the line in that
   direction, with a 10 s re-arm so a reverse does not count.
 - Edge streets end in a U-turn arc back into the grid (two parallel streets joined by a
-  semicircle), the sketch's "turn back" loops; one street at the east edge is a real dead end
-  for the edge closure.
-- The generator keeps the lobes, grids, river and greenbelt as separate pieces with their own
-  parameters so a layout change is a parameter change.
+  semicircle); one street at the east edge is a real dead end for the edge closure.
+- The generator keeps the straights, lobes, grids, river and greenbelt as separate pieces with
+  their own parameters so a layout change is a parameter change.
 
 ## One of everything (checklist the tests assert)
 signals, stop signs, one-way pair, bus-only lane, bus stops, bus loop, sidewalks, crossings,
