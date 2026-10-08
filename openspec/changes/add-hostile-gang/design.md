@@ -39,13 +39,18 @@ Per player, host-held: rises while any member sees the player in turf, falls aft
 with a fill ring next to the seen badge; the legend explains it.
 
 ## Police
-Member gunfire calls `wanted.report("gunfire", from=member)` with the member as the
-offender; officers path to the offender, and with `officers_fight_gang: true` (default) treat
-members as targets using the existing officer fire and fists. The player in the middle is
-still wanted only for their own crimes.
+Decided by the human (2026-10-07): "the police can fight the gang, if they see a crime."
+Officers never engage members on sight. A member's crime in view of an officer (gunfire,
+a melee hit on the player or a bystander, a gang car ramming) calls
+`wanted.report(kind, from=member)` with the member as the offender; officers path to that
+offender and treat members of the same crew as targets using the existing officer fire and
+fists until the crew flees or is down. Out of an officer's view the gang and police ignore
+each other. The player in the middle is still wanted only for their own crimes.
 
 ## Decisions for the human
-- Group size (proposed 6 on patrol, 10 cap per turf) and aggression (warning 2 s).
+- Group size: decided by the human, a crew of six: five members and one leader (the leader
+  has more health, carries the ranged variant in gritty and drives the gang car); the cap
+  per turf is that crew plus respawns in flight. Aggression (warning 2 s) still open.
 - Whether members use guns in gritty (proposed: one in three carries the pistol) or
   knives only.
-- Officers fight the gang by default, or stay focused on the player.
+- (decided) Officers fight the gang only after witnessing a crime; see Police above.
