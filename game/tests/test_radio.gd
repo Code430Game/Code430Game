@@ -232,3 +232,52 @@ func test_one_render_at_a_time_and_the_playing_station_first() -> void:
 			break
 		await get_tree().process_frame
 	assert_bool(_radio.rendering()).override_failure_message("renders still running after 1200 frames").is_false()
+
+
+## Godot 4.7's own WAV looping crashes the audio thread at a wrap past about 1.2 million
+## samples (Hilltop's 56 s loop at 22 kHz); every windowed run died at 55 s. The radio feeds its
+## loops through a generator and wraps them itself, so the mixer never sees a looping WAV.
+func test_loops_are_fed_through_a_generator_and_wrap_in_script() -> void:
+	assert_object(_radio._player.stream).is_instanceof(AudioStreamGenerator)
+	var n := 1245176  # Hilltop's loop length
+	var pcm := PackedByteArray()
+	pcm.resize(n * 2)
+	for i in range(n):
+		pcm.encode_s16(i * 2, i % 1000)  # a ramp: sample i reads i mod 1000
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = 22050
+	wav.data = pcm
+	Radio._set_loop(wav, n)
+	assert_int(Radio.loop_frames(wav)).is_equal(n)
+	var got := Radio.loop_frames_from(wav, n - 2, 5)
+	var frames: PackedVector2Array = got[0]
+	assert_int(frames.size()).is_equal(5)
+	assert_int(got[1]).is_equal(3)  # two before the end, then 0, 1, 2
+	var expected := [(n - 2) % 1000, (n - 1) % 1000, 0, 1, 2]
+	for i in range(5):
+		assert_int(int(round(frames[i].x * 32768.0))).is_equal(expected[i])
+		assert_float(frames[i].y).is_equal(frames[i].x)
+
+
+func test_pausing_remembers_the_position_in_the_loop() -> void:
+	_use_short_loop(_radio)
+	await _await_render(_radio, "test_loop")
+	_radio.car_entered()
+	_radio._feed_cursor = 4410  # 0.2 s in
+	_radio.car_exited()
+	assert_bool(_radio.is_playing()).is_false()
+	assert_float(float(_radio._positions["test_loop"])).is_equal_approx(0.2, 1e-3)
+	# Resuming starts the feed from the saved position (the first fill then runs on from it).
+	var wav := _radio.stream_for("test_loop")
+	var resume_at := posmod(int(0.2 * wav.mix_rate), Radio.loop_frames(wav))
+	_radio.car_entered()
+	assert_bool(_radio.is_playing()).is_true()
+	var fed := _radio._feed_cursor - resume_at
+	if fed < 0:
+		fed += Radio.loop_frames(wav)
+	# The first fill pushes at most the generator's buffer (rounded up to a power of two by the engine).
+	var cap := 1
+	while cap < int(Radio.FEED_BUFFER_S * wav.mix_rate):
+		cap *= 2
+	assert_int(fed).is_between(0, cap)
