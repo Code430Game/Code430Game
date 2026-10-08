@@ -25,6 +25,7 @@ var elapsed: float = 0.0  # seconds settled in `state`
 var duration: float = 0.0  # drawn length of the settled state
 var seed: int = 0
 var pinned: bool = false  # --weather=<state>: hold it, never consult the table
+var upcoming: String = ""  # the state drawn to follow this one (forecast); "" when pinned or unknown
 var mirror: bool = false  # a guest: the host's snapshots drive it, no table here
 var bias_wet: bool = false  # ContentMode flag weather_bias: rain and fog weigh more
 var hour: float = 12.0  # fed from DayNight; gates snow
@@ -93,6 +94,9 @@ func _enter(id: String) -> void:
 	wind_speed = _rng.randf_range(float(w[0]), float(w[1]))
 	var ang := _rng.randf_range(0.0, TAU)
 	wind_dir = Vector2(cos(ang), sin(ang))
+	# The follower is drawn now rather than at the end of the state, so the HUD can show a
+	# forecast; a pinned session or a guest never consults the table.
+	upcoming = pick_next() if not pinned and not mirror else ""
 
 
 func _process(delta: float) -> void:
@@ -141,7 +145,8 @@ func step(delta: float) -> void:
 	elif not pinned and not mirror:
 		elapsed += delta
 		if elapsed >= duration:
-			var nxt := pick_next()
+			# Snow drawn hours ago may no longer be allowed: draw again in that case.
+			var nxt := upcoming if upcoming != "" and (upcoming != "snow" or snow_allowed()) else pick_next()
 			if nxt == state:
 				elapsed = 0.0
 				_enter(state)
@@ -267,7 +272,7 @@ func is_snowing() -> bool:
 
 ## The host's view of the weather for the clock sync: state, next, t, seed, elapsed.
 func snapshot() -> PackedFloat32Array:
-	return PackedFloat32Array([float(order.find(state)), float(order.find(next_state)), t, float(seed), elapsed])
+	return PackedFloat32Array([float(order.find(state)), float(order.find(next_state)), t, float(seed), elapsed, float(order.find(upcoming)), duration])
 
 
 ## A guest takes the host's snapshot and keeps blending locally from it.
@@ -285,6 +290,21 @@ func apply_snapshot(p: PackedFloat32Array) -> void:
 		next_state = new_next
 	t = clampf(p[2], 0.0, 1.0)
 	elapsed = p[4]
+	if p.size() >= 7:
+		var ui := int(p[5])
+		upcoming = order[ui] if ui >= 0 and ui < order.size() else ""
+		duration = p[6]
+
+
+## The forecast for the HUD: the state now, what follows (the transition's target while one
+## runs, else the drawn follower, "" when unknown), whether a change is under way, and the
+## real seconds left before the next change starts (weather runs on real time).
+func forecast() -> Dictionary:
+	var changing := t < 1.0 and next_state != state
+	var follower := next_state if changing else upcoming
+	if follower == state:
+		follower = ""
+	return {"state": state, "next": follower, "changing": changing, "seconds_left": maxf(duration - elapsed, 0.0) if not changing else 0.0}
 
 
 ## Short text for the HUD and logs, e.g. "rain" or "overcast > rain 40%".

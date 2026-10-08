@@ -126,10 +126,12 @@ func test_a_guest_follows_the_host_snapshot() -> void:
 	assert_float(guest.t).is_equal_approx(0.25, 1e-6)
 	assert_int(guest.seed).is_equal(11)
 	assert_float(guest.coverage()).is_equal_approx(host.coverage(), 1e-6)
-	# A mirror keeps blending but never walks the table on its own.
+	# A mirror keeps blending but never walks the table on its own (its one pick was the
+	# forecast drawn at setup, before it became a mirror).
+	var picks_before := guest.picks()
 	for i in range(3600):
 		guest.step(1.0)
-	assert_int(guest.picks()).is_equal(0)
+	assert_int(guest.picks()).is_equal(picks_before)
 	assert_str(guest.state).is_equal("rain")
 
 

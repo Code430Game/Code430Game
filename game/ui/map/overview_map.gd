@@ -35,6 +35,10 @@ const LEGEND_ACTIONS := ["ui_up", "ui_down", "ui_accept", "ui_cancel"]
 var renderer: MapRenderer
 var graph: RoadGraph
 var player: Node3D
+## Same as Minimap.heading_source: the arrow follows the camera on foot, the car when driving.
+var heading_source: Callable = Callable()
+## The forecast strip in the map's corner (WeatherStrip); the scene sets its `weather`.
+var strip: WeatherStrip
 var zoom: float = 0.6:
 	set(value):
 		zoom = value
@@ -67,6 +71,11 @@ var _hover_hidden: bool = false  # just picked a place: its label, not the road'
 
 func _ready() -> void:
 	visible = false
+	strip = WeatherStrip.new()
+	strip.name = "WeatherStrip"
+	strip.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	strip.position = Vector2(16.0, 16.0)
+	add_child(strip)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_view.draw.connect(_draw_view)
 	_view.theme = MenuTheme.theme()
@@ -278,7 +287,7 @@ func _draw_view() -> void:
 		_view.draw_polyline(pts, Color(1.0, 0.9, 0.2), maxf(3.0, MapRenderer.road_width_px(hovered_edge.road_class) * zoom + 2.0), true)
 	_draw_places(centre)
 	if player != null:
-		var heading := -player.global_basis.z
+		var heading := heading_vector()
 		var angle := atan2(heading.x, -heading.z)  # 0 = north (up on the map)
 		var p := centre + pan
 		var tip := p + Vector2(sin(angle), -cos(angle)) * PLAYER_MARKER_PX
@@ -318,3 +327,13 @@ func _draw_places(centre: Vector2) -> void:
 	PlaceIcons.draw(_view, f, focused.kind, r * 1.25)
 	var title := PlaceIcons.display_name(focused)
 	_view.draw_string(ThemeDB.fallback_font, f + Vector2(ring + 10.0, 6.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(1, 1, 1, 0.95))
+
+
+## The player's facing for the arrow: the heading source when set, else the body's forward.
+func heading_vector() -> Vector3:
+	if heading_source.is_valid():
+		var h: Vector3 = heading_source.call()
+		h.y = 0.0
+		if h.length_squared() > 1e-6:
+			return h.normalized()
+	return -player.global_basis.z if player != null else Vector3.FORWARD
