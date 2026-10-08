@@ -3,6 +3,25 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-08
+
+- **The testbed dies about 55 s into any windowed run** (found timing a lap for
+  `add-proving-ground`; a `fix/`). Reproduce on main (30ea8dd):
+  `godot --path game --resolution 1280x800 -- --benchmark=150 --autodrive --mute --traffic=0 --peds=0`
+  (Ottawa or `--pack=code430.proving-ground`, with or without `--audio-driver Dummy`, so it
+  is not the mixer). The log shows `ERROR: /root: The caller thread can't call the function
+  propagate_notification() on this node` and then signal 11 in a pthread (frames inside the
+  engine binary, no GDScript frame). The 40 s benchmarks end before it, which is why the Deck
+  runs never saw it. The only worker-thread users are the chunk streamer's build task and the
+  radio's render task; the lot signs already build their `Label3D` on the main thread. Start
+  by running with `--verbose` to catch the error's own backtrace, then look for what the
+  build task creates that reaches the tree (a theme or font lookup, a resource load that
+  registers with `/root`).
+- **Proving ground built** (`add-proving-ground`, PR #92): `--pack=code430.proving-ground`
+  starts on the Double Cross start line; the lap readout and the four access points are in.
+  The gang's turf (`turf.v0.json`) is the block 8 Lane to 9 Lane, Park Road to Mid Road,
+  under the viaduct's south straight (x 550 to 750, z 400 to 550).
+
 ## 2026-10-07
 
 - **Relay needs a redeploy for report tags** (done 2026-10-07 from the Mac that has Cloudflare: deployed version fcb4e14b, `/health` ok, a tagged report now passes the schema, `tag:*` labels created; left for the human: resend from Saved reports on the Deck) (human, 2026-10-07:

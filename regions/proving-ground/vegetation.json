@@ -1,0 +1,317 @@
+{
+ "version": 0.6,
+ "generator": "code430 proving_ground",
+ "elements": [
+  {
+   "type": "node",
+   "id": 65000,
+   "lat": 44.9960474,
+   "lon": -75.0102903,
+   "tags": {
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65001,
+   "lat": 44.9958229,
+   "lon": -75.0097186,
+   "tags": {
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65002,
+   "lat": 44.9960474,
+   "lon": -75.0091469,
+   "tags": {
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65003,
+   "lat": 45.0035124,
+   "lon": -75.0055898,
+   "tags": {
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65004,
+   "lat": 45.0035124,
+   "lon": -75.0050816,
+   "tags": {
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65005,
+   "lat": 45.0035124,
+   "lon": -75.0045735,
+   "tags": {
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65006,
+   "lat": 45.0035124,
+   "lon": -75.0040653,
+   "tags": {
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65007,
+   "lat": 45.0035124,
+   "lon": -75.0035571,
+   "tags": {
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65008,
+   "lat": 45.0035124,
+   "lon": -75.003049,
+   "tags": {
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "way",
+   "id": 60002,
+   "nodes": [
+    60002000,
+    60002001
+   ],
+   "tags": {
+    "natural": "tree_row"
+   },
+   "geometry": [
+    {
+     "lat": 44.9952569,
+     "lon": -75.0105444
+    },
+    {
+     "lat": 44.9952569,
+     "lon": -75.0085117
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 60003,
+   "nodes": [
+    60003000,
+    60003001
+   ],
+   "tags": {
+    "natural": "tree_row"
+   },
+   "geometry": [
+    {
+     "lat": 45.0025063,
+     "lon": -75.0058439
+    },
+    {
+     "lat": 45.0025063,
+     "lon": -75.0022867
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 60004,
+   "nodes": [
+    60004000,
+    60004001
+   ],
+   "tags": {
+    "natural": "tree_row"
+   },
+   "geometry": [
+    {
+     "lat": 45.0008175,
+     "lon": -74.9973322
+    },
+    {
+     "lat": 45.0008175,
+     "lon": -74.987423
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 60000,
+   "nodes": [
+    60000000,
+    60000001,
+    60000002,
+    60000003,
+    60000004,
+    60000005,
+    60000006
+   ],
+   "tags": {
+    "name": "Northbank Woods",
+    "natural": "wood"
+   },
+   "geometry": [
+    {
+     "lat": 45.0071865,
+     "lon": -75.0152448
+    },
+    {
+     "lat": 45.0071865,
+     "lon": -74.9847552
+    },
+    {
+     "lat": 45.0057492,
+     "lon": -74.9847552
+    },
+    {
+     "lat": 45.0057492,
+     "lon": -75.0133392
+    },
+    {
+     "lat": 44.9928135,
+     "lon": -75.0133392
+    },
+    {
+     "lat": 44.9928135,
+     "lon": -75.0152448
+    },
+    {
+     "lat": 45.0071865,
+     "lon": -75.0152448
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 60001,
+   "nodes": [
+    60001000,
+    60001001,
+    60001002,
+    60001003,
+    60001004
+   ],
+   "tags": {
+    "leisure": "park",
+    "name": "Cross Park"
+   },
+   "geometry": [
+    {
+     "lat": 44.9963169,
+     "lon": -75.0106714
+    },
+    {
+     "lat": 44.9963169,
+     "lon": -75.0083847
+    },
+    {
+     "lat": 44.9951491,
+     "lon": -75.0083847
+    },
+    {
+     "lat": 44.9951491,
+     "lon": -75.0106714
+    },
+    {
+     "lat": 44.9963169,
+     "lon": -75.0106714
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 60005,
+   "nodes": [
+    60005000,
+    60005001,
+    60005002,
+    60005003,
+    60005004
+   ],
+   "tags": {
+    "landuse": "grass",
+    "name": "South Bank"
+   },
+   "geometry": [
+    {
+     "lat": 44.998804,
+     "lon": -75.012704
+    },
+    {
+     "lat": 44.998877,
+     "lon": -74.9847552
+    },
+    {
+     "lat": 44.9978261,
+     "lon": -74.9847552
+    },
+    {
+     "lat": 44.9978261,
+     "lon": -75.012704
+    },
+    {
+     "lat": 44.998804,
+     "lon": -75.012704
+    }
+   ]
+  },
+  {
+   "type": "way",
+   "id": 60006,
+   "nodes": [
+    60006000,
+    60006001,
+    60006002,
+    60006003,
+    60006004
+   ],
+   "tags": {
+    "landuse": "grass",
+    "name": "North Bank"
+   },
+   "geometry": [
+    {
+     "lat": 45.0002695,
+     "lon": -75.0078765
+    },
+    {
+     "lat": 45.0002695,
+     "lon": -74.9902179
+    },
+    {
+     "lat": 44.9994644,
+     "lon": -74.9902179
+    },
+    {
+     "lat": 44.9995848,
+     "lon": -75.0078765
+    },
+    {
+     "lat": 45.0002695,
+     "lon": -75.0078765
+    }
+   ]
+  }
+ ]
+}

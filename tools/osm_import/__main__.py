@@ -54,6 +54,24 @@ def _import(args: argparse.Namespace) -> int:
         args.title = args.title or region.get("pack_name") or region.get("name")
         if args.dem == "hrdem" and region.get("dem"):
             args.dem = region["dem"]
+        # A region may name every layer's input file (a generated district, or a cached
+        # extract), so the import runs with no network at all. Paths are relative to the file.
+        base = args.region.parent
+        for layer, attr in (
+            ("osm", "osm_json"),
+            ("water", "water_json"),
+            ("buildings", "buildings_json"),
+            ("parking", "parking_json"),
+            ("bridges", "bridges_json"),
+            ("services", "services_json"),
+            ("vegetation", "vegetation_json"),
+        ):
+            rel = region.get("inputs", {}).get(layer)
+            if rel and getattr(args, attr) is None:
+                setattr(args, attr, base / rel)
+        args.extras = [base / rel for rel in region.get("extras", [])]
+        args.spawn = region.get("spawn")
+        args.synthetic = region.get("synthetic")
     bbox = BBox.parse(args.bbox)
     cfg, cfg_name = load_cfg(args.config)
     if args.osm_json:
@@ -63,7 +81,7 @@ def _import(args: argparse.Namespace) -> int:
     if args.dem == "hrdem":
         elevation = hrdem_source(bbox, Projector.for_bbox(bbox), args.cache_dir)
     elif args.dem == "synthetic":
-        elevation = SyntheticSource()
+        elevation = SyntheticSource(**(getattr(args, "synthetic", None) or {}))
     elif args.dem == "flat":
         elevation = FlatSource()
     else:
@@ -108,8 +126,12 @@ def _import(args: argparse.Namespace) -> int:
         )
         # Bridges after the terrain (pier feet stand on it); they lift deck walkways, so the
         # pedestrian ways are re-exported after them.
-        outlines, meta = fetch_query(bridges_query(bbox), bbox, args.cache_dir)
-        sources.append(_source("bridges", meta))
+        if args.bridges_json:
+            outlines = json.loads(args.bridges_json.read_text(encoding="utf-8"))
+            sources.append(_source("bridges", None, args.bridges_json))
+        else:
+            outlines, meta = fetch_query(bridges_query(bbox), bbox, args.cache_dir)
+            sources.append(_source("bridges", meta))
         bridges = build_bridges(
             result.graph, ChunkSampler(chunks).sample, cfg.bridges, outlines, proj, water
         )
@@ -145,14 +167,22 @@ def _import(args: argparse.Namespace) -> int:
             result.report.summary["parking"] = parking.counts()
         # Vegetation last: it keeps off the final roads, sidewalks, buildings and water, and
         # stands on the finished terrain.
-        v_payload, meta = fetch_query(vegetation_query(bbox), bbox, args.cache_dir)
-        sources.append(_source("vegetation", meta))
+        if args.vegetation_json:
+            v_payload = json.loads(args.vegetation_json.read_text(encoding="utf-8"))
+            sources.append(_source("vegetation", None, args.vegetation_json))
+        else:
+            v_payload, meta = fetch_query(vegetation_query(bbox), bbox, args.cache_dir)
+            sources.append(_source("vegetation", meta))
         vegetation = build_vegetation(
             v_payload, bbox, proj, result.graph, buildings, water, ChunkSampler(chunks)
         )
         result.report.summary["vegetation"] = vegetation.counts()
-        s_payload, meta = fetch_query(services_query(bbox), bbox, args.cache_dir)
-        sources.append(_source("services", meta))
+        if args.services_json:
+            s_payload = json.loads(args.services_json.read_text(encoding="utf-8"))
+            sources.append(_source("services", None, args.services_json))
+        else:
+            s_payload, meta = fetch_query(services_query(bbox), bbox, args.cache_dir)
+            sources.append(_source("services", meta))
         services = build_services(
             s_payload,
             bbox,
@@ -184,7 +214,13 @@ def _import(args: argparse.Namespace) -> int:
             bridges,
             vegetation,
             services,
+            spawn=getattr(args, "spawn", None),
         )
+        # Pack extras the importer does not produce (a lap timer, a gang's turf) ride along.
+        for extra in getattr(args, "extras", None) or []:
+            target = args.pack_out / extra.name
+            target.write_bytes(extra.read_bytes())
+            paths[extra.stem] = target
         print(f"terrain: {tstats}")
         print(f"barriers: {barriers.counts}")
         print(f"bridges: {bridges.counts()}")
@@ -273,6 +309,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     imp.add_argument(
         "--osm-json", type=Path, help="Read this Overpass JSON file instead of fetching"
+    )
+    imp.add_argument(
+        "--bridges-json",
+        type=Path,
+        help="Read this Overpass bridge-outline JSON instead of fetching",
+    )
+    imp.add_argument(
+        "--services-json", type=Path, help="Read this Overpass services JSON instead of fetching"
+    )
+    imp.add_argument(
+        "--vegetation-json",
+        type=Path,
+        help="Read this Overpass vegetation JSON instead of fetching",
     )
     imp.add_argument("--config", type=Path, help="Road class defaults JSON")
     imp.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)

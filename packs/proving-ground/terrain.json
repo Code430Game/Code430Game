@@ -1,0 +1,569 @@
+{
+ "chunk_size_m": 256.0,
+ "chunks": [
+  {
+   "cx": -5,
+   "cz": -4,
+   "file": "terrain/chunk_-5_-4.png",
+   "max_y": 55.928,
+   "min_y": 54.88
+  },
+  {
+   "cx": -4,
+   "cz": -4,
+   "file": "terrain/chunk_-4_-4.png",
+   "max_y": 57.246,
+   "min_y": 55.905
+  },
+  {
+   "cx": -3,
+   "cz": -4,
+   "file": "terrain/chunk_-3_-4.png",
+   "max_y": 59.118,
+   "min_y": 56.947
+  },
+  {
+   "cx": -2,
+   "cz": -4,
+   "file": "terrain/chunk_-2_-4.png",
+   "max_y": 60.166,
+   "min_y": 58.021
+  },
+  {
+   "cx": -1,
+   "cz": -4,
+   "file": "terrain/chunk_-1_-4.png",
+   "max_y": 60.337,
+   "min_y": 59.046
+  },
+  {
+   "cx": 0,
+   "cz": -4,
+   "file": "terrain/chunk_0_-4.png",
+   "max_y": 61.051,
+   "min_y": 60.02
+  },
+  {
+   "cx": 1,
+   "cz": -4,
+   "file": "terrain/chunk_1_-4.png",
+   "max_y": 62.049,
+   "min_y": 61.026
+  },
+  {
+   "cx": 2,
+   "cz": -4,
+   "file": "terrain/chunk_2_-4.png",
+   "max_y": 63.072,
+   "min_y": 62.048
+  },
+  {
+   "cx": 3,
+   "cz": -4,
+   "file": "terrain/chunk_3_-4.png",
+   "max_y": 64.096,
+   "min_y": 63.072
+  },
+  {
+   "cx": 4,
+   "cz": -4,
+   "file": "terrain/chunk_4_-4.png",
+   "max_y": 65.12,
+   "min_y": 64.096
+  },
+  {
+   "cx": -5,
+   "cz": -3,
+   "file": "terrain/chunk_-5_-3.png",
+   "max_y": 56.017,
+   "min_y": 54.881
+  },
+  {
+   "cx": -4,
+   "cz": -3,
+   "file": "terrain/chunk_-4_-3.png",
+   "max_y": 58.425,
+   "min_y": 55.928
+  },
+  {
+   "cx": -3,
+   "cz": -3,
+   "file": "terrain/chunk_-3_-3.png",
+   "max_y": 63.446,
+   "min_y": 57.246
+  },
+  {
+   "cx": -2,
+   "cz": -3,
+   "file": "terrain/chunk_-2_-3.png",
+   "max_y": 65.056,
+   "min_y": 59.118
+  },
+  {
+   "cx": -1,
+   "cz": -3,
+   "file": "terrain/chunk_-1_-3.png",
+   "max_y": 64.581,
+   "min_y": 60.166
+  },
+  {
+   "cx": 0,
+   "cz": -3,
+   "file": "terrain/chunk_0_-3.png",
+   "max_y": 61.59,
+   "min_y": 60.337
+  },
+  {
+   "cx": 1,
+   "cz": -3,
+   "file": "terrain/chunk_1_-3.png",
+   "max_y": 62.051,
+   "min_y": 61.033
+  },
+  {
+   "cx": 2,
+   "cz": -3,
+   "file": "terrain/chunk_2_-3.png",
+   "max_y": 63.072,
+   "min_y": 62.049
+  },
+  {
+   "cx": 3,
+   "cz": -3,
+   "file": "terrain/chunk_3_-3.png",
+   "max_y": 64.096,
+   "min_y": 63.028
+  },
+  {
+   "cx": 4,
+   "cz": -3,
+   "file": "terrain/chunk_4_-3.png",
+   "max_y": 65.12,
+   "min_y": 64.096
+  },
+  {
+   "cx": -5,
+   "cz": -2,
+   "file": "terrain/chunk_-5_-2.png",
+   "max_y": 56.061,
+   "min_y": 54.882
+  },
+  {
+   "cx": -4,
+   "cz": -2,
+   "file": "terrain/chunk_-4_-2.png",
+   "max_y": 58.997,
+   "min_y": 56.017
+  },
+  {
+   "cx": -3,
+   "cz": -2,
+   "file": "terrain/chunk_-3_-2.png",
+   "max_y": 65.544,
+   "min_y": 58.425
+  },
+  {
+   "cx": -2,
+   "cz": -2,
+   "file": "terrain/chunk_-2_-2.png",
+   "max_y": 67.525,
+   "min_y": 63.446
+  },
+  {
+   "cx": -1,
+   "cz": -2,
+   "file": "terrain/chunk_-1_-2.png",
+   "max_y": 66.634,
+   "min_y": 61.59
+  },
+  {
+   "cx": 0,
+   "cz": -2,
+   "file": "terrain/chunk_0_-2.png",
+   "max_y": 62.167,
+   "min_y": 61.004
+  },
+  {
+   "cx": 1,
+   "cz": -2,
+   "file": "terrain/chunk_1_-2.png",
+   "max_y": 62.052,
+   "min_y": 61.149
+  },
+  {
+   "cx": 2,
+   "cz": -2,
+   "file": "terrain/chunk_2_-2.png",
+   "max_y": 63.072,
+   "min_y": 62.022
+  },
+  {
+   "cx": 3,
+   "cz": -2,
+   "file": "terrain/chunk_3_-2.png",
+   "max_y": 64.096,
+   "min_y": 63.042
+  },
+  {
+   "cx": 4,
+   "cz": -2,
+   "file": "terrain/chunk_4_-2.png",
+   "max_y": 65.12,
+   "min_y": 64.066
+  },
+  {
+   "cx": -5,
+   "cz": -1,
+   "file": "terrain/chunk_-5_-1.png",
+   "max_y": 56.053,
+   "min_y": 54.881
+  },
+  {
+   "cx": -4,
+   "cz": -1,
+   "file": "terrain/chunk_-4_-1.png",
+   "max_y": 58.889,
+   "min_y": 55.958
+  },
+  {
+   "cx": -3,
+   "cz": -1,
+   "file": "terrain/chunk_-3_-1.png",
+   "max_y": 65.148,
+   "min_y": 57.642
+  },
+  {
+   "cx": -2,
+   "cz": -1,
+   "file": "terrain/chunk_-2_-1.png",
+   "max_y": 67.06,
+   "min_y": 60.573
+  },
+  {
+   "cx": -1,
+   "cz": -1,
+   "file": "terrain/chunk_-1_-1.png",
+   "max_y": 67.767,
+   "min_y": 60.655
+  },
+  {
+   "cx": 0,
+   "cz": -1,
+   "file": "terrain/chunk_0_-1.png",
+   "max_y": 67.767,
+   "min_y": 60.655
+  },
+  {
+   "cx": 1,
+   "cz": -1,
+   "file": "terrain/chunk_1_-1.png",
+   "max_y": 62.065,
+   "min_y": 58.378
+  },
+  {
+   "cx": 2,
+   "cz": -1,
+   "file": "terrain/chunk_2_-1.png",
+   "max_y": 69.507,
+   "min_y": 62.014
+  },
+  {
+   "cx": 3,
+   "cz": -1,
+   "file": "terrain/chunk_3_-1.png",
+   "max_y": 69.667,
+   "min_y": 63.042
+  },
+  {
+   "cx": 4,
+   "cz": -1,
+   "file": "terrain/chunk_4_-1.png",
+   "max_y": 65.12,
+   "min_y": 62.306
+  },
+  {
+   "cx": -5,
+   "cz": 0,
+   "file": "terrain/chunk_-5_0.png",
+   "max_y": 55.958,
+   "min_y": 54.88
+  },
+  {
+   "cx": -4,
+   "cz": 0,
+   "file": "terrain/chunk_-4_0.png",
+   "max_y": 57.642,
+   "min_y": 55.909
+  },
+  {
+   "cx": -3,
+   "cz": 0,
+   "file": "terrain/chunk_-3_0.png",
+   "max_y": 60.573,
+   "min_y": 56.978
+  },
+  {
+   "cx": -2,
+   "cz": 0,
+   "file": "terrain/chunk_-2_0.png",
+   "max_y": 61.964,
+   "min_y": 58.115
+  },
+  {
+   "cx": -1,
+   "cz": 0,
+   "file": "terrain/chunk_-1_0.png",
+   "max_y": 61.65,
+   "min_y": 59.053
+  },
+  {
+   "cx": 0,
+   "cz": 0,
+   "file": "terrain/chunk_0_0.png",
+   "max_y": 61.084,
+   "min_y": 59.053
+  },
+  {
+   "cx": 1,
+   "cz": 0,
+   "file": "terrain/chunk_1_0.png",
+   "max_y": 62.049,
+   "min_y": 59.053
+  },
+  {
+   "cx": 2,
+   "cz": 0,
+   "file": "terrain/chunk_2_0.png",
+   "max_y": 63.072,
+   "min_y": 59.053
+  },
+  {
+   "cx": 3,
+   "cz": 0,
+   "file": "terrain/chunk_3_0.png",
+   "max_y": 64.096,
+   "min_y": 59.053
+  },
+  {
+   "cx": 4,
+   "cz": 0,
+   "file": "terrain/chunk_4_0.png",
+   "max_y": 65.12,
+   "min_y": 59.053
+  },
+  {
+   "cx": -5,
+   "cz": 1,
+   "file": "terrain/chunk_-5_1.png",
+   "max_y": 55.909,
+   "min_y": 54.88
+  },
+  {
+   "cx": -4,
+   "cz": 1,
+   "file": "terrain/chunk_-4_1.png",
+   "max_y": 56.997,
+   "min_y": 55.904
+  },
+  {
+   "cx": -3,
+   "cz": 1,
+   "file": "terrain/chunk_-3_1.png",
+   "max_y": 58.206,
+   "min_y": 56.902
+  },
+  {
+   "cx": -2,
+   "cz": 1,
+   "file": "terrain/chunk_-2_1.png",
+   "max_y": 59.245,
+   "min_y": 57.959
+  },
+  {
+   "cx": -1,
+   "cz": 1,
+   "file": "terrain/chunk_-1_1.png",
+   "max_y": 68.517,
+   "min_y": 58.982
+  },
+  {
+   "cx": 0,
+   "cz": 1,
+   "file": "terrain/chunk_0_1.png",
+   "max_y": 61.03,
+   "min_y": 59.914
+  },
+  {
+   "cx": 1,
+   "cz": 1,
+   "file": "terrain/chunk_1_1.png",
+   "max_y": 62.048,
+   "min_y": 60.995
+  },
+  {
+   "cx": 2,
+   "cz": 1,
+   "file": "terrain/chunk_2_1.png",
+   "max_y": 63.072,
+   "min_y": 62.018
+  },
+  {
+   "cx": 3,
+   "cz": 1,
+   "file": "terrain/chunk_3_1.png",
+   "max_y": 69.203,
+   "min_y": 63.042
+  },
+  {
+   "cx": 4,
+   "cz": 1,
+   "file": "terrain/chunk_4_1.png",
+   "max_y": 65.12,
+   "min_y": 64.066
+  },
+  {
+   "cx": -5,
+   "cz": 2,
+   "file": "terrain/chunk_-5_2.png",
+   "max_y": 55.904,
+   "min_y": 54.88
+  },
+  {
+   "cx": -4,
+   "cz": 2,
+   "file": "terrain/chunk_-4_2.png",
+   "max_y": 56.93,
+   "min_y": 55.904
+  },
+  {
+   "cx": -3,
+   "cz": 2,
+   "file": "terrain/chunk_-3_2.png",
+   "max_y": 57.959,
+   "min_y": 56.898
+  },
+  {
+   "cx": -2,
+   "cz": 2,
+   "file": "terrain/chunk_-2_2.png",
+   "max_y": 58.982,
+   "min_y": 57.922
+  },
+  {
+   "cx": -1,
+   "cz": 2,
+   "file": "terrain/chunk_-1_2.png",
+   "max_y": 60.259,
+   "min_y": 58.946
+  },
+  {
+   "cx": 0,
+   "cz": 2,
+   "file": "terrain/chunk_0_2.png",
+   "max_y": 61.024,
+   "min_y": 59.957
+  },
+  {
+   "cx": 1,
+   "cz": 2,
+   "file": "terrain/chunk_1_2.png",
+   "max_y": 68.587,
+   "min_y": 60.946
+  },
+  {
+   "cx": 2,
+   "cz": 2,
+   "file": "terrain/chunk_2_2.png",
+   "max_y": 63.072,
+   "min_y": 62.003
+  },
+  {
+   "cx": 3,
+   "cz": 2,
+   "file": "terrain/chunk_3_2.png",
+   "max_y": 66.519,
+   "min_y": 62.974
+  },
+  {
+   "cx": 4,
+   "cz": 2,
+   "file": "terrain/chunk_4_2.png",
+   "max_y": 65.12,
+   "min_y": 64.066
+  },
+  {
+   "cx": -5,
+   "cz": 3,
+   "file": "terrain/chunk_-5_3.png",
+   "max_y": 55.904,
+   "min_y": 54.88
+  },
+  {
+   "cx": -4,
+   "cz": 3,
+   "file": "terrain/chunk_-4_3.png",
+   "max_y": 56.928,
+   "min_y": 55.904
+  },
+  {
+   "cx": -3,
+   "cz": 3,
+   "file": "terrain/chunk_-3_3.png",
+   "max_y": 57.952,
+   "min_y": 56.928
+  },
+  {
+   "cx": -2,
+   "cz": 3,
+   "file": "terrain/chunk_-2_3.png",
+   "max_y": 58.976,
+   "min_y": 57.911
+  },
+  {
+   "cx": -1,
+   "cz": 3,
+   "file": "terrain/chunk_-1_3.png",
+   "max_y": 60.0,
+   "min_y": 58.921
+  },
+  {
+   "cx": 0,
+   "cz": 3,
+   "file": "terrain/chunk_0_3.png",
+   "max_y": 61.024,
+   "min_y": 59.966
+  },
+  {
+   "cx": 1,
+   "cz": 3,
+   "file": "terrain/chunk_1_3.png",
+   "max_y": 62.048,
+   "min_y": 60.983
+  },
+  {
+   "cx": 2,
+   "cz": 3,
+   "file": "terrain/chunk_2_3.png",
+   "max_y": 63.072,
+   "min_y": 61.995
+  },
+  {
+   "cx": 3,
+   "cz": 3,
+   "file": "terrain/chunk_3_3.png",
+   "max_y": 64.096,
+   "min_y": 63.041
+  },
+  {
+   "cx": 4,
+   "cz": 3,
+   "file": "terrain/chunk_4_3.png",
+   "max_y": 65.12,
+   "min_y": 64.096
+  }
+ ],
+ "encoding": "rgb8: height = (R*256 + G) / 65535 * (max_y - min_y) + min_y; row 0 is the north edge (min z)",
+ "resolution_m": 4.0,
+ "samples_per_chunk": 65,
+ "schema_version": 0
+}

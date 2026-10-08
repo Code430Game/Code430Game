@@ -520,10 +520,29 @@ static func _terrain_material() -> StandardMaterial3D:
 	return m
 
 
-## The edge the spawn sits on: the westernmost eastbound motorway edge.
-## The eastbound motorway edge of at least SPAWN_MIN_EDGE_M whose start is nearest the map
-## origin, so the game starts mid-district rather than on a stub cut by the import bbox.
+## The manifest's fixed spawn (`map.spawn`: x, z, heading_deg), or empty when the pack leaves
+## the start to the game (add-proving-ground: the district's author chose the start line).
+func manifest_spawn() -> Dictionary:
+	var m: Variant = manifest.get("map", {})
+	var spawn: Variant = m.get("spawn", {}) if m is Dictionary else {}
+	return spawn if spawn is Dictionary and spawn.has("x") and spawn.has("z") else {}
+
+
+## The road nearest a fixed spawn, or an empty hit when there is none.
+func _fixed_spawn_hit() -> Dictionary:
+	var fixed := manifest_spawn()
+	if fixed.is_empty():
+		return {}
+	return graph.nearest_edge(Vector3(float(fixed["x"]), 0.0, float(fixed["z"])), 60.0)
+
+
+## The edge the spawn sits on: the road under a fixed spawn, else the westernmost eastbound
+## motorway edge of at least SPAWN_MIN_EDGE_M whose start is nearest the map origin, so the
+## game starts mid-district rather than on a stub cut by the import bbox.
 func spawn_edge() -> RoadGraph.RoadEdge:
+	var fixed_hit := _fixed_spawn_hit()
+	if not fixed_hit.is_empty():
+		return fixed_hit["edge"]
 	var best: RoadGraph.RoadEdge = null
 	var best_d := INF
 	for eid in graph.sorted_edge_ids():
@@ -541,8 +560,16 @@ func spawn_edge() -> RoadGraph.RoadEdge:
 	return best
 
 
-## A sensible spawn on the highway, 20 m into the spawn edge, in the outer lane, facing along it.
+## The manifest's fixed spawn when the pack has one (at road height, facing its heading), else a
+## sensible spawn on the highway, 20 m into the spawn edge, in the outer lane, facing along it.
 func spawn_transform() -> Transform3D:
+	var fixed := manifest_spawn()
+	if not fixed.is_empty():
+		var hit := _fixed_spawn_hit()
+		var y := float(hit["point"].y) if not hit.is_empty() else 0.0
+		var heading := deg_to_rad(float(fixed.get("heading_deg", 0.0)))
+		var forward := Vector3(sin(heading), 0.0, -cos(heading))  # 0 north (-z), 90 east (+x)
+		return Transform3D(Basis.looking_at(forward, Vector3.UP), Vector3(float(fixed["x"]), y + 1.0, float(fixed["z"])))
 	var best := spawn_edge()
 	if best == null:
 		return Transform3D(Basis(), Vector3(0, 2, 0))

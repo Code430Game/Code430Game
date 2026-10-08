@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/pack-format/turf.schema.v0.json",
+  "title": "Code 430 turf v0",
+  "description": "Ground a faction holds in a map pack (written by add-proving-ground for add-hostile-gang). Local metres, x east, z south; each ring is a closed polygon given without repeating its first point.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "turfs"],
+  "properties": {
+    "schema_version": { "const": 0 },
+    "turfs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "ring"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "name": { "type": "string" },
+          "ring": {
+            "type": "array",
+            "minItems": 3,
+            "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } }
+          }
+        }
+      }
+    }
+  }
+}

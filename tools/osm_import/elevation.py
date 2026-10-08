@@ -82,18 +82,25 @@ class SyntheticSource:
     slope_x: float = 0.01
     hill_height: float = 12.0
     hill_radius: float = 250.0
+    hill_x: float = 0.0  # the hill's centre; a region file may move it off the origin
+    hill_z: float = 0.0
 
     def sample(self, x: float, z: float) -> float:
-        r2 = (x * x + z * z) / (self.hill_radius * self.hill_radius)
+        dx, dz = x - self.hill_x, z - self.hill_z
+        r2 = (dx * dx + dz * dz) / (self.hill_radius * self.hill_radius)
         return self.base + self.slope_x * x + self.hill_height * math.exp(-r2)
 
     def describe(self) -> dict:
-        return {
+        out = {
             "kind": "synthetic",
             "base": self.base,
             "slope_x": self.slope_x,
             "hill_height": self.hill_height,
         }
+        if self.hill_x or self.hill_z:
+            out["hill_centre"] = [self.hill_x, self.hill_z]
+            out["hill_radius"] = self.hill_radius
+        return out
 
 
 @dataclass

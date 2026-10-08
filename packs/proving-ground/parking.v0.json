@@ -1,0 +1,196 @@
+{
+ "bays": [
+  {
+   "edge": "w1015.0",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  },
+  {
+   "edge": "w1015.1",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  },
+  {
+   "edge": "w1015.2",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  },
+  {
+   "edge": "w1015.3",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  },
+  {
+   "edge": "w1015.4",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  }
+ ],
+ "garages": [
+  {
+   "access": null,
+   "building": "w20044.0",
+   "capacity": null,
+   "ceiling_y": 67.18,
+   "entrances": [
+    {
+     "at": [
+      -370.45,
+      67.48,
+      -349.68
+     ],
+     "dir": [
+      -1.0,
+      -0.0001
+     ],
+     "osm_id": 100935,
+     "ramp": [
+      [
+       -370.45,
+       67.48,
+       -349.68
+      ],
+      [
+       -391.78,
+       64.28,
+       -349.68
+      ]
+     ]
+    }
+   ],
+   "fee": null,
+   "floor_y": 64.28,
+   "footprint": "building",
+   "id": "g0",
+   "name": "Cross Garage",
+   "rings": [
+    [
+     [
+      -392.48,
+      -321.74
+     ],
+     [
+      -392.48,
+      -345.43
+     ],
+     [
+      -389.09,
+      -346.4
+     ],
+     [
+      -387.53,
+      -349.68
+     ],
+     [
+      -389.09,
+      -352.97
+     ],
+     [
+      -392.48,
+      -353.93
+     ],
+     [
+      -392.48,
+      -377.62
+     ],
+     [
+      -448.54,
+      -377.62
+     ],
+     [
+      -448.55,
+      -321.75
+     ]
+    ]
+   ],
+   "tier": "garage"
+  }
+ ],
+ "lots": [
+  {
+   "access": null,
+   "aisles": [
+    "w1072.0"
+   ],
+   "capacity": 40,
+   "entrances": [],
+   "fee": null,
+   "ground_y": 63.67,
+   "id": "w40000.0",
+   "kind": "surface",
+   "name": "Loop Lot",
+   "operator": null,
+   "orientation": null,
+   "osm_id": 40000,
+   "rings": [
+    [
+     [
+      -155.19,
+      -309.76
+     ],
+     [
+      -155.19,
+      -379.61
+     ],
+     [
+      -30.03,
+      -379.61
+     ],
+     [
+      -30.04,
+      -309.76
+     ]
+    ]
+   ],
+   "stall_dir": [
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "access": null,
+   "aisles": [],
+   "capacity": 200,
+   "entrances": [],
+   "fee": null,
+   "ground_y": 67.0,
+   "id": "w40001.0",
+   "kind": "multi-storey",
+   "name": "Cross Garage",
+   "operator": null,
+   "orientation": null,
+   "osm_id": 40001,
+   "rings": [
+    [
+     [
+      -450.55,
+      -319.75
+     ],
+     [
+      -450.54,
+      -379.62
+     ],
+     [
+      -390.48,
+      -379.62
+     ],
+     [
+      -390.48,
+      -319.74
+     ]
+    ]
+   ],
+   "stall_dir": [
+    1.0,
+    0.0001
+   ]
+  }
+ ],
+ "schema_version": 0,
+ "units": "metres, x east, z south; ground_y vertical"
+}

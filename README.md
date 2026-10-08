@@ -23,6 +23,8 @@ godot --path game --editor
 ```
 Or open `game/project.godot` from the Godot project manager. Press F5 to run the play testbed: it loads the Ottawa map pack from `packs/`, builds the city, and puts you on foot beside a car on the Queensway.
 
+For a quick try of a change there is also the Double Cross proving ground, a small generated test district with one of everything and a figure-eight track: `godot --path game -- --pack=code430.proving-ground --drive` starts on its start line (or save the pack under `[map] pack` in `user://settings.cfg`). It is rebuilt from `tools/proving_ground` by `scripts/regen-proving-ground.sh`; CI checks the committed pack matches.
+
 Controls for controller and keyboard are in `docs/controls.md`, generated from the game's input map; the pause menu's Controls tab shows the same list and rebinds them.
 
 Benchmark from the command line (vsync off, prints a frame-time summary and quits):

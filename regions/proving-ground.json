@@ -1,0 +1,39 @@
+{
+  "name": "proving-ground",
+  "bbox": [
+    44.9928135,
+    -75.0152448,
+    45.0071865,
+    -74.9847552
+  ],
+  "pack_id": "code430.proving-ground",
+  "pack_name": "Double Cross",
+  "dem": "synthetic",
+  "synthetic": {
+    "base": 60.0,
+    "slope_x": 0.004,
+    "hill_height": 9.0,
+    "hill_radius": 320.0,
+    "hill_x": -380.0,
+    "hill_z": -330.0
+  },
+  "inputs": {
+    "osm": "proving-ground/osm.json",
+    "water": "proving-ground/water.json",
+    "buildings": "proving-ground/buildings.json",
+    "parking": "proving-ground/parking.json",
+    "bridges": "proving-ground/bridges.json",
+    "services": "proving-ground/services.json",
+    "vegetation": "proving-ground/vegetation.json"
+  },
+  "extras": [
+    "proving-ground/lap.v0.json",
+    "proving-ground/turf.v0.json"
+  ],
+  "description": "The Double Cross proving ground: a generated test district with one of everything (tools/proving_ground).",
+  "spawn": {
+    "x": -1.75,
+    "z": -340.0,
+    "heading_deg": 180.0
+  }
+}

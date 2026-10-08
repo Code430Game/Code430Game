@@ -61,6 +61,9 @@ GENERATED = [
     (PARKING_NAME, PARKING_SCHEMA_PATH, [("lots", "id"), ("garages", "id")]),
     (VEGETATION_NAME, VEGETATION_SCHEMA_PATH, [("areas", "id")]),
     (SERVICES_NAME, SERVICES_SCHEMA_PATH, [("places", "id")]),
+    # Pack extras a district's author writes by hand or by generator (add-proving-ground).
+    ("lap.v0.json", FORMAT_DIR / "lap.schema.v0.json", [("laps", "id")]),
+    ("turf.v0.json", FORMAT_DIR / "turf.schema.v0.json", [("turfs", "id")]),
 ]
 MAX_ERRORS_PER_FILE = 20
 MODES_DIR = REPO_ROOT / "game" / "core" / "content" / "modes"

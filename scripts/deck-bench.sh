@@ -14,6 +14,9 @@
 #   --extra     more testbed flags, e.g. "--wanted=3" (the base is --autodrive --preset=deck)
 #   --change/--task  append a dated note with the medians under that task in
 #               openspec/changes/<id>/tasks.md (the task is not ticked)
+#   --pack      map pack id to start on (passed as --pack=<id>; default the Ottawa pack)
+#   --route     a named run: "loop" is the Double Cross proving ground's lap from its start
+#               line (sets --pack code430.proving-ground; the pack's own spawn is the line)
 #   --no-deploy benchmark what is on the Deck now (one ref only)
 #   --dry-run   print what would run, touch nothing
 #   --host      ssh target (default deck@steamdeck.local, or $DECK_HOST)
@@ -32,6 +35,8 @@ REFS=()
 RUNS=2
 SECONDS_LEN=40
 EXTRA=""
+PACK=""
+ROUTE=""
 CHANGE=""
 TASK=""
 DEPLOY=true
@@ -50,6 +55,8 @@ while [ $# -gt 0 ]; do
     --change) CHANGE="${2:?}"; shift 2 ;;
     --task) TASK="${2:?}"; shift 2 ;;
     --host) HOST="${2:?}"; shift 2 ;;
+    --pack) PACK="${2:?--pack needs a pack id}"; shift 2 ;;
+    --route) ROUTE="${2:?--route needs a name}"; shift 2 ;;
     --no-deploy) DEPLOY=false; shift ;;
     --dry-run) DRY=true; shift ;;
     -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
@@ -70,7 +77,12 @@ if ! $DEPLOY && [ ${#REFS[@]} -gt 1 ]; then die "--no-deploy benchmarks one buil
 # The game's process as the player or this script starts it, anchored so it never matches the
 # ssh shell running the check.
 RUNNING_PATTERN='^(/home/deck/Games/code430/|\./)code430\.x86_64'
-FLAGS="--benchmark=$SECONDS_LEN --autodrive --preset=deck${EXTRA:+ $EXTRA}"
+case "${ROUTE:-}" in
+  "") ;;
+  loop) PACK="${PACK:-code430.proving-ground}" ;;
+  *) die "unknown route: $ROUTE (known: loop)" ;;
+esac
+FLAGS="--benchmark=$SECONDS_LEN --autodrive --preset=deck${PACK:+ --pack=$PACK}${EXTRA:+ $EXTRA}"
 
 remote() {
   if $DRY; then echo "[dry-run] $SSH $HOST $*" >&3; return 0; fi
