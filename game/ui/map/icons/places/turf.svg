@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Code 430 place icon (CC BY-SA 4.0): a faction's turf, two crossed bats behind a tag -->
+<path fill="#fff" d="M14 12 L20 8 L52 40 L48 46 Z M50 12 L44 8 L12 40 L16 46 Z"/>
+<path fill="#fff" d="M20 44 H44 Q48 44 48 48 V54 Q48 58 44 58 H20 Q16 58 16 54 V48 Q16 44 20 44 Z"/>
+</svg>
