@@ -90,6 +90,11 @@ var _weapon_at_start: int = 0  # --weapon=1|2: hold the melee weapon or the gun 
 var _shots_at_start: int = 0  # --shoot=N: aim and fire N times once the world is up (screenshots)
 var _fists_at_start: String = ""  # --fists=punch|kick: hold a punch or kick mid-move (screenshots)
 var _officer_at_start: String = ""  # --officer=stagger|down|tagged: an officer in front, hit into that state (screenshots)
+var _factions: FactionManager  # hostile crews on their turf (add-hostile-gang)
+var _heat_glyph: HeatGlyph
+var _shout_label: Label
+var _gang_at_start: int = -1  # --gang=N: a turf of N members and a leader around the player at start
+var _turf_log: bool = false  # --turf-log: print each crew's state and heat every second
 var _fly_at_start: bool = false  # --fly: start in the police helicopter on its pad (add-flyable-helicopter)
 var _fly_at: Vector3 = Vector3.INF  # --fly-at=x,y,z: start flying it there instead (screenshots)
 var _fly_input: Dictionary = {}  # --fly-input=x,z,climb,yaw: hold these controls (screenshots)
@@ -638,6 +643,7 @@ func _setup_wanted() -> void:
 	var b := Projector_bounds()
 	_police.air_bounds = Rect2(b.x, b.y, b.z - b.x, b.w - b.y)
 	_police.aircraft_taken.connect(func(heli: FlyableHelicopter) -> void: _wanted.report("aircraft_theft", heli.global_position, true))
+	_setup_factions()
 	_player.exit_refused.connect(func(_reason: String) -> void: _land_first_s = 2.0)
 	_banner = Label.new()
 	_banner.name = "Banner"
@@ -675,6 +681,57 @@ func _setup_wanted() -> void:
 				_wanted.report("assault", at))
 
 
+## Hostile factions (add-hostile-gang): the pack's turfs get their crews, the weapons reach the
+## members, member crimes go to the police as theirs, and the heat glyph sits beside the seen
+## badge with the crew's shout under the stars.
+func _setup_factions() -> void:
+	_factions = FactionManager.new()
+	_factions.name = "Factions"
+	_factions.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_factions.load_data(_pack.pack_dir)
+	_factions.holder = _world
+	_factions.targets = [_player]
+	_factions.graph = _pack.graph
+	_factions.walk = _peds.walk if _peds != null else null
+	_factions.police = _police
+	_factions.wanted = _wanted
+	_factions.peds = _peds
+	_factions.effects = _combat_effects
+	_factions.log_turf = _turf_log
+	_factions.mirror = Session.is_client()
+	add_child(_factions)
+	_factions.setup_turfs(_pack.turfs)
+	_shooter.factions = _factions
+	_police.factions = _factions
+	_factions.hurt.connect(_hurt)
+	_heat_glyph = HeatGlyph.new()
+	_heat_glyph.name = "HeatGlyph"
+	_heat_glyph.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	# Left of the seen badge: offsets from the right edge, like the badge's own (its `position`
+	# reads back as a screen x once anchored).
+	_heat_glyph.position = Vector2(_seen_badge.offset_left - 10.0 - _heat_glyph.size.x, 84.0)
+	_heat_glyph.visible = false
+	$HUD.add_child(_heat_glyph)
+	_shout_label = Label.new()
+	_shout_label.name = "Shout"
+	_shout_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_shout_label.position = Vector2(-420.0, 136.0)
+	_shout_label.size = Vector2(400.0, 30.0)
+	_shout_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_shout_label.add_theme_font_size_override("font_size", 20)
+	_shout_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.75))
+	_shout_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	_shout_label.visible = false
+	$HUD.add_child(_shout_label)
+	_factions.warned.connect(func(text: String, _at: Vector3) -> void:
+		_shout_label.text = "\"%s\"" % text
+		_shout_label.visible = text != ""
+		get_tree().create_timer(3.0).timeout.connect(func() -> void: _shout_label.visible = false))
+	if _gang_at_start >= 0:
+		get_tree().create_timer(1.5).timeout.connect(func() -> void:
+			_factions.add_turf_around(_player.global_position, 45.0, _gang_at_start))
+
+
 func _setup_net() -> void:
 	Session.local_manifest = _pack.manifest_summary()
 	_player_sync = PlayerSync.new()
@@ -694,6 +751,10 @@ func _setup_net() -> void:
 	_world_sync.day_night = _day_night
 	_world_sync.take_granted.connect(_on_take_granted)
 	_world_sync.police = _police
+	_world_sync.factions = _factions
+	if _factions != null:
+		_factions.on_guest_hit = func(turf: int, seed: int, weapon_id: String, pos: Vector3, from: Vector3) -> void:
+			_world_sync.report_member_hit(turf, seed, weapon_id, pos, from)
 	_world_sync.helicopter_granted.connect(_on_helicopter_granted)
 	if _traffic != null:
 		_traffic.mirror_hit.connect(func(p: Vector3, v: Vector3) -> void: _world_sync.report_hit(p, v))
@@ -912,7 +973,7 @@ func _setup_maps() -> void:
 	_overview.places = places
 	_minimap.places = places
 	var t0 := Time.get_ticks_msec()
-	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas)
+	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas, _pack.turfs)
 	print("map texture %s rendered in %d ms" % [_map_renderer.size_px, Time.get_ticks_msec() - t0])
 	if _open_map_on_start or _map_pick != "":
 		_overview.open()
@@ -1008,6 +1069,10 @@ func _parse_args() -> void:
 			_fists_at_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--officer="):
 			_officer_at_start = arg.get_slice("=", 1)
+		elif arg.begins_with("--gang="):
+			_gang_at_start = int(arg.get_slice("=", 1))
+		elif arg == "--turf-log":
+			_turf_log = true
 		elif arg == "--fly":
 			_fly_at_start = true
 		elif arg.begins_with("--fly-input="):
@@ -1271,6 +1336,10 @@ func _process(delta: float) -> void:
 		_minimap.blips = blips
 	if _seen_badge != null and _wanted != null:
 		_seen_badge.show_wanted(_wanted.stars, _wanted.helicopter_sees, _wanted.ground_sees, _wanted.hidden_progress())
+	if _heat_glyph != null and _factions != null and _player != null:
+		_heat_glyph.show_heat(_factions.heat_shown(), _factions.in_turf(_player.global_position), _factions.tags)
+		if OS.has_environment("CODE430_HEAT_DEBUG") and Engine.get_process_frames() % 120 == 0:
+			print("heat glyph: heat %.2f visible %s at %s size %s" % [_heat_glyph.heat, _heat_glyph.visible, _heat_glyph.global_position, _heat_glyph.size])
 	if in_play and driving and Input.is_action_just_pressed("horn") and _peds != null:
 		_peds.startle(_driven_car().global_position, HORN_STARTLE_M)
 	if in_play and Input.is_action_just_pressed("camera_cycle") and _player != null and _player.is_driving():
