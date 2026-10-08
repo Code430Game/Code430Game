@@ -4,7 +4,9 @@
 # ///
 """Add (or update) the Code 430 non-Steam shortcut on a Steam Deck over SSH.
 
-Usage: uv run scripts/deck-add-shortcut.py [host]
+Usage: uv run scripts/deck-add-shortcut.py [host] [--name "<shortcut name>"] [--launch "<launch options>"]
+  --name    the shortcut's name (default "Code 430"); a second name makes a second entry
+  --launch  Steam launch options, e.g. "-- --pack=code430.proving-ground"
 Downloads <userdata>/config/shortcuts.vdf (or starts a new one), upserts an entry
 pointing at ~/Games/code430/code430.x86_64, and uploads it. Backs up the existing
 file first. Steam reads the file only at startup, so restart the Deck (Power >
@@ -19,8 +21,14 @@ import time
 import zlib
 from pathlib import Path
 
-HOST = sys.argv[1] if len(sys.argv) > 1 else "steamdeck.local"
-APP_NAME = "Code 430"
+def _arg(flag: str, default: str) -> str:
+    return sys.argv[sys.argv.index(flag) + 1] if flag in sys.argv else default
+
+
+_positional = [a for i, a in enumerate(sys.argv[1:], 1) if not a.startswith("--") and not sys.argv[i - 1].startswith("--")]
+HOST = _positional[0] if _positional else "steamdeck.local"
+APP_NAME = _arg("--name", "Code 430")
+LAUNCH_OPTIONS = _arg("--launch", "")
 EXE = "/home/deck/Games/code430/code430.x86_64"
 START_DIR = "/home/deck/Games/code430/"
 LOCAL = Path("/tmp/code430_shortcuts.vdf")
@@ -58,7 +66,7 @@ def main() -> int:
         "StartDir": f'"{START_DIR}"',
         "icon": "",
         "ShortcutPath": "",
-        "LaunchOptions": "",
+        "LaunchOptions": LAUNCH_OPTIONS,
         "IsHidden": 0,
         "AllowDesktopConfig": 1,
         "AllowOverlay": 1,
