@@ -19,6 +19,8 @@
   - 2026-10-08: a sixth tab, Packs: one row per discovered pack (`[x]`/`[ ]`/`[!]`, name, type, version, the loader's state on the right in a key cap, warning tint for system and refused packs); A toggles data-only non-map packs and saves; map rows explain `--pack=` and the setting; toggles are refused during a co-op session; footer says changes apply at the next load. `test_pause_menu.gd` drives it with D-pad and A. Screenshots: see the PR body.
 
 ## 4. Verification
-- [ ] 4.1 CI green (`scripts/ci-local.sh`): pack validator over `packs/`, gdUnit, pytest
+- [x] 4.1 CI green (`scripts/ci-local.sh`): pack validator over `packs/`, gdUnit, pytest
+  - 2026-10-08: All checks passed: 400 pytest, 4 packs valid, 54 specs, 600 gdUnit cases, 0 failures, 0 orphans. Mac deck-preset 40 s autodrive on Ottawa, main 7aa89e3 against the branch: first playable 422 vs 348 ms, frame avg 8.37 vs 8.36 ms, render cpu 0.46 vs 0.46 ms, physics mean 6.20 vs 6.07 ms, draw calls 465 both.
 - [ ] 4.2 Deck: package, deploy, benchmark; start-up time with the loader against the previous build; frame unchanged
+  - Not run on 2026-10-08: the Deck was being deployed to by another process. Command: `scripts/deck-bench.sh --ref main --ref change/add-pack-loader --change add-pack-loader --task 4.2`; compare the "first play" column as well as the measured render line.
 - [ ] 4.3 **Stop: human opens the Packs list on the Deck, disables the character pack, restarts and sees the built-in palette**
