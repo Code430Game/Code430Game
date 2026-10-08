@@ -29,8 +29,10 @@
 - Bottom lobe, motorway: from the crossing east along the river to the far right, a second
   river bridge heading south, an elevated sweep (`bridge=yes`, `layer=1` where it runs over
   residential streets) round the lower right and back north up the vertical straight. No
-  junctions except the two `motorway_link` exits with gores: one on the far-right descent,
-  one on the vertical ascent, both into the residential grid.
+  junctions except the `motorway_link` pairs with gores: on the river highway between the
+  crossing and the far-right bridge, into the city top right; on the far-right descent, into
+  the residential east; and on the vertical ascent, aimed west into the residential west.
+  With the roundabout top left that is one way on and off per quarter.
 - Lap direction: top lobe clockwise, bottom lobe anticlockwise; the start line sits on the
   vertical straight just north of the centre bridge. The timer is a `lap.v0.json` entry: a
   point on the loop and a direction; it triggers on the car crossing the line in that
