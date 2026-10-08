@@ -932,7 +932,12 @@ def build_spawn(d: District) -> None:
     d.spawn = (-1.75, -340.0, 180.0)
 
 
-def build() -> District:
+def build(town: str = TOWN) -> District:
+    """The whole district; `town` names the station, police, hospital and fire hall."""
+    global TOWN
+    TOWN = town
+    from proving_ground.dressing import build_dressing
+
     d = District()
     build_river(d)
     build_greenbelt(d)
@@ -943,6 +948,7 @@ def build() -> District:
     build_exits(d)
     build_services(d)
     build_paths(d)
+    build_dressing(d)
     build_spawn(d)
     stitch(d)
     return d

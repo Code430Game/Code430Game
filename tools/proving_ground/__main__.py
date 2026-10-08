@@ -26,8 +26,9 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="Write the region file here (inputs are referenced relative to it)",
     )
+    parser.add_argument("--town", default="Double Cross", help="The town's name")
     args = parser.parse_args(argv)
-    district = build()
+    district = build(args.town)
     paths = write_all(district, args.out, args.region)
     counts = feature_counts(district)
     print(" ".join(f"{k}={v}" for k, v in counts.items()))
