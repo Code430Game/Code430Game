@@ -20,31 +20,38 @@ place to be proved in minutes, a loop to drive laps on, and somewhere to put the
   shoulders, elevation, crossings, bridges, underpasses, barriers, water, buildings,
   parking, garages, services, bus lanes, vegetation) and the output is deterministic. The
   importer gains the file inputs it is missing (`--services-json`, `--vegetation-json`).
-- **The layout** (human: "when I say race track, that's like the main road, but I am
-  thinking of having other streets come off of it, so like a larger track with a city grid
-  inside"). A fictional town, working name Harbourline, about 1.6 km by 1.2 km: a ring road
-  is the track, and the town grid sits inside it with side streets branching off the ring
-  at real junctions, so the ring is both the fast lap and the way into town.
-  - the **loop**: a two-lane ring road of roughly 2.5 km with two long sweepers, a straight
-    along the water, a chicane, and one grade-separated crossing where it bridges over the
-    highway stub; a start line on the straight. The grid's avenues meet the ring at
-    signalled junctions, its small streets at stop signs; the sweepers have no junctions;
-  - a **bridge** on the loop over a canal that cuts the district in two, with a footbridge
-    beside it and a boat-sized gap of water under it;
-  - a **town grid** of three by three blocks inside the loop, its two avenues running out to
-    the ring on both sides: signals at the centre crossing and where the avenues meet the
-    ring, stop signs elsewhere, one-way pair, bus lane, sidewalks, crossings, shopfronts, a
-    multi-storey garage with an underground entrance, a surface lot, kerb parking;
-  - a **highway stub** with an on and an off ramp joining the loop, a gore at each, and an
-    underpass where a path crosses under it;
-  - **services**: a police station with a helipad, a hospital with an ambulance bay, a fire
-    station, each on its own block with its driveway;
-  - a **park** with trees, a tree row, grass, a path network and the footbridge;
-  - **residential streets** with houses and driveways on the far side of the canal;
-  - a **dead end** at the map edge for the edge closure, and a bus loop with stops and a
-    reserved lane;
-  - a **rail stub** with a station, tagged for `add-rail`, inert until that lands;
-  - the **spawn** on the loop's straight, facing the start line.
+- **The layout** (the human's sketch, 2026-10-08: a figure eight; "the loop would be
+  highway, in the city it could come down to ground level, maybe do a little roundabout";
+  "the middle where they meet to be straights on having a bridge"; exits in the lower right
+  "as it goes down, and then as it comes back up which gives access to residential areas";
+  "the top is city, the top left is the main city"; edge streets "turn back into the grid").
+  A fictional town, working name **Double Cross** (track and gang share the name; the town's
+  own name is still open), about 2.4 km by 1.6 km with a river across the middle and a
+  greenbelt along the top and left edges:
+  - the **loop** is a figure eight of roughly 2.7 km. The small lobe, top left, runs at
+    street level through the main city as a two-lane `secondary` and drops into a small
+    roundabout on its west side. From the crossing the big lobe climbs to an elevated
+    `motorway` (no junctions, the flat-out half of the lap), crosses the river on its east
+    side, sweeps round the lower right and returns to the crossing;
+  - the **crossing**: the two straights meet in the middle of the map on one bridge over the
+    river, the street-level straight on the lower deck and the highway straight on the upper
+    (`bridge=yes`, `layer=1` and `layer=2`), so one structure exercises piers, abutments, lane
+    layers and the river in a single place; a footbridge beside it;
+  - two **exits** in the lower right, one on the way down and one on the way back up, with
+    gores, feeding the residential grid; an underpass where a path crosses under the ramp;
+  - the **main city** grid, top left, around and through the small lobe: signals where the
+    avenues cross the loop, stops elsewhere, a one-way pair, a bus loop with a reserved lane
+    and stops, sidewalks, crossings, shopfronts, a multi-storey garage with an underground
+    entrance, a surface lot, kerb parking; the police station with its helipad and the
+    hospital with its ambulance bay on their own blocks;
+  - the **city** grid, top right, between the river and the greenbelt: the fire station, an
+    office block row, the rail stub with a station (tagged for `add-rail`, inert until then);
+  - the **residential** grid across the whole south, under the big lobe: houses with
+    driveways, the gang's turf on a block the human picks, a park with trees, a tree row,
+    grass and paths;
+  - every **edge street** curls back into the grid instead of dead-ending; one deliberate
+    dead end at the map edge keeps the edge closure testable;
+  - the **spawn** on the small lobe's straight, facing the start line.
   Street and place names are generic and invented; no real people, brands or parodies.
 - **A committed pack.** The generated pack `packs/proving-ground` (id
   `code430.proving-ground`, region `regions/proving-ground.json` with `"dem": "synthetic"`
