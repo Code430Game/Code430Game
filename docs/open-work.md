@@ -7,6 +7,10 @@ Every change below is ready to pick up: an OpenSpec change in `openspec/changes/
 
 Updated 2026-10-07.
 
+## In progress
+
+- `add-weather` (claim #101, branch `change/add-weather`, the Fable session on the maintainer's Mac)
+
 ## Ready to build
 
 Medium:
@@ -23,14 +27,12 @@ Large:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
-| `add-weather` | sky, rain, snow, fog, wet roads | nothing | sky shader, materials, traffic and grip factors |
 | `add-hover-cars` | dystopia flying cars | helicopter (merged) | new hover car, catalogue, controls, traffic, police |
 | `add-two-wheelers` | bicycles and motorcycles | nothing | importer bike lanes, traffic, vehicles, character rig |
 | `add-bus-routes` | numbered routes, signs, shelters | nothing | importer routes, traffic, bus mesh, dressing |
 | `add-rail` | the Confederation Line with trains | nothing | importer rail, track builder, trains, co-op |
 | `add-character-features` | more clothes and hair, crowd LODs | `add-character-detail` (built, awaiting its Deck try) | character profile/mesh/rig, pedestrian shader |
-| `add-pack-loader` | v1 pack format and a Packs menu | nothing | pack tools, loader, registry, co-op handshake |
-| `add-story-pack` | the first mission, "First Ride" | `add-pack-loader` | missions, markers, co-op |
+| `add-story-pack` | the first mission, "First Ride", with the Double Cross crew as the antagonist | `add-pack-loader` (merged #100), `add-hostile-gang` (merged #97) | missions, markers, co-op |
 | `update-audio-pass` | positional city sound, engine per class | the maintainer schedules an audio round | audio, traffic, emergency managers |
 
 ## Files several changes touch
@@ -71,7 +73,8 @@ maintainer:
 - `add-flyable-helicopter` 4.2 and 4.3
 - `update-shared-deck-heights` 2.1
 - `update-proving-ground-dressing` 2.2 (Deck benchmark) and 2.3
-- `add-hostile-gang` 4.1 (Deck benchmark) and 4.2
+- `add-hostile-gang` 4.2
+- `add-pack-loader` 4.2 (Deck benchmark) and 4.3
 
 `add-coop-multiplayer` still needs:
 - the tone sent on join (1.3);
