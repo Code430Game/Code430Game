@@ -96,11 +96,11 @@ func test_lb_rb_and_q_e_cycle_the_tabs() -> void:
 	await _press(JOY_BUTTON_LEFT_SHOULDER)
 	await _press(JOY_BUTTON_LEFT_SHOULDER)
 	await _press(JOY_BUTTON_LEFT_SHOULDER)
-	assert_int(menu.tab).is_equal(PauseMenu.SETTINGS_TAB)  # wraps round
+	assert_int(menu.tab).is_equal(PauseMenu.PACKS_TAB)  # wraps round to the last tab
 	await _key(KEY_E)
 	assert_int(menu.tab).is_equal(PauseMenu.GAME_TAB)
 	await _key(KEY_Q)
-	assert_int(menu.tab).is_equal(PauseMenu.SETTINGS_TAB)
+	assert_int(menu.tab).is_equal(PauseMenu.PACKS_TAB)
 	menu.close()
 	_restore_settings()
 
@@ -219,3 +219,60 @@ func test_co_op_has_its_own_tab_and_join_still_focuses_the_address() -> void:
 	assert_str(joined[0]).is_equal("127.0.0.1")
 	menu.close()
 	_restore_settings()
+
+
+## add-pack-loader 3.2: the Packs tab lists every discovered pack, A toggles a data-only
+## non-map pack and saves it, a map pack row explains itself, and the footer says changes
+## apply at the next load.
+func test_packs_tab_toggles_a_character_pack_with_the_controller() -> void:
+	var saved_dirs := PackLoader.search_dirs
+	var saved_path := PackLoader.enabled_path
+	var saved_map := PackLoader.active_map
+	PackLoader.enabled_path = "user://tmp/packs_menu_%d.cfg" % Time.get_ticks_usec()
+	PackLoader.search_dirs = PackedStringArray([ProjectSettings.globalize_path("res://").path_join("../packs").simplify_path()])
+	PackLoader.active_map = "code430.ottawa-centretown"
+	PackLoader.reload()
+	var menu := await _open()
+	menu.show_tab(PauseMenu.PACKS_TAB)
+	await get_tree().process_frame
+	var rows := menu.rows(PauseMenu.PACKS_TAB)
+	assert_int(rows.size()).is_equal(PackLoader.packs.size())
+	assert_str(menu.hint_text()).contains("enable / disable")
+	var chars := -1
+	var ottawa := -1
+	for i in range(rows.size()):
+		var id := str((rows[i] as Button).get_meta("pack_id"))
+		if id == "code430.characters":
+			chars = i
+		elif id == "code430.ottawa-centretown":
+			ottawa = i
+	assert_int(chars).is_greater_equal(0)
+	assert_int(ottawa).is_greater_equal(0)
+	assert_str(str((rows[chars] as Button).get_meta("text"))).starts_with("[x]")
+	for i in range(chars):
+		await _press(JOY_BUTTON_DPAD_DOWN)
+	await _press(JOY_BUTTON_A)
+	assert_bool(PackLoader.is_enabled("code430.characters")).is_false()
+	rows = menu.rows(PauseMenu.PACKS_TAB)
+	assert_str(str((rows[chars] as Button).get_meta("text"))).starts_with("[ ]")
+	assert_str(menu._packs_note.text).contains("next load")
+	var cfg := ConfigFile.new()
+	assert_int(cfg.load(PackLoader.enabled_path)).is_equal(OK)
+	var enabled: PackedStringArray = cfg.get_value(PackLoader.SECTION, PackLoader.KEY_ENABLED)
+	assert_bool(enabled.has("code430.characters")).is_false()
+	await _press(JOY_BUTTON_A)
+	assert_bool(PackLoader.is_enabled("code430.characters")).is_true()
+	# A map pack row does not toggle; it says how the map is chosen. (Every toggle rebuilds the rows.)
+	rows = menu.rows(PauseMenu.PACKS_TAB)
+	(rows[ottawa] as Button).pressed.emit()
+	assert_bool(PackLoader.is_enabled("code430.ottawa-centretown")).is_true()
+	assert_str(menu._packs_note.text).contains("--pack=")
+	menu.close()
+	await get_tree().process_frame  # the rebuilt rows' old buttons free at the frame's end
+	await get_tree().process_frame
+	_restore_settings()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(PackLoader.enabled_path))
+	PackLoader.search_dirs = saved_dirs
+	PackLoader.enabled_path = saved_path
+	PackLoader.active_map = saved_map
+	PackLoader.reload()
