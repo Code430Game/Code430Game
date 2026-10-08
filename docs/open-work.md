@@ -9,7 +9,7 @@ Updated 2026-10-07.
 
 ## In progress
 
-- `add-weather` (claim #101, branch `change/add-weather`, the Fable session on the maintainer's Mac)
+- `fix/proving-ground-density` (smaller blocks, frontage roads; the Fable session on the maintainer's Mac)
 
 ## Ready to build
 
@@ -75,6 +75,7 @@ maintainer:
 - `update-proving-ground-dressing` 2.2 (Deck benchmark) and 2.3
 - `add-hostile-gang` 4.2
 - `add-pack-loader` 4.2 (Deck benchmark) and 4.3
+- `add-weather` 4.1 (Deck benchmark, `--extra "--weather=rain"`) and 4.2
 
 `add-coop-multiplayer` still needs:
 - the tone sent on join (1.3);
