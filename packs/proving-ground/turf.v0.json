@@ -4,6 +4,7 @@
   {
    "id": "double-cross",
    "name": "the Double Cross",
+   "faction": "double-cross",
    "ring": [
     [
      550.0,
@@ -21,6 +22,10 @@
      550.0,
      550.0
     ]
+   ],
+   "centre": [
+    650.0,
+    475.0
    ]
   }
  ]

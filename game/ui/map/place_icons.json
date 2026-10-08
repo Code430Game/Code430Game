@@ -15,6 +15,7 @@
     {"kind": "ambulance", "name": "Ambulance post", "color": "#d9466b", "icon": "ambulance"},
     {"kind": "security", "name": "Security", "color": "#66739a", "icon": "security"},
     {"kind": "helipad", "name": "Helipad", "color": "#8a8fa3", "icon": "helipad", "title": "Police helipad", "note": "The police helicopter parks here"},
-    {"kind": "garage", "name": "Parking garage", "color": "#4a7fd9", "icon": "garage", "title": "{street} Parking", "note": "Underground · heli cover"}
+    {"kind": "garage", "name": "Parking garage", "color": "#4a7fd9", "icon": "garage", "title": "{street} Parking", "note": "Underground · heli cover"},
+    {"kind": "turf", "name": "Turf", "color": "#b23a3a", "icon": "turf", "note": "A crew holds this ground"}
   ]
 }

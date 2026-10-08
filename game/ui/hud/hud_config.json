@@ -17,6 +17,12 @@
     "opacity": 0.7,
     "flash_s": 0.6
   },
+  "heat_glyph": {
+    "_doc": "add-hostile-gang: the gang heat mark beside the seen badge. outside_alpha dims it while the heat drains outside turf.",
+    "size_px": 44.0,
+    "ring_px": 3.0,
+    "outside_alpha": 0.45
+  },
   "seen_badge": {
     "_doc": "update-police-pursuit: the eye beside the wanted stars. blink_s is half a blink cycle while hidden; hidden_alpha the dim half.",
     "size_px": 44.0,

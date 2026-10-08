@@ -48,6 +48,7 @@ with only the proposal. The maintainer approves the direction before code is wri
   - `--wanted=N` (plus `--police-log`) for chases
   - `--weapon=1|2 --shoot=N` for weapons, `--wheel=N` for the weapon wheel open on entry N
   - `--knockdown-every=S` (plus `--ambulance-log`) for ambulances
+  - `--gang=N` (plus `--turf-log`) for a crew of N and a leader on a turf round the player, in any pack
 - **Performance:** the Steam Deck is the baseline (`AGENTS.md`, performance budget). Run
   `--benchmark=40 --autodrive --preset=deck` on main and on your branch, back to back on the
   same machine, and quote both in the PR. If you have a Deck, say so and include its numbers;

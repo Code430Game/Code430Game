@@ -61,6 +61,7 @@ var garage_light_material: Material
 var vegetation_chunks: Dictionary = {}  # chunk -> {"trees", "bushes"} rows, priority order
 var green_areas: Array = []  # for the maps
 var services: Array[Services.Place] = []  # police stations, hospitals, fire stations, helipads
+var turfs: Array[Turf] = []  # ground a faction holds (add-hostile-gang)
 var parking_lots: Array[ParkingLotBuilder.Lot] = []
 var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
 
@@ -124,6 +125,19 @@ func load(dir: String) -> bool:
 	VegetationBuilder.read_preset()
 	green_areas = VegetationBuilder.load_areas(dir)
 	services = Services.load_places(dir)
+	turfs = Turf.load_all(dir)
+	for t in turfs:
+		# The turf's centre is a place on the maps (kind "turf"), beside the services.
+		var p := Services.Place.new()
+		p.id = "turf:" + t.id
+		p.kind = "turf"
+		p.name = t.name
+		var hit := graph.nearest_edge(Vector3(t.centre.x, 0.0, t.centre.y), 200.0)
+		var y: float = float((hit["point"] as Vector3).y) if hit.has("point") else 0.0
+		p.at = Vector3(t.centre.x, y, t.centre.y)
+		p.road_node = ""
+		p.address = ""
+		services.append(p)
 	garages = GarageBuilder.load_garages(dir, graph)
 	var built := GarageBuilder.build(garages)
 	garage_chunks = built["structure"]
