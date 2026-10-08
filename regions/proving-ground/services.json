@@ -1,0 +1,72 @@
+{
+ "version": 0.6,
+ "generator": "code430 proving_ground",
+ "elements": [
+  {
+   "type": "way",
+   "id": 50000,
+   "center": {
+    "lat": 45.0020212,
+    "lon": -76.5052722
+   },
+   "tags": {
+    "addr:housenumber": "1",
+    "addr:street": "Circle Avenue",
+    "amenity": "police",
+    "name": "Double Cross Police"
+   }
+  },
+  {
+   "type": "way",
+   "id": 50001,
+   "center": {
+    "lat": 45.0020661,
+    "lon": -76.5045099
+   },
+   "tags": {
+    "aeroway": "helipad",
+    "name": "Police Pad"
+   }
+  },
+  {
+   "type": "way",
+   "id": 50002,
+   "center": {
+    "lat": 45.0030093,
+    "lon": -76.5032395
+   },
+   "tags": {
+    "addr:housenumber": "2",
+    "addr:street": "Station Avenue",
+    "amenity": "hospital",
+    "name": "Double Cross General"
+   }
+  },
+  {
+   "type": "way",
+   "id": 50003,
+   "center": {
+    "lat": 45.0030992,
+    "lon": -76.5024773
+   },
+   "tags": {
+    "emergency": "ambulance_station",
+    "name": "Ambulance Bay"
+   }
+  },
+  {
+   "type": "way",
+   "id": 50004,
+   "center": {
+    "lat": 45.0031441,
+    "lon": -76.496824
+   },
+   "tags": {
+    "addr:housenumber": "3",
+    "addr:street": "Station Avenue",
+    "amenity": "fire_station",
+    "name": "Double Cross Fire Hall"
+   }
+  }
+ ]
+}
