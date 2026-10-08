@@ -4,15 +4,15 @@
    "classes": {
     "motorway": 12,
     "motorway_link": 6,
-    "parking": 6,
-    "residential": 95,
+    "parking": 174,
+    "residential": 248,
     "secondary": 15,
     "service": 3,
     "tertiary": 59
    },
-   "edges": 196,
+   "edges": 517,
    "likely_cause": "main network",
-   "nodes": 123,
+   "nodes": 444,
    "sample_names": [
     "1 Lane",
     "10 Lane",
@@ -55,8 +55,8 @@
     "category": "parking",
     "edge_id": "w1068.0",
     "name": "Police Drive",
-    "node_id": "n100930",
-    "osm_node_id": 100930,
+    "node_id": "n101098",
+    "osm_node_id": 101098,
     "osm_way_id": 1068,
     "road_class": "parking"
    },
@@ -64,8 +64,8 @@
     "category": "parking",
     "edge_id": "w1069.0",
     "name": "Hospital Drive",
-    "node_id": "n100931",
-    "osm_node_id": 100931,
+    "node_id": "n101099",
+    "osm_node_id": 101099,
     "osm_way_id": 1069,
     "road_class": "parking"
    },
@@ -73,8 +73,8 @@
     "category": "parking",
     "edge_id": "w1070.0",
     "name": "Fire Hall Drive",
-    "node_id": "n100932",
-    "osm_node_id": 100932,
+    "node_id": "n101100",
+    "osm_node_id": 101100,
     "osm_way_id": 1070,
     "road_class": "parking"
    },
@@ -82,8 +82,8 @@
     "category": "parking",
     "edge_id": "w1072.0",
     "name": null,
-    "node_id": "n100934",
-    "osm_node_id": 100934,
+    "node_id": "n101102",
+    "osm_node_id": 101102,
     "osm_way_id": 1072,
     "road_class": "parking"
    },
@@ -91,9 +91,1521 @@
     "category": "parking",
     "edge_id": "w1073.0",
     "name": "Garage Ramp",
-    "node_id": "n100935",
-    "osm_node_id": 100935,
+    "node_id": "n101103",
+    "osm_node_id": 101103,
     "osm_way_id": 1073,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1084.0",
+    "name": null,
+    "node_id": "n101158",
+    "osm_node_id": 101158,
+    "osm_way_id": 1084,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1085.0",
+    "name": null,
+    "node_id": "n101159",
+    "osm_node_id": 101159,
+    "osm_way_id": 1085,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1086.0",
+    "name": null,
+    "node_id": "n101160",
+    "osm_node_id": 101160,
+    "osm_way_id": 1086,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1087.0",
+    "name": null,
+    "node_id": "n101161",
+    "osm_node_id": 101161,
+    "osm_way_id": 1087,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1088.0",
+    "name": null,
+    "node_id": "n101162",
+    "osm_node_id": 101162,
+    "osm_way_id": 1088,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1089.0",
+    "name": null,
+    "node_id": "n101163",
+    "osm_node_id": 101163,
+    "osm_way_id": 1089,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1090.0",
+    "name": null,
+    "node_id": "n101164",
+    "osm_node_id": 101164,
+    "osm_way_id": 1090,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1091.0",
+    "name": null,
+    "node_id": "n101165",
+    "osm_node_id": 101165,
+    "osm_way_id": 1091,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1092.0",
+    "name": null,
+    "node_id": "n101166",
+    "osm_node_id": 101166,
+    "osm_way_id": 1092,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1093.0",
+    "name": null,
+    "node_id": "n101167",
+    "osm_node_id": 101167,
+    "osm_way_id": 1093,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1094.0",
+    "name": null,
+    "node_id": "n101168",
+    "osm_node_id": 101168,
+    "osm_way_id": 1094,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1095.0",
+    "name": null,
+    "node_id": "n101169",
+    "osm_node_id": 101169,
+    "osm_way_id": 1095,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1096.0",
+    "name": null,
+    "node_id": "n101170",
+    "osm_node_id": 101170,
+    "osm_way_id": 1096,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1097.0",
+    "name": null,
+    "node_id": "n101171",
+    "osm_node_id": 101171,
+    "osm_way_id": 1097,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1098.0",
+    "name": null,
+    "node_id": "n101172",
+    "osm_node_id": 101172,
+    "osm_way_id": 1098,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1099.0",
+    "name": null,
+    "node_id": "n101173",
+    "osm_node_id": 101173,
+    "osm_way_id": 1099,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1100.0",
+    "name": null,
+    "node_id": "n101174",
+    "osm_node_id": 101174,
+    "osm_way_id": 1100,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1101.0",
+    "name": null,
+    "node_id": "n101175",
+    "osm_node_id": 101175,
+    "osm_way_id": 1101,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1102.0",
+    "name": null,
+    "node_id": "n101176",
+    "osm_node_id": 101176,
+    "osm_way_id": 1102,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1103.0",
+    "name": null,
+    "node_id": "n101177",
+    "osm_node_id": 101177,
+    "osm_way_id": 1103,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1104.0",
+    "name": null,
+    "node_id": "n101178",
+    "osm_node_id": 101178,
+    "osm_way_id": 1104,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1105.0",
+    "name": null,
+    "node_id": "n101179",
+    "osm_node_id": 101179,
+    "osm_way_id": 1105,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1106.0",
+    "name": null,
+    "node_id": "n101180",
+    "osm_node_id": 101180,
+    "osm_way_id": 1106,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1107.0",
+    "name": null,
+    "node_id": "n101181",
+    "osm_node_id": 101181,
+    "osm_way_id": 1107,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1108.0",
+    "name": null,
+    "node_id": "n101182",
+    "osm_node_id": 101182,
+    "osm_way_id": 1108,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1109.0",
+    "name": null,
+    "node_id": "n101183",
+    "osm_node_id": 101183,
+    "osm_way_id": 1109,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1110.0",
+    "name": null,
+    "node_id": "n101184",
+    "osm_node_id": 101184,
+    "osm_way_id": 1110,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1111.0",
+    "name": null,
+    "node_id": "n101185",
+    "osm_node_id": 101185,
+    "osm_way_id": 1111,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1112.0",
+    "name": null,
+    "node_id": "n101186",
+    "osm_node_id": 101186,
+    "osm_way_id": 1112,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1113.0",
+    "name": null,
+    "node_id": "n101187",
+    "osm_node_id": 101187,
+    "osm_way_id": 1113,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1114.0",
+    "name": null,
+    "node_id": "n101188",
+    "osm_node_id": 101188,
+    "osm_way_id": 1114,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1115.0",
+    "name": null,
+    "node_id": "n101189",
+    "osm_node_id": 101189,
+    "osm_way_id": 1115,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1116.0",
+    "name": null,
+    "node_id": "n101190",
+    "osm_node_id": 101190,
+    "osm_way_id": 1116,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1117.0",
+    "name": null,
+    "node_id": "n101191",
+    "osm_node_id": 101191,
+    "osm_way_id": 1117,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1118.0",
+    "name": null,
+    "node_id": "n101192",
+    "osm_node_id": 101192,
+    "osm_way_id": 1118,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1119.0",
+    "name": null,
+    "node_id": "n101193",
+    "osm_node_id": 101193,
+    "osm_way_id": 1119,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1120.0",
+    "name": null,
+    "node_id": "n101194",
+    "osm_node_id": 101194,
+    "osm_way_id": 1120,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1121.0",
+    "name": null,
+    "node_id": "n101195",
+    "osm_node_id": 101195,
+    "osm_way_id": 1121,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1122.0",
+    "name": null,
+    "node_id": "n101196",
+    "osm_node_id": 101196,
+    "osm_way_id": 1122,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1123.0",
+    "name": null,
+    "node_id": "n101197",
+    "osm_node_id": 101197,
+    "osm_way_id": 1123,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1124.0",
+    "name": null,
+    "node_id": "n101198",
+    "osm_node_id": 101198,
+    "osm_way_id": 1124,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1125.0",
+    "name": null,
+    "node_id": "n101199",
+    "osm_node_id": 101199,
+    "osm_way_id": 1125,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1126.0",
+    "name": null,
+    "node_id": "n101200",
+    "osm_node_id": 101200,
+    "osm_way_id": 1126,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1127.0",
+    "name": null,
+    "node_id": "n101201",
+    "osm_node_id": 101201,
+    "osm_way_id": 1127,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1128.0",
+    "name": null,
+    "node_id": "n101202",
+    "osm_node_id": 101202,
+    "osm_way_id": 1128,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1129.0",
+    "name": null,
+    "node_id": "n101203",
+    "osm_node_id": 101203,
+    "osm_way_id": 1129,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1130.0",
+    "name": null,
+    "node_id": "n101204",
+    "osm_node_id": 101204,
+    "osm_way_id": 1130,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1131.0",
+    "name": null,
+    "node_id": "n101205",
+    "osm_node_id": 101205,
+    "osm_way_id": 1131,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1132.0",
+    "name": null,
+    "node_id": "n101206",
+    "osm_node_id": 101206,
+    "osm_way_id": 1132,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1133.0",
+    "name": null,
+    "node_id": "n101207",
+    "osm_node_id": 101207,
+    "osm_way_id": 1133,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1134.0",
+    "name": null,
+    "node_id": "n101208",
+    "osm_node_id": 101208,
+    "osm_way_id": 1134,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1135.0",
+    "name": null,
+    "node_id": "n101209",
+    "osm_node_id": 101209,
+    "osm_way_id": 1135,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1136.0",
+    "name": null,
+    "node_id": "n101210",
+    "osm_node_id": 101210,
+    "osm_way_id": 1136,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1137.0",
+    "name": null,
+    "node_id": "n101211",
+    "osm_node_id": 101211,
+    "osm_way_id": 1137,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1138.0",
+    "name": null,
+    "node_id": "n101212",
+    "osm_node_id": 101212,
+    "osm_way_id": 1138,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1139.0",
+    "name": null,
+    "node_id": "n101213",
+    "osm_node_id": 101213,
+    "osm_way_id": 1139,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1140.0",
+    "name": null,
+    "node_id": "n101214",
+    "osm_node_id": 101214,
+    "osm_way_id": 1140,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1141.0",
+    "name": null,
+    "node_id": "n101215",
+    "osm_node_id": 101215,
+    "osm_way_id": 1141,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1142.0",
+    "name": null,
+    "node_id": "n101216",
+    "osm_node_id": 101216,
+    "osm_way_id": 1142,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1143.0",
+    "name": null,
+    "node_id": "n101217",
+    "osm_node_id": 101217,
+    "osm_way_id": 1143,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1144.0",
+    "name": null,
+    "node_id": "n101218",
+    "osm_node_id": 101218,
+    "osm_way_id": 1144,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1145.0",
+    "name": null,
+    "node_id": "n101219",
+    "osm_node_id": 101219,
+    "osm_way_id": 1145,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1146.0",
+    "name": null,
+    "node_id": "n101220",
+    "osm_node_id": 101220,
+    "osm_way_id": 1146,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1147.0",
+    "name": null,
+    "node_id": "n101221",
+    "osm_node_id": 101221,
+    "osm_way_id": 1147,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1148.0",
+    "name": null,
+    "node_id": "n101222",
+    "osm_node_id": 101222,
+    "osm_way_id": 1148,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1149.0",
+    "name": null,
+    "node_id": "n101223",
+    "osm_node_id": 101223,
+    "osm_way_id": 1149,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1150.0",
+    "name": null,
+    "node_id": "n101224",
+    "osm_node_id": 101224,
+    "osm_way_id": 1150,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1151.0",
+    "name": null,
+    "node_id": "n101225",
+    "osm_node_id": 101225,
+    "osm_way_id": 1151,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1152.0",
+    "name": null,
+    "node_id": "n101226",
+    "osm_node_id": 101226,
+    "osm_way_id": 1152,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1153.0",
+    "name": null,
+    "node_id": "n101227",
+    "osm_node_id": 101227,
+    "osm_way_id": 1153,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1154.0",
+    "name": null,
+    "node_id": "n101228",
+    "osm_node_id": 101228,
+    "osm_way_id": 1154,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1155.0",
+    "name": null,
+    "node_id": "n101229",
+    "osm_node_id": 101229,
+    "osm_way_id": 1155,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1156.0",
+    "name": null,
+    "node_id": "n101230",
+    "osm_node_id": 101230,
+    "osm_way_id": 1156,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1157.0",
+    "name": null,
+    "node_id": "n101231",
+    "osm_node_id": 101231,
+    "osm_way_id": 1157,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1158.0",
+    "name": null,
+    "node_id": "n101232",
+    "osm_node_id": 101232,
+    "osm_way_id": 1158,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1159.0",
+    "name": null,
+    "node_id": "n101233",
+    "osm_node_id": 101233,
+    "osm_way_id": 1159,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1160.0",
+    "name": null,
+    "node_id": "n101234",
+    "osm_node_id": 101234,
+    "osm_way_id": 1160,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1161.0",
+    "name": null,
+    "node_id": "n101235",
+    "osm_node_id": 101235,
+    "osm_way_id": 1161,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1162.0",
+    "name": null,
+    "node_id": "n101236",
+    "osm_node_id": 101236,
+    "osm_way_id": 1162,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1163.0",
+    "name": null,
+    "node_id": "n101237",
+    "osm_node_id": 101237,
+    "osm_way_id": 1163,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1164.0",
+    "name": null,
+    "node_id": "n101238",
+    "osm_node_id": 101238,
+    "osm_way_id": 1164,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1165.0",
+    "name": null,
+    "node_id": "n101239",
+    "osm_node_id": 101239,
+    "osm_way_id": 1165,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1166.0",
+    "name": null,
+    "node_id": "n101240",
+    "osm_node_id": 101240,
+    "osm_way_id": 1166,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1167.0",
+    "name": null,
+    "node_id": "n101241",
+    "osm_node_id": 101241,
+    "osm_way_id": 1167,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1168.0",
+    "name": null,
+    "node_id": "n101242",
+    "osm_node_id": 101242,
+    "osm_way_id": 1168,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1169.0",
+    "name": null,
+    "node_id": "n101243",
+    "osm_node_id": 101243,
+    "osm_way_id": 1169,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1170.0",
+    "name": null,
+    "node_id": "n101244",
+    "osm_node_id": 101244,
+    "osm_way_id": 1170,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1171.0",
+    "name": null,
+    "node_id": "n101245",
+    "osm_node_id": 101245,
+    "osm_way_id": 1171,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1172.0",
+    "name": null,
+    "node_id": "n101246",
+    "osm_node_id": 101246,
+    "osm_way_id": 1172,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1173.0",
+    "name": null,
+    "node_id": "n101247",
+    "osm_node_id": 101247,
+    "osm_way_id": 1173,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1174.0",
+    "name": null,
+    "node_id": "n101248",
+    "osm_node_id": 101248,
+    "osm_way_id": 1174,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1175.0",
+    "name": null,
+    "node_id": "n101249",
+    "osm_node_id": 101249,
+    "osm_way_id": 1175,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1176.0",
+    "name": null,
+    "node_id": "n101250",
+    "osm_node_id": 101250,
+    "osm_way_id": 1176,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1177.0",
+    "name": null,
+    "node_id": "n101251",
+    "osm_node_id": 101251,
+    "osm_way_id": 1177,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1178.0",
+    "name": null,
+    "node_id": "n101252",
+    "osm_node_id": 101252,
+    "osm_way_id": 1178,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1179.0",
+    "name": null,
+    "node_id": "n101253",
+    "osm_node_id": 101253,
+    "osm_way_id": 1179,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1180.0",
+    "name": null,
+    "node_id": "n101254",
+    "osm_node_id": 101254,
+    "osm_way_id": 1180,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1181.0",
+    "name": null,
+    "node_id": "n101255",
+    "osm_node_id": 101255,
+    "osm_way_id": 1181,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1182.0",
+    "name": null,
+    "node_id": "n101256",
+    "osm_node_id": 101256,
+    "osm_way_id": 1182,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1183.0",
+    "name": null,
+    "node_id": "n101257",
+    "osm_node_id": 101257,
+    "osm_way_id": 1183,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1184.0",
+    "name": null,
+    "node_id": "n101258",
+    "osm_node_id": 101258,
+    "osm_way_id": 1184,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1185.0",
+    "name": null,
+    "node_id": "n101259",
+    "osm_node_id": 101259,
+    "osm_way_id": 1185,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1186.0",
+    "name": null,
+    "node_id": "n101260",
+    "osm_node_id": 101260,
+    "osm_way_id": 1186,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1187.0",
+    "name": null,
+    "node_id": "n101261",
+    "osm_node_id": 101261,
+    "osm_way_id": 1187,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1188.0",
+    "name": null,
+    "node_id": "n101262",
+    "osm_node_id": 101262,
+    "osm_way_id": 1188,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1189.0",
+    "name": null,
+    "node_id": "n101263",
+    "osm_node_id": 101263,
+    "osm_way_id": 1189,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1190.0",
+    "name": null,
+    "node_id": "n101264",
+    "osm_node_id": 101264,
+    "osm_way_id": 1190,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1191.0",
+    "name": null,
+    "node_id": "n101265",
+    "osm_node_id": 101265,
+    "osm_way_id": 1191,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1192.0",
+    "name": null,
+    "node_id": "n101266",
+    "osm_node_id": 101266,
+    "osm_way_id": 1192,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1193.0",
+    "name": null,
+    "node_id": "n101267",
+    "osm_node_id": 101267,
+    "osm_way_id": 1193,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1194.0",
+    "name": null,
+    "node_id": "n101268",
+    "osm_node_id": 101268,
+    "osm_way_id": 1194,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1195.0",
+    "name": null,
+    "node_id": "n101269",
+    "osm_node_id": 101269,
+    "osm_way_id": 1195,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1196.0",
+    "name": null,
+    "node_id": "n101270",
+    "osm_node_id": 101270,
+    "osm_way_id": 1196,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1197.0",
+    "name": null,
+    "node_id": "n101271",
+    "osm_node_id": 101271,
+    "osm_way_id": 1197,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1198.0",
+    "name": null,
+    "node_id": "n101272",
+    "osm_node_id": 101272,
+    "osm_way_id": 1198,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1199.0",
+    "name": null,
+    "node_id": "n101273",
+    "osm_node_id": 101273,
+    "osm_way_id": 1199,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1200.0",
+    "name": null,
+    "node_id": "n101274",
+    "osm_node_id": 101274,
+    "osm_way_id": 1200,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1201.0",
+    "name": null,
+    "node_id": "n101275",
+    "osm_node_id": 101275,
+    "osm_way_id": 1201,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1202.0",
+    "name": null,
+    "node_id": "n101276",
+    "osm_node_id": 101276,
+    "osm_way_id": 1202,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1203.0",
+    "name": null,
+    "node_id": "n101277",
+    "osm_node_id": 101277,
+    "osm_way_id": 1203,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1204.0",
+    "name": null,
+    "node_id": "n101278",
+    "osm_node_id": 101278,
+    "osm_way_id": 1204,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1205.0",
+    "name": null,
+    "node_id": "n101279",
+    "osm_node_id": 101279,
+    "osm_way_id": 1205,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1206.0",
+    "name": null,
+    "node_id": "n101280",
+    "osm_node_id": 101280,
+    "osm_way_id": 1206,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1207.0",
+    "name": null,
+    "node_id": "n101281",
+    "osm_node_id": 101281,
+    "osm_way_id": 1207,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1208.0",
+    "name": null,
+    "node_id": "n101282",
+    "osm_node_id": 101282,
+    "osm_way_id": 1208,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1209.0",
+    "name": null,
+    "node_id": "n101283",
+    "osm_node_id": 101283,
+    "osm_way_id": 1209,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1210.0",
+    "name": null,
+    "node_id": "n101284",
+    "osm_node_id": 101284,
+    "osm_way_id": 1210,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1211.0",
+    "name": null,
+    "node_id": "n101285",
+    "osm_node_id": 101285,
+    "osm_way_id": 1211,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1212.0",
+    "name": null,
+    "node_id": "n101286",
+    "osm_node_id": 101286,
+    "osm_way_id": 1212,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1213.0",
+    "name": null,
+    "node_id": "n101287",
+    "osm_node_id": 101287,
+    "osm_way_id": 1213,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1214.0",
+    "name": null,
+    "node_id": "n101288",
+    "osm_node_id": 101288,
+    "osm_way_id": 1214,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1215.0",
+    "name": null,
+    "node_id": "n101289",
+    "osm_node_id": 101289,
+    "osm_way_id": 1215,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1216.0",
+    "name": null,
+    "node_id": "n101290",
+    "osm_node_id": 101290,
+    "osm_way_id": 1216,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1217.0",
+    "name": null,
+    "node_id": "n101291",
+    "osm_node_id": 101291,
+    "osm_way_id": 1217,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1218.0",
+    "name": null,
+    "node_id": "n101292",
+    "osm_node_id": 101292,
+    "osm_way_id": 1218,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1219.0",
+    "name": null,
+    "node_id": "n101293",
+    "osm_node_id": 101293,
+    "osm_way_id": 1219,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1220.0",
+    "name": null,
+    "node_id": "n101294",
+    "osm_node_id": 101294,
+    "osm_way_id": 1220,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1221.0",
+    "name": null,
+    "node_id": "n101295",
+    "osm_node_id": 101295,
+    "osm_way_id": 1221,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1222.0",
+    "name": null,
+    "node_id": "n101296",
+    "osm_node_id": 101296,
+    "osm_way_id": 1222,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1223.0",
+    "name": null,
+    "node_id": "n101297",
+    "osm_node_id": 101297,
+    "osm_way_id": 1223,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1224.0",
+    "name": null,
+    "node_id": "n101298",
+    "osm_node_id": 101298,
+    "osm_way_id": 1224,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1225.0",
+    "name": null,
+    "node_id": "n101299",
+    "osm_node_id": 101299,
+    "osm_way_id": 1225,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1226.0",
+    "name": null,
+    "node_id": "n101300",
+    "osm_node_id": 101300,
+    "osm_way_id": 1226,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1227.0",
+    "name": null,
+    "node_id": "n101301",
+    "osm_node_id": 101301,
+    "osm_way_id": 1227,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1228.0",
+    "name": null,
+    "node_id": "n101302",
+    "osm_node_id": 101302,
+    "osm_way_id": 1228,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1229.0",
+    "name": null,
+    "node_id": "n101303",
+    "osm_node_id": 101303,
+    "osm_way_id": 1229,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1230.0",
+    "name": null,
+    "node_id": "n101304",
+    "osm_node_id": 101304,
+    "osm_way_id": 1230,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1231.0",
+    "name": null,
+    "node_id": "n101305",
+    "osm_node_id": 101305,
+    "osm_way_id": 1231,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1232.0",
+    "name": null,
+    "node_id": "n101306",
+    "osm_node_id": 101306,
+    "osm_way_id": 1232,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1233.0",
+    "name": null,
+    "node_id": "n101307",
+    "osm_node_id": 101307,
+    "osm_way_id": 1233,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1234.0",
+    "name": null,
+    "node_id": "n101308",
+    "osm_node_id": 101308,
+    "osm_way_id": 1234,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1235.0",
+    "name": null,
+    "node_id": "n101309",
+    "osm_node_id": 101309,
+    "osm_way_id": 1235,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1236.0",
+    "name": null,
+    "node_id": "n101310",
+    "osm_node_id": 101310,
+    "osm_way_id": 1236,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1237.0",
+    "name": null,
+    "node_id": "n101311",
+    "osm_node_id": 101311,
+    "osm_way_id": 1237,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1238.0",
+    "name": null,
+    "node_id": "n101312",
+    "osm_node_id": 101312,
+    "osm_way_id": 1238,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1239.0",
+    "name": null,
+    "node_id": "n101313",
+    "osm_node_id": 101313,
+    "osm_way_id": 1239,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1240.0",
+    "name": null,
+    "node_id": "n101314",
+    "osm_node_id": 101314,
+    "osm_way_id": 1240,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1241.0",
+    "name": null,
+    "node_id": "n101315",
+    "osm_node_id": 101315,
+    "osm_way_id": 1241,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1242.0",
+    "name": null,
+    "node_id": "n101316",
+    "osm_node_id": 101316,
+    "osm_way_id": 1242,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1243.0",
+    "name": null,
+    "node_id": "n101317",
+    "osm_node_id": 101317,
+    "osm_way_id": 1243,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1244.0",
+    "name": null,
+    "node_id": "n101318",
+    "osm_node_id": 101318,
+    "osm_way_id": 1244,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1245.0",
+    "name": null,
+    "node_id": "n101319",
+    "osm_node_id": 101319,
+    "osm_way_id": 1245,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1246.0",
+    "name": null,
+    "node_id": "n101320",
+    "osm_node_id": 101320,
+    "osm_way_id": 1246,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1247.0",
+    "name": null,
+    "node_id": "n101321",
+    "osm_node_id": 101321,
+    "osm_way_id": 1247,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1248.0",
+    "name": null,
+    "node_id": "n101322",
+    "osm_node_id": 101322,
+    "osm_way_id": 1248,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1249.0",
+    "name": null,
+    "node_id": "n101323",
+    "osm_node_id": 101323,
+    "osm_way_id": 1249,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1250.0",
+    "name": null,
+    "node_id": "n101324",
+    "osm_node_id": 101324,
+    "osm_way_id": 1250,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1251.0",
+    "name": null,
+    "node_id": "n101325",
+    "osm_node_id": 101325,
+    "osm_way_id": 1251,
     "road_class": "parking"
    }
   ],
@@ -110,12 +1622,12 @@
   "contaminated_vertices": 23,
   "edges_over_grade": [],
   "fixed_vertices": 230,
-  "free_vertices": 708,
+  "free_vertices": 1029,
   "inferred_bridges": [],
-  "max_residual_grade": 0.08,
+  "max_residual_grade": 0.1096,
   "max_shared_step": 0.665,
-  "max_y": 70.057,
-  "min_y": 56.595,
+  "max_y": 70.047,
+  "min_y": 56.555,
   "share_followers": 4,
   "share_rounds_exhausted": false,
   "shared_deck_vertices": 225,
@@ -123,15 +1635,23 @@
   "shared_groups": 112,
   "shared_step_left": 0.269,
   "tie_rounds": 2,
-  "vertices_clamped": 54
+  "vertices_clamped": 55
  },
  "junction_clusters": [
   {
    "max_arm_offset_m": 4.988,
-   "node_id": "c100597",
+   "node_id": "c100626",
    "osm_node_ids": [
-    100597,
-    100675
+    100626,
+    100805
+   ]
+  },
+  {
+   "max_arm_offset_m": 3.144,
+   "node_id": "c100599",
+   "osm_node_ids": [
+    100599,
+    100763
    ]
   },
   {
@@ -141,6 +1661,118 @@
     100407,
     100445
    ]
+  },
+  {
+   "max_arm_offset_m": 2.155,
+   "node_id": "c100558",
+   "osm_node_ids": [
+    100558,
+    100559
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.672,
+   "node_id": "c100560",
+   "osm_node_ids": [
+    100560,
+    100561
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.222,
+   "node_id": "c100797",
+   "osm_node_ids": [
+    100797,
+    100798
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.1,
+   "node_id": "c100788",
+   "osm_node_ids": [
+    100788,
+    100789
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.056,
+   "node_id": "c100640",
+   "osm_node_ids": [
+    100640,
+    100641
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.009,
+   "node_id": "c100661",
+   "osm_node_ids": [
+    100661,
+    100662
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100553",
+   "osm_node_ids": [
+    100553,
+    100554
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100636",
+   "osm_node_ids": [
+    100636,
+    100637
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100681",
+   "osm_node_ids": [
+    100681,
+    100682
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100708",
+   "osm_node_ids": [
+    100708,
+    100709
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100795",
+   "osm_node_ids": [
+    100795,
+    100796
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100808",
+   "osm_node_ids": [
+    100808,
+    100809
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100823",
+   "osm_node_ids": [
+    100823,
+    100824
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100843",
+   "osm_node_ids": [
+    100843,
+    100844
+   ]
   }
  ],
  "one_way_traps": [],
@@ -148,10 +1780,11 @@
  "summary": {
   "barriers": {
    "curb": 8,
-   "guardrail": 15,
+   "guardrail": 11,
    "median": 4,
    "parapet": 10,
-   "roadblock": 1
+   "roadblock": 1,
+   "soundwall": 7
   },
   "bridges": {
    "abutments": 16,
@@ -166,18 +1799,19 @@
    "walkways_on_decks": 0
   },
   "buildings": {
-   "footprints": 45,
+   "footprints": 1989,
    "height_sources": {
     "default": 6,
-    "levels": 39
+    "levels": 1968,
+    "tag": 15
    },
    "skipped": []
   },
   "classes": {
    "motorway": 12,
    "motorway_link": 6,
-   "parking": 6,
-   "residential": 95,
+   "parking": 174,
+   "residential": 248,
    "secondary": 15,
    "service": 3,
    "tertiary": 59
@@ -187,18 +1821,18 @@
    "bbox_edge": 1,
    "declared_noexit": 0,
    "likely_real": 0,
-   "parking": 5,
+   "parking": 173,
    "suspicious": 0
   },
   "defaulted_fields": {
-   "lanes": 13,
-   "speed_kph": 13,
-   "width": 196
+   "lanes": 181,
+   "speed_kph": 181,
+   "width": 517
   },
-  "edges": 196,
-  "largest_component_nodes": 123,
-  "largest_scc_nodes": 123,
-  "nodes": 123,
+  "edges": 517,
+  "largest_component_nodes": 444,
+  "largest_scc_nodes": 444,
+  "nodes": 444,
   "one_way_traps": 0,
   "oneway_dead_ends": 0,
   "parking": {
@@ -208,9 +1842,9 @@
    "garages": 1,
    "kinds": {
     "multi-storey": 1,
-    "surface": 1
+    "surface": 2
    },
-   "lots": 2,
+   "lots": 3,
    "skipped": 0,
    "with_aisles": 1,
    "with_capacity": 2
@@ -231,34 +1865,34 @@
   },
   "terrain": {
    "cells_carved": 6756,
-   "cells_flattened": 41249,
+   "cells_flattened": 42420,
    "cells_lowered_for_water": 7789,
-   "cells_lowered_under_decks": 21708,
-   "cells_under_buildings": 2770,
+   "cells_lowered_under_decks": 21729,
+   "cells_under_buildings": 21287,
    "chunks": 80,
    "underpasses": {
     "tunnels": 1,
     "uncovered": 0
    }
   },
-  "total_length_km": 35.97,
+  "total_length_km": 37.65,
   "vegetation": {
    "areas": 4,
-   "bushes": 462,
+   "bushes": 9802,
    "chunks_over_400_trees": 14,
    "max_trees_in_a_chunk": 723,
    "skipped": {
     "edge on a road, sidewalk, building or water": 2,
-    "frontage on a road, sidewalk, building or water": 16,
-    "row on a road, sidewalk, building or water": 2,
+    "frontage on a road, sidewalk, building or water": 3325,
+    "row on a road, sidewalk, building or water": 74,
     "scatter on a road, sidewalk, building or water": 350,
-    "tagged on a road, sidewalk, building or water": 1
+    "tagged on a road, sidewalk, building or water": 17
    },
-   "trees": 10663,
+   "trees": 13122,
    "trees_by_source": {
-    "row": 150,
+    "row": 2142,
     "scatter": 10505,
-    "tagged": 8
+    "tagged": 475
    }
   },
   "water": {
