@@ -149,14 +149,14 @@ def test_pack_is_dressed_as_a_town():
     kinds: dict[str, int] = {}
     for b in buildings:
         kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
-    assert len(buildings) >= 1500, len(buildings)
+    assert len(buildings) >= 2300, len(buildings)
     for kind, need in (
-        ("house", 300),
-        ("semidetached_house", 100),
-        ("terrace", 100),
+        ("house", 550),
+        ("semidetached_house", 350),
+        ("terrace", 550),
         ("retail", 150),
-        ("apartments", 60),
-        ("office", 100),
+        ("apartments", 80),
+        ("office", 200),
         ("warehouse", 8),
     ):
         assert kinds.get(kind, 0) >= need, (kind, kinds.get(kind, 0))
@@ -166,9 +166,31 @@ def test_pack_is_dressed_as_a_town():
     rows = sum(1 for t in veg["trees"] if t[source] == "row")
     tagged = sum(1 for t in veg["trees"] if t[source] == "tagged")
     assert rows >= 600, rows
-    assert tagged >= 250, tagged
+    assert tagged >= 500, tagged
     graph = _load("road_graph.v0.json")
     driveways = sum(
         1 for e in graph["edges"] if e["class"] == "parking" or e.get("service") == "driveway"
     )
     assert driveways >= 100 or sum(1 for e in graph["edges"] if e["class"] == "service") >= 100
+
+
+def test_pack_has_the_minor_streets_and_frontage_roads():
+    """fix/proving-ground-density: town-sized blocks and roads beside the motorway, counted
+    on the committed pack."""
+    graph = _load("road_graph.v0.json")
+    edges = graph["edges"]
+    residential = [e for e in edges if e["class"] == "residential"]
+    assert len(residential) >= 400, len(residential)
+    names = {e["name"] for e in edges if e["name"]}
+    for name in (
+        "Viaduct Road North",
+        "Viaduct Road South",
+        "Viaduct Lane",
+        "River Lane",
+        "Elm Road",
+        "Quay Avenue",
+        "Hollow Avenue",
+    ):
+        assert name in names, name
+    report = _load("validation_report.json")
+    assert report["dead_ends"]["likely_real"] == []
