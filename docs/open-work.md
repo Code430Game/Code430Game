@@ -56,7 +56,6 @@ maintainer:
 - `add-emergency-services` 3.1
 - `add-ambulance-response` 2.2
 - `add-road-shoulders` 3.2 (now with the 1.4 infill and gores)
-- `add-character-detail` 2.2 and 2.3
 - `update-radio-per-car` 2.1
 - `update-garage-polish` 2.1 (`--spawn=97,62.6,-377` starts on the NAC garage floor)
 - `add-unarmed-combat` 2.1 and 2.2
@@ -83,7 +82,7 @@ maintainer:
 
 - **Signs (billboards) in the middle of roads:** check the rule from `19d8c7f` holds wherever
   the human reports more.
-- **On-screen keyboard on the Deck:** the report form and the co-op Join box can't be typed
+- **On-screen keyboard on the Deck (decided 2026-10-08: "we're using the Steam Deck keyboard, done"):** use Steam's own keyboard, which means the Steamworks integration (GodotSteam) as a new dependency, approved by the maintainer; a `fix/` that opens Steam's keyboard when the report form or the co-op Join box focuses, and falls back to the typed field elsewhere. Previously: the report form and the co-op Join box can't be typed
   into, because Steam's keyboard only opens for Steamworks games. The choices are a built-in
   keyboard (no dependency) or GodotSteam (a new dependency, so the maintainer decides first).
 - More in `docs/backlog.md`.
