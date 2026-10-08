@@ -35,23 +35,106 @@ const BUILD_MIN := 0.85
 const BUILD_MAX := 1.20
 const BUILD_STEP := 0.05
 
+## Palette key -> the profile fields that index it.
+const PALETTE_FIELDS := {"skin": ["skin"], "hair_colour": ["hair_colour"], "cloth": ["top", "bottom", "jacket_colour"], "shoes": ["shoes"]}
+
+## Palettes in use: the enabled character pack's (PackLoader.items("palettes"), the first
+## pack's file wins) over the built-in constants. Cached until `refresh_palettes`.
+static var _palettes: Dictionary = {}  # key -> Array[Color]
+static var _palette_names: Dictionary = {}  # key -> PackedStringArray
+static var _palettes_loaded: bool = false
+static var _palette_source: String = ""  # "pack_id:path" or "" for built-in
+
+
+## The colours of a palette ("skin", "hair_colour", "cloth", "shoes") in use right now.
+static func palette(key: String) -> Array[Color]:
+	_ensure_palettes()
+	var out: Array[Color] = []
+	out.assign(_palettes.get(key, []))
+	return out
+
+
+## The names of a palette's entries, parallel to `palette(key)`.
+static func palette_names(key: String) -> PackedStringArray:
+	_ensure_palettes()
+	return _palette_names.get(key, PackedStringArray())
+
+
+## Where the palettes came from: "pack_id:path", or "" for the built-in colours.
+static func palette_source() -> String:
+	_ensure_palettes()
+	return _palette_source
+
+
+## Re-reads the palettes from the loader (after a pack reload or a mode change).
+static func refresh_palettes() -> void:
+	_palettes_loaded = false
+	_ensure_palettes()
+
+
+static func _ensure_palettes() -> void:
+	if _palettes_loaded:
+		return
+	_palettes_loaded = true
+	_palettes = {"skin": SKIN, "hair_colour": HAIR_COLOUR, "cloth": CLOTH, "shoes": SHOE_COLOURS}
+	_palette_names = {
+		"skin": _tone_names(SKIN.size()), "hair_colour": HAIR_COLOUR_NAMES, "cloth": CLOTH_NAMES, "shoes": SHOE_NAMES,
+	}
+	_palette_source = ""
+	var loader: Node = Engine.get_main_loop().root.get_node_or_null("PackLoader") if Engine.get_main_loop() is SceneTree else null
+	if loader == null:
+		return
+	var files: Array = loader.call("items", "palettes")
+	if files.is_empty():
+		return
+	var file: Dictionary = files[0]
+	var lists: Dictionary = file.get("palettes", {})
+	var colours := {}
+	var names := {}
+	for key: String in PALETTE_FIELDS:
+		var entries: Array = lists.get(key, [])
+		if entries.is_empty():
+			return  # a pack palette must be complete; keep the built-ins
+		var cs: Array[Color] = []
+		var ns := PackedStringArray()
+		for e: Variant in entries:
+			if not (e is Dictionary):
+				continue
+			var c: Array = (e as Dictionary).get("colour", [])
+			if c.size() < 3:
+				continue
+			cs.append(Color(float(c[0]), float(c[1]), float(c[2])))
+			ns.append(str((e as Dictionary).get("name", "")))
+		colours[key] = cs
+		names[key] = ns
+	_palettes = colours
+	_palette_names = names
+	_palette_source = str(file.get("source", ""))
+
+
+static func _tone_names(n: int) -> PackedStringArray:
+	var out := PackedStringArray()
+	for i in range(n):
+		out.append("tone %d" % (i + 1))
+	return out
+
 
 static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 	if rng == null:
 		rng = RandomNumberGenerator.new()
 		rng.randomize()
 	return normalise({
-		"skin": rng.randi_range(0, SKIN.size() - 1),
+		"skin": rng.randi_range(0, _count("skin") - 1),
 		"hair": rng.randi_range(0, HAIR_NAMES.size() - 1),
-		"hair_colour": rng.randi_range(0, HAIR_COLOUR.size() - 1),
-		"top": rng.randi_range(0, CLOTH.size() - 1),
-		"bottom": rng.randi_range(0, CLOTH.size() - 1),
-		"shoes": rng.randi_range(0, SHOE_COLOURS.size() - 1),
+		"hair_colour": rng.randi_range(0, _count("hair_colour") - 1),
+		"top": rng.randi_range(0, _count("top") - 1),
+		"bottom": rng.randi_range(0, _count("bottom") - 1),
+		"shoes": rng.randi_range(0, _count("shoes") - 1),
 		"hat": 0 if rng.randf() < 0.7 else rng.randi_range(1, HAT_NAMES.size() - 1),
 		"beard": 0 if rng.randf() < 0.55 else rng.randi_range(1, BEARD_NAMES.size() - 1),
 		"glasses": 1 if rng.randf() < 0.2 else 0,
 		"jacket": 1 if rng.randf() < 0.4 else 0,
-		"jacket_colour": rng.randi_range(0, CLOTH.size() - 1),
+		"jacket_colour": rng.randi_range(0, _count("jacket_colour") - 1),
 		"height": HEIGHT_MIN + HEIGHT_STEP * rng.randi_range(0, _steps("height")),
 		"build": BUILD_MIN + BUILD_STEP * rng.randi_range(0, _steps("build")),
 	})
@@ -91,13 +174,13 @@ static func label(p: Dictionary, key: String) -> String:
 	var v: Variant = p.get(key, 0)
 	match key:
 		"skin":
-			return "tone %d" % (int(v) + 1)
+			return _palette_label("skin", int(v))
 		"hair":
 			return HAIR_NAMES[clampi(int(v), 0, HAIR_NAMES.size() - 1)]
 		"hair_colour":
-			return HAIR_COLOUR_NAMES[clampi(int(v), 0, HAIR_COLOUR_NAMES.size() - 1)]
+			return _palette_label("hair_colour", int(v))
 		"top", "bottom", "jacket_colour":
-			return CLOTH_NAMES[clampi(int(v), 0, CLOTH_NAMES.size() - 1)]
+			return _palette_label("cloth", int(v))
 		"beard":
 			return BEARD_NAMES[clampi(int(v), 0, BEARD_NAMES.size() - 1)]
 		"glasses":
@@ -105,7 +188,7 @@ static func label(p: Dictionary, key: String) -> String:
 		"jacket":
 			return JACKET_NAMES[clampi(int(v), 0, JACKET_NAMES.size() - 1)]
 		"shoes":
-			return SHOE_NAMES[clampi(int(v), 0, SHOE_NAMES.size() - 1)]
+			return _palette_label("shoes", int(v))
 		"hat":
 			return HAT_NAMES[clampi(int(v), 0, HAT_NAMES.size() - 1)]
 		"height":
@@ -127,16 +210,23 @@ static func equals(a: Dictionary, b: Dictionary) -> bool:
 	return true
 
 
+static func _palette_label(key: String, index: int) -> String:
+	var names := palette_names(key)
+	if names.is_empty():
+		return str(index)
+	return names[clampi(index, 0, names.size() - 1)]
+
+
 static func _count(key: String) -> int:
 	match key:
 		"skin":
-			return SKIN.size()
+			return palette("skin").size()
 		"hair":
 			return HAIR_NAMES.size()
 		"hair_colour":
-			return HAIR_COLOUR.size()
+			return palette("hair_colour").size()
 		"top", "bottom", "jacket_colour":
-			return CLOTH.size()
+			return palette("cloth").size()
 		"beard":
 			return BEARD_NAMES.size()
 		"glasses":
@@ -144,7 +234,7 @@ static func _count(key: String) -> int:
 		"jacket":
 			return JACKET_NAMES.size()
 		"shoes":
-			return SHOE_COLOURS.size()
+			return palette("shoes").size()
 		"hat":
 			return HAT_NAMES.size()
 	return 1

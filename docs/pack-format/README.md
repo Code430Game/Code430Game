@@ -24,6 +24,56 @@ Anything else is rejected, in particular Godot resource formats (`.tres`, `.res`
 ## System packs
 System packs ship as a `.pck` next to their `pack.json`, must set `"trusted": true`, and the game warns the player before enabling them. Data-only packs must not set `trusted` to true.
 
+## Manifest versions
+
+Two manifest schemas exist. `pack.schema.v0.json` is frozen: a v0 manifest keeps validating
+and loading unchanged. `pack.schema.v1.json` is v0 plus a `content[]` index and the
+`character` and `story` sections, with `supported_modes` and `max_descriptors` required. The
+loader picks the schema by `schema_version` and refuses any other value, naming the folder
+and the version. A v0 pack gets a synthesised content index from its known file names
+(`ads.v0.json` is `ads`, `vehicles.v0.json` is `vehicles`, and so on), so systems that read
+the content registry see v0 and v1 packs alike.
+
+### v1 additions
+
+| Field | Required | Meaning |
+|---|---|---|
+| `schema_version` | yes | `1`. |
+| `supported_modes` | yes | As in v0, now required. |
+| `max_descriptors` | yes | As in v0, now required (may be `{}`). |
+| `content` | no | Index of the pack's content files: `[{"type": "ads", "path": "ads.v0.json"}, ...]`. Types: `ads`, `vehicles`, `weapons`, `factions`, `turf`, `lap`, `radio`, `music`, `palettes`, `presets`, `missions`. Every path is relative to the pack folder, inside it, and must validate against the type's schema. |
+| `character` | character packs | `palettes` (path of a `character-palettes.schema.v1.json` file) and optional `presets` (`character-presets.schema.v1.json`). List the same files in `content[]` as `palettes` and `presets`. |
+| `story` | story packs | `map` (id of the map pack the stories are placed on; also a dependency) and `missions` (paths, add-story-pack). |
+
+### Namespaces and the registry
+
+Every file a pack refers to is addressed as `pack_id:relative/path` and resolved by the
+loader only inside that pack's folder; `..` and absolute paths are refused. Nothing in a
+pack is ever copied under the game's own files, and a pack never overwrites another pack's.
+The content registry (`PackLoader.items(type)`) returns every item of a content type across
+the enabled packs, each tagged with its `pack_id` and `source` file, filtered by the active
+tone mode's descriptor limits. Billboards draw their ads from it, so a story pack can add ads
+to the map it depends on.
+
+### Character packs
+
+A character pack ships palettes (`skin`, `hair_colour`, `cloth`, `shoes`: named colours in
+0..1 RGB) and named presets (profiles whose colour fields index the pack's palettes). Profiles
+store indices, so a pack that replaces the palettes keeps the built-in colours first, in the
+built-in order, and appends; a saved character then still looks right. With no character pack
+enabled the game uses its built-in palettes. The first-party `code430-characters` pack is the
+reference.
+
+### Enabled packs
+
+`user://packs.cfg` lists the enabled pack ids; first-party packs are enabled by default and a
+newly found pack is enabled and announced once. Map packs are not toggled there: the active
+map is chosen by `--pack=<id>`, the `[map] pack` setting, or the Ottawa default, and the
+other map packs stay available. The Packs tab in the pause menu toggles the rest; changes
+apply at the next load. For co-op the host's enabled set is the session's: `hello` and
+`welcome` carry every enabled pack's id, version and content hash, and a join is refused
+naming the first pack that differs or is missing on either side.
+
 ## Manifest fields (`pack.schema.v0.json`)
 
 | Field | Required | Meaning |

@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/pack.schema.v1.json",
+  "title": "Code 430 pack manifest v1",
+  "description": "Manifest every pack carries as pack.json, version 1: everything in v0 plus a content index and the character and story sections. v0 stays valid. See docs/pack-format/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "version",
+    "type",
+    "engine_api",
+    "license",
+    "attribution",
+    "supported_modes",
+    "max_descriptors"
+  ],
+  "properties": {
+    "schema_version": {
+      "description": "Version of this manifest schema.",
+      "const": 1
+    },
+    "id": {
+      "description": "Globally unique pack id: reverse-domain or author.name, lowercase, dots and dashes only.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$",
+      "maxLength": 128
+    },
+    "name": {
+      "description": "Display name.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "version": {
+      "description": "Semantic version of the pack.",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$"
+    },
+    "type": {
+      "description": "Pack type. Data-only types may not contain code or Godot resource formats.",
+      "enum": [
+        "map",
+        "character",
+        "story",
+        "system"
+      ]
+    },
+    "engine_api": {
+      "description": "Major version of the game's pack API this pack targets.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "dependencies": {
+      "description": "Other packs this pack needs, by id and semver range (^1.2, ~1.2, >=1.0 <2.0, or exact).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "license": {
+      "description": "SPDX identifier for the pack's own content, or 'proprietary'.",
+      "type": "string",
+      "minLength": 1
+    },
+    "attribution": {
+      "description": "Credit lines shown in-game. Map packs must include '© OpenStreetMap contributors'.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "trusted": {
+      "description": "True only for system packs, which run code. The game warns before enabling.",
+      "type": "boolean",
+      "default": false
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri"
+    },
+    "supported_modes": {
+      "description": "Tone modes this pack's content supports (ids of mode files). The game warns when the active mode is missing.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "uniqueItems": true
+    },
+    "max_descriptors": {
+      "description": "The strongest level of each content descriptor anywhere in the pack, for registry filtering.",
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "none",
+          "mild",
+          "strong"
+        ]
+      }
+    },
+    "content": {
+      "description": "Index of the content files the pack ships, by content type. Every path is relative to the pack folder, inside it, and validated against the type's schema. The loader serves these through the content registry.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "path"
+        ],
+        "properties": {
+          "type": {
+            "description": "Content type; decides the schema and which system reads it.",
+            "enum": [
+              "ads",
+              "vehicles",
+              "weapons",
+              "factions",
+              "turf",
+              "lap",
+              "radio",
+              "music",
+              "palettes",
+              "presets",
+              "missions"
+            ]
+          },
+          "path": {
+            "description": "Relative path inside the pack, forward slashes, no leading slash and no '..'.",
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+\\.json$",
+            "maxLength": 256
+          },
+          "id": {
+            "description": "Optional id for the file as a whole, for packs that ship several files of one type.",
+            "type": "string",
+            "pattern": "^[a-z0-9_.-]+$"
+          }
+        }
+      }
+    },
+    "character": {
+      "description": "Character packs only: the palette and preset files (also listed in content[] as palettes and presets).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "palettes"
+      ],
+      "properties": {
+        "palettes": {
+          "type": "string",
+          "description": "Path of the palettes file (character-palettes.schema.v1.json)."
+        },
+        "presets": {
+          "type": "string",
+          "description": "Path of the presets file (character-presets.schema.v1.json)."
+        }
+      }
+    },
+    "story": {
+      "description": "Story packs only: the map pack the stories are placed on and the mission files.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map"
+      ],
+      "properties": {
+        "map": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$",
+          "description": "Id of the map pack the stories are placed on; also a dependency."
+        },
+        "missions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Mission files (add-story-pack)."
+        }
+      }
+    },
+    "map": {
+      "description": "Map packs only: local origin and bounds.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "crs",
+        "origin"
+      ],
+      "properties": {
+        "crs": {
+          "type": "string",
+          "description": "EPSG code of the projected coordinates, e.g. EPSG:32618."
+        },
+        "origin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "easting",
+            "northing",
+            "lat",
+            "lon"
+          ],
+          "properties": {
+            "easting": {
+              "type": "number"
+            },
+            "northing": {
+              "type": "number"
+            },
+            "lat": {
+              "type": "number"
+            },
+            "lon": {
+              "type": "number"
+            }
+          }
+        },
+        "bbox": {
+          "description": "[min_lat, min_lon, max_lat, max_lon] in WGS84.",
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "spawn": {
+          "description": "Optional fixed start: local metres and a compass heading (0 north, 90 east). Without it the game picks a spot on the highway.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            },
+            "heading_deg": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "system"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "trusted"
+        ],
+        "properties": {
+          "trusted": {
+            "const": true
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "trusted": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "map"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "map"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "character"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "character"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "story"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "story"
+        ]
+      }
+    }
+  ]
+}

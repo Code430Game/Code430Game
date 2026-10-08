@@ -128,13 +128,14 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 	var sy: float = p["height"]
 	var sw: float = p["build"]
 	var s := Vector3(sw, sy, sw)
-	var skin: Color = CharacterProfile.SKIN[p["skin"]]
-	var hair: Color = CharacterProfile.HAIR_COLOUR[p["hair_colour"]]
-	var top: Color = CharacterProfile.CLOTH[p["top"]]
-	var bottom: Color = CharacterProfile.CLOTH[p["bottom"]]
-	var shoes: Color = CharacterProfile.SHOE_COLOURS[p["shoes"]]
+	var cloth := CharacterProfile.palette("cloth")
+	var skin: Color = CharacterProfile.palette("skin")[p["skin"]]
+	var hair: Color = CharacterProfile.palette("hair_colour")[p["hair_colour"]]
+	var top: Color = cloth[p["top"]]
+	var bottom: Color = cloth[p["bottom"]]
+	var shoes: Color = CharacterProfile.palette("shoes")[p["shoes"]]
 	var jacket := int(p["jacket"]) == 1
-	var sleeve: Color = CharacterProfile.CLOTH[p["jacket_colour"]] if jacket else top
+	var sleeve: Color = cloth[p["jacket_colour"]] if jacket else top
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	if bone_channel:

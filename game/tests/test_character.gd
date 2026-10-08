@@ -33,11 +33,11 @@ func test_random_profiles_are_normalised_and_step_wraps_or_clamps() -> void:
 		assert_bool(p.has(key)).override_failure_message("missing " + key).is_true()
 	assert_bool(CharacterProfile.equals(p, CharacterProfile.normalise(p))).is_true()
 	var q := CharacterProfile.step({"top": 0}, "top", -1)
-	assert_int(q["top"]).is_equal(CharacterProfile.CLOTH.size() - 1)
+	assert_int(q["top"]).is_equal(CharacterProfile.palette("cloth").size() - 1)
 	var tall := CharacterProfile.step({"height": CharacterProfile.HEIGHT_MAX}, "height", 3)
 	assert_float(tall["height"]).is_equal_approx(CharacterProfile.HEIGHT_MAX, 0.001)
 	var junk := CharacterProfile.normalise({"skin": 99, "hair": -4, "height": "tall", "extra": 1})
-	assert_int(junk["skin"]).is_equal(CharacterProfile.SKIN.size() - 1)
+	assert_int(junk["skin"]).is_equal(CharacterProfile.palette("skin").size() - 1)
 	assert_int(junk["hair"]).is_equal(0)
 	assert_float(junk["height"]).is_equal_approx(1.0, 0.001)
 	assert_bool(junk.has("extra")).is_false()
@@ -123,7 +123,7 @@ func test_creator_changes_the_profile_live_and_saves_last_on_done() -> void:
 	await _joy(JOY_BUTTON_DPAD_DOWN)
 	await _joy(JOY_BUTTON_DPAD_LEFT)  # top 0 -> last colour
 	assert_int(creator.profile["skin"]).is_equal(3)
-	assert_int(creator.profile["top"]).is_equal(CharacterProfile.CLOTH.size() - 1)
+	assert_int(creator.profile["top"]).is_equal(CharacterProfile.palette("cloth").size() - 1)
 	assert_int(live.size()).is_greater_equal(3)
 	await _joy(JOY_BUTTON_B)
 	await get_tree().process_frame
@@ -202,6 +202,43 @@ func test_jacket_front_opens_wide_enough_not_to_read_as_a_tie() -> void:
 ## Vertex colours come back quantised to 8 bits, so compare loosely.
 static func _same_colour(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) < 0.02 and absf(a.g - b.g) < 0.02 and absf(a.b - b.b) < 0.02
+
+
+## add-pack-loader 3.1: the enabled character pack's palettes replace the built-ins, keeping
+## the built-in colours first so a saved character still looks right; with the pack disabled
+## the built-ins return, and the creator lists the pack's presets under the player's own.
+func test_character_pack_palettes_extend_the_built_ins_and_fall_back_when_disabled() -> void:
+	var saved_dirs := PackLoader.search_dirs
+	var saved_path := PackLoader.enabled_path
+	var saved_map := PackLoader.active_map
+	PackLoader.enabled_path = "user://tmp/packs_char_%d.cfg" % Time.get_ticks_usec()
+	PackLoader.search_dirs = PackedStringArray([ProjectSettings.globalize_path("res://").path_join("../packs").simplify_path()])
+	PackLoader.active_map = "code430.ottawa-centretown"
+	PackLoader.reload()
+	assert_bool(PackLoader.loaded_ids.has("code430.characters")).is_true()
+	var cloth := CharacterProfile.palette("cloth")
+	assert_int(cloth.size()).is_greater(CharacterProfile.CLOTH.size())
+	for i in range(CharacterProfile.CLOTH.size()):
+		assert_bool(cloth[i].is_equal_approx(CharacterProfile.CLOTH[i])).override_failure_message("cloth %d changed" % i).is_true()
+	assert_str(CharacterProfile.palette_source()).is_equal("code430.characters:palettes.v1.json")
+	assert_str(CharacterProfile.label({"top": 10}, "top")).is_equal("navy")
+	var nowhere := "user://tmp/no_such_characters_%d.json" % Time.get_ticks_usec()
+	var presets := CharacterCreator.all_presets(nowhere)
+	assert_int(presets.size()).is_equal(6)
+	assert_str(str((presets[0] as Dictionary)["pack_id"])).is_equal("code430.characters")
+	var mesh := CharacterMesh.build((presets[0] as Dictionary)["profile"])
+	assert_int(mesh.get_surface_count()).is_equal(1)
+	PackLoader.set_enabled("code430.characters", false)
+	PackLoader.reload()
+	assert_int(CharacterProfile.palette("cloth").size()).is_equal(CharacterProfile.CLOTH.size())
+	assert_str(CharacterProfile.palette_source()).is_empty()
+	assert_str(CharacterProfile.label({"top": 10}, "top")).is_equal("teal")  # clamped to the built-in list
+	assert_int(CharacterCreator.all_presets(nowhere).size()).is_equal(0)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(PackLoader.enabled_path))
+	PackLoader.search_dirs = saved_dirs
+	PackLoader.enabled_path = saved_path
+	PackLoader.active_map = saved_map
+	PackLoader.reload()
 
 
 func test_hair_stops_above_the_eyes_and_shirt_stops_at_the_waist() -> void:

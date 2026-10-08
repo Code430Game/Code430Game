@@ -75,7 +75,7 @@ func _ready() -> void:
 
 func open(start: Dictionary) -> void:
 	profile = CharacterProfile.normalise(start)
-	_presets = CharacterStore.presets(store_path)
+	_presets = all_presets(store_path)
 	_preset_index = -1 if _presets.is_empty() else 0
 	_selected = 0
 	_status.text = ""
@@ -113,7 +113,21 @@ func _refresh() -> void:
 func _preset_name() -> String:
 	if _preset_index < 0 or _preset_index >= _presets.size():
 		return "none saved"
-	return str((_presets[_preset_index] as Dictionary).get("name", "?"))
+	var p: Dictionary = _presets[_preset_index]
+	return str(p.get("name", "?")) + ("  (pack)" if p.has("pack_id") else "")
+
+
+## The player's saved presets first, then every enabled character pack's named presets
+## (add-pack-loader 3.1); pack presets carry `pack_id` and cannot be deleted here.
+static func all_presets(path: String) -> Array:
+	var out: Array = CharacterStore.presets(path)
+	var loader: Node = Engine.get_main_loop().root.get_node_or_null("PackLoader") if Engine.get_main_loop() is SceneTree else null
+	if loader == null:
+		return out
+	for item: Dictionary in loader.call("items", "presets"):
+		if item.get("profile") is Dictionary:
+			out.append({"name": str(item.get("name", "preset")), "profile": CharacterProfile.normalise(item["profile"]), "pack_id": str(item.get("pack_id", ""))})
+	return out
 
 
 func _input(event: InputEvent) -> void:
@@ -157,15 +171,20 @@ func _activate(key: String) -> void:
 				_apply()
 		"save":
 			var name := CharacterStore.save_preset(profile, "", store_path)
-			_presets = CharacterStore.presets(store_path)
-			_preset_index = _presets.size() - 1
+			_presets = all_presets(store_path)
+			_preset_index = CharacterStore.presets(store_path).size() - 1
 			_status.text = "saved as %s" % name
 			_refresh()
 		"delete":
 			if _preset_index >= 0 and _preset_index < _presets.size():
-				var gone := _preset_name()
+				var chosen: Dictionary = _presets[_preset_index]
+				if chosen.has("pack_id"):
+					_status.text = "%s comes with a pack; disable the pack to remove it" % str(chosen.get("name", "?"))
+					_refresh()
+					return
+				var gone := str(chosen.get("name", "?"))
 				CharacterStore.delete_preset(gone, store_path)
-				_presets = CharacterStore.presets(store_path)
+				_presets = all_presets(store_path)
 				_preset_index = -1 if _presets.is_empty() else mini(_preset_index, _presets.size() - 1)
 				_status.text = "deleted %s" % gone
 				_refresh()

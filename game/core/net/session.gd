@@ -14,8 +14,11 @@ const DEFAULT_PORT := 43010
 const MAX_PLAYERS := 4
 
 var max_players: int = MAX_PLAYERS
-## This peer's pack summary: {"id", "version", "hash"}; set by the scene before hosting or joining.
+## This peer's map pack summary: {"id", "version", "hash"}; set by the scene before hosting or joining.
 var local_manifest: Dictionary = {}
+## This peer's whole enabled pack set, `[{"id", "version", "hash"}]` sorted by id
+## (PackLoader.manifest_summary); the host's set is the session's (add-pack-loader).
+var local_packs: Array = []
 ## Peer id -> {"name", "color", "profile"} for every player in the session, including this one.
 var peers: Dictionary = {}
 ## This player's CharacterProfile, sent with hello and welcome; set by the scene.
@@ -111,7 +114,7 @@ func _reset() -> void:
 func _on_connected_to_server() -> void:
 	connected = true
 	print("net: connected to host, sending hello")
-	_hello.rpc_id(1, local_manifest, _pending_name, local_profile, ContentMode.current)
+	_hello.rpc_id(1, local_manifest, _pending_name, local_profile, ContentMode.current, local_packs)
 
 
 func _on_peer_connected(id: int) -> void:
@@ -133,14 +136,41 @@ static func mismatch_reason(host_manifest: Dictionary, guest_manifest: Dictionar
 	return ""
 
 
+## Pure check over whole pack sets (both sorted by id): "" when they match, else the first
+## difference: a pack missing on either side, or a version or hash that differs.
+static func pack_set_mismatch(host_packs: Array, guest_packs: Array) -> String:
+	var guest_by_id := {}
+	for row: Dictionary in guest_packs:
+		guest_by_id[str(row.get("id", ""))] = row
+	var host_by_id := {}
+	for row: Dictionary in host_packs:
+		host_by_id[str(row.get("id", ""))] = row
+	for row: Dictionary in host_packs:
+		var id := str(row.get("id", ""))
+		if not guest_by_id.has(id):
+			return "pack %s missing on your side (host has %s)" % [id, row.get("version", "?")]
+		var theirs: Dictionary = guest_by_id[id]
+		if str(row.get("version", "")) != str(theirs.get("version", "")):
+			return "pack %s: host has %s, you have %s" % [id, row.get("version", "?"), theirs.get("version", "?")]
+		if str(row.get("hash", "")) != str(theirs.get("hash", "")):
+			return "pack %s differs from the host's copy (same version %s, different contents)" % [id, row.get("version", "?")]
+	for row: Dictionary in guest_packs:
+		var id := str(row.get("id", ""))
+		if not host_by_id.has(id):
+			return "pack %s is not enabled on the host" % id
+	return ""
+
+
 @rpc("any_peer", "reliable")
-func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}, _mode: String = "") -> void:
+func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}, _mode: String = "", packs: Array = []) -> void:
 	if not is_host():
 		return
 	var id := multiplayer.get_remote_sender_id()
 	var reason := ""
 	if peers.size() >= max_players:
 		reason = "the game is full (%d players)" % max_players
+	elif not local_packs.is_empty() or not packs.is_empty():
+		reason = pack_set_mismatch(local_packs, packs)
 	else:
 		reason = mismatch_reason(local_manifest, manifest)
 	if reason != "":
@@ -150,7 +180,7 @@ func _hello(manifest: Dictionary, name: String, profile: Dictionary = {}, _mode:
 		return
 	print("net: peer %d joined as %s (%d players)" % [id, name, peers.size() + 1])
 	peers[id] = {"name": name, "color": _color_for(id), "profile": profile}
-	_welcome.rpc_id(id, peers, local_manifest, signal_time, ContentMode.current)
+	_welcome.rpc_id(id, peers, local_manifest, signal_time, ContentMode.current, local_packs)
 	_peer_came.rpc(id, peers[id])
 	peer_joined.emit(id, peers[id])
 
@@ -169,14 +199,14 @@ func _refuse(reason: String) -> void:
 
 
 @rpc("authority", "reliable")
-func _welcome(all_peers: Dictionary, host_manifest: Dictionary, host_signal_time: float, mode: String = "") -> void:
+func _welcome(all_peers: Dictionary, host_manifest: Dictionary, host_signal_time: float, mode: String = "", host_packs: Array = []) -> void:
 	peers = all_peers
 	signal_time = host_signal_time
 	if mode != "":
 		ContentMode.set_mode(mode, false)  # the host's tone is the session's
 		ContentMode.locked = true
 	print("net: welcomed as peer %d with %d players" % [multiplayer.get_unique_id(), peers.size()])
-	joined.emit({"peers": peers, "pack": host_manifest})
+	joined.emit({"peers": peers, "pack": host_manifest, "packs": host_packs})
 	for id in peers:
 		peer_joined.emit(int(id), peers[id])
 

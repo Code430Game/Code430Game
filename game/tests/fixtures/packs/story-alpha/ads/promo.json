@@ -1,0 +1,13 @@
+{
+  "ads": [
+    {
+      "id": "alpha.mild",
+      "variants": {"fallback": {"text": "Alpha Cabs, any hour"}}
+    },
+    {
+      "id": "alpha.heist",
+      "descriptors": {"crime": "strong"},
+      "variants": {"fallback": {"text": "Alpha Lockworks: no questions", "descriptors": {"crime": "strong"}}}
+    }
+  ]
+}
