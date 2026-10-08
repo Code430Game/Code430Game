@@ -10,8 +10,8 @@
 ## 3. Police and co-op
 - [x] 3.1 Member gunfire and assaults report through `Wanted.report_other` as the member's (the player's stars never move); an officer who saw it engages the crew (`PoliceManager.engage_gang`): patrol cars come to the scene with no stars for `incident_s`, officers walk at the nearest standing member and fire or jab at it through `FactionManager.hit_member`; test
 - [x] 3.2 Host-only simulation (`mirror` on guests); members ride their own `_factions_snapshot` (ten floats each: turf, faction, seed, leader, position, yaw, state, in car) at the pedestrian rate, guests build replicas by seed and pose them by state; a guest's hit goes to the host over `report_member_hit`; one-process test with a host and a mirror manager
-- [ ] 3.3 Mac screenshots: the warning, a fight in the proving ground turf in each tone, officers arriving, the heat glyph; `--gang=N` and `--turf-log` documented in CONTRIBUTING
+- [x] 3.3 Mac screenshots (2026-10-08, listed in PR #97): the turf block from above with its hatched fill and marker on the minimap; a gritty fight at the spawn (a member with a knife at the player, health 12, the heat glyph amber); clean (the crew tagging, the glyph pink with x18 tags, nobody down); dystopia (the glyph in the mode's accent). Officers arriving is covered by the test only: the windowed run cannot last long enough for a patrol car to reach the scene before the ~55 s crash on main. `--gang=N` and `--turf-log` documented in CONTRIBUTING
 
 ## 4. Verification
-- [ ] 4.1 Deck benchmark in the turf during a fight (proving ground, then the Market turf)
+- [ ] 4.1 Deck benchmark in the turf during a fight (proving ground, then the Market turf). Not run on 2026-10-08: the Deck did not resolve on the network. Command when it does: `scripts/deck-bench.sh --pack code430.proving-ground --extra "--spawn=650,475 --gang=5" --change add-hostile-gang --task 4.1`. No Market turf exists yet (the Ottawa pack was off limits this round)
 - [ ] 4.2 **Stop: human walks into the turf on the Deck in gritty and in clean, fights, runs, and says whether the gang is fun and fair**
