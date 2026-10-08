@@ -23,6 +23,7 @@ var police: PoliceManager
 var factions: FactionManager
 var player_sync: PlayerSync
 var day_night: DayNight
+var weather: WeatherController  # the host's goes out with the clock; a guest's mirrors it
 var config: Dictionary = {}
 var _accum: float = 0.0
 var _signal_accum: float = 0.0
@@ -57,7 +58,8 @@ func _process(delta: float) -> void:
 				_factions_snapshot.rpc_id(int(id), factions.snapshot(around, REPLICATE_RADIUS_M))
 	if _signal_accum >= SIGNAL_SYNC_S:
 		_signal_accum = 0.0
-		_signal_time.rpc(traffic.signals.time, day_night.hour if day_night != null else -1.0)
+		var sky := weather.snapshot() if weather != null else PackedFloat32Array()
+		_signal_time.rpc(traffic.signals.time, day_night.hour if day_night != null else -1.0, sky)
 
 
 ## Guest: asks the host for the traffic car at `position`; the answer spawns a car via `take_granted`.
@@ -214,11 +216,15 @@ func _report_member_hit(_turf: int, seed: int, weapon_id: String, pos: Vector3, 
 
 
 @rpc("authority", "reliable")
-func _signal_time(t: float, hour: float) -> void:
+func _signal_time(t: float, hour: float, sky: PackedFloat32Array = PackedFloat32Array()) -> void:
 	if traffic != null:
 		traffic.signals.time = t
 	if day_night != null and hour >= 0.0:
 		day_night.hour = hour
+	# The host's weather rides with the clock (add-weather): state, next, progress, seed, elapsed.
+	if weather != null and sky.size() >= 5:
+		weather.mirror = true
+		weather.apply_snapshot(sky)
 
 
 ## Guest: the host's helicopter is theirs, at `transform` (fly it from there).
