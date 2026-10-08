@@ -40,8 +40,12 @@ place to be proved in minutes, a loop to drive laps on, and somewhere to put the
   - the **crossing**: the vertical road is `bridge=yes layer=1` over the highway (at grade)
     and the river in one span, with a footbridge beside it, so one structure exercises
     piers, abutments, lane layers and the river in a single place;
-  - two **exits** with gores feeding the residential grid, one on the far-right descent and
-    one on the vertical ascent; an underpass where a path crosses under a ramp;
+  - **four ways on and off**, one per quarter of the map (human: "good access to escape the
+    police"): the roundabout top left; a new exit and entry pair off the river highway into
+    the city grid top right; the far-right descent exit into the bottom right; and the exit
+    on the vertical ascent aimed west into the bottom left. Each exit is an off and on pair
+    with gores, so the lap can be rejoined from every quarter; an underpass where a path
+    crosses under a ramp;
   - the **main city** grid, top left, around and through the small lobe: signals where the
     avenues cross the loop, stops elsewhere, a one-way pair, a bus loop with a reserved lane
     and stops, sidewalks, crossings, shopfronts, a multi-storey garage with an underground
