@@ -12,4 +12,4 @@
 ## 3. Verification
 - [x] 3.1 Deck benchmark on the loop (`deck-bench.sh --pack code430.proving-ground --route loop`), numbers recorded as the quick-check baseline (the Deck was off the network on 2026-10-08; Mac, deck preset, 40 s autodrive, 150 traffic agents: avg 8.3 ms, p99 8.7 ms, render cpu 0.35 ms, 322 draw calls, 80 chunks, first playable 110 ms)
   - 2026-10-08 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck --pack=code430.proving-ground`): working-tree 137d071: render cpu 1.10 / gpu 8.20 ms measured, physics mean 8.84 ms (max 19.79), frame avg 9.06 / p99 15.16 ms (paced), first playable 217 ms.
-- [ ] 3.2 **Stop: human drives laps of the loop on the Deck, visits each service, and says what is missing from the district**
+- [x] 3.2 Human drove it on the Deck (2026-10-08): "that world seems to work. It's a little sparse so we might come back to spruce it up."
