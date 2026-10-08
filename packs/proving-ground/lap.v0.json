@@ -1,0 +1,24 @@
+{
+ "schema_version": 0,
+ "laps": [
+  {
+   "id": "double-cross",
+   "name": "Double Cross",
+   "start": {
+    "x": 0.0,
+    "z": -180.0
+   },
+   "direction": {
+    "x": 0.0,
+    "z": 1.0
+   },
+   "half_width_m": 16.0,
+   "rearm_s": 10.0,
+   "loop_names": [
+    "Double Cross Loop",
+    "Double Cross Highway",
+    "Loop Circle"
+   ]
+  }
+ ]
+}

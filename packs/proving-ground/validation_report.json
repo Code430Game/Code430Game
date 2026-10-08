@@ -1,0 +1,269 @@
+{
+ "components": [
+  {
+   "classes": {
+    "motorway": 12,
+    "motorway_link": 6,
+    "parking": 6,
+    "residential": 95,
+    "secondary": 15,
+    "service": 3,
+    "tertiary": 59
+   },
+   "edges": 196,
+   "likely_cause": "main network",
+   "nodes": 123,
+   "sample_names": [
+    "1 Lane",
+    "10 Lane",
+    "2 Lane",
+    "3 Lane",
+    "4 Lane",
+    "5 Lane",
+    "6 Lane",
+    "7 Lane"
+   ],
+   "sample_way_ids": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007
+   ],
+   "touches_bbox_edge": true
+  }
+ ],
+ "dead_ends": {
+  "bbox_edge": [
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1034.0",
+    "name": "Edge Road",
+    "node_id": "n100545",
+    "osm_node_id": 100545,
+    "osm_way_id": 1034,
+    "road_class": "residential"
+   }
+  ],
+  "declared_noexit": [],
+  "likely_real": [],
+  "parking": [
+   {
+    "category": "parking",
+    "edge_id": "w1068.0",
+    "name": "Police Drive",
+    "node_id": "n100930",
+    "osm_node_id": 100930,
+    "osm_way_id": 1068,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1069.0",
+    "name": "Hospital Drive",
+    "node_id": "n100931",
+    "osm_node_id": 100931,
+    "osm_way_id": 1069,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1070.0",
+    "name": "Fire Hall Drive",
+    "node_id": "n100932",
+    "osm_node_id": 100932,
+    "osm_way_id": 1070,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1072.0",
+    "name": null,
+    "node_id": "n100934",
+    "osm_node_id": 100934,
+    "osm_way_id": 1072,
+    "road_class": "parking"
+   },
+   {
+    "category": "parking",
+    "edge_id": "w1073.0",
+    "name": "Garage Ramp",
+    "node_id": "n100935",
+    "osm_node_id": 100935,
+    "osm_way_id": 1073,
+    "road_class": "parking"
+   }
+  ],
+  "suspicious": []
+ },
+ "elevation": {
+  "aligned_dropped": 1,
+  "aligned_vertices": 5,
+  "anchorless_spans": 0,
+  "bound_conflicts": 0,
+  "clearance_raised": [],
+  "clearance_short": [],
+  "clearance_shortfalls": [],
+  "contaminated_vertices": 23,
+  "edges_over_grade": [],
+  "fixed_vertices": 230,
+  "free_vertices": 708,
+  "inferred_bridges": [],
+  "max_residual_grade": 0.08,
+  "max_shared_step": 0.665,
+  "max_y": 70.032,
+  "min_y": 56.544,
+  "share_followers": 4,
+  "share_rounds_exhausted": false,
+  "shared_deck_vertices": 225,
+  "shared_ground_vertices": 6,
+  "shared_groups": 112,
+  "shared_step_left": 0.269,
+  "tie_rounds": 2,
+  "vertices_clamped": 54
+ },
+ "junction_clusters": [
+  {
+   "max_arm_offset_m": 4.989,
+   "node_id": "c100597",
+   "osm_node_ids": [
+    100597,
+    100675
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.744,
+   "node_id": "c100407",
+   "osm_node_ids": [
+    100407,
+    100445
+   ]
+  }
+ ],
+ "one_way_traps": [],
+ "ramps": [],
+ "summary": {
+  "barriers": {
+   "curb": 8,
+   "guardrail": 15,
+   "median": 4,
+   "parapet": 10,
+   "roadblock": 1
+  },
+  "bridges": {
+   "abutments": 16,
+   "bridges": 3,
+   "infill_strips": 5,
+   "kinds": {
+    "over_water": 3
+   },
+   "piers": 162,
+   "piers_skipped": 0,
+   "walkways_lifted": 0,
+   "walkways_on_decks": 0
+  },
+  "buildings": {
+   "footprints": 45,
+   "height_sources": {
+    "default": 6,
+    "levels": 39
+   },
+   "skipped": []
+  },
+  "classes": {
+   "motorway": 12,
+   "motorway_link": 6,
+   "parking": 6,
+   "residential": 95,
+   "secondary": 15,
+   "service": 3,
+   "tertiary": 59
+  },
+  "components": 1,
+  "dead_ends": {
+   "bbox_edge": 1,
+   "declared_noexit": 0,
+   "likely_real": 0,
+   "parking": 5,
+   "suspicious": 0
+  },
+  "defaulted_fields": {
+   "lanes": 13,
+   "speed_kph": 13,
+   "width": 196
+  },
+  "edges": 196,
+  "largest_component_nodes": 123,
+  "largest_scc_nodes": 123,
+  "nodes": 123,
+  "one_way_traps": 0,
+  "oneway_dead_ends": 0,
+  "parking": {
+   "bays": 5,
+   "door_tier": 0,
+   "garage_tier": 1,
+   "garages": 1,
+   "kinds": {
+    "multi-storey": 1,
+    "surface": 1
+   },
+   "lots": 2,
+   "skipped": 0,
+   "with_aisles": 1,
+   "with_capacity": 2
+  },
+  "ramp_problems": 0,
+  "service_addresses": {
+   "building": 0,
+   "none": 0,
+   "street": 2,
+   "tags": 3
+  },
+  "services": {
+   "ambulance": 1,
+   "fire_station": 1,
+   "helipad": 1,
+   "hospital": 1,
+   "police": 1
+  },
+  "terrain": {
+   "cells_carved": 6661,
+   "cells_flattened": 41440,
+   "cells_lowered_for_water": 7779,
+   "cells_lowered_under_decks": 23577,
+   "cells_under_buildings": 2737,
+   "chunks": 80,
+   "underpasses": {
+    "tunnels": 1,
+    "uncovered": 0
+   }
+  },
+  "total_length_km": 35.976,
+  "vegetation": {
+   "areas": 4,
+   "bushes": 462,
+   "chunks_over_400_trees": 15,
+   "max_trees_in_a_chunk": 696,
+   "skipped": {
+    "edge on a road, sidewalk, building or water": 2,
+    "frontage on a road, sidewalk, building or water": 16,
+    "row on a road, sidewalk, building or water": 2,
+    "scatter on a road, sidewalk, building or water": 351,
+    "tagged on a road, sidewalk, building or water": 1
+   },
+   "trees": 10743,
+   "trees_by_source": {
+    "row": 150,
+    "scatter": 10585,
+    "tagged": 8
+   }
+  },
+  "water": {
+   "polygons": 1,
+   "skipped": []
+  }
+ }
+}

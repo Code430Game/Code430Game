@@ -1,0 +1,142 @@
+"""The committed proving ground pack: built offline from the committed inputs, byte for byte,
+and holding one of every feature the game needs within a short drive of the spawn."""
+
+from __future__ import annotations
+
+import json
+import math
+from pathlib import Path
+
+import pytest
+
+from osm_import import __main__ as importer
+
+REPO = Path(__file__).resolve().parents[2]
+PACK = REPO / "packs" / "proving-ground"
+REGION = REPO / "regions" / "proving-ground.json"
+
+
+def _load(name: str) -> dict:
+    return json.loads((PACK / name).read_text(encoding="utf-8"))
+
+
+def test_committed_pack_matches_a_fresh_import(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The whole pipeline from the committed inputs, offline, gives the committed pack."""
+
+    def no_network(*_args, **_kwargs):
+        raise AssertionError("the proving ground import must not touch the network")
+
+    monkeypatch.setattr(importer, "fetch_query", no_network)
+    monkeypatch.setattr(importer, "fetch_bbox", no_network)
+    out = tmp_path / "pack"
+    argv = ["--region", str(REGION), "--pack-out", str(out), "--pack-version", "0.1.0"]
+    assert importer.main(argv) == 0
+    fresh = sorted(p.relative_to(out) for p in out.rglob("*") if p.is_file())
+    committed = sorted(
+        p.relative_to(PACK)
+        for p in PACK.rglob("*")
+        if p.is_file() and "chunks" not in p.parts and p.name != "build.json"
+    )
+    assert fresh == committed
+    for rel in committed:
+        assert (out / rel).read_bytes() == (PACK / rel).read_bytes(), (
+            f"{rel} differs; run scripts/regen-proving-ground.sh"
+        )
+
+
+def test_pack_has_one_of_everything():
+    graph = _load("road_graph.v0.json")
+    edges = graph["edges"]
+    classes = {e["class"] for e in edges}
+    assert {
+        "motorway",
+        "motorway_link",
+        "secondary",
+        "tertiary",
+        "residential",
+        "parking",
+        "service",
+    } <= classes
+    assert any(e["bus"] == "only" for e in edges), "a bus-only street"
+    assert any(e["bus"] == "lane" for e in edges), "a reserved bus lane"
+    assert len(graph["bus_stops"]) >= 3
+    assert any(e["oneway"] and e["class"] == "residential" for e in edges), "the one-way pair"
+    assert any("Circle" in (e["name"] or "") for e in edges), "the roundabout"
+    assert any(e["bridge"] and e["class"] == "motorway" for e in edges), "the viaduct"
+    assert any(e["bridge"] and e["class"] in ("residential", "tertiary") for e in edges), (
+        "a street bridge"
+    )
+    assert any(e["shoulder_right_m"] > 0 for e in edges if e["class"] == "motorway"), "shoulders"
+    controls = {n["control"] for n in graph["nodes"]}
+    assert "signals" in controls
+    assert any(e["control_from"] == "stop" or e["control_to"] == "stop" for e in edges), (
+        "stop signs"
+    )
+    kinds = {w["kind"] for w in graph["pedestrian_ways"]}
+    assert {"sidewalk", "crossing", "cycleway", "steps", "footway"} <= kinds
+    assert any(w.get("profile") == "tunnel" for w in graph["pedestrian_ways"]), "the underpass"
+    report = _load("validation_report.json")
+    assert report["summary"]["components"] == 1
+    assert report["summary"]["one_way_traps"] == 0
+    assert report["summary"]["ramp_problems"] == 0
+    assert report["elevation"]["inferred_bridges"] == []
+    assert report["elevation"]["clearance_shortfalls"] == []
+    assert report["elevation"]["edges_over_grade"] == []
+    dead = report["dead_ends"]
+    assert len(dead["bbox_edge"]) == 1 and dead["likely_real"] == [] and dead["suspicious"] == []
+    bridges = _load("bridges.v0.json")["bridges"]
+    assert {b["kind"] for b in bridges} >= {"over_water"}
+    assert max(b["span_m"] for b in bridges) > 1500.0, "the viaduct round the bottom lobe"
+    parking = _load("parking.v0.json")
+    assert {lot["kind"] for lot in parking["lots"]} >= {"surface", "multi-storey"}
+    assert parking["bays"], "kerb parking bays"
+    assert parking["garages"], "an underground garage"
+    assert any(lot["aisles"] for lot in parking["lots"])
+    services = _load("services.v0.json")["places"]
+    assert {p["kind"] for p in services} == {
+        "police",
+        "hospital",
+        "fire_station",
+        "helipad",
+        "ambulance",
+    }
+    veg = _load("vegetation.v0.json")
+    source = veg["columns"].index("source")
+    assert {t[source] for t in veg["trees"]} >= {"tagged", "row", "scatter"}
+    assert veg["bushes"]
+    assert _load("water.v0.json")["polygons"]
+    buildings = _load("buildings.v0.json")["buildings"]
+    assert {b["kind"] for b in buildings} >= {"house", "apartments", "retail", "office", "hospital"}
+    assert any(b["shopfront"] for b in buildings)
+    barriers = _load("barriers.v0.json")["barriers"]
+    assert any(b["kind"] == "roadblock" for b in barriers), "the edge closure"
+    assert any(b["kind"] == "parapet" for b in barriers)
+    assert (PACK / "lap.v0.json").exists() and (PACK / "turf.v0.json").exists()
+
+
+def test_services_are_a_short_drive_from_the_spawn():
+    spawn = _load("pack.json")["map"]["spawn"]
+    places = _load("services.v0.json")["places"]
+    for kind in ("police", "hospital", "fire_station", "helipad", "ambulance"):
+        place = next(p for p in places if p["kind"] == kind)
+        x, _y, z = place["at"]
+        assert math.dist((x, z), (spawn["x"], spawn["z"])) < 600.0, kind
+
+
+def test_spawn_and_start_line_are_on_the_loop():
+    graph = _load("road_graph.v0.json")
+    lap = _load("lap.v0.json")["laps"][0]
+    spawn = _load("pack.json")["map"]["spawn"]
+    loop = [e for e in graph["edges"] if e["name"] in lap["loop_names"]]
+    assert loop
+
+    def near_loop(x: float, z: float, within: float) -> bool:
+        for e in loop:
+            for p in e["polyline"]:
+                if math.dist((p[0], p[2]), (x, z)) <= within:
+                    return True
+        return False
+
+    assert near_loop(spawn["x"], spawn["z"], 25.0)
+    assert near_loop(lap["start"]["x"], lap["start"]["z"], 25.0)
+    assert spawn["heading_deg"] == 180.0, "the car starts heading south down the vertical"

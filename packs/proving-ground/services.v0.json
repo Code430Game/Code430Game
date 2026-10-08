@@ -1,0 +1,66 @@
+{
+ "places": [
+  {
+   "address": "1 Circle Avenue",
+   "at": [
+    -411.32,
+    66.33,
+    -232.04
+   ],
+   "id": "w50000",
+   "kind": "police",
+   "name": "Double Cross Police",
+   "road_node": "n100930"
+  },
+  {
+   "address": "on Police Drive",
+   "at": [
+    -351.15,
+    66.78,
+    -235.91
+   ],
+   "id": "w50001",
+   "kind": "helipad",
+   "name": "Police Pad",
+   "road_node": "n100930"
+  },
+  {
+   "address": "2 Station Avenue",
+   "at": [
+    -249.08,
+    66.42,
+    -338.83
+   ],
+   "id": "w50002",
+   "kind": "hospital",
+   "name": "Double Cross General",
+   "road_node": "n100470"
+  },
+  {
+   "address": "on Hospital Drive",
+   "at": [
+    -188.83,
+    65.52,
+    -347.7
+   ],
+   "id": "w50003",
+   "kind": "ambulance",
+   "name": "Ambulance Bay",
+   "road_node": "n100931"
+  },
+  {
+   "address": "3 Station Avenue",
+   "at": [
+    256.81,
+    61.21,
+    -344.44
+   ],
+   "id": "w50004",
+   "kind": "fire_station",
+   "name": "Double Cross Fire Hall",
+   "road_node": "n100932"
+  }
+ ],
+ "schema_version": 0,
+ "units": "metres, x east, z south; y the ground"
+}
