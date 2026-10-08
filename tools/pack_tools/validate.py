@@ -35,6 +35,9 @@ WEAPONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "weapons.schema.v0.js
 WEAPONS_NAME = "weapons.v0.json"
 SERVICES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "services.schema.v0.json"
 SERVICES_NAME = "services.v0.json"
+FACTIONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "factions.schema.v0.json"
+FACTIONS_NAME = "factions.v0.json"
+BASE_WEAPONS_PATH = REPO_ROOT / "game" / "actors" / "combat" / "weapons.v0.json"
 FORMAT_DIR = REPO_ROOT / "docs" / "pack-format"
 # Files the importer generates: (file, schema, where the ids are). An id path is the list key
 # then the id field, or list, nested list and field for ids inside items (a bridge's decks).
@@ -93,6 +96,56 @@ def validate_weapons(weapons: dict, validator: Draft202012Validator) -> list[str
                     f"{WEAPONS_NAME}: {w.get('id')}: variant '{key}' is lethal in a mode without lethal weapons"
                 )
     return errors
+
+
+def validate_factions(
+    factions: dict,
+    weapons: dict,
+    desc: dict,
+    validator: Draft202012Validator,
+) -> list[str]:
+    """Schema errors, unknown descriptors, weapon ids that are not in `weapons`, and any variant
+    keyed to a mode without lethal weapons that names a weapon lethal in that mode
+    (add-hostile-gang 1.1)."""
+    errors = []
+    for err in sorted(validator.iter_errors(factions), key=lambda e: list(e.path)):
+        where = "/".join(str(p) for p in err.path) or "(root)"
+        errors.append(f"{FACTIONS_NAME}: {where}: {err.message}")
+    if errors:
+        return errors
+    banned = nonlethal_variant_keys()
+    by_id = {w.get("id"): w for w in weapons.get("weapons", [])}
+    for f in factions.get("factions", []):
+        fid = f.get("id")
+        errors.extend(_descriptor_errors(f"{FACTIONS_NAME}: {fid}", f.get("descriptors", {}), desc))
+        for key, v in f.get("variants", {}).items():
+            errors.extend(
+                _descriptor_errors(
+                    f"{FACTIONS_NAME}: {fid}: variant '{key}'", v.get("descriptors", {}), desc
+                )
+            )
+            for role in ("melee", "ranged"):
+                wid = v.get(role, "")
+                if wid == "":
+                    continue
+                w = by_id.get(wid)
+                if w is None:
+                    errors.append(
+                        f"{FACTIONS_NAME}: {fid}: variant '{key}' names unknown weapon '{wid}'"
+                    )
+                    continue
+                if key in banned:
+                    wv = w.get("variants", {}).get(key, w.get("variants", {}).get("fallback", {}))
+                    if wv.get("lethal"):
+                        errors.append(
+                            f"{FACTIONS_NAME}: {fid}: variant '{key}' arms the crew with '{wid}', lethal in a mode without lethal weapons"
+                        )
+    return errors
+
+
+def load_base_weapons(path: Path = BASE_WEAPONS_PATH) -> dict:
+    """The first-party weapons a faction's ids resolve against."""
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 LEVELS = ["none", "mild", "strong"]
@@ -339,6 +392,18 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
             report.errors.append(f"{WEAPONS_NAME}: invalid JSON: {exc}")
             return report
         report.errors.extend(validate_weapons(weapons, load_schema(WEAPONS_SCHEMA_PATH)))
+    factions_path = pack_dir / FACTIONS_NAME
+    if factions_path.is_file():
+        try:
+            factions = json.loads(factions_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            report.errors.append(f"{FACTIONS_NAME}: invalid JSON: {exc}")
+            return report
+        report.errors.extend(
+            validate_factions(
+                factions, load_base_weapons(), desc, load_schema(FACTIONS_SCHEMA_PATH)
+            )
+        )
     report.errors.extend(validate_generated(pack_dir))
     return report
 

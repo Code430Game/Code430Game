@@ -5,42 +5,108 @@
   "description": "One tone mode: the maximum level per content descriptor, mechanic flags and the variant key content items use. Base modes live in game/core/content/modes/.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "name", "max", "flags", "variant_key"],
+  "required": [
+    "id",
+    "name",
+    "max",
+    "flags",
+    "variant_key"
+  ],
   "properties": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-    "name": {"type": "string", "minLength": 1},
-    "about": {"type": "string"},
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "about": {
+      "type": "string"
+    },
     "max": {
       "type": "object",
-      "additionalProperties": {"enum": ["none", "mild", "strong"]}
+      "additionalProperties": {
+        "enum": [
+          "none",
+          "mild",
+          "strong"
+        ]
+      }
     },
     "flags": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["violence", "lethal_weapons", "drug_use", "sex_work_services"],
+      "required": [
+        "violence",
+        "lethal_weapons",
+        "drug_use",
+        "sex_work_services"
+      ],
       "properties": {
-        "violence": {"type": "boolean"},
-        "lethal_weapons": {"type": "boolean"},
-        "drug_use": {"type": "boolean"},
-        "sex_work_services": {"type": "boolean"}
+        "violence": {
+          "type": "boolean"
+        },
+        "lethal_weapons": {
+          "type": "boolean"
+        },
+        "drug_use": {
+          "type": "boolean"
+        },
+        "sex_work_services": {
+          "type": "boolean"
+        }
       }
     },
-    "variant_key": {"type": "string", "minLength": 1},
+    "variant_key": {
+      "type": "string",
+      "minLength": 1
+    },
     "outcomes": {
       "type": "object",
       "additionalProperties": false,
       "description": "How systems resolve things in this mode, so gameplay code never branches on a mode id.",
       "properties": {
-        "ambulance": {"enum": ["revive", "stretcher", "drone"], "description": "What paramedics do once they have tended a downed person: they get up, are carried off on a stretcher, or are lifted away by a drone."},
-        "aircraft": {"enum": ["bounce", "damage"], "description": "What a hard hit does to the flyable helicopter (add-flyable-helicopter): it bounces off and lands gently and is never wrecked, or it takes damage and at zero auto-rotates down, disabled. A mode without violence never wrecks it."},
-        "officer": {"enum": ["knock_down", "tag_out"], "description": "What happens to a police officer the player has beaten (add-police-combat): knocked down until the chase ends, or tagged out (sits with hands up, then walks back to the car). A mode without violence never knocks down."}
+        "ambulance": {
+          "enum": [
+            "revive",
+            "stretcher",
+            "drone"
+          ],
+          "description": "What paramedics do once they have tended a downed person: they get up, are carried off on a stretcher, or are lifted away by a drone."
+        },
+        "aircraft": {
+          "enum": [
+            "bounce",
+            "damage"
+          ],
+          "description": "What a hard hit does to the flyable helicopter (add-flyable-helicopter): it bounces off and lands gently and is never wrecked, or it takes damage and at zero auto-rotates down, disabled. A mode without violence never wrecks it."
+        },
+        "officer": {
+          "enum": [
+            "knock_down",
+            "tag_out"
+          ],
+          "description": "What happens to a police officer the player has beaten (add-police-combat): knocked down until the chase ends, or tagged out (sits with hands up, then walks back to the car). A mode without violence never knocks down."
+        },
+        "gang": {
+          "enum": [
+            "knock_down",
+            "tag_out"
+          ],
+          "description": "What happens to a gang member the player has beaten (add-hostile-gang): knocked down until they respawn, or tagged out (sits with hands up, then walks back to the turf). A mode without violence never knocks down."
+        }
       }
     },
     "hud": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "accent": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "description": "The HUD accent: the chosen segment of the weapon wheel and the idle tile's flash."}
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "The HUD accent: the chosen segment of the weapon wheel and the idle tile's flash."
+        }
       }
     }
   }
