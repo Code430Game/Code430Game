@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from itertools import pairwise
 
 Point = tuple[float, float]
 
@@ -68,6 +69,24 @@ SOUTH_AVENUES = (250.0, 400.0, 550.0, 700.0)  # z; River, Park, Mid, South Road
 SOUTH_STREETS = (-850.0, -650.0, -450.0, -250.0, -50.0, 150.0, 350.0, 550.0, 750.0, 1000.0)
 GREENBELT_TOP = -640.0
 GREENBELT_LEFT = -1050.0
+
+# Minor streets fill the grids to Ottawa-sized blocks (about 70 to 100 m on a side; the human,
+# 2026-10-08: "there is a lot of open space in the grid"). Each grid names its own; a segment
+# that would run through a service, the park, the turf or a ramp is left out, so those keep
+# their larger blocks. Frontage roads run beside the elevated motorway through the south and
+# along the bank road's south side.
+MAIN_MINOR_AVENUES = (-190.0, -285.0, -470.0)  # z; -285 clears the hospital and the garage
+MAIN_MINOR_STREETS = (-700.0, -545.0, -85.0)  # x
+CITY_MINOR_AVENUES = (-200.0, -300.0)  # z
+CITY_MINOR_STREETS = (300.0, 500.0, 700.0, 900.0)  # x
+SOUTH_MINOR_AVENUES = (325.0, 475.0, 625.0)  # z; 625 stops short of the viaduct's sweeps
+SOUTH_MINOR_STREETS = (-750.0, -550.0, -350.0, -150.0, 50.0, 250.0, 450.0, 650.0, 875.0)  # x
+VIADUCT_FRONTAGE_Z = (590.0, 650.0)  # both sides of the south straight, 6 Lane to 9 Lane
+VIADUCT_LANE_X = 50.0  # east of the vertical straight, River Road to Park Road
+RIVER_LANE_Z = 10.0  # the bank road's south side, First Street to a turning circle
+RIVER_LANE_END_X = 760.0
+BULB_R = 14.0
+MINOR_MARGIN_M = 8.0  # a minor street keeps this clear of a footprint or a ramp corridor
 
 STEP_M = 12.0  # arc sampling
 
@@ -445,16 +464,13 @@ def build_exits(d: District) -> None:
     insert_vertex(d, "5 Lane", (lane5, 390.0))
     zs = B_SOUTH + PAIR_OFFSET  # the lap carriageway along the south straight, heading east
     on3 = insert_vertex(d, HIGHWAY, (500.0, zs))
+    fz = VIADUCT_FRONTAGE_Z[1]
     _ramp(
         d,
         "West Entrance",
-        chain(
-            [(380.0, SOUTH_AVENUES[3])],
-            line((410.0, SOUTH_AVENUES[3] - 20.0), (480.0, zs + 12.0), 20.0),
-            [on3],
-        ),
+        chain([(360.0, fz)], line((420.0, fz - 10.0), (480.0, zs + 12.0), 20.0), [on3]),
     )
-    insert_vertex(d, "South Road", (380.0, SOUTH_AVENUES[3]))
+    insert_vertex(d, "Viaduct Road South", (360.0, fz))
     d.access.append(("west exit", (-40.0, 330.0)))
 
 
@@ -532,10 +548,10 @@ def build_main_city(d: District) -> None:
         "oneway": "yes",
         "name": "Bus Loop",
     }
-    d.way(line((s3, a2 - 60.0), (s3 - 40.0, a2 - 60.0)), **busonly)
-    d.way(line((s3 - 40.0, a2 - 60.0), (s3 - 40.0, a2)), **busonly)
-    d.way(line((s3, a2), (s3, a2 - 60.0)), **busonly)
-    insert_vertex(d, "Third Street", (s3, a2 - 60.0))
+    d.way(line((s3, a2 + 60.0), (s3 - 40.0, a2 + 60.0)), **busonly)
+    d.way(line((s3 - 40.0, a2 + 60.0), (s3 - 40.0, a2)), **busonly)
+    d.way(line((s3, a2), (s3, a2 + 60.0)), **busonly)
+    insert_vertex(d, "Third Street", (s3, a2 + 60.0))
     insert_vertex(d, "Circle Avenue", (s3 - 40.0, a2))
 
 
@@ -627,6 +643,7 @@ def build_south(d: District) -> None:
         )
     insert_vertex(d, "Bridge Street", (EAST_STREET, SOUTH_AVENUES[0]))
     insert_vertex(d, "Bridge Street", (EAST_STREET, SOUTH_AVENUES[1]))
+    build_frontage(d)
     # Mill Bridge: Second Street continues south over the river to River Road.
     s2 = MAIN_STREETS[1]
     d.way(line((s2, BANK_Z), (s2, 45.0)), **tert, name="Mill Bridge Road")
@@ -640,6 +657,8 @@ def build_south(d: District) -> None:
         (SOUTH_AVENUES[2], -1.0, "Mid Road"),
     ):
         for sx in range(int(SOUTH_STREETS[1]) + 30, int(SOUTH_STREETS[4]) - 30, 40):
+            if any(abs(sx - mx) < 22.0 for mx in SOUTH_MINOR_STREETS):
+                continue  # a minor lane runs here
             z0, z1 = az + side * 14.0, az + side * 26.0
             d.area(
                 "building",
@@ -744,12 +763,50 @@ def build_south(d: District) -> None:
     )
 
 
+def build_frontage(d: District) -> None:
+    """Roads beside the elevated motorway: one each side of the south straight from 6 Lane to
+    9 Lane, a lane east of the vertical straight from River Road to Park Road, and River Lane
+    along the bank road's south side from First Street to a turning circle short of the
+    highway's north-east corner (the human: "roads beside the highway in the residential
+    section too, to densen it all up a bit")."""
+    res = {"highway": "residential", "lanes": "2", "maxspeed": "40"}
+    x0, x1 = SOUTH_STREETS[5], SOUTH_STREETS[8]  # 6 Lane to 9 Lane
+    zn, zs = VIADUCT_FRONTAGE_Z
+    d.way(line((x0, zn), (x1, zn), 100.0), **res, name="Viaduct Road North")
+    d.way(line((x0, zs), (x1, zs), 100.0), **res, name="Viaduct Road South")
+    vx = VIADUCT_LANE_X
+    d.way(line((vx, SOUTH_AVENUES[0]), (vx, SOUTH_AVENUES[1])), **res, name="Viaduct Lane")
+    # River Lane and the two streets that reach it across the bank road.
+    s1, _s2, s3 = MAIN_STREETS
+    d.way(line((s1, BANK_Z), (s1, RIVER_LANE_Z)), **res, name="First Street")
+    d.way(line((s3, BANK_Z), (s3, RIVER_LANE_Z)), **res, name="Third Street")
+    d.way(
+        line((s1, RIVER_LANE_Z), (RIVER_LANE_END_X, RIVER_LANE_Z), 100.0), **res, name="River Lane"
+    )
+    cx, cz = RIVER_LANE_END_X + BULB_R, RIVER_LANE_Z
+    circle = [
+        (
+            cx + BULB_R * math.cos(math.radians(180 - 22.5 * k)),
+            cz + BULB_R * math.sin(math.radians(180 - 22.5 * k)),
+        )
+        for k in range(17)
+    ]
+    d.way(
+        circle,
+        highway="residential",
+        junction="roundabout",
+        oneway="yes",
+        maxspeed="20",
+        name="River Lane Circle",
+    )
+
+
 def build_services(d: District) -> None:
     """Police with helipad, hospital with ambulance bay (main city), fire station (city),
     shopfronts, offices, apartments, the garage with an underground entrance, the surface lot."""
     _a1, a2, a3 = MAIN_AVENUES
     s1, s2, s3 = MAIN_STREETS
-    police = rect(s1 + 20.0, a2 + 20.0, s1 + 90.0, a2 + 70.0)
+    police = rect(s1 + 20.0, a2 + 20.0, s1 + 90.0, a2 + 60.0)
     addr_p = {"addr:housenumber": "1", "addr:street": "Circle Avenue"}
     d.area(
         "building",
@@ -827,7 +884,7 @@ def build_services(d: District) -> None:
             name=["Loaf", "Thread", "Pages", "Bolt"][k % 4] + " Shop",
             **{"addr:housenumber": str(10 + k), "addr:street": "Circle Avenue"},
         )
-    for k, x in enumerate(range(int(CITY_STREETS[1]) + 20, int(CITY_STREETS[3]) - 40, 70)):
+    for k, x in enumerate((410, 530, 610, 730)):  # between the city's streets and minor streets
         d.area(
             "building",
             rect(x, CITY_AVENUES[0] - 60.0, x + 50.0, CITY_AVENUES[0] - 14.0),
@@ -886,6 +943,152 @@ def build_services(d: District) -> None:
         line((s2, a3 + 50.0), entrance), highway="service", service="driveway", name="Garage Ramp"
     )
     d.tag_node(entrance, amenity="parking_entrance", parking="underground", name="Cross Garage")
+
+
+Box = tuple[float, float, float, float]
+
+
+def _hits_box(a: Point, b: Point, box: Box) -> bool:
+    """Whether the axis-aligned segment ab, widened by the minor margin, overlaps the box."""
+    m = MINOR_MARGIN_M
+    sx0, sx1 = min(a[0], b[0]) - m, max(a[0], b[0]) + m
+    sz0, sz1 = min(a[1], b[1]) - m, max(a[1], b[1]) + m
+    return not (sx1 <= box[0] or box[2] <= sx0 or sz1 <= box[1] or box[3] <= sz0)
+
+
+def _box(ring: list[Point]) -> Box:
+    xs = [p[0] for p in ring]
+    zs = [p[1] for p in ring]
+    return (min(xs), min(zs), max(xs), max(zs))
+
+
+def _reserved(d: District) -> list[Box]:
+    """What a minor street never runs through: footprints, lots, services, bridges, the park,
+    the turf, the roundabout and the ramp corridors."""
+    boxes: list[Box] = []
+    for group in (d.buildings, d.parking, d.service_areas, d.bridges):
+        boxes.extend(_box(a.ring) for a in group)
+    boxes.extend(_box(a.ring) for a in d.vegetation_areas if a.tags.get("leisure") == "park")
+    if d.turf:
+        boxes.append(_box(d.turf))
+    rz = MAIN_AVENUES[1]
+    r = ROUNDABOUT_R + 10.0
+    boxes.append((A_WEST - r, rz - r, A_WEST + r, rz + r))
+    xe = B_EAST + PAIR_OFFSET
+    lane10 = SOUTH_STREETS[9]
+    boxes.append((-60.0, 270.0, 0.0, 395.0))  # West Exit, down to 5 Lane
+    boxes.append((350.0, 620.0, 505.0, 660.0))  # West Entrance, up from Viaduct Road South
+    boxes.append((xe - 6.0, 245.0, lane10 + 5.0, 335.0))  # East Exit, down to River Road
+    boxes.append((xe - 6.0, 465.0, lane10 + 5.0, 555.0))  # East Entrance, up from Mid Road
+    boxes.append((240.0, BANK_Z - 70.0, 710.0, BANK_Z))  # City Exit and Entrance off the bank
+    return boxes
+
+
+def _pieces(
+    fixed: float, breaks: list[float], lo: float, hi: float, vertical: bool
+) -> list[tuple[Point, Point]]:
+    """A straight street at `fixed` from lo to hi, cut at every cross road it meets."""
+    cuts = sorted({c for c in breaks if lo <= c <= hi} | {lo, hi})
+    out = []
+    for c0, c1 in pairwise(cuts):
+        if vertical:
+            out.append(((fixed, c0), (fixed, c1)))
+        else:
+            out.append(((c0, fixed), (c1, fixed)))
+    return out
+
+
+def _minor_way(
+    d: District,
+    pieces: list[tuple[Point, Point]],
+    name: str,
+    boxes: list[Box],
+    big: list[tuple[Point, Point]],
+) -> None:
+    """Joins consecutive kept pieces of one minor street into ways; a piece that meets a
+    reserved box is left out, so the street breaks there. An end on a through road gets a
+    stop sign 8 m back."""
+    res = {"highway": "residential", "lanes": "2", "maxspeed": "40"}
+    run: list[Point] = []
+
+    def flush() -> None:
+        if len(run) >= 2:
+            w = d.way(list(run), **res, name=name)
+            for end, back in ((w.points[0], w.points[1]), (w.points[-1], w.points[-2])):
+                if _on_segments(end, big):
+                    dx, dz = back[0] - end[0], back[1] - end[1]
+                    length = math.hypot(dx, dz) or 1.0
+                    stop_at = (end[0] + dx / length * 8.0, end[1] + dz / length * 8.0)
+                    split_stop(d, end, stop_at)
+                    d.tag_node(stop_at, highway="stop")
+        run.clear()
+
+    for a, b in pieces:
+        if any(_hits_box(a, b, box) for box in boxes):
+            flush()
+            continue
+        if not run:
+            run.extend([a, b])
+        else:
+            run.append(b)
+    flush()
+
+
+def _on_segments(p: Point, segments: list[tuple[Point, Point]]) -> bool:
+    for a, b in segments:
+        t, dist = _project(p, a, b)
+        if -1e-6 <= t <= 1.0 + 1e-6 and dist < 0.01:
+            return True
+    return False
+
+
+def build_minor_grids(d: District) -> None:
+    """The minor streets of all three grids. Runs after the services so a street never cuts a
+    footprint; the stitch pass gives every end and crossing its junction."""
+    boxes = _reserved(d)
+    big: list[tuple[Point, Point]] = []  # ends on a through road get a stop sign
+    for w in d.ways:
+        if w.tags.get("highway") in ("tertiary", "secondary") and "junction" not in w.tags:
+            big.extend(pairwise(w.points))
+    # Main city: streets between the bank road and the loop's top, avenues from the west pair.
+    a1, _a2, a3 = MAIN_AVENUES
+    s1 = MAIN_STREETS[0]
+    m1, m2, m3 = MAIN_MINOR_AVENUES
+    x_alder, x_birch, x_cedar = MAIN_MINOR_STREETS
+    cross_z = sorted([BANK_Z, *MAIN_AVENUES, *MAIN_MINOR_AVENUES, A_NORTH])
+    cross_x = sorted([*WEST_STREETS, A_WEST, *MAIN_STREETS, *MAIN_MINOR_STREETS, 0.0])
+    _minor_way(d, _pieces(x_alder, cross_z, a1, a3, True), "Alder Street", boxes, big)
+    _minor_way(d, _pieces(x_birch, cross_z, a1, a3, True), "Birch Street", boxes, big)
+    _minor_way(d, _pieces(x_cedar, cross_z, BANK_Z, m2, True), "Cedar Street", boxes, big)
+    _minor_way(d, _pieces(x_cedar, cross_z, a3, m3, True), "Cedar Street", boxes, big)
+    _minor_way(
+        d, _pieces(m1, cross_x, WEST_STREETS[1], x_cedar, False), "Hollow Avenue", boxes, big
+    )
+    _minor_way(d, _pieces(m2, cross_x, s1, x_cedar, False), "Kiln Avenue", boxes, big)
+    _minor_way(d, _pieces(m3, cross_x, s1, x_cedar, False), "Foundry Avenue", boxes, big)
+    # City: two avenues and four streets between Riverside and Station Avenue.
+    c1, c3 = CITY_AVENUES
+    cross_z = sorted([c1, *CITY_MINOR_AVENUES, c3])
+    cross_x = sorted([*CITY_STREETS, *CITY_MINOR_STREETS])
+    names = ("Ninth Street", "Tenth Street", "Eleventh Street", "Twelfth Street")
+    for x, name in zip(CITY_MINOR_STREETS, names):
+        _minor_way(d, _pieces(x, cross_z, c1, c3, True), name, boxes, big)
+    for z, name in zip(CITY_MINOR_AVENUES, ("Quay Avenue", "Depot Avenue")):
+        _minor_way(
+            d, _pieces(z, cross_x, CITY_STREETS[0], CITY_STREETS[4], False), name, boxes, big
+        )
+    # South: three roads and nine lanes; Ash Road stops short of the viaduct's sweeps.
+    r0, r3 = SOUTH_AVENUES[0], SOUTH_AVENUES[3]
+    cross_z = sorted([*SOUTH_AVENUES, *SOUTH_MINOR_AVENUES, *VIADUCT_FRONTAGE_Z])
+    cross_x = sorted([*SOUTH_STREETS, *SOUTH_MINOR_STREETS, VIADUCT_LANE_X])
+    for i, x in enumerate(SOUTH_MINOR_STREETS):
+        hi = SOUTH_AVENUES[1] if x == VIADUCT_LANE_X else r3
+        _minor_way(d, _pieces(x, cross_z, r0, hi, True), f"{11 + i} Lane", boxes, big)
+    elm, oak, ash = SOUTH_MINOR_AVENUES
+    west, east = SOUTH_STREETS[0], SOUTH_STREETS[9]
+    _minor_way(d, _pieces(elm, cross_x, west, east, False), "Elm Road", boxes, big)
+    _minor_way(d, _pieces(oak, cross_x, west, east, False), "Oak Road", boxes, big)
+    _minor_way(d, _pieces(ash, cross_x, west, SOUTH_STREETS[5], False), "Ash Road", boxes, big)
 
 
 def build_paths(d: District) -> None:
@@ -947,6 +1150,7 @@ def build(town: str = TOWN) -> District:
     build_south(d)
     build_exits(d)
     build_services(d)
+    build_minor_grids(d)
     build_paths(d)
     build_dressing(d)
     build_spawn(d)

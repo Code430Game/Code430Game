@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+from itertools import pairwise
 from pathlib import Path
 
 from proving_ground import dressing, emit, layout
@@ -141,12 +142,12 @@ def test_committed_inputs_match_the_generator(tmp_path: Path):
 
 # Minimum counts the dressed district must reach, by the generator's own tags.
 DRESSING_MINIMUMS = {
-    "house": 300,
-    "semidetached_house": 100,
-    "terrace": 100,
+    "house": 550,
+    "semidetached_house": 350,
+    "terrace": 550,
     "retail": 150,
-    "apartments": 60,
-    "office": 100,
+    "apartments": 80,
+    "office": 200,
     "warehouse": 8,
 }
 
@@ -177,9 +178,9 @@ def test_dressing_puts_buildings_on_every_grid():
             towers.append(a)
     assert 3 <= len(towers) <= dressing.TOWER_COUNT, "a few towers near the roundabout"
     yard = [t for t in d.trees if t.tags.get("denotation") == "garden"]
-    assert len(yard) >= 250, "a yard tree behind the detached houses"
+    assert len(yard) >= 400, "a yard tree behind the detached houses"
     assert len(d.tree_rows) >= 20, "tree rows on the avenues and the bank road"
-    assert sum(1 for w in d.ways if w.tags.get("service") == "driveway") >= 100
+    assert sum(1 for w in d.ways if w.tags.get("service") == "driveway") >= 200
 
 
 def test_dressing_keeps_off_roads_banks_greenbelt_park_and_turf():
@@ -210,3 +211,87 @@ def test_town_name_is_a_parameter():
     assert any(t.get("name") == "Lintport Station" for _, t in d.node_tags)
     d = build()
     assert any(t.get("name") == "Double Cross Station" for _, t in d.node_tags)
+
+
+# ------------------------------------------------ density (fix/proving-ground-density)
+
+
+def _gaps(values) -> list[float]:
+    ordered = sorted(values)
+    return [b - a for a, b in pairwise(ordered)]
+
+
+def test_blocks_are_town_sized():
+    """Streets and avenues in every grid are at most about 100 m apart, except where a service,
+    the park or the turf keeps its larger block (the human: "a lot of open space in the grid")."""
+    main_x = [*layout.MAIN_STREETS, *layout.MAIN_MINOR_STREETS, layout.A_WEST, 0.0]
+    main_z = [layout.BANK_Z, *layout.MAIN_AVENUES, *layout.MAIN_MINOR_AVENUES, layout.A_NORTH]
+    city_x = [*layout.CITY_STREETS, *layout.CITY_MINOR_STREETS]
+    city_z = [*layout.CITY_AVENUES, *layout.CITY_MINOR_AVENUES]
+    south_x = [*layout.SOUTH_STREETS, *layout.SOUTH_MINOR_STREETS, layout.VIADUCT_LANE_X]
+    south_z = [*layout.SOUTH_AVENUES, *layout.SOUTH_MINOR_AVENUES, *layout.VIADUCT_FRONTAGE_Z]
+    for name, values, limit in (
+        ("main streets", main_x, 160.0),  # the police and garage block stays 150 m wide
+        ("main avenues", main_z, 120.0),  # the hospital and garage strip
+        ("city streets", city_x, 110.0),
+        ("city avenues", city_z, 110.0),
+        ("south lanes", south_x, 130.0),  # the turf's east side
+        ("south roads", south_z, 110.0),
+    ):
+        assert max(_gaps(values)) <= limit, (name, _gaps(values))
+
+
+def test_frontage_roads_run_beside_the_motorway():
+    """A road each side of the viaduct's south straight, a lane east of its vertical straight,
+    and River Lane along the bank road's south side, all joined to the grid; the West Entrance
+    climbs from the south frontage road."""
+    d = build()
+    names = {w.tags.get("name") for w in d.ways}
+    for name in ("Viaduct Road North", "Viaduct Road South", "Viaduct Lane", "River Lane"):
+        assert name in names, name
+    entrance = next(w for w in d.ways if w.tags.get("name") == "West Entrance")
+    south = next(w for w in d.ways if w.tags.get("name") == "Viaduct Road South")
+    assert entrance.points[0] in south.points
+    viaduct = [w for w in d.ways if w.tags.get("highway") == "motorway" and w.tags.get("bridge")]
+    deck_z = [p[1] for w in viaduct for p in w.points if 200.0 < p[0] < 700.0 and p[1] > 600.0]
+    for w in d.ways:
+        if w.tags.get("name", "").startswith("Viaduct Road"):
+            for p in w.points:
+                assert min(abs(p[1] - z) for z in deck_z) >= 20.0, "clear of the deck's edge"
+
+
+def test_minor_streets_keep_out_of_services_park_and_turf():
+    d = build()
+    minor = [
+        w
+        for w in d.ways
+        if w.tags.get("name", "").split(" ")[0]
+        in (
+            "Alder",
+            "Birch",
+            "Cedar",
+            "Hollow",
+            "Kiln",
+            "Foundry",
+            "Quay",
+            "Depot",
+            "Elm",
+            "Oak",
+            "Ash",
+        )
+        or (w.tags.get("name", "").endswith(" Lane") and w.tags.get("name", "")[0].isdigit())
+    ]
+    assert len(minor) >= 20
+    turf = dressing._bbox(d.turf)
+    park = next(a for a in d.vegetation_areas if a.tags.get("leisure") == "park")
+    keep_out = [turf, dressing._bbox(park.ring)] + [
+        dressing._bbox(a.ring) for a in d.service_areas + d.parking
+    ]
+    for w in minor:
+        for a, b in zip(w.points, w.points[1:], strict=False):
+            mid = ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+            for box in keep_out:
+                assert not (box[0] < mid[0] < box[2] and box[1] < mid[1] < box[3]), (
+                    w.tags.get("name"),
+                    mid,
+                )

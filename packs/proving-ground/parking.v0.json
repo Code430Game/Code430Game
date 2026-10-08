@@ -29,12 +29,30 @@
    "orientation": "parallel",
    "osm_way_id": 1015,
    "side": "right"
+  },
+  {
+   "edge": "w1015.5",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  },
+  {
+   "edge": "w1015.6",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
+  },
+  {
+   "edge": "w1015.7",
+   "orientation": "parallel",
+   "osm_way_id": 1015,
+   "side": "right"
   }
  ],
  "garages": [
   {
    "access": null,
-   "building": "w20044.0",
+   "building": "w20037.0",
    "capacity": null,
    "ceiling_y": 67.18,
    "entrances": [
@@ -48,7 +66,7 @@
       -1.0,
       -0.0001
      ],
-     "osm_id": 101103,
+     "osm_id": 101220,
      "ramp": [
       [
        -370.45,
@@ -115,7 +133,7 @@
   {
    "access": null,
    "aisles": [
-    "w1072.0"
+    "w1079.0"
    ],
    "capacity": 40,
    "entrances": [],
@@ -226,6 +244,82 @@
    "stall_dir": [
     1.0,
     0.0001
+   ]
+  },
+  {
+   "access": null,
+   "aisles": [],
+   "capacity": null,
+   "entrances": [],
+   "fee": null,
+   "ground_y": 65.99,
+   "id": "w40003.0",
+   "kind": "surface",
+   "name": null,
+   "operator": null,
+   "orientation": null,
+   "osm_id": 40003,
+   "rings": [
+    [
+     [
+      -301.87,
+      -437.49
+     ],
+     [
+      -301.86,
+      -459.44
+     ],
+     [
+      -271.82,
+      -459.44
+     ],
+     [
+      -271.82,
+      -437.49
+     ]
+    ]
+   ],
+   "stall_dir": [
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "access": null,
+   "aisles": [],
+   "capacity": null,
+   "entrances": [],
+   "fee": null,
+   "ground_y": 63.53,
+   "id": "w40004.0",
+   "kind": "surface",
+   "name": null,
+   "operator": null,
+   "orientation": null,
+   "osm_id": 40004,
+   "rings": [
+    [
+     [
+      -133.66,
+      -437.49
+     ],
+     [
+      -133.66,
+      -459.44
+     ],
+     [
+      -103.63,
+      -459.44
+     ],
+     [
+      -103.63,
+      -437.49
+     ]
+    ]
+   ],
+   "stall_dir": [
+    1.0,
+    0.0
    ]
   }
  ],

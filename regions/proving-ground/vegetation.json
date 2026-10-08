@@ -513,19 +513,19 @@
   {
    "type": "node",
    "id": 65047,
-   "lat": 44.997501,
-   "lon": -75.0044852,
+   "lat": 44.997503,
+   "lon": -75.0042659,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65048,
-   "lat": 44.9974963,
-   "lon": -75.0042599,
+   "lat": 44.9975043,
+   "lon": -75.0040173,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -535,30 +535,30 @@
   {
    "type": "node",
    "id": 65049,
-   "lat": 44.9975056,
-   "lon": -75.0039789,
+   "lat": 44.9974969,
+   "lon": -75.0028724,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65050,
-   "lat": 44.9974813,
-   "lon": -75.0038086,
+   "lat": 44.9975141,
+   "lon": -75.0026385,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65051,
-   "lat": 44.9974984,
-   "lon": -75.0028839,
+   "lat": 44.9975156,
+   "lon": -75.002451,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -568,8 +568,8 @@
   {
    "type": "node",
    "id": 65052,
-   "lat": 44.997498,
-   "lon": -74.9994294,
+   "lat": 44.9975065,
+   "lon": -75.0017452,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -579,19 +579,8 @@
   {
    "type": "node",
    "id": 65053,
-   "lat": 44.9975037,
-   "lon": -74.9990201,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65054,
-   "lat": 44.9974813,
-   "lon": -74.99829,
+   "lat": 44.9975068,
+   "lon": -75.0015115,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -600,20 +589,31 @@
   },
   {
    "type": "node",
-   "id": 65055,
-   "lat": 44.9975096,
-   "lon": -74.9974027,
+   "id": 65054,
+   "lat": 44.9975088,
+   "lon": -75.0012738,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65055,
+   "lat": 44.9974928,
+   "lon": -75.0003398,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65056,
-   "lat": 44.9975089,
-   "lon": -74.9971539,
+   "lat": 44.9975095,
+   "lon": -74.9985555,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -623,30 +623,30 @@
   {
    "type": "node",
    "id": 65057,
-   "lat": 44.9974818,
-   "lon": -74.9964519,
+   "lat": 44.9974981,
+   "lon": -74.9976351,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65058,
-   "lat": 44.9974846,
-   "lon": -74.9962425,
+   "lat": 44.9974887,
+   "lon": -74.996449,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65059,
-   "lat": 44.997506,
-   "lon": -74.996002,
+   "lat": 44.9974916,
+   "lon": -74.9950715,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -656,8 +656,19 @@
   {
    "type": "node",
    "id": 65060,
-   "lat": 44.9974916,
-   "lon": -74.9948428,
+   "lat": 44.9975114,
+   "lon": -74.9921218,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65061,
+   "lat": 44.9975119,
+   "lon": -74.9914083,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -666,20 +677,9 @@
   },
   {
    "type": "node",
-   "id": 65061,
-   "lat": 44.9974858,
-   "lon": -74.9928428,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
    "id": 65062,
-   "lat": 44.9974931,
-   "lon": -74.9926101,
+   "lat": 44.9975023,
+   "lon": -74.9907072,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -689,19 +689,19 @@
   {
    "type": "node",
    "id": 65063,
-   "lat": 44.9974988,
-   "lon": -74.9921339,
+   "lat": 44.9975121,
+   "lon": -74.9900813,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65064,
-   "lat": 44.9975057,
-   "lon": -74.9918891,
+   "lat": 44.9975153,
+   "lon": -74.989875,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -711,19 +711,8 @@
   {
    "type": "node",
    "id": 65065,
-   "lat": 44.9974805,
-   "lon": -74.9916556,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65066,
-   "lat": 44.9975155,
-   "lon": -74.9914295,
+   "lat": 44.99749,
+   "lon": -74.9896169,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -732,9 +721,9 @@
   },
   {
    "type": "node",
-   "id": 65067,
-   "lat": 44.9974832,
-   "lon": -74.9911789,
+   "id": 65066,
+   "lat": 44.9975119,
+   "lon": -74.9891096,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -743,20 +732,31 @@
   },
   {
    "type": "node",
-   "id": 65068,
-   "lat": 44.9974973,
-   "lon": -74.9909547,
+   "id": 65067,
+   "lat": 44.9974903,
+   "lon": -74.9871258,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65068,
+   "lat": 44.997493,
+   "lon": -74.9868739,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65069,
-   "lat": 44.9975061,
-   "lon": -74.9907776,
+   "lat": 44.99751,
+   "lon": -74.9866406,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -766,8 +766,8 @@
   {
    "type": "node",
    "id": 65070,
-   "lat": 44.9961476,
-   "lon": -75.0065707,
+   "lat": 44.9961711,
+   "lon": -75.0076864,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -777,8 +777,8 @@
   {
    "type": "node",
    "id": 65071,
-   "lat": 44.9961624,
-   "lon": -75.0060583,
+   "lat": 44.996166,
+   "lon": -75.0067627,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -788,8 +788,41 @@
   {
    "type": "node",
    "id": 65072,
+   "lat": 44.9961667,
+   "lon": -75.0065327,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65073,
+   "lat": 44.9961554,
+   "lon": -75.0060854,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65074,
    "lat": 44.9961753,
-   "lon": -75.0051712,
+   "lon": -75.0042465,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65075,
+   "lat": 44.9961753,
+   "lon": -75.0035576,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -798,86 +831,20 @@
   },
   {
    "type": "node",
-   "id": 65073,
-   "lat": 44.9961495,
-   "lon": -75.0015368,
+   "id": 65076,
+   "lat": 44.9961463,
+   "lon": -75.0017271,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
     "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65074,
-   "lat": 44.996146,
-   "lon": -75.0010698,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65075,
-   "lat": 44.9961642,
-   "lon": -75.0008263,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65076,
-   "lat": 44.9961553,
-   "lon": -74.9983071,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65077,
-   "lat": 44.9961485,
-   "lon": -74.9975819,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65078,
-   "lat": 44.9961651,
-   "lon": -74.9973703,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65079,
-   "lat": 44.99616,
-   "lon": -74.9971794,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65080,
-   "lat": 44.996151,
-   "lon": -74.9951008,
+   "lat": 44.9961658,
+   "lon": -75.0010826,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -886,9 +853,42 @@
   },
   {
    "type": "node",
+   "id": 65078,
+   "lat": 44.9961538,
+   "lon": -75.0003678,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65079,
+   "lat": 44.9961729,
+   "lon": -74.9989989,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65080,
+   "lat": 44.9961754,
+   "lon": -74.9985547,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
    "id": 65081,
-   "lat": 44.9961545,
-   "lon": -74.9949024,
+   "lat": 44.9961773,
+   "lon": -74.9982926,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -898,30 +898,30 @@
   {
    "type": "node",
    "id": 65082,
-   "lat": 44.9961578,
-   "lon": -74.9946497,
+   "lat": 44.9961718,
+   "lon": -74.9978786,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65083,
-   "lat": 44.996164,
-   "lon": -74.9934661,
+   "lat": 44.9961691,
+   "lon": -74.9976477,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65084,
-   "lat": 44.9961775,
-   "lon": -74.9933022,
+   "lat": 44.996151,
+   "lon": -74.9960154,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -931,19 +931,8 @@
   {
    "type": "node",
    "id": 65085,
-   "lat": 44.9961741,
-   "lon": -74.9903302,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65086,
-   "lat": 44.9961759,
-   "lon": -74.989806,
+   "lat": 44.9961545,
+   "lon": -74.995817,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -952,9 +941,20 @@
   },
   {
    "type": "node",
+   "id": 65086,
+   "lat": 44.9961589,
+   "lon": -74.9953355,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
    "id": 65087,
-   "lat": 44.9961606,
-   "lon": -74.9896217,
+   "lat": 44.9961607,
+   "lon": -74.9939496,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -964,30 +964,30 @@
   {
    "type": "node",
    "id": 65088,
-   "lat": 44.9961591,
-   "lon": -74.989422,
+   "lat": 44.9961517,
+   "lon": -74.9937204,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65089,
-   "lat": 44.9961699,
-   "lon": -74.9891222,
+   "lat": 44.9961567,
+   "lon": -74.9934933,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65090,
-   "lat": 44.996162,
-   "lon": -74.9889257,
+   "lat": 44.996143,
+   "lon": -74.9900697,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -997,19 +997,19 @@
   {
    "type": "node",
    "id": 65091,
-   "lat": 44.9961438,
-   "lon": -74.98803,
+   "lat": 44.9961628,
+   "lon": -74.9898535,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65092,
-   "lat": 44.9961717,
-   "lon": -74.9877521,
+   "lat": 44.9961776,
+   "lon": -74.9891818,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1019,8 +1019,19 @@
   {
    "type": "node",
    "id": 65093,
+   "lat": 44.9961737,
+   "lon": -74.987997,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65094,
    "lat": 44.9961575,
-   "lon": -74.9875677,
+   "lon": -74.9877964,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1029,20 +1040,9 @@
   },
   {
    "type": "node",
-   "id": 65094,
-   "lat": 44.9961458,
-   "lon": -74.9871394,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
    "id": 65095,
-   "lat": 44.9961563,
-   "lon": -74.9864017,
+   "lat": 44.9961635,
+   "lon": -74.9875228,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1052,8 +1052,19 @@
   {
    "type": "node",
    "id": 65096,
+   "lat": 44.9961563,
+   "lon": -74.9866304,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65097,
    "lat": 44.9966625,
-   "lon": -75.0102097,
+   "lon": -75.0104384,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1062,20 +1073,9 @@
   },
   {
    "type": "node",
-   "id": 65097,
-   "lat": 44.9966441,
-   "lon": -75.0099788,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
    "id": 65098,
-   "lat": 44.9966629,
-   "lon": -75.0097123,
+   "lat": 44.9966441,
+   "lon": -75.0102075,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1085,41 +1085,8 @@
   {
    "type": "node",
    "id": 65099,
-   "lat": 44.9966618,
-   "lon": -75.0094827,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65100,
-   "lat": 44.9966395,
-   "lon": -75.0090042,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65101,
-   "lat": 44.9966438,
-   "lon": -75.0078669,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65102,
-   "lat": 44.9966575,
-   "lon": -75.0076896,
+   "lat": 44.9966629,
+   "lon": -75.009941,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1128,9 +1095,31 @@
   },
   {
    "type": "node",
-   "id": 65103,
-   "lat": 44.9966564,
-   "lon": -75.0074274,
+   "id": 65100,
+   "lat": 44.9966618,
+   "lon": -75.0097114,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65101,
+   "lat": 44.9966395,
+   "lon": -75.0092329,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65102,
+   "lat": 44.9966366,
+   "lon": -75.0079256,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1139,7 +1128,7 @@
   },
   {
    "type": "node",
-   "id": 65104,
+   "id": 65103,
    "lat": 44.9966593,
    "lon": -75.0071829,
    "tags": {
@@ -1150,40 +1139,29 @@
   },
   {
    "type": "node",
-   "id": 65105,
-   "lat": 44.9966521,
-   "lon": -75.0069979,
+   "id": 65104,
+   "lat": 44.9966615,
+   "lon": -75.0065128,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65105,
+   "lat": 44.9966365,
+   "lon": -75.0062743,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65106,
-   "lat": 44.9966502,
-   "lon": -75.0067489,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65107,
-   "lat": 44.9966601,
-   "lon": -75.0062707,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65108,
    "lat": 44.9966362,
    "lon": -75.0060516,
    "tags": {
@@ -1194,7 +1172,7 @@
   },
   {
    "type": "node",
-   "id": 65109,
+   "id": 65107,
    "lat": 44.9966506,
    "lon": -75.0048945,
    "tags": {
@@ -1205,7 +1183,7 @@
   },
   {
    "type": "node",
-   "id": 65110,
+   "id": 65108,
    "lat": 44.9966543,
    "lon": -75.0046755,
    "tags": {
@@ -1216,20 +1194,42 @@
   },
   {
    "type": "node",
-   "id": 65111,
-   "lat": 44.9966495,
-   "lon": -75.0045115,
+   "id": 65109,
+   "lat": 44.9966598,
+   "lon": -75.0026262,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65110,
+   "lat": 44.9966555,
+   "lon": -75.0024476,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65111,
+   "lat": 44.9966454,
+   "lon": -75.0021856,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65112,
-   "lat": 44.9966609,
-   "lon": -75.0042564,
+   "lat": 44.9966487,
+   "lon": -75.0017084,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1239,19 +1239,19 @@
   {
    "type": "node",
    "id": 65113,
-   "lat": 44.9966417,
-   "lon": -75.0035254,
+   "lat": 44.9966587,
+   "lon": -75.0014887,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65114,
-   "lat": 44.9966652,
-   "lon": -75.0028435,
+   "lat": 44.9966473,
+   "lon": -74.9976053,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1261,8 +1261,19 @@
   {
    "type": "node",
    "id": 65115,
-   "lat": 44.9966592,
-   "lon": -75.0026145,
+   "lat": 44.9966493,
+   "lon": -74.9973805,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65116,
+   "lat": 44.996641,
+   "lon": -74.9964836,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1271,53 +1282,42 @@
   },
   {
    "type": "node",
-   "id": 65116,
-   "lat": 44.9966454,
-   "lon": -75.0024143,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
    "id": 65117,
-   "lat": 44.9966531,
-   "lon": -75.0021573,
+   "lat": 44.9966668,
+   "lon": -74.9962539,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65118,
-   "lat": 44.9966473,
-   "lon": -75.0019537,
+   "lat": 44.9966686,
+   "lon": -74.996026,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65119,
-   "lat": 44.9966692,
-   "lon": -75.0017042,
+   "lat": 44.9966655,
+   "lon": -74.9957967,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65120,
-   "lat": 44.9966434,
-   "lon": -75.0010704,
+   "lat": 44.9966593,
+   "lon": -74.9952906,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1327,19 +1327,8 @@
   {
    "type": "node",
    "id": 65121,
-   "lat": 44.9966625,
-   "lon": -74.9994449,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65122,
-   "lat": 44.9966442,
-   "lon": -74.9992458,
+   "lat": 44.9966716,
+   "lon": -74.9948858,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1348,9 +1337,9 @@
   },
   {
    "type": "node",
-   "id": 65123,
-   "lat": 44.9966684,
-   "lon": -74.9989688,
+   "id": 65122,
+   "lat": 44.9966466,
+   "lon": -74.994688,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1359,42 +1348,53 @@
   },
   {
    "type": "node",
-   "id": 65124,
-   "lat": 44.9966668,
-   "lon": -74.9987916,
+   "id": 65123,
+   "lat": 44.9966388,
+   "lon": -74.9937498,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65124,
+   "lat": 44.9966597,
+   "lon": -74.9934757,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65125,
-   "lat": 44.9966597,
-   "lon": -74.9984988,
+   "lat": 44.9966594,
+   "lon": -74.9932663,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65126,
-   "lat": 44.9966601,
-   "lon": -74.9983093,
+   "lat": 44.9966694,
+   "lon": -74.9926112,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65127,
-   "lat": 44.9966477,
-   "lon": -74.9977926,
+   "lat": 44.996651,
+   "lon": -74.9923303,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1404,8 +1404,8 @@
   {
    "type": "node",
    "id": 65128,
-   "lat": 44.996637,
-   "lon": -74.9975849,
+   "lat": 44.9966497,
+   "lon": -74.9921288,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1415,19 +1415,19 @@
   {
    "type": "node",
    "id": 65129,
-   "lat": 44.9966635,
-   "lon": -74.9971757,
+   "lat": 44.9966395,
+   "lon": -74.991886,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65130,
-   "lat": 44.9966501,
-   "lon": -74.9953529,
+   "lat": 44.9966512,
+   "lon": -74.9917003,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1437,74 +1437,19 @@
   {
    "type": "node",
    "id": 65131,
-   "lat": 44.9966685,
-   "lon": -74.9948517,
+   "lat": 44.9966437,
+   "lon": -74.9914572,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65132,
-   "lat": 44.9966572,
-   "lon": -74.9946201,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65133,
-   "lat": 44.9966693,
-   "lon": -74.9940001,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65134,
-   "lat": 44.9966451,
-   "lon": -74.9937377,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65135,
-   "lat": 44.9966504,
-   "lon": -74.9928375,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65136,
-   "lat": 44.9966595,
-   "lon": -74.9925946,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65137,
-   "lat": 44.9966528,
-   "lon": -74.9923326,
+   "lat": 44.9966666,
+   "lon": -74.9907285,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1513,9 +1458,64 @@
   },
   {
    "type": "node",
+   "id": 65133,
+   "lat": 44.9966686,
+   "lon": -74.9903183,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65134,
+   "lat": 44.9966668,
+   "lon": -74.9896176,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65135,
+   "lat": 44.9966705,
+   "lon": -74.9891884,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65136,
+   "lat": 44.9966469,
+   "lon": -74.9877816,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65137,
+   "lat": 44.9966574,
+   "lon": -74.9875152,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
    "id": 65138,
-   "lat": 44.9966599,
-   "lon": -74.9920989,
+   "lat": 44.9966651,
+   "lon": -74.987061,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1525,19 +1525,8 @@
   {
    "type": "node",
    "id": 65139,
-   "lat": 44.996649,
-   "lon": -74.9914079,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65140,
-   "lat": 44.9966584,
-   "lon": -74.9912034,
+   "lat": 44.9966709,
+   "lon": -74.9866217,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1546,31 +1535,42 @@
   },
   {
    "type": "node",
-   "id": 65141,
-   "lat": 44.9966686,
-   "lon": -74.9910043,
+   "id": 65140,
+   "lat": 44.9948033,
+   "lon": -75.010392,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65141,
+   "lat": 44.9948091,
+   "lon": -75.0099865,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65142,
-   "lat": 44.9966668,
-   "lon": -74.9903036,
+   "lat": 44.9948012,
+   "lon": -75.009721,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65143,
-   "lat": 44.9966705,
-   "lon": -74.9898745,
+   "lat": 44.994812,
+   "lon": -75.0093012,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1580,30 +1580,30 @@
   {
    "type": "node",
    "id": 65144,
-   "lat": 44.9966497,
-   "lon": -74.9895884,
+   "lat": 44.9948158,
+   "lon": -75.0088137,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65145,
-   "lat": 44.9966463,
-   "lon": -74.9894112,
+   "lat": 44.994797,
+   "lon": -75.0074686,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65146,
-   "lat": 44.9966364,
-   "lon": -74.9891716,
+   "lat": 44.9948008,
+   "lon": -75.0071738,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1613,19 +1613,19 @@
   {
    "type": "node",
    "id": 65147,
-   "lat": 44.996664,
-   "lon": -74.9880168,
+   "lat": 44.994829,
+   "lon": -75.0067805,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65148,
-   "lat": 44.9966564,
-   "lon": -74.9877866,
+   "lat": 44.9947981,
+   "lon": -75.0064934,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1635,19 +1635,19 @@
   {
    "type": "node",
    "id": 65149,
-   "lat": 44.9966576,
-   "lon": -74.9870859,
+   "lat": 44.994827,
+   "lon": -75.0063098,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65150,
-   "lat": 44.9966569,
-   "lon": -74.9868906,
+   "lat": 44.9948062,
+   "lon": -75.0060691,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1657,107 +1657,52 @@
   {
    "type": "node",
    "id": 65151,
-   "lat": 44.9966648,
-   "lon": -74.9866251,
+   "lat": 44.9948104,
+   "lon": -75.0054337,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65152,
-   "lat": 44.9966451,
-   "lon": -74.9863807,
+   "lat": 44.9948266,
+   "lon": -75.0049435,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65153,
-   "lat": 44.9948234,
-   "lon": -75.0104385,
+   "lat": 44.9948195,
+   "lon": -75.004689,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65154,
-   "lat": 44.9948095,
-   "lon": -75.0102047,
+   "lat": 44.9948144,
+   "lon": -75.0042228,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65155,
-   "lat": 44.9948136,
-   "lon": -75.0097664,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65156,
-   "lat": 44.9948116,
-   "lon": -75.0095431,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65157,
-   "lat": 44.994797,
-   "lon": -75.0090693,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65158,
-   "lat": 44.9948008,
-   "lon": -75.0087745,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65159,
-   "lat": 44.9947945,
-   "lon": -75.0086013,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65160,
-   "lat": 44.9948141,
-   "lon": -75.0072445,
+   "lat": 44.9948015,
+   "lon": -75.0040301,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1766,9 +1711,64 @@
   },
   {
    "type": "node",
+   "id": 65156,
+   "lat": 44.9948144,
+   "lon": -75.0024306,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65157,
+   "lat": 44.9948205,
+   "lon": -75.002168,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65158,
+   "lat": 44.9948247,
+   "lon": -75.0017272,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65159,
+   "lat": 44.9948259,
+   "lon": -75.0014711,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65160,
+   "lat": 44.9948216,
+   "lon": -75.0012964,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
    "id": 65161,
-   "lat": 44.9948288,
-   "lon": -75.0070129,
+   "lat": 44.9947951,
+   "lon": -75.0008552,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1778,52 +1778,19 @@
   {
    "type": "node",
    "id": 65162,
-   "lat": 44.9948128,
-   "lon": -75.006325,
+   "lat": 44.9948173,
+   "lon": -75.0003962,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65163,
-   "lat": 44.9948059,
-   "lon": -75.0060767,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65164,
-   "lat": 44.9948044,
-   "lon": -75.0051935,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65165,
-   "lat": 44.9948033,
-   "lon": -75.0046825,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65166,
-   "lat": 44.9948294,
-   "lon": -75.0045071,
+   "lat": 44.9948207,
+   "lon": -74.9978548,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1832,31 +1799,64 @@
   },
   {
    "type": "node",
-   "id": 65167,
-   "lat": 44.9948038,
-   "lon": -75.0040431,
+   "id": 65164,
+   "lat": 44.9948174,
+   "lon": -74.9971846,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65165,
+   "lat": 44.9948293,
+   "lon": -74.9964464,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65166,
+   "lat": 44.9948268,
+   "lon": -74.995779,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65167,
+   "lat": 44.9948143,
+   "lon": -74.9953429,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65168,
-   "lat": 44.9947989,
-   "lon": -75.0038126,
+   "lat": 44.9948258,
+   "lon": -74.9951083,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65169,
-   "lat": 44.9948101,
-   "lon": -75.0026061,
+   "lat": 44.9948086,
+   "lon": -74.9939858,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -1866,217 +1866,162 @@
   {
    "type": "node",
    "id": 65170,
-   "lat": 44.994797,
-   "lon": -75.0022031,
+   "lat": 44.9948216,
+   "lon": -74.9937409,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65171,
-   "lat": 44.9948003,
-   "lon": -75.0019285,
+   "lat": 44.9947948,
+   "lon": -74.9935076,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65172,
-   "lat": 44.9948012,
-   "lon": -75.0017522,
+   "lat": 44.9948116,
+   "lon": -74.9932433,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65173,
-   "lat": 44.9947963,
-   "lon": -75.001508,
+   "lat": 44.9948277,
+   "lon": -74.9928138,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65174,
-   "lat": 44.9948224,
-   "lon": -75.0012545,
+   "lat": 44.9948285,
+   "lon": -74.9923167,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65175,
-   "lat": 44.9948219,
-   "lon": -75.0010659,
+   "lat": 44.9948212,
+   "lon": -74.9916615,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65176,
-   "lat": 44.9948233,
-   "lon": -75.0003671,
+   "lat": 44.9947978,
+   "lon": -74.9910011,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65177,
-   "lat": 44.9948032,
-   "lon": -74.9978768,
+   "lat": 44.9947984,
+   "lon": -74.9907195,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65178,
-   "lat": 44.9948118,
-   "lon": -74.9976094,
+   "lat": 44.9948193,
+   "lon": -74.9898285,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65179,
-   "lat": 44.9948268,
-   "lon": -74.9969224,
+   "lat": 44.9948282,
+   "lon": -74.9887371,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65180,
-   "lat": 44.9948143,
-   "lon": -74.9964863,
+   "lat": 44.9948066,
+   "lon": -74.9884673,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65181,
-   "lat": 44.9948258,
-   "lon": -74.9962516,
+   "lat": 44.9948115,
+   "lon": -74.9881921,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65182,
-   "lat": 44.9948074,
-   "lon": -74.9953224,
+   "lat": 44.9948252,
+   "lon": -74.9880258,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65183,
-   "lat": 44.9948023,
-   "lon": -74.9950973,
+   "lat": 44.9948037,
+   "lon": -74.9877597,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65184,
-   "lat": 44.9947999,
-   "lon": -74.9948572,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65185,
-   "lat": 44.9948283,
-   "lon": -74.9946287,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65186,
-   "lat": 44.9948277,
-   "lon": -74.9941859,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65187,
-   "lat": 44.9948285,
-   "lon": -74.9936888,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65188,
-   "lat": 44.9947961,
-   "lon": -74.9928274,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65189,
-   "lat": 44.9947978,
-   "lon": -74.9923731,
+   "lat": 44.994826,
+   "lon": -74.9870992,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2085,9 +2030,64 @@
   },
   {
    "type": "node",
+   "id": 65185,
+   "lat": 44.9947989,
+   "lon": -74.9868486,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65186,
+   "lat": 44.9948199,
+   "lon": -74.9866417,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65187,
+   "lat": 44.9948164,
+   "lon": -74.9864188,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65188,
+   "lat": 44.9952939,
+   "lon": -75.0076861,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65189,
+   "lat": 44.9953068,
+   "lon": -75.00678,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
    "id": 65190,
-   "lat": 44.9947984,
-   "lon": -74.9920915,
+   "lat": 44.9953132,
+   "lon": -75.0052006,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2097,107 +2097,8 @@
   {
    "type": "node",
    "id": 65191,
-   "lat": 44.9948193,
-   "lon": -74.9912005,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65192,
-   "lat": 44.9948282,
-   "lon": -74.9901091,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65193,
-   "lat": 44.9948066,
-   "lon": -74.9898393,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65194,
-   "lat": 44.9947995,
-   "lon": -74.9886715,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65195,
-   "lat": 44.9948265,
-   "lon": -74.9882451,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65196,
-   "lat": 44.9948097,
-   "lon": -74.9880019,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65197,
-   "lat": 44.9948166,
-   "lon": -74.9877796,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65198,
-   "lat": 44.9948167,
-   "lon": -74.9866574,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65199,
-   "lat": 44.9952949,
-   "lon": -75.0065279,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65200,
-   "lat": 44.9953116,
-   "lon": -75.0051614,
+   "lat": 44.9952955,
+   "lon": -75.0042444,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2206,20 +2107,119 @@
   },
   {
    "type": "node",
-   "id": 65201,
-   "lat": 44.9952963,
-   "lon": -75.0015081,
+   "id": 65192,
+   "lat": 44.9952971,
+   "lon": -75.0010387,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65193,
+   "lat": 44.9953139,
+   "lon": -75.000852,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65194,
+   "lat": 44.995293,
+   "lon": -74.9990134,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65195,
+   "lat": 44.9953169,
+   "lon": -74.9987756,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65196,
+   "lat": 44.9953019,
+   "lon": -74.9984857,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65197,
+   "lat": 44.9953042,
+   "lon": -74.9978005,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65198,
+   "lat": 44.9952929,
+   "lon": -74.9975923,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65199,
+   "lat": 44.9953161,
+   "lon": -74.9973976,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65200,
+   "lat": 44.995299,
+   "lon": -74.9965014,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65201,
+   "lat": 44.9953109,
+   "lon": -74.9957513,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65202,
-   "lat": 44.9953014,
-   "lon": -75.0008283,
+   "lat": 44.9952893,
+   "lon": -74.9952993,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2229,19 +2229,19 @@
   {
    "type": "node",
    "id": 65203,
-   "lat": 44.9953083,
-   "lon": -75.0003538,
+   "lat": 44.9952925,
+   "lon": -74.9948442,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65204,
-   "lat": 44.9953019,
-   "lon": -74.9989431,
+   "lat": 44.9952898,
+   "lon": -74.9946763,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2251,8 +2251,8 @@
   {
    "type": "node",
    "id": 65205,
-   "lat": 44.9953222,
-   "lon": -74.9984839,
+   "lat": 44.9953063,
+   "lon": -74.9939582,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2262,19 +2262,8 @@
   {
    "type": "node",
    "id": 65206,
-   "lat": 44.9952972,
-   "lon": -74.9982928,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65207,
-   "lat": 44.9953156,
-   "lon": -74.9967126,
+   "lat": 44.995322,
+   "lon": -74.9937519,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2283,9 +2272,20 @@
   },
   {
    "type": "node",
+   "id": 65207,
+   "lat": 44.9953094,
+   "lon": -74.9934711,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
    "id": 65208,
-   "lat": 44.9953109,
-   "lon": -74.99598,
+   "lat": 44.9952998,
+   "lon": -74.9932575,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2295,30 +2295,30 @@
   {
    "type": "node",
    "id": 65209,
-   "lat": 44.9953243,
-   "lon": -74.9953335,
+   "lat": 44.995297,
+   "lon": -74.9900709,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65210,
-   "lat": 44.9952898,
-   "lon": -74.9948972,
+   "lat": 44.9953059,
+   "lon": -74.9868308,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65211,
-   "lat": 44.995294,
-   "lon": -74.9946142,
+   "lat": 44.9934677,
+   "lon": -75.0096988,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2328,96 +2328,107 @@
   {
    "type": "node",
    "id": 65212,
-   "lat": 44.9953086,
-   "lon": -74.9944198,
+   "lat": 44.9934671,
+   "lon": -75.0094822,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65213,
-   "lat": 44.995304,
-   "lon": -74.9941737,
+   "lat": 44.9934717,
+   "lon": -75.0090815,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65214,
-   "lat": 44.9953158,
-   "lon": -74.9939509,
+   "lat": 44.993456,
+   "lon": -75.0088053,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65215,
-   "lat": 44.9953134,
-   "lon": -74.9936859,
+   "lat": 44.9934513,
+   "lon": -75.0086126,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65216,
-   "lat": 44.9953137,
-   "lon": -74.9903322,
+   "lat": 44.9934455,
+   "lon": -75.0076699,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65217,
-   "lat": 44.9953059,
-   "lon": -74.9870595,
+   "lat": 44.9934477,
+   "lon": -75.0070047,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65218,
-   "lat": 44.9934677,
-   "lon": -75.0099274,
+   "lat": 44.9934613,
+   "lon": -75.0067802,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65219,
-   "lat": 44.9934671,
-   "lon": -75.0097109,
+   "lat": 44.9934584,
+   "lon": -75.0065268,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65220,
-   "lat": 44.9934717,
-   "lon": -75.0093101,
+   "lat": 44.9934515,
+   "lon": -75.0062657,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65221,
+   "lat": 44.9934501,
+   "lon": -75.0060719,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2426,31 +2437,9 @@
   },
   {
    "type": "node",
-   "id": 65221,
-   "lat": 44.993456,
-   "lon": -75.009034,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
    "id": 65222,
-   "lat": 44.9934513,
-   "lon": -75.0088413,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65223,
-   "lat": 44.9934455,
-   "lon": -75.0078986,
+   "lat": 44.9934505,
+   "lon": -75.0058596,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2459,31 +2448,31 @@
   },
   {
    "type": "node",
-   "id": 65224,
-   "lat": 44.9934477,
-   "lon": -75.0072333,
+   "id": 65223,
+   "lat": 44.9934433,
+   "lon": -75.0056329,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65224,
+   "lat": 44.993453,
+   "lon": -75.0053913,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65225,
-   "lat": 44.9934613,
-   "lon": -75.0070088,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65226,
-   "lat": 44.9934584,
-   "lon": -75.0067555,
+   "lat": 44.9934579,
+   "lon": -75.0051827,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2492,9 +2481,20 @@
   },
   {
    "type": "node",
+   "id": 65226,
+   "lat": 44.9934553,
+   "lon": -75.0040176,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
    "id": 65227,
-   "lat": 44.9934515,
-   "lon": -75.0064944,
+   "lat": 44.993445,
+   "lon": -75.0038091,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2504,8 +2504,8 @@
   {
    "type": "node",
    "id": 65228,
-   "lat": 44.9934501,
-   "lon": -75.0063005,
+   "lat": 44.9934553,
+   "lon": -75.0035485,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2515,41 +2515,8 @@
   {
    "type": "node",
    "id": 65229,
-   "lat": 44.9934505,
-   "lon": -75.0060883,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65230,
-   "lat": 44.9934433,
-   "lon": -75.0058616,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65231,
-   "lat": 44.993453,
-   "lon": -75.00562,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65232,
-   "lat": 44.9934579,
-   "lon": -75.0054113,
+   "lat": 44.9934721,
+   "lon": -75.0029085,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2558,9 +2525,9 @@
   },
   {
    "type": "node",
-   "id": 65233,
-   "lat": 44.9934553,
-   "lon": -75.0042462,
+   "id": 65230,
+   "lat": 44.9934689,
+   "lon": -75.0026209,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2569,9 +2536,42 @@
   },
   {
    "type": "node",
+   "id": 65231,
+   "lat": 44.9934535,
+   "lon": -75.0023725,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65232,
+   "lat": 44.9934441,
+   "lon": -75.0019806,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65233,
+   "lat": 44.9934609,
+   "lon": -75.001728,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
    "id": 65234,
-   "lat": 44.993445,
-   "lon": -75.0040378,
+   "lat": 44.9934697,
+   "lon": -75.0008475,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2581,8 +2581,19 @@
   {
    "type": "node",
    "id": 65235,
-   "lat": 44.9934553,
-   "lon": -75.0037772,
+   "lat": 44.9934648,
+   "lon": -75.0000869,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65236,
+   "lat": 44.9934615,
+   "lon": -74.9999373,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2591,20 +2602,9 @@
   },
   {
    "type": "node",
-   "id": 65236,
-   "lat": 44.9934669,
-   "lon": -75.0035471,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
    "id": 65237,
-   "lat": 44.993463,
-   "lon": -75.0028626,
+   "lat": 44.9934725,
+   "lon": -74.9996863,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2614,30 +2614,8 @@
   {
    "type": "node",
    "id": 65238,
-   "lat": 44.9934383,
-   "lon": -75.0026757,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65239,
-   "lat": 44.9934677,
-   "lon": -75.0023856,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65240,
-   "lat": 44.9934733,
-   "lon": -75.0021977,
+   "lat": 44.9934489,
+   "lon": -74.9994331,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2646,9 +2624,31 @@
   },
   {
    "type": "node",
+   "id": 65239,
+   "lat": 44.993471,
+   "lon": -74.9992226,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65240,
+   "lat": 44.9934476,
+   "lon": -74.9978641,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
    "id": 65241,
-   "lat": 44.9934397,
-   "lon": -75.0019335,
+   "lat": 44.9934394,
+   "lon": -74.9973447,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2658,30 +2658,8 @@
   {
    "type": "node",
    "id": 65242,
-   "lat": 44.993461,
-   "lon": -75.0017446,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65243,
-   "lat": 44.9934453,
-   "lon": -75.0010442,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65244,
-   "lat": 44.9934539,
-   "lon": -75.0008371,
+   "lat": 44.9934703,
+   "lon": -74.997167,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2690,9 +2668,20 @@
   },
   {
    "type": "node",
-   "id": 65245,
-   "lat": 44.9934648,
-   "lon": -75.0005442,
+   "id": 65243,
+   "lat": 44.9934607,
+   "lon": -74.9969388,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65244,
+   "lat": 44.9934493,
+   "lon": -74.9967007,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2701,9 +2690,9 @@
   },
   {
    "type": "node",
-   "id": 65246,
-   "lat": 44.9934615,
-   "lon": -75.0003947,
+   "id": 65245,
+   "lat": 44.9934509,
+   "lon": -74.9964795,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2712,9 +2701,20 @@
   },
   {
    "type": "node",
+   "id": 65246,
+   "lat": 44.9934557,
+   "lon": -74.9959737,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
    "id": 65247,
-   "lat": 44.9934725,
-   "lon": -75.0001436,
+   "lat": 44.9934664,
+   "lon": -74.9957615,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2724,41 +2724,41 @@
   {
    "type": "node",
    "id": 65248,
-   "lat": 44.9934489,
-   "lon": -74.9998904,
+   "lat": 44.993446,
+   "lon": -74.9955235,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65249,
-   "lat": 44.993471,
-   "lon": -74.9996799,
+   "lat": 44.993449,
+   "lon": -74.9943814,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65250,
-   "lat": 44.9934476,
-   "lon": -74.9983215,
+   "lat": 44.9934675,
+   "lon": -74.9941558,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65251,
-   "lat": 44.9934394,
-   "lon": -74.9978021,
+   "lat": 44.9934653,
+   "lon": -74.9939863,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2768,30 +2768,30 @@
   {
    "type": "node",
    "id": 65252,
-   "lat": 44.9934703,
-   "lon": -74.9976243,
+   "lat": 44.9934521,
+   "lon": -74.9937041,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65253,
-   "lat": 44.9934607,
-   "lon": -74.9973962,
+   "lat": 44.9934447,
+   "lon": -74.9932489,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65254,
-   "lat": 44.9934493,
-   "lon": -74.9971581,
+   "lat": 44.9934622,
+   "lon": -74.9928579,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2801,8 +2801,8 @@
   {
    "type": "node",
    "id": 65255,
-   "lat": 44.9934509,
-   "lon": -74.9969368,
+   "lat": 44.9934616,
+   "lon": -74.9923814,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2812,19 +2812,8 @@
   {
    "type": "node",
    "id": 65256,
-   "lat": 44.9934557,
-   "lon": -74.9964311,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65257,
-   "lat": 44.9934664,
-   "lon": -74.9962188,
+   "lat": 44.9934518,
+   "lon": -74.992113,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -2833,117 +2822,40 @@
   },
   {
    "type": "node",
-   "id": 65258,
-   "lat": 44.993446,
-   "lon": -74.9959808,
+   "id": 65257,
+   "lat": 44.9934383,
+   "lon": -74.9916984,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65258,
+   "lat": 44.9934609,
+   "lon": -74.9912107,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65259,
-   "lat": 44.993449,
-   "lon": -74.9948388,
+   "lat": 44.9934538,
+   "lon": -74.9909659,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65260,
-   "lat": 44.9934675,
-   "lon": -74.9946132,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65261,
-   "lat": 44.9934653,
-   "lon": -74.9944436,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65262,
-   "lat": 44.9934521,
-   "lon": -74.9941614,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65263,
-   "lat": 44.9934447,
-   "lon": -74.9937063,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65264,
-   "lat": 44.993464,
-   "lon": -74.9934972,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65265,
-   "lat": 44.9934661,
-   "lon": -74.9932693,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65266,
-   "lat": 44.9934405,
-   "lon": -74.992131,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65267,
-   "lat": 44.9934502,
-   "lon": -74.990971,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65268,
    "lat": 44.9934505,
    "lon": -74.9905231,
    "tags": {
@@ -2954,7 +2866,7 @@
   },
   {
    "type": "node",
-   "id": 65269,
+   "id": 65261,
    "lat": 44.9934547,
    "lon": -74.9903149,
    "tags": {
@@ -2965,7 +2877,7 @@
   },
   {
    "type": "node",
-   "id": 65270,
+   "id": 65262,
    "lat": 44.9934684,
    "lon": -74.9889501,
    "tags": {
@@ -2976,7 +2888,7 @@
   },
   {
    "type": "node",
-   "id": 65271,
+   "id": 65263,
    "lat": 44.9934483,
    "lon": -74.9887017,
    "tags": {
@@ -2987,7 +2899,7 @@
   },
   {
    "type": "node",
-   "id": 65272,
+   "id": 65264,
    "lat": 44.9934454,
    "lon": -74.9882795,
    "tags": {
@@ -2998,7 +2910,7 @@
   },
   {
    "type": "node",
-   "id": 65273,
+   "id": 65265,
    "lat": 44.9934398,
    "lon": -74.9875297,
    "tags": {
@@ -3009,7 +2921,7 @@
   },
   {
    "type": "node",
-   "id": 65274,
+   "id": 65266,
    "lat": 44.9934422,
    "lon": -74.9868698,
    "tags": {
@@ -3020,7 +2932,7 @@
   },
   {
    "type": "node",
-   "id": 65275,
+   "id": 65267,
    "lat": 44.9934461,
    "lon": -74.9865897,
    "tags": {
@@ -3031,7 +2943,7 @@
   },
   {
    "type": "node",
-   "id": 65276,
+   "id": 65268,
    "lat": 44.9934619,
    "lon": -74.9864133,
    "tags": {
@@ -3042,7 +2954,7 @@
   },
   {
    "type": "node",
-   "id": 65277,
+   "id": 65269,
    "lat": 44.9939816,
    "lon": -75.0102087,
    "tags": {
@@ -3053,293 +2965,293 @@
   },
   {
    "type": "node",
-   "id": 65278,
-   "lat": 44.9939553,
-   "lon": -75.0094634,
+   "id": 65270,
+   "lat": 44.9939608,
+   "lon": -75.0092831,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65271,
+   "lat": 44.9939626,
+   "lon": -75.0067687,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65272,
+   "lat": 44.9939597,
+   "lon": -75.0063199,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65273,
+   "lat": 44.9939618,
+   "lon": -75.0053989,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65274,
+   "lat": 44.9939649,
+   "lon": -75.0051264,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65275,
+   "lat": 44.9939788,
+   "lon": -75.0048891,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65276,
+   "lat": 44.993953,
+   "lon": -75.0042298,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65277,
+   "lat": 44.9939748,
+   "lon": -75.0040393,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65278,
+   "lat": 44.9939848,
+   "lon": -75.0038285,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65279,
-   "lat": 44.9939763,
-   "lon": -75.0093135,
+   "lat": 44.9939856,
+   "lon": -75.003575,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65280,
-   "lat": 44.9939648,
-   "lon": -75.0090371,
+   "lat": 44.9939624,
+   "lon": -75.0023979,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65281,
-   "lat": 44.9939511,
-   "lon": -75.0088246,
+   "lat": 44.9939771,
+   "lon": -75.0022065,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65282,
-   "lat": 44.9939762,
-   "lon": -75.0067661,
+   "lat": 44.993982,
+   "lon": -75.0014627,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65283,
-   "lat": 44.9939616,
-   "lon": -75.0061134,
+   "lat": 44.9939751,
+   "lon": -75.0010535,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65284,
-   "lat": 44.9939649,
-   "lon": -75.0053551,
+   "lat": 44.993966,
+   "lon": -75.0003524,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65285,
-   "lat": 44.9939788,
-   "lon": -75.0051178,
+   "lat": 44.9939743,
+   "lon": -75.0001461,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65286,
-   "lat": 44.9939855,
-   "lon": -75.0046698,
+   "lat": 44.9939787,
+   "lon": -74.9999166,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65287,
-   "lat": 44.9939739,
-   "lon": -75.0040193,
+   "lat": 44.9939531,
+   "lon": -74.9990122,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65288,
-   "lat": 44.9939668,
-   "lon": -75.0037941,
+   "lat": 44.9939515,
+   "lon": -74.9987627,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65289,
-   "lat": 44.9939758,
-   "lon": -75.0024128,
+   "lat": 44.9939805,
+   "lon": -74.9978221,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65290,
-   "lat": 44.9939522,
-   "lon": -75.0021528,
+   "lat": 44.9939524,
+   "lon": -74.9975965,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65291,
-   "lat": 44.9939791,
-   "lon": -75.0019756,
+   "lat": 44.9939835,
+   "lon": -74.9973742,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65292,
-   "lat": 44.9939733,
-   "lon": -75.0014587,
+   "lat": 44.9939617,
+   "lon": -74.9960247,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65293,
-   "lat": 44.9939793,
-   "lon": -75.0012907,
+   "lat": 44.9939519,
+   "lon": -74.9953095,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65294,
-   "lat": 44.993963,
-   "lon": -75.0010325,
+   "lat": 44.9939747,
+   "lon": -74.9951138,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65295,
-   "lat": 44.9939641,
-   "lon": -75.0007856,
+   "lat": 44.9939812,
+   "lon": -74.9948865,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65296,
-   "lat": 44.9939743,
-   "lon": -75.0003748,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65297,
-   "lat": 44.9939787,
-   "lon": -75.0001453,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65298,
-   "lat": 44.9939531,
-   "lon": -74.9992408,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65299,
-   "lat": 44.9939515,
-   "lon": -74.9989913,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65300,
-   "lat": 44.9939572,
-   "lon": -74.997824,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65301,
-   "lat": 44.9939688,
-   "lon": -74.997615,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65302,
-   "lat": 44.9939617,
-   "lon": -74.9962534,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65303,
-   "lat": 44.9939672,
-   "lon": -74.9953535,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65304,
    "lat": 44.993953,
    "lon": -74.9944186,
    "tags": {
@@ -3350,7 +3262,7 @@
   },
   {
    "type": "node",
-   "id": 65305,
+   "id": 65297,
    "lat": 44.993965,
    "lon": -74.9942155,
    "tags": {
@@ -3361,7 +3273,7 @@
   },
   {
    "type": "node",
-   "id": 65306,
+   "id": 65298,
    "lat": 44.9939546,
    "lon": -74.9937515,
    "tags": {
@@ -3372,7 +3284,7 @@
   },
   {
    "type": "node",
-   "id": 65307,
+   "id": 65299,
    "lat": 44.9939754,
    "lon": -74.9935189,
    "tags": {
@@ -3383,7 +3295,7 @@
   },
   {
    "type": "node",
-   "id": 65308,
+   "id": 65300,
    "lat": 44.9939711,
    "lon": -74.9923479,
    "tags": {
@@ -3394,173 +3306,129 @@
   },
   {
    "type": "node",
-   "id": 65309,
-   "lat": 44.9939548,
-   "lon": -74.9918754,
+   "id": 65301,
+   "lat": 44.9939691,
+   "lon": -74.9909985,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65302,
+   "lat": 44.9939571,
+   "lon": -74.9907835,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65303,
+   "lat": 44.9939554,
+   "lon": -74.9903232,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65304,
+   "lat": 44.9939826,
+   "lon": -74.9896303,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65305,
+   "lat": 44.9939635,
+   "lon": -74.9891519,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65306,
+   "lat": 44.9939735,
+   "lon": -74.9882416,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65307,
+   "lat": 44.9939532,
+   "lon": -74.987769,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65308,
+   "lat": 44.9939531,
+   "lon": -74.9875765,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65309,
+   "lat": 44.9939707,
+   "lon": -74.9871282,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65310,
-   "lat": 44.9939741,
-   "lon": -74.9914242,
+   "lat": 44.9975121,
+   "lon": -75.0104709,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65311,
-   "lat": 44.9939556,
-   "lon": -74.9911868,
+   "lat": 44.9973627,
+   "lon": -75.0104663,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65312,
-   "lat": 44.9939571,
-   "lon": -74.9910121,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65313,
-   "lat": 44.9939591,
-   "lon": -74.9907165,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65314,
-   "lat": 44.9939826,
-   "lon": -74.989859,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65315,
-   "lat": 44.9939635,
-   "lon": -74.9893806,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65316,
-   "lat": 44.993957,
-   "lon": -74.9891726,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65317,
-   "lat": 44.993954,
-   "lon": -74.9888925,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65318,
-   "lat": 44.9939735,
-   "lon": -74.9886989,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65319,
-   "lat": 44.9939532,
-   "lon": -74.9882263,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65320,
-   "lat": 44.9939531,
-   "lon": -74.9880338,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65321,
-   "lat": 44.9939824,
-   "lon": -74.987766,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65322,
-   "lat": 44.9939524,
-   "lon": -74.986636,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65323,
-   "lat": 44.9939557,
-   "lon": -74.9864247,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65324,
-   "lat": 44.9972087,
+   "lat": 44.9968853,
    "lon": -75.0104408,
    "tags": {
     "denotation": "garden",
@@ -3570,8 +3438,8 @@
   },
   {
    "type": "node",
-   "id": 65325,
-   "lat": 44.9970261,
+   "id": 65313,
+   "lat": 44.9967028,
    "lon": -75.0104742,
    "tags": {
     "denotation": "garden",
@@ -3581,31 +3449,9 @@
   },
   {
    "type": "node",
-   "id": 65326,
-   "lat": 44.996541,
-   "lon": -75.010462,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65327,
-   "lat": 44.9947654,
-   "lon": -75.010462,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65328,
-   "lat": 44.9942465,
-   "lon": -75.0104739,
+   "id": 65314,
+   "lat": 44.9975199,
+   "lon": -75.0111317,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3614,9 +3460,9 @@
   },
   {
    "type": "node",
-   "id": 65329,
-   "lat": 44.9941434,
-   "lon": -75.0104344,
+   "id": 65315,
+   "lat": 44.9973774,
+   "lon": -75.0111625,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3625,8 +3471,8 @@
   },
   {
    "type": "node",
-   "id": 65330,
-   "lat": 44.9973421,
+   "id": 65316,
+   "lat": 44.9968571,
    "lon": -75.0111626,
    "tags": {
     "denotation": "garden",
@@ -3636,8 +3482,8 @@
   },
   {
    "type": "node",
-   "id": 65331,
-   "lat": 44.9971858,
+   "id": 65317,
+   "lat": 44.9967007,
    "lon": -75.0111259,
    "tags": {
     "denotation": "garden",
@@ -3647,8 +3493,8 @@
   },
   {
    "type": "node",
-   "id": 65332,
-   "lat": 44.9968803,
+   "id": 65318,
+   "lat": 44.9963953,
    "lon": -75.0111588,
    "tags": {
     "denotation": "garden",
@@ -3658,8 +3504,8 @@
   },
   {
    "type": "node",
-   "id": 65333,
-   "lat": 44.9967035,
+   "id": 65319,
+   "lat": 44.9962185,
    "lon": -75.0111616,
    "tags": {
     "denotation": "garden",
@@ -3669,8 +3515,8 @@
   },
   {
    "type": "node",
-   "id": 65334,
-   "lat": 44.9965204,
+   "id": 65320,
+   "lat": 44.9960354,
    "lon": -75.0111684,
    "tags": {
     "denotation": "garden",
@@ -3680,8 +3526,8 @@
   },
   {
    "type": "node",
-   "id": 65335,
-   "lat": 44.996354,
+   "id": 65321,
+   "lat": 44.9958689,
    "lon": -75.0111623,
    "tags": {
     "denotation": "garden",
@@ -3691,8 +3537,8 @@
   },
   {
    "type": "node",
-   "id": 65336,
-   "lat": 44.9962093,
+   "id": 65322,
+   "lat": 44.9957242,
    "lon": -75.0111557,
    "tags": {
     "denotation": "garden",
@@ -3702,8 +3548,8 @@
   },
   {
    "type": "node",
-   "id": 65337,
-   "lat": 44.996033,
+   "id": 65323,
+   "lat": 44.9955479,
    "lon": -75.0111352,
    "tags": {
     "denotation": "garden",
@@ -3713,8 +3559,8 @@
   },
   {
    "type": "node",
-   "id": 65338,
-   "lat": 44.9957107,
+   "id": 65324,
+   "lat": 44.9952256,
    "lon": -75.0111698,
    "tags": {
     "denotation": "garden",
@@ -3724,8 +3570,8 @@
   },
   {
    "type": "node",
-   "id": 65339,
-   "lat": 44.9955564,
+   "id": 65325,
+   "lat": 44.9950713,
    "lon": -75.0111627,
    "tags": {
     "denotation": "garden",
@@ -3735,8 +3581,8 @@
   },
   {
    "type": "node",
-   "id": 65340,
-   "lat": 44.9954031,
+   "id": 65326,
+   "lat": 44.994918,
    "lon": -75.0111268,
    "tags": {
     "denotation": "garden",
@@ -3746,8 +3592,8 @@
   },
   {
    "type": "node",
-   "id": 65341,
-   "lat": 44.9952512,
+   "id": 65327,
+   "lat": 44.9947661,
    "lon": -75.0111441,
    "tags": {
     "denotation": "garden",
@@ -3757,8 +3603,8 @@
   },
   {
    "type": "node",
-   "id": 65342,
-   "lat": 44.9950781,
+   "id": 65328,
+   "lat": 44.994593,
    "lon": -75.011128,
    "tags": {
     "denotation": "garden",
@@ -3768,8 +3614,8 @@
   },
   {
    "type": "node",
-   "id": 65343,
-   "lat": 44.9949257,
+   "id": 65329,
+   "lat": 44.9944406,
    "lon": -75.0111298,
    "tags": {
     "denotation": "garden",
@@ -3779,8 +3625,8 @@
   },
   {
    "type": "node",
-   "id": 65344,
-   "lat": 44.9947679,
+   "id": 65330,
+   "lat": 44.9942828,
    "lon": -75.0111539,
    "tags": {
     "denotation": "garden",
@@ -3790,8 +3636,8 @@
   },
   {
    "type": "node",
-   "id": 65345,
-   "lat": 44.9946118,
+   "id": 65331,
+   "lat": 44.9941267,
    "lon": -75.0111676,
    "tags": {
     "denotation": "garden",
@@ -3801,75 +3647,9 @@
   },
   {
    "type": "node",
-   "id": 65346,
-   "lat": 44.9940975,
-   "lon": -75.0111338,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65347,
-   "lat": 44.9974576,
-   "lon": -75.0078901,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65348,
-   "lat": 44.997308,
-   "lon": -75.0079248,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65349,
-   "lat": 44.997149,
-   "lon": -75.0078962,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65350,
-   "lat": 44.9961675,
-   "lon": -75.0079328,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65351,
-   "lat": 44.9960093,
-   "lon": -75.0078955,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65352,
-   "lat": 44.9955488,
-   "lon": -75.0079313,
+   "id": 65332,
+   "lat": 44.9974657,
+   "lon": -75.0079199,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3878,20 +3658,9 @@
   },
   {
    "type": "node",
-   "id": 65353,
-   "lat": 44.9954129,
-   "lon": -75.0078944,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65354,
-   "lat": 44.9948975,
-   "lon": -75.0079255,
+   "id": 65333,
+   "lat": 44.9968374,
+   "lon": -75.0078845,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3900,20 +3669,9 @@
   },
   {
    "type": "node",
-   "id": 65355,
-   "lat": 44.9947378,
-   "lon": -75.0079266,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65356,
-   "lat": 44.9942593,
-   "lon": -75.0078848,
+   "id": 65334,
+   "lat": 44.9961678,
+   "lon": -75.0079145,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3922,9 +3680,31 @@
   },
   {
    "type": "node",
-   "id": 65357,
-   "lat": 44.9940665,
-   "lon": -75.0079021,
+   "id": 65335,
+   "lat": 44.9960401,
+   "lon": -75.007902,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65336,
+   "lat": 44.9958716,
+   "lon": -75.0079016,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65337,
+   "lat": 44.9955424,
+   "lon": -75.0078913,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3933,9 +3713,20 @@
   },
   {
    "type": "node",
-   "id": 65358,
-   "lat": 44.9934498,
-   "lon": -75.0078941,
+   "id": 65338,
+   "lat": 44.9953658,
+   "lon": -75.0078884,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65339,
+   "lat": 44.9947433,
+   "lon": -75.0079011,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3944,30 +3735,41 @@
   },
   {
    "type": "node",
-   "id": 65359,
-   "lat": 44.9973305,
-   "lon": -75.0085855,
+   "id": 65340,
+   "lat": 44.9942417,
+   "lon": -75.0078847,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
-   "id": 65360,
-   "lat": 44.9971781,
-   "lon": -75.0086136,
+   "id": 65341,
+   "lat": 44.9934258,
+   "lon": -75.0078843,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
-   "id": 65361,
-   "lat": 44.9948922,
+   "id": 65342,
+   "lat": 44.9974664,
+   "lon": -75.0085973,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65343,
+   "lat": 44.9973056,
    "lon": -75.0086021,
    "tags": {
     "denotation": "garden",
@@ -3977,9 +3779,20 @@
   },
   {
    "type": "node",
-   "id": 65362,
-   "lat": 44.9947525,
-   "lon": -75.0086249,
+   "id": 65344,
+   "lat": 44.9968169,
+   "lon": -75.0086139,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65345,
+   "lat": 44.9945657,
+   "lon": -75.0086255,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3988,9 +3801,20 @@
   },
   {
    "type": "node",
-   "id": 65363,
-   "lat": 44.9945482,
-   "lon": -75.008607,
+   "id": 65346,
+   "lat": 44.9942808,
+   "lon": -75.0085988,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65347,
+   "lat": 44.9934587,
+   "lon": -75.0085879,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -3999,20 +3823,20 @@
   },
   {
    "type": "node",
-   "id": 65364,
-   "lat": 44.9943863,
-   "lon": -75.0086145,
+   "id": 65348,
+   "lat": 44.9973456,
+   "lon": -75.0053571,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
-   "id": 65365,
-   "lat": 44.9942227,
-   "lon": -75.0086011,
+   "id": 65349,
+   "lat": 44.9967098,
+   "lon": -75.0053917,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4021,9 +3845,9 @@
   },
   {
    "type": "node",
-   "id": 65366,
-   "lat": 44.9940814,
-   "lon": -75.0086074,
+   "id": 65350,
+   "lat": 44.9965377,
+   "lon": -75.0053927,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4032,8 +3856,8 @@
   },
   {
    "type": "node",
-   "id": 65367,
-   "lat": 44.9973462,
+   "id": 65351,
+   "lat": 44.9962143,
    "lon": -75.0053912,
    "tags": {
     "denotation": "garden",
@@ -4043,8 +3867,8 @@
   },
   {
    "type": "node",
-   "id": 65368,
-   "lat": 44.996723,
+   "id": 65352,
+   "lat": 44.9955911,
    "lon": -75.0053656,
    "tags": {
     "denotation": "garden",
@@ -4054,9 +3878,9 @@
   },
   {
    "type": "node",
-   "id": 65369,
-   "lat": 44.9960346,
-   "lon": -75.0053488,
+   "id": 65353,
+   "lat": 44.9947666,
+   "lon": -75.005344,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4065,42 +3889,9 @@
   },
   {
    "type": "node",
-   "id": 65370,
-   "lat": 44.9959209,
-   "lon": -75.0053427,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65371,
-   "lat": 44.9957138,
-   "lon": -75.0053436,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65372,
-   "lat": 44.994607,
-   "lon": -75.0053921,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65373,
-   "lat": 44.9975069,
-   "lon": -75.0060817,
+   "id": 65354,
+   "lat": 44.9941072,
+   "lon": -75.005383,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4109,9 +3900,9 @@
   },
   {
    "type": "node",
-   "id": 65374,
-   "lat": 44.9971973,
-   "lon": -75.006045,
+   "id": 65355,
+   "lat": 44.9939761,
+   "lon": -75.0053571,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4120,20 +3911,9 @@
   },
   {
    "type": "node",
-   "id": 65375,
-   "lat": 44.9970419,
-   "lon": -75.0060473,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65376,
-   "lat": 44.9968959,
-   "lon": -75.0060536,
+   "id": 65356,
+   "lat": 44.9968573,
+   "lon": -75.0060681,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4142,8 +3922,41 @@
   },
   {
    "type": "node",
-   "id": 65377,
-   "lat": 44.9966986,
+   "id": 65357,
+   "lat": 44.9967278,
+   "lon": -75.0060588,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65358,
+   "lat": 44.9960737,
+   "lon": -75.0060579,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65359,
+   "lat": 44.9959002,
+   "lon": -75.0060535,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65360,
+   "lat": 44.9955667,
    "lon": -75.0060906,
    "tags": {
     "denotation": "garden",
@@ -4153,19 +3966,8 @@
   },
   {
    "type": "node",
-   "id": 65378,
-   "lat": 44.9960798,
-   "lon": -75.0060804,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65379,
-   "lat": 44.9958997,
+   "id": 65361,
+   "lat": 44.9946061,
    "lon": -75.0060692,
    "tags": {
     "denotation": "garden",
@@ -4175,8 +3977,8 @@
   },
   {
    "type": "node",
-   "id": 65380,
-   "lat": 44.995388,
+   "id": 65362,
+   "lat": 44.9940945,
    "lon": -75.0060698,
    "tags": {
     "denotation": "garden",
@@ -4186,9 +3988,42 @@
   },
   {
    "type": "node",
-   "id": 65381,
-   "lat": 44.9947766,
-   "lon": -75.0060716,
+   "id": 65363,
+   "lat": 44.9974712,
+   "lon": -75.0028189,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65364,
+   "lat": 44.9973179,
+   "lon": -75.0028073,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65365,
+   "lat": 44.9968256,
+   "lon": -75.0028102,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65366,
+   "lat": 44.9955418,
+   "lon": -75.0028356,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4197,20 +4032,31 @@
   },
   {
    "type": "node",
-   "id": 65382,
-   "lat": 44.9945828,
-   "lon": -75.0060529,
+   "id": 65367,
+   "lat": 44.9953886,
+   "lon": -75.0028088,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
-   "id": 65383,
-   "lat": 44.997501,
-   "lon": -75.0028127,
+   "id": 65368,
+   "lat": 44.9952027,
+   "lon": -75.0028218,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65369,
+   "lat": 44.9945667,
+   "lon": -75.0028161,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4219,20 +4065,9 @@
   },
   {
    "type": "node",
-   "id": 65384,
-   "lat": 44.9971571,
-   "lon": -75.0028026,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65385,
-   "lat": 44.9966948,
-   "lon": -75.0028484,
+   "id": 65370,
+   "lat": 44.9942617,
+   "lon": -75.0028476,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4241,42 +4076,9 @@
   },
   {
    "type": "node",
-   "id": 65386,
-   "lat": 44.9962215,
-   "lon": -75.0028319,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65387,
-   "lat": 44.9955654,
-   "lon": -75.0028341,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65388,
-   "lat": 44.9953836,
-   "lon": -75.0028469,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65389,
-   "lat": 44.9945822,
-   "lon": -75.0028229,
+   "id": 65371,
+   "lat": 44.9974694,
+   "lon": -75.0035107,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4285,9 +4087,9 @@
   },
   {
    "type": "node",
-   "id": 65390,
-   "lat": 44.9944317,
-   "lon": -75.0028156,
+   "id": 65372,
+   "lat": 44.9973423,
+   "lon": -75.0035364,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4296,9 +4098,9 @@
   },
   {
    "type": "node",
-   "id": 65391,
-   "lat": 44.9942693,
-   "lon": -75.0028074,
+   "id": 65373,
+   "lat": 44.9968506,
+   "lon": -75.0035152,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4307,53 +4109,9 @@
   },
   {
    "type": "node",
-   "id": 65392,
-   "lat": 44.9940962,
-   "lon": -75.0028392,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65393,
-   "lat": 44.9934717,
-   "lon": -75.0028112,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65394,
-   "lat": 44.9973461,
-   "lon": -75.0035391,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65395,
-   "lat": 44.9971432,
-   "lon": -75.0035053,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65396,
-   "lat": 44.997023,
-   "lon": -75.0035032,
+   "id": 65374,
+   "lat": 44.9966582,
+   "lon": -75.0035082,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4362,20 +4120,9 @@
   },
   {
    "type": "node",
-   "id": 65397,
-   "lat": 44.9966461,
-   "lon": -75.0035207,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65398,
-   "lat": 44.9957058,
-   "lon": -75.003544,
+   "id": 65375,
+   "lat": 44.9960073,
+   "lon": -75.0035167,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4384,8 +4131,41 @@
   },
   {
    "type": "node",
-   "id": 65399,
-   "lat": 44.9955532,
+   "id": 65376,
+   "lat": 44.9953807,
+   "lon": -75.0035269,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65377,
+   "lat": 44.9942808,
+   "lon": -75.003513,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65378,
+   "lat": 44.994074,
+   "lon": -75.0035333,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65379,
+   "lat": 44.9939362,
    "lon": -75.0035353,
    "tags": {
     "denotation": "garden",
@@ -4395,9 +4175,75 @@
   },
   {
    "type": "node",
-   "id": 65400,
-   "lat": 44.995405,
-   "lon": -75.0035037,
+   "id": 65380,
+   "lat": 44.9954159,
+   "lon": -75.0003023,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65381,
+   "lat": 44.9947369,
+   "lon": -75.0002725,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65382,
+   "lat": 44.9946259,
+   "lon": -75.0002671,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65383,
+   "lat": 44.9941245,
+   "lon": -75.0003053,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65384,
+   "lat": 44.9971826,
+   "lon": -75.0009701,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65385,
+   "lat": 44.9955707,
+   "lon": -75.000971,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65386,
+   "lat": 44.995392,
+   "lon": -75.001,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4406,9 +4252,163 @@
   },
   {
    "type": "node",
+   "id": 65387,
+   "lat": 44.9939608,
+   "lon": -75.0009907,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65388,
+   "lat": 44.9955123,
+   "lon": -74.9977568,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65389,
+   "lat": 44.997463,
+   "lon": -74.998457,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65390,
+   "lat": 44.9973004,
+   "lon": -74.9984677,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65391,
+   "lat": 44.9968261,
+   "lon": -74.9984521,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65392,
+   "lat": 44.9966946,
+   "lon": -74.998463,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65393,
+   "lat": 44.995359,
+   "lon": -74.9984371,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65394,
+   "lat": 44.9975275,
+   "lon": -74.9951855,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65395,
+   "lat": 44.9959038,
+   "lon": -74.9952031,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65396,
+   "lat": 44.9954126,
+   "lon": -74.9952192,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65397,
+   "lat": 44.9939777,
+   "lon": -74.9952138,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65398,
+   "lat": 44.9974964,
+   "lon": -74.9958809,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65399,
+   "lat": 44.9973481,
+   "lon": -74.9959252,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65400,
+   "lat": 44.9960778,
+   "lon": -74.9959149,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
    "id": 65401,
-   "lat": 44.9947214,
-   "lon": -75.0035502,
+   "lat": 44.9958739,
+   "lon": -74.9958936,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4418,41 +4418,41 @@
   {
    "type": "node",
    "id": 65402,
-   "lat": 44.9944011,
-   "lon": -75.0035434,
+   "lat": 44.9955881,
+   "lon": -74.9958838,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65403,
-   "lat": 44.9940906,
-   "lon": -75.0035335,
+   "lat": 44.9974504,
+   "lon": -74.9933672,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65404,
-   "lat": 44.9975336,
-   "lon": -75.0002745,
+   "lat": 44.9973156,
+   "lon": -74.9933815,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65405,
-   "lat": 44.9973359,
-   "lon": -75.0002775,
+   "lat": 44.9968643,
+   "lon": -74.9933657,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4462,8 +4462,19 @@
   {
    "type": "node",
    "id": 65406,
-   "lat": 44.9946248,
-   "lon": -75.0002741,
+   "lat": 44.9966663,
+   "lon": -74.9933633,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65407,
+   "lat": 44.9956815,
+   "lon": -74.9933373,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4472,9 +4483,9 @@
   },
   {
    "type": "node",
-   "id": 65407,
-   "lat": 44.9944311,
-   "lon": -75.000297,
+   "id": 65408,
+   "lat": 44.9955603,
+   "lon": -74.9933771,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4483,86 +4494,31 @@
   },
   {
    "type": "node",
-   "id": 65408,
-   "lat": 44.9939499,
-   "lon": -75.0002874,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
    "id": 65409,
-   "lat": 44.997516,
-   "lon": -75.0009662,
+   "lat": 44.9954009,
+   "lon": -74.9933837,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65410,
-   "lat": 44.9973227,
-   "lon": -75.0009968,
+   "lat": 44.9934515,
+   "lon": -74.9933792,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65411,
-   "lat": 44.9972117,
-   "lon": -75.0009947,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65412,
-   "lat": 44.9970591,
-   "lon": -75.0009702,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65413,
-   "lat": 44.9968688,
-   "lon": -75.0009746,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65414,
-   "lat": 44.9967312,
-   "lon": -75.0009937,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65415,
-   "lat": 44.9957616,
-   "lon": -75.0009931,
+   "lat": 44.9973474,
+   "lon": -74.9901196,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4571,9 +4527,53 @@
   },
   {
    "type": "node",
+   "id": 65412,
+   "lat": 44.9967219,
+   "lon": -74.9901398,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65413,
+   "lat": 44.9959027,
+   "lon": -74.9901362,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65414,
+   "lat": 44.9957388,
+   "lon": -74.99013,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65415,
+   "lat": 44.9955671,
+   "lon": -74.9901152,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
    "id": 65416,
-   "lat": 44.9955946,
-   "lon": -75.0010017,
+   "lat": 44.994766,
+   "lon": -74.9901136,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4583,8 +4583,19 @@
   {
    "type": "node",
    "id": 65417,
-   "lat": 44.9954162,
-   "lon": -75.000987,
+   "lat": 44.9941257,
+   "lon": -74.9901316,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65418,
+   "lat": 44.997351,
+   "lon": -74.9908089,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4593,31 +4604,20 @@
   },
   {
    "type": "node",
-   "id": 65418,
-   "lat": 44.9945941,
-   "lon": -75.0010043,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
    "id": 65419,
-   "lat": 44.9944486,
-   "lon": -75.001007,
+   "lat": 44.996845,
+   "lon": -74.9908211,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65420,
-   "lat": 44.9942502,
-   "lon": -75.0010083,
+   "lat": 44.9939526,
+   "lon": -74.9908229,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4627,19 +4627,19 @@
   {
    "type": "node",
    "id": 65421,
-   "lat": 44.9975026,
-   "lon": -74.9977444,
+   "lat": 44.9975101,
+   "lon": -74.9869271,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65422,
-   "lat": 44.9973295,
-   "lon": -74.9977359,
+   "lat": 44.9973268,
+   "lon": -74.9869549,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4649,19 +4649,19 @@
   {
    "type": "node",
    "id": 65423,
-   "lat": 44.997166,
-   "lon": -74.9977576,
+   "lat": 44.9971732,
+   "lon": -74.9869435,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65424,
-   "lat": 44.9970143,
-   "lon": -74.9977218,
+   "lat": 44.9970058,
+   "lon": -74.9869392,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4671,19 +4671,19 @@
   {
    "type": "node",
    "id": 65425,
-   "lat": 44.9968614,
-   "lon": -74.9977358,
+   "lat": 44.9968572,
+   "lon": -74.9869362,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65426,
-   "lat": 44.9966755,
-   "lon": -74.9977463,
+   "lat": 44.9966533,
+   "lon": -74.9869232,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4693,19 +4693,8 @@
   {
    "type": "node",
    "id": 65427,
-   "lat": 44.9960383,
-   "lon": -74.9977345,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65428,
-   "lat": 44.9958898,
-   "lon": -74.9977591,
+   "lat": 44.9958745,
+   "lon": -74.9869284,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4714,9 +4703,20 @@
   },
   {
    "type": "node",
+   "id": 65428,
+   "lat": 44.9956796,
+   "lon": -74.986947,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
    "id": 65429,
-   "lat": 44.995394,
-   "lon": -74.9977428,
+   "lat": 44.9942164,
+   "lon": -74.9869241,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4726,19 +4726,8 @@
   {
    "type": "node",
    "id": 65430,
-   "lat": 44.9968657,
-   "lon": -74.9984318,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65431,
-   "lat": 44.9966682,
-   "lon": -74.9984586,
+   "lat": 44.9940976,
+   "lon": -74.9869391,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4747,9 +4736,20 @@
   },
   {
    "type": "node",
+   "id": 65431,
+   "lat": 44.9934306,
+   "lon": -74.9869653,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
    "id": 65432,
-   "lat": 44.99569,
-   "lon": -74.9984422,
+   "lat": 44.997492,
+   "lon": -74.9876457,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4759,8 +4759,19 @@
   {
    "type": "node",
    "id": 65433,
-   "lat": 44.9955711,
-   "lon": -74.9984405,
+   "lat": 44.9968266,
+   "lon": -74.9876269,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65434,
+   "lat": 44.9966883,
+   "lon": -74.9876331,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4769,20 +4780,9 @@
   },
   {
    "type": "node",
-   "id": 65434,
-   "lat": 44.9940938,
-   "lon": -74.9984341,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
    "id": 65435,
-   "lat": 44.9975126,
-   "lon": -74.9951932,
+   "lat": 44.9960319,
+   "lon": -74.9876633,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4792,19 +4792,19 @@
   {
    "type": "node",
    "id": 65436,
-   "lat": 44.9968629,
-   "lon": -74.9952107,
+   "lat": 44.995892,
+   "lon": -74.9876358,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65437,
-   "lat": 44.9967029,
-   "lon": -74.9952065,
+   "lat": 44.9955269,
+   "lon": -74.9876281,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4814,8 +4814,8 @@
   {
    "type": "node",
    "id": 65438,
-   "lat": 44.9955807,
-   "lon": -74.995194,
+   "lat": 44.9953903,
+   "lon": -74.9876269,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4825,8 +4825,8 @@
   {
    "type": "node",
    "id": 65439,
-   "lat": 44.9947577,
-   "lon": -74.995181,
+   "lat": 44.9942496,
+   "lon": -74.987643,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4836,8 +4836,8 @@
   {
    "type": "node",
    "id": 65440,
-   "lat": 44.9941076,
-   "lon": -74.9952036,
+   "lat": 44.9940567,
+   "lon": -74.98763,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4847,8 +4847,8 @@
   {
    "type": "node",
    "id": 65441,
-   "lat": 44.9974968,
-   "lon": -74.9959122,
+   "lat": 44.9949347,
+   "lon": -74.997014,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4858,19 +4858,19 @@
   {
    "type": "node",
    "id": 65442,
-   "lat": 44.9973698,
-   "lon": -74.9959068,
+   "lat": 44.9949359,
+   "lon": -74.9965709,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65443,
-   "lat": 44.9971904,
-   "lon": -74.9959259,
+   "lat": 44.9949292,
+   "lon": -74.991341,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4880,107 +4880,184 @@
   {
    "type": "node",
    "id": 65444,
-   "lat": 44.9970375,
-   "lon": -74.9958961,
+   "lat": 44.9938976,
+   "lon": -74.997693,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65445,
-   "lat": 44.9968951,
-   "lon": -74.9959254,
+   "lat": 44.9939124,
+   "lon": -74.9958986,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65446,
-   "lat": 44.9966762,
-   "lon": -74.9959064,
+   "lat": 44.9939235,
+   "lon": -74.994955,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65447,
-   "lat": 44.9960677,
-   "lon": -74.9959192,
+   "lat": 44.9939221,
+   "lon": -74.9947691,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65448,
-   "lat": 44.9958643,
-   "lon": -74.9958846,
+   "lat": 44.9939101,
+   "lon": -74.9944837,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65449,
-   "lat": 44.9957028,
-   "lon": -74.9959273,
+   "lat": 44.9939198,
+   "lon": -74.9943199,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65450,
-   "lat": 44.9955817,
-   "lon": -74.9959217,
+   "lat": 44.9939222,
+   "lon": -74.9940588,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65451,
-   "lat": 44.9953966,
-   "lon": -74.9958835,
+   "lat": 44.9939007,
+   "lon": -74.9938216,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65452,
-   "lat": 44.9974766,
-   "lon": -74.9926401,
+   "lat": 44.9939297,
+   "lon": -74.9933589,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Tilia americana"
    }
   },
   {
    "type": "node",
    "id": 65453,
-   "lat": 44.9973181,
-   "lon": -74.9926654,
+   "lat": 44.9938995,
+   "lon": -74.9926968,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65454,
+   "lat": 44.9938965,
+   "lon": -74.9924496,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65455,
+   "lat": 44.9939186,
+   "lon": -74.9922176,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65456,
+   "lat": 44.993915,
+   "lon": -74.9912963,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65457,
+   "lat": 44.9973109,
+   "lon": -74.9990017,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65458,
+   "lat": 44.9966591,
+   "lon": -74.9989985,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65459,
+   "lat": 44.997483,
+   "lon": -74.9997072,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65460,
+   "lat": 44.9973143,
+   "lon": -74.9996942,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -4989,86 +5066,9 @@
   },
   {
    "type": "node",
-   "id": 65454,
-   "lat": 44.9971613,
-   "lon": -74.9926841,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65455,
-   "lat": 44.9940711,
-   "lon": -74.992677,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65456,
-   "lat": 44.9934108,
-   "lon": -74.9926862,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65457,
-   "lat": 44.9974749,
-   "lon": -74.9933824,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65458,
-   "lat": 44.996854,
-   "lon": -74.9933521,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65459,
-   "lat": 44.9967029,
-   "lon": -74.9933667,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65460,
-   "lat": 44.9956971,
-   "lon": -74.9933546,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
    "id": 65461,
-   "lat": 44.9955424,
-   "lon": -74.9933791,
+   "lat": 44.9971769,
+   "lon": -74.9997148,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5078,19 +5078,19 @@
   {
    "type": "node",
    "id": 65462,
-   "lat": 44.9953716,
-   "lon": -74.9933547,
+   "lat": 44.9974719,
+   "lon": -75.009157,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65463,
-   "lat": 44.9947541,
-   "lon": -74.9933658,
+   "lat": 44.9966623,
+   "lon": -75.0091662,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5100,30 +5100,19 @@
   {
    "type": "node",
    "id": 65464,
-   "lat": 44.9975163,
-   "lon": -74.9901206,
+   "lat": 44.9968399,
+   "lon": -75.0098601,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65465,
-   "lat": 44.9971831,
-   "lon": -74.9901374,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Tilia americana"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65466,
-   "lat": 44.9966724,
-   "lon": -74.99012,
+   "lat": 44.9946215,
+   "lon": -75.0091914,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5132,9 +5121,9 @@
   },
   {
    "type": "node",
-   "id": 65467,
-   "lat": 44.995586,
-   "lon": -74.990138,
+   "id": 65466,
+   "lat": 44.9947778,
+   "lon": -75.0098976,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5143,9 +5132,20 @@
   },
   {
    "type": "node",
+   "id": 65467,
+   "lat": 44.9973535,
+   "lon": -75.0066391,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
    "id": 65468,
-   "lat": 44.9954069,
-   "lon": -74.9901259,
+   "lat": 44.9968658,
+   "lon": -75.0066581,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5155,19 +5155,19 @@
   {
    "type": "node",
    "id": 65469,
-   "lat": 44.994742,
-   "lon": -74.9901164,
+   "lat": 44.9967192,
+   "lon": -75.0066155,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Betula papyrifera"
+    "species": "Quercus rubra"
    }
   },
   {
    "type": "node",
    "id": 65470,
-   "lat": 44.9975008,
-   "lon": -74.9908428,
+   "lat": 44.9960633,
+   "lon": -75.0066607,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5177,8 +5177,19 @@
   {
    "type": "node",
    "id": 65471,
-   "lat": 44.9973692,
-   "lon": -74.9908318,
+   "lat": 44.9954258,
+   "lon": -75.0066194,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65472,
+   "lat": 44.9945921,
+   "lon": -75.0066289,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5187,9 +5198,20 @@
   },
   {
    "type": "node",
-   "id": 65472,
-   "lat": 44.9971654,
-   "lon": -74.9908447,
+   "id": 65473,
+   "lat": 44.9939442,
+   "lon": -75.0066572,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65474,
+   "lat": 44.9975133,
+   "lon": -75.007343,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5198,31 +5220,9 @@
   },
   {
    "type": "node",
-   "id": 65473,
-   "lat": 44.9968423,
-   "lon": -74.990836,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Quercus rubra"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65474,
-   "lat": 44.9947285,
-   "lon": -74.9908438,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
    "id": 65475,
-   "lat": 44.9974579,
-   "lon": -74.9869541,
+   "lat": 44.9973451,
+   "lon": -75.0073264,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5232,30 +5232,30 @@
   {
    "type": "node",
    "id": 65476,
-   "lat": 44.9968272,
-   "lon": -74.9869572,
+   "lat": 44.9968941,
+   "lon": -75.0073146,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Tilia americana"
+    "species": "Acer saccharum"
    }
   },
   {
    "type": "node",
    "id": 65477,
-   "lat": 44.9966658,
-   "lon": -74.9869335,
+   "lat": 44.9959123,
+   "lon": -75.0073377,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65478,
-   "lat": 44.996014,
-   "lon": -74.9869328,
+   "lat": 44.9955566,
+   "lon": -75.007344,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5265,30 +5265,30 @@
   {
    "type": "node",
    "id": 65479,
-   "lat": 44.9955611,
-   "lon": -74.9869451,
+   "lat": 44.995404,
+   "lon": -75.0073536,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Quercus rubra"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65480,
-   "lat": 44.9947491,
-   "lon": -74.986927,
+   "lat": 44.9941006,
+   "lon": -75.0073369,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
-    "species": "Acer saccharum"
+    "species": "Betula papyrifera"
    }
   },
   {
    "type": "node",
    "id": 65481,
-   "lat": 44.9945555,
-   "lon": -74.9869424,
+   "lat": 44.9968614,
+   "lon": -75.0040728,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5298,19 +5298,8 @@
   {
    "type": "node",
    "id": 65482,
-   "lat": 44.9944281,
-   "lon": -74.9869329,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Betula papyrifera"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65483,
-   "lat": 44.9934704,
-   "lon": -74.9869226,
+   "lat": 44.9960521,
+   "lon": -75.0040945,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5319,9 +5308,20 @@
   },
   {
    "type": "node",
+   "id": 65483,
+   "lat": 44.9954041,
+   "lon": -75.0040922,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
    "id": 65484,
-   "lat": 44.9973395,
-   "lon": -74.987632,
+   "lat": 44.9947879,
+   "lon": -75.0040786,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5331,8 +5331,8 @@
   {
    "type": "node",
    "id": 65485,
-   "lat": 44.997141,
-   "lon": -74.9876544,
+   "lat": 44.994611,
+   "lon": -75.0041022,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5342,8 +5342,8 @@
   {
    "type": "node",
    "id": 65486,
-   "lat": 44.9966772,
-   "lon": -74.987656,
+   "lat": 44.9940979,
+   "lon": -75.0041025,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5353,30 +5353,8 @@
   {
    "type": "node",
    "id": 65487,
-   "lat": 44.9958496,
-   "lon": -74.9876621,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65488,
-   "lat": 44.9957029,
-   "lon": -74.9876461,
-   "tags": {
-    "denotation": "garden",
-    "natural": "tree",
-    "species": "Acer saccharum"
-   }
-  },
-  {
-   "type": "node",
-   "id": 65489,
-   "lat": 44.9955289,
-   "lon": -74.9876704,
+   "lat": 44.9939427,
+   "lon": -75.0040848,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5385,9 +5363,42 @@
   },
   {
    "type": "node",
+   "id": 65488,
+   "lat": 44.9973652,
+   "lon": -75.0047964,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65489,
+   "lat": 44.9966801,
+   "lon": -75.0048009,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
    "id": 65490,
-   "lat": 44.9947393,
-   "lon": -74.9876484,
+   "lat": 44.9960706,
+   "lon": -75.0048135,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65491,
+   "lat": 44.9947743,
+   "lon": -75.0048154,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
@@ -5396,9 +5407,1714 @@
   },
   {
    "type": "node",
-   "id": 65491,
-   "lat": 44.994556,
-   "lon": -74.9876271,
+   "id": 65492,
+   "lat": 44.9946004,
+   "lon": -75.0048153,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65493,
+   "lat": 44.9941078,
+   "lon": -75.00481,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65494,
+   "lat": 44.9970237,
+   "lon": -75.001559,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65495,
+   "lat": 44.9968823,
+   "lon": -75.0015727,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65496,
+   "lat": 44.9955788,
+   "lon": -75.0015496,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65497,
+   "lat": 44.9954038,
+   "lon": -75.0015652,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65498,
+   "lat": 44.9947876,
+   "lon": -75.0015522,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65499,
+   "lat": 44.9946028,
+   "lon": -75.0015329,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65500,
+   "lat": 44.997504,
+   "lon": -75.0022599,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65501,
+   "lat": 44.9973387,
+   "lon": -75.0022421,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65502,
+   "lat": 44.9966797,
+   "lon": -75.0022514,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65503,
+   "lat": 44.9955648,
+   "lon": -75.0022461,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65504,
+   "lat": 44.9946238,
+   "lon": -75.0022767,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65505,
+   "lat": 44.9941175,
+   "lon": -75.0022677,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65506,
+   "lat": 44.9973424,
+   "lon": -74.9964963,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65507,
+   "lat": 44.9968879,
+   "lon": -74.9964799,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65508,
+   "lat": 44.9966873,
+   "lon": -74.996473,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65509,
+   "lat": 44.9965605,
+   "lon": -74.9964788,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65510,
+   "lat": 44.9960516,
+   "lon": -74.9964523,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65511,
+   "lat": 44.9959205,
+   "lon": -74.9964869,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65512,
+   "lat": 44.9955738,
+   "lon": -74.996451,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65513,
+   "lat": 44.9954114,
+   "lon": -74.9964958,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65514,
+   "lat": 44.9975341,
+   "lon": -74.9971976,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65515,
+   "lat": 44.9955798,
+   "lon": -74.9971937,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65516,
+   "lat": 44.9973799,
+   "lon": -74.9939268,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65517,
+   "lat": 44.99671,
+   "lon": -74.9939486,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65518,
+   "lat": 44.9960763,
+   "lon": -74.9939432,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65519,
+   "lat": 44.9959272,
+   "lon": -74.99392,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65520,
+   "lat": 44.9957284,
+   "lon": -74.9939444,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65521,
+   "lat": 44.9955722,
+   "lon": -74.993922,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65522,
+   "lat": 44.9973672,
+   "lon": -74.9946458,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65523,
+   "lat": 44.9968748,
+   "lon": -74.9946078,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65524,
+   "lat": 44.9967153,
+   "lon": -74.9946205,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65525,
+   "lat": 44.995413,
+   "lon": -74.9946202,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65526,
+   "lat": 44.9952391,
+   "lon": -74.9946088,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65527,
+   "lat": 44.9949269,
+   "lon": -74.9946101,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65528,
+   "lat": 44.9974782,
+   "lon": -74.9914089,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65529,
+   "lat": 44.9974842,
+   "lon": -74.9921148,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65530,
+   "lat": 44.9973289,
+   "lon": -74.9920774,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65531,
+   "lat": 44.9947869,
+   "lon": -74.9885208,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65532,
+   "lat": 44.9946121,
+   "lon": -74.9885155,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65533,
+   "lat": 44.9941413,
+   "lon": -74.9885337,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65534,
+   "lat": 44.9975209,
+   "lon": -74.9892547,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65535,
+   "lat": 44.9973694,
+   "lon": -74.989245,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65536,
+   "lat": 44.9960673,
+   "lon": -74.9892296,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65537,
+   "lat": 44.9945736,
+   "lon": -74.9892524,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65538,
+   "lat": 44.9944246,
+   "lon": -74.9892485,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65539,
+   "lat": 44.9968293,
+   "lon": -75.010259,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65540,
+   "lat": 44.996818,
+   "lon": -75.0099996,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65541,
+   "lat": 44.9968436,
+   "lon": -75.0097537,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65542,
+   "lat": 44.9968296,
+   "lon": -75.0091301,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65543,
+   "lat": 44.9968334,
+   "lon": -75.0088495,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65544,
+   "lat": 44.9968424,
+   "lon": -75.0065336,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65545,
+   "lat": 44.9968417,
+   "lon": -75.0063828,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65546,
+   "lat": 44.996833,
+   "lon": -75.0061078,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65547,
+   "lat": 44.996836,
+   "lon": -75.0038541,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65548,
+   "lat": 44.9968405,
+   "lon": -75.0035617,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65549,
+   "lat": 44.9968416,
+   "lon": -75.0026893,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65550,
+   "lat": 44.9968294,
+   "lon": -75.0024876,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65551,
+   "lat": 44.9968418,
+   "lon": -75.0022304,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65552,
+   "lat": 44.9973357,
+   "lon": -75.0099794,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65553,
+   "lat": 44.9973416,
+   "lon": -75.0088648,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65554,
+   "lat": 44.9973426,
+   "lon": -75.0076946,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65555,
+   "lat": 44.997315,
+   "lon": -75.0075057,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65556,
+   "lat": 44.997326,
+   "lon": -75.0063296,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65557,
+   "lat": 44.9973226,
+   "lon": -75.0054532,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65558,
+   "lat": 44.9973126,
+   "lon": -75.0052368,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65559,
+   "lat": 44.9973099,
+   "lon": -75.0038681,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65560,
+   "lat": 44.9973149,
+   "lon": -75.0035715,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65561,
+   "lat": 44.9973097,
+   "lon": -75.0033458,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65562,
+   "lat": 44.9973226,
+   "lon": -75.0028853,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65563,
+   "lat": 44.996831,
+   "lon": -74.9988508,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65564,
+   "lat": 44.9968253,
+   "lon": -74.9974037,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65565,
+   "lat": 44.9968258,
+   "lon": -74.997208,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65566,
+   "lat": 44.9968406,
+   "lon": -74.9962764,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65567,
+   "lat": 44.9968411,
+   "lon": -74.9961041,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65568,
+   "lat": 44.9968298,
+   "lon": -74.9951636,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65569,
+   "lat": 44.9968244,
+   "lon": -74.9948936,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65570,
+   "lat": 44.9968437,
+   "lon": -74.993801,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65571,
+   "lat": 44.9968505,
+   "lon": -74.993525,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65572,
+   "lat": 44.9968488,
+   "lon": -74.9933162,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65573,
+   "lat": 44.9968415,
+   "lon": -74.9912637,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65574,
+   "lat": 44.9968367,
+   "lon": -74.9910241,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65575,
+   "lat": 44.9968445,
+   "lon": -74.9901139,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65576,
+   "lat": 44.996821,
+   "lon": -74.9894623,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65577,
+   "lat": 44.9968303,
+   "lon": -74.989178,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65578,
+   "lat": 44.9973178,
+   "lon": -74.9990579,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65579,
+   "lat": 44.9973212,
+   "lon": -74.9988139,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65580,
+   "lat": 44.9973265,
+   "lon": -74.9986021,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65581,
+   "lat": 44.9973132,
+   "lon": -74.9983532,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65582,
+   "lat": 44.997343,
+   "lon": -74.9972277,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65583,
+   "lat": 44.9973344,
+   "lon": -74.9964938,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65584,
+   "lat": 44.9973289,
+   "lon": -74.996275,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65585,
+   "lat": 44.9973441,
+   "lon": -74.9947091,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65586,
+   "lat": 44.9973376,
+   "lon": -74.9945112,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65587,
+   "lat": 44.9973396,
+   "lon": -74.9935219,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65588,
+   "lat": 44.9973103,
+   "lon": -74.9924207,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65589,
+   "lat": 44.9973439,
+   "lon": -74.991042,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65590,
+   "lat": 44.9973442,
+   "lon": -74.9901436,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65591,
+   "lat": 44.9973252,
+   "lon": -74.9897048,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65592,
+   "lat": 44.9954956,
+   "lon": -75.0079258,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65593,
+   "lat": 44.9954893,
+   "lon": -75.0076663,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65594,
+   "lat": 44.9954806,
+   "lon": -75.0051387,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65595,
+   "lat": 44.9954991,
+   "lon": -75.0040235,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65596,
+   "lat": 44.9955039,
+   "lon": -75.0035776,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65597,
+   "lat": 44.9954814,
+   "lon": -75.0026289,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65598,
+   "lat": 44.9954969,
+   "lon": -75.0024041,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65599,
+   "lat": 44.9954833,
+   "lon": -75.001492,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65600,
+   "lat": 44.9954729,
+   "lon": -75.001077,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65601,
+   "lat": 44.9955011,
+   "lon": -74.9994177,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65602,
+   "lat": 44.9954693,
+   "lon": -74.9992239,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65603,
+   "lat": 44.9954681,
+   "lon": -74.9989674,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65604,
+   "lat": 44.9954782,
+   "lon": -74.9987435,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65605,
+   "lat": 44.9954962,
+   "lon": -74.9985145,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65606,
+   "lat": 44.9954774,
+   "lon": -74.9975972,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65607,
+   "lat": 44.9954861,
+   "lon": -74.9973945,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65608,
+   "lat": 44.9955009,
+   "lon": -74.9962466,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65609,
+   "lat": 44.9954773,
+   "lon": -74.996016,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65610,
+   "lat": 44.9959771,
+   "lon": -75.0079075,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65611,
+   "lat": 44.995972,
+   "lon": -75.0076465,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65612,
+   "lat": 44.9959888,
+   "lon": -75.0074491,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65613,
+   "lat": 44.9959927,
+   "lon": -75.0062731,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65614,
+   "lat": 44.995993,
+   "lon": -75.0051205,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65615,
+   "lat": 44.9959676,
+   "lon": -75.0026159,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65616,
+   "lat": 44.9959806,
+   "lon": -75.0012792,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65617,
+   "lat": 44.9959921,
+   "lon": -75.0010664,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65618,
+   "lat": 44.9959898,
+   "lon": -74.9982935,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65619,
+   "lat": 44.9959792,
+   "lon": -74.9976498,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65620,
+   "lat": 44.9959932,
+   "lon": -74.9962082,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65621,
+   "lat": 44.9941528,
+   "lon": -75.0101826,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65622,
+   "lat": 44.9941333,
+   "lon": -75.0099404,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65623,
+   "lat": 44.9941341,
+   "lon": -75.0090268,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65624,
+   "lat": 44.9941507,
+   "lon": -75.0088058,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65625,
+   "lat": 44.9941275,
+   "lon": -75.0074469,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65626,
+   "lat": 44.9941322,
+   "lon": -75.0072169,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65627,
+   "lat": 44.9941312,
+   "lon": -75.0053967,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65628,
+   "lat": 44.9941327,
+   "lon": -75.0051208,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65629,
+   "lat": 44.9941454,
+   "lon": -75.0048901,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65630,
+   "lat": 44.9941326,
+   "lon": -75.0035305,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65631,
+   "lat": 44.9941519,
+   "lon": -75.0028124,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65632,
+   "lat": 44.9941473,
+   "lon": -75.0026193,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65633,
+   "lat": 44.9941258,
+   "lon": -75.0024136,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65634,
+   "lat": 44.9941298,
+   "lon": -75.0021748,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65635,
+   "lat": 44.9941385,
+   "lon": -75.0000776,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65636,
+   "lat": 44.994123,
+   "lon": -74.9999127,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65637,
+   "lat": 44.9941243,
+   "lon": -74.9991908,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65638,
+   "lat": 44.9941303,
+   "lon": -74.9989506,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65639,
+   "lat": 44.9946348,
+   "lon": -75.0103848,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65640,
+   "lat": 44.9946319,
+   "lon": -75.0090246,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65641,
+   "lat": 44.9946291,
+   "lon": -75.006505,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65642,
+   "lat": 44.9946375,
+   "lon": -75.0051456,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65643,
+   "lat": 44.9946404,
+   "lon": -75.0048907,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Betula papyrifera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65644,
+   "lat": 44.9946313,
+   "lon": -75.0039653,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Quercus rubra"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65645,
+   "lat": 44.9946243,
+   "lon": -75.0014933,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Tilia americana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65646,
+   "lat": 44.9946343,
+   "lon": -75.0012712,
+   "tags": {
+    "denotation": "garden",
+    "natural": "tree",
+    "species": "Acer saccharum"
+   }
+  },
+  {
+   "type": "node",
+   "id": 65647,
+   "lat": 44.994633,
+   "lon": -74.9998994,
    "tags": {
     "denotation": "garden",
     "natural": "tree",
