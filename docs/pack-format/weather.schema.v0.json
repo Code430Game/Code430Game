@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/pack-format/weather.schema.v0.json",
+  "title": "Weather states v0",
+  "description": "Weather states and the weighted table that walks between them (add-weather). The base game ships game/world/sky/weather.v0.json, validated against this schema in CI; packs cannot replace the table yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["states", "start"],
+  "properties": {
+    "_comment": {"type": "string"},
+    "states": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["coverage", "precip", "fog", "wind", "temp_c", "duration_s", "transition_s", "next"],
+        "properties": {
+          "coverage": {"type": "number", "minimum": 0, "maximum": 1},
+          "precip": {"type": "number", "minimum": 0, "maximum": 1},
+          "fog": {"type": "number", "minimum": 0, "maximum": 1},
+          "wind": {"$ref": "#/$defs/range"},
+          "temp_c": {"$ref": "#/$defs/range"},
+          "duration_s": {"$ref": "#/$defs/range"},
+          "transition_s": {"type": "number", "exclusiveMinimum": 0},
+          "tint": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1.5}, "minItems": 3, "maxItems": 3},
+          "grip": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "headlights": {"type": "number", "minimum": 0, "maximum": 1},
+          "next": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {"type": "number", "minimum": 0}
+          }
+        }
+      }
+    },
+    "start": {"type": "string"},
+    "snow_hours": {"$ref": "#/$defs/range"},
+    "bias_wet_weight": {"type": "number", "minimum": 1},
+    "wetness_rise_s": {"type": "number", "exclusiveMinimum": 0},
+    "wetness_dry_s": {"type": "number", "exclusiveMinimum": 0},
+    "snow_rise_s": {"type": "number", "exclusiveMinimum": 0},
+    "snow_melt_s": {"type": "number", "exclusiveMinimum": 0}
+  },
+  "$defs": {
+    "range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+  }
+}
