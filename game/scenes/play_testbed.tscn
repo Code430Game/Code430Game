@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scenes/play_testbed.gd" id="1"]
+[ext_resource type="Shader" path="res://world/sky/sky.gdshader" id="sky_shader"]
 [ext_resource type="PackedScene" path="res://ui/map/overview_map.tscn" id="5"]
 [ext_resource type="Script" path="res://ui/map/minimap.gd" id="6"]
 [ext_resource type="PackedScene" path="res://ui/pause/pause_menu.tscn" id="7"]
@@ -10,11 +11,11 @@
 [ext_resource type="PackedScene" path="res://ui/character/character_creator.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://ui/report/report_form.tscn" id="9"]
 
-[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
-sky_top_color = Color(0.25, 0.42, 0.72, 1)
-sky_horizon_color = Color(0.68, 0.72, 0.78, 1)
-ground_bottom_color = Color(0.15, 0.15, 0.17, 1)
-ground_horizon_color = Color(0.68, 0.72, 0.78, 1)
+[sub_resource type="ShaderMaterial" id="sky_mat"]
+shader = ExtResource("sky_shader")
+shader_parameter/top_color = Color(0.25, 0.42, 0.72, 1)
+shader_parameter/horizon_color = Color(0.68, 0.72, 0.78, 1)
+shader_parameter/ground_color = Color(0.15, 0.15, 0.17, 1)
 
 [sub_resource type="Sky" id="sky"]
 sky_material = SubResource("sky_mat")

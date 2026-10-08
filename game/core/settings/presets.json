@@ -27,7 +27,11 @@
     "vegetation_bushes_per_chunk": 600,
     "vegetation_lod0_m": 260.0,
     "vegetation_sway": false,
-    "aircraft_lookahead_m": 300.0
+    "aircraft_lookahead_m": 300.0,
+    "cloud_layers": 1,
+    "cloud_shadows": false,
+    "rain_particles": 1500,
+    "snow_particles": 600
   },
   "high": {
     "label": "High (desktop)",
@@ -56,6 +60,10 @@
     "vegetation_bushes_per_chunk": 2000,
     "vegetation_lod0_m": 400.0,
     "vegetation_sway": true,
-    "aircraft_lookahead_m": 600.0
+    "aircraft_lookahead_m": 600.0,
+    "cloud_layers": 2,
+    "cloud_shadows": true,
+    "rain_particles": 6000,
+    "snow_particles": 2500
   }
 }
