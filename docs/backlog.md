@@ -5,6 +5,13 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-08
 
+- **The gang was underground on the Deck (human: "I did not see the gang in the marked area").**
+  Fixed on `fix/gang-spawns-in-play`: the turf's ground height came from a physics ray at
+  load, before the turf's chunk (a kilometre from the spawn) had collision, so the crew stood
+  at y 0 under a street at 62.6. `MapPack.ground_height(x, z)` now reads the pack's heightmap
+  with no physics; the ray only refines within 3 m (from 60 m up it found the viaduct deck).
+  Anything else that places actors far from the player at load should use the same sampler.
+
 - **Proving ground is sparse (human, Deck 2026-10-08: "that world seems to work. It's a little
   sparse so we might come back to spruce it up").** Archived on that verdict. A spruce-up
   round for Double Cross: houses on every residential block, shopfronts and a few taller
