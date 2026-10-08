@@ -62,6 +62,17 @@ func test_free_agent_reaches_speed_fraction_of_limit() -> void:
 	assert_float(a.speed).is_equal_approx(50.0 / 3.6 * float(m.config["speed_fraction"]), 0.2)
 
 
+func test_snow_scales_the_lane_limit_by_the_weather_factor() -> void:
+	var m := _manager(_graph([{"id": "w1.0", "pl": [[0, 0, 0], [400, 0, 0]], "kph": 50}]))
+	m.anchors = PackedVector3Array([Vector3(0, 0, 0)])
+	var table: Dictionary = m.config["weather_speed_factor"]
+	m.weather_speed_factor = float(table["snow"])
+	var a := _add_agent(m, 0, 10.0, 0.0)
+	for i in range(300):
+		m.step(1.0 / 60.0)
+	assert_float(a.speed).is_equal_approx(50.0 / 3.6 * float(m.config["speed_fraction"]) * 0.7, 0.2)
+
+
 func test_second_car_waits_for_occupied_junction() -> void:
 	# Two one-way streets crossing at the origin; both cars arrive together.
 	var g := _graph([

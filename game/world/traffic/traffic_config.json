@@ -24,6 +24,7 @@
     "parking": 0.0
   },
   "speed_fraction": 0.9,
+  "weather_speed_factor": {"clear": 1.0, "overcast": 1.0, "rain": 0.85, "snow": 0.7, "fog": 0.8},
   "connector_speed_kph": 25,
   "accel_mps2": 2.5,
   "decel_mps2": 6.0,

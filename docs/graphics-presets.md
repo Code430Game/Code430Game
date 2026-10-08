@@ -23,6 +23,9 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | Parked car bodies (`parked_car_bodies`) | 8 | 16 | parked cars: how many of the nearest get physics bodies |
 | Surface detail (`surface_detail_px`, `surface_detail_macro`) | 512 px, one sample | 1024 px, plus a large-scale sample against tiling | ground materials (asphalt, concrete, paint) via `SurfaceDetail` |
 | Aircraft look-ahead (`aircraft_lookahead_m`) | 300 m | 600 m | streaming: a second anchor this far at most ahead of a flying helicopter, so the city ahead is built in time (add-flyable-helicopter) |
+| Cloud layers (`cloud_layers`) | 1 | 2 (a second, slower high layer) | sky shader via `DayNight` (add-weather) |
+| Cloud shadows (`cloud_shadows`) | off | on: a noise projector on the sun once the sky is mostly cloud | `DayNight` |
+| Rain / snow particles (`rain_particles`, `snow_particles`) | 1500 / 600 | 6000 / 2500 | `Precipitation`, the particle box around the camera |
 
 ## Adding a feature
 1. Add the key to both presets in `presets.json`.

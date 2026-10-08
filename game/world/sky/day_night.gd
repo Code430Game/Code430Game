@@ -18,6 +18,18 @@ var sun: DirectionalLight3D
 var moon: DirectionalLight3D
 var environment: Environment
 var sky_material: ProceduralSkyMaterial
+var sky_shader: ShaderMaterial  # sky.gdshader: the gradient plus clouds (add-weather)
+## Weather inputs, written by WeatherController each frame (0 and white when there is none):
+## cloud coverage dims the sun and ambient, fog drives the distance fog and hides the sun disc,
+## the tint colours the clouds, wind times time scrolls them.
+var weather_coverage: float = 0.0
+var weather_fog: float = 0.0
+var weather_tint: Color = Color.WHITE
+var weather_wind: Vector2 = Vector2.ZERO
+var weather_time: float = 0.0
+var cloud_layers: int = 1
+var cloud_shadows: bool = false
+var _base_volumetric_density: float = 0.0
 var _emissive: Array = []  # [[StandardMaterial3D, base energy], ...]
 var _shaders: Array[ShaderMaterial] = []
 var _night_factor: float = 0.0
@@ -44,6 +56,11 @@ func setup(sun_light: DirectionalLight3D, env: Environment) -> void:
 	environment = env
 	if env != null and env.sky != null and env.sky.sky_material is ProceduralSkyMaterial:
 		sky_material = env.sky.sky_material
+	elif env != null and env.sky != null and env.sky.sky_material is ShaderMaterial:
+		sky_shader = env.sky.sky_material
+		sky_shader.set_shader_parameter("cloud_noise", WeatherController.cloud_noise_texture())
+	if env != null:
+		_base_volumetric_density = env.volumetric_fog_density
 	moon = DirectionalLight3D.new()
 	moon.name = "Moon"
 	moon.shadow_enabled = false
@@ -103,15 +120,23 @@ func apply() -> void:
 			sun.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), Vector3(0, 200, 0))
 		var warm := _c(config.get("sun_color_horizon", [1, 0.62, 0.38]))
 		var noon := _c(config.get("sun_color_noon", [1, 0.98, 0.94]))
-		sun.light_color = warm.lerp(noon, daylight)
-		sun.light_energy = float(config.get("sun_energy_noon", 1.3)) * daylight
+		sun.light_color = warm.lerp(noon, daylight).lerp(weather_tint * warm.lerp(noon, daylight), weather_coverage)
+		# Overcast dims the sun; fog flattens it further. The sky shader hides the disc itself.
+		sun.light_energy = float(config.get("sun_energy_noon", 1.3)) * daylight * (1.0 - weather_coverage * 0.6) * (1.0 - weather_fog * 0.5)
 		sun.visible = elev > -0.5
+		if cloud_shadows:
+			# A noise projector on the sun stands in for cloud shadows once the sky is mostly cloud.
+			var want: Texture2D = WeatherController.cloud_noise_texture() if weather_coverage > 0.45 else null
+			if sun.light_projector != want:
+				sun.light_projector = want
+		elif sun.light_projector != null:
+			sun.light_projector = null
 	if moon != null:
 		moon.light_color = _c(config.get("moon_color", [0.55, 0.65, 0.9]))
 		moon.light_energy = float(config.get("moon_energy", 0.12)) * _night_factor
 		moon.visible = _night_factor > 0.01
 		moon.global_transform = Transform3D(Basis.looking_at(Vector3(0.3, -0.8, -0.5).normalized(), Vector3.UP), Vector3(0, 200, 0))
-	if sky_material != null:
+	if sky_material != null or sky_shader != null:
 		var day: Dictionary = config.get("sky_day", {})
 		var dusk: Dictionary = config.get("sky_dusk", {})
 		var night: Dictionary = config.get("sky_night", {})
@@ -119,13 +144,37 @@ func apply() -> void:
 		var t_dusk := clampf(1.0 - absf(elev) / dusk_w, 0.0, 1.0)
 		var top := _c(day.get("top")) if elev > 0.0 else _c(night.get("top"))
 		var hor := _c(day.get("horizon")) if elev > 0.0 else _c(night.get("horizon"))
-		sky_material.sky_top_color = top.lerp(_c(dusk.get("top")), t_dusk)
-		sky_material.sky_horizon_color = hor.lerp(_c(dusk.get("horizon")), t_dusk)
-		sky_material.ground_horizon_color = sky_material.sky_horizon_color
+		var sky_top := top.lerp(_c(dusk.get("top")), t_dusk)
+		var sky_hor := hor.lerp(_c(dusk.get("horizon")), t_dusk)
+		# Weather: overcast greys the sky toward the tinted horizon, fog pulls everything to one tone.
+		var grey := sky_hor.lerp(sky_top, 0.35) * weather_tint
+		sky_top = sky_top.lerp(grey, weather_coverage * 0.7).lerp(sky_hor * weather_tint, weather_fog)
+		sky_hor = sky_hor.lerp(sky_hor * weather_tint, maxf(weather_coverage * 0.5, weather_fog))
+		if sky_material != null:
+			sky_material.sky_top_color = sky_top
+			sky_material.sky_horizon_color = sky_hor
+			sky_material.ground_horizon_color = sky_material.sky_horizon_color
+		if sky_shader != null:
+			sky_shader.set_shader_parameter("top_color", sky_top)
+			sky_shader.set_shader_parameter("horizon_color", sky_hor)
+			sky_shader.set_shader_parameter("night", _night_factor)
+			sky_shader.set_shader_parameter("cloud_coverage", weather_coverage)
+			sky_shader.set_shader_parameter("cloud_tint", weather_tint)
+			sky_shader.set_shader_parameter("cloud_layers", cloud_layers)
+			sky_shader.set_shader_parameter("cloud_offset", weather_wind * weather_time * 0.0004)
+			sky_shader.set_shader_parameter("sun_disc", clampf(1.0 - weather_fog * 1.6, 0.0, 1.0))
 	if environment != null:
 		environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 		environment.ambient_light_sky_contribution = 1.0
-		environment.ambient_light_energy = lerpf(float(config.get("ambient_day", 0.5)), float(config.get("ambient_night", 0.18)), _night_factor)
+		environment.ambient_light_energy = lerpf(float(config.get("ambient_day", 0.5)), float(config.get("ambient_night", 0.18)), _night_factor) * (1.0 - weather_coverage * 0.25)
+		# Distance fog follows the weather's fog value; the preset's volumetric haze thickens with it.
+		environment.fog_enabled = weather_fog > 0.001
+		environment.fog_mode = Environment.FOG_MODE_EXPONENTIAL
+		environment.fog_density = weather_fog * weather_fog * float(config.get("fog_density_max", 0.03))
+		environment.fog_light_color = (sky_material.sky_horizon_color if sky_material != null else Color(0.7, 0.72, 0.76)).lerp(Color(0.05, 0.06, 0.09), _night_factor)
+		environment.fog_sky_affect = clampf(weather_fog * 1.2, 0.0, 1.0)
+		if environment.volumetric_fog_enabled:
+			environment.volumetric_fog_density = _base_volumetric_density + weather_fog * float(config.get("volumetric_fog_max", 0.02))
 	for pair in _emissive:
 		var mat: StandardMaterial3D = pair[0]
 		mat.emission_energy_multiplier = float(pair[1]) * _night_factor
