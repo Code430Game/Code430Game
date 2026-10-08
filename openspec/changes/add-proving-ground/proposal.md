@@ -28,17 +28,20 @@ place to be proved in minutes, a loop to drive laps on, and somewhere to put the
   A fictional town, working name **Double Cross** (track and gang share the name; the town's
   own name is still open), about 2.4 km by 1.6 km with a river across the middle and a
   greenbelt along the top and left edges:
-  - the **loop** is a figure eight of roughly 2.7 km. The small lobe, top left, runs at
-    street level through the main city as a two-lane `secondary` and drops into a small
-    roundabout on its west side. From the crossing the big lobe climbs to an elevated
-    `motorway` (no junctions, the flat-out half of the lap), crosses the river on its east
-    side, sweeps round the lower right and returns to the crossing;
-  - the **crossing**: the two straights meet in the middle of the map on one bridge over the
-    river, the street-level straight on the lower deck and the highway straight on the upper
-    (`bridge=yes`, `layer=1` and `layer=2`), so one structure exercises piers, abutments, lane
-    layers and the river in a single place; a footbridge beside it;
-  - two **exits** in the lower right, one on the way down and one on the way back up, with
-    gores, feeding the residential grid; an underpass where a path crosses under the ramp;
+  - the **loop** is a figure eight of roughly 2.7 km made of two straights at right angles:
+    the **highway** runs west to east along the river's north bank at grade, and a
+    **vertical** road crosses the highway and the river together on one bridge at the map
+    centre. North of the crossing the loop runs at street level through the main city as a
+    two-lane `secondary` with a small roundabout on its west side, and returns east along
+    the highway line to the crossing. South of it the highway continues east along the
+    river, crosses it at the far right on a second bridge, loops round the lower right as
+    elevated `motorway` (no junctions, the flat-out half of the lap) and comes back north up
+    the vertical straight over the centre bridge;
+  - the **crossing**: the vertical road is `bridge=yes layer=1` over the highway (at grade)
+    and the river in one span, with a footbridge beside it, so one structure exercises
+    piers, abutments, lane layers and the river in a single place;
+  - two **exits** with gores feeding the residential grid, one on the far-right descent and
+    one on the vertical ascent; an underpass where a path crosses under a ramp;
   - the **main city** grid, top left, around and through the small lobe: signals where the
     avenues cross the loop, stops elsewhere, a one-way pair, a bus loop with a reserved lane
     and stops, sidewalks, crossings, shopfronts, a multi-storey garage with an underground
@@ -51,7 +54,8 @@ place to be proved in minutes, a loop to drive laps on, and somewhere to put the
     grass and paths;
   - every **edge street** curls back into the grid instead of dead-ending; one deliberate
     dead end at the map edge keeps the edge closure testable;
-  - the **spawn** on the small lobe's straight, facing the start line.
+  - the **spawn** on the vertical straight just north of the centre bridge, facing the
+    start line.
   Street and place names are generic and invented; no real people, brands or parodies.
 - **A committed pack.** The generated pack `packs/proving-ground` (id
   `code430.proving-ground`, region `regions/proving-ground.json` with `"dem": "synthetic"`
