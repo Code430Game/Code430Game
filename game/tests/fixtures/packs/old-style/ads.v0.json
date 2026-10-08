@@ -1,0 +1,5 @@
+{
+  "ads": [
+    {"id": "old.one", "variants": {"fallback": {"text": "Old Style Diner"}}}
+  ]
+}

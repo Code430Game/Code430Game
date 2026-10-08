@@ -11,7 +11,7 @@ Status (2026-10-06): a playable sandbox in one district, central Ottawa, built f
 - an in-game issue reporter;
 - LAN co-op (in progress).
 
-Not yet built: the pack loader for third-party packs, missions, and an economy. `docs/open-work.md` lists what is next.
+Not yet built: missions, a pack browser, and an economy. `docs/open-work.md` lists what is next.
 
 ## Requirements
 - Godot `4.7.2-stable` (see `.godot-version`). macOS: `brew install --cask godot`. Others: https://godotengine.org/download.
@@ -80,7 +80,7 @@ Or let `scripts/deck-bench.sh` do all of it: package, deploy, run the benchmark 
 To get it into the Game Mode library without Desktop Mode, `uv run scripts/deck-add-shortcut.py` writes the non-Steam shortcut over SSH; restart the Deck afterwards and it shows up under the Non-Steam tab.
 
 Manual route:
-1. Run `scripts/package-linux.sh` (or download the `code430-linux-*` artifact from GitHub Actions). You get `build/linux/` with `code430.x86_64`, `code430.pck`, and a `packs/` folder. The game looks for packs next to the executable, in `~/.local/share/Code 430/packs`, or in the repo when run from the editor.
+1. Run `scripts/package-linux.sh` (or download the `code430-linux-*` artifact from GitHub Actions). You get `build/linux/` with `code430.x86_64`, `code430.pck`, and a `packs/` folder. The game looks for packs next to the executable, in `~/.local/share/Code 430/packs`, or in the repo when run from the editor. Every pack found is listed on the pause menu's Packs tab, where data-only packs (characters, stories) can be enabled or disabled for the next load; `--packs=id,id` pins the enabled set for one run. The format is documented in `docs/pack-format/README.md`.
 2. On the Deck, switch to Desktop Mode (Power menu > Switch to Desktop).
 3. Copy both files to the Deck, for example with a USB stick, or from a Mac over the network:
    ```

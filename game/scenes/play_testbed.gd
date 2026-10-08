@@ -122,6 +122,7 @@ var _last_vy: float = 0.0
 const BUMP_THRESHOLD_MPS2 := 90.0
 var _spawn_override: Vector3 = Vector3.INF
 var _pack_id: String = ""  # --pack=<id>; resolved against Settings.map_pack and PACK_ID at load
+var _packs_pinned: PackedStringArray = PackedStringArray()  # --packs=id,id: the enabled non-map set for this run
 var _lap: LapTimer  # laps across the pack's start line (add-proving-ground), local to this player
 var _lap_label: Label
 var _spawn_on_foot_at: Vector3 = Vector3.INF  # --spawn=x,y,z: the player starts on foot exactly here (a garage floor)
@@ -176,14 +177,19 @@ func _ready() -> void:
 	Session.joined.connect(_on_joined)
 	Session.refused.connect(func(reason: String) -> void: _pause_menu.set_status("join refused: " + reason); _set_mirror(false))
 	Session.session_ended.connect(func() -> void: _pause_menu.set_status("offline"); _set_mirror(false))
-	# --pack=<id> wins, then the saved map_pack setting, then the Ottawa default.
+	# --pack=<id> wins, then the saved map_pack setting, then the Ottawa default. The loader
+	# discovered every pack at start; --packs=id,id pins the non-map set for this run.
 	if _pack_id == "":
 		_pack_id = Settings.map_pack if Settings.map_pack != "" else PACK_ID
-	var dir := PackLocator.find_pack(_pack_id)
+	if not _packs_pinned.is_empty():
+		PackLoader.pin(_packs_pinned)
+	PackLoader.set_active_map(_pack_id)
+	var dir := PackLoader.map_pack_dir(_pack_id)
 	if dir == "":
-		_hud.text = "Map pack %s not found.\nSearched: %s" % [_pack_id, "\n".join(PackLocator.search_dirs())]
+		_hud.text = "Map pack %s not found.\nSearched: %s" % [_pack_id, "\n".join(PackLoader.dirs())]
 		push_error(_hud.text)
 		return
+	print("packs: %s" % ", ".join(PackLoader.loaded_ids))
 	_pack = MapPack.new()
 	if not _pack.load(dir):
 		_hud.text = "Failed to load pack at %s" % dir
@@ -734,6 +740,7 @@ func _setup_factions() -> void:
 
 func _setup_net() -> void:
 	Session.local_manifest = _pack.manifest_summary()
+	Session.local_packs = PackLoader.manifest_summary()
 	_player_sync = PlayerSync.new()
 	_player_sync.name = "PlayerSync"
 	_player_sync.player = _player
@@ -765,16 +772,19 @@ func _setup_net() -> void:
 		_join_game(_join_address)
 
 
+## Boards draw from the content registry: the map's ads plus any enabled pack's (a story pack
+## can add ads to the map it depends on).
 func _setup_billboards() -> void:
-	if _pack.ads.is_empty():
+	var ads := PackLoader.items("ads")
+	if ads.is_empty():
 		return
 	_billboards = Billboards.new()
 	_billboards.name = "Billboards"
 	_billboards.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_world.add_child(_billboards)
-	_billboards.setup(_pack.graph.edges.values(), _pack.ads, SESSION_SEED, Billboards.obstacles_from_pack(_pack))
+	_billboards.setup(_pack.graph.edges.values(), ads, SESSION_SEED, Billboards.obstacles_from_pack(_pack))
 	var first: Vector3 = _billboards.sites[0]["transform"].origin if _billboards.count() > 0 else Vector3.ZERO
-	print("billboards: %d boards from %d ads, tone %s, first at (%.0f, %.1f, %.0f)" % [_billboards.count(), _pack.ads.size(), ContentMode.current, first.x, first.y, first.z])
+	print("billboards: %d boards from %d ads, tone %s, first at (%.0f, %.1f, %.0f)" % [_billboards.count(), ads.size(), ContentMode.current, first.x, first.y, first.z])
 	var warning := _tone_warning()
 	if warning != "":
 		print("content: " + warning)
@@ -811,9 +821,8 @@ func _open_report(from_pause: bool) -> void:
 	var clock := _day_night.clock_text() if _day_night != null else ""
 	var place := Diagnostics.place_for(_pack.graph if _pack != null else null, body, driving, clock)
 	var packs := []
-	if _pack != null:
-		var summary := _pack.manifest_summary()
-		packs.append({"id": summary["id"], "version": summary["version"]})
+	for row: Dictionary in PackLoader.manifest_summary():
+		packs.append({"id": row["id"], "version": row["version"]})
 	var redactor := Diagnostics.local_redactor()
 	var diag := Diagnostics.collect(place, packs, _pause_menu.captured_frame_stats, redactor)
 	_report_form.open(_pause_menu.captured_frame, diag, Diagnostics.log_tail(redactor))
@@ -1049,6 +1058,8 @@ func _parse_args() -> void:
 			_autodrive = true
 		elif arg.begins_with("--pack="):
 			_pack_id = arg.get_slice("=", 1)
+		elif arg.begins_with("--packs="):
+			_packs_pinned = arg.get_slice("=", 1).split(",", false)
 		elif arg.begins_with("--preset="):
 			Settings.apply_preset(arg.get_slice("=", 1))
 		elif arg.begins_with("--screenshot="):

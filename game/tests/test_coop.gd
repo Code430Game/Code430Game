@@ -10,6 +10,20 @@ func test_manifest_mismatch_names_the_field() -> void:
 	assert_str(Session.mismatch_reason(host, {"id": "a", "version": "1", "hash": "y"})).contains("hash")
 
 
+func test_pack_set_mismatch_names_the_first_difference() -> void:
+	var map := {"id": "code430.ottawa-centretown", "version": "0.1.0", "hash": "m"}
+	var chars := {"id": "code430.characters", "version": "0.1.0", "hash": "c"}
+	var host := [chars, map]
+	assert_str(Session.pack_set_mismatch(host, [chars, map])).is_empty()
+	assert_str(Session.pack_set_mismatch(host, [map])).contains("code430.characters missing on your side")
+	var old_chars := {"id": "code430.characters", "version": "0.0.9", "hash": "c"}
+	assert_str(Session.pack_set_mismatch(host, [old_chars, map])).contains("host has 0.1.0, you have 0.0.9")
+	var edited := {"id": "code430.characters", "version": "0.1.0", "hash": "zz"}
+	assert_str(Session.pack_set_mismatch(host, [edited, map])).contains("differs from the host's copy")
+	var extra := {"id": "test.story-alpha", "version": "1.2.0", "hash": "a"}
+	assert_str(Session.pack_set_mismatch(host, [chars, map, extra])).contains("test.story-alpha is not enabled on the host")
+
+
 func test_traffic_snapshot_round_trips_positions_headings_colours_and_classes() -> void:
 	var m: TrafficManager = auto_free(TrafficManager.new())
 	add_child(m)
