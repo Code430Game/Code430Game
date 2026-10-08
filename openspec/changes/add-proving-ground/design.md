@@ -14,21 +14,28 @@
   underpass dig and the terrain flattening are all exercised; `FlatSource` is the escape hatch.
 - Determinism: the generator takes no clock or random input; the pack diff in CI is the test.
 
-## The loop as a track, the grid inside it
-- Ring road class `secondary`, `lanes=2`, `oneway=no`, 50 km/h; the straight along the water
-  is 400 m; sweepers are arcs of 180 m and 140 m radius with no junction on them; the chicane
-  is two 60 m offsets on the far side from the water.
-- The grid sits inside the ring. Its two avenues (`tertiary`) run across the grid and out to
-  the ring on both sides, meeting it at four signalled T-junctions; four `residential` streets
-  reach the ring at stop signs. So the ring is a lap when driven straight through and the way
-  into town when turned off, and every junction type the junction builder handles (signals,
-  stops, a T against a curve, a four-way inside the grid) is on the lap or one turn off it.
-  Junctions on the ring sit on the straights, never in a sweeper, so laps stay fast.
-- The grade-separated crossing is the loop bridging the highway stub (`bridge=yes`,
-  `layer=1`); the canal bridge is a second bridge with a footbridge beside it.
-- The start line is a `lap.v0.json` entry: a point on the loop and a direction; the timer
-  triggers on the car crossing the line in that direction, with a 10 s re-arm so a reverse
-  does not count.
+## The loop: a figure eight from the sketch
+- Small lobe: `secondary`, `lanes=2`, `oneway=no`, 50 km/h, a teardrop of about 1.1 km
+  through the main city, with a `junction=roundabout` of 14 m radius on its west side where
+  it meets the city's main avenue. Avenues cross it at signals, streets at stops; junctions
+  only on its straights.
+- Big lobe: `motorway`, `lanes=2` each way as a one-way pair, 100 km/h, about 1.6 km,
+  elevated (`bridge=yes`, `layer=1`) from the crossing round the lower right and back; no
+  junctions except the two `motorway_link` exits in the lower right (one each direction),
+  each with a gore. It crosses the river once on its east side on its own deck.
+- The crossing: both straights pass over the river at the map centre; the street-level
+  straight is `bridge=yes layer=1`, the highway straight `bridge=yes layer=2`, the river
+  and a footbridge (`layer=1`) beneath. The bridge stage groups the decks; piers land on the
+  banks and on the island between the spans.
+- Lap direction: clockwise on the small lobe, which makes the big lobe anticlockwise; the
+  start line is on the small lobe's north straight. The timer is a `lap.v0.json` entry: a
+  point on the loop and a direction; it triggers on the car crossing the line in that
+  direction, with a 10 s re-arm so a reverse does not count.
+- Edge streets end in a U-turn arc back into the grid (two parallel streets joined by a
+  semicircle), the sketch's "turn back" loops; one street at the east edge is a real dead end
+  for the edge closure.
+- The generator keeps the lobes, grids, river and greenbelt as separate pieces with their own
+  parameters so a layout change is a parameter change.
 
 ## One of everything (checklist the tests assert)
 signals, stop signs, one-way pair, bus-only lane, bus stops, bus loop, sidewalks, crossings,
@@ -46,10 +53,10 @@ pack output it must produce (an edge, a polygon, a service entry, a tree count).
   with `--autodrive` holding the throttle round the loop.
 
 ## Decisions for the human
-- Grid inside the ring (proposed, the human's preferred reading) or the ring inside a larger
-  grid; the generator keeps the ring and grid as separate pieces so swapping is a layout
-  change, not a rewrite.
-- The town's name and street names (Harbourline is a placeholder).
+- (decided 2026-10-08) The figure eight from the human's sketch replaces the ring-and-grid
+  layout; see above.
+- The town's name and street names (the track and gang are "Double Cross"; the town is open).
+- Where the gang's turf block sits in the residential south.
 - Commit the generated pack (proposed, so a change's diff shows what it did to the district)
   or generate it at build time and commit only the generator.
 - The lap timer in this change (proposed, it is small) or later with a race mode.
