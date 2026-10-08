@@ -4,11 +4,16 @@ extends Node
 ## (D-pad left, Q) while the local player drives.
 ##
 ## Each station is one loop from `radio/music.v0.json`. Loops are never synthesised per frame: the
-## first time a station is needed its loop renders on a WorkerThreadPool task into a looping
+## first time a station is needed its loop renders on a WorkerThreadPool task into a 16-bit
 ## AudioStreamWAV (about a second on a Mac), the station being played first and the others one
 ## at a time after it, and each render is cached under user://radio_cache/ keyed by the track's
 ## data, so later sessions load it at once. The station and the Music volume are remembered in
 ## settings.cfg. Getting in resumes the station where it paused; getting out pauses it.
+##
+## The loop is played through an AudioStreamGenerator fed from the WAV's samples each frame,
+## wrapping at the loop end in this script. The engine's own WAV looping is not used: in Godot
+## 4.7 a LOOP_FORWARD wrap past about 1.2 million samples (Hilltop's 56 s loop at 22050 Hz)
+## crashes the audio thread, which was the "windowed runs die after 55 s" bug.
 ##
 ## Each drivable car keeps its own station in its `radio_station` field: getting in tunes to the
 ## car's station, and changing station writes it back. A car with none yet (the player's own) takes
@@ -33,6 +38,8 @@ const RENDER_VERSION := "2"
 ## Rendered before the loop and thrown away, so envelopes, held notes and the echo at the start of
 ## the kept pass are what a real repeat hands it (the dungeon's drone holds a whole bar).
 const WARMUP_S := 4.0
+## The generator's buffer: longer than the synth voices' so a chunk landing cannot starve the music.
+const FEED_BUFFER_S := 0.25
 
 var settings_path: String = Settings.DEFAULT_SETTINGS_PATH
 var cache_dir: String = CACHE_DIR
@@ -49,14 +56,17 @@ var _task: int = -1  # the WorkerThreadPool task rendering `_task_track`
 var _task_track: String = ""
 var _positions: Dictionary = {}  # track id -> seconds, where it paused
 var _render_started: Dictionary = {}  # track id -> msec, for the log
-var _player: AudioStreamPlayer
+var _player: AudioStreamPlayer  # a generator stream fed by _feed()
+var _feed_track: String = ""  # the track being fed, or "" while silent
+var _feed_wav: AudioStreamWAV
+var _feed_cursor: int = 0  # next sample of the loop to push
 var _toast: Label
 var _toast_left: float = 0.0
 
 
 func _ready() -> void:
-	_player = AudioStreamPlayer.new()
-	_player.bus = "Music" if AudioServer.get_bus_index("Music") >= 0 else "Master"
+	_player = Synth.make_player("Music" if AudioServer.get_bus_index("Music") >= 0 else "Master")
+	(_player.stream as AudioStreamGenerator).buffer_length = FEED_BUFFER_S
 	add_child(_player)
 	var layer := CanvasLayer.new()
 	layer.layer = 20
@@ -196,7 +206,14 @@ static func station_ids() -> Array:
 
 ## True while a station's loop is audible.
 func is_playing() -> bool:
-	return _player.playing
+	return _player.playing and _feed_track != ""
+
+
+## Seconds into the current loop (the next sample to be fed), 0 while silent.
+func playback_position() -> float:
+	if _feed_wav == null or _feed_track == "":
+		return 0.0
+	return float(_feed_cursor) / float(_feed_wav.mix_rate)
 
 
 ## The rendered loop for a track id, or null until its render finishes.
@@ -207,7 +224,7 @@ func stream_for(track_id: String) -> AudioStreamWAV:
 ## One line for the benchmark summary: station, playing, loops rendered and under way.
 func describe() -> String:
 	return "radio: %s, driving %s, playing %s, rendered %d, rendering %d, bus %s %.1f dB" % [
-		station_id, driving, _player.playing, _streams.size(), _queue.size() + (1 if _task != -1 else 0), _player.bus,
+		station_id, driving, is_playing(), _streams.size(), _queue.size() + (1 if _task != -1 else 0), _player.bus,
 		AudioServer.get_bus_volume_db(AudioServer.get_bus_index(_player.bus))]
 
 
@@ -314,24 +331,78 @@ func _prerender_all() -> void:
 
 func _play_current() -> void:
 	if not driving or station_id == OFF:
-		_player.stop()
+		_silence()
 		return
 	var track_id := str(variant(station_id).get("track", ""))
 	var wav := stream_for(track_id)
 	if wav == null:
 		request_render(track_id)  # plays when it lands
 		return
-	if _player.stream != wav:
-		_player.stream = wav
-	_player.play(float(_positions.get(track_id, 0.0)))
+	if _feed_track == track_id and _player.playing:
+		return
+	_feed_wav = wav
+	_feed_track = track_id
+	_feed_cursor = posmod(int(float(_positions.get(track_id, 0.0)) * wav.mix_rate), maxi(loop_frames(wav), 1))
+	if not _player.playing:
+		_player.play()
+	_feed()
 
 
 func _pause_current() -> void:
-	if _player.playing and _player.stream != null:
-		for id in _streams:
-			if _streams[id] == _player.stream:
-				_positions[id] = _player.get_playback_position()
+	if _feed_track != "":
+		_positions[_feed_track] = playback_position()
+	_silence()
+
+
+func _silence() -> void:
+	_feed_track = ""
+	_feed_wav = null
 	_player.stop()
+
+
+## Frames in a loop: its loop end when set, else the whole sample.
+static func loop_frames(wav: AudioStreamWAV) -> int:
+	var per_frame := 2 * (2 if wav.stereo else 1)  # 16-bit samples
+	var total := wav.data.size() / per_frame
+	return wav.loop_end if wav.loop_mode != AudioStreamWAV.LOOP_DISABLED and wav.loop_end > 0 and wav.loop_end <= total else total
+
+
+## The next `count` frames of `wav` from `cursor`, wrapping at the loop end (16-bit PCM, mono
+## duplicated to both channels). Returns [frames, new cursor].
+static func loop_frames_from(wav: AudioStreamWAV, cursor: int, count: int) -> Array:
+	var n := loop_frames(wav)
+	var out := PackedVector2Array()
+	if n <= 0 or count <= 0:
+		return [out, cursor]
+	out.resize(count)
+	var data := wav.data
+	var stereo := wav.stereo
+	var c := posmod(cursor, n)
+	for i in range(count):
+		if stereo:
+			out[i] = Vector2(data.decode_s16(c * 4) / 32768.0, data.decode_s16(c * 4 + 2) / 32768.0)
+		else:
+			var v := data.decode_s16(c * 2) / 32768.0
+			out[i] = Vector2(v, v)
+		c += 1
+		if c >= n:
+			c = 0
+	return [out, c]
+
+
+## Fills the generator with the next frames of the current loop.
+func _feed() -> void:
+	if _feed_track == "" or _feed_wav == null:
+		return
+	var pb: AudioStreamGeneratorPlayback = _player.get_stream_playback()
+	if pb == null:
+		return
+	var want := pb.get_frames_available()
+	if want <= 0:
+		return
+	var got := loop_frames_from(_feed_wav, _feed_cursor, want)
+	pb.push_buffer(got[0])
+	_feed_cursor = got[1]
 
 
 func _show_toast(title: String, tagline: String) -> void:
@@ -341,6 +412,7 @@ func _show_toast(title: String, tagline: String) -> void:
 
 
 func _process(delta: float) -> void:
+	_feed()
 	if _toast_left > 0.0:
 		_toast_left -= delta
 		if _toast_left <= 0.0:

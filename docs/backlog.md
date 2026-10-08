@@ -13,18 +13,16 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   open). Physics on the loop measured 8.8 ms mean against Ottawa's 6.4; look at how many
   traffic agents sit near the player on the elevated lap.
 
-- **The testbed dies about 55 s into any windowed run** (found timing a lap for
-  `add-proving-ground`; a `fix/`). Reproduce on main (30ea8dd):
-  `godot --path game --resolution 1280x800 -- --benchmark=150 --autodrive --mute --traffic=0 --peds=0`
-  (Ottawa or `--pack=code430.proving-ground`, with or without `--audio-driver Dummy`, so it
-  is not the mixer). The log shows `ERROR: /root: The caller thread can't call the function
-  propagate_notification() on this node` and then signal 11 in a pthread (frames inside the
-  engine binary, no GDScript frame). The 40 s benchmarks end before it, which is why the Deck
-  runs never saw it. The only worker-thread users are the chunk streamer's build task and the
-  radio's render task; the lot signs already build their `Label3D` on the main thread. Start
-  by running with `--verbose` to catch the error's own backtrace, then look for what the
-  build task creates that reaches the tree (a theme or font lookup, a resource load that
-  registers with `/root`).
+- **Windowed runs crashed after about 55 s** (fixed 2026-10-08, `fix/windowed-worker-crash`).
+  Not a worker-thread bug: Godot 4.7's `AudioStreamWAV` `LOOP_FORWARD` wrap crashes the audio
+  thread (`/root: The caller thread can't call propagate_notification()`, then signal 11 in the
+  CoreAudio thread) once the loop point is past about 1.2 million samples. Hilltop's loop is
+  1,245,176 samples (56.47 s at 22050 Hz) and is the default station, so every windowed run
+  with the radio on died at its first wrap; `--radio=off` or `--radio=crypt` (45.7 s) ran
+  fine, and a bare 1,245,176-sample looping WAV crashed the same way while 1,200,000 did not.
+  The radio now feeds its loops through an `AudioStreamGenerator` and wraps them itself, so
+  no looping WAV reaches the mixer. Probe script: a `SceneTree` that plays a synthetic
+  looping WAV of N samples from 3 s before its end.
 - **Proving ground built** (`add-proving-ground`, PR #92): `--pack=code430.proving-ground`
   starts on the Double Cross start line; the lap readout and the four access points are in.
   The gang's turf (`turf.v0.json`) is the block 8 Lane to 9 Lane, Park Road to Mid Road,
