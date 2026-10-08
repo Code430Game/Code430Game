@@ -7,10 +7,6 @@ Every change below is ready to pick up: an OpenSpec change in `openspec/changes/
 
 Updated 2026-10-07.
 
-## In progress
-
-- `fix/proving-ground-density` (smaller blocks, frontage roads; the Fable session on the maintainer's Mac)
-
 ## Ready to build
 
 Medium:
@@ -72,7 +68,7 @@ maintainer:
 - `add-map-legend` 3.1
 - `add-flyable-helicopter` 4.2 and 4.3
 - `update-shared-deck-heights` 2.1
-- `update-proving-ground-dressing` 2.2 (Deck benchmark) and 2.3
+- `update-proving-ground-dressing` 2.3 (now with the density pass #104: smaller blocks, frontage roads)
 - `add-hostile-gang` 4.2
 - `add-pack-loader` 4.2 (Deck benchmark) and 4.3
 - `add-weather` 4.1 (Deck benchmark, `--extra "--weather=rain"`) and 4.2
