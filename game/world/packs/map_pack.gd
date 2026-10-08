@@ -527,10 +527,11 @@ static func _road_material() -> Material:
 	return SurfaceDetail.material("asphalt", 0.9)  # vertex colours (sRGB) with asphalt grain
 
 
-static func _terrain_material() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_color = TerrainBuilder.TERRAIN_COLOR
-	m.roughness = 1.0
+static func _terrain_material() -> ShaderMaterial:
+	# One colour, with the weather's wetness and snow as uniforms (terrain.gdshader).
+	var m := ShaderMaterial.new()
+	m.shader = preload("res://world/terrain/terrain.gdshader")
+	m.set_shader_parameter("base_color", TerrainBuilder.TERRAIN_COLOR)
 	return m
 
 

@@ -64,4 +64,5 @@ static func build(ways: Array[RoadGraph.PedestrianWay]) -> Dictionary:
 static func material() -> Material:
 	var m := SurfaceDetail.material("concrete", 0.95)
 	m.set_shader_parameter("joints", true)
+	m.set_shader_parameter("snow_cover", 1.0)  # sidewalks whiten under snow; roads are ploughed
 	return m
