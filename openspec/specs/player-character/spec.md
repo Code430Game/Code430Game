@@ -51,15 +51,19 @@ Movement, camera, and entry tunables SHALL live in an exported config resource, 
 - **THEN** the character runs at the new speed without any code change
 
 ### Requirement: Character Profile
-The player character's look SHALL be described by a profile (skin, hair, clothing colours, hat, height, build) that is random on first start so nothing blocks play, and the body built from it SHALL be worn by the on-foot player and by that player's replica on other peers.
+The player character's look SHALL be described by a profile (skin, hair style and colour, beard, glasses, top, jacket, trousers, shoes, hat, height, build) that is random on first start so nothing blocks play. The body built from it SHALL have a face, jointed limbs and a walk cycle driven by movement, and SHALL be worn by the on-foot player, by that player's replica on other peers, and in pre-posed variants by pedestrians.
 
 #### Scenario: First start
 - **WHEN** the game starts with no saved characters
 - **THEN** the player spawns wearing a random profile, and that profile is saved as the last created character
 
+#### Scenario: Walking
+- **WHEN** the player moves on foot
+- **THEN** the body's legs and arms swing in step with the distance covered and rest when the player stops
+
 #### Scenario: Co-op
 - **WHEN** a guest with a saved character joins a host
-- **THEN** the host sees the guest's body built from the guest's profile
+- **THEN** the host sees the guest's body built from the guest's profile, walking when the guest walks
 
 ### Requirement: Character Creator
 The pause menu SHALL open a creator where the player adjusts each profile field with a controller, sees the result immediately, randomises, saves the body as a preset, loads or deletes a preset, and leaves with the body applied and stored as the last created character.
