@@ -62,6 +62,14 @@ func report(kind: String, pos: Vector3, seen: bool = false) -> bool:
 	return true
 
 
+## Somebody else's crime of `kind` at `pos` (a gang member's, add-hostile-gang): the police
+## take it up when they can see it, and the player's stars never move. Returns true when an
+## officer or patrol car saw it.
+func report_other(kind: String, pos: Vector3) -> bool:
+	var add := int((config.get("crimes", {}) as Dictionary).get(kind, 0))
+	return add > 0 and police_sees(pos)
+
+
 ## Sets the level directly (screenshots, tests, debug).
 func set_stars(n: int) -> void:
 	unseen_s = 0.0
