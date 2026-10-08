@@ -23,8 +23,6 @@ Large:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
-| `add-hostile-gang` | first hostile faction with turf, patrols and gang heat; the antagonist for the story pack | `add-weapons-and-combat`, `add-police-combat` (merged); turf placement via the proving ground's `turf.v0.json` (merged) | factions data, pedestrian states, police, HUD |
-| `update-proving-ground-dressing` | spruce up Double Cross: houses on every block, shopfronts, trees, street furniture, a town name (proposal to write) | nothing | generator, pack regen |
 | `add-weather` | sky, rain, snow, fog, wet roads | nothing | sky shader, materials, traffic and grip factors |
 | `add-hover-cars` | dystopia flying cars | helicopter (merged) | new hover car, catalogue, controls, traffic, police |
 | `add-two-wheelers` | bicycles and motorcycles | nothing | importer bike lanes, traffic, vehicles, character rig |
@@ -72,6 +70,8 @@ maintainer:
 - `add-map-legend` 3.1
 - `add-flyable-helicopter` 4.2 and 4.3
 - `update-shared-deck-heights` 2.1
+- `update-proving-ground-dressing` 2.2 (Deck benchmark) and 2.3
+- `add-hostile-gang` 4.1 (Deck benchmark) and 4.2
 
 `add-coop-multiplayer` still needs:
 - the tone sent on join (1.3);
