@@ -16,6 +16,9 @@ const KEY_PRESET := "preset"
 ## Rebound controls: key "<action>/pad" or "<action>/key", value Controls.event_to_dict().
 ## Defaults stay in project.godot, so resetting is deleting this section.
 const SECTION_CONTROLS := "controls"
+## The map pack to start on; empty means the testbed's default (add-proving-ground).
+const SECTION_MAP := "map"
+const KEY_PACK := "pack"
 const PRESET_AUTO := "auto"
 const PRESET_DECK := "deck"
 const PRESET_HIGH := "high"
@@ -56,6 +59,8 @@ var current_preset_name: String = ""
 var is_steam_deck: bool = false
 ## The player's rebinds, "<action>/pad" or "<action>/key" -> Controls.event_to_dict().
 var binding_overrides: Dictionary = {}
+## The saved map pack id, or "" for the default.
+var map_pack: String = ""
 
 
 func _ready() -> void:
@@ -104,6 +109,10 @@ func load_settings() -> void:
 			var d: Variant = cfg.get_value(SECTION_CONTROLS, key)
 			if d is Dictionary:
 				binding_overrides[key] = d
+	map_pack = ""
+	var pack: Variant = cfg.get_value(SECTION_MAP, KEY_PACK, "")
+	if typeof(pack) == TYPE_STRING:
+		map_pack = pack
 
 
 ## Writes the current override to disk.
@@ -111,6 +120,10 @@ func save_settings() -> Error:
 	var cfg := ConfigFile.new()
 	cfg.load(settings_path)
 	cfg.set_value(SECTION_GRAPHICS, KEY_PRESET, preset_override)
+	if map_pack != "":
+		cfg.set_value(SECTION_MAP, KEY_PACK, map_pack)
+	elif cfg.has_section_key(SECTION_MAP, KEY_PACK):
+		cfg.erase_section_key(SECTION_MAP, KEY_PACK)
 	if cfg.has_section(SECTION_CONTROLS):
 		cfg.erase_section(SECTION_CONTROLS)
 	for key: String in binding_overrides:

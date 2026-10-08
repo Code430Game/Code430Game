@@ -73,6 +73,21 @@ func test_override_persists_across_instances() -> void:
 	assert_str(second.resolve_preset_name()).is_equal("high")
 
 
+## The saved map pack (add-proving-ground): empty by default, kept across instances, and
+## cleared again when set back to empty.
+func test_map_pack_persists_and_clears() -> void:
+	var first := _make(false)
+	assert_str(first.map_pack).is_equal("")
+	first.map_pack = "code430.proving-ground"
+	assert_int(first.save_settings()).is_equal(OK)
+	var second := _make(false)
+	assert_str(second.map_pack).is_equal("code430.proving-ground")
+	second.map_pack = ""
+	assert_int(second.save_settings()).is_equal(OK)
+	var third := _make(false)
+	assert_str(third.map_pack).is_equal("")
+
+
 func test_apply_to_environment_follows_preset() -> void:
 	var s := _make(false)
 	s.apply_preset("deck")
