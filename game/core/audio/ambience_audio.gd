@@ -8,6 +8,8 @@ var _noise_state: Array = [0x2545F491]
 var _lp1: float = 0.0
 var _lp2: float = 0.0
 var _level: float = 0.3
+var rain: float = 0.0  # 0..1 precipitation from the weather: a hiss over the hum
+var _hp: float = 0.0
 var muted: bool = false
 
 
@@ -37,10 +39,15 @@ func _process(delta: float) -> void:
 	var frames := pb.get_frames_available()
 	var buf := PackedVector2Array()
 	buf.resize(frames)
+	var rain_gain := rain * 0.22
 	for i in range(frames):
 		var n := Synth.noise(_noise_state)
 		_lp1 += (n - _lp1) * 0.02
 		_lp2 += (_lp1 - _lp2) * 0.02
 		var s := _lp2 * 4.0 * _level
+		if rain_gain > 0.0:
+			# Rain: the noise minus a gentle low-pass, so a bright steady hiss sits over the hum.
+			_hp += (n - _hp) * 0.3
+			s += (n - _hp) * rain_gain
 		buf[i] = Vector2(s, s)
 	pb.push_buffer(buf)

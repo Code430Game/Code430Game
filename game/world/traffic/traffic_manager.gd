@@ -48,6 +48,7 @@ var _debug_mesh: MeshInstance3D
 enum Kind { CAR, BUS }
 ## Clock hour 0..24 for spawn weights (vans by day, taxis by night). Set by the scene.
 var hour: float = 12.0
+var weather_speed_factor: float = 1.0  # add-weather: the lane limit scales by the state's factor
 ## Beyond this distance from every player a vehicle draws at LOD1 (preset `vehicle_lod0_m`).
 var lod0_m: float = 80.0
 var _meshes: Dictionary = {}  # "vehicle_id:lod" -> MultiMeshInstance3D
@@ -292,7 +293,7 @@ func _rebuild_lane_index() -> void:
 
 func _step_agent(a: TrafficAgent, delta: float) -> void:
 	var path: LaneGraph.LanePath = lanes.paths[a.path_id]
-	var limit := float(path.speed_kph) / 3.6 * float(config["speed_fraction"])
+	var limit := float(path.speed_kph) / 3.6 * float(config["speed_fraction"]) * weather_speed_factor
 	if path.is_connector:
 		limit = minf(limit, float(config["connector_speed_kph"]) / 3.6)
 	var target := limit

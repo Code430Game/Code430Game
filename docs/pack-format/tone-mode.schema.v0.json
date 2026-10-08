@@ -55,6 +55,10 @@
         },
         "sex_work_services": {
           "type": "boolean"
+        },
+        "weather_bias": {
+          "type": "boolean",
+          "description": "Optional: weight the weather table toward rain and fog (add-weather; dystopia sets it)."
         }
       }
     },

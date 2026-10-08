@@ -9,6 +9,8 @@ render_mode cull_back;
 
 uniform float storey_height_m = 3.2;
 uniform float night = 0.0;  // 0 by day, 1 at night: lit windows glow
+uniform float snow = 0.0;  // add-weather: roofs and trim whiten
+uniform float wetness = 0.0;  // walls darken a little in the rain
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -112,11 +114,13 @@ void fragment() {
 			albedo *= 1.0 - 0.06 * step(fract(v / 0.3), 0.12) * (1.0 - is_window);
 		}
 	} else if (treatment < -1.5) {
-		albedo = base * 0.75;                            // trim
+		albedo = mix(base * 0.75, vec3(0.86, 0.88, 0.92), snow * 0.6);  // trim
 		rough = 0.8;
 	} else if (treatment < -0.5) {
-		albedo = base * 0.85;                            // roof
+		albedo = mix(base * 0.85, vec3(0.88, 0.90, 0.94), snow);       // roof
+		rough = mix(rough, 0.8, snow);
 	}
+	albedo *= 1.0 - 0.18 * wetness;
 	ALBEDO = albedo;
 	ROUGHNESS = rough;
 	METALLIC = metal;

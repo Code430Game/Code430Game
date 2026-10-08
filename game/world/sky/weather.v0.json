@@ -1,0 +1,22 @@
+{
+  "_comment": "Weather states and the table that walks between them (add-weather). coverage 0..1 cloud, precip 0..1, fog 0..1, wind m/s range, temp_c range, duration_s range, transition_s blend time, tint on the clouds and sky, grip on the player's tyres, headlights 1 when the auto mode should switch on. next: weighted transitions. Snow is only picked between snow_hours (evening to morning) until a season table exists.",
+  "states": {
+    "clear":    {"coverage": 0.15, "precip": 0.0, "fog": 0.0,  "wind": [1, 4],  "temp_c": [8, 26],  "duration_s": [900, 2400], "transition_s": 120, "tint": [1.0, 1.0, 1.0],    "grip": 1.0,  "headlights": 0,
+                 "next": {"clear": 0.6, "overcast": 0.4}},
+    "overcast": {"coverage": 0.85, "precip": 0.0, "fog": 0.05, "wind": [2, 7],  "temp_c": [2, 18],  "duration_s": [600, 1800], "transition_s": 180, "tint": [0.9, 0.92, 0.96],  "grip": 1.0,  "headlights": 0,
+                 "next": {"clear": 0.35, "rain": 0.35, "snow": 0.15, "fog": 0.15}},
+    "rain":     {"coverage": 0.95, "precip": 1.0, "fog": 0.12, "wind": [3, 9],  "temp_c": [3, 20],  "duration_s": [400, 1200], "transition_s": 90,  "tint": [0.8, 0.84, 0.9],   "grip": 0.8,  "headlights": 1,
+                 "next": {"overcast": 0.7, "rain": 0.2, "fog": 0.1}},
+    "snow":     {"coverage": 0.95, "precip": 1.0, "fog": 0.2,  "wind": [1, 6],  "temp_c": [-15, 0], "duration_s": [600, 1800], "transition_s": 120, "tint": [0.85, 0.87, 0.92], "grip": 0.55, "headlights": 1,
+                 "next": {"overcast": 0.6, "snow": 0.3, "clear": 0.1}},
+    "fog":      {"coverage": 0.5,  "precip": 0.0, "fog": 0.6,  "wind": [0, 2],  "temp_c": [0, 12],  "duration_s": [300, 900],  "transition_s": 150, "tint": [0.88, 0.9, 0.92],  "grip": 1.0,  "headlights": 1,
+                 "next": {"overcast": 0.5, "clear": 0.5}}
+  },
+  "start": "clear",
+  "snow_hours": [20, 7],
+  "bias_wet_weight": 2.0,
+  "wetness_rise_s": 60,
+  "wetness_dry_s": 900,
+  "snow_rise_s": 300,
+  "snow_melt_s": 1800
+}

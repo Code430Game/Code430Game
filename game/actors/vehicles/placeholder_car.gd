@@ -32,6 +32,8 @@ var override_hold: bool = false  # handbrake on for one physics frame: stopped a
 
 ## Peer id of the player driving, 0 when empty. Only the driver's input reaches the car.
 var driver_peer_id: int = 0
+var _base_grip: float = 2.5  # the catalogue entry's tyre grip; weather scales it (add-weather)
+var _grip_factor: float = 1.0
 
 var _spawn: Transform3D
 var _recover_timer: float = 0.0
@@ -97,6 +99,22 @@ func set_braking(on: bool) -> void:
 		mesh_node.set_surface_override_material(3, VehicleMesh.brake_material() if on else null)
 
 
+## Tyre grip as a fraction of the catalogue's (rain 0.8, snow 0.55 from the weather table).
+func set_grip_factor(factor: float) -> void:
+	var f := clampf(factor, 0.05, 1.5)
+	if is_equal_approx(f, _grip_factor):
+		return
+	_grip_factor = f
+	for name in ["WheelFL", "WheelFR", "WheelRL", "WheelRR"]:
+		var w := get_node_or_null(name) as VehicleWheel3D
+		if w != null:
+			w.wheel_friction_slip = _base_grip * _grip_factor
+
+
+func grip_factor() -> float:
+	return _grip_factor
+
+
 ## Brightness of the headlights, 0 off to 1 full; follows the night factor.
 func set_headlights(amount: float) -> void:
 	for l in _headlights:
@@ -154,13 +172,14 @@ func apply_entry(id: String) -> void:
 	wheel_mesh.material = VehicleMesh.dark_material()
 	var positions := VehicleMesh.wheel_positions(e)
 	var names := ["WheelFL", "WheelFR", "WheelRL", "WheelRR"]
+	_base_grip = float(e["grip"])
 	for i in range(4):
 		var w := get_node(names[i]) as VehicleWheel3D
 		# The attach point sits so the tyre touches y = 0 with the suspension a little compressed.
 		w.position = Vector3(positions[i].x, wr + rest - 0.05, positions[i].z)
 		w.wheel_radius = wr
 		w.wheel_rest_length = rest
-		w.wheel_friction_slip = float(e["grip"])
+		w.wheel_friction_slip = _base_grip * _grip_factor
 		w.suspension_max_force = mass * 9.8 * 1.5  # per wheel: the box truck must not bottom out
 		var wm := w.get_child(0) as MeshInstance3D
 		wm.mesh = wheel_mesh

@@ -16,6 +16,12 @@ uniform vec3 emission_color = vec3(0.0);
 uniform bool joints = false;
 uniform float joint_w_m = 0.025;
 uniform float emission_energy = 0.0;
+// Weather (add-weather): `wetness` darkens and polishes the surface so lights reflect in it,
+// `snow` whitens it by `snow_cover` (1 on sidewalks and lots, 0 on ploughed roads and paint).
+uniform float wetness = 0.0;
+uniform float snow = 0.0;
+uniform float snow_cover = 0.0;
+uniform vec3 snow_color : source_color = vec3(0.86, 0.88, 0.92);
 
 varying vec3 world_pos;
 
@@ -47,5 +53,11 @@ void fragment() {
 		}
 		ALBEDO *= mix(1.0, 0.7, line);
 	}
-	EMISSION = emission_color * emission_energy;
+	ALBEDO = mix(ALBEDO, ALBEDO * 0.6, wetness);
+	ROUGHNESS = mix(ROUGHNESS, 0.2, wetness);
+	SPECULAR = mix(0.5, 0.7, wetness);
+	float s = snow * snow_cover;
+	ALBEDO = mix(ALBEDO, snow_color * (1.0 + d * 0.6), s);
+	ROUGHNESS = mix(ROUGHNESS, 0.78, s);
+	EMISSION = emission_color * emission_energy * (1.0 - s);
 }

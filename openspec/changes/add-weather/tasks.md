@@ -1,16 +1,16 @@
 ## 1. Sky and data
-- [ ] 1.1 `weather.v0.json` and `WeatherController`: states, seeded table, transitions, pinned `--weather=` and `--weather-seed=`, night gate for snow; tests on determinism (same seed, same sequence) and blend values
-- [ ] 1.2 `sky.gdshader` replacing the procedural sky with the same day-night look plus one cloud layer; `DayNight` feeds the uniforms; `presets.json` gains `cloud_layers` and `cloud_shadows`, `high` adds the second layer and the shadow projector; preset doc updated; preset test passes
+- [x] 1.1 `weather.v0.json` and `WeatherController` (`game/world/sky/weather.gd`): states, seeded table, transitions, pinned `--weather=` and `--weather-seed=`, night gate for snow (`snow_hours` 20 to 7), dystopia's `weather_bias` flag; schema `docs/pack-format/weather.schema.v0.json`; tests `test_weather.gd` (same seed same sequence, blends, pinned never consults the table, snow gate, wet bias) and `tools/tests/test_weather_data.py`
+- [x] 1.2 `sky.gdshader` (gradient, sun disc and halo, scrolling clouds from a seamless noise texture) replaces the procedural sky in `play_testbed.tscn`; `DayNight` feeds colours, night, coverage, tint, wind offset and hides the sun in fog; `presets.json` gains `cloud_layers`, `cloud_shadows`, `rain_particles`, `snow_particles`; `high` adds the second layer and a noise projector on the sun once the sky is mostly cloud; `docs/graphics-presets.md` updated; `test_day_night.gd` covers the dimming, the uniforms, the fog and the projector
 
 ## 2. Precipitation and surfaces
-- [ ] 2.1 `precipitation.gd` camera-following particle box, rain and snow, counts per preset
-- [ ] 2.2 Wetness and snow uniforms on road, marking, terrain, roof and sidewalk materials; rise and dry times from data; fog state hooked to the distance fog (and volumetric density on `high`); rain bed in `ambience_audio.gd`
-- [ ] 2.3 Mac screenshots: overcast noon, rain at night with headlights on wet Bank Street, snow at dawn, fog on the Queensway
+- [x] 2.1 `precipitation.gd`: one `GPUParticles3D` box 14 m over and 4 m ahead of the camera, rain streaks (fixed-Y billboards) or drifting snow dots, counts per preset, intensity from the blended precipitation, wind in the velocity; `test_precipitation.gd`
+- [x] 2.2 `wetness` and `snow` uniforms on the ground detail shader (roads, lots, markings, sidewalks with `snow_cover` 1 on sidewalks and 0 on ploughed roads), a terrain shader (`world/terrain/terrain.gdshader`, the terrain material is a ShaderMaterial now), roofs and trim in the facade shader; rise and dry times from the data; distance fog and the high preset's volumetric density follow the fog value in `DayNight`; rain hiss in `ambience_audio.gd`; `test_weather.gd` outputs test
+- [x] 2.3 Mac screenshots (deck preset unless noted, under the scratchpad `weather/`): `sky_clear.png` and `sky_clear_high.png` (clear noon looking up, one and two cloud layers), `sky_overcast.png` (overcast noon), `rain_night.png` (23:10 on the Queensway, headlights on, wet road reflecting the lights, streaks), `snow_dawn.png` (06:10, white terrain and roofs, dark ploughed road, flakes), `fog_queensway.png` (08:10, the Queensway closing in)
 
 ## 3. Gameplay and co-op
-- [ ] 3.1 Traffic speed factor per state; player grip factor; headlight auto in heavy weather; tests on the factors
-- [ ] 3.2 Weather state in the clock sync; guest blends to the host's state; test with a mirrored controller
+- [x] 3.1 `traffic_config.json` `weather_speed_factor` table applied to the lane limit (`TrafficManager.weather_speed_factor`); `PlaceholderCar.set_grip_factor` scales every wheel's `wheel_friction_slip` from the state's `grip` (rain 0.8, snow 0.55); the headlight auto mode takes the weather's `headlights` value as dusk; tests in `test_traffic.gd` and `test_weather.gd`
+- [x] 3.2 `_signal_time` carries `[state, next, t, seed, elapsed]` (a trailing argument, old hosts send none); a guest's controller mirrors it and keeps blending, never walking the table; `test_weather.gd` drives a `WorldSync` with a mirrored controller
 
 ## 4. Verification
-- [ ] 4.1 Deck benchmark in rain at 23:00 on the usual route; sky and particle cost stated against the clear-day run; no regression past budget
+- [ ] 4.1 Deck benchmark in rain at 23:00 on the usual route; sky and particle cost stated against the clear-day run; no regression past budget (the Deck was in the human's hands on 2026-10-08; run `scripts/deck-bench.sh --ref main --ref change/add-weather --change add-weather --task 4.1 --extra "--weather=rain --time=23"`)
 - [ ] 4.2 **Stop: human drives through a rain storm and a snowfall on the Deck**
