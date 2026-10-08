@@ -46,6 +46,9 @@ var _join_address: String = ""  # --join=address[:port]
 var _spawn_transform: Transform3D
 var _keyboard: bool = false  # last input came from keyboard or mouse: show those hints
 var _day_night: DayNight
+var _weather: WeatherController
+var _weather_pin: String = ""  # --weather=<state>: hold that state all session
+var _weather_seed: int = -1  # --weather-seed=N; otherwise random per session (the host's travels to guests)
 var _vehicle_audio: VehicleAudio
 var _reset_ring: HoldRing
 var _foot_reset_s: float = 0.0  # seconds reset has been held on foot; -1 once it fired
@@ -432,6 +435,39 @@ func _setup_day_night() -> void:
 	_day_night.register_shader(SignalHeads.head_material())
 	var preset: Dictionary = Settings.presets.get(Settings.current_preset_name, {})
 	_car.add_headlights(bool(preset.get("headlight_shadows", false)))
+	_day_night.cloud_layers = int(preset.get("cloud_layers", 1))
+	_day_night.cloud_shadows = bool(preset.get("cloud_shadows", false))
+	_setup_weather()
+
+
+## The weather rides on the clock: seeded table, or one state held by --weather=.
+func _setup_weather() -> void:
+	_weather = WeatherController.new()
+	_weather.name = "Weather"
+	_weather.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_weather.day_night = _day_night
+	_weather.bias_wet = ContentMode.flag("weather_bias")
+	var seed := _weather_seed if _weather_seed >= 0 else randi()
+	if _weather_pin != "" and not _weather.load_data():
+		return
+	if _weather_pin != "" and not _weather.states.has(_weather_pin):
+		push_warning("--weather=%s is not a state; known: %s" % [_weather_pin, ", ".join(_weather.states.keys())])
+		_weather_pin = ""
+	_weather.setup(seed, _weather_pin, _weather_pin != "")
+	add_child(_weather)
+	# Outputs: the shared ground, terrain and facade materials take wetness and snow; the
+	# particle box follows the camera; traffic reads the speed table.
+	for m in [_pack.road_material, _pack.marking_material, _pack.sidewalk_material, _pack.terrain_material, _pack.building_material]:
+		if m is ShaderMaterial:
+			_weather.surfaces.append(m)
+	var precip := Precipitation.new()
+	precip.name = "Precipitation"
+	precip.configure(Settings.presets.get(Settings.current_preset_name, {}))
+	add_child(precip)
+	_weather.precipitation = precip
+	if _traffic != null:
+		_weather.traffic = _traffic
+		_weather.speed_table = _traffic.config.get("weather_speed_factor", {})
 
 
 func _setup_audio() -> void:
@@ -456,6 +492,8 @@ func _setup_audio() -> void:
 	_ambience.name = "Ambience"
 	_ambience.traffic = _traffic
 	add_child(_ambience)
+	if _weather != null:
+		_weather.ambience = _ambience
 
 
 ## --weapon / --shoot: holds a weapon, aims and fires a few times for screenshots.
@@ -756,6 +794,7 @@ func _setup_net() -> void:
 		_parked.stall_taken.connect(_world_sync.announce_stall_taken)
 	_world_sync.player_sync = _player_sync
 	_world_sync.day_night = _day_night
+	_world_sync.weather = _weather
 	_world_sync.take_granted.connect(_on_take_granted)
 	_world_sync.police = _police
 	_world_sync.factions = _factions
@@ -1056,6 +1095,10 @@ func _parse_args() -> void:
 			_bench_seconds = float(arg.get_slice("=", 1))
 		elif arg == "--autodrive":
 			_autodrive = true
+		elif arg.begins_with("--weather="):
+			_weather_pin = arg.get_slice("=", 1)
+		elif arg.begins_with("--weather-seed="):
+			_weather_seed = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--pack="):
 			_pack_id = arg.get_slice("=", 1)
 		elif arg.begins_with("--packs="):
@@ -1243,6 +1286,8 @@ func _process(delta: float) -> void:
 				obstacles.append(_player_sync.remotes[id])
 		if _streamer != null:
 			_streamer.anchors = anchors
+		if _weather != null:
+			_weather.mirror = Session.is_online() and not Session.is_host()  # guests follow the host's sky
 		if _traffic != null:
 			_traffic.anchors = anchors
 			if _day_night != null:
@@ -1279,12 +1324,18 @@ func _process(delta: float) -> void:
 			net = "  |  co-op %s %d/%d" % [Session.role, Session.peers.size(), Session.max_players]
 		if _day_night != null:
 			net = "  |  %s" % _day_night.clock_text() + net
+			if _weather != null and _weather.state != "clear":
+				net = "  |  %s" % _weather.describe() + net
 			var amount := _day_night.night_factor()
+			if _weather != null:
+				amount = maxf(amount, _weather.headlight_need())  # heavy weather counts as dusk
 			if _headlights == Headlights.ON:
 				amount = 1.0
 			elif _headlights == Headlights.OFF:
 				amount = 0.0
 			_light_driven_car(amount)
+			if _weather != null and _player.is_driving() and _driven_car().has_method("set_grip_factor"):
+				_driven_car().set_grip_factor(_weather.grip_factor())
 			if _headlights != Headlights.AUTO:
 				net += "  |  lights %s" % ("on" if _headlights == Headlights.ON else "off")
 		if _player.is_driving():
