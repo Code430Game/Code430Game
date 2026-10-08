@@ -140,3 +140,35 @@ def test_spawn_and_start_line_are_on_the_loop():
     assert near_loop(spawn["x"], spawn["z"], 25.0)
     assert near_loop(lap["start"]["x"], lap["start"]["z"], 25.0)
     assert spawn["heading_deg"] == 180.0, "the car starts heading south down the vertical"
+
+
+def test_pack_is_dressed_as_a_town():
+    """update-proving-ground-dressing: buildings on every grid and tree rows on the avenues,
+    counted on the committed pack."""
+    buildings = _load("buildings.v0.json")["buildings"]
+    kinds: dict[str, int] = {}
+    for b in buildings:
+        kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
+    assert len(buildings) >= 1500, len(buildings)
+    for kind, need in (
+        ("house", 300),
+        ("semidetached_house", 100),
+        ("terrace", 100),
+        ("retail", 150),
+        ("apartments", 60),
+        ("office", 100),
+        ("warehouse", 8),
+    ):
+        assert kinds.get(kind, 0) >= need, (kind, kinds.get(kind, 0))
+    assert sum(1 for b in buildings if b["height_m"] >= 30.0) >= 3, "towers"
+    veg = _load("vegetation.v0.json")
+    source = veg["columns"].index("source")
+    rows = sum(1 for t in veg["trees"] if t[source] == "row")
+    tagged = sum(1 for t in veg["trees"] if t[source] == "tagged")
+    assert rows >= 600, rows
+    assert tagged >= 250, tagged
+    graph = _load("road_graph.v0.json")
+    driveways = sum(
+        1 for e in graph["edges"] if e["class"] == "parking" or e.get("service") == "driveway"
+    )
+    assert driveways >= 100 or sum(1 for e in graph["edges"] if e["class"] == "service") >= 100

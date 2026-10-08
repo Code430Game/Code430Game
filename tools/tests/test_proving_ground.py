@@ -4,9 +4,10 @@ emitted data, the four ways on and off the loop, and ways that cross at grade sh
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
-from proving_ground import emit
+from proving_ground import dressing, emit, layout
 from proving_ground.layout import build
 
 REPO = Path(__file__).resolve().parents[2]
@@ -134,3 +135,78 @@ def test_committed_inputs_match_the_generator(tmp_path: Path):
     assert (tmp_path / "proving-ground.json").read_text(encoding="utf-8") == REGION.read_text(
         encoding="utf-8"
     )
+
+
+# ------------------------------------------------ dressing (update-proving-ground-dressing)
+
+# Minimum counts the dressed district must reach, by the generator's own tags.
+DRESSING_MINIMUMS = {
+    "house": 300,
+    "semidetached_house": 100,
+    "terrace": 100,
+    "retail": 150,
+    "apartments": 60,
+    "office": 100,
+    "warehouse": 8,
+}
+
+
+def _building_counts(d: layout.District) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for a in d.buildings:
+        kind = a.tags.get("building", "yes")
+        counts[kind] = counts.get(kind, 0) + 1
+    return counts
+
+
+def test_dressing_puts_buildings_on_every_grid():
+    d = build()
+    counts = _building_counts(d)
+    short = {
+        k: counts.get(k, 0) for k, need in DRESSING_MINIMUMS.items() if counts.get(k, 0) < need
+    }
+    assert short == {}, f"below the dressing minimums: {short}"
+    roundabout = (layout.A_WEST, layout.MAIN_AVENUES[1])
+    towers = []
+    for a in d.buildings:
+        if int(a.tags.get("building:levels", "0")) < 10:
+            continue
+        cx = sum(p[0] for p in a.ring) / len(a.ring)
+        cz = sum(p[1] for p in a.ring) / len(a.ring)
+        if math.dist((cx, cz), roundabout) < dressing.TOWER_RADIUS_M + 20.0:
+            towers.append(a)
+    assert 3 <= len(towers) <= dressing.TOWER_COUNT, "a few towers near the roundabout"
+    yard = [t for t in d.trees if t.tags.get("denotation") == "garden"]
+    assert len(yard) >= 250, "a yard tree behind the detached houses"
+    assert len(d.tree_rows) >= 20, "tree rows on the avenues and the bank road"
+    assert sum(1 for w in d.ways if w.tags.get("service") == "driveway") >= 100
+
+
+def test_dressing_keeps_off_roads_banks_greenbelt_park_and_turf():
+    """Every dressed footprint clears the roads, the river band, the greenbelt, the park and
+    the turf, judged by the same geometry the pass used, rebuilt from the streets alone."""
+    d = build()
+    streets = layout.District()
+    streets.ways = [w for w in d.ways if w.tags.get("service") != "driveway"]
+    streets.vegetation_areas = d.vegetation_areas
+    streets.turf = d.turf
+    ex = dressing._Exclusions(streets)
+    placed = [
+        a
+        for a in d.buildings
+        if a.tags.get("addr:housenumber", "0").isdigit()
+        and int(a.tags.get("addr:housenumber", "0")) >= 200
+    ]
+    assert len(placed) > 1500
+    for a in placed:
+        x0, z0, x1, z1 = dressing._bbox(a.ring)
+        assert not ex.rejects(dressing.Lot(x0, z0, x1, z1), None), a.tags
+
+
+def test_town_name_is_a_parameter():
+    d = build("Lintport")
+    names = {a.tags.get("name", "") for a in d.service_areas}
+    assert "Lintport Police" in names and "Lintport General" in names
+    assert any(t.get("name") == "Lintport Station" for _, t in d.node_tags)
+    d = build()
+    assert any(t.get("name") == "Double Cross Station" for _, t in d.node_tags)
