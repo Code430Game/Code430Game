@@ -1,0 +1,1941 @@
+{
+ "buildings": [
+  {
+   "colour": "",
+   "ground_y": 57.54,
+   "height_m": 6.4,
+   "id": "w20000.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20000,
+   "rings": [
+    [
+     [
+      -628.84,
+      424.68
+     ],
+     [
+      -628.84,
+      412.7
+     ],
+     [
+      -612.82,
+      412.7
+     ],
+     [
+      -612.82,
+      424.68
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 57.7,
+   "height_m": 6.4,
+   "id": "w20001.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20001,
+   "rings": [
+    [
+     [
+      -588.79,
+      424.68
+     ],
+     [
+      -588.79,
+      412.71
+     ],
+     [
+      -572.76,
+      412.71
+     ],
+     [
+      -572.77,
+      424.68
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 57.87,
+   "height_m": 6.4,
+   "id": "w20002.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20002,
+   "rings": [
+    [
+     [
+      -548.73,
+      424.69
+     ],
+     [
+      -548.73,
+      412.71
+     ],
+     [
+      -532.71,
+      412.71
+     ],
+     [
+      -532.71,
+      424.69
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.03,
+   "height_m": 6.4,
+   "id": "w20003.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20003,
+   "rings": [
+    [
+     [
+      -508.68,
+      424.69
+     ],
+     [
+      -508.68,
+      412.71
+     ],
+     [
+      -492.66,
+      412.71
+     ],
+     [
+      -492.66,
+      424.69
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.19,
+   "height_m": 6.4,
+   "id": "w20004.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20004,
+   "rings": [
+    [
+     [
+      -468.63,
+      424.69
+     ],
+     [
+      -468.63,
+      412.72
+     ],
+     [
+      -452.6,
+      412.72
+     ],
+     [
+      -452.6,
+      424.69
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.35,
+   "height_m": 6.4,
+   "id": "w20005.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20005,
+   "rings": [
+    [
+     [
+      -428.57,
+      424.69
+     ],
+     [
+      -428.57,
+      412.72
+     ],
+     [
+      -412.55,
+      412.72
+     ],
+     [
+      -412.55,
+      424.7
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.52,
+   "height_m": 6.4,
+   "id": "w20006.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20006,
+   "rings": [
+    [
+     [
+      -388.52,
+      424.7
+     ],
+     [
+      -388.52,
+      412.72
+     ],
+     [
+      -372.5,
+      412.72
+     ],
+     [
+      -372.5,
+      424.7
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.68,
+   "height_m": 6.4,
+   "id": "w20007.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20007,
+   "rings": [
+    [
+     [
+      -348.47,
+      424.7
+     ],
+     [
+      -348.46,
+      412.72
+     ],
+     [
+      -332.44,
+      412.72
+     ],
+     [
+      -332.44,
+      424.7
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.83,
+   "height_m": 6.4,
+   "id": "w20008.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20008,
+   "rings": [
+    [
+     [
+      -308.41,
+      424.7
+     ],
+     [
+      -308.41,
+      412.73
+     ],
+     [
+      -292.39,
+      412.73
+     ],
+     [
+      -292.39,
+      424.7
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.99,
+   "height_m": 6.4,
+   "id": "w20009.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20009,
+   "rings": [
+    [
+     [
+      -268.36,
+      424.7
+     ],
+     [
+      -268.36,
+      412.73
+     ],
+     [
+      -252.34,
+      412.73
+     ],
+     [
+      -252.34,
+      424.7
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.15,
+   "height_m": 6.4,
+   "id": "w20010.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20010,
+   "rings": [
+    [
+     [
+      -228.3,
+      424.7
+     ],
+     [
+      -228.3,
+      412.73
+     ],
+     [
+      -212.29,
+      412.73
+     ],
+     [
+      -212.29,
+      424.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.3,
+   "height_m": 6.4,
+   "id": "w20011.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20011,
+   "rings": [
+    [
+     [
+      -188.25,
+      424.71
+     ],
+     [
+      -188.25,
+      412.73
+     ],
+     [
+      -172.23,
+      412.73
+     ],
+     [
+      -172.23,
+      424.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.46,
+   "height_m": 6.4,
+   "id": "w20012.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20012,
+   "rings": [
+    [
+     [
+      -148.2,
+      424.71
+     ],
+     [
+      -148.2,
+      412.73
+     ],
+     [
+      -132.17,
+      412.73
+     ],
+     [
+      -132.17,
+      424.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.62,
+   "height_m": 6.4,
+   "id": "w20013.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20013,
+   "rings": [
+    [
+     [
+      -108.14,
+      424.71
+     ],
+     [
+      -108.14,
+      412.73
+     ],
+     [
+      -92.13,
+      412.73
+     ],
+     [
+      -92.13,
+      424.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 57.52,
+   "height_m": 6.4,
+   "id": "w20014.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20014,
+   "rings": [
+    [
+     [
+      -628.85,
+      534.44
+     ],
+     [
+      -628.85,
+      522.48
+     ],
+     [
+      -612.83,
+      522.48
+     ],
+     [
+      -612.83,
+      534.44
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 57.68,
+   "height_m": 6.4,
+   "id": "w20015.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20015,
+   "rings": [
+    [
+     [
+      -588.8,
+      534.45
+     ],
+     [
+      -588.8,
+      522.48
+     ],
+     [
+      -572.77,
+      522.48
+     ],
+     [
+      -572.78,
+      534.45
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 57.84,
+   "height_m": 6.4,
+   "id": "w20016.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20016,
+   "rings": [
+    [
+     [
+      -548.74,
+      534.45
+     ],
+     [
+      -548.74,
+      522.49
+     ],
+     [
+      -532.72,
+      522.49
+     ],
+     [
+      -532.72,
+      534.45
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.0,
+   "height_m": 6.4,
+   "id": "w20017.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20017,
+   "rings": [
+    [
+     [
+      -508.69,
+      534.45
+     ],
+     [
+      -508.69,
+      522.49
+     ],
+     [
+      -492.67,
+      522.49
+     ],
+     [
+      -492.67,
+      534.45
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.16,
+   "height_m": 6.4,
+   "id": "w20018.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20018,
+   "rings": [
+    [
+     [
+      -468.64,
+      534.46
+     ],
+     [
+      -468.63,
+      522.49
+     ],
+     [
+      -452.61,
+      522.49
+     ],
+     [
+      -452.61,
+      534.46
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.32,
+   "height_m": 6.4,
+   "id": "w20019.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20019,
+   "rings": [
+    [
+     [
+      -428.58,
+      534.46
+     ],
+     [
+      -428.58,
+      522.5
+     ],
+     [
+      -412.56,
+      522.5
+     ],
+     [
+      -412.56,
+      534.46
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.48,
+   "height_m": 6.4,
+   "id": "w20020.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20020,
+   "rings": [
+    [
+     [
+      -388.53,
+      534.46
+     ],
+     [
+      -388.53,
+      522.5
+     ],
+     [
+      -372.5,
+      522.5
+     ],
+     [
+      -372.5,
+      534.46
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.64,
+   "height_m": 6.4,
+   "id": "w20021.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20021,
+   "rings": [
+    [
+     [
+      -348.47,
+      534.46
+     ],
+     [
+      -348.47,
+      522.5
+     ],
+     [
+      -332.45,
+      522.5
+     ],
+     [
+      -332.45,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.8,
+   "height_m": 6.4,
+   "id": "w20022.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20022,
+   "rings": [
+    [
+     [
+      -308.41,
+      534.47
+     ],
+     [
+      -308.41,
+      522.5
+     ],
+     [
+      -292.4,
+      522.5
+     ],
+     [
+      -292.4,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 58.96,
+   "height_m": 6.4,
+   "id": "w20023.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20023,
+   "rings": [
+    [
+     [
+      -268.36,
+      534.47
+     ],
+     [
+      -268.36,
+      522.5
+     ],
+     [
+      -252.34,
+      522.5
+     ],
+     [
+      -252.34,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.12,
+   "height_m": 6.4,
+   "id": "w20024.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20024,
+   "rings": [
+    [
+     [
+      -228.31,
+      534.47
+     ],
+     [
+      -228.31,
+      522.51
+     ],
+     [
+      -212.29,
+      522.51
+     ],
+     [
+      -212.29,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.28,
+   "height_m": 6.4,
+   "id": "w20025.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20025,
+   "rings": [
+    [
+     [
+      -188.26,
+      534.47
+     ],
+     [
+      -188.26,
+      522.51
+     ],
+     [
+      -172.23,
+      522.51
+     ],
+     [
+      -172.23,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.44,
+   "height_m": 6.4,
+   "id": "w20026.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20026,
+   "rings": [
+    [
+     [
+      -148.2,
+      534.47
+     ],
+     [
+      -148.2,
+      522.51
+     ],
+     [
+      -132.18,
+      522.51
+     ],
+     [
+      -132.18,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 59.6,
+   "height_m": 6.4,
+   "id": "w20027.0",
+   "kind": "house",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20027,
+   "rings": [
+    [
+     [
+      -108.14,
+      534.47
+     ],
+     [
+      -108.14,
+      522.51
+     ],
+     [
+      -92.13,
+      522.51
+     ],
+     [
+      -92.13,
+      534.47
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 62.42,
+   "height_m": 16.0,
+   "id": "w20028.0",
+   "kind": "apartments",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20028,
+   "rings": [
+    [
+     [
+      570.77,
+      458.61
+     ],
+     [
+      570.76,
+      418.7
+     ],
+     [
+      640.86,
+      418.69
+     ],
+     [
+      640.86,
+      458.6
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 62.9,
+   "height_m": 6.4,
+   "id": "w20029.0",
+   "kind": "retail",
+   "levels": 0.0,
+   "material": "",
+   "name": "Corner Store",
+   "osm_id": 20029,
+   "rings": [
+    [
+     [
+      710.97,
+      536.43
+     ],
+     [
+      710.96,
+      508.5
+     ],
+     [
+      739.0,
+      508.49
+     ],
+     [
+      739.0,
+      536.43
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 66.18,
+   "height_m": 9.6,
+   "id": "w20030.0",
+   "kind": "yes",
+   "levels": 3.0,
+   "material": "",
+   "name": "Double Cross Police",
+   "osm_id": 20030,
+   "rings": [
+    [
+     [
+      -450.56,
+      -200.0
+     ],
+     [
+      -450.55,
+      -249.9
+     ],
+     [
+      -380.47,
+      -249.89
+     ],
+     [
+      -380.47,
+      -199.99
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 66.51,
+   "height_m": 12.8,
+   "id": "w20031.0",
+   "kind": "hospital",
+   "levels": 4.0,
+   "material": "",
+   "name": "Double Cross General",
+   "osm_id": 20031,
+   "rings": [
+    [
+     [
+      -300.37,
+      -299.78
+     ],
+     [
+      -300.36,
+      -369.64
+     ],
+     [
+      -210.25,
+      -369.64
+     ],
+     [
+      -210.25,
+      -299.77
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.2,
+   "height_m": 6.4,
+   "id": "w20032.0",
+   "kind": "fire_station",
+   "levels": 0.0,
+   "material": "",
+   "name": "Double Cross Fire Hall",
+   "osm_id": 20032,
+   "rings": [
+    [
+     [
+      220.27,
+      -329.71
+     ],
+     [
+      220.27,
+      -369.64
+     ],
+     [
+      280.34,
+      -369.64
+     ],
+     [
+      280.34,
+      -329.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 66.53,
+   "height_m": 6.4,
+   "id": "w20033.0",
+   "kind": "retail",
+   "levels": 0.0,
+   "material": "",
+   "name": "Loaf Shop",
+   "osm_id": 20033,
+   "rings": [
+    [
+     [
+      -300.37,
+      -229.92
+     ],
+     [
+      -300.37,
+      -257.86
+     ],
+     [
+      -276.34,
+      -257.86
+     ],
+     [
+      -276.34,
+      -229.92
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 66.19,
+   "height_m": 6.4,
+   "id": "w20034.0",
+   "kind": "retail",
+   "levels": 0.0,
+   "material": "",
+   "name": "Thread Shop",
+   "osm_id": 20034,
+   "rings": [
+    [
+     [
+      -270.33,
+      -229.92
+     ],
+     [
+      -270.33,
+      -257.86
+     ],
+     [
+      -246.3,
+      -257.86
+     ],
+     [
+      -246.3,
+      -229.92
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 65.75,
+   "height_m": 6.4,
+   "id": "w20035.0",
+   "kind": "retail",
+   "levels": 0.0,
+   "material": "",
+   "name": "Pages Shop",
+   "osm_id": 20035,
+   "rings": [
+    [
+     [
+      -240.3,
+      -229.92
+     ],
+     [
+      -240.3,
+      -257.86
+     ],
+     [
+      -216.27,
+      -257.86
+     ],
+     [
+      -216.27,
+      -229.92
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 65.25,
+   "height_m": 6.4,
+   "id": "w20036.0",
+   "kind": "retail",
+   "levels": 0.0,
+   "material": "",
+   "name": "Bolt Shop",
+   "osm_id": 20036,
+   "rings": [
+    [
+     [
+      -210.26,
+      -229.92
+     ],
+     [
+      -210.25,
+      -257.86
+     ],
+     [
+      -186.23,
+      -257.86
+     ],
+     [
+      -186.23,
+      -229.92
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 61.79,
+   "height_m": 19.2,
+   "id": "w20037.0",
+   "kind": "office",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20037,
+   "rings": [
+    [
+     [
+      420.53,
+      -114.18
+     ],
+     [
+      420.52,
+      -160.08
+     ],
+     [
+      470.59,
+      -160.08
+     ],
+     [
+      470.59,
+      -114.18
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 62.07,
+   "height_m": 22.4,
+   "id": "w20038.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20038,
+   "rings": [
+    [
+     [
+      490.62,
+      -114.18
+     ],
+     [
+      490.61,
+      -160.08
+     ],
+     [
+      540.68,
+      -160.09
+     ],
+     [
+      540.68,
+      -114.19
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 62.34,
+   "height_m": 25.6,
+   "id": "w20039.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20039,
+   "rings": [
+    [
+     [
+      560.71,
+      -114.19
+     ],
+     [
+      560.7,
+      -160.09
+     ],
+     [
+      610.76,
+      -160.1
+     ],
+     [
+      610.77,
+      -114.19
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 62.62,
+   "height_m": 28.8,
+   "id": "w20040.0",
+   "kind": "office",
+   "levels": 9.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20040,
+   "rings": [
+    [
+     [
+      630.79,
+      -114.2
+     ],
+     [
+      630.78,
+      -160.1
+     ],
+     [
+      680.84,
+      -160.1
+     ],
+     [
+      680.85,
+      -114.2
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 62.9,
+   "height_m": 32.0,
+   "id": "w20041.0",
+   "kind": "office",
+   "levels": 10.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20041,
+   "rings": [
+    [
+     [
+      700.88,
+      -114.2
+     ],
+     [
+      700.87,
+      -160.1
+     ],
+     [
+      750.93,
+      -160.11
+     ],
+     [
+      750.94,
+      -114.21
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 66.18,
+   "height_m": 25.6,
+   "id": "w20042.0",
+   "kind": "apartments",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20042,
+   "rings": [
+    [
+     [
+      -450.54,
+      -413.55
+     ],
+     [
+      -450.54,
+      -449.48
+     ],
+     [
+      -406.48,
+      -449.47
+     ],
+     [
+      -406.49,
+      -413.55
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 66.6,
+   "height_m": 25.6,
+   "id": "w20043.0",
+   "kind": "apartments",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20043,
+   "rings": [
+    [
+     [
+      -390.47,
+      -413.55
+     ],
+     [
+      -390.47,
+      -449.47
+     ],
+     [
+      -346.42,
+      -449.47
+     ],
+     [
+      -346.42,
+      -413.54
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 66.99,
+   "height_m": 12.8,
+   "id": "w20044.0",
+   "kind": "parking",
+   "levels": 4.0,
+   "material": "",
+   "name": "Cross Garage",
+   "osm_id": 20044,
+   "rings": [
+    [
+     [
+      -450.55,
+      -319.75
+     ],
+     [
+      -450.54,
+      -379.62
+     ],
+     [
+      -390.48,
+      -379.62
+     ],
+     [
+      -390.48,
+      -319.74
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  }
+ ],
+ "schema_version": 0,
+ "units": "metres, x east, z south; ground_y and height_m vertical"
+}

@@ -116,6 +116,9 @@ var _bumps: bool = false
 var _last_vy: float = 0.0
 const BUMP_THRESHOLD_MPS2 := 90.0
 var _spawn_override: Vector3 = Vector3.INF
+var _pack_id: String = ""  # --pack=<id>; resolved against Settings.map_pack and PACK_ID at load
+var _lap: LapTimer  # laps across the pack's start line (add-proving-ground), local to this player
+var _lap_label: Label
 var _spawn_on_foot_at: Vector3 = Vector3.INF  # --spawn=x,y,z: the player starts on foot exactly here (a garage floor)
 var _car_id: String = ""  # --car=<vehicle id>: start in this catalogue vehicle (default: the catalogue's)
 var _road_label: String = ""
@@ -168,9 +171,12 @@ func _ready() -> void:
 	Session.joined.connect(_on_joined)
 	Session.refused.connect(func(reason: String) -> void: _pause_menu.set_status("join refused: " + reason); _set_mirror(false))
 	Session.session_ended.connect(func() -> void: _pause_menu.set_status("offline"); _set_mirror(false))
-	var dir := PackLocator.find_pack(PACK_ID)
+	# --pack=<id> wins, then the saved map_pack setting, then the Ottawa default.
+	if _pack_id == "":
+		_pack_id = Settings.map_pack if Settings.map_pack != "" else PACK_ID
+	var dir := PackLocator.find_pack(_pack_id)
 	if dir == "":
-		_hud.text = "Map pack %s not found.\nSearched: %s" % [PACK_ID, "\n".join(PackLocator.search_dirs())]
+		_hud.text = "Map pack %s not found.\nSearched: %s" % [_pack_id, "\n".join(PackLocator.search_dirs())]
 		push_error(_hud.text)
 		return
 	_pack = MapPack.new()
@@ -178,6 +184,19 @@ func _ready() -> void:
 		_hud.text = "Failed to load pack at %s" % dir
 		return
 	VehicleCatalogue.merge_pack_dir(dir)  # a pack may add vehicles
+	_lap = LapTimer.new()
+	if _lap.load(dir):
+		_lap_label = Label.new()
+		_lap_label.name = "Lap"
+		_lap_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		_lap_label.position = Vector2(-220.0, 12.0)
+		_lap_label.size = Vector2(440.0, 36.0)
+		_lap_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_lap_label.add_theme_font_size_override("font_size", 26)
+		_lap_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+		_lap_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+		_lap_label.visible = false
+		$HUD.add_child(_lap_label)
 	var t0 := Time.get_ticks_msec()
 	_streamer = ChunkStreamer.new()
 	_streamer.name = "Streamer"
@@ -705,7 +724,7 @@ func _tone_warning() -> String:
 	var supported: Array = _pack.manifest.get("supported_modes", [])
 	if supported.is_empty() or supported.has(ContentMode.current):
 		return ""
-	return "%s does not list tone %s; its content may be hidden" % [_pack.manifest.get("name", PACK_ID), ContentMode.mode_name()]
+	return "%s does not list tone %s; its content may be hidden" % [_pack.manifest.get("name", _pack_id), ContentMode.mode_name()]
 
 
 func _open_creator() -> void:
@@ -967,6 +986,8 @@ func _parse_args() -> void:
 			_bench_seconds = float(arg.get_slice("=", 1))
 		elif arg == "--autodrive":
 			_autodrive = true
+		elif arg.begins_with("--pack="):
+			_pack_id = arg.get_slice("=", 1)
 		elif arg.begins_with("--preset="):
 			Settings.apply_preset(arg.get_slice("=", 1))
 		elif arg.begins_with("--screenshot="):
@@ -1125,6 +1146,15 @@ func _process(delta: float) -> void:
 	($HUD as CanvasLayer).visible = not menu_open()
 	if _car != null:
 		var body: Node3D = Players.local_controlled_body()
+		if _lap_label != null and _pack != null:
+			var was_visible := _lap.visible
+			var was_current := _lap.current_s
+			_lap.update(body.global_position, _pack.graph, delta)
+			if OS.has_environment("CODE430_LAP_DEBUG") and (was_visible != _lap.visible or (was_current >= 0.0) != (_lap.current_s >= 0.0)):
+				var hit := _pack.graph.nearest_edge(body.global_position, 20.0)
+				print("lap: at %s visible %s current %.2f nearest %s" % [body.global_position.round(), _lap.visible, _lap.current_s, hit["edge"].name if not hit.is_empty() else "-"])
+			_lap_label.visible = _lap.visible
+			_lap_label.text = _lap.readout()
 		var anchors := PackedVector3Array([body.global_position])
 		if body is FlyableHelicopter:
 			var heli := body as FlyableHelicopter
@@ -1316,6 +1346,8 @@ func _print_benchmark() -> void:
 			print("benchmark: knockdowns %d, ragdolls falling on average %.2f per frame" % [_knockdowns, falling / maxf(_bench_falling.size(), 1.0)])
 	if _streamer != null:
 		print("benchmark: chunks in scene %d, built %d, downgraded %d, freed %d, failed %d, first playable %d ms" % [_streamer.chunk_count(), _streamer.stats["built"], _streamer.stats["downgraded"], _streamer.stats["freed"], _streamer.stats["failed"], _first_playable_ms])
+		if _lap_label != null:
+			print("benchmark: lap %s (on loop %s)" % [_lap.readout(), _lap.visible])
 		print("benchmark: streamer cost add max %.1f ms (ema %.2f), shapes max %.1f ms (ema %.2f), frames over 8 ms %d" % [_streamer.profile["add_max_ms"], _streamer.profile["add_ema_ms"], _streamer.profile["shape_max_ms"], _streamer.profile["shape_ema_ms"], _streamer.profile["slow_frames"]])
 
 

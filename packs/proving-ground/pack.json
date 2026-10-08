@@ -1,0 +1,37 @@
+{
+ "attribution": [
+  "© OpenStreetMap contributors"
+ ],
+ "authors": [
+  "Code 430 contributors"
+ ],
+ "dependencies": [],
+ "description": "Generated from OpenStreetMap by tools/osm_import. Roads, junctions, and terrain for one district.",
+ "engine_api": 0,
+ "id": "code430.proving-ground",
+ "license": "ODbL-1.0",
+ "map": {
+  "bbox": [
+   44.9928135,
+   -75.0152448,
+   45.0071865,
+   -74.9847552
+  ],
+  "crs": "EPSG:32618",
+  "origin": {
+   "easting": 500000.0,
+   "lat": 44.9999964,
+   "lon": -75.0,
+   "northing": 4982950.0
+  },
+  "spawn": {
+   "heading_deg": 180.0,
+   "x": -1.75,
+   "z": -340.0
+  }
+ },
+ "name": "Double Cross",
+ "schema_version": 0,
+ "type": "map",
+ "version": "0.1.0"
+}

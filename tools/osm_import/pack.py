@@ -565,8 +565,10 @@ def write_pack(
     bridges: BridgesResult | None = None,
     vegetation: VegetationResult | None = None,
     services: ServicesResult | None = None,
+    spawn: dict | None = None,
 ) -> dict[str, Path]:
-    """Write the pack folder. Returns the paths written."""
+    """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
+    fixed start on the manifest for packs whose author chose one."""
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "terrain").mkdir(exist_ok=True)
     attribution = [OSM_ATTRIBUTION]
@@ -595,6 +597,12 @@ def write_pack(
             "bbox": bbox.as_list(),
         },
     }
+    if spawn:
+        manifest["map"]["spawn"] = {
+            "x": float(spawn["x"]),
+            "z": float(spawn["z"]),
+            "heading_deg": float(spawn.get("heading_deg", 0.0)),
+        }
     terrain_index = {
         "schema_version": 0,
         "chunk_size_m": CHUNK_SIZE_M,

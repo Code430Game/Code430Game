@@ -7,7 +7,7 @@ cd tools
 uv run python -m osm_import --bbox 45.405,-75.715,45.435,-75.675 --out ../packs/ottawa-centretown/import --title "Ottawa Centretown"
 ```
 
-Options: `--osm-json FILE` reads a saved Overpass JSON file instead of fetching (used by tests), `--config FILE` swaps the defaults table, `--cache-dir DIR` moves the download cache (default `osm_import/.cache/`, gitignored).
+Options: `--osm-json FILE` reads a saved Overpass JSON file instead of fetching (used by tests), and `--water-json`, `--buildings-json`, `--parking-json`, `--bridges-json`, `--services-json`, `--vegetation-json` do the same for each layer, so a region whose `inputs` name every file builds a complete pack offline (see `regions/README.md`); `--config FILE` swaps the defaults table, `--cache-dir DIR` moves the download cache (default `osm_import/.cache/`, gitignored).
 
 Fixtures: `python -m osm_import crop --osm-json CACHED.json --bbox S,W,N,E --out tests/fixtures/NAME.osm.json` cuts a committed test extract out of a cached download and records where it came from.
 

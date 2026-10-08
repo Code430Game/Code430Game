@@ -65,7 +65,15 @@ with only the proposal. The maintainer approves the direction before code is wri
 - **Map data:** changes under `tools/osm_import` mean re-exporting the Ottawa pack (command in
   the README) and regenerating the golden fixture in `tools/tests/golden/`. Overpass can be
   slow or fail. Set `CODE430_OSM_CACHE` to a directory of your choice to cache its responses
-  between runs.
+  between runs. They also mean regenerating the proving ground: `scripts/regen-proving-ground.sh`
+  rebuilds `packs/proving-ground` (and the inputs under `regions/proving-ground`) from the
+  generator in `tools/proving_ground`, offline; commit the result. CI rebuilds it in
+  `tools/tests/test_proving_ground_pack.py` and fails when the committed pack differs, so a
+  stale pack shows up as a failing test. `scripts/regen-proving-ground.sh --check` is the same
+  check from the shell.
+- **Trying a change quickly:** the proving ground has one of everything within a short drive.
+  `godot --path game -- --pack=code430.proving-ground --drive` starts on its start line;
+  `scripts/deck-bench.sh --route loop` benchmarks a lap of it on the Deck.
 - **Content:** original content only, with generic names (no real brands or trademarks).
   Anything that differs by tone reads `ContentMode` instead of hard-coding a tone.
 - **Shared files:** some files are touched by several open changes (listed in
