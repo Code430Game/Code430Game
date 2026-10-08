@@ -50,7 +50,7 @@ static func road_width_px(road_class: String) -> float:
 ## Draws the map into `texture`. Must be called from a node in the tree; awaits one frame.
 ## Place markers (services, garages) aren't baked in: the maps draw them with PlaceIcons at
 ## screen size so they stay sharp at any zoom (add-map-legend).
-func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = []) -> void:
+func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = [], turfs: Array = []) -> void:
 	var viewport := SubViewport.new()
 	viewport.size = size_px
 	viewport.transparent_bg = false
@@ -63,6 +63,7 @@ func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon
 	canvas.buildings = buildings
 	canvas.lots = lots
 	canvas.green = green
+	canvas.turfs = turfs
 	viewport.add_child(canvas)
 	host.add_child(viewport)
 	await RenderingServer.frame_post_draw
@@ -80,6 +81,34 @@ class MapCanvas:
 	var buildings: Array[BuildingBuilder.Building] = []
 	var lots: Array = []  # ParkingLotBuilder.Lot
 	var green: Array = []  # {"kind", "vertices": PackedVector2Array, "triangles": PackedInt32Array}
+	var turfs: Array = []  # Turf (add-hostile-gang): a hatched fill and an edge over everything
+
+	## A faction's turf: hatching in its colour and a solid edge, drawn last so it reads on the
+	## minimap's crop as well as the full map.
+	func _draw_turf(t: Turf) -> void:
+		var pts := PackedVector2Array()
+		for p in t.ring:
+			pts.append(renderer.world_to_pixel(p.x, p.y))
+		if pts.size() < 3:
+			return
+		var col := PlaceIcons.color("turf")
+		draw_colored_polygon(pts, Color(col, 0.18))
+		var r := Rect2(pts[0], Vector2.ZERO)
+		for p in pts:
+			r = r.expand(p)
+		var step := 6.0
+		var x := r.position.x - r.size.y
+		while x < r.end.x:
+			var a := Vector2(x, r.end.y)
+			var b := Vector2(x + r.size.y, r.position.y)
+			var clipped := Geometry2D.clip_polyline_with_polygon(PackedVector2Array([a, b]), pts)
+			for seg in clipped:
+				if seg.size() >= 2:
+					draw_polyline(seg, Color(col, 0.45), 1.0, true)
+			x += step
+		var edge := pts.duplicate()
+		edge.append(pts[0])
+		draw_polyline(edge, col, 2.0, true)
 
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(renderer.size_px)), BACKGROUND)
@@ -146,3 +175,5 @@ class MapCanvas:
 				pts.append(renderer.world_to_pixel(p.x, p.z))
 			var color: Color = RoadGraphDebugView.DEBUG_COLORS.get(e.road_class, Color.WHITE)
 			draw_polyline(pts, color.darkened(0.25), MapRenderer.road_width_px(e.road_class), true)
+		for t: Turf in turfs:
+			_draw_turf(t)

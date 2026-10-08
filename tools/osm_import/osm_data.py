@@ -82,7 +82,9 @@ class OsmData:
     @classmethod
     def load(cls, path: Path, source: dict | None = None) -> OsmData:
         payload = json.loads(path.read_text(encoding="utf-8"))
-        src = {"kind": "file", "path": str(path)}
+        # The file's name, not its absolute path: a committed pack must regenerate byte for
+        # byte on any machine (the proving ground's check compares the files).
+        src = {"kind": "file", "path": path.name}
         src.update(source or {})
         return cls.from_overpass_json(payload, src)
 

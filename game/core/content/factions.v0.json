@@ -1,0 +1,24 @@
+{
+ "schema_version": 0,
+ "_comment": "First-party factions (add-hostile-gang). The Double Cross crew holds the proving ground's turf; a map pack places turf with turf.v0.json and may ship its own factions.v0.json. Weapons are ids from weapons.v0.json; the tone picks the variant. Invented names only.",
+ "factions": [
+  {
+   "id": "double-cross",
+   "name": "the Double Cross",
+   "descriptors": {"violence": "strong", "crime": "strong"},
+   "variants": {
+    "fallback": {"name": "the Double Cross", "melee": "melee", "ranged": "gun", "ranged_share": 0.34, "tag": "Wrong turf.", "descriptors": {"violence": "strong", "crime": "strong"}},
+    "dystopia": {"name": "the Double Cross", "melee": "melee", "ranged": "gun", "ranged_share": 0.5, "tag": "Wrong block, meat.", "descriptors": {"violence": "strong", "crime": "strong", "dystopia_tech": "mild"}},
+    "clean": {"name": "the Double Cross crew", "melee": "melee", "ranged": "gun", "ranged_share": 0.5, "tag": "Tag, you're it!", "descriptors": {"violence": "mild", "crime": "mild"}}
+   },
+   "look": {"top": 5, "bottom": 5, "jacket": 1, "jacket_colour": 0, "hat": 0, "leader_hat": 2},
+   "car": {"catalogue_id": "sedan", "colour": [0.1, 0.1, 0.12]},
+   "crew": {"members": 5, "leader_health": 2.0},
+   "sight_m": 28.0,
+   "warning_s": 2.0,
+   "flee_health": 0.3,
+   "respawn_s": 45.0,
+   "heat": {"rise_per_s": 0.12, "fall_per_s": 0.08, "out_of_turf_s": 12.0}
+  }
+ ]
+}

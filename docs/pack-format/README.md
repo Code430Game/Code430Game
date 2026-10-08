@@ -71,7 +71,9 @@ item (a billboard goes blank). First item type: billboard ads in `ads.v0.json`
 | `ads.v0.json` | no | Billboard ads with per-mode variants; schema `ads.schema.v0.json`. |
 | `parking.v0.json` | no | Parking lots (rings, kind, capacity, operator, stall direction, aisles inside, entrances, ground height) and street-side bays along edges; schema `parking.schema.v0.json`. |
 | `vehicles.v0.json` | no | Vehicles merged after the base catalogue (same id replaces): body class, dimensions, mass and handling, palette, spawn weights by road group and hour, liveries with per-mode variants; schema `vehicles.schema.v0.json`. Any pack type may ship one. |
-| `overrides.json` | no | Hand fixes applied on top of the generated data (empty for now). |
+| `turf.v0.json` | no | Ground a faction holds: rings in local metres, optionally the faction id and a centre; schema `turf.schema.v0.json` (add-hostile-gang). |
+| `factions.v0.json` | no | Factions merged after the base game's (`game/core/content/factions.v0.json`, same id replaces): crew size, look, car, per-mode weapon variants by weapon id, threat and heat tunables; schema `factions.schema.v0.json`. Any pack type may ship one. |
+| `overrides.json` | no | Hand fixes applied on top of the generated data. A `turf` key (the same shape as `turf.v0.json`'s `turfs`) is written out as `turf.v0.json` at export, so a city pack can place a faction's turf by hand. |
 | `chunks/*.glb` + `chunks/build.json` | no | Pre-built meshes from the Godot pack builder. `build.json` holds a hash of the inputs; the game ignores chunks whose hash no longer matches and generates meshes at load instead. |
 
 ## Validating locally

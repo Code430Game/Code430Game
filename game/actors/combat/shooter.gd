@@ -31,6 +31,8 @@ var player: Player
 var peds: PedestrianManager
 ## The police, whose officers the weapons reach (add-police-combat); null: none.
 var police: PoliceManager
+## The factions, whose members the weapons reach (add-hostile-gang); null: none.
+var factions: FactionManager
 var effects: CombatEffects
 var weapons: WeaponSet
 var hud: Label
@@ -380,6 +382,9 @@ func _swing(w: Dictionary) -> void:
 		if body is OfficerBody and police != null and police.in_fight((body as OfficerBody).officer):
 			hit(w, body, centre, -fwd, player.global_position)
 			return
+		if body is FactionBody and factions != null and (factions.mirror or factions.in_fight((body as FactionBody).member)):
+			hit(w, body, centre, -fwd, player.global_position)
+			return
 		var who: Pedestrian = peds.agent_of(body as Node) if peds != null and body is Node else null
 		if who != null and who.state == Pedestrian.State.WALKING:
 			hit(w, body, centre, -fwd, player.global_position)
@@ -474,6 +479,9 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 	if collider is OfficerBody:
 		_hit_officer((collider as OfficerBody).officer, w, pos, from)
 		return
+	if collider is FactionBody:
+		_hit_member((collider as FactionBody).member, w, pos, from)
+		return
 	var a: Pedestrian = peds.agent_of(collider as Node) if peds != null and collider is Node else null
 	if a != null and a.state != Pedestrian.State.WALKING:
 		return  # already down or falling: nothing more happens, and no new crime is reported
@@ -516,6 +524,25 @@ func _hit_officer(o: Node3D, w: Dictionary, pos: Vector3, from: Vector3) -> void
 	elif kind == "paint":
 		_paint_index = (_paint_index + 1) % 4
 		effects.mark(str(weapons.impact(kind).get("decal", "")), o.global_position + Vector3.UP * 0.02, Vector3.UP, _paint_index)
+
+
+## A hit on a gang member (add-hostile-gang): the FactionManager decides what it does (and a
+## guest's hit goes to the host); blood where a lethal weapon downs them and gore is allowed,
+## paint by a tagged-out member.
+func _hit_member(m: GangMember, w: Dictionary, pos: Vector3, from: Vector3) -> void:
+	if factions == null or m == null:
+		return
+	var kind := str(w.get("impact", ""))
+	var result := factions.hit_member(m, w, pos, from)
+	if result == "" or result == "sent" or effects == null:
+		return
+	if kind == "fist":
+		effects.sound(str(weapons.impact("fist").get("sound", "")))
+	if result == "down" and bool(w.get("lethal", false)) and ContentMode.allows("gore"):
+		effects.mark("blood", m.global_position + Vector3.UP * 0.02, Vector3.UP)
+	elif kind == "paint":
+		_paint_index = (_paint_index + 1) % 4
+		effects.mark(str(weapons.impact(kind).get("decal", "")), m.global_position + Vector3.UP * 0.02, Vector3.UP, _paint_index)
 
 
 ## A punch or kick landing on a walker: a knock-down for a kick or the punch that completes a

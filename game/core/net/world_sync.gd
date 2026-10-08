@@ -19,6 +19,8 @@ var parked: ParkedCars
 ## The police (add-flyable-helicopter): the host's parked helicopter, and where a guest's
 ## stolen one is parked when they leave.
 var police: PoliceManager
+## The factions (add-hostile-gang): the host's members ride to guests as snapshots.
+var factions: FactionManager
 var player_sync: PlayerSync
 var day_night: DayNight
 var config: Dictionary = {}
@@ -51,6 +53,8 @@ func _process(delta: float) -> void:
 			_traffic_snapshot.rpc_id(int(id), traffic.snapshot(around, REPLICATE_RADIUS_M))
 			if peds != null:
 				_peds_snapshot.rpc_id(int(id), peds.snapshot(around, REPLICATE_RADIUS_M))
+			if factions != null:
+				_factions_snapshot.rpc_id(int(id), factions.snapshot(around, REPLICATE_RADIUS_M))
 	if _signal_accum >= SIGNAL_SYNC_S:
 		_signal_accum = 0.0
 		_signal_time.rpc(traffic.signals.time, day_night.hour if day_night != null else -1.0)
@@ -186,6 +190,27 @@ func _traffic_snapshot(data: PackedFloat32Array) -> void:
 func _peds_snapshot(data: PackedFloat32Array) -> void:
 	if peds != null:
 		peds.apply_snapshot(data)
+
+
+@rpc("authority", "unreliable")
+func _factions_snapshot(data: PackedFloat32Array) -> void:
+	if factions != null:
+		factions.apply_snapshot(data)
+
+
+## Guest: a hit on a gang member replica goes to the host, who adjudicates it (add-hostile-gang 3.2).
+func report_member_hit(turf: int, seed: int, weapon_id: String, pos: Vector3, from: Vector3) -> void:
+	_report_member_hit.rpc_id(1, turf, seed, weapon_id, pos, from)
+
+
+@rpc("any_peer", "reliable")
+func _report_member_hit(_turf: int, seed: int, weapon_id: String, pos: Vector3, from: Vector3) -> void:
+	if not Session.is_host() or factions == null:
+		return
+	var m := factions.member_by_seed(seed)
+	if m == null:
+		return
+	factions.hit_member(m, factions.weapon(weapon_id) if weapon_id != "fist" else {"id": "fist", "impact": "fist", "lethal": false}, pos, from)
 
 
 @rpc("authority", "reliable")

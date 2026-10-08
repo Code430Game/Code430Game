@@ -89,6 +89,13 @@ var _officer_weapon: Dictionary = {}
 ## Prints the chase each second (the testbed's --police-log).
 var log_chase: bool = false
 var _log_s: float = 0.0
+## The factions (add-hostile-gang): officers fight a crew whose crime they saw.
+var factions: FactionManager
+## A gang member officers are after, when an officer saw the member's crime; null otherwise.
+var gang_target: GangMember
+## Until when the police keep responding to a gang incident with no stars on the player.
+var _incident_until: float = -INF
+var _incident_at: Vector3 = Vector3.INF
 
 
 func _ready() -> void:
@@ -121,11 +128,19 @@ func _physics_process(delta: float) -> void:
 	var target := _target()
 	var want: int = (cfg("police_per_star", [0, 1, 2, 4]) as Array)[clampi(wanted.stars, 0, 3)]
 	want = mini(want, int(cfg("max_police", 4)))
-	if wanted.stars == 0:
+	# A gang incident an officer saw keeps one car on the scene with no stars on the player
+	# (add-hostile-gang 3.1); it ends when the crew is out of the fight or the time runs out.
+	if gang_target != null and (not is_instance_valid(gang_target) or factions == null or not factions.in_fight(gang_target)):
+		gang_target = _next_gang_target()
+	var incident := _clock < _incident_until and gang_target != null
+	if incident:
+		want = maxi(want, 1)
+	if wanted.stars == 0 and not incident:
 		_clear_all()
 	else:
 		while cars.size() < want:
-			if not _spawn_car(target.global_position):
+			var around := _incident_at if (incident and wanted.stars == 0) else target.global_position
+			if not _spawn_car(around, _incident_at if incident else Vector3.INF):
 				break
 	var positions := PackedVector3Array()
 	for car in cars.duplicate():
@@ -470,6 +485,9 @@ func _step_officer(o: Node3D, delta: float) -> void:
 	var target := _target()
 	if _step_stagger(o, delta):
 		return
+	if gang_target != null and is_instance_valid(gang_target) and factions != null and factions.in_fight(gang_target):
+		_step_officer_against_gang(o, delta)
+		return
 	var goal := target.global_position
 	var to := goal - o.global_position
 	to.y = 0.0
@@ -515,6 +533,83 @@ func _step_officer(o: Node3D, delta: float) -> void:
 			shot_at.emit(float(cfg("officer_damage", 9.0)))
 		else:
 			net_hit.emit(float(cfg("net_s", 3.0)))
+
+
+## An officer who saw a gang crime goes for the crew instead of the player (add-hostile-gang
+## 3.1): walks at the nearest standing member, fires the tone's officer weapon in range (the
+## FactionManager takes the hit), or jabs within reach. The player's stars never move for it.
+func _step_officer_against_gang(o: Node3D, delta: float) -> void:
+	var m := _nearest_member(o.global_position)
+	if m == null:
+		return
+	var goal := m.global_position
+	var to := goal - o.global_position
+	to.y = 0.0
+	var d := to.length()
+	var speed := 0.0
+	var stop := float(cfg("officer_punch_m", 2.0)) * 0.8
+	if d > stop:
+		speed = float(cfg("officer_speed_mps", 4.2))
+		o.global_position += to.normalized() * minf(speed * delta, d)
+	o.global_position.y = lerpf(o.global_position.y, goal.y, clampf(delta * 6.0, 0.0, 1.0))
+	if d > 0.1:
+		o.look_at(Vector3(goal.x, o.global_position.y, goal.z), Vector3.UP)
+	(o.get_meta("rig") as CharacterRig).advance(delta, speed)
+	var cool := float(_officer_cooldown.get(o, 0.0)) - delta
+	_officer_cooldown[o] = cool
+	var w := WeaponSet.resolve(_officer_weapon)
+	var held: HeldWeapon = o.get_meta("held", null)
+	var from := o.global_position + Vector3.UP * 1.4
+	if w.is_empty():
+		if held != null:
+			held.aiming = false
+		if cool <= 0.0 and d <= float(cfg("officer_punch_m", 2.0)):
+			if held != null:
+				var side := int(o.get_meta("jab", 0))
+				held.punch(side)
+				o.set_meta("jab", 1 - side)
+			_officer_cooldown[o] = float(cfg("officer_punch_rate_s", 0.8))
+			factions.hit_member(m, {"id": "fist", "impact": "fist", "lethal": false}, goal + Vector3.UP, from)
+		return
+	if held != null:
+		held.aiming = d <= float(cfg("officer_fire_m", 22.0))
+	if cool > 0.0 or d > float(cfg("officer_fire_m", 22.0)):
+		return
+	if held != null:
+		held.recoil()
+	_officer_cooldown[o] = float(cfg("officer_rate_s", 1.1))
+	factions.hit_member(m, w, goal + Vector3.UP, from)
+
+
+func _nearest_member(from: Vector3) -> GangMember:
+	if factions == null:
+		return null
+	var best: GangMember = null
+	var best_d := INF
+	for m in factions.members:
+		if not is_instance_valid(m) or not m.in_fight() or m.in_car:
+			continue
+		var d := m.global_position.distance_to(from)
+		if d < best_d:
+			best_d = d
+			best = m
+	return best
+
+
+func _next_gang_target() -> GangMember:
+	if _clock >= _incident_until:
+		return null
+	return _nearest_member(_incident_at) if _incident_at != Vector3.INF else null
+
+
+## An officer saw member `m`'s crime: the police go for the crew (add-hostile-gang 3.1).
+## Cars come to the member even with no stars on the player, for `incident_s`.
+func engage_gang(m: GangMember) -> void:
+	if m == null or not is_instance_valid(m):
+		return
+	gang_target = m
+	_incident_at = m.global_position
+	_incident_until = _clock + float(cfg("incident_s", 45.0))
 
 
 ## No tone weapon for officers: a jab at a player on foot within reach, hands alternating.

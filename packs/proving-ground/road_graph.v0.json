@@ -25104,7 +25104,7 @@
     "generator": "code430 proving_ground",
     "kind": "file",
     "layer": "roads",
-    "path": "/Users/rjackson/Projects/Code430/.claude/worktrees/agent-aec3964b795f0dd6d/regions/proving-ground/osm.json"
+    "path": "osm.json"
    },
    {
     "kind": "file",

@@ -181,13 +181,19 @@ def lap_payload(d: District) -> dict:
 
 
 def turf_payload(d: District) -> dict:
+    """The gang's turf with the faction that holds it and where the crew regroups (the ring's
+    centroid), for add-hostile-gang."""
+    cx = sum(x for x, _ in d.turf) / len(d.turf)
+    cz = sum(z for _, z in d.turf) / len(d.turf)
     return {
         "schema_version": 0,
         "turfs": [
             {
                 "id": "double-cross",
                 "name": "the Double Cross",
+                "faction": "double-cross",
                 "ring": [[x, z] for x, z in d.turf],
+                "centre": [round(cx, 2), round(cz, 2)],
             }
         ],
     }

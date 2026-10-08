@@ -10,6 +10,7 @@ terrain.json, because Godot reads only 8-bit PNG channels.
 
 from __future__ import annotations
 
+import json
 import math
 import warnings
 from dataclasses import dataclass
@@ -637,6 +638,17 @@ def write_pack(
     dump_json(terrain_index, paths["terrain"])
     if not paths["overrides"].exists():
         dump_json({"schema_version": 0, "edges": {}, "nodes": {}}, paths["overrides"])
+    # A hand-placed turf in the overrides (add-hostile-gang 1.2) becomes the pack's turf file,
+    # so a city pack can give a faction its ground without a generator; a turf extra copied
+    # after this call replaces it.
+    overrides = json.loads(paths["overrides"].read_text(encoding="utf-8"))
+    if (
+        isinstance(overrides, dict)
+        and isinstance(overrides.get("turf"), list)
+        and overrides["turf"]
+    ):
+        paths["turf"] = out_dir / "turf.v0.json"
+        dump_json({"schema_version": 0, "turfs": overrides["turf"]}, paths["turf"])
     dump_json(report_dict, paths["report_json"])
     paths["report_md"].write_text(report_md, encoding="utf-8")
     if water is not None:

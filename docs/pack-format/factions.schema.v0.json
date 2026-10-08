@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/pack-format/factions.schema.v0.json",
+  "title": "Code 430 factions v0",
+  "description": "Hostile factions (add-hostile-gang): a crew that holds turf, recognises the player there and attacks. Weapons are ids from weapons.v0.json, resolved by tone like the player's; a variant keyed to a mode without lethal weapons may only name weapons whose variant for that mode is not lethal. The base game ships game/core/content/factions.v0.json; a pack's factions.v0.json adds factions or overrides one by id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "factions"],
+  "properties": {
+    "schema_version": { "const": 0 },
+    "_comment": { "type": "string" },
+    "factions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "descriptors", "variants", "look", "crew"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "name": { "type": "string" },
+          "descriptors": { "type": "object", "additionalProperties": { "enum": ["none", "mild", "strong"] } },
+          "variants": {
+            "type": "object",
+            "required": ["fallback"],
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["melee", "ranged", "tag"],
+              "properties": {
+                "name": { "type": "string", "description": "What the crew calls itself in this mode" },
+                "melee": { "type": "string", "description": "weapon id for the close members" },
+                "ranged": { "type": "string", "description": "weapon id for the members holding at range; empty: knives only" },
+                "ranged_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "share of members (not the leader) who carry the ranged weapon" },
+                "tag": { "type": "string", "description": "the shout on the warning" },
+                "descriptors": { "type": "object", "additionalProperties": { "enum": ["none", "mild", "strong"] } }
+              }
+            }
+          },
+          "look": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Character profile fields every member shares (the rest is random)",
+            "properties": {
+              "top": { "type": "integer", "minimum": 0 },
+              "bottom": { "type": "integer", "minimum": 0 },
+              "jacket": { "type": "integer", "minimum": 0, "maximum": 1 },
+              "jacket_colour": { "type": "integer", "minimum": 0 },
+              "hat": { "type": "integer", "minimum": 0 },
+              "leader_hat": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "car": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["catalogue_id"],
+            "properties": {
+              "catalogue_id": { "type": "string" },
+              "colour": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number", "minimum": 0, "maximum": 1 } }
+            }
+          },
+          "crew": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["members"],
+            "properties": {
+              "members": { "type": "integer", "minimum": 1, "maximum": 12, "description": "members on patrol besides the leader" },
+              "leader_health": { "type": "number", "exclusiveMinimum": 0, "description": "multiplier on a member's toughness" }
+            }
+          },
+          "sight_m": { "type": "number", "exclusiveMinimum": 0 },
+          "warning_s": { "type": "number", "minimum": 0 },
+          "flee_health": { "type": "number", "minimum": 0, "maximum": 1 },
+          "respawn_s": { "type": "number", "minimum": 0 },
+          "heat": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "rise_per_s": { "type": "number", "minimum": 0 },
+              "fall_per_s": { "type": "number", "minimum": 0 },
+              "out_of_turf_s": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
