@@ -208,3 +208,44 @@ def test_lower_road_owns_terrain_where_roads_cross_without_a_node():
     row, col = int(40 / TERRAIN_RES_M), int(40 / TERRAIN_RES_M)  # the crossing cell
     assert chunk.heights[row, col] < 69.0
     assert chunk.heights[row, col - 4] < 69.0  # still on Under, 16 m west, inside Over's shoulder
+
+
+def test_a_turf_in_the_overrides_becomes_the_packs_turf_file(tmp_path: Path):
+    """A hand-placed turf (add-hostile-gang 1.2) rides from overrides.json into turf.v0.json."""
+    ways = [
+        (1, [(-300, 0), (0, 0), (300, 0)], {"highway": "secondary", "name": "Main"}),
+        (2, [(0, -300), (0, 0), (0, 300)], {"highway": "residential", "name": "Cross"}),
+    ]
+    g, proj = graph_for(ways, SyntheticSource())
+    bounds = proj.bbox_local(BBOX)
+    report = validate(g, CFG, bounds)
+    chunks, _stats = build_terrain(g, SyntheticSource(), bounds)
+    gd = graph_to_dict(g, BBOX, proj.frame, [{"kind": "synthetic"}], "test", {"kind": "synthetic"})
+    out = tmp_path / "pack"
+    out.mkdir()
+    turf = {
+        "id": "market",
+        "name": "the Market crew",
+        "faction": "double-cross",
+        "ring": [[-50.0, -50.0], [50.0, -50.0], [50.0, 50.0], [-50.0, 50.0]],
+    }
+    (out / "overrides.json").write_text(
+        json.dumps({"schema_version": 0, "edges": {}, "nodes": {}, "turf": [turf]}),
+        encoding="utf-8",
+    )
+    paths = write_pack(
+        out,
+        "code430.test-map",
+        "Test Map",
+        "0.1.0",
+        gd,
+        report.to_dict(),
+        "# r\n",
+        chunks,
+        proj.frame,
+        BBOX,
+        None,
+    )
+    assert json.loads(paths["turf"].read_text()) == {"schema_version": 0, "turfs": [turf]}
+    reports = validate_root(out)
+    assert reports and all(r.ok for r in reports), [r.errors for r in reports]

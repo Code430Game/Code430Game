@@ -1,6 +1,6 @@
 ## 1. Data
-- [ ] 1.1 `factions.schema.v0.json`, `turf.schema.v0.json`, the base `factions.v0.json` with the first gang in three variants, `faction_config.json`; `overrides.json` gains `turf`; validator checks (descriptors, lethal variants, turf ring); tests
-- [ ] 1.2 Proving ground generator writes the turf; an Ottawa turf in `overrides.json` around the Market for trying it there; both packs re-exported (the proving ground via its regen script)
+- [x] 1.1 `factions.schema.v0.json`, `turf.schema.v0.json` (gains `faction` and `centre`), the base `factions.v0.json` with the Double Cross in three variants (five members and a leader), `faction_config.json`, `outcomes.gang` in the tone schema and mode files; validator checks factions (schema, descriptors, weapon ids, a lethal weapon in a non-lethal mode's variant); tests in `test_factions_data.py`
+- [x] 1.2 The generator writes the turf's faction and centre; `overrides.json` may carry `turf`, which the importer writes out as `turf.v0.json` (test in `test_osm_pack.py`); the proving ground re-exported. The importer now records an input file's name, not its absolute path, so the committed pack regenerates byte for byte on any machine (the fresh-import test failed off the original worktree). The Ottawa Market turf is not placed: the Ottawa pack was off limits for this round; `--gang=N` tries the crew anywhere instead
 
 ## 2. Members
 - [ ] 2.1 Members as pedestrians with a faction and a held weapon: spawn in turf to the cap, patrol pairs on the walk graph, the gang car on the lanes; snapshot stride; the Shooter and fists reach them; tests
