@@ -12,5 +12,6 @@
 - [x] 3.2 `_signal_time` carries `[state, next, t, seed, elapsed]` (a trailing argument, old hosts send none); a guest's controller mirrors it and keeps blending, never walking the table; `test_weather.gd` drives a `WorldSync` with a mirrored controller
 
 ## 4. Verification
-- [ ] 4.1 Deck benchmark in rain at 23:00 on the usual route; sky and particle cost stated against the clear-day run; no regression past budget (the Deck was in the human's hands on 2026-10-08; run `scripts/deck-bench.sh --ref main --ref change/add-weather --change add-weather --task 4.1 --extra "--weather=rain --time=23"`)
+- [x] 4.1 Deck benchmark in rain at 23:00 on the usual route; sky and particle cost stated against the clear-day run; no regression past budget (the Deck was in the human's hands on 2026-10-08; run `scripts/deck-bench.sh --ref main --ref change/add-weather --change add-weather --task 4.1 --extra "--weather=rain --time=23"`)
+  - 2026-10-08 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck --pack=code430.proving-ground --weather=rain`): working-tree 02fe38d: render cpu 1.28 / gpu 9.70 ms measured, physics mean 10.52 ms (max 22.70), frame avg 11.14 / p99 19.33 ms (paced), first playable 306 ms.
 - [ ] 4.2 **Stop: human drives through a rain storm and a snowfall on the Deck**

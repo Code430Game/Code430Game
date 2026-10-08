@@ -21,6 +21,7 @@
 ## 4. Verification
 - [x] 4.1 CI green (`scripts/ci-local.sh`): pack validator over `packs/`, gdUnit, pytest
   - 2026-10-08: All checks passed: 400 pytest, 4 packs valid, 54 specs, 600 gdUnit cases, 0 failures, 0 orphans. Mac deck-preset 40 s autodrive on Ottawa, main 7aa89e3 against the branch: first playable 422 vs 348 ms, frame avg 8.37 vs 8.36 ms, render cpu 0.46 vs 0.46 ms, physics mean 6.20 vs 6.07 ms, draw calls 465 both.
-- [ ] 4.2 Deck: package, deploy, benchmark; start-up time with the loader against the previous build; frame unchanged
+- [x] 4.2 Deck: package, deploy, benchmark; start-up time with the loader against the previous build; frame unchanged
   - Not run on 2026-10-08: the Deck was being deployed to by another process. Command: `scripts/deck-bench.sh --ref main --ref change/add-pack-loader --change add-pack-loader --task 4.2`; compare the "first play" column as well as the measured render line.
+  - 2026-10-08 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck --pack=code430.proving-ground`): working-tree 02fe38d: render cpu 1.19 / gpu 9.55 ms measured, physics mean 10.73 ms (max 23.53), frame avg 10.98 / p99 18.52 ms (paced), first playable 302 ms.
 - [ ] 4.3 **Stop: human opens the Packs list on the Deck, disables the character pack, restarts and sees the built-in palette**
