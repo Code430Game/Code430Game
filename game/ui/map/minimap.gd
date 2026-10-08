@@ -1,7 +1,8 @@
 class_name Minimap
 extends Control
-## Corner minimap: a crop of the map texture around the player, rotated so the
-## car's heading points up. One textured quad per frame, no extra rendering.
+## Corner minimap: a crop of the map texture around the player, rotated so the way the
+## player faces points up: the camera's look direction on foot (also the aim), the car's
+## heading when driving. One textured quad per frame, no extra rendering.
 ##
 ## On a garage level (GarageBuilder.level_at) it draws that garage's floor instead: outline,
 ## stalls, ramps and columns, closer in, until the player is back near the top of a ramp.
@@ -24,6 +25,9 @@ const DASHES := 6  # dashes in the searching helicopter's ring
 
 var renderer: MapRenderer
 var player: Node3D
+## Where "up" comes from: a Callable returning a world xz forward vector (the scene gives the
+## camera's look on foot), or empty to use the player's own facing (a car's heading).
+var heading_source: Callable = Callable()
 ## Moving markers set each frame by the scene: [{"at": Vector3, "color": Color, "shape": String,
 ## "flash": bool}]. Shapes: "cross" (the default; ambulances on a call), "dot" (police cars and
 ## officers) and "helicopter" (a ring round a dot). Police colours flash red and blue when
@@ -46,6 +50,16 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 
+## The forward direction the map turns to: `heading_source` when set, else the player's facing.
+func heading() -> Vector3:
+	if heading_source.is_valid():
+		var h: Vector3 = heading_source.call()
+		h.y = 0.0
+		if h.length_squared() > 1e-6:
+			return h.normalized()
+	return -player.global_basis.z if player != null else Vector3.FORWARD
+
+
 ## Rotation to apply to the map so `heading` (world xz forward) points up on screen.
 static func map_rotation_for(heading: Vector3) -> float:
 	return -atan2(heading.x, -heading.z)
@@ -61,7 +75,7 @@ func _draw() -> void:
 		return
 	var centre := size * 0.5
 	var scale := (size.x * 0.5) / VIEW_RADIUS_M * renderer.metres_per_pixel
-	var rot := map_rotation_for(-player.global_basis.z)
+	var rot := map_rotation_for(heading())
 	var player_px := renderer.world_to_pixel(player.global_position.x, player.global_position.z)
 	draw_rect(Rect2(Vector2.ZERO, size), MapRenderer.BACKGROUND)
 	if garage != null:

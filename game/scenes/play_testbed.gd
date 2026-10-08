@@ -49,6 +49,7 @@ var _day_night: DayNight
 var _weather: WeatherController
 var _weather_pin: String = ""  # --weather=<state>: hold that state all session
 var _weather_seed: int = -1  # --weather-seed=N; otherwise random per session (the host's travels to guests)
+var _weather_start: String = ""  # --weather-start=<state>: begin there but keep the table running (the forecast shows)
 var _vehicle_audio: VehicleAudio
 var _reset_ring: HoldRing
 var _foot_reset_s: float = 0.0  # seconds reset has been held on foot; -1 once it fired
@@ -336,6 +337,7 @@ func _on_entered_vehicle(car: VehicleBody3D) -> void:
 	_camera.current = true
 	_minimap.player = car
 	_overview.player = car
+	_set_map_heading(false)
 
 
 func _on_take_vehicle_requested(traffic_body: Node3D) -> void:
@@ -412,6 +414,7 @@ func _on_exited_vehicle(_car_left: VehicleBody3D) -> void:
 	_player.activate_camera()
 	_minimap.player = _player
 	_overview.player = _player
+	_set_map_heading(true)
 
 
 func _setup_day_night() -> void:
@@ -453,8 +456,9 @@ func _setup_weather() -> void:
 	if _weather_pin != "" and not _weather.states.has(_weather_pin):
 		push_warning("--weather=%s is not a state; known: %s" % [_weather_pin, ", ".join(_weather.states.keys())])
 		_weather_pin = ""
-	_weather.setup(seed, _weather_pin, _weather_pin != "")
+	_weather.setup(seed, _weather_pin if _weather_pin != "" else _weather_start, _weather_pin != "")
 	add_child(_weather)
+	_setup_weather_strip()  # the maps were wired before the sky existed
 	# Outputs: the shared ground, terrain and facade materials take wetness and snow; the
 	# particle box follows the camera; traffic reads the speed table.
 	for m in [_pack.road_material, _pack.marking_material, _pack.sidewalk_material, _pack.terrain_material, _pack.building_material]:
@@ -1013,6 +1017,8 @@ func _setup_maps() -> void:
 	_minimap.renderer = _map_renderer
 	_minimap.player = Players.local_controlled_body()
 	_minimap.garages = _pack.garages
+	_set_map_heading(Players.local_controlled_body() == _player)
+	_setup_weather_strip()
 	_overview.renderer = _map_renderer
 	_overview.graph = _pack.graph
 	_overview.player = Players.local_controlled_body()
@@ -1098,6 +1104,8 @@ func _parse_args() -> void:
 			_autodrive = true
 		elif arg.begins_with("--weather="):
 			_weather_pin = arg.get_slice("=", 1)
+		elif arg.begins_with("--weather-start="):
+			_weather_start = arg.get_slice("=", 1)
 		elif arg.begins_with("--weather-seed="):
 			_weather_seed = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--pack="):
@@ -1552,3 +1560,36 @@ func _next_edge(node_id: String, from: RoadGraph.RoadEdge) -> RoadGraph.RoadEdge
 			best_dot = dot
 			best = e
 	return best
+
+
+## Points the minimap and the overview map's arrow at the camera's look on foot (what the
+## player sees and aims along) and at the car's heading when driving (hud fix, 2026-10-08).
+func _set_map_heading(on_foot: bool) -> void:
+	var source := Callable()
+	if on_foot and _player != null:
+		source = func() -> Vector3:
+			var cam := _player.camera()
+			return -cam.global_basis.z if cam != null else -_player.global_basis.z
+	_minimap.heading_source = source
+	_overview.heading_source = source
+
+
+## The weather forecast strip directly above the minimap, the minimap's width; the overview
+## map carries its own copy in its corner. Both read the same controller.
+func _setup_weather_strip() -> void:
+	if _weather == null or _minimap.get_node_or_null("../WeatherStrip") != null:
+		return
+	var strip := WeatherStrip.new()
+	strip.name = "WeatherStrip"
+	strip.weather = _weather
+	strip.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	var gap := 8.0
+	strip.offset_left = _minimap.offset_left
+	strip.offset_right = _minimap.offset_left + WeatherStrip.WIDTH_PX
+	strip.offset_top = _minimap.offset_top - gap - WeatherStrip.HEIGHT_PX
+	strip.offset_bottom = _minimap.offset_top - gap
+	strip.visibility_layer = _minimap.visibility_layer
+	_minimap.get_parent().add_child(strip)
+	_minimap.visibility_changed.connect(func() -> void: strip.visible = _minimap.visible and _weather != null)
+	if _overview.strip != null:
+		_overview.strip.weather = _weather
