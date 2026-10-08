@@ -5,6 +5,14 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 
 ## 2026-10-08
 
+- **Proving ground is sparse (human, Deck 2026-10-08: "that world seems to work. It's a little
+  sparse so we might come back to spruce it up").** Archived on that verdict. A spruce-up
+  round for Double Cross: houses on every residential block, shopfronts and a few taller
+  blocks in the main city, trees along the bank road and the greenbelt edge, street
+  furniture, the gang's turf dressed once `add-hostile-gang` lands, and a town name (still
+  open). Physics on the loop measured 8.8 ms mean against Ottawa's 6.4; look at how many
+  traffic agents sit near the player on the elevated lap.
+
 - **The testbed dies about 55 s into any windowed run** (found timing a lap for
   `add-proving-ground`; a `fix/`). Reproduce on main (30ea8dd):
   `godot --path game --resolution 1280x800 -- --benchmark=150 --autodrive --mute --traffic=0 --peds=0`

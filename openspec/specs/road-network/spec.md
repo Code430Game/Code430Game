@@ -2,9 +2,7 @@
 
 ## Purpose
 The city's roads as data and as geometry: the OSM import into a validated road graph with classes, lanes, one-way streets, bridges, tunnels and layers, junctions that meet cleanly, road surfaces with their detail texture, and the validation report that finds the import's mistakes.
-
 ## Requirements
-
 ### Requirement: OSM Road Import
 The import tool SHALL produce a road graph from OpenStreetMap data for a given bounding box, preserving connectivity, one-way direction, road class, lanes, bridges, tunnels, and layers, and SHALL keep `service=parking_aisle` and `service=driveway` ways as edges of class `parking` connected to the streets they meet.
 
@@ -99,3 +97,11 @@ The pack SHALL describe each bridge (its grouped deck edges, span, level, kind a
 - **WHEN** a footway tagged as part of a bridge runs beside its deck
 - **THEN** it is drawn at the deck's height with the parapet outside it
 - **AND** the sidewalks of the road under the bridge stay on the ground
+
+### Requirement: Layer Inputs From Files
+Every importer layer that is fetched from Overpass SHALL also accept its payload from a local JSON file, so a generated or cached dataset builds a complete pack with no network access.
+
+#### Scenario: Offline pack build
+- **WHEN** the importer runs with `--osm-json` and a `--*-json` file for every enabled layer
+- **THEN** it writes a complete pack without any Overpass request and the road graph's meta records each layer's file as its source
+
