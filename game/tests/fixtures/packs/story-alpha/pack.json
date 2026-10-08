@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "test.story-alpha",
+  "name": "Story Alpha",
+  "version": "1.2.0",
+  "type": "story",
+  "engine_api": 0,
+  "license": "CC-BY-SA-4.0",
+  "attribution": ["Story Alpha by the tests"],
+  "supported_modes": ["clean", "gritty", "dystopia"],
+  "max_descriptors": {"crime": "strong"},
+  "dependencies": [{"id": "code430.ottawa-centretown", "version": "^0.1"}],
+  "story": {"map": "code430.ottawa-centretown"},
+  "content": [{"type": "ads", "path": "ads/promo.json"}]
+}

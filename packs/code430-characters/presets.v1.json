@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "presets": [
+    {
+      "name": "Courier",
+      "profile": {"skin": 1, "hair": 1, "hair_colour": 1, "top": 10, "bottom": 5, "shoes": 0, "hat": 1, "beard": 0, "glasses": 0, "jacket": 1, "jacket_colour": 7, "height": 1.0, "build": 1.0}
+    },
+    {
+      "name": "Night Shift",
+      "profile": {"skin": 4, "hair": 0, "hair_colour": 0, "top": 5, "bottom": 5, "shoes": 0, "hat": 0, "beard": 1, "glasses": 0, "jacket": 1, "jacket_colour": 6, "height": 1.04, "build": 1.1}
+    },
+    {
+      "name": "Market Regular",
+      "profile": {"skin": 0, "hair": 3, "hair_colour": 3, "top": 13, "bottom": 10, "shoes": 2, "hat": 0, "beard": 0, "glasses": 1, "jacket": 0, "jacket_colour": 0, "height": 0.96, "build": 0.95}
+    },
+    {
+      "name": "Track Day",
+      "profile": {"skin": 2, "hair": 4, "hair_colour": 6, "top": 0, "bottom": 5, "shoes": 1, "hat": 0, "beard": 0, "glasses": 1, "jacket": 1, "jacket_colour": 4, "height": 1.0, "build": 1.0}
+    },
+    {
+      "name": "Office Hours",
+      "profile": {"skin": 3, "hair": 5, "hair_colour": 2, "top": 4, "bottom": 10, "shoes": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 1, "jacket_colour": 5, "height": 1.02, "build": 0.9}
+    },
+    {
+      "name": "Greenbelt",
+      "profile": {"skin": 5, "hair": 2, "hair_colour": 7, "top": 11, "bottom": 12, "shoes": 2, "hat": 2, "beard": 2, "glasses": 0, "jacket": 0, "jacket_colour": 0, "height": 1.08, "build": 1.15}
+    }
+  ]
+}

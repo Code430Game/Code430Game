@@ -1,15 +1,20 @@
 """Validate pack folders against the manifest schema and the data-only rules.
 
-Approach: for each folder under the given root that has a pack.json, validate the
-manifest against docs/pack-format/pack.schema.v0.json, then walk the folder and
-reject any file whose extension is not on the allowlist for data-only packs.
-Errors are collected, not raised, so one run reports everything.
+Approach: for each folder under the given root that has a pack.json, validate the manifest
+against the schema for its `schema_version` (v0 frozen, v1 additive), then walk the folder and
+reject any file whose extension is not on the allowlist for data-only packs. Every content
+file the pack indexes (v1 `content[]`, or the known v0 file names) must exist inside the pack
+and validate against its type's schema; items that carry descriptors or variants are checked
+against the tone modes. Dependencies are resolved across the packs under the root (a warning
+when the dependency is not there, an error when it is there but out of range). Errors are
+collected, not raised, so one run reports everything.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -17,28 +22,64 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "pack.schema.v0.json"
-ADS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "ads.schema.v0.json"
+FORMAT_DIR = REPO_ROOT / "docs" / "pack-format"
+SCHEMA_PATH = FORMAT_DIR / "pack.schema.v0.json"
+SCHEMA_V1_PATH = FORMAT_DIR / "pack.schema.v1.json"
+MANIFEST_SCHEMAS = {0: SCHEMA_PATH, 1: SCHEMA_V1_PATH}
+ADS_SCHEMA_PATH = FORMAT_DIR / "ads.schema.v0.json"
 CONTENT_DIR = REPO_ROOT / "game" / "core" / "content"
 DESCRIPTORS_PATH = CONTENT_DIR / "content-descriptors.v0.json"
 MODES_DIR = CONTENT_DIR / "modes"
 ADS_NAME = "ads.v0.json"
-VEHICLES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vehicles.schema.v0.json"
+VEHICLES_SCHEMA_PATH = FORMAT_DIR / "vehicles.schema.v0.json"
 VEHICLES_NAME = "vehicles.v0.json"
-PARKING_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "parking.schema.v0.json"
+PARKING_SCHEMA_PATH = FORMAT_DIR / "parking.schema.v0.json"
 PARKING_NAME = "parking.v0.json"
-BRIDGES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "bridges.schema.v0.json"
+BRIDGES_SCHEMA_PATH = FORMAT_DIR / "bridges.schema.v0.json"
 BRIDGES_NAME = "bridges.v0.json"
-VEGETATION_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "vegetation.schema.v0.json"
+VEGETATION_SCHEMA_PATH = FORMAT_DIR / "vegetation.schema.v0.json"
 VEGETATION_NAME = "vegetation.v0.json"
-WEAPONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "weapons.schema.v0.json"
+WEAPONS_SCHEMA_PATH = FORMAT_DIR / "weapons.schema.v0.json"
 WEAPONS_NAME = "weapons.v0.json"
-SERVICES_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "services.schema.v0.json"
+SERVICES_SCHEMA_PATH = FORMAT_DIR / "services.schema.v0.json"
 SERVICES_NAME = "services.v0.json"
-FACTIONS_SCHEMA_PATH = REPO_ROOT / "docs" / "pack-format" / "factions.schema.v0.json"
+FACTIONS_SCHEMA_PATH = FORMAT_DIR / "factions.schema.v0.json"
 FACTIONS_NAME = "factions.v0.json"
+TURF_SCHEMA_PATH = FORMAT_DIR / "turf.schema.v0.json"
+LAP_SCHEMA_PATH = FORMAT_DIR / "lap.schema.v0.json"
+RADIO_SCHEMA_PATH = FORMAT_DIR / "radio.schema.v0.json"
+MUSIC_SCHEMA_PATH = FORMAT_DIR / "music.schema.v0.json"
+PALETTES_SCHEMA_PATH = FORMAT_DIR / "character-palettes.schema.v1.json"
+PRESETS_SCHEMA_PATH = FORMAT_DIR / "character-presets.schema.v1.json"
 BASE_WEAPONS_PATH = REPO_ROOT / "game" / "actors" / "combat" / "weapons.v0.json"
-FORMAT_DIR = REPO_ROOT / "docs" / "pack-format"
+
+# Content types the registry serves: the schema each file validates against and the key of
+# the item list inside it (None: the file is one item). `missions` has no schema until
+# add-story-pack lands; its files must exist and parse.
+CONTENT_SCHEMAS: dict[str, tuple[Path | None, str | None]] = {
+    "ads": (ADS_SCHEMA_PATH, "ads"),
+    "vehicles": (VEHICLES_SCHEMA_PATH, "vehicles"),
+    "weapons": (WEAPONS_SCHEMA_PATH, "weapons"),
+    "factions": (FACTIONS_SCHEMA_PATH, "factions"),
+    "turf": (TURF_SCHEMA_PATH, "turfs"),
+    "lap": (LAP_SCHEMA_PATH, "laps"),
+    "radio": (RADIO_SCHEMA_PATH, "stations"),
+    "music": (MUSIC_SCHEMA_PATH, "tracks"),
+    "palettes": (PALETTES_SCHEMA_PATH, None),
+    "presets": (PRESETS_SCHEMA_PATH, "presets"),
+    "missions": (None, "missions"),
+}
+# A v0 manifest has no content index: these file names imply their type.
+V0_CONTENT_FILES: dict[str, str] = {
+    ADS_NAME: "ads",
+    VEHICLES_NAME: "vehicles",
+    WEAPONS_NAME: "weapons",
+    FACTIONS_NAME: "factions",
+    "turf.v0.json": "turf",
+    "lap.v0.json": "lap",
+    "radio.v0.json": "radio",
+    "music.v0.json": "music",
+}
 # Files the importer generates: (file, schema, where the ids are). An id path is the list key
 # then the id field, or list, nested list and field for ids inside items (a bridge's decks).
 GENERATED = [
@@ -65,89 +106,10 @@ GENERATED = [
     (VEGETATION_NAME, VEGETATION_SCHEMA_PATH, [("areas", "id")]),
     (SERVICES_NAME, SERVICES_SCHEMA_PATH, [("places", "id")]),
     # Pack extras a district's author writes by hand or by generator (add-proving-ground).
-    ("lap.v0.json", FORMAT_DIR / "lap.schema.v0.json", [("laps", "id")]),
-    ("turf.v0.json", FORMAT_DIR / "turf.schema.v0.json", [("turfs", "id")]),
+    ("lap.v0.json", LAP_SCHEMA_PATH, [("laps", "id")]),
+    ("turf.v0.json", TURF_SCHEMA_PATH, [("turfs", "id")]),
 ]
 MAX_ERRORS_PER_FILE = 20
-MODES_DIR = REPO_ROOT / "game" / "core" / "content" / "modes"
-
-
-def nonlethal_variant_keys(modes_dir: Path = MODES_DIR) -> set[str]:
-    """Variant keys of the tone modes whose `lethal_weapons` flag is off (clean)."""
-    keys = set()
-    for p in sorted(modes_dir.glob("*.json")):
-        mode = json.loads(p.read_text(encoding="utf-8"))
-        if not mode.get("flags", {}).get("lethal_weapons", False):
-            keys.add(str(mode.get("variant_key", mode.get("id", p.stem))))
-    return keys
-
-
-def validate_weapons(weapons: dict, validator: Draft202012Validator) -> list[str]:
-    """Schema errors, plus any lethal variant keyed to a mode that bans lethal weapons."""
-    errors = []
-    for err in sorted(validator.iter_errors(weapons), key=lambda e: list(e.path)):
-        where = "/".join(str(p) for p in err.path) or "(root)"
-        errors.append(f"{WEAPONS_NAME}: {where}: {err.message}")
-    banned = nonlethal_variant_keys()
-    for w in weapons.get("weapons", []):
-        for key, v in w.get("variants", {}).items():
-            if key in banned and v.get("lethal"):
-                errors.append(
-                    f"{WEAPONS_NAME}: {w.get('id')}: variant '{key}' is lethal in a mode without lethal weapons"
-                )
-    return errors
-
-
-def validate_factions(
-    factions: dict,
-    weapons: dict,
-    desc: dict,
-    validator: Draft202012Validator,
-) -> list[str]:
-    """Schema errors, unknown descriptors, weapon ids that are not in `weapons`, and any variant
-    keyed to a mode without lethal weapons that names a weapon lethal in that mode
-    (add-hostile-gang 1.1)."""
-    errors = []
-    for err in sorted(validator.iter_errors(factions), key=lambda e: list(e.path)):
-        where = "/".join(str(p) for p in err.path) or "(root)"
-        errors.append(f"{FACTIONS_NAME}: {where}: {err.message}")
-    if errors:
-        return errors
-    banned = nonlethal_variant_keys()
-    by_id = {w.get("id"): w for w in weapons.get("weapons", [])}
-    for f in factions.get("factions", []):
-        fid = f.get("id")
-        errors.extend(_descriptor_errors(f"{FACTIONS_NAME}: {fid}", f.get("descriptors", {}), desc))
-        for key, v in f.get("variants", {}).items():
-            errors.extend(
-                _descriptor_errors(
-                    f"{FACTIONS_NAME}: {fid}: variant '{key}'", v.get("descriptors", {}), desc
-                )
-            )
-            for role in ("melee", "ranged"):
-                wid = v.get(role, "")
-                if wid == "":
-                    continue
-                w = by_id.get(wid)
-                if w is None:
-                    errors.append(
-                        f"{FACTIONS_NAME}: {fid}: variant '{key}' names unknown weapon '{wid}'"
-                    )
-                    continue
-                if key in banned:
-                    wv = w.get("variants", {}).get(key, w.get("variants", {}).get("fallback", {}))
-                    if wv.get("lethal"):
-                        errors.append(
-                            f"{FACTIONS_NAME}: {fid}: variant '{key}' arms the crew with '{wid}', lethal in a mode without lethal weapons"
-                        )
-    return errors
-
-
-def load_base_weapons(path: Path = BASE_WEAPONS_PATH) -> dict:
-    """The first-party weapons a faction's ids resolve against."""
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
 LEVELS = ["none", "mild", "strong"]
 MANIFEST_NAME = "pack.json"
 
@@ -172,6 +134,7 @@ DATA_ONLY_EXTENSIONS = {
 }
 OSM_CREDIT = "© OpenStreetMap contributors"
 IGNORED_NAMES = {".DS_Store", ".gitkeep"}
+_SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$")
 
 
 @dataclass
@@ -181,17 +144,35 @@ class PackReport:
     path: Path
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    manifest: dict = field(default_factory=dict)
 
     @property
     def ok(self) -> bool:
         return not self.errors
 
 
+_schema_cache: dict[Path, Draft202012Validator] = {}
+
+
 def load_schema(path: Path = SCHEMA_PATH) -> Draft202012Validator:
-    """Load and check the manifest schema itself."""
-    schema = json.loads(path.read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    return Draft202012Validator(schema)
+    """Load and check a schema (cached per path)."""
+    if path not in _schema_cache:
+        schema = json.loads(path.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        _schema_cache[path] = Draft202012Validator(schema)
+    return _schema_cache[path]
+
+
+def manifest_validator(manifest: dict, v0: Draft202012Validator | None = None) -> tuple:
+    """(validator, error) for the manifest's `schema_version`: v0 (the given validator when one
+    is passed, for callers that bring their own schema), v1, or an error naming the version."""
+    version = manifest.get("schema_version")
+    if version == 0:
+        return (v0 if v0 is not None else load_schema(SCHEMA_PATH)), ""
+    if version == 1:
+        return load_schema(SCHEMA_V1_PATH), ""
+    known = ", ".join(str(v) for v in MANIFEST_SCHEMAS)
+    return None, f"schema_version: unknown version {version!r} (known: {known})"
 
 
 def validate_manifest(manifest: dict, validator: Draft202012Validator) -> list[str]:
@@ -199,10 +180,7 @@ def validate_manifest(manifest: dict, validator: Draft202012Validator) -> list[s
     errors: list[str] = []
     for err in sorted(validator.iter_errors(manifest), key=lambda e: list(e.path)):
         where = "/".join(str(p) for p in err.path) or "(root)"
-        if err.validator == "required":
-            errors.append(f"{where}: {err.message}")
-        else:
-            errors.append(f"{where}: {err.message}")
+        errors.append(f"{where}: {err.message}")
     if manifest.get("type") == "map":
         credits = manifest.get("attribution", [])
         if not any(OSM_CREDIT in line for line in credits if isinstance(line, str)):
@@ -238,6 +216,21 @@ def load_content_rules(
     return desc, modes
 
 
+def nonlethal_variant_keys(modes_dir: Path = MODES_DIR) -> set[str]:
+    """Variant keys of the tone modes whose `lethal_weapons` flag is off (clean)."""
+    keys = set()
+    for p in sorted(modes_dir.glob("*.json")):
+        mode = json.loads(p.read_text(encoding="utf-8"))
+        if not mode.get("flags", {}).get("lethal_weapons", False):
+            keys.add(str(mode.get("variant_key", mode.get("id", p.stem))))
+    return keys
+
+
+def load_base_weapons(path: Path = BASE_WEAPONS_PATH) -> dict:
+    """The first-party weapons a faction's ids resolve against."""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def _level(value: str, descriptor: str, desc: dict) -> int | None:
     aliases = desc["descriptors"].get(descriptor, {}).get("aliases", {})
     value = aliases.get(value, value)
@@ -263,38 +256,329 @@ def _allowed(declared: dict, mode: dict, desc: dict) -> bool:
     return True
 
 
-def validate_ads(
-    ads: dict, manifest: dict, desc: dict, modes: dict, ads_validator: Draft202012Validator
+def _schema_errors(name: str, data, validator: Draft202012Validator) -> list[str]:
+    errors = []
+    for found, err in enumerate(
+        sorted(validator.iter_errors(data), key=lambda e: list(e.path)), start=1
+    ):
+        where = "/".join(str(p) for p in err.path) or "(root)"
+        errors.append(f"{name}: {where}: {err.message}")
+        if found >= MAX_ERRORS_PER_FILE:
+            break
+    return errors
+
+
+def item_content_checks(
+    name: str, items: list, desc: dict, modes: dict, supported: list[str]
 ) -> tuple[list[str], list[str]]:
-    """Descriptor, leak and support checks for an ads file. Returns (errors, warnings)."""
+    """Descriptor, leak and support checks for any list of content items: each item's own
+    `descriptors`, each variant's descriptors, no variant keyed to a mode exceeding what that
+    mode allows, and a warning when a supported mode would hide an item with variants
+    entirely. Returns (errors, warnings)."""
     errors: list[str] = []
     warnings: list[str] = []
-    for err in sorted(ads_validator.iter_errors(ads), key=lambda e: list(e.path)):
-        where = "/".join(str(p) for p in err.path) or "(root)"
-        errors.append(f"{ADS_NAME}/{where}: {err.message}")
-    if errors:
-        return errors, warnings
-    supported = [m for m in manifest.get("supported_modes", []) if m in modes]
-    for item in ads.get("ads", []):
-        iid = item["id"]
-        errors.extend(_descriptor_errors(f"{ADS_NAME} {iid}", item.get("descriptors", {}), desc))
-        for key, variant in item["variants"].items():
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        iid = str(item.get("id", item.get("name", index)))
+        errors.extend(_descriptor_errors(f"{name} {iid}", item.get("descriptors", {}), desc))
+        variants = item.get("variants")
+        if not isinstance(variants, dict):
+            continue
+        for key, variant in variants.items():
+            if not isinstance(variant, dict):
+                continue
             declared = variant.get("descriptors", {})
-            errors.extend(_descriptor_errors(f"{ADS_NAME} {iid}/{key}", declared, desc))
+            errors.extend(_descriptor_errors(f"{name} {iid}/{key}", declared, desc))
             if key in modes and not _allowed(declared, modes[key], desc):
                 over = [n for n in declared if not _allowed({n: declared[n]}, modes[key], desc)]
                 errors.append(
-                    f"{ADS_NAME} {iid}/{key}: descriptors {over} exceed what mode '{key}' allows"
+                    f"{name} {iid}/{key}: descriptors {over} exceed what mode '{key}' allows"
                 )
         for mode_id in supported:
             mode = modes[mode_id]
             shown = any(
                 key in (mode["variant_key"], "fallback")
+                and isinstance(variant, dict)
                 and _allowed(variant.get("descriptors", {}), mode, desc)
-                for key, variant in item["variants"].items()
+                for key, variant in variants.items()
             )
             if not shown:
-                warnings.append(f"{ADS_NAME} {iid}: nothing allowed in supported mode '{mode_id}'")
+                warnings.append(f"{name} {iid}: nothing allowed in supported mode '{mode_id}'")
+    return errors, warnings
+
+
+def validate_ads(
+    ads: dict, manifest: dict, desc: dict, modes: dict, ads_validator: Draft202012Validator
+) -> tuple[list[str], list[str]]:
+    """Descriptor, leak and support checks for an ads file. Returns (errors, warnings)."""
+    errors = _schema_errors(ADS_NAME, ads, ads_validator)
+    if errors:
+        return errors, []
+    supported = [m for m in manifest.get("supported_modes", []) if m in modes]
+    return item_content_checks(ADS_NAME, ads.get("ads", []), desc, modes, supported)
+
+
+def validate_vehicles(
+    vehicles: dict, desc: dict, vehicles_validator: Draft202012Validator
+) -> list[str]:
+    """Schema (body class, dims, tunables) and descriptor checks for a vehicles file."""
+    errors = _schema_errors(VEHICLES_NAME, vehicles, vehicles_validator)
+    if errors:
+        return errors
+    seen = set()
+    for v in vehicles.get("vehicles", []):
+        vid = v["id"]
+        if vid in seen:
+            errors.append(f"{VEHICLES_NAME}: duplicate id '{vid}'")
+        seen.add(vid)
+        errors.extend(_descriptor_errors(f"{VEHICLES_NAME}: {vid}", v.get("descriptors", {}), desc))
+        for key, variant in v.get("liveries", {}).get("variants", {}).items():
+            errors.extend(
+                _descriptor_errors(
+                    f"{VEHICLES_NAME}: {vid} livery {key}", variant.get("descriptors", {}), desc
+                )
+            )
+    return errors
+
+
+def validate_weapons(weapons: dict, validator: Draft202012Validator) -> list[str]:
+    """Schema errors, plus any lethal variant keyed to a mode that bans lethal weapons."""
+    errors = _schema_errors(WEAPONS_NAME, weapons, validator)
+    banned = nonlethal_variant_keys()
+    for w in weapons.get("weapons", []):
+        for key, v in w.get("variants", {}).items():
+            if key in banned and v.get("lethal"):
+                errors.append(
+                    f"{WEAPONS_NAME}: {w.get('id')}: variant '{key}' is lethal in a mode without lethal weapons"
+                )
+    return errors
+
+
+def validate_factions(
+    factions: dict,
+    weapons: dict,
+    desc: dict,
+    validator: Draft202012Validator,
+) -> list[str]:
+    """Schema errors, unknown descriptors, weapon ids that are not in `weapons`, and any variant
+    keyed to a mode without lethal weapons that names a weapon lethal in that mode
+    (add-hostile-gang 1.1)."""
+    errors = _schema_errors(FACTIONS_NAME, factions, validator)
+    if errors:
+        return errors
+    banned = nonlethal_variant_keys()
+    by_id = {w.get("id"): w for w in weapons.get("weapons", [])}
+    for f in factions.get("factions", []):
+        fid = f.get("id")
+        errors.extend(_descriptor_errors(f"{FACTIONS_NAME}: {fid}", f.get("descriptors", {}), desc))
+        for key, v in f.get("variants", {}).items():
+            errors.extend(
+                _descriptor_errors(
+                    f"{FACTIONS_NAME}: {fid}: variant '{key}'", v.get("descriptors", {}), desc
+                )
+            )
+            for role in ("melee", "ranged"):
+                wid = v.get(role, "")
+                if wid == "":
+                    continue
+                w = by_id.get(wid)
+                if w is None:
+                    errors.append(
+                        f"{FACTIONS_NAME}: {fid}: variant '{key}' names unknown weapon '{wid}'"
+                    )
+                    continue
+                if key in banned:
+                    wv = w.get("variants", {}).get(key, w.get("variants", {}).get("fallback", {}))
+                    if wv.get("lethal"):
+                        errors.append(
+                            f"{FACTIONS_NAME}: {fid}: variant '{key}' arms the crew with '{wid}', lethal in a mode without lethal weapons"
+                        )
+    return errors
+
+
+def validate_presets(presets: dict, palettes: dict | None) -> list[str]:
+    """Every preset's colour indices must fit the pack's palettes (schema errors come first)."""
+    errors: list[str] = []
+    if palettes is None:
+        return errors
+    lists = palettes.get("palettes", {})
+    fields = {
+        "skin": "skin",
+        "hair_colour": "hair_colour",
+        "top": "cloth",
+        "bottom": "cloth",
+        "jacket_colour": "cloth",
+        "shoes": "shoes",
+    }
+    for preset in presets.get("presets", []):
+        profile = preset.get("profile", {})
+        for key, palette in fields.items():
+            n = len(lists.get(palette, []))
+            if int(profile.get(key, 0)) >= n:
+                errors.append(
+                    f"presets: {preset.get('name')}: {key} index {profile.get(key)} is outside the {palette} palette ({n} entries)"
+                )
+    return errors
+
+
+def parse_semver(version: str) -> tuple[int, int, int] | None:
+    """(major, minor, patch) or None when `version` is not a semantic version."""
+    m = _SEMVER.match(version or "")
+    return (int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
+
+
+def semver_satisfies(version: str, spec: str) -> bool:
+    """Whether `version` satisfies `spec`: exact, `^1.2`, `~1.2.3`, `>=1.0 <2.0` (space
+    separated comparators) or `*`. Unparseable input never satisfies."""
+    v = parse_semver(version)
+    if v is None:
+        return False
+    spec = (spec or "").strip()
+    if spec in ("", "*"):
+        return True
+    for part in spec.split():
+        if not _satisfies_one(v, part):
+            return False
+    return True
+
+
+def _pad(text: str) -> tuple[tuple[int, int, int], int]:
+    """A partial version like `1.2` padded to a triple, plus how many parts were given."""
+    parts = text.split(".")
+    nums = [int(p) if p.isdigit() else 0 for p in parts[:3]]
+    while len(nums) < 3:
+        nums.append(0)
+    return (nums[0], nums[1], nums[2]), len(parts)
+
+
+def _satisfies_one(v: tuple[int, int, int], part: str) -> bool:
+    if part.startswith("^"):
+        low, _ = _pad(part[1:])
+        if low[0] > 0:
+            high = (low[0] + 1, 0, 0)
+        elif low[1] > 0:
+            high = (0, low[1] + 1, 0)
+        else:
+            high = (0, 0, low[2] + 1)
+        return low <= v < high
+    if part.startswith("~"):
+        low, given = _pad(part[1:])
+        high = (low[0] + 1, 0, 0) if given == 1 else (low[0], low[1] + 1, 0)
+        return low <= v < high
+    for op in (">=", "<=", ">", "<", "="):
+        if part.startswith(op):
+            bound, _ = _pad(part[len(op) :])
+            return {
+                ">=": v >= bound,
+                "<=": v <= bound,
+                ">": v > bound,
+                "<": v < bound,
+                "=": v == bound,
+            }[op]
+    exact, given = _pad(part)
+    return v == exact if given == 3 else v[:given] == exact[:given]
+
+
+def content_index(manifest: dict, pack_dir: Path) -> list[dict]:
+    """The pack's content entries: `content[]` for v1, or the known v0 file names that exist."""
+    if manifest.get("schema_version") == 1:
+        entries = manifest.get("content", [])
+        return [e for e in entries if isinstance(e, dict)]
+    return [
+        {"type": ctype, "path": name}
+        for name, ctype in V0_CONTENT_FILES.items()
+        if (pack_dir / name).is_file()
+    ]
+
+
+def _inside(pack_dir: Path, rel: str) -> Path | None:
+    """The absolute path of `rel` when it stays inside `pack_dir`, else None."""
+    if not rel or rel.startswith(("/", "\\")) or ".." in Path(rel).parts:
+        return None
+    target = (pack_dir / rel).resolve()
+    try:
+        target.relative_to(pack_dir.resolve())
+    except ValueError:
+        return None
+    return target
+
+
+def validate_content(
+    pack_dir: Path, manifest: dict, desc: dict, modes: dict
+) -> tuple[list[str], list[str]]:
+    """Every indexed content file exists inside the pack, parses, validates against its type's
+    schema and passes the descriptor checks; v1 packs also get the type-section cross checks."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    supported = [m for m in manifest.get("supported_modes", []) if m in modes]
+    loaded: dict[str, dict] = {}
+    indexed_paths: set[str] = set()
+    for entry in content_index(manifest, pack_dir):
+        ctype = str(entry.get("type", ""))
+        rel = str(entry.get("path", ""))
+        indexed_paths.add(rel)
+        if ctype not in CONTENT_SCHEMAS:
+            errors.append(f"content: {rel}: unknown content type '{ctype}'")
+            continue
+        target = _inside(pack_dir, rel)
+        if target is None:
+            errors.append(f"content: {rel}: path leaves the pack folder")
+            continue
+        if not target.is_file():
+            errors.append(f"content: {rel}: file not found")
+            continue
+        try:
+            data = json.loads(target.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"{rel}: invalid JSON: {exc}")
+            continue
+        schema_path, list_key = CONTENT_SCHEMAS[ctype]
+        if schema_path is None:
+            warnings.append(f"content: {rel}: no schema for '{ctype}' yet, only parsed")
+            continue
+        if not isinstance(data, dict):
+            errors.append(f"{rel}: must be a JSON object")
+            continue
+        name = Path(rel).name
+        if ctype == "ads":
+            e, w = validate_ads(data, manifest, desc, modes, load_schema(schema_path))
+            errors.extend(x.replace(ADS_NAME, rel, 1) for x in e)
+            warnings.extend(x.replace(ADS_NAME, rel, 1) for x in w)
+        elif ctype == "vehicles":
+            errors.extend(validate_vehicles(data, desc, load_schema(schema_path)))
+        elif ctype == "weapons":
+            errors.extend(validate_weapons(data, load_schema(schema_path)))
+        elif ctype == "factions":
+            errors.extend(
+                validate_factions(data, load_base_weapons(), desc, load_schema(schema_path))
+            )
+        else:
+            errors.extend(_schema_errors(name, data, load_schema(schema_path)))
+            if list_key is not None and isinstance(data.get(list_key), list):
+                e, w = item_content_checks(name, data[list_key], desc, modes, supported)
+                errors.extend(e)
+                warnings.extend(w)
+        loaded[ctype] = data
+    if manifest.get("schema_version") == 1:
+        for name, ctype in V0_CONTENT_FILES.items():
+            if (pack_dir / name).is_file() and name not in indexed_paths:
+                warnings.append(f"{name}: not in content[]; the loader will not see it")
+        character = manifest.get("character")
+        if isinstance(character, dict):
+            for key, ctype in (("palettes", "palettes"), ("presets", "presets")):
+                path = character.get(key)
+                if path is not None and path not in indexed_paths:
+                    errors.append(
+                        f"character.{key}: '{path}' is not listed in content[] as {ctype}"
+                    )
+        story = manifest.get("story")
+        if isinstance(story, dict):
+            deps = {d.get("id") for d in manifest.get("dependencies", []) if isinstance(d, dict)}
+            if story.get("map") not in deps:
+                errors.append(f"story.map: '{story.get('map')}' must also be a dependency")
+        if "presets" in loaded:
+            errors.extend(validate_presets(loaded["presets"], loaded.get("palettes")))
     return errors, warnings
 
 
@@ -336,18 +620,14 @@ def validate_generated(pack_dir: Path) -> list[str]:
         except json.JSONDecodeError as exc:
             errors.append(f"{name}: invalid JSON: {exc}")
             continue
-        for found, err in enumerate(load_schema(schema_path).iter_errors(data), start=1):
-            where = "/".join(str(p) for p in err.path) or "(root)"
-            errors.append(f"{name}: {where}: {err.message}")
-            if found >= MAX_ERRORS_PER_FILE:
-                break
+        errors.extend(_schema_errors(name, data, load_schema(schema_path)))
         if isinstance(data, dict):
             errors.extend(duplicate_ids(name, data, id_paths))
     return errors
 
 
-def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport:
-    """Validate one pack folder."""
+def validate_pack(pack_dir: Path, validator: Draft202012Validator | None = None) -> PackReport:
+    """Validate one pack folder. `validator` is used for v0 manifests when given."""
     report = PackReport(path=pack_dir)
     manifest_path = pack_dir / MANIFEST_NAME
     try:
@@ -358,7 +638,12 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
     if not isinstance(manifest, dict):
         report.errors.append(f"{MANIFEST_NAME}: must be a JSON object")
         return report
-    report.errors.extend(validate_manifest(manifest, validator))
+    report.manifest = manifest
+    chosen, version_error = manifest_validator(manifest, validator)
+    if chosen is None:
+        report.errors.append(version_error)
+        return report
+    report.errors.extend(validate_manifest(manifest, chosen))
     pack_type = manifest.get("type")
     if isinstance(pack_type, str):
         report.errors.extend(validate_files(pack_dir, pack_type))
@@ -366,72 +651,33 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator) -> PackReport
     for mode_id in manifest.get("supported_modes", []):
         if mode_id not in modes:
             report.errors.append(f"supported_modes: unknown mode '{mode_id}'")
-    ads_path = pack_dir / ADS_NAME
-    if ads_path.is_file():
-        try:
-            ads = json.loads(ads_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{ADS_NAME}: invalid JSON: {exc}")
-            return report
-        errors, warnings = validate_ads(ads, manifest, desc, modes, load_schema(ADS_SCHEMA_PATH))
-        report.errors.extend(errors)
-        report.warnings.extend(warnings)
-    vehicles_path = pack_dir / VEHICLES_NAME
-    if vehicles_path.is_file():
-        try:
-            vehicles = json.loads(vehicles_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{VEHICLES_NAME}: invalid JSON: {exc}")
-            return report
-        report.errors.extend(validate_vehicles(vehicles, desc, load_schema(VEHICLES_SCHEMA_PATH)))
-    weapons_path = pack_dir / WEAPONS_NAME
-    if weapons_path.is_file():
-        try:
-            weapons = json.loads(weapons_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{WEAPONS_NAME}: invalid JSON: {exc}")
-            return report
-        report.errors.extend(validate_weapons(weapons, load_schema(WEAPONS_SCHEMA_PATH)))
-    factions_path = pack_dir / FACTIONS_NAME
-    if factions_path.is_file():
-        try:
-            factions = json.loads(factions_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            report.errors.append(f"{FACTIONS_NAME}: invalid JSON: {exc}")
-            return report
-        report.errors.extend(
-            validate_factions(
-                factions, load_base_weapons(), desc, load_schema(FACTIONS_SCHEMA_PATH)
-            )
-        )
+    errors, warnings = validate_content(pack_dir, manifest, desc, modes)
+    report.errors.extend(errors)
+    report.warnings.extend(warnings)
     report.errors.extend(validate_generated(pack_dir))
     return report
 
 
-def validate_vehicles(
-    vehicles: dict, desc: dict, vehicles_validator: Draft202012Validator
-) -> list[str]:
-    """Schema (body class, dims, tunables) and descriptor checks for a vehicles file."""
-    errors = []
-    for err in sorted(vehicles_validator.iter_errors(vehicles), key=lambda e: list(e.path)):
-        where = "/".join(str(p) for p in err.path) or "(root)"
-        errors.append(f"{VEHICLES_NAME}: {where}: {err.message}")
-    if errors:
-        return errors
-    seen = set()
-    for v in vehicles.get("vehicles", []):
-        vid = v["id"]
-        if vid in seen:
-            errors.append(f"{VEHICLES_NAME}: duplicate id '{vid}'")
-        seen.add(vid)
-        errors.extend(_descriptor_errors(f"{VEHICLES_NAME}: {vid}", v.get("descriptors", {}), desc))
-        for key, variant in v.get("liveries", {}).get("variants", {}).items():
-            errors.extend(
-                _descriptor_errors(
-                    f"{VEHICLES_NAME}: {vid} livery {key}", variant.get("descriptors", {}), desc
+def validate_dependencies(reports: list[PackReport]) -> None:
+    """Resolves every pack's dependencies against the packs validated together: a dependency
+    missing from the root is a warning (it may be installed elsewhere), one present but out of
+    its range is an error. Adds to the reports in place."""
+    by_id = {r.manifest.get("id"): r.manifest for r in reports if r.manifest.get("id")}
+    for report in reports:
+        for dep in report.manifest.get("dependencies", []):
+            if not isinstance(dep, dict):
+                continue
+            dep_id = str(dep.get("id", ""))
+            spec = str(dep.get("version", "*"))
+            found = by_id.get(dep_id)
+            if found is None:
+                report.warnings.append(
+                    f"dependencies: '{dep_id}' not found beside this pack (needs {spec})"
                 )
-            )
-    return errors
+            elif not semver_satisfies(str(found.get("version", "")), spec):
+                report.errors.append(
+                    f"dependencies: '{dep_id}' is {found.get('version')}, this pack needs {spec}"
+                )
 
 
 def find_packs(root: Path) -> list[Path]:
@@ -442,15 +688,19 @@ def find_packs(root: Path) -> list[Path]:
 
 
 def validate_root(root: Path, schema_path: Path = SCHEMA_PATH) -> list[PackReport]:
-    """Validate every pack under root."""
+    """Validate every pack under root, then their dependencies against each other."""
     validator = load_schema(schema_path)
-    return [validate_pack(pack_dir, validator) for pack_dir in find_packs(root)]
+    reports = [validate_pack(pack_dir, validator) for pack_dir in find_packs(root)]
+    validate_dependencies(reports)
+    return reports
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate Code 430 pack manifests and contents.")
     parser.add_argument("root", type=Path, help="Folder containing packs, or a single pack folder.")
-    parser.add_argument("--schema", type=Path, default=SCHEMA_PATH, help="Manifest schema to use.")
+    parser.add_argument(
+        "--schema", type=Path, default=SCHEMA_PATH, help="Manifest schema to use for v0 packs."
+    )
     args = parser.parse_args(argv)
 
     reports = validate_root(args.root, args.schema)

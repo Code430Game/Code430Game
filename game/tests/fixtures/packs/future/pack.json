@@ -1,0 +1,10 @@
+{
+  "schema_version": 9,
+  "id": "test.future",
+  "name": "From The Future",
+  "version": "1.0.0",
+  "type": "story",
+  "engine_api": 0,
+  "license": "CC-BY-SA-4.0",
+  "attribution": ["Future by the tests"]
+}

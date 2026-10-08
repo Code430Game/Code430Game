@@ -1,0 +1,10 @@
+{
+  "schema_version": 0,
+  "id": "test.old-style",
+  "name": "Old Style",
+  "version": "0.1.0",
+  "type": "story",
+  "engine_api": 0,
+  "license": "CC-BY-SA-4.0",
+  "attribution": ["Old Style by the tests"]
+}

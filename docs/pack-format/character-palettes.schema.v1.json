@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/character-palettes.schema.v1.json",
+  "title": "Code 430 character palettes v1",
+  "description": "Named colour lists for the character creator and the pedestrians. A profile stores indices into these lists, so a pack that replaces them keeps the built-in entries first, in the built-in order, to keep saved characters looking right.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "palettes"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "palettes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skin", "hair_colour", "cloth", "shoes"],
+      "properties": {
+        "skin": {"$ref": "#/$defs/list"},
+        "hair_colour": {"$ref": "#/$defs/list"},
+        "cloth": {"$ref": "#/$defs/list"},
+        "shoes": {"$ref": "#/$defs/list"}
+      }
+    }
+  },
+  "$defs": {
+    "list": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "colour"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "maxLength": 24},
+          "colour": {
+            "description": "RGB in 0..1.",
+            "type": "array",
+            "items": {"type": "number", "minimum": 0, "maximum": 1},
+            "minItems": 3,
+            "maxItems": 3
+          }
+        }
+      }
+    }
+  }
+}

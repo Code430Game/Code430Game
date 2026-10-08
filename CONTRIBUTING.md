@@ -49,6 +49,7 @@ with only the proposal. The maintainer approves the direction before code is wri
   - `--weapon=1|2 --shoot=N` for weapons, `--wheel=N` for the weapon wheel open on entry N
   - `--knockdown-every=S` (plus `--ambulance-log`) for ambulances
   - `--gang=N` (plus `--turf-log`) for a crew of N and a leader on a turf round the player, in any pack
+  - `--packs=id,id` pins the enabled non-map packs for the run (the saved set in `user://packs.cfg` is untouched); `--menu=packs` opens the Packs tab
 - **Performance:** the Steam Deck is the baseline (`AGENTS.md`, performance budget). Run
   `--benchmark=40 --autodrive --preset=deck` on main and on your branch, back to back on the
   same machine, and quote both in the PR. If you have a Deck, say so and include its numbers;

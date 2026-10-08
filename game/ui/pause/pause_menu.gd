@@ -17,12 +17,13 @@ signal host_requested
 signal join_requested(address: String)
 signal report_requested
 
-const TABS: PackedStringArray = ["Game", "Co-op", "Controls", "Options", "Settings"]
+const TABS: PackedStringArray = ["Game", "Co-op", "Controls", "Options", "Settings", "Packs"]
 const GAME_TAB := 0
 const COOP_TAB := 1
 const CONTROLS_TAB := 2
 const OPTIONS_TAB := 3
 const SETTINGS_TAB := 4
+const PACKS_TAB := 5
 ## Rows of the Game tab.
 const REPORT_ROW := 2
 const QUIT_ROW := 3
@@ -56,12 +57,15 @@ var captured_frame_stats: Dictionary = {}
 
 var _pages: Array[Control] = []
 var _rows: Array = []  # per tab: Array[Button]
-var _selected: PackedInt32Array = [0, 0, 0, 0, 0]
+var _selected: PackedInt32Array = [0, 0, 0, 0, 0, 0]
 var _tab_labels: Array[Button] = []
 var _controls_list: VBoxContainer
 var _controls_scroll: ScrollContainer
 var _controls_note: Label
 var _device_label: Label
+var _packs_list: VBoxContainer
+var _packs_scroll: ScrollContainer
+var _packs_note: Label
 var _hold_s: float = -1.0  # time the pause button has been held since it opened the menu; -1 when not held
 
 
@@ -77,8 +81,8 @@ func _ready() -> void:
 	var coop: Array[Button] = [$Panel/VBox/Pages/Coop/Host, $Panel/VBox/Pages/Coop/Join]
 	coop[HOST_ROW].pressed.connect(func() -> void: host_requested.emit())
 	coop[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
-	_pages = [$Panel/VBox/Pages/Game, $Panel/VBox/Pages/Coop, _build_controls_page(), _build_options_page(), _build_settings_page()]
-	_rows = [game, coop, [], [], []]
+	_pages = [$Panel/VBox/Pages/Game, $Panel/VBox/Pages/Coop, _build_controls_page(), _build_options_page(), _build_settings_page(), _build_packs_page()]
+	_rows = [game, coop, [], [], [], []]
 	for i in range(TABS.size()):
 		var b := Button.new()
 		b.text = TABS[i]
@@ -116,6 +120,8 @@ func show_tab(index: int) -> void:
 		_tab_labels[i].button_pressed = i == tab
 	if tab == CONTROLS_TAB:
 		_rebuild_controls()
+	elif tab == PACKS_TAB:
+		_rebuild_packs()
 	_update_hint()
 	_highlight()
 
@@ -197,6 +203,8 @@ func _update_hint() -> void:
 	match tab:
 		CONTROLS_TAB:
 			MenuTheme.hint_bar(_hint, [tabs, [accept, "rebind"], back])
+		PACKS_TAB:
+			MenuTheme.hint_bar(_hint, [tabs, [accept, "enable / disable"], back])
 		OPTIONS_TAB, SETTINGS_TAB:
 			MenuTheme.hint_bar(_hint, [tabs, ["Left / Right", "change"], back])
 		_:
@@ -228,6 +236,8 @@ func _highlight() -> void:
 		current.grab_focus()
 	if tab == CONTROLS_TAB and _controls_scroll != null:
 		_controls_scroll.ensure_control_visible.call_deferred(current)
+	elif tab == PACKS_TAB and _packs_scroll != null:
+		_packs_scroll.ensure_control_visible.call_deferred(current)
 
 
 func _row_button(text: String) -> Button:
@@ -467,6 +477,111 @@ func _step_preset(delta: int) -> void:
 	_highlight()
 
 
+# --- Packs tab (add-pack-loader) ---
+
+func _build_packs_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Packs"
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.add_theme_constant_override("separation", 8)
+	_packs_scroll = ScrollContainer.new()
+	_packs_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	page.add_child(MenuTheme.scroll_frame(_packs_scroll))
+	var gutter := MarginContainer.new()
+	gutter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gutter.add_theme_constant_override("margin_right", int(MenuTheme.num(MenuTheme.theme().get_meta("data", {}), "spacing", "scroll_gutter", 12)))
+	_packs_scroll.add_child(gutter)
+	_packs_list = VBoxContainer.new()
+	_packs_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_packs_list.add_theme_constant_override("separation", 2)
+	gutter.add_child(_packs_list)
+	_packs_note = Label.new()
+	_packs_note.name = "Note"
+	_packs_note.theme_type_variation = MenuTheme.NOTE
+	_packs_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_packs_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(_packs_note)
+	_pages_root.add_child(page)
+	return page
+
+
+## One row per discovered pack: `[x] Name  type  version`, with the loader's state on the
+## right. Accept toggles a data-only non-map pack; map packs name the active one; system packs
+## and refused packs say why they cannot be enabled. Changes apply at the next load.
+func _rebuild_packs() -> void:
+	if _packs_list == null:
+		return
+	var keep := _selected[PACKS_TAB]
+	for c in _packs_list.get_children():
+		_packs_list.remove_child(c)
+		c.queue_free()
+	var buttons: Array[Button] = []
+	var maps := 0
+	for info: PackLoader.PackInfo in PackLoader.listed():
+		if info.is_map():
+			maps += 1
+		var b := _pack_row(info)
+		_packs_list.add_child(b)
+		buttons.append(b)
+	if buttons.is_empty():
+		var none := _row_button("No packs found")
+		none.pressed.connect(func() -> void: _packs_note.text = "Packs go in %s" % "\n".join(PackLoader.dirs()))
+		_packs_list.add_child(none)
+		buttons.append(none)
+	_rows[PACKS_TAB] = buttons
+	_selected[PACKS_TAB] = clampi(keep, 0, buttons.size() - 1)
+	var enabled_maps := 0
+	for id in PackLoader.enabled_ids():
+		if (PackLoader.packs[id] as PackLoader.PackInfo).is_map():
+			enabled_maps += 1
+	_packs_note.text = "Changes apply at the next load. The map in play is %s%s" % [
+		PackLoader.active_map if PackLoader.active_map != "" else "(none)",
+		"; start with --pack=<id> or the map setting to change it." if maps > 1 else ".",
+	]
+
+
+func _pack_row(info: PackLoader.PackInfo) -> Button:
+	var mark := "[x]" if info.enabled and info.valid and info.reason == "" else ("[ ]" if info.valid else "[!]")
+	var b := _row_button("%s %s   %s %s" % [mark, info.name, info.type, info.version])
+	b.add_theme_font_size_override("font_size", int(MenuTheme.num(MenuTheme.theme().get_meta("data", {}), "fonts", "body", 18)))
+	b.set_meta("pack_id", info.id)
+	var state := MenuTheme.key_cap(PackLoader.state_text(info))
+	if info.type == "system" or not info.valid:
+		state.modulate = Color(1.0, 0.7, 0.4)
+	state.anchor_left = 1.0
+	state.anchor_right = 1.0
+	state.anchor_top = 0.5
+	state.anchor_bottom = 0.5
+	state.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	state.grow_vertical = Control.GROW_DIRECTION_BOTH
+	state.offset_left = -12.0
+	state.offset_right = -12.0
+	state.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(state)
+	b.pressed.connect(_toggle_pack.bind(info.id))
+	return b
+
+
+func _toggle_pack(id: String) -> void:
+	if not PackLoader.packs.has(id):
+		return
+	var info: PackLoader.PackInfo = PackLoader.packs[id]
+	if info.type == "system":
+		_packs_note.text = "%s runs code; system packs are not supported yet." % info.name
+	elif not info.valid:
+		_packs_note.text = "%s cannot be enabled: %s" % [info.name, info.reason]
+	elif info.is_map():
+		_packs_note.text = "%s is a map pack: start with --pack=%s or set it in the map setting." % [info.name, info.id]
+	elif Session.is_online():
+		_packs_note.text = "Packs cannot change during a co-op session."
+	else:
+		var on := not info.enabled
+		PackLoader.set_enabled(id, on)
+		_packs_note.text = "%s %s; applies at the next load." % [info.name, "enabled" if on else "disabled"]
+	_rebuild_packs()
+	_highlight()
+
+
 func _process(delta: float) -> void:
 	if _hold_s < 0.0 or not visible:
 		return
@@ -492,7 +607,7 @@ func open() -> void:
 	capture()
 	MenuTheme.refresh_accent()
 	visible = true
-	_selected = PackedInt32Array([0, 0, 0, 0, 0])
+	_selected = PackedInt32Array([0, 0, 0, 0, 0, 0])
 	_rebuild_options()
 	_rebuild_settings()
 	show_tab(GAME_TAB)

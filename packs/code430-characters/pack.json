@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "code430.characters",
+  "name": "Code 430 Characters",
+  "version": "0.1.0",
+  "type": "character",
+  "engine_api": 0,
+  "description": "The base game's character palettes and six starting bodies as data. Disable it and the creator falls back to its built-in palette.",
+  "authors": ["Code 430 contributors"],
+  "license": "CC-BY-SA-4.0",
+  "attribution": ["Code 430 Characters by Code 430 contributors"],
+  "supported_modes": ["clean", "gritty", "dystopia"],
+  "max_descriptors": {},
+  "character": {"palettes": "palettes.v1.json", "presets": "presets.v1.json"},
+  "content": [
+    {"type": "palettes", "path": "palettes.v1.json"},
+    {"type": "presets", "path": "presets.v1.json"}
+  ]
+}

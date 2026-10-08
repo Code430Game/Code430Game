@@ -185,3 +185,35 @@ func test_a_tree_at_the_site_moves_the_board() -> void:
 	low.add_ribbon(main.polyline, main.width_m * 0.5)
 	low.add_tree([plain.origin.x + 2.0, 0.0, plain.origin.z, "bush_round", 2.5, 1.5, 2, "scatter"], float(cfg.get("crown_mid", 0.62)), float(cfg.get("crown_half_height", 0.28)))
 	assert_str(Billboards.footprint_blocked(plain, low)).is_equal("")
+
+
+## add-pack-loader 2.2: boards draw from the registry, so a story pack's ads join the map's
+## pool and a disabled pack's ads vanish.
+func test_boards_draw_ads_from_every_loaded_pack() -> void:
+	var saved_dirs := PackLoader.search_dirs
+	var saved_path := PackLoader.enabled_path
+	var saved_map := PackLoader.active_map
+	PackLoader.enabled_path = "user://tmp/packs_bb_%d.cfg" % Time.get_ticks_usec()
+	var repo := ProjectSettings.globalize_path("res://").path_join("../packs").simplify_path()
+	PackLoader.search_dirs = PackedStringArray([ProjectSettings.globalize_path("res://tests/fixtures/packs"), repo])
+	PackLoader.active_map = PACK_ID
+	PackLoader.reload()
+	var ads := PackLoader.items("ads")
+	var boards: Billboards = auto_free(Billboards.new())
+	add_child(boards)
+	boards.setup(_pack.graph.edges.values(), ads, 430, _obstacles)
+	var packs_seen := {}
+	for s: Dictionary in boards.sites:
+		packs_seen[str((s["ad"] as Dictionary).get("pack_id", ""))] = true
+	assert_bool(packs_seen.has(PACK_ID)).is_true()
+	assert_bool(packs_seen.has("test.story-alpha")).is_true()
+	assert_bool(packs_seen.has("test.story-beta")).is_false()  # its dependency is unmet
+	PackLoader.set_enabled("test.story-alpha", false)
+	PackLoader.reload()
+	for item in PackLoader.items("ads"):
+		assert_str(str(item["pack_id"])).is_not_equal("test.story-alpha")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(PackLoader.enabled_path))
+	PackLoader.search_dirs = saved_dirs
+	PackLoader.enabled_path = saved_path
+	PackLoader.active_map = saved_map
+	PackLoader.reload()

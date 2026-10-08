@@ -26,6 +26,7 @@ Settings="*res://core/settings/settings.gd"
 Players="*res://core/players.gd"
 Session="*res://core/net/session.gd"
 ContentMode="*res://core/content/content_mode.gd"
+PackLoader="*res://core/packs/pack_loader.gd"
 VehicleCatalogue="*res://actors/vehicles/vehicle_catalogue.gd"
 DebugOverlay="*res://core/debug/debug_overlay.tscn"
 
