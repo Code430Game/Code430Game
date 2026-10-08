@@ -286,3 +286,212 @@ def test_pack_vehicle_unknown_descriptor_is_rejected(tmp_path: Path) -> None:
         tmp_path, "p", GOOD, {"vehicles.v0.json": _vehicles(descriptors={"spiders": "mild"})}
     )
     assert any("unknown descriptor 'spiders'" in e for e in errors_for(tmp_path))
+
+
+# --- pack format v1 (add-pack-loader 1.2) ---
+
+GOOD_V1 = {
+    **GOOD,
+    "schema_version": 1,
+    "supported_modes": ["clean", "gritty", "dystopia"],
+    "max_descriptors": {},
+    "content": [{"type": "ads", "path": "ads.v0.json"}],
+    "story": {"map": "code430.ottawa-centretown"},
+    "dependencies": [{"id": "code430.ottawa-centretown", "version": "^0.1"}],
+}
+PALETTES = {
+    "schema_version": 1,
+    "palettes": {
+        "skin": [{"name": "tone 1", "colour": [0.9, 0.8, 0.7]}],
+        "hair_colour": [{"name": "black", "colour": [0.1, 0.08, 0.07]}],
+        "cloth": [
+            {"name": "red", "colour": [0.8, 0.2, 0.18]},
+            {"name": "blue", "colour": [0.2, 0.42, 0.85]},
+        ],
+        "shoes": [{"name": "black", "colour": [0.12, 0.1, 0.09]}],
+    },
+}
+PRESET_PROFILE = {
+    "skin": 0,
+    "hair": 1,
+    "hair_colour": 0,
+    "top": 1,
+    "bottom": 0,
+    "shoes": 0,
+    "hat": 0,
+    "beard": 0,
+    "glasses": 0,
+    "jacket": 0,
+    "jacket_colour": 0,
+    "height": 1.0,
+    "build": 1.0,
+}
+CHARACTER_V1 = {
+    **GOOD,
+    "schema_version": 1,
+    "type": "character",
+    "supported_modes": ["clean", "gritty", "dystopia"],
+    "max_descriptors": {},
+    "character": {"palettes": "palettes.v1.json", "presets": "presets.v1.json"},
+    "content": [
+        {"type": "palettes", "path": "palettes.v1.json"},
+        {"type": "presets", "path": "presets.v1.json"},
+    ],
+}
+OK_ADS = _ads({"ad.x": {"fallback": {"text": "hi"}}})
+
+
+def _presets(profile: dict, name: str = "Courier") -> bytes:
+    return json.dumps(
+        {"schema_version": 1, "presets": [{"name": name, "profile": profile}]}
+    ).encode()
+
+
+def test_v1_manifest_with_content_index_passes(tmp_path: Path) -> None:
+    write_pack(tmp_path, "story", GOOD_V1, {"ads.v0.json": OK_ADS})
+    (report,) = validate_root(tmp_path)
+    assert report.errors == []
+    # The map it depends on is not beside it: a warning, never an error.
+    assert any("code430.ottawa-centretown" in w and "not found" in w for w in report.warnings)
+
+
+def test_v1_requires_supported_modes_and_max_descriptors(tmp_path: Path) -> None:
+    manifest = {k: v for k, v in GOOD_V1.items() if k not in ("supported_modes", "max_descriptors")}
+    write_pack(tmp_path, "p", manifest, {"ads.v0.json": OK_ADS})
+    errors = errors_for(tmp_path)
+    assert any("'supported_modes' is a required property" in e for e in errors)
+    assert any("'max_descriptors' is a required property" in e for e in errors)
+
+
+def test_unknown_schema_version_is_named(tmp_path: Path) -> None:
+    write_pack(tmp_path, "p", {**GOOD, "schema_version": 7})
+    assert errors_for(tmp_path) == ["schema_version: unknown version 7 (known: 0, 1)"]
+
+
+def test_v0_manifest_still_validates_against_v0(tmp_path: Path) -> None:
+    write_pack(tmp_path, "old", GOOD, {"ads.v0.json": OK_ADS})
+    assert errors_for(tmp_path) == []
+
+
+def test_content_path_that_is_missing_is_an_error(tmp_path: Path) -> None:
+    manifest = {**GOOD_V1, "content": [{"type": "missions", "path": "missions/first.json"}]}
+    write_pack(tmp_path, "p", manifest)
+    assert "content: missions/first.json: file not found" in errors_for(tmp_path)
+
+
+def test_content_path_may_not_leave_the_pack(tmp_path: Path) -> None:
+    (tmp_path / "ads.v0.json").write_bytes(OK_ADS)
+    manifest = {**GOOD_V1, "content": [{"type": "ads", "path": "sub/../../ads.v0.json"}]}
+    write_pack(tmp_path, "p", manifest)
+    errors = errors_for(tmp_path)
+    assert any("sub/../../ads.v0.json" in e for e in errors), errors
+
+
+def test_content_file_is_checked_against_its_types_schema(tmp_path: Path) -> None:
+    manifest = {**GOOD_V1, "content": [{"type": "ads", "path": "promo.json"}]}
+    files = {"promo.json": json.dumps({"ads": [{"id": "x"}]}).encode()}
+    write_pack(tmp_path, "p", manifest, files)
+    errors = errors_for(tmp_path)
+    assert any(e.startswith("promo.json") and "variants" in e for e in errors), errors
+
+
+def test_v1_known_file_outside_the_index_is_a_warning(tmp_path: Path) -> None:
+    write_pack(tmp_path, "p", {**GOOD_V1, "content": []}, {"ads.v0.json": OK_ADS})
+    (report,) = validate_root(tmp_path)
+    assert report.ok
+    assert any("ads.v0.json" in w and "content[]" in w for w in report.warnings)
+
+
+def test_disallowed_file_in_a_v1_story_pack_is_rejected(tmp_path: Path) -> None:
+    write_pack(tmp_path, "p", GOOD_V1, {"ads.v0.json": OK_ADS, "mod/evil.gd": b"x"})
+    assert any("mod/evil.gd" in e for e in errors_for(tmp_path))
+
+
+def test_dependency_present_but_out_of_range_is_an_error(tmp_path: Path) -> None:
+    old_map = {**MAP_MANIFEST, "id": "code430.ottawa-centretown", "version": "0.2.0"}
+    write_pack(tmp_path, "map", old_map)
+    needs_newer = {
+        **GOOD_V1,
+        "dependencies": [{"id": "code430.ottawa-centretown", "version": "^0.3"}],
+    }
+    write_pack(tmp_path, "story", needs_newer, {"ads.v0.json": OK_ADS})
+    reports = {r.path.name: r for r in validate_root(tmp_path)}
+    assert reports["map"].ok
+    assert any("is 0.2.0, this pack needs ^0.3" in e for e in reports["story"].errors)
+
+
+def test_dependency_in_range_resolves_without_a_warning(tmp_path: Path) -> None:
+    write_pack(
+        tmp_path, "map", {**MAP_MANIFEST, "id": "code430.ottawa-centretown", "version": "0.1.4"}
+    )
+    write_pack(tmp_path, "story", GOOD_V1, {"ads.v0.json": OK_ADS})
+    reports = {r.path.name: r for r in validate_root(tmp_path)}
+    assert reports["story"].ok
+    assert not any("dependencies" in w for w in reports["story"].warnings)
+
+
+def test_story_map_must_be_a_dependency(tmp_path: Path) -> None:
+    write_pack(tmp_path, "p", {**GOOD_V1, "dependencies": []}, {"ads.v0.json": OK_ADS})
+    assert any(e.startswith("story.map") for e in errors_for(tmp_path))
+
+
+def test_character_pack_palettes_and_presets_validate(tmp_path: Path) -> None:
+    files = {
+        "palettes.v1.json": json.dumps(PALETTES).encode(),
+        "presets.v1.json": _presets(PRESET_PROFILE),
+    }
+    write_pack(tmp_path, "chars", CHARACTER_V1, files)
+    assert errors_for(tmp_path) == []
+
+
+def test_preset_index_outside_the_palette_is_an_error(tmp_path: Path) -> None:
+    files = {
+        "palettes.v1.json": json.dumps(PALETTES).encode(),
+        "presets.v1.json": _presets({**PRESET_PROFILE, "top": 5}),
+    }
+    write_pack(tmp_path, "chars", CHARACTER_V1, files)
+    errors = errors_for(tmp_path)
+    assert any("Courier" in e and "top index 5" in e for e in errors), errors
+
+
+def test_character_section_file_must_be_indexed(tmp_path: Path) -> None:
+    manifest = {**CHARACTER_V1, "content": [{"type": "palettes", "path": "palettes.v1.json"}]}
+    files = {"palettes.v1.json": json.dumps(PALETTES).encode(), "presets.v1.json": b"{}"}
+    write_pack(tmp_path, "chars", manifest, files)
+    assert any(e.startswith("character.presets") for e in errors_for(tmp_path))
+
+
+def test_character_pack_requires_its_section(tmp_path: Path) -> None:
+    manifest = {k: v for k, v in CHARACTER_V1.items() if k != "character"}
+    files = {
+        "palettes.v1.json": json.dumps(PALETTES).encode(),
+        "presets.v1.json": _presets(PRESET_PROFILE),
+    }
+    write_pack(tmp_path, "chars", manifest, files)
+    assert any("'character' is a required property" in e for e in errors_for(tmp_path))
+
+
+@pytest.mark.parametrize(
+    ("version", "spec", "ok"),
+    [
+        ("1.2.3", "1.2.3", True),
+        ("1.2.4", "1.2.3", False),
+        ("1.2.3", "1.2", True),
+        ("1.9.0", "^1.2", True),
+        ("2.0.0", "^1.2", False),
+        ("0.3.5", "^0.3", True),
+        ("0.4.0", "^0.3", False),
+        ("0.0.2", "^0.0.2", True),
+        ("0.0.3", "^0.0.2", False),
+        ("1.2.9", "~1.2.3", True),
+        ("1.3.0", "~1.2.3", False),
+        ("1.5.0", ">=1.0 <2.0", True),
+        ("2.0.0", ">=1.0 <2.0", False),
+        ("3.1.0", "*", True),
+        ("nope", "*", False),
+    ],
+)
+def test_semver_ranges(version: str, spec: str, ok: bool) -> None:
+    from pack_tools.validate import semver_satisfies
+
+    assert semver_satisfies(version, spec) is ok

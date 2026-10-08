@@ -1,6 +1,8 @@
 ## 1. Format and validator
-- [ ] 1.1 `pack.schema.v1.json`, `character-palettes.schema.v1.json`, `character-presets.schema.v1.json`; README sections for v1, `content[]`, character and story packs
-- [ ] 1.2 `validate.py`: schema by version, `content[]` path and type checks, dependency resolution within the root, descriptor and variant checks on every content file; tests on a v0 pack, a v1 pack, a bad path, a disallowed file, an unresolved dependency
+- [x] 1.1 `pack.schema.v1.json`, `character-palettes.schema.v1.json`, `character-presets.schema.v1.json`; README sections for v1, `content[]`, character and story packs
+  - 2026-10-08: v1 is v0 plus `content[]` (eleven types), `character` and `story` sections (required for those pack types), `supported_modes` and `max_descriptors` required; v0 untouched. README gains Manifest versions, Namespaces and the registry, Character packs, Enabled packs.
+- [x] 1.2 `validate.py`: schema by version, `content[]` path and type checks, dependency resolution within the root, descriptor and variant checks on every content file; tests on a v0 pack, a v1 pack, a bad path, a disallowed file, an unresolved dependency
+  - 2026-10-08: `manifest_validator` picks v0 or v1 by `schema_version` (unknown versions named); `content_index` synthesises the v0 index from known file names; `validate_content` checks every indexed file (inside the pack, exists, parses, its type's schema, descriptor and variant checks through `item_content_checks`, presets against palettes); `validate_dependencies` across the root with `semver_satisfies` (exact, `^`, `~`, comparators, `*`): missing is a warning, out of range an error. 24 new pytest cases.
 
 ## 2. Loader
 - [ ] 2.1 `pack_loader.gd`: discovery over `PackLocator.search_dirs`, manifest check, file rules, dependency order, namespaces and `resolve()`, `user://packs.cfg`, `--packs=`; tests on fixtures under `game/tests/fixtures/packs/`
