@@ -261,6 +261,30 @@ func build_all_chunks(parent: Node3D, with_collision: bool = true) -> Dictionary
 
 
 ## Builds one chunk node (meshes plus optional collision) at the NEAR tier.
+var _height_chunks: Dictionary = {}  # Vector2i -> TerrainBuilder.ChunkHeights, decoded on demand for ground_height
+
+
+## Terrain height at a local x, z from the pack's heightmaps, with no physics and no chunk
+## loaded: the thing to place something on the ground before its chunk has collision.
+## Returns NAN outside the pack's chunks.
+func ground_height(x: float, z: float) -> float:
+	if terrain_index.is_empty():
+		return NAN
+	var chunk_m := float(int(terrain_index.get("samples_per_chunk", 2)) - 1) * float(terrain_index.get("resolution_m", 1.0))
+	if chunk_m <= 0.0:
+		return NAN
+	var coord := Vector2i(floori(x / chunk_m), floori(z / chunk_m))
+	if not _height_chunks.has(coord):
+		var found: TerrainBuilder.ChunkHeights = null
+		for entry in terrain_index.get("chunks", []):
+			if int(entry["cx"]) == coord.x and int(entry["cz"]) == coord.y:
+				found = TerrainBuilder.load_chunk(pack_dir, terrain_index, entry)
+				break
+		_height_chunks[coord] = found
+	var heights: TerrainBuilder.ChunkHeights = _height_chunks[coord]
+	return heights.sample(x, z) if heights != null else NAN
+
+
 func build_chunk(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, road_result: RoadMeshBuilder.Result, with_collision: bool) -> Node3D:
 	var parts := build_chunk_meshes(coord, heights, road_result, Tier.NEAR)
 	if with_collision:

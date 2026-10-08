@@ -47,6 +47,7 @@ var effects: CombatEffects
 var mirror: bool = false  # guest: members come from snapshots, nothing is simulated
 var on_guest_hit: Callable = Callable()  # guest: forwards a hit to the host (turf, seed, weapon, pos, from)
 var log_turf: bool = false
+var ground: Callable = Callable()  # (x, z) -> terrain height or NAN; used before a turf's chunk has collision
 var members: Array[GangMember] = []
 var downed: Array[GangMember] = []
 var tags: int = 0  # non-lethal hits on the local player since the last reset
@@ -522,7 +523,7 @@ func _waypoint(t: Turf) -> Vector3:
 		if inside.size() > 0:
 			return inside[_rng.randi_range(0, inside.size() - 1)]
 	var q := t.random_point(_rng)
-	return Vector3(q.x, t.ground_y, q.y)
+	return Vector3(q.x, _ground_y(Vector3(q.x, t.ground_y, q.y), t.ground_y), q.y)
 
 
 func _go_to(m: GangMember, goal: Vector3, speed: float, delta: float) -> void:
@@ -1013,11 +1014,22 @@ func member_by_seed(seed: int) -> GangMember:
 
 ## A ground height at `p`: a ray down on the world layer, else `fallback`.
 func _ground_y(p: Vector3, fallback: float) -> float:
+	# The heightmap first: it is there before any chunk is built, which a crew a kilometre
+	# from the spawn needs (the crew once stood 60 m underground on the Deck because the
+	# raycast below found nothing at load). The ray then refines it where collision exists.
+	var base := fallback
+	if ground.is_valid():
+		var h: float = ground.call(p.x, p.z)
+		if not is_nan(h):
+			base = h
 	if holder == null or not holder.is_inside_tree():
-		return fallback
-	var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP * 60.0, p + Vector3.DOWN * 60.0, 1)
+		return base
+	# Refine only within a few metres of that height: a ray from 60 m up found the viaduct deck
+	# over the turf instead of the street under it.
+	var window := 3.0 if ground.is_valid() else 60.0
+	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, base + window, p.z), Vector3(p.x, base - window, p.z), 1)
 	var res := holder.get_world_3d().direct_space_state.intersect_ray(q)
-	return float((res["position"] as Vector3).y) if not res.is_empty() else fallback
+	return float((res["position"] as Vector3).y) if not res.is_empty() else base
 
 
 ## Everything off the ground (a new pack, tests).

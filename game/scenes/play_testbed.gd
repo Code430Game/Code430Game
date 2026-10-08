@@ -704,6 +704,7 @@ func _setup_factions() -> void:
 	_factions.peds = _peds
 	_factions.effects = _combat_effects
 	_factions.log_turf = _turf_log
+	_factions.ground = _pack.ground_height
 	_factions.mirror = Session.is_client()
 	add_child(_factions)
 	_factions.setup_turfs(_pack.turfs)
