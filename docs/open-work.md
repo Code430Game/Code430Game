@@ -23,6 +23,9 @@ Large:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
+| `update-houses-and-yards` | house types with doors and porches, front lawns, fenced backyards | nothing | importer buildings and a new yards stage, building builder, dressing |
+| `update-commercial-buildings` | office facades with a base and a top, business signs (generic names), posters by tone | nothing | importer businesses, building builder and shader, dressing, content modes |
+| `add-landmarks` | custom landmark models replacing generated buildings; Parliament first | nothing | pack format, a landmark builder, building builder, vegetation |
 | `add-hover-cars` | dystopia flying cars | helicopter (merged) | new hover car, catalogue, controls, traffic, police |
 | `add-two-wheelers` | bicycles and motorcycles | nothing | importer bike lanes, traffic, vehicles, character rig |
 | `add-bus-routes` | numbered routes, signs, shelters | nothing | importer routes, traffic, bus mesh, dressing |
