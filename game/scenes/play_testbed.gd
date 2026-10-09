@@ -1396,6 +1396,8 @@ func _process(delta: float) -> void:
 		_wanted.target = Players.local_controlled_body()
 	if _police != null and _day_night != null:
 		_police.night = _day_night.night_factor()
+	if _traffic != null and _day_night != null:
+		_traffic.night = _day_night.night_factor()
 	if _minimap != null:
 		var blips: Array = []
 		if _ambulances != null:

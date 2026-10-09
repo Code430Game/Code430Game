@@ -15,6 +15,7 @@ const CAR_SCENE := preload("res://world/traffic/traffic_car.tscn")
 const Signals := preload("res://world/traffic/signal_controller.gd")
 const DRIVABLE_CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const TAIL_SHADER := preload("res://actors/vehicles/car_tail.gdshader")
+const POOL_SHADER := preload("res://world/traffic/headlight_pool.gdshader")
 const CONFIG_PATH := "res://world/traffic/traffic_config.json"
 const BODY_POOL := 24
 const BODY_RADIUS_M := 70.0
@@ -26,6 +27,14 @@ var road_graph: RoadGraph
 var heads: SignalHeads
 ## Tail-light material of the traffic MultiMesh; DayNight drives its `night` uniform.
 var tail_material: ShaderMaterial
+## Headlights at night (update-traffic-headlights): every car near a player lights a patch of
+## road ahead (one MultiMesh of soft quads), and the nearest `headlight_lights` cars carry a
+## real light. 0 day .. 1 night, set by the scene.
+var night: float = 0.0
+var pool_material: ShaderMaterial
+var headlight_lights: int = 6  # from the preset's `traffic_headlights`
+var _pool_mmi: MultiMeshInstance3D
+var _beams: Array[SpotLight3D] = []
 var max_agents: int = 150
 var agents: Array[TrafficAgent] = []
 var rng := RandomNumberGenerator.new()
@@ -124,6 +133,8 @@ func _setup_rendering() -> void:
 	lod0_m = float(preset.get("vehicle_lod0_m", config.get("lod0_m", 80.0)))
 	tail_material = ShaderMaterial.new()
 	tail_material.shader = TAIL_SHADER
+	headlight_lights = int(preset.get("traffic_headlights", 6))
+	_setup_headlights()
 	_body_material = VehicleMesh.body_material(Color.WHITE)  # white bodies take the instance colour
 	var total := 0.0
 	for id in VehicleCatalogue.ids():
@@ -440,6 +451,7 @@ func _claim_junction(a: TrafficAgent, node: String) -> void:
 		return
 	_leave_junction(a)
 	a.occupies_junction = node
+	a.approach_rank = road_rank(lanes.paths[a.path_id].road_class) if a.path_id >= 0 else 0
 	if not _junction_occupants.has(node):
 		_junction_occupants[node] = []
 	_junction_occupants[node].append(a)
@@ -452,11 +464,37 @@ func _leave_junction(a: TrafficAgent) -> void:
 		a.occupies_junction = ""
 
 
+## True when another car holds `node` and `me` should wait for it. At a junction with no
+## signal or stop sign the bigger road has priority: a car never waits for one coming from a
+## smaller road (a motorway doesn't yield to its own on-ramp, #106). Equal roads: first come.
 func _junction_busy(node: String, me: TrafficAgent) -> bool:
+	var mine := road_rank(lanes.paths[me.path_id].road_class) if me.path_id >= 0 else 0
 	for o in _junction_occupants.get(node, []):
-		if o != me and not o.retired:
+		if o != me and not o.retired and o.approach_rank >= mine:
 			return true
 	return false
+
+
+## Priority of a road class at an uncontrolled junction: motorway highest, then trunk,
+## primary, secondary, tertiary, local streets, every kind of ramp (they join or leave the
+## road they serve), and service roads and parking aisles last.
+static func road_rank(road_class: String) -> int:
+	if road_class.ends_with("_link"):
+		return 2
+	match road_class:
+		"motorway":
+			return 8
+		"trunk":
+			return 7
+		"primary":
+			return 6
+		"secondary":
+			return 5
+		"tertiary":
+			return 4
+		"unclassified", "residential", "living_street":
+			return 3
+	return 1
 
 
 func _gap_ahead(a: TrafficAgent, path: LaneGraph.LanePath) -> float:
@@ -881,6 +919,79 @@ func _render() -> void:
 			mm.set_instance_color(i, a.color)
 			mm.set_instance_custom_data(i, Color(1.0 if a.braking else 0.0, 0.0, 0.0, 0.0))
 		mm.visible_instance_count = list.size()
+	_render_headlights()
+
+
+func _setup_headlights() -> void:
+	pool_material = ShaderMaterial.new()
+	pool_material.shader = POOL_SHADER
+	_pool_mmi = MultiMeshInstance3D.new()
+	_pool_mmi.name = "HeadlightPools"
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	var quad := PlaneMesh.new()
+	quad.size = Vector2.ONE
+	mm.mesh = quad
+	mm.instance_count = max_agents
+	mm.visible_instance_count = 0
+	_pool_mmi.multimesh = mm
+	_pool_mmi.material_override = pool_material
+	_pool_mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_pool_mmi)
+	for i in range(headlight_lights):
+		var l := SpotLight3D.new()
+		l.name = "TrafficBeam%d" % i
+		l.light_color = Color(1.0, 0.94, 0.82)
+		l.spot_range = float(config.get("headlight_range_m", 32.0))
+		l.spot_angle = 34.0
+		l.spot_attenuation = 1.2
+		l.shadow_enabled = false
+		l.visible = false
+		add_child(l)
+		_beams.append(l)
+
+
+## Places the light pools and the real beams for this frame (night only).
+func _render_headlights() -> void:
+	if _pool_mmi == null:
+		return
+	var mm := _pool_mmi.multimesh
+	if night < 0.02 or anchors.is_empty():
+		mm.visible_instance_count = 0
+		for l in _beams:
+			l.visible = false
+		return
+	pool_material.set_shader_parameter("night", night)
+	var reach := float(config.get("headlight_pool_m", 120.0))
+	var length := float(config.get("headlight_pool_length_m", 12.0))
+	var width := float(config.get("headlight_pool_width_m", 4.2))
+	var near: Array = []  # [distance, agent]
+	var n := 0
+	for a in agents:
+		if a.retired:
+			continue
+		var d := _distance_to_anchors(a.position())
+		if d > reach:
+			continue
+		var b := a.transform.basis
+		var at := a.position() - b.z * (a.length_m * 0.5 + length * 0.5) + Vector3.UP * 0.06
+		if n >= mm.instance_count:
+			mm.instance_count = n + 16
+		mm.set_instance_transform(n, Transform3D(Basis(b.x * width, Vector3.UP, b.z * length), at))
+		n += 1
+		near.append([d, a])
+	mm.visible_instance_count = n
+	near.sort_custom(func(x: Array, y: Array) -> bool: return float(x[0]) < float(y[0]))
+	for i in range(_beams.size()):
+		var l := _beams[i]
+		if i >= near.size():
+			l.visible = false
+			continue
+		var a: TrafficAgent = near[i][1]
+		var b := a.transform.basis
+		l.visible = true
+		l.light_energy = float(config.get("headlight_energy", 1.6)) * night
+		l.global_transform = Transform3D(b.rotated(b.x, deg_to_rad(-7.0)), a.position() - b.z * (a.length_m * 0.5) + Vector3.UP * 0.8)
 
 
 ## Draws lane paths (green) and connectors (orange) as lines; toggled by the scene's graph view.

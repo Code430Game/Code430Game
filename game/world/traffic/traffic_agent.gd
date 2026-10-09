@@ -8,6 +8,7 @@ var distance: float = 0.0
 var speed: float = 0.0
 var wait_time: float = 0.0
 var occupies_junction: String = ""
+var approach_rank: int = 0  # TrafficManager.road_rank of the road it came in on, for junction priority
 var retired: bool = false  # hit: physics for hit_timer seconds, then resting or recovered
 var resting: bool = false  # retired and at rest off its lane; blocks followers, never moves again
 var hit_timer: float = 0.0

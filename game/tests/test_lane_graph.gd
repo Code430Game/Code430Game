@@ -94,3 +94,101 @@ func test_position_and_direction_along_path() -> void:
 	assert_float(p.length).is_equal_approx(100.0, 0.5)
 	assert_that(p.position_at(25.0)).is_equal_approx(Vector3(25, 0, 0), Vector3(0.6, 0.1, 0.6))
 	assert_that(p.direction_at(80.0)).is_equal_approx(Vector3(0, 0, 1), Vector3(0.05, 0.05, 0.05))
+
+
+## Connectors leaving `lane` as {target lane id: lateral shift in metres}.
+func _targets(lg: LaneGraph, lane: LaneGraph.LanePath) -> Dictionary:
+	var out := {}
+	for cid in lane.next:
+		var c: LaneGraph.LanePath = lg.paths[cid]
+		var t: LaneGraph.LanePath = lg.paths[c.next[0]]
+		out[t.id] = absf(t.points[0].z - lane.points[lane.points.size() - 1].z)
+	return out
+
+
+func _lanes_of(lg: LaneGraph, edge_id: String) -> Array:
+	return lg.paths.filter(func(p: LaneGraph.LanePath) -> bool: return not p.is_connector and p.edge_id == edge_id)
+
+
+func test_a_road_continuing_past_a_node_keeps_each_car_in_its_lane() -> void:
+	# #93, #107: two lanes eastbound, split into two edges at x = 100. Each lane goes on into
+	# the lane beside it, never across to the other one.
+	var g := _graph([
+		{"id": "w1.0", "pl": [[0, 0, 0], [100, 0, 0]], "lf": 2, "lb": 0, "w": 7.0},
+		{"id": "w2.0", "pl": [[100, 0, 0], [200, 0, 0]], "lf": 2, "lb": 0, "w": 7.0},
+	])
+	var lg := LaneGraph.build(g, {})
+	for lane in _lanes_of(lg, "w1.0"):
+		var t := _targets(lg, lane)
+		assert_int(t.size()).is_equal(1)
+		assert_float(t.values()[0]).is_less(0.1)
+
+
+func test_an_added_lane_is_fed_and_a_dropped_lane_merges() -> void:
+	var g := _graph([
+		{"id": "w1.0", "pl": [[0, 0, 0], [100, 0, 0]], "lf": 1, "lb": 0, "w": 3.5},
+		{"id": "w2.0", "pl": [[100, 0, 0], [200, 0, 0]], "lf": 2, "lb": 0, "w": 7.0},
+		{"id": "w3.0", "pl": [[200, 0, 0], [300, 0, 0]], "lf": 1, "lb": 0, "w": 3.5},
+	])
+	var lg := LaneGraph.build(g, {})
+	var one: LaneGraph.LanePath = _lanes_of(lg, "w1.0")[0]
+	assert_int(_targets(lg, one).size()).is_equal(2)  # the new lane starts from the only lane there was
+	for lane in _lanes_of(lg, "w2.0"):
+		assert_int(_targets(lg, lane).size()).is_equal(1)  # both lanes go on into the single lane
+
+
+func test_a_turn_still_reaches_every_lane_of_the_road_it_turns_into() -> void:
+	var g := _graph([
+		{"id": "w1.0", "pl": [[-100, 0, 0], [0, 0, 0]], "lf": 1, "lb": 0, "w": 3.5},
+		{"id": "w2.0", "pl": [[0, 0, 0], [0, 0, 100]], "lf": 2, "lb": 0, "w": 7.0},
+	])
+	var lg := LaneGraph.build(g, {})
+	assert_int(_targets(lg, _lanes_of(lg, "w1.0")[0]).size()).is_equal(2)
+
+
+func test_in_ottawa_a_car_going_straight_on_joins_the_nearest_lane() -> void:
+	# Each straight-on connector leads into the lane of the next road that starts nearest where
+	# the car's lane ends, or feeds a lane that only starts there (nothing else reaches it).
+	# Before #93 / #107 a car could take any lane of the next road, hopping across.
+	var pack := MapPack.new()
+	assert_bool(pack.load(PackLocator.find_pack("code430.ottawa-centretown"))).is_true()
+	var lg := LaneGraph.build(pack.graph, pack.junctions)
+	var lanes_of_road := {}
+	for p in lg.paths:
+		if not p.is_connector:
+			if not lanes_of_road.has(p.edge_id):
+				lanes_of_road[p.edge_id] = []
+			lanes_of_road[p.edge_id].append(p)
+	var feeders := {}  # lane id -> lanes whose straight-on connectors reach it
+	var from_lane := {}  # connector id -> the lane it leaves
+	for p in lg.paths:
+		if p.is_connector:
+			continue
+		for cid in p.next:
+			from_lane[cid] = p
+			var t: int = lg.paths[cid].next[0]
+			var tl: LaneGraph.LanePath = lg.paths[t]
+			if tl.edge_id == p.edge_id or p.direction_at(p.length).dot(tl.direction_at(0.0)) < LaneGraph.THROUGH_COS:
+				continue  # only straight-on feeders count: a turn may also reach a new lane
+			if not feeders.has(t):
+				feeders[t] = []
+			feeders[t].append(p.id)
+	var bad := 0
+	var example := ""
+	var checked := 0
+	for c in lg.paths:
+		if not c.is_connector or c.next.is_empty() or not from_lane.has(c.id):
+			continue
+		var a: LaneGraph.LanePath = from_lane[c.id]
+		var b: LaneGraph.LanePath = lg.paths[c.next[0]]
+		if b.edge_id == a.edge_id or a.direction_at(a.length).dot(b.direction_at(0.0)) < LaneGraph.THROUGH_COS:
+			continue  # a turn or a U-turn
+		checked += 1
+		var end := a.points[a.points.size() - 1]
+		var same_way := (lanes_of_road[b.edge_id] as Array).filter(func(l: LaneGraph.LanePath) -> bool: return l.direction_at(0.0).dot(b.direction_at(0.0)) > 0.0)
+		var nearest: LaneGraph.LanePath = LaneGraph._nearest_start(same_way, end)  # lanes leaving this end of the road
+		if nearest != b and (feeders[b.id] as Array).size() > 1:
+			bad += 1
+			example = "lane %d (%s) into lane %d of %s at %s" % [a.id, a.edge_id, b.id, b.edge_id, end.snapped(Vector3.ONE)]
+	assert_int(checked).is_greater(5000)
+	assert_int(bad).override_failure_message("%d straight-on connectors hop a lane, e.g. %s" % [bad, example]).is_equal(0)
