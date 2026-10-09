@@ -266,3 +266,44 @@ func test_hair_stops_above_the_eyes_and_shirt_stops_at_the_waist() -> void:
 	assert_float(hair_front_low).is_greater(1.69)
 	assert_float(shirt_low).is_greater(0.93)
 	assert_float(trousers_high).is_greater(1.0)
+
+
+## add-character-features 1.1: body A is today's body exactly; body B is reshaped and joined.
+func test_an_old_profile_builds_the_same_body_and_body_b_differs() -> void:
+	var old := {"skin": 2, "top": 1, "height": 1.0, "build": 1.0}  # saved before bodies existed
+	var with_a := old.merged({"body": 0})
+	var m_old := CharacterMesh.build(old)
+	var m_a := CharacterMesh.build(with_a)
+	assert_int(m_old.surface_get_array_len(0)).is_equal(m_a.surface_get_array_len(0))
+	assert_bool(m_old.get_aabb().is_equal_approx(m_a.get_aabb())).is_true()
+	var m_b := CharacterMesh.build(old.merged({"body": 1}))
+	assert_int(m_b.surface_get_array_len(0)).is_equal(m_a.surface_get_array_len(0))  # same parts
+	# Shoulders: the arms hang closer in. Hips: the legs stand wider apart.
+	var arm := CharacterMesh.bone_index("upper_arm_l")
+	var thigh := CharacterMesh.bone_index("thigh_l")
+	assert_float(CharacterMesh.bone_pivot(arm, old.merged({"body": 1})).x).is_less(CharacterMesh.bone_pivot(arm, old).x)
+	assert_float(CharacterMesh.bone_pivot(thigh, old.merged({"body": 1})).x).is_greater(CharacterMesh.bone_pivot(thigh, old).x)
+	# Skinned and posed builds agree for body B (the skeleton follows the reshaped parts).
+	var posed := CharacterMesh.build(old.merged({"body": 1}), {})
+	assert_bool(posed.get_aabb().is_equal_approx(m_b.get_aabb())).is_true()
+
+
+func test_body_labels_follow_the_tone() -> void:
+	var before := ContentMode.current
+	ContentMode.set_mode("clean", false)
+	assert_str(CharacterProfile.label({"body": 0}, "body")).is_equal("A")
+	assert_str(CharacterProfile.label({"body": 1}, "body")).is_equal("B")
+	ContentMode.set_mode("gritty", false)
+	assert_str(CharacterProfile.label({"body": 0}, "body")).is_equal("Man")
+	assert_str(CharacterProfile.label({"body": 1}, "body")).is_equal("Woman")
+	assert_str(ContentMode.text("body.label")).is_equal("Body")
+	ContentMode.set_mode(before, false)
+
+
+func test_random_profiles_split_between_the_bodies() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var b := 0
+	for i in range(400):
+		b += int(CharacterProfile.random(rng)["body"])
+	assert_int(b).is_between(140, 260)  # about half, from population.v0.json

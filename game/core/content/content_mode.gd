@@ -7,6 +7,7 @@ extends Node
 signal mode_changed(id: String)
 
 const MODES_DIR := "res://core/content/modes"
+const STRINGS_PATH := "res://core/content/strings.v0.json"
 const DESCRIPTORS_PATH := "res://core/content/content-descriptors.v0.json"
 const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SECTION := "content"
@@ -18,6 +19,7 @@ var settings_path: String = DEFAULT_SETTINGS_PATH
 var modes: Dictionary = {}  # id -> mode dictionary
 var descriptors: Dictionary = {}  # name -> {"about", "aliases"}
 var levels: PackedStringArray = ["none", "mild", "strong"]
+var _strings: Dictionary = {}
 var current: String = DEFAULT_MODE
 ## True on a co-op client: the host chose the mode and the menu cannot change it.
 var locked: bool = false
@@ -121,6 +123,19 @@ func pick_variant(item: Dictionary) -> Dictionary:
 		_hidden_warned[id] = true
 		print("content: '%s' has nothing allowed in mode '%s', hidden" % [id, current])
 	return {}
+
+
+## A UI string that differs by tone (strings.v0.json: id -> {"variants": {mode: {"text"}}}),
+## for the active mode; the key itself when it is missing.
+func text(key: String) -> String:
+	if _strings.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(STRINGS_PATH))
+		_strings = (parsed as Dictionary).get("strings", {}) if parsed is Dictionary else {"_": {}}
+	var item: Dictionary = _strings.get(key, {})
+	if item.is_empty():
+		return key
+	var v := pick_variant(item.merged({"id": key}))
+	return str(v.get("text", key))
 
 
 ## Switches mode. Returns false for an unknown id. Persists unless `persist` is false.

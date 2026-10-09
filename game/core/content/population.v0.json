@@ -1,0 +1,5 @@
+{
+  "_comment": "Who appears in the crowd (add-character-features): the share of each body type among adults. A map pack may override it; children (clean mode only) come in a later task.",
+  "schema_version": 0,
+  "body": {"a": 0.5, "b": 0.5}
+}

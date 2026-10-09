@@ -54,11 +54,47 @@ static func bone_index(name: String) -> int:
 	return -1
 
 
-## Pivot of a bone in model space for a profile's scale.
+## Pivot of a bone in model space for a profile's body and scale.
 static func bone_pivot(i: int, profile: Dictionary) -> Vector3:
 	var p := CharacterProfile.normalise(profile)
 	var s := Vector3(float(p["build"]), float(p["height"]), float(p["build"]))
-	return (BONES[i][2] as Vector3) * s
+	return body_shape(BONES[i][2] as Vector3, BONES[i][0], int(p["body"])) * s
+
+
+## Body proportions (add-character-features): factors on the unscaled body, per body type.
+## Body A (index 0) is the original body exactly. Shoulders scale the spine's width and set
+## where the arms hang; hips scale the pelvis's width and set where the legs stand; chest scales
+## the spine's depth.
+const BODIES: Array = [
+	{"shoulder": 1.0, "hip": 1.0, "chest": 1.0, "limb": 1.0},
+	{"shoulder": 0.82, "hip": 1.16, "chest": 1.06, "limb": 0.86},
+]
+
+
+## A limb vertex: thinner about the limb's own axis (at x = +/-`axis_x`, z = 0) by `limb`, then
+## moved with its joint as the torso widens or narrows by `width`.
+static func _limb(v: Vector3, axis_x: float, width: float, limb: float) -> Vector3:
+	var ax := signf(v.x) * axis_x
+	return Vector3(ax * width + (v.x - ax) * limb, v.y, v.z * limb)
+
+
+## `v` (unscaled, rest pose) on `bone` reshaped for `body`. Torso parts stretch; limbs move with
+## their joint and keep their shape; the head is untouched. Bone pivots go through the same rule,
+## so skinned and posed meshes stay joined.
+static func body_shape(v: Vector3, bone: String, body: int) -> Vector3:
+	if body <= 0:
+		return v
+	var f: Dictionary = BODIES[clampi(body, 0, BODIES.size() - 1)]
+	match bone:
+		"spine":
+			return Vector3(v.x * float(f["shoulder"]), v.y, v.z * float(f["chest"]))
+		"hips":
+			return Vector3(v.x * float(f["hip"]), v.y, v.z)
+		"upper_arm_l", "upper_arm_r", "forearm_l", "forearm_r":
+			return _limb(v, 0.30, float(f["shoulder"]), float(f["limb"]))
+		"thigh_l", "thigh_r", "shin_l", "shin_r":
+			return _limb(v, 0.11, float(f["hip"]), float(f["limb"]))
+	return v
 
 
 ## Walk cycle coefficients, shared with pedestrian_walk.gdshader (a test keeps them equal).
@@ -276,7 +312,7 @@ class _Builder:
 				_bone_xf[name] = CharacterMesh.bone_global(i, p, pose) * Transform3D(Basis(), -CharacterMesh.bone_pivot(i, p))
 
 	func _emit(v: Vector3, n: Vector3, color: Color, bone: String) -> void:
-		var pos := v * scale
+		var pos := CharacterMesh.body_shape(v, bone, int(profile["body"])) * scale
 		if skinned:
 			var idx := CharacterMesh.bone_index(bone)
 			st.set_bones(PackedInt32Array([idx, 0, 0, 0]))
