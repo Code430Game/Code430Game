@@ -12,6 +12,7 @@ const PACK_ID := "code430.ottawa-centretown"
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const PLAYER_SCENE := preload("res://actors/player/player.tscn")
 const ON_FOOT_OFFSET_M := 2.2
+const FALL_BELOW_GROUND_M := 25.0  # on foot this far under the terrain: fell out of the world
 const BENCH_WARMUP_S := 3.0
 const HORN_STARTLE_M := 25.0  # pedestrians this close turn to look when the horn sounds
 
@@ -252,7 +253,7 @@ func _ready() -> void:
 	_player.profile = CharacterStore.last_or_random()
 	Session.local_profile = _player.profile
 	add_child(_player)
-	_player.global_position = spawn.origin + spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+	_player.global_position = _on_foot_start(spawn)
 	if _spawn_on_foot_at != Vector3.INF:
 		_player.global_position = _spawn_on_foot_at
 	_player.entered_vehicle.connect(_on_entered_vehicle)
@@ -563,10 +564,33 @@ func _caught(how: String) -> void:
 
 ## Puts the player on foot 1 m above `at`, building the ground there first: after a jump across
 ## the map the chunk's collision may not have streamed in yet, and the player fell through it.
+## The streamer's anchor moves there at once too: still on the old position, its next update
+## could downgrade the chunks just built (dropping their collision) as far away (#81).
 func _place_player(at: Vector3) -> void:
+	_streamer.anchors = PackedVector3Array([at])
 	_streamer.build_now(at)
 	_player.global_position = at + Vector3.UP * 1.0
 	_player.velocity = Vector3.ZERO
+
+
+## Where the player stands at the start: on the shoulder beside the start car, not in it.
+func _on_foot_start(spawn: Transform3D) -> Vector3:
+	return spawn.origin + spawn.basis.x * ON_FOOT_OFFSET_M + Vector3.UP * 0.2
+
+
+## Safety net: a player on foot more than FALL_BELOW_GROUND_M under the terrain (deeper than any
+## garage or tunnel) has fallen out of the world; they go back to the nearest road.
+func _catch_fallen_player() -> void:
+	if _player == null or _player.is_driving():
+		return
+	var p := _player.global_position
+	var ground := _pack.ground_height(p.x, p.z)
+	if is_nan(ground) or p.y > ground - FALL_BELOW_GROUND_M:
+		return
+	var hit := _pack.graph.nearest_edge(p, 120.0)
+	var at: Vector3 = hit["point"] if not hit.is_empty() else Vector3(p.x, ground, p.z)
+	print("player fell out of the world at %s; back to %s" % [p.round(), at.round()])
+	_place_player(at)
 
 
 ## On foot, holding reset (R3 / R, like a stuck car) for the hold time takes the player back to
@@ -582,7 +606,9 @@ func _step_foot_reset(held: bool, delta: float) -> float:
 	if _foot_reset_s < Controls.hold_s():
 		return _foot_reset_s / Controls.hold_s()
 	_foot_reset_s = -1.0
-	_place_player(_pack.spawn_transform().origin)
+	# The on-foot start, beside the start car: its own spot put the player inside the car if it
+	# was still there, and the push out of it could go down through the road (#81).
+	_place_player(_on_foot_start(_pack.spawn_transform()) - Vector3.UP * 1.0)
 	return 0.0
 
 
@@ -1269,6 +1295,7 @@ func menu_open() -> bool:
 
 
 func _process(delta: float) -> void:
+	_catch_fallen_player()
 	if _player != null and (get_tree().paused or _player.is_driving() or not _keyboard) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	($HUD as CanvasLayer).visible = not menu_open()
