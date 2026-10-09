@@ -12,7 +12,7 @@ signal closed(profile: Dictionary)
 const FIELD_ROWS: Array = [
 	["skin", "Skin"], ["hair", "Hair"], ["hair_colour", "Hair colour"], ["top", "Top"],
 	["jacket", "Jacket"], ["jacket_colour", "Jacket colour"], ["bottom", "Trousers"], ["shoes", "Shoes"],
-	["hat", "Hat"], ["beard", "Beard"], ["glasses", "Glasses"], ["height", "Height"], ["build", "Build"],
+	["hat", "Hat"], ["beard", "Beard"], ["glasses", "Glasses"], ["body", "body.label"], ["height", "Height"], ["build", "Build"],
 ]
 const ACTION_ROWS: Array = [
 	["randomise", "Randomise"], ["preset", "Preset"], ["save", "Save as a new preset"],
@@ -100,7 +100,7 @@ func _refresh() -> void:
 	var rows: Array = FIELD_ROWS + ACTION_ROWS
 	for i in range(rows.size()):
 		var key: String = rows[i][0]
-		_names[i].text = str(rows[i][1])
+		_names[i].text = ContentMode.text(str(rows[i][1])) if str(rows[i][1]).contains(".") else str(rows[i][1])
 		MenuTheme.set_selected(_lines[i], i == _selected, true)
 		var value := ""
 		if i < FIELD_ROWS.size():
