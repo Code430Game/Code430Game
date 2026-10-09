@@ -34,6 +34,12 @@ const DOOR_COLOR := Color(0.36, 0.38, 0.4)
 const SLAT_COLOR := Color(0.3, 0.32, 0.34)
 const LINE_COLOR := Color(0.85, 0.85, 0.8)
 const LIGHT_COLOR := Color(1.0, 0.97, 0.88)
+const SIGN_BLUE := Color(0.08, 0.3, 0.75)
+const SIGN_M := 1.2  # the P sign's panel
+const CLEARANCE_M := 2.3  # the clearance bar's underside above the street
+const RAMP_LIGHT_FIRST_M := 3.0
+const RAMP_LIGHT_STEP_M := 5.0
+const RAMP_LIGHT_Y_M := 2.0  # above the ramp floor
 
 
 class Ramp:
@@ -275,8 +281,11 @@ static func build(garages: Array[Garage]) -> Dictionary:
 		for r in g.ramps:
 			var out := _bucket(structure, (r.start + r.end) * 0.5)
 			_ramp(out, r)
+			_ramp_lights(_bucket(lights, (r.start + r.end) * 0.5), r)
 			if g.tier == "door":
 				_door(out, r)
+			else:
+				_entrance(_bucket(structure, r.start), _bucket(lights, r.start), r)
 		if g.tier == "garage" and g.outer.size() >= 3:
 			_box(structure, lights, g)
 	return {"structure": structure, "lights": lights}
@@ -314,6 +323,61 @@ static func _ramp(out: RoadMeshBuilder.ChunkTriangles, r: Ramp) -> void:
 		_quad(out, a_top, a_top + off, b_top, b_top + off, Vector3.UP, WALL_COLOR)  # wall top
 		var cope := side * (COPING_M * sgn)
 		_quad(out, a_top + off, a_top + off + cope, b_top + off, b_top + off + cope, Vector3.UP, WALL_COLOR)
+
+
+## Light strips down both ramp walls, so a ramp reads as a way in and not a pit (#89, #90).
+static func _ramp_lights(out: RoadMeshBuilder.ChunkTriangles, r: Ramp) -> void:
+	var side := Vector3(-r.dir.y, 0.0, r.dir.x)
+	var along := Vector3(r.dir.x, 0.0, r.dir.y)
+	var length := Vector2(r.end.x - r.start.x, r.end.z - r.start.z).length()
+	var d := RAMP_LIGHT_FIRST_M
+	while d < length - 1.0:
+		var t := d / length
+		var floor_y := lerpf(r.start.y, r.end.y, t)
+		var top_y := r.start.y + 0.25
+		var y := minf(floor_y + RAMP_LIGHT_Y_M, top_y - 0.3)
+		if y > floor_y + 0.6:  # the wall is tall enough here to carry a light
+			for sgn: float in [-1.0, 1.0]:
+				var c := r.start.lerp(r.end, t) + side * ((RAMP_WIDTH_M * 0.5 - 0.02) * sgn)
+				c.y = y
+				var inward := -side * sgn
+				_quad(out, c - along * 0.6 - Vector3.UP * 0.06, c + along * 0.6 - Vector3.UP * 0.06, c - along * 0.6 + Vector3.UP * 0.06, c + along * 0.6 + Vector3.UP * 0.06, inward, LIGHT_COLOR)
+		d += RAMP_LIGHT_STEP_M
+
+
+## A public garage's way in: posts and a header beam across the ramp's mouth with a striped
+## clearance bar under it, and a blue P sign on top whose letter glows at night (#89, #90).
+static func _entrance(out: RoadMeshBuilder.ChunkTriangles, glow: RoadMeshBuilder.ChunkTriangles, r: Ramp) -> void:
+	var side := Vector3(-r.dir.y, 0.0, r.dir.x)
+	var along := Vector3(r.dir.x, 0.0, r.dir.y)
+	var hw := RAMP_WIDTH_M * 0.5 + WALL_M * 0.5
+	var base := r.start + along * 0.4
+	var street := r.start.y + 0.25
+	var bar_y := street + CLEARANCE_M
+	for sgn: float in [-1.0, 1.0]:  # posts on the wall tops
+		BridgeBuilder._box(out, Vector3(base.x, bar_y + 0.6, base.z) + side * (hw * sgn), along, side, 0.2, 0.2, bar_y + 0.6 - street, WALL_COLOR)
+	BridgeBuilder._box(out, Vector3(base.x, bar_y + 0.6, base.z), side, along, hw + 0.2, 0.25, 0.6, WALL_COLOR)  # header beam
+	# Clearance bar: yellow and black stripes under the beam, facing the street.
+	var n := 8
+	for i in range(n):
+		var a := -hw + (2.0 * hw) * float(i) / n
+		var b := -hw + (2.0 * hw) * float(i + 1) / n
+		var c := Color(0.95, 0.78, 0.1) if i % 2 == 0 else Color(0.08, 0.08, 0.08)
+		var f := base - along * 0.27
+		_quad(out, Vector3(f.x, bar_y - 0.25, f.z) + side * a, Vector3(f.x, bar_y - 0.25, f.z) + side * b, Vector3(f.x, bar_y, f.z) + side * a, Vector3(f.x, bar_y, f.z) + side * b, -along, c)
+	# The sign: a blue panel above the beam's middle, the letter in the glow mesh just in front.
+	var panel_c := Vector3(base.x, bar_y + 0.6 + SIGN_M * 0.5 + 0.1, base.z) - along * 0.26
+	var u := side * (SIGN_M * 0.5)
+	var v := Vector3.UP * (SIGN_M * 0.5)
+	_quad(out, panel_c - u - v, panel_c + u - v, panel_c - u + v, panel_c + u + v, -along, SIGN_BLUE)
+	var f := panel_c - along * 0.02
+	var k := SIGN_M / 10.0  # the letter on a 10 x 10 grid: stem, top and bottom of the bowl, its side
+	for rect: Rect2 in [Rect2(-2.5, -3.5, 1.4, 7.0), Rect2(-1.1, 2.1, 3.0, 1.4), Rect2(-1.1, -0.9, 3.0, 1.4), Rect2(1.9, -0.9, 1.4, 4.4)]:
+		var x0 := side * (rect.position.x * k)
+		var x1 := side * ((rect.position.x + rect.size.x) * k)
+		var y0 := Vector3.UP * (rect.position.y * k)
+		var y1 := Vector3.UP * ((rect.position.y + rect.size.y) * k)
+		_quad(glow, f + x0 + y0, f + x1 + y0, f + x0 + y1, f + x1 + y1, -along, LIGHT_COLOR)
 
 
 ## The closed door at the ramp's foot, in a portal wall that rises past the street.
