@@ -126,3 +126,28 @@ func test_a_strip_lot_too_shallow_for_an_aisle_gets_one_row() -> void:
 		assert_float(s.centre.y).is_equal_approx(4.5, 0.01)  # down the middle
 		for c in ParkingLotBuilder.stall_corners(s):
 			assert_bool(ParkingLotBuilder.contains(lot, c)).is_true()
+
+
+## #88: a lot's entrance sign stood in the street's travel lane (an offset from the entrance
+## point, which is on the street). Every sign now stands inside its lot, clear of every road and
+## aisle and of the stalls; most lots with an entrance still get one.
+func test_in_ottawa_lot_signs_stand_inside_the_lot_and_off_the_roads() -> void:
+	var pack := MapPack.new()
+	assert_bool(pack.load(PackLocator.find_pack("code430.ottawa-centretown"))).is_true()
+	var with_entrance := 0
+	var signed := 0
+	for lot: ParkingLotBuilder.Lot in pack.parking_lots:
+		if lot.entrances.is_empty():
+			continue
+		with_entrance += 1
+		if lot.sign_spot == Vector2.INF:
+			continue
+		signed += 1
+		var p := lot.sign_spot
+		assert_bool(ParkingLotBuilder.contains(lot, p)).override_failure_message("%s: sign outside the lot" % lot.id).is_true()
+		var hit := pack.graph.nearest_edge(Vector3(p.x, 0.0, p.y), 30.0)
+		if not hit.is_empty():
+			var half := (hit["edge"] as RoadGraph.RoadEdge).width_m * 0.5
+			assert_float(float(hit["distance"])).override_failure_message("%s: sign on %s at %s" % [lot.id, hit["edge"].id, p]).is_greater(half + 1.0)
+	print("lot signs: %d of %d lots with an entrance" % [signed, with_entrance])
+	assert_float(float(signed) / float(maxi(with_entrance, 1))).is_greater(0.5)

@@ -419,6 +419,7 @@ static func attach_collision(parts: Dictionary) -> void:
 			label.autowrap_mode = TextServer.AUTOWRAP_WORD
 			label.transform = Transform3D(l[1], l[0])
 			label.visibility_range_end = 120.0
+			label.double_sided = false  # from behind, a blank panel rather than the letters backwards
 			signs.add_child(label)
 		node.add_child(signs)
 
