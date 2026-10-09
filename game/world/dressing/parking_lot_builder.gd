@@ -27,6 +27,8 @@ const ASPHALT := Color(0.33, 0.33, 0.34)  # close to the aisle roads drawn over 
 const KERB := Color(0.55, 0.55, 0.53)
 const CURB_STOP := Color(0.62, 0.6, 0.56)
 const LINE := Color(0.92, 0.92, 0.88)
+const SIGN_EDGE_M := 0.6  # the sign keeps this far inside the lot's outline
+const SIGN_ROAD_CLEAR_M := 1.2  # and this far beyond any road or aisle ribbon
 const SIGN_BLUE := Color(0.12, 0.3, 0.62)
 const SIGN_POST := Color(0.35, 0.36, 0.38)
 const DRAWN_KINDS := ["surface", "street_side"]
@@ -60,6 +62,7 @@ class Lot:
 	var entrances := PackedVector3Array()
 	var stalls: Array[Stall] = []
 	var bounds: Rect2
+	var sign_spot := Vector2.INF  # where the entrance sign stands, inside the lot; INF: no sign
 
 	## A downtown-style lot: paid or run by someone (parked cars fill it by day).
 	func is_commercial() -> bool:
@@ -144,7 +147,36 @@ static func lot_from_dict(d: Dictionary, graph: RoadGraph, streets: Dictionary =
 		hi = Vector2(maxf(hi.x, p.x), maxf(hi.y, p.y))
 	lot.bounds = Rect2(lo, hi - lo)
 	lot.stalls = layout_stalls(lot, graph, streets)
+	lot.sign_spot = sign_spot(lot, graph)
 	return lot
+
+
+## Where a lot's entrance sign stands: near its first entrance, inside the lot, clear of every
+## road and aisle ribbon and of the stalls. Offsetting from the entrance point alone put the
+## sign in the street's travel lane (#88). INF when nothing near the entrance qualifies.
+static func sign_spot(lot: Lot, graph: RoadGraph) -> Vector2:
+	if lot.entrances.is_empty():
+		return Vector2.INF
+	var e := Vector2(lot.entrances[0].x, lot.entrances[0].z)
+	var toward := (lot.bounds.get_center() - e).normalized()
+	var across := Vector2(-toward.y, toward.x)
+	for inward in range(1, 13):
+		for side: float in [3.0, -3.0, 4.5, -4.5, 1.5, -1.5, 0.0]:
+			var p := e + toward * float(inward) + across * side
+			if not contains(lot, p) or edge_distance(lot, p) < SIGN_EDGE_M:
+				continue
+			if graph != null:
+				var hit := graph.nearest_edge(Vector3(p.x, 0.0, p.y), 30.0)
+				if not hit.is_empty() and float(hit["distance"]) < (hit["edge"] as RoadGraph.RoadEdge).width_m * 0.5 + SIGN_ROAD_CLEAR_M:
+					continue  # on or by a road or aisle
+			var in_stall := false
+			for st in lot.stalls:
+				if Geometry2D.is_point_in_polygon(p, stall_corners(st)):
+					in_stall = true
+					break
+			if not in_stall:
+				return p
+	return Vector2.INF
 
 
 ## True when `p` is inside the lot (outer ring, not in a hole).
@@ -410,16 +442,17 @@ static func build_chunk(lots: Array, coord: Vector2i, heights: TerrainBuilder.Ch
 			var stop := back - s.facing * 0.6
 			_add_strip(props, stop - r * 0.8, stop + r * 0.8, 0.2, heights, LIFT_M, 0.15, CURB_STOP)
 		# The entrance sign, in the chunk that holds the first entrance.
-		if not lot.entrances.is_empty():
+		if lot.sign_spot != Vector2.INF and not lot.entrances.is_empty():
 			var e := lot.entrances[0]
-			if chunk_rect.has_point(Vector2(e.x, e.z)):
+			var spot := lot.sign_spot
+			if chunk_rect.has_point(spot):
 				var toward := (lot.bounds.get_center() - Vector2(e.x, e.z)).normalized()
-				var spot := Vector2(e.x, e.z) + Vector2(-toward.y, toward.x) * 4.0 + toward * 2.0
 				var y := heights.sample(spot.x, spot.y)
 				_add_box(props, Vector3(spot.x, y + 1.1, spot.y), Vector3(0.1, 2.2, 0.1), SIGN_POST)
 				_add_box(props, Vector3(spot.x, y + 2.4, spot.y), Vector3(0.9, 0.9, 0.08), SIGN_BLUE, toward)
 				var text := lot.operator if lot.operator != "" else "P"
-				var basis := Basis.looking_at(Vector3(-toward.x, 0.0, -toward.y), Vector3.UP)
+				# A Label3D reads from its +Z side: point -Z into the lot so the text faces the street.
+				var basis := Basis.looking_at(Vector3(toward.x, 0.0, toward.y), Vector3.UP)
 				labels.append([Vector3(spot.x, y + 2.4, spot.y) - Vector3(toward.x, 0.0, toward.y) * 0.05, basis, text])
 	return {"surface": surface, "markings": markings, "props": props, "labels": labels}
 
