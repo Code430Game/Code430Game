@@ -1,11 +1,15 @@
 name: CI
 
-# The private repo gets 2,000 free Actions minutes a month and GitHub bills every job rounded
-# up to a minute, so this workflow skips what a change can't affect:
+# Runs on the maintainer's Mac (a self-hosted runner labelled `code430-mac`, set up 2026-10-09),
+# not on GitHub's runners: the private repo's 2,000 free minutes ran out. Jobs wait in the queue
+# while that Mac is off. The one job runs scripts/ci-local.sh, the same check as by hand.
+# Before the repo goes public, PRs from forks must not run here (they would run a stranger's
+# code on that Mac): move pull_request jobs back to GitHub's runners then.
+# It still skips what a change can't affect:
 # - docs, OpenSpec and Markdown-only changes don't build or test the game (OpenSpec has its own
 #   quick check in openspec.yml);
 # - a newer push to a pull request cancels the older run;
-# - the Linux export runs only by hand (Deck builds are made locally with scripts/package-linux.sh).
+# - the Linux export runs only by hand.
 on:
   push:
     branches: [main]
@@ -30,117 +34,29 @@ env:
   UV_VERSION: "0.12.19"
 
 jobs:
-  tools:
-    name: Python tools and pack manifests (pytest, ruff, pack_tools)
-    timeout-minutes: 10  # a hang must not burn the month's runner minutes
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools
+  local-ci:
+    name: Local CI (pytest, ruff, packs, OpenSpec, gdUnit4)
+    timeout-minutes: 30  # a hang must not tie up the Mac
+    runs-on: [self-hosted, code430-mac]
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
         with:
-          version: ${{ env.UV_VERSION }}
-          enable-cache: true
-          cache-dependency-glob: tools/uv.lock
-      - run: uv sync --frozen
-      - run: uv run ruff check . && uv run ruff format --check .
-      - run: uv run pytest -q
-      - run: uv run python -m pack_tools ../packs
-
-  gdunit:
-    name: gdUnit4 (headless)
-    timeout-minutes: 20  # a hang must not burn the month's runner minutes
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Read pinned Godot version
-        id: godot
-        run: echo "version=$(cat .godot-version)" >> "$GITHUB_OUTPUT"
-      - name: Cache Godot
-        id: cache-godot
-        uses: actions/cache@v4
-        with:
-          path: ~/godot
-          key: godot-${{ steps.godot.outputs.version }}-linux
-      - name: Download Godot
-        if: steps.cache-godot.outputs.cache-hit != 'true'
-        run: |
-          set -euo pipefail
-          V="${{ steps.godot.outputs.version }}"
-          mkdir -p ~/godot
-          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
-          unzip -q /tmp/godot.zip -d ~/godot
-          mv ~/godot/Godot_v${V}_linux.x86_64 ~/godot/godot
-          chmod +x ~/godot/godot
-      - name: Import project
-        run: ~/godot/godot --headless --path game --import --quit
-      - name: Run tests
-        # gdUnit exits 101 when every test passed but some left orphan nodes. That fails the run:
-        # orphans once piled up to 2,197 while CI stayed green.
-        run: |
-          set +e
-          ~/godot/godot --headless --path game -s -d --remote-debug tcp://127.0.0.1:0 \
-            res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
-          status=$?
-          if [ "$status" -eq 101 ]; then echo "gdUnit: tests passed but left orphan nodes; free them (auto_free)"; fi
-          exit "$status"
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gdunit4-report
-          path: game/reports
-          if-no-files-found: ignore
-          retention-days: 3
+          persist-credentials: false
+      - name: scripts/ci-local.sh
+        run: scripts/ci-local.sh  # GODOT_BIN comes from the runner's .env
 
   export-linux:
     name: Linux export
-    timeout-minutes: 30  # a hang must not burn the month's runner minutes
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'  # by hand only; Deck builds are made locally
-    needs: [tools, gdunit]
+    timeout-minutes: 30
+    runs-on: [self-hosted, code430-mac]
+    if: github.event_name == 'workflow_dispatch'  # by hand only
+    needs: [local-ci]
     steps:
       - uses: actions/checkout@v4
-      - name: Read pinned Godot version
-        id: godot
-        run: |
-          V="$(cat .godot-version)"
-          echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "templates_dir=${V/-stable/.stable}" >> "$GITHUB_OUTPUT"
-      - name: Cache Godot and export templates
-        id: cache-godot
-        uses: actions/cache@v4
         with:
-          path: |
-            ~/godot
-            ~/.local/share/godot/export_templates
-          key: godot-${{ steps.godot.outputs.version }}-linux-templates
-      - name: Download Godot and export templates
-        if: steps.cache-godot.outputs.cache-hit != 'true'
-        run: |
-          set -euo pipefail
-          V="${{ steps.godot.outputs.version }}"
-          T="${{ steps.godot.outputs.templates_dir }}"
-          mkdir -p ~/godot ~/.local/share/godot/export_templates
-          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
-          unzip -q /tmp/godot.zip -d ~/godot
-          mv ~/godot/Godot_v${V}_linux.x86_64 ~/godot/godot
-          chmod +x ~/godot/godot
-          curl -sSL -o /tmp/templates.tpz "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_export_templates.tpz"
-          unzip -q /tmp/templates.tpz -d /tmp/templates
-          mv /tmp/templates/templates ~/.local/share/godot/export_templates/"$T"
-      - name: Import project
-        run: ~/godot/godot --headless --path game --import --quit
-      - name: Export
-        run: |
-          scripts/stamp-build.sh
-          mkdir -p build/linux
-          ~/godot/godot --headless --path game --export-release "Linux" ../build/linux/code430.x86_64
-          ls -la build/linux
-      - name: Upload build
-        uses: actions/upload-artifact@v4
+          persist-credentials: false
+      - run: GODOT_BIN="$GODOT_BIN" scripts/package-linux.sh
+      - uses: actions/upload-artifact@v4
         with:
           name: code430-linux-${{ github.sha }}
           path: build/linux
