@@ -185,8 +185,11 @@ func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
 		player.try_exit_vehicle()
 		await get_tree().physics_frame
 	var pack: MapPack = _bed.get("_pack")
-	var start: Vector3 = pack.spawn_transform().origin
-	var away := start + Vector3(400.0, 0.0, 300.0)
+	# #81: the on-foot start beside the start car, not the car's own spot (inside the car the
+	# push-out could go down through the road), from far enough away that the start's ground
+	# had been dropped to the far tier (past 900 m).
+	var start: Vector3 = _bed.call("_on_foot_start", pack.spawn_transform())
+	var away := start + Vector3(1200.0, 0.0, 900.0)
 	player.global_position = away + Vector3.UP * 50.0
 	player.velocity = Vector3.ZERO
 	var half := Controls.hold_s() * 0.6
@@ -195,6 +198,8 @@ func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
 	assert_float(player.global_position.distance_to(start)).is_greater(100.0)
 	_bed.call("_step_foot_reset", true, half)
 	assert_float(Vector2(player.global_position.x - start.x, player.global_position.z - start.z).length()).is_less(0.5)
+	var streamer: ChunkStreamer = _bed.get("_streamer")
+	assert_float(streamer.anchors[0].distance_to(start)).is_less(3.0)  # the anchor moved with them at once
 	# A long hold resets once; letting go arms it again.
 	player.global_position = away + Vector3.UP * 50.0
 	assert_float(_bed.call("_step_foot_reset", true, half)).is_equal(0.0)
@@ -206,6 +211,23 @@ func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
 		await get_tree().physics_frame
 	assert_bool(player.is_on_floor()).override_failure_message("the player fell through the ground at the start").is_true()
 	assert_float(absf(player.global_position.y - start.y)).is_less(3.0)
+
+
+func test_a_player_who_falls_out_of_the_world_is_put_back_on_a_road() -> void:
+	var player: Variant = _bed.get("_player")
+	if player.is_driving():
+		player.try_exit_vehicle()
+		await get_tree().physics_frame
+	var pack: MapPack = _bed.get("_pack")
+	var start: Vector3 = _bed.call("_on_foot_start", pack.spawn_transform())
+	var ground := pack.ground_height(start.x, start.z)
+	player.global_position = Vector3(start.x, ground - 40.0, start.z)
+	player.velocity = Vector3(0, -30, 0)
+	_bed.call("_catch_fallen_player")
+	assert_float(player.global_position.y).is_greater(ground - 15.0)
+	for i in range(30):
+		await get_tree().physics_frame
+	assert_bool(player.is_on_floor()).override_failure_message("put back but not standing on anything").is_true()
 
 
 ## update-menu-design: the HUD (minimap, position line, badges) steps back while a menu is open.
