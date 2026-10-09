@@ -52,6 +52,10 @@ const TALL_GLASS_HEIGHT_M := 40.0
 const PLAIN_MAX_HEIGHT_M := 3.5
 const STONE_KINDS := ["church", "cathedral", "university", "school", "public", "government", "hospital"]
 const PLAIN_KINDS := ["garage", "garages", "shed", "roof", "industrial", "warehouse"]
+const CANOPY_KINDS := ["roof", "carport"]  # roofs with no walls: open underneath
+const CANOPY_THICK_M := 0.4
+const CANOPY_MIN_CLEARANCE_M := 2.6
+const CANOPY_POST_M := 0.25
 const GLASS_KINDS := ["office", "commercial", "retail", "hotel"]
 
 const KIND_COLORS := {
@@ -289,6 +293,9 @@ static func build(buildings: Array[Building]) -> Dictionary:
 
 
 static func _extrude(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
+	if b.kind in CANOPY_KINDS:
+		_canopy(b, out)
+		return
 	var wall := color_for(b)
 	var roof := wall.darkened(ROOF_DARKEN)
 	var y0 := b.ground_y - WALL_EMBED_M
@@ -346,6 +353,58 @@ static func _extrude(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
 		if b.height_m >= ROOF_BOX_MIN_HEIGHT_M and not box.is_empty() and float(box["half_short"]) > 6.0:
 			var c2: Vector2 = box["centre"]
 			_box(Vector3(c2.x, y1 + 1.5, c2.y), Vector3(4.0, 3.0, 3.0), box["axis"], wall.darkened(0.3), trim_uv2, out)
+
+
+## OSM `building=roof` (and carports) is a roof with no walls: a drop-off canopy, a fuel-station
+## roof, a covered walkway. Built as a slab at the top with a fascia round its edge and a thin
+## post at each corner, open underneath, so people and cars pass below it; built as a solid
+## block from the ground it boxed in the hospital's drop-off and the respawn there (#80).
+static func _canopy(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
+	var wall := color_for(b)
+	var y1 := b.ground_y + maxf(b.height_m, CANOPY_MIN_CLEARANCE_M + CANOPY_THICK_M)
+	var y0 := y1 - CANOPY_THICK_M
+	var uv2 := Vector2(float(TREATMENT_PLAIN), seed_for(b.id))
+	for ring in b.rings:
+		for i in range(ring.size()):
+			var a := ring[i]
+			var c := ring[(i + 1) % ring.size()]
+			if a.distance_squared_to(c) < 1e-6:
+				continue
+			var d := c - a
+			var outward := Vector3(d.y, 0.0, -d.x).normalized()
+			var a_low := Vector3(a.x, y0, a.y)
+			var a_high := Vector3(a.x, y1, a.y)
+			var c_low := Vector3(c.x, y0, c.y)
+			var c_high := Vector3(c.x, y1, c.y)
+			var ua := Vector2(0.0, 0.0)
+			var uc := Vector2(d.length(), 0.0)
+			var n := (c_high - a_low).cross(c_low - a_low)
+			if n.dot(outward) >= 0.0:
+				out.add_triangle_uv(a_low, c_low, c_high, wall, ua, uc, uc + Vector2(0, CANOPY_THICK_M), uv2)
+				out.add_triangle_uv(a_low, c_high, a_high, wall, ua, uc + Vector2(0, CANOPY_THICK_M), ua + Vector2(0, CANOPY_THICK_M), uv2)
+			else:
+				out.add_triangle_uv(a_low, c_high, c_low, wall, ua, uc + Vector2(0, CANOPY_THICK_M), uc, uv2)
+				out.add_triangle_uv(a_low, a_high, c_high, wall, ua, ua + Vector2(0, CANOPY_THICK_M), uc + Vector2(0, CANOPY_THICK_M), uv2)
+		# A post at each corner, from the ground to the slab.
+		for i in range(ring.size()):
+			var prev := ring[(i - 1 + ring.size()) % ring.size()]
+			var here := ring[i]
+			var next := ring[(i + 1) % ring.size()]
+			var turn := (here - prev).normalized().cross((next - here).normalized())
+			if absf(turn) < 0.5:
+				continue  # not a corner: the edge only bends a little here
+			var inward := ((prev - here).normalized() + (next - here).normalized()).normalized()
+			var p := here + inward * CANOPY_POST_M
+			var foot := b.ground_y - WALL_EMBED_M
+			_box(Vector3(p.x, (y0 + foot) * 0.5, p.y), Vector3(CANOPY_POST_M, y0 - foot, CANOPY_POST_M), Vector2.RIGHT, wall.darkened(0.15), uv2, out)
+	var roof := wall.darkened(ROOF_DARKEN)
+	var roof_uv2 := Vector2(-1.0, seed_for(b.id))
+	for t in range(0, b.roof_triangles.size(), 3):
+		var p := b.roof_vertices[b.roof_triangles[t]]
+		var q := b.roof_vertices[b.roof_triangles[t + 1]]
+		var r := b.roof_vertices[b.roof_triangles[t + 2]]
+		out.add_triangle_uv(Vector3(p.x, y1, p.y), Vector3(q.x, y1, q.y), Vector3(r.x, y1, r.y), roof, p, q, r, roof_uv2)
+		out.add_triangle_uv(Vector3(p.x, y0, p.y), Vector3(r.x, y0, r.y), Vector3(q.x, y0, q.y), roof.darkened(0.3), p, r, q, roof_uv2)  # the underside
 
 
 ## A gabled or hipped roof over the footprint's oriented box, from the eave at y_eave.
