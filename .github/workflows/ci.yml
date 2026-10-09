@@ -1,17 +1,37 @@
 name: CI
 
+# The private repo gets 2,000 free Actions minutes a month and GitHub bills every job rounded
+# up to a minute, so this workflow skips what a change can't affect:
+# - docs, OpenSpec and Markdown-only changes don't build or test the game (OpenSpec has its own
+#   quick check in openspec.yml);
+# - a newer push to a pull request cancels the older run;
+# - the Linux export runs only by hand (Deck builds are made locally with scripts/package-linux.sh).
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "openspec/**"
+      - "**/*.md"
+      - "LICENSE*"
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "openspec/**"
+      - "**/*.md"
+      - "LICENSE*"
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   UV_VERSION: "0.12.19"
 
 jobs:
   tools:
-    name: Python tools (pytest, ruff)
+    name: Python tools and pack manifests (pytest, ruff, pack_tools)
     timeout-minutes: 10  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
     defaults:
@@ -27,35 +47,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run ruff check . && uv run ruff format --check .
       - run: uv run pytest -q
-
-  packs:
-    name: Pack manifests
-    timeout-minutes: 10  # a hang must not burn the month's runner minutes
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          version: ${{ env.UV_VERSION }}
-          enable-cache: true
-          cache-dependency-glob: tools/uv.lock
-      - run: uv sync --frozen
       - run: uv run python -m pack_tools ../packs
-
-  openspec:
-    name: OpenSpec (validate --strict --all)
-    timeout-minutes: 10  # a hang must not burn the month's runner minutes
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - run: npm install -g "@fission-ai/openspec@$(cat .openspec-version)"
-      - run: openspec validate --strict --all --no-interactive
 
   gdunit:
     name: gdUnit4 (headless)
@@ -107,8 +99,8 @@ jobs:
     name: Linux export
     timeout-minutes: 30  # a hang must not burn the month's runner minutes
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    needs: [tools, packs, openspec, gdunit]
+    if: github.event_name == 'workflow_dispatch'  # by hand only; Deck builds are made locally
+    needs: [tools, gdunit]
     steps:
       - uses: actions/checkout@v4
       - name: Read pinned Godot version

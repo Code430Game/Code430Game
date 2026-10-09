@@ -1,0 +1,37 @@
+name: OpenSpec
+
+# Strict validation of every change and spec. Its own workflow so an OpenSpec-only PR costs one
+# short job instead of the whole game build (see ci.yml).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "openspec/**"
+      - ".openspec-version"
+      - ".github/workflows/openspec.yml"
+  pull_request:
+    paths:
+      - "openspec/**"
+      - ".openspec-version"
+      - ".github/workflows/openspec.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: openspec-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: OpenSpec (validate --strict --all)
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install -g "@fission-ai/openspec@$(cat .openspec-version)"
+      - run: openspec validate --strict --all --no-interactive
