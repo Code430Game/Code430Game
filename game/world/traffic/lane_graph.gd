@@ -10,6 +10,7 @@ extends RefCounted
 ## (quadratic curves through the junction centre) from every arriving lane to
 ## every lane of every legal outgoing edge. Dead ends get a U-turn connector.
 
+const THROUGH_COS := 0.85  # within about 32 degrees: carrying straight on, not turning
 const CONNECTOR_STEPS := 6
 const MIN_PATH_LENGTH_M := 1.0
 
@@ -156,21 +157,71 @@ func _connect_node(graph: RoadGraph, nid: String) -> void:
 	var arriving: Array = _by_edge_end.get(nid, [])
 	var leaving: Array = _by_edge_start.get(nid, [])
 	var centre: Vector3 = graph.nodes[nid].position
+	# Leaving lanes grouped by their road.
+	var by_road := {}
+	for b_id in leaving:
+		var b: LanePath = paths[b_id]
+		if not by_road.has(b.edge_id):
+			by_road[b.edge_id] = []
+		by_road[b.edge_id].append(b)
+	var made := {}  # arriving lane id -> connectors made
+	for edge_id: String in by_road:
+		var outs: Array = by_road[edge_id]
+		var dir_out: Vector3 = (outs[0] as LanePath).direction_at(0.0)
+		# Arriving lanes that carry straight on into this road (a road continuing past a node,
+		# a fork, a merge, straight across a junction) keep their lane: each joins the lane
+		# nearest where it ends, and a lane that only starts here (an added lane) takes the
+		# nearest arriving one. All-to-all here let cars hop sideways across lanes over a node a
+		# few metres long (#93, #107). Turns still reach every lane of the road they turn into.
+		var through: Array = []
+		for a_id in arriving:
+			var a: LanePath = paths[a_id]
+			if a.edge_id == edge_id:
+				continue  # U-turns: dead ends only, below
+			if a.direction_at(a.length).dot(dir_out) >= THROUGH_COS:
+				through.append(a)
+			else:
+				for b in outs:
+					_add_connector(a, b, centre, nid, graph)
+				made[a.id] = int(made.get(a.id, 0)) + outs.size()
+		var fed := {}
+		for a in through:
+			var end: Vector3 = (a as LanePath).points[(a as LanePath).points.size() - 1]
+			var best: LanePath = _nearest_start(outs, end)
+			_add_connector(a, best, centre, nid, graph)
+			fed[best.id] = true
+			made[a.id] = int(made.get(a.id, 0)) + 1
+		if not through.is_empty():
+			for b in outs:
+				if not fed.has(b.id):
+					var nearest: LanePath = _nearest_end(through, (b as LanePath).points[0])
+					_add_connector(nearest, b, centre, nid, graph)
 	for a_id in arriving:
 		var a: LanePath = paths[a_id]
-		var made := 0
-		for b_id in leaving:
-			var b: LanePath = paths[b_id]
-			if b.edge_id == a.edge_id:
-				continue  # U-turn onto the same road is handled below for dead ends only
-			_add_connector(a, b, centre, nid, graph)
-			made += 1
-		if made == 0:
+		if int(made.get(a.id, 0)) == 0:
 			# Dead end (or only way out is back the same road): U-turn to a lane leaving along our own edge.
 			for b_id in leaving:
 				var b: LanePath = paths[b_id]
 				if b.edge_id == a.edge_id:
 					_add_connector(a, b, centre, nid, graph)
+
+
+## The lane in `lanes` whose first point is nearest `p`.
+static func _nearest_start(lanes: Array, p: Vector3) -> LanePath:
+	var best: LanePath = lanes[0]
+	for l: LanePath in lanes:
+		if l.points[0].distance_to(p) < best.points[0].distance_to(p):
+			best = l
+	return best
+
+
+## The lane in `lanes` whose last point is nearest `p`.
+static func _nearest_end(lanes: Array, p: Vector3) -> LanePath:
+	var best: LanePath = lanes[0]
+	for l: LanePath in lanes:
+		if l.points[l.points.size() - 1].distance_to(p) < best.points[best.points.size() - 1].distance_to(p):
+			best = l
+	return best
 
 
 func _add_connector(a: LanePath, b: LanePath, centre: Vector3, nid: String, graph: RoadGraph) -> void:

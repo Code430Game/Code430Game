@@ -19,6 +19,7 @@ Two presets exist from day one, defined as data in `game/core/settings/presets.j
 | Soft shadow quality | low | high | RenderingServer |
 | FPS cap | none | none | Engine |
 | Vehicle detail distance (`vehicle_lod0_m`) | 60 m | 110 m | traffic: LOD0 bodies within this distance of a player, LOD1 beyond |
+| Traffic cars with a real headlight at night (`traffic_headlights`) | 6 | 16 | traffic: the nearest cars; every car near a player also lights a soft patch of road (one MultiMesh) |
 | Parked cars per chunk (`parked_cars_per_chunk`) | 120 | 300 | parked cars: the stalls farthest from any player stay empty above this |
 | Parked car bodies (`parked_car_bodies`) | 8 | 16 | parked cars: how many of the nearest get physics bodies |
 | Surface detail (`surface_detail_px`, `surface_detail_macro`) | 512 px, one sample | 1024 px, plus a large-scale sample against tiling | ground materials (asphalt, concrete, paint) via `SurfaceDetail` |

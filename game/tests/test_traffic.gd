@@ -490,3 +490,65 @@ func test_nothing_spawns_on_a_parking_aisle() -> void:
 	for i in range(200):
 		m._spawn_one()
 	assert_int(m.agents.size()).is_equal(0)
+
+
+func test_the_bigger_road_has_priority_at_an_uncontrolled_junction() -> void:
+	# #106: highway traffic stopped at its own on-ramp waiting for ramp cars.
+	assert_int(TrafficManager.road_rank("motorway")).is_greater(TrafficManager.road_rank("motorway_link"))
+	assert_int(TrafficManager.road_rank("primary")).is_greater(TrafficManager.road_rank("residential"))
+	assert_int(TrafficManager.road_rank("residential")).is_greater(TrafficManager.road_rank("service"))
+
+
+func test_a_motorway_car_does_not_wait_for_its_on_ramp_but_the_ramp_waits_for_it() -> void:
+	# #106: the merge node, tagged a plain junction, held highway cars for ramp cars.
+	var g := _graph([
+		{"id": "w1.0", "pl": [[-100, 0, 0], [0, 0, 0]], "class": "motorway", "lf": 2, "lb": 0, "w": 7.0},
+		{"id": "w2.0", "pl": [[0, 0, 0], [100, 0, 0]], "class": "motorway", "lf": 2, "lb": 0, "w": 7.0},
+		{"id": "w3.0", "pl": [[-100, 0, 30], [0, 0, 0]], "class": "motorway_link", "lf": 1, "lb": 0, "w": 3.5},
+	])
+	var m := _manager(g)
+	var node := ""
+	var motor_lane := -1
+	var ramp_lane := -1
+	for p in m.lanes.paths:
+		if p.is_connector:
+			continue
+		if p.edge_id == "w1.0" and motor_lane < 0:
+			motor_lane = p.id
+		if p.edge_id == "w3.0":
+			ramp_lane = p.id
+	for nid in g.nodes:
+		if (g.nodes[nid].position as Vector3).length() < 0.1:
+			node = nid
+	var motor := TrafficAgent.new()
+	motor.path_id = motor_lane
+	var ramp := TrafficAgent.new()
+	ramp.path_id = ramp_lane
+	m._claim_junction(ramp, node)
+	assert_bool(m._junction_busy(node, motor)).override_failure_message("the motorway car waited for the ramp").is_false()
+	m._leave_junction(ramp)
+	m._claim_junction(motor, node)
+	assert_bool(m._junction_busy(node, ramp)).override_failure_message("the ramp car did not wait for the motorway").is_true()
+
+
+
+func test_other_cars_light_the_road_at_night_and_the_nearest_carry_a_light() -> void:
+	var g := _graph([{"id": "w1.0", "pl": [[-200, 0, 0], [200, 0, 0]], "lf": 1, "lb": 0, "w": 3.5}])
+	var m := _manager(g)
+	m.anchors = PackedVector3Array([Vector3.ZERO])
+	for x in [-60.0, -20.0, 30.0, 300.0]:  # the last one is beyond the pool reach
+		var a := TrafficAgent.new()
+		a.transform = Transform3D(Basis.looking_at(Vector3.RIGHT, Vector3.UP), Vector3(x, 0, 0))
+		m.agents.append(a)
+	m.night = 0.0
+	m._render()
+	assert_int(m._pool_mmi.multimesh.visible_instance_count).is_equal(0)  # by day: nothing
+	assert_bool(m._beams.any(func(l: SpotLight3D) -> bool: return l.visible)).is_false()
+	m.night = 1.0
+	m._render()
+	assert_int(m._pool_mmi.multimesh.visible_instance_count).is_equal(3)
+	var lit := m._beams.filter(func(l: SpotLight3D) -> bool: return l.visible)
+	assert_int(lit.size()).is_equal(mini(3, m.headlight_lights))
+	# The pool sits ahead of its car (the car faces +x).
+	var t := m._pool_mmi.multimesh.get_instance_transform(0)
+	assert_float(t.origin.x).is_greater(-60.0 + 2.0)
