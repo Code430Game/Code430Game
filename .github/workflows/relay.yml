@@ -40,7 +40,7 @@ jobs:
   test:
     name: Relay tests
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
     defaults:
       run:
         working-directory: tools
@@ -48,9 +48,6 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6
-        with:
-          version: ${{ env.UV_VERSION }}
       - run: uv sync --frozen
       - run: uv run ruff check report_relay && uv run ruff format --check report_relay
       - run: uv run pytest -q tests/test_report_relay.py
@@ -60,7 +57,7 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
     environment:
       name: relay-production
       url: ${{ env.RELAY_URL }}/health
@@ -74,9 +71,6 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: "22"  # wrangler needs Node 22
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6
-        with:
-          version: ${{ env.UV_VERSION }}
       - name: Token present
         id: token
         env:
@@ -109,7 +103,7 @@ jobs:
     name: Report labels
     needs: deploy
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
     permissions:
       contents: read
       issues: write  # labels are created through the issues API

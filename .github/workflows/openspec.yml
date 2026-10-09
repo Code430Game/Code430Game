@@ -27,11 +27,9 @@ jobs:
   validate:
     name: OpenSpec (validate --strict --all)
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-      - run: npm install -g "@fission-ai/openspec@$(cat .openspec-version)"
-      - run: openspec validate --strict --all --no-interactive
+          persist-credentials: false
+      - run: openspec validate --strict --all --no-interactive  # the Mac's installed OpenSpec
