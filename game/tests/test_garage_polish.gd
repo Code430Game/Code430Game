@@ -228,3 +228,31 @@ static func _near_other_hole(holes: Array, p: Vector2, r: GarageBuilder.Ramp) ->
 		if TerrainBuilder._in_hole([grown], Vector3(p.x, 0.0, p.y)):
 			return true
 	return false
+
+
+## #89, #90: a public garage's ramp mouth has a header with a P sign, and its walls carry lights;
+## a private garage's ramp gets the lights but keeps its closed door instead of a sign.
+func test_public_garage_entrances_are_signed_and_ramps_are_lit() -> void:
+	var g := GarageBuilder.Garage.new()
+	g.tier = "garage"
+	var r := GarageBuilder.Ramp.new()
+	r.start = Vector3(0, 10, 0)
+	r.end = Vector3(0, 6, 20)
+	r.dir = Vector2(0, 1)
+	g.ramps.append(r)
+	var built := GarageBuilder.build([g] as Array[GarageBuilder.Garage])
+	var glow := 0
+	var sign_glow := 0
+	for t: RoadMeshBuilder.ChunkTriangles in (built["lights"] as Dictionary).values():
+		var verts: PackedVector3Array = t.to_mesh().surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		glow += verts.size()
+		for v in verts:
+			if v.y > 10.0 + GarageBuilder.CLEARANCE_M:
+				sign_glow += 1  # the P, above the header
+	assert_int(sign_glow).is_greater(0)
+	assert_int(glow - sign_glow).is_greater(0)  # wall lights down the ramp
+	g.tier = "door"
+	built = GarageBuilder.build([g] as Array[GarageBuilder.Garage])
+	for t: RoadMeshBuilder.ChunkTriangles in (built["lights"] as Dictionary).values():
+		for v in t.to_mesh().surface_get_arrays(0)[Mesh.ARRAY_VERTEX]:
+			assert_float(v.y).is_less(10.0 + GarageBuilder.CLEARANCE_M)  # no sign on a private ramp

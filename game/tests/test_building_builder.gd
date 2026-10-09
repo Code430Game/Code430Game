@@ -118,3 +118,24 @@ func test_tagged_colour_and_material_win() -> void:
 	assert_int(BuildingBuilder.treatment_of("house", 7.0, "glass", 0.9)).is_equal(BuildingBuilder.TREATMENT_CURTAIN)
 	assert_int(BuildingBuilder.treatment_of("house", 7.0, "", 0.2)).is_equal(BuildingBuilder.TREATMENT_STUCCO)
 	assert_int(BuildingBuilder.treatment_of("house", 7.0, "", 0.8)).is_equal(BuildingBuilder.TREATMENT_PUNCHED)
+
+
+## #80: OSM `building=roof` is a canopy. The hospital drop-off's was built as a solid block from
+## the ground and boxed in the respawn under it; now nothing stands below the slab except a
+## thin post at each corner.
+func test_a_roof_building_is_a_canopy_open_underneath() -> void:
+	var b := _box("w1.0", 0.0, 0.0, 6.0, 3.2, 10.0)
+	b.kind = "roof"
+	var built := BuildingBuilder.build([b] as Array[BuildingBuilder.Building])
+	var tris: RoadMeshBuilder.ChunkTriangles = (built["lod0"] as Dictionary).values()[0]
+	var mesh := tris.to_mesh()
+	var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var slab_bottom := 10.0 + 3.2 - BuildingBuilder.CANOPY_THICK_M
+	var low := 0
+	for v in verts:
+		if v.y < slab_bottom - 0.01:
+			low += 1
+			# Below the slab only the corner posts: within a post's width of a corner.
+			assert_float(minf(absf(absf(v.x) - 6.0), absf(absf(v.z) - 6.0))).is_less(BuildingBuilder.CANOPY_POST_M * 2.0)
+			assert_bool(absf(v.x) > 5.0 and absf(v.z) > 5.0).override_failure_message("something below the canopy away from its corners at %s" % v).is_true()
+	assert_int(low).is_greater(0)  # the posts are there
