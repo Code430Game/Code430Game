@@ -1,7 +1,7 @@
 # proving-ground Specification
 
 ## Purpose
-TBD - created by archiving change add-proving-ground. Update Purpose after archive.
+Double Cross, a small fictional district generated from code into its own map pack, byte-identical on every run. It has one of every road and place feature the game handles, plus a figure-eight loop with a lap timer, so a change can be proved and benchmarked in minutes, away from the drift of live OpenStreetMap data.
 ## Requirements
 ### Requirement: Generated Test District
 The repository SHALL contain a generator that produces a small fictional district as OpenStreetMap-shaped data, and the normal import pipeline with a synthetic elevation source SHALL turn it into the map pack `code430.proving-ground`, byte-identical on every run, with the generated pack committed and CI failing when a regeneration differs.

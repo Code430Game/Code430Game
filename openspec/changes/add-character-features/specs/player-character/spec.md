@@ -23,6 +23,10 @@ The player character's look SHALL be described by a profile (body type a or b, s
 - **WHEN** a guest with a saved character joins a host
 - **THEN** the host sees the guest's body built from the guest's profile, walking when the guest walks
 
+#### Scenario: Walking
+- **WHEN** the player moves on foot
+- **THEN** the body's legs and arms swing in step with the distance covered and rest when the player stops
+
 ### Requirement: Character Creator
 The creator SHALL present the profile's rows on pages switched with the shoulder buttons, SHALL name the body type through a strings table with per-mode variants rather than a fixed label, SHALL offer a print picker showing the active mode's variant of each print, and SHALL work with a controller alone.
 
@@ -37,3 +41,11 @@ The creator SHALL present the profile's rows on pages switched with the shoulder
 #### Scenario: Pages
 - **WHEN** the player presses the right shoulder button on the Body page
 - **THEN** the Face page shows with its rows and the preview stays
+
+#### Scenario: Tweak and keep
+- **WHEN** the player changes the top colour and presses Done
+- **THEN** the on-foot body shows the new colour, and the next start loads the same body
+
+#### Scenario: Presets
+- **WHEN** the player saves a preset, randomises, then loads that preset
+- **THEN** the body matches the saved preset
