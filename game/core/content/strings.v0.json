@@ -1,0 +1,9 @@
+{
+  "_comment": "UI strings that differ by tone (add-character-features). Each id has variants per mode id plus a fallback, read with ContentMode.text(id). Nothing in code names a sex: the clean mode calls the two bodies A and B.",
+  "schema_version": 0,
+  "strings": {
+    "body.label": {"variants": {"fallback": {"text": "Body"}}},
+    "body.a": {"variants": {"clean": {"text": "A"}, "fallback": {"text": "Man"}}},
+    "body.b": {"variants": {"clean": {"text": "B"}, "fallback": {"text": "Woman"}}}
+  }
+}

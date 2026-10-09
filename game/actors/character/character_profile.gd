@@ -3,7 +3,11 @@ extends RefCounted
 ## A player's look as a plain dictionary so it travels over the network and into JSON as is.
 ## Colour fields are palette indices; height and build are scales about 1.0.
 
-const FIELDS: PackedStringArray = ["skin", "hair", "hair_colour", "top", "bottom", "shoes", "hat", "height", "build", "beard", "glasses", "jacket", "jacket_colour"]
+const FIELDS: PackedStringArray = ["skin", "hair", "hair_colour", "top", "bottom", "shoes", "hat", "height", "build", "beard", "glasses", "jacket", "jacket_colour", "body"]
+## Body types (CharacterMesh.BODIES): 0 is body A (the original proportions), 1 is body B. Their
+## names on screen come from strings.v0.json per tone (ContentMode.text), never from code.
+const BODY_COUNT := 2
+const BODY_B_HEIGHT_STEPS := 2  # body B is drawn this many height steps shorter by default
 
 const SKIN: Array[Color] = [
 	Color(0.96, 0.82, 0.70), Color(0.88, 0.70, 0.55), Color(0.78, 0.58, 0.42),
@@ -123,7 +127,7 @@ static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 	if rng == null:
 		rng = RandomNumberGenerator.new()
 		rng.randomize()
-	return normalise({
+	var p := normalise({
 		"skin": rng.randi_range(0, _count("skin") - 1),
 		"hair": rng.randi_range(0, HAIR_NAMES.size() - 1),
 		"hair_colour": rng.randi_range(0, _count("hair_colour") - 1),
@@ -138,6 +142,26 @@ static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 		"height": HEIGHT_MIN + HEIGHT_STEP * rng.randi_range(0, _steps("height")),
 		"build": BUILD_MIN + BUILD_STEP * rng.randi_range(0, _steps("build")),
 	})
+	# Drawn last, so every field above keeps the value it always had for a given seed.
+	p["body"] = 0 if rng.randf() < body_a_share() else 1
+	if p["body"] == 1:
+		p["height"] = snappedf(clampf(float(p["height"]) - HEIGHT_STEP * BODY_B_HEIGHT_STEPS, HEIGHT_MIN, HEIGHT_MAX), HEIGHT_STEP)
+	return p
+
+
+const POPULATION_PATH := "res://core/content/population.v0.json"
+static var _population: Dictionary = {}
+
+
+## The share of adults with body A (population.v0.json), 0.5 when the file says nothing.
+static func body_a_share() -> float:
+	if _population.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(POPULATION_PATH))
+		_population = parsed if parsed is Dictionary else {"body": {}}
+	var split: Dictionary = _population.get("body", {})
+	var a := float(split.get("a", 0.5))
+	var b := float(split.get("b", 0.5))
+	return a / maxf(a + b, 0.0001)
 
 
 ## Fills missing fields and clamps every value into range; unknown keys are dropped.
@@ -193,6 +217,8 @@ static func label(p: Dictionary, key: String) -> String:
 			return HAT_NAMES[clampi(int(v), 0, HAT_NAMES.size() - 1)]
 		"height":
 			return "%d cm" % roundi(180.0 * float(v))
+		"body":
+			return ContentMode.text("body.a" if int(v) == 0 else "body.b")
 		"build":
 			return "%d%%" % roundi(100.0 * float(v))
 	return str(v)
@@ -237,6 +263,8 @@ static func _count(key: String) -> int:
 			return palette("shoes").size()
 		"hat":
 			return HAT_NAMES.size()
+		"body":
+			return BODY_COUNT
 	return 1
 
 
