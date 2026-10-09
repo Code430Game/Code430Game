@@ -5,7 +5,7 @@ Every change below is ready to pick up: an OpenSpec change in `openspec/changes/
 `CONTRIBUTING.md` first, then the change's folder. Claim a change before starting
 (`CONTRIBUTING.md`, Claiming work).
 
-Updated 2026-10-07.
+Updated 2026-10-09.
 
 ## Ready to build
 
@@ -71,6 +71,7 @@ maintainer:
 - `add-hostile-gang` 4.2
 - `add-pack-loader` 4.2 (Deck benchmark) and 4.3
 - `add-weather` 4.1 (Deck benchmark, `--extra "--weather=rain"`) and 4.2
+- `update-traffic-headlights` 2.1 (Deck benchmark, `--extra "--time=22"`) and 2.2
 
 `add-coop-multiplayer` still needs:
 - the tone sent on join (1.3);
