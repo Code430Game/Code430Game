@@ -11,6 +11,14 @@ Pedestrians SHALL swing their arms and legs with the same walk cycle as the play
 - **WHEN** two pedestrians share a body pool
 - **THEN** they can still differ in body type, skin and clothing tints and in the print on their top
 
+#### Scenario: Waiting at a kerb
+- **WHEN** a pedestrian waits for a crossing or for a player ahead
+- **THEN** its limbs settle to the standing pose within half a second
+
+#### Scenario: Crowd cost
+- **WHEN** 120 pedestrians walk near the player
+- **THEN** each body pool is still one MultiMesh draw and no per-person skeleton is created
+
 ## ADDED Requirements
 
 ### Requirement: Body Levels Of Detail
