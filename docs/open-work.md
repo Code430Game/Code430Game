@@ -5,7 +5,7 @@ Every change below is ready to pick up: an OpenSpec change in `openspec/changes/
 `CONTRIBUTING.md` first, then the change's folder. Claim a change before starting
 (`CONTRIBUTING.md`, Claiming work).
 
-Updated 2026-10-09.
+Updated 2026-10-10.
 
 ## Ready to build
 
@@ -23,6 +23,7 @@ Large:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
+| `adopt-art-kit` | Quaternius CC0 kit for vehicles, people, trees and props, and building facades, in four stages | nothing (licence receipts first) | third-party assets, vehicle catalogue, character pipeline and walk shader, vegetation, building builder |
 | `update-houses-and-yards` | house types with doors and porches, front lawns, fenced backyards | nothing | importer buildings and a new yards stage, building builder, dressing |
 | `update-commercial-buildings` | office facades with a base and a top, business signs (generic names), posters by tone | nothing | importer businesses, building builder and shader, dressing, content modes |
 | `add-landmarks` | custom landmark models replacing generated buildings; Parliament first | nothing | pack format, a landmark builder, building builder, vegetation |

@@ -14,8 +14,8 @@
 - [ ] 3.2 Builder UV2 regions on top, hood, cap and bag; shader atlas sample and tint LUT from the instance colour; `PedestrianManager` writes print index and tints; the gang's `look.print`; the player's and remote players' rigs pick their print from the profile; tests on UV2 regions and on the shader's pick per mode (bake and read back)
 
 ## 4. Garments, parts, LODs, creator
-- [ ] 4.1 Garments, hair styles, hats, eyewear, accessories, patterns, face and build sliders; new fields and names; tests on the heaviest profile
-- [ ] 4.2 LOD1 and LOD2 builders with triangle-budget tests; `character_rig.gd` three instances with ranges; pools per LOD in the manager; tests that ranges match
+- [ ] 4.1 (superseded by `adopt-art-kit` stage 2: garments come from the kit) Garments, hair styles, hats, eyewear, accessories, patterns, face and build sliders; new fields and names; tests on the heaviest profile
+- [ ] 4.2 (superseded by `adopt-art-kit` stage 2: LODs of kit parts) LOD1 and LOD2 builders with triangle-budget tests; `character_rig.gd` three instances with ranges; pools per LOD in the manager; tests that ranges match
 - [ ] 4.3 Creator pages on the shoulder buttons, the print picker, preview LOD readout; `docs/controls.md`
 - [ ] 4.4 Mac screenshots: a crowd on Rideau in each mode (children only in clean, prints differing), the same crowd from 120 m, the creator's Body and Clothes pages in clean and gritty
 
