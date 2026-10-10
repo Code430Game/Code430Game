@@ -17,6 +17,11 @@ Exceptions
   contributors. https://www.openstreetmap.org/copyright
 - Elevation data from Natural Resources Canada: Open Government Licence –
   Canada. https://open.canada.ca/en/open-government-licence-canada
+- Third-party art keeps its own license, recorded beside it (scripts/check-third-party.sh
+  holds every pack to a receipt):
+  - art/quaternius/ and the vehicles built from it in game/assets/vehicles/:
+    models by Quaternius (https://quaternius.com), CC0 1.0 Universal (public domain
+    dedication). Credit given with thanks though not required.
 - Third-party addons keep their own licenses (for example
   game/addons/gdUnit4, MIT).
 - Community packs choose their own license, declared in their pack.json.

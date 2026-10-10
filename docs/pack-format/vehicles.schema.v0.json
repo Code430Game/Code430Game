@@ -69,6 +69,11 @@
         "dims": {
           "$ref": "#/$defs/dims"
         },
+        "model": {
+          "type": "string",
+          "pattern": "^res://assets/vehicles/[a-z0-9_]+\\.glb$",
+          "description": "A kit model built by tools/vehicle_kit, drawn at LOD0 instead of the parametric body (LOD1 stays parametric). The dims should be the ones the tool measured, so the wheels and collision box match. Packs can name the built-in models only, for now."
+        },
         "mass_kg": {
           "type": "number",
           "minimum": 300,

@@ -1,9 +1,10 @@
 ## 0. Licence and pipeline
-- [ ] 0.1 `game/assets/third_party/quaternius/` with per-pack `License.txt`, `SOURCE.md` and file list; `scripts/check-third-party.sh` (CC0 receipt present, size budget) in local and GitHub CI; `LICENSE-ASSETS` third-party section; tests on the check
+- [x] 0.1 `art/quaternius/<pack>/` (unmodified sources) with `SOURCE.md` (licence, links, date, sha256 list) and the pack's `License.txt` or a receipt section; built models in `game/assets/` beside a `SOURCE.md`; `scripts/check-third-party.sh` (`tools/third_party_check.py`: CC0 receipt, listed hashes, 120 MB budget) in `scripts/ci-local.sh`; `LICENSE-ASSETS` third-party section; tests on the check. The Cars Pack's own `License.txt` is still to add: its Drive folder was over quota on 2026-10-10, so the `.glb` files came from Poly Pizza (CC0, by Quaternius) and the receipt links the pack, itch.io and Poly Pizza pages
 
 ## 1. Vehicles
-- [ ] 1.1 Import the Cars and Public Transport packs (glTF, curated); `model` in the vehicle catalogue; `kit_vehicle.gd` (wheels and lights from named nodes); traffic MultiMeshes per model and LOD; liveries as overrides; tests
-- [ ] 1.2 Screenshots before and after (lineup and street); Deck benchmark against main
+- [x] 1.1 Cars Pack imported; `tools/vehicle_kit` (Blender script from `recipes.json`: light wheels, `Paint` material, scale, and the ambulance, van, box truck and pickup derived from the kit SUV) with `scripts/build-vehicles.sh` and `apply_dims.py`; `model` in the catalogue and schema; `kit_vehicle.gd` rebuilding a model into VehicleMesh's four surfaces at LOD0 (traffic, parked cars, the player's car); tests. The bus waits for the Public Transport pack (Drive quota); the player's wheel nodes keep the cylinder wheels
+- [ ] 1.2 Screenshots before and after (lineup and street): done 2026-10-10 on the Mac (frame avg 19.1 vs 18.8 ms, draw calls 1,309 both); Deck benchmark against main pending
+- [ ] 1.3 Round 2 (the human): nudge the derived vehicles in `recipes.json` (taller cab, box from the skirt); the Public Transport bus; kit wheels on the player's wheel nodes
 
 ## 2. People
 - [ ] 2.1 Import the modular men and women (glTF parts, skeleton, animations); `kit_character.gd` assembling parts per profile; the player and actors on kit animations; tests

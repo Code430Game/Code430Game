@@ -1,7 +1,8 @@
 extends Node3D
 ## Every catalogue vehicle side by side: LOD0 in front, LOD1 behind, each in a palette colour,
 ## for screenshots. `--night` darkens the sky and lights the lamps; `--screenshot=path` saves
-## a frame and quits; `--angle=front|side|rear` picks the camera.
+## a frame and quits; `--angle=front|side|rear` picks the camera; `--at=<id>` centres it on
+## that vehicle.
 ##
 ## Run: Godot --path game res://scenes/vehicle_lineup.tscn -- --screenshot=/tmp/lineup.png
 
@@ -11,6 +12,7 @@ var _screenshot := ""
 var _night := false
 var _angle := "front"
 var _frames := 0
+var _at := ""
 
 
 func _ready() -> void:
@@ -21,6 +23,8 @@ func _ready() -> void:
 			_night = true
 		elif arg.begins_with("--angle="):
 			_angle = arg.get_slice("=", 1)
+		elif arg.begins_with("--at="):
+			_at = arg.get_slice("=", 1)
 	var env := WorldEnvironment.new()
 	env.environment = Environment.new()
 	env.environment.background_mode = Environment.BG_COLOR
@@ -48,6 +52,7 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	var x0 := -SPACING_M * (ids.size() - 1) * 0.5
+	var focus_x := 0.0
 	for i in range(ids.size()):
 		var id := ids[i]
 		var e: Dictionary = VehicleCatalogue.entry(id)
@@ -59,6 +64,8 @@ func _ready() -> void:
 			mi.set_surface_override_material(0, VehicleMesh.body_material(colour))
 			mi.position = Vector3(x0 + i * SPACING_M + (spacing - SPACING_M) * 0.5, 0, 0.0 if lod == VehicleMesh.Lod.LOD0 else 14.0)
 			add_child(mi)
+		if id == _at:
+			focus_x = x0 + i * SPACING_M
 	var cam := Camera3D.new()
 	add_child(cam)
 	match _angle:
@@ -71,6 +78,7 @@ func _ready() -> void:
 		_:
 			cam.position = Vector3(4, 5.0, -17)
 			cam.look_at(Vector3(0, 1.0, 4))
+	cam.position.x += focus_x  # after look_at: slides the view sideways, same angle
 	cam.fov = 55.0
 	cam.current = true
 

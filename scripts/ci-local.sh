@@ -22,6 +22,9 @@ esac
 step "Python tools: ruff + pytest"
 ( cd "$ROOT/tools" && uv sync --frozen --quiet && uv run ruff check . && uv run ruff format --check . && uv run pytest -q )
 
+step "Third-party art (receipts, budget)"
+"$ROOT/scripts/check-third-party.sh"
+
 step "Pack manifests"
 ( cd "$ROOT/tools" && uv run python -m pack_tools ../packs )
 
