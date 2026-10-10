@@ -3,7 +3,8 @@
 
 ## 1. Vehicles
 - [x] 1.1 Cars Pack imported; `tools/vehicle_kit` (Blender script from `recipes.json`: light wheels, `Paint` material, scale, and the ambulance, van, box truck and pickup derived from the kit SUV) with `scripts/build-vehicles.sh` and `apply_dims.py`; `model` in the catalogue and schema; `kit_vehicle.gd` rebuilding a model into VehicleMesh's four surfaces at LOD0 (traffic, parked cars, the player's car); tests. The bus waits for the Public Transport pack (Drive quota); the player's wheel nodes keep the cylinder wheels
-- [ ] 1.2 Screenshots before and after (lineup and street): done 2026-10-10 on the Mac (frame avg 19.1 vs 18.8 ms, draw calls 1,309 both); Deck benchmark against main pending
+- [x] 1.2 Screenshots before and after (lineup and street): done 2026-10-10 on the Mac (frame avg 19.1 vs 18.8 ms, draw calls 1,309 both); Deck benchmark against main below. One branch run had a single 2 s physics hitch that three more runs of the same build did not repeat (render cpu 1.76 / gpu 12.21 ms, physics mean 13.06 ms, max 25 ms, against main's 1.73 / 12.05 / 12.28)
+  - 2026-10-10 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck`): main c2500cb: render cpu 1.73 / gpu 12.05 ms measured, physics mean 12.28 ms (max 27.92), frame avg 13.62 / p99 23.13 ms (paced), first playable 869 ms; change/adopt-art-kit-vehicles 1cfa903: render cpu 1.88 / gpu 12.57 ms measured, physics mean 22.71 ms (max 1017.93), frame avg 14.24 / p99 24.97 ms (paced), first playable 897 ms.
 - [ ] 1.3 Round 2 (the human): nudge the derived vehicles in `recipes.json` (taller cab, box from the skirt); the Public Transport bus; kit wheels on the player's wheel nodes
 
 ## 2. People
