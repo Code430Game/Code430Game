@@ -1,0 +1,50 @@
+{
+ "about": "One recipe per catalogue id. Lengths in metres, in the source model's own frame before scaling (front is -y, up is +z, the SUV is 4.2 m long). Edit a number, run scripts/build-vehicles.sh, look at build/vehicle_kit/lineup.png.",
+ "vehicles": [
+  {"id": "sedan", "source": "NormalCar1.glb", "paint": ["Blue"], "length_m": 4.6},
+  {"id": "hatchback", "source": "NormalCar2.glb", "paint": ["LightBlue"], "length_m": 4.0},
+  {"id": "coupe", "source": "SportsCar.glb", "paint": ["Orange"], "accent": ["DarkOrange"], "length_m": 4.5},
+  {"id": "suv", "source": "SUV.glb", "paint": ["White"], "length_m": 4.8},
+  {"id": "taxi", "source": "Taxi.glb", "paint": ["Yellow"], "length_m": 4.6},
+  {"id": "police", "source": "Cop.glb", "paint": ["White"], "length_m": 4.7},
+  {
+   "id": "ambulance", "source": "SUV.glb", "paint": ["White"], "length_m": 6.0,
+   "derive": "box",
+   "cab": {"cut_y": 0.22, "scale_y": 1.0, "scale_z": 1.0, "drop_roof_rails": true},
+   "box": {"y0": 0.12, "y1": 3.45, "width": 2.12, "z0": 0.30, "z1": 2.22, "bevel": 0.07,
+           "skirt_h": 0.16, "stripe": [1.02, 1.20]},
+   "rear_axle_y": 2.55,
+   "windows": {"side": [0.55, 1.15, 1.40, 1.88], "rear": true},
+   "curb_door": [1.35, 2.15],
+   "beacons": "ambulance"
+  },
+  {
+   "id": "van", "source": "SUV.glb", "paint": ["White"], "length_m": 5.3,
+   "derive": "box",
+   "cab": {"cut_y": 0.22, "scale_y": 1.0, "scale_z": 1.0, "drop_roof_rails": true},
+   "box": {"y0": 0.16, "y1": 2.95, "width": 2.10, "z0": 0.30, "z1": 2.02, "bevel": 0.12,
+           "skirt_h": 0.16},
+   "rear_axle_y": 2.15,
+   "windows": {"side": [0.45, 1.25, 1.30, 1.75], "rear": true},
+   "curb_door": [0.40, 1.40]
+  },
+  {
+   "id": "box_truck", "source": "SUV.glb", "paint": ["White"], "length_m": 7.5,
+   "derive": "box",
+   "cab": {"cut_y": 0.22, "scale_y": 1.0, "scale_z": 1.08, "drop_roof_rails": true},
+   "box": {"y0": 0.32, "y1": 4.30, "width": 2.30, "z0": 0.62, "z1": 2.75, "bevel": 0.04,
+           "skirt_h": 0.10, "box_paint": "Cargo"},
+   "rear_axle_y": 3.25,
+   "windows": {"rear": false},
+   "roller_door": true,
+   "chassis": true
+  },
+  {
+   "id": "pickup", "source": "SUV.glb", "paint": ["White"], "length_m": 5.6,
+   "derive": "pickup",
+   "cab": {"cut_y": 1.02, "scale_y": 1.0, "scale_z": 1.0, "drop_roof_rails": true},
+   "bed": {"y1": 3.05, "floor_z": 0.72, "top_z": 1.12, "wall": 0.07, "skirt_z": 0.30},
+   "rear_axle_y": 2.25
+  }
+ ]
+}

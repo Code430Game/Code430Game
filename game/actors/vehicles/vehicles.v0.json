@@ -8,13 +8,13 @@
    "body_class": "sedan",
    "dims": {
     "length_m": 4.6,
-    "width_m": 1.8,
-    "height_m": 1.45,
-    "wheelbase_m": 2.7,
-    "track_m": 1.56,
-    "wheel_radius_m": 0.33,
-    "front_overhang_m": 0.9,
-    "cabin_start_m": 1.75,
+    "width_m": 1.845,
+    "height_m": 1.282,
+    "wheelbase_m": 2.658,
+    "track_m": 1.502,
+    "wheel_radius_m": 0.285,
+    "front_overhang_m": 1.0,
+    "cabin_start_m": 1.458,
     "roof_length_m": 1.3
    },
    "mass_kg": 1400,
@@ -68,7 +68,8 @@
    ],
    "spawn": {
     "weight": 3.0
-   }
+   },
+   "model": "res://assets/vehicles/sedan.glb"
   },
   {
    "id": "hatchback",
@@ -76,13 +77,13 @@
    "body_class": "hatchback",
    "dims": {
     "length_m": 4.0,
-    "width_m": 1.75,
-    "height_m": 1.48,
-    "wheelbase_m": 2.5,
-    "track_m": 1.52,
-    "wheel_radius_m": 0.31,
-    "front_overhang_m": 0.8,
-    "cabin_start_m": 1.45,
+    "width_m": 1.838,
+    "height_m": 1.385,
+    "wheelbase_m": 2.412,
+    "track_m": 1.591,
+    "wheel_radius_m": 0.299,
+    "front_overhang_m": 0.749,
+    "cabin_start_m": 1.176,
     "roof_length_m": 1.55
    },
    "mass_kg": 1150,
@@ -141,7 +142,8 @@
      "arterial": 1.0,
      "local": 1.4
     }
-   }
+   },
+   "model": "res://assets/vehicles/hatchback.glb"
   },
   {
    "id": "coupe",
@@ -149,13 +151,13 @@
    "body_class": "coupe",
    "dims": {
     "length_m": 4.5,
-    "width_m": 1.82,
-    "height_m": 1.3,
-    "wheelbase_m": 2.6,
-    "track_m": 1.58,
-    "wheel_radius_m": 0.33,
-    "front_overhang_m": 0.95,
-    "cabin_start_m": 1.95,
+    "width_m": 1.894,
+    "height_m": 1.31,
+    "wheelbase_m": 2.77,
+    "track_m": 1.595,
+    "wheel_radius_m": 0.295,
+    "front_overhang_m": 0.903,
+    "cabin_start_m": 1.447,
     "roof_length_m": 0.95
    },
    "mass_kg": 1450,
@@ -209,7 +211,8 @@
    ],
    "spawn": {
     "weight": 0.6
-   }
+   },
+   "model": "res://assets/vehicles/coupe.glb"
   },
   {
    "id": "suv",
@@ -217,13 +220,13 @@
    "body_class": "suv",
    "dims": {
     "length_m": 4.8,
-    "width_m": 1.95,
-    "height_m": 1.75,
-    "wheelbase_m": 2.85,
-    "track_m": 1.66,
-    "wheel_radius_m": 0.38,
-    "front_overhang_m": 0.9,
-    "cabin_start_m": 1.6,
+    "width_m": 2.234,
+    "height_m": 1.742,
+    "wheelbase_m": 2.928,
+    "track_m": 1.781,
+    "wheel_radius_m": 0.373,
+    "front_overhang_m": 0.898,
+    "cabin_start_m": 1.43,
     "roof_length_m": 2.0
    },
    "mass_kg": 2000,
@@ -277,7 +280,8 @@
    ],
    "spawn": {
     "weight": 2.0
-   }
+   },
+   "model": "res://assets/vehicles/suv.glb"
   },
   {
    "id": "pickup",
@@ -285,13 +289,13 @@
    "body_class": "pickup",
    "dims": {
     "length_m": 5.6,
-    "width_m": 2.0,
-    "height_m": 1.85,
-    "wheelbase_m": 3.5,
-    "track_m": 1.7,
-    "wheel_radius_m": 0.39,
-    "front_overhang_m": 0.95,
-    "cabin_start_m": 1.8,
+    "width_m": 2.08,
+    "height_m": 1.598,
+    "wheelbase_m": 3.787,
+    "track_m": 1.658,
+    "wheel_radius_m": 0.347,
+    "front_overhang_m": 0.836,
+    "cabin_start_m": 1.332,
     "roof_length_m": 1.3,
     "bed_length_m": 1.9
    },
@@ -351,7 +355,8 @@
      "arterial": 1.0,
      "local": 0.8
     }
-   }
+   },
+   "model": "res://assets/vehicles/pickup.glb"
   },
   {
    "id": "van",
@@ -359,13 +364,13 @@
    "body_class": "van",
    "dims": {
     "length_m": 5.3,
-    "width_m": 2.0,
-    "height_m": 2.3,
-    "wheelbase_m": 3.3,
-    "track_m": 1.72,
-    "wheel_radius_m": 0.35,
-    "front_overhang_m": 0.85,
-    "cabin_start_m": 0.65,
+    "width_m": 2.152,
+    "height_m": 2.072,
+    "wheelbase_m": 3.524,
+    "track_m": 1.588,
+    "wheel_radius_m": 0.333,
+    "front_overhang_m": 0.8,
+    "cabin_start_m": 1.275,
     "roof_length_m": 4.0
    },
    "mass_kg": 2400,
@@ -411,7 +416,8 @@
       0.4
      ]
     ]
-   }
+   },
+   "model": "res://assets/vehicles/van.glb"
   },
   {
    "id": "box_truck",
@@ -419,13 +425,13 @@
    "body_class": "box_truck",
    "dims": {
     "length_m": 7.5,
-    "width_m": 2.4,
-    "height_m": 3.3,
-    "wheelbase_m": 4.4,
-    "track_m": 1.95,
-    "wheel_radius_m": 0.45,
-    "front_overhang_m": 1.1,
-    "cabin_start_m": 0.9,
+    "width_m": 2.601,
+    "height_m": 3.163,
+    "wheelbase_m": 5.218,
+    "track_m": 1.785,
+    "wheel_radius_m": 0.374,
+    "front_overhang_m": 0.9,
+    "cabin_start_m": 1.433,
     "box_length_m": 5.2
    },
    "mass_kg": 6500,
@@ -476,7 +482,8 @@
       0.25
      ]
     ]
-   }
+   },
+   "model": "res://assets/vehicles/box_truck.glb"
   },
   {
    "id": "taxi",
@@ -484,13 +491,13 @@
    "body_class": "taxi",
    "dims": {
     "length_m": 4.6,
-    "width_m": 1.8,
-    "height_m": 1.45,
-    "wheelbase_m": 2.7,
-    "track_m": 1.56,
-    "wheel_radius_m": 0.33,
-    "front_overhang_m": 0.9,
-    "cabin_start_m": 1.75,
+    "width_m": 1.845,
+    "height_m": 1.428,
+    "wheelbase_m": 2.658,
+    "track_m": 1.502,
+    "wheel_radius_m": 0.285,
+    "front_overhang_m": 1.0,
+    "cabin_start_m": 1.458,
     "roof_length_m": 1.3
    },
    "mass_kg": 1450,
@@ -539,7 +546,8 @@
       "roof_sign": "TAXI"
      }
     }
-   }
+   },
+   "model": "res://assets/vehicles/taxi.glb"
   },
   {
    "id": "bus",
@@ -582,15 +590,15 @@
    "name": "Patrol Car",
    "body_class": "sedan",
    "dims": {
-    "length_m": 4.6,
-    "width_m": 1.8,
-    "height_m": 1.45,
-    "wheelbase_m": 2.7,
-    "track_m": 1.56,
-    "wheel_radius_m": 0.33,
-    "front_overhang_m": 0.9,
-    "cabin_start_m": 1.75,
-    "roof_length_m": 1.3
+    "length_m": 4.7,
+    "width_m": 2.127,
+    "height_m": 1.561,
+    "wheelbase_m": 2.892,
+    "track_m": 1.764,
+    "wheel_radius_m": 0.347,
+    "front_overhang_m": 0.91,
+    "cabin_start_m": 1.53,
+    "roof_length_m": 1.328
    },
    "mass_kg": 1400,
    "engine_force": 5625,
@@ -622,22 +630,23 @@
       "light_bar": true
      }
     }
-   }
+   },
+   "model": "res://assets/vehicles/police.glb"
   },
   {
    "id": "ambulance",
    "name": "Ambulance",
    "body_class": "van",
    "dims": {
-    "length_m": 5.3,
-    "width_m": 2.0,
-    "height_m": 2.3,
-    "wheelbase_m": 3.3,
-    "track_m": 1.72,
-    "wheel_radius_m": 0.35,
-    "front_overhang_m": 0.85,
-    "cabin_start_m": 0.65,
-    "roof_length_m": 4.0
+    "length_m": 6.0,
+    "width_m": 2.244,
+    "height_m": 2.455,
+    "wheelbase_m": 4.06,
+    "track_m": 1.64,
+    "wheel_radius_m": 0.344,
+    "front_overhang_m": 0.827,
+    "cabin_start_m": 1.317,
+    "roof_length_m": 4.528
    },
    "mass_kg": 2400,
    "engine_force": 5600,
@@ -669,7 +678,8 @@
       "light_bar": true
      }
     }
-   }
+   },
+   "model": "res://assets/vehicles/ambulance.glb"
   }
  ]
 }

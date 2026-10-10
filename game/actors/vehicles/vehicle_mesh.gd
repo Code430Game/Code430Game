@@ -1,6 +1,7 @@
 class_name VehicleMesh
 extends RefCounted
-## Parametric low-poly vehicle bodies for every catalogue class, at two levels of detail.
+## Parametric low-poly vehicle bodies for every catalogue class, at two levels of detail. An
+## entry with a kit `model` draws that at LOD0 instead (KitVehicle); LOD1 stays parametric.
 ##
 ## Approach: a side profile (z along the vehicle, y up; -Z is the front) is computed from the
 ## entry's dims for its body class, then extruded across the width into a hull; the cabin sits
@@ -35,6 +36,8 @@ const LOD1_BUDGET := 260
 ## the player's car has wheel nodes and leaves them out. `livery` is the entry's livery
 ## variant for the current mode (stripe, roof sign), {} for none.
 static func build(entry: Dictionary, lod: int = Lod.LOD0, with_wheels: bool = true, livery: Dictionary = {}) -> ArrayMesh:
+	if lod == Lod.LOD0 and KitVehicle.has_model(entry):
+		return KitVehicle.build(entry, with_wheels)
 	if str(entry.get("body_class", "sedan")) == "bus":
 		return BusMesh.build(with_wheels)
 	var b := _Builder.new(entry, lod, livery)
