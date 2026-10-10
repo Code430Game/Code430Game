@@ -1,6 +1,8 @@
 extends GdUnitTestSuite
 ## VehicleMesh: every catalogue class at LOD0 and LOD1 within budget, wound outward, body
-## white, glass and lights coloured, bounds matching the dims.
+## white, glass and lights coloured, bounds matching the dims. Entries are read without their
+## kit `model` so the parametric builder (LOD1 and the fallback) is what's tested; the kit
+## models have test_kit_vehicle.gd.
 
 const CatalogueScript := preload("res://actors/vehicles/vehicle_catalogue.gd")
 
@@ -16,6 +18,12 @@ func after() -> void:
 	_cat.free()
 
 
+func _parametric(id: String) -> Dictionary:
+	var e: Dictionary = _cat.entry(id).duplicate(true)
+	e.erase("model")
+	return e
+
+
 func _tris(mesh: ArrayMesh) -> int:
 	var n := 0
 	for s in range(mesh.get_surface_count()):
@@ -25,7 +33,7 @@ func _tris(mesh: ArrayMesh) -> int:
 
 func test_every_class_is_within_its_triangle_budget() -> void:
 	for id in _cat.ids():
-		var e: Dictionary = _cat.entry(id)
+		var e: Dictionary = _parametric(id)
 		var cls: String = e["body_class"]
 		var lod0 := VehicleMesh.build(e, VehicleMesh.Lod.LOD0, true, _cat.livery(id))
 		var lod1 := VehicleMesh.build(e, VehicleMesh.Lod.LOD1, true)
@@ -40,7 +48,7 @@ func test_every_triangle_is_wound_to_face_out() -> void:
 	# point against the outward normal the generator gave it; and most faces point away from
 	# the vehicle's middle (wheel wells and the pickup bed are the honest exceptions).
 	for id in _cat.ids():
-		var e: Dictionary = _cat.entry(id)
+		var e: Dictionary = _parametric(id)
 		if e["body_class"] == "bus":
 			continue
 		for lod in [VehicleMesh.Lod.LOD0, VehicleMesh.Lod.LOD1]:
@@ -79,7 +87,7 @@ func test_every_triangle_is_wound_to_face_out() -> void:
 
 func test_body_is_white_and_glass_and_lights_are_not() -> void:
 	for id in _cat.ids():
-		var e: Dictionary = _cat.entry(id)
+		var e: Dictionary = _parametric(id)
 		var mesh := VehicleMesh.build(e, VehicleMesh.Lod.LOD0, true, _cat.livery(id))
 		assert_int(mesh.get_surface_count()).is_equal(4)
 		for c: Color in mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]:
@@ -95,7 +103,7 @@ func test_body_is_white_and_glass_and_lights_are_not() -> void:
 
 func test_bounds_match_the_dims_and_wheels_touch_the_ground() -> void:
 	for id in _cat.ids():
-		var e: Dictionary = _cat.entry(id)
+		var e: Dictionary = _parametric(id)
 		if e["body_class"] == "bus":
 			continue
 		var d: Dictionary = e["dims"]
@@ -107,15 +115,15 @@ func test_bounds_match_the_dims_and_wheels_touch_the_ground() -> void:
 
 
 func test_wheels_only_when_asked_and_the_taxi_wears_its_sign() -> void:
-	var sedan: Dictionary = _cat.entry("sedan")
+	var sedan: Dictionary = _parametric("sedan")
 	assert_int(_tris(VehicleMesh.build(sedan, VehicleMesh.Lod.LOD0, true))).is_greater(_tris(VehicleMesh.build(sedan, VehicleMesh.Lod.LOD0, false)))
-	var taxi: Dictionary = _cat.entry("taxi")
+	var taxi: Dictionary = _parametric("taxi")
 	var signed := VehicleMesh.build(taxi, VehicleMesh.Lod.LOD0, true, _cat.livery("taxi")).get_aabb()
 	assert_float(signed.end.y).is_greater(float(taxi["dims"]["height_m"]) + 0.1)
 
 
 func test_wheel_positions_follow_the_dims() -> void:
-	var e: Dictionary = _cat.entry("box_truck")
+	var e: Dictionary = _parametric("box_truck")
 	var w := VehicleMesh.wheel_positions(e)
 	assert_int(w.size()).is_equal(4)
 	assert_float(w[2].z - w[0].z).is_equal_approx(float(e["dims"]["wheelbase_m"]), 0.001)

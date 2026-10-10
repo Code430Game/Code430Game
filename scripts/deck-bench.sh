@@ -29,6 +29,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOST="${DECK_HOST:-deck@steamdeck.local}"
 SSH="${DECK_SSH:-ssh}"
 GODOT="${GODOT_BIN:-godot}"
+# tools/deck_bench.py needs Python 3.11 (the tools' uv environment); macOS python3 is 3.9.
+if [[ -z "${PYTHON:-}" ]] && command -v uv >/dev/null 2>&1; then
+  PYTHON="uv run --project $ROOT/tools python"
+fi
 PYTHON="${PYTHON:-python3}"
 DEST="Games/code430"
 REFS=()
@@ -193,5 +197,5 @@ if $DRY; then
 fi
 args=("$RESULTS")
 [ -n "$TASK" ] && args+=(--tasks-file "$TASKS_FILE" --task "$TASK")
-"$PYTHON" "$ROOT/tools/deck_bench.py" "${args[@]}"
+$PYTHON "$ROOT/tools/deck_bench.py" "${args[@]}"  # unquoted: may be "uv run ... python"
 echo "deck-bench: logs in $RESULTS"

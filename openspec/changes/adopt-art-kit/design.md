@@ -24,9 +24,19 @@
   once, not re-saved.
 
 ## Assembly
-- **Vehicles:** a catalogue entry gains `model` (a `.glb` path), and `kit_vehicle.gd` places the
-  wheels and lights from named nodes in the model. Traffic MultiMeshes take the model's mesh;
-  LOD1 is the model decimated at import or a simpler kit car.
+- **Vehicles (built 2026-10-10):** `tools/vehicle_kit/build_vehicles.py` runs in Blender over
+  `recipes.json`. It takes the unmodified sources from `art/quaternius/cars`, swaps the kit
+  wheels (1,680 triangles a car) for 16-sided ones named `Wheel_FL` and so on, renames the body
+  paint `Paint` (accents `PaintAccent`), scales to the recipe's length and exports to
+  `game/assets/vehicles/<id>.glb`. Derived vehicles keep the SUV's cab (cut behind the front
+  doors, or behind the rear doors for the pickup, the cut capped) and add a bevelled box or a
+  bed with wheel arches cut by a boolean; every number is in the recipe so they can be nudged
+  without opening Blender. The measured dims go into the catalogue (`apply_dims.py`).
+  `kit_vehicle.gd` rebuilds a model into VehicleMesh's four surfaces (paint white so the tint
+  shows, the rest in the kit colours, lights on their own surfaces), so traffic, parked cars
+  and the player's car need no other change; LOD1 stays the generated body.
+- **Where files live:** unmodified sources in `art/<source>/<pack>/` (outside the Godot
+  project, so they aren't imported or exported), built models in `game/assets/`.
 - **People:** a kit character is a skeleton plus part meshes (body, head, hair, outfit pieces)
   skinned to it. The profile names a part per slot and colours per material slot. The crowd's
   MultiMesh needs one mesh per pool: the parts are merged into one mesh per pool look at load,
