@@ -462,7 +462,8 @@ func _make_officer(at: Vector3) -> Node3D:
 	p["bottom"] = 5  # black
 	p["jacket"] = 1
 	p["jacket_colour"] = 5
-	p["hat"] = 1  # cap
+	p["hat"] = 0
+	p["outfit"] = KitCharacter.index_of(int(p["body"]), "outfit", "uniform")
 	rig.profile = p
 	o.add_child(rig)
 	o.set_meta("rig", rig)

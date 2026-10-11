@@ -8,8 +8,8 @@
 - [ ] 1.3 Round 2 (the human): nudge the derived vehicles in `recipes.json` (taller cab, box from the skirt); the Public Transport bus; kit wheels on the player's wheel nodes
 
 ## 2. People
-- [ ] 2.1 Import the modular men and women (glTF parts, skeleton, animations); `kit_character.gd` assembling parts per profile; the player and actors on kit animations; tests
-- [ ] 2.2 Crowd pools merged per look with bone indices; walk shader on the kit skeleton; ragdolls on the kit skeleton; tests (CPU against shader pose)
+- [x] 2.1 Modular men and women imported (master `.blend` per pack with its `License.txt`; the Cars Pack's `License.txt` added too); `tools/people_kit` (Blender, `recipes.json`) moving faces, hair, beards, hats and eight outfits per body onto the game's rig (see design.md: not the kit skeleton or animations) with `scripts/build-people.sh`; `kit_character.gd` assembling a profile's parts in `CharacterMesh`, kit pivots for the rig, crowd shader and ragdolls; `outfit` in the profile and creator, kit names for hair, beards, hats and outfits; officers in the uniform, paramedics in work clothes, the gang in its named outfit (`look.outfit`); tests
+- [ ] 2.2 The crowd pools, walk shader and ragdolls already wear the kit through 2.1 (same rig, kit pivots). Left: the kit's own animations (run, punch, death) where they beat the procedural ones, and a lighter crowd level of detail if the Deck needs it; tests
 - [ ] 2.3 Prints and recolours; police, paramedic and gang looks; the creator on kit parts; children per the open question; screenshots in each tone; Deck benchmark with `--peds` at the cap
 
 ## 3. Trees and props

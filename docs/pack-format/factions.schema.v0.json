@@ -46,7 +46,8 @@
               "jacket": { "type": "integer", "minimum": 0, "maximum": 1 },
               "jacket_colour": { "type": "integer", "minimum": 0 },
               "hat": { "type": "integer", "minimum": 0 },
-              "leader_hat": { "type": "integer", "minimum": 0 }
+              "leader_hat": { "type": "integer", "minimum": 0 },
+              "outfit": { "type": "string", "description": "A kit outfit by name (game/assets/people/people.json), e.g. punk; a body without it wears its first outfit" }
             }
           },
           "car": {

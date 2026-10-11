@@ -37,12 +37,24 @@
   and the player's car need no other change; LOD1 stays the generated body.
 - **Where files live:** unmodified sources in `art/<source>/<pack>/` (outside the Godot
   project, so they aren't imported or exported), built models in `game/assets/`.
-- **People:** a kit character is a skeleton plus part meshes (body, head, hair, outfit pieces)
-  skinned to it. The profile names a part per slot and colours per material slot. The crowd's
-  MultiMesh needs one mesh per pool: the parts are merged into one mesh per pool look at load,
-  with bone indices in a custom channel for the walk shader (as `CharacterMesh` does today). The
-  shader's pivot array grows to the kit skeleton's bone count, with a cap of about 24 bones;
-  extra bones fold into their parents for the crowd.
+- **People (built 2026-10-11):** the plan was the kit's skeleton (capped near 24 bones) and its
+  animations. Built instead: the kit parts moved onto the game's eleven-bone rig, because the
+  procedural walk, the crowd's walk shader, held-weapon and kick poses and the ragdolls all
+  run on that rig, and moving the meshes changes none of them. `tools/people_kit` (Blender,
+  `recipes.json`) takes the master `.blend` of each pack (Ultimate Modular Men, Feb 2022, and
+  Women, Apr 2022; their own `License.txt` says CC0), lowers the T-pose arms, bakes that pose
+  and gives each vertex the rig bone with most of its kit weight (fingers to the forearm, the
+  foot to the shin), written in the vertex colour. Each kit material becomes a colour role
+  (skin, hair, eye, stubble, top, accent, bottom, shoes) or keeps its kit colour. Parts are
+  decimated to budgets (face 500, hair 700, top 1,300, legs 500, feet 300 triangles): a person
+  is at most about 3,600 triangles. The output is one `.glb` per body with every part, plus
+  `people.json` (pivots, per-bone extents for ragdoll shapes, eyes for glasses, the names of
+  the choices). `KitCharacter` assembles a profile's parts into `CharacterMesh`'s one surface;
+  the pivots replace the primitive body's, so the crowd shader, skinned rigs and ragdolls
+  follow. The profile gains `outfit` (eight per body, the same count in both); hair, beard and
+  hat keep their indices and take the kit's names per body (women's beards are "none"). A hat
+  replaces the hair with the short hair that shows below it. Glasses stay primitive, placed at
+  the kit's eyes. The kit's own animations (run, punch, death) are left for later.
 - **Buildings:** a facade is split into bays the kit's wall-piece width (about 2–4 m) wide and
   floors the kit's storey height; each bay gets a piece (window, blank, door, shop) by rules.
   Corners get corner pieces, and roofs are kit roof pieces or our generated roof on the kit

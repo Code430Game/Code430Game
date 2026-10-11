@@ -1,0 +1,590 @@
+{
+ "about": "Written by tools/people_kit/build_people.py; do not edit by hand.",
+ "packs": {
+  "men": {
+   "beard": [
+    "none",
+    "stubble",
+    "full"
+   ],
+   "beard_parts": [
+    "",
+    "Beard1",
+    "Beard2"
+   ],
+   "body": 0,
+   "bones": {
+    "forearm_l": {
+     "max": [
+      0.3136,
+      1.2356,
+      0.0015
+     ],
+     "min": [
+      0.145,
+      0.7586,
+      -0.1898
+     ]
+    },
+    "forearm_r": {
+     "max": [
+      -0.145,
+      1.2494,
+      0.0015
+     ],
+     "min": [
+      -0.3145,
+      0.7599,
+      -0.1895
+     ]
+    },
+    "head": {
+     "max": [
+      0.1053,
+      1.7999,
+      0.061
+     ],
+     "min": [
+      -0.1053,
+      1.4993,
+      -0.1721
+     ]
+    },
+    "hips": {
+     "max": [
+      0.1377,
+      1.0536,
+      0.0783
+     ],
+     "min": [
+      -0.1377,
+      0.8447,
+      -0.1626
+     ]
+    },
+    "shin_l": {
+     "max": [
+      0.1876,
+      0.5271,
+      0.0114
+     ],
+     "min": [
+      0.0521,
+      0.0007,
+      -0.2818
+     ]
+    },
+    "shin_r": {
+     "max": [
+      -0.0521,
+      0.5281,
+      0.0114
+     ],
+     "min": [
+      -0.1878,
+      0.001,
+      -0.2818
+     ]
+    },
+    "spine": {
+     "max": [
+      0.1816,
+      1.5481,
+      0.0896
+     ],
+     "min": [
+      -0.1831,
+      0.9918,
+      -0.1939
+     ]
+    },
+    "thigh_l": {
+     "max": [
+      0.1872,
+      1.0328,
+      0.0517
+     ],
+     "min": [
+      0.0199,
+      0.5294,
+      -0.1549
+     ]
+    },
+    "thigh_r": {
+     "max": [
+      -0.0199,
+      1.0328,
+      0.0517
+     ],
+     "min": [
+      -0.1872,
+      0.5294,
+      -0.1549
+     ]
+    },
+    "upper_arm_l": {
+     "max": [
+      0.2337,
+      1.47,
+      0.0045
+     ],
+     "min": [
+      0.1262,
+      1.2461,
+      -0.105
+     ]
+    },
+    "upper_arm_r": {
+     "max": [
+      -0.1265,
+      1.4654,
+      0.0043
+     ],
+     "min": [
+      -0.2343,
+      1.2461,
+      -0.105
+     ]
+    }
+   },
+   "eyes": {
+    "centre": [
+     0.0,
+     1.673,
+     -0.1418
+    ],
+    "half_spacing": 0.0528
+   },
+   "hair": [
+    "bald",
+    "short",
+    "long",
+    "side part",
+    "mohawk",
+    "ponytail"
+   ],
+   "hair_parts": [
+    "",
+    "Hair1",
+    "Hair2",
+    "Hair3",
+    "Hair4",
+    "Hair5"
+   ],
+   "hat": [
+    "none",
+    "hard hat",
+    "sun hat"
+   ],
+   "hat_parts": [
+    "",
+    "Hat1",
+    "Hat2"
+   ],
+   "hat_under": [
+    "",
+    "Hat1Under",
+    "Hat2Under"
+   ],
+   "model": "res://assets/people/men.glb",
+   "outfit": [
+    "casual",
+    "tee",
+    "suit",
+    "worker",
+    "punk",
+    "overalls",
+    "beach",
+    "uniform"
+   ],
+   "pivots": {
+    "forearm_l": [
+     0.1871,
+     1.2381,
+     -0.0551
+    ],
+    "forearm_r": [
+     -0.1871,
+     1.2381,
+     -0.0551
+    ],
+    "head": [
+     0.0003,
+     1.49,
+     -0.0424
+    ],
+    "hips": [
+     0.0,
+     0.9529,
+     -0.0443
+    ],
+    "shin_l": [
+     0.1185,
+     0.5294,
+     -0.0859
+    ],
+    "shin_r": [
+     -0.1185,
+     0.5294,
+     -0.0859
+    ],
+    "spine": [
+     0.0003,
+     0.9874,
+     -0.0443
+    ],
+    "thigh_l": [
+     0.1185,
+     0.9529,
+     -0.0443
+    ],
+    "thigh_r": [
+     -0.1185,
+     0.9529,
+     -0.0443
+    ],
+    "upper_arm_l": [
+     0.1499,
+     1.4129,
+     -0.0588
+    ],
+    "upper_arm_r": [
+     -0.1499,
+     1.4129,
+     -0.0588
+    ]
+   },
+   "top": 1.9372,
+   "triangles": {
+    "Beard1": 44,
+    "Beard2": 299,
+    "Face": 496,
+    "Hair1": 700,
+    "Hair2": 699,
+    "Hair3": 700,
+    "Hair4": 700,
+    "Hair5": 700,
+    "Hat1": 320,
+    "Hat1Under": 140,
+    "Hat2": 320,
+    "Hat2Under": 140,
+    "Outfit0_Feet": 300,
+    "Outfit0_Legs": 500,
+    "Outfit0_Top": 1300,
+    "Outfit1_Feet": 300,
+    "Outfit1_Legs": 500,
+    "Outfit1_Top": 1300,
+    "Outfit2_Feet": 300,
+    "Outfit2_Legs": 500,
+    "Outfit2_Top": 1300,
+    "Outfit3_Feet": 300,
+    "Outfit3_Legs": 500,
+    "Outfit3_Top": 1300,
+    "Outfit4_Feet": 300,
+    "Outfit4_Legs": 500,
+    "Outfit4_Top": 1300,
+    "Outfit5_Feet": 300,
+    "Outfit5_Legs": 500,
+    "Outfit5_Top": 1300,
+    "Outfit6_Feet": 300,
+    "Outfit6_Legs": 500,
+    "Outfit6_Top": 1300,
+    "Outfit7_Feet": 300,
+    "Outfit7_Legs": 500,
+    "Outfit7_Top": 1300
+   }
+  },
+  "women": {
+   "beard": [
+    "none",
+    "none",
+    "none"
+   ],
+   "beard_parts": [
+    "",
+    "",
+    ""
+   ],
+   "body": 1,
+   "bones": {
+    "forearm_l": {
+     "max": [
+      0.2752,
+      1.2153,
+      -0.0188
+     ],
+     "min": [
+      0.1291,
+      0.7495,
+      -0.1862
+     ]
+    },
+    "forearm_r": {
+     "max": [
+      -0.1291,
+      1.2153,
+      -0.0188
+     ],
+     "min": [
+      -0.2752,
+      0.7501,
+      -0.1859
+     ]
+    },
+    "head": {
+     "max": [
+      0.0918,
+      1.7661,
+      0.0448
+     ],
+     "min": [
+      -0.0918,
+      1.5201,
+      -0.1743
+     ]
+    },
+    "hips": {
+     "max": [
+      0.1079,
+      1.175,
+      0.0482
+     ],
+     "min": [
+      -0.1079,
+      0.9149,
+      -0.1701
+     ]
+    },
+    "shin_l": {
+     "max": [
+      0.1542,
+      0.558,
+      0.0161
+     ],
+     "min": [
+      0.033,
+      0.0004,
+      -0.2666
+     ]
+    },
+    "shin_r": {
+     "max": [
+      -0.033,
+      0.5568,
+      0.0161
+     ],
+     "min": [
+      -0.1542,
+      0.0,
+      -0.2674
+     ]
+    },
+    "spine": {
+     "max": [
+      0.1481,
+      1.5074,
+      0.0114
+     ],
+     "min": [
+      -0.1481,
+      1.091,
+      -0.1856
+     ]
+    },
+    "thigh_l": {
+     "max": [
+      0.1768,
+      1.1345,
+      0.0579
+     ],
+     "min": [
+      0.0086,
+      0.5712,
+      -0.1507
+     ]
+    },
+    "thigh_r": {
+     "max": [
+      -0.002,
+      1.1345,
+      0.0579
+     ],
+     "min": [
+      -0.1772,
+      0.5712,
+      -0.1507
+     ]
+    },
+    "upper_arm_l": {
+     "max": [
+      0.1875,
+      1.4409,
+      -0.0142
+     ],
+     "min": [
+      0.1037,
+      1.2209,
+      -0.1047
+     ]
+    },
+    "upper_arm_r": {
+     "max": [
+      -0.1037,
+      1.4409,
+      -0.0144
+     ],
+     "min": [
+      -0.189,
+      1.2209,
+      -0.1047
+     ]
+    }
+   },
+   "eyes": {
+    "centre": [
+     0.0,
+     1.6702,
+     -0.1439
+    ],
+    "half_spacing": 0.0549
+   },
+   "hair": [
+    "crop",
+    "bob",
+    "long",
+    "bun",
+    "mohawk",
+    "shoulder"
+   ],
+   "hair_parts": [
+    "Hair0",
+    "Hair1",
+    "Hair2",
+    "Hair3",
+    "Hair4",
+    "Hair5"
+   ],
+   "hat": [
+    "none",
+    "hard hat",
+    "hood"
+   ],
+   "hat_parts": [
+    "",
+    "Hat1",
+    "Hat2"
+   ],
+   "hat_under": [
+    "",
+    "Hat1Under",
+    "Hat2Under"
+   ],
+   "model": "res://assets/people/women.glb",
+   "outfit": [
+    "casual",
+    "dress",
+    "suit",
+    "worker",
+    "punk",
+    "outdoor",
+    "jumpsuit",
+    "uniform"
+   ],
+   "pivots": {
+    "forearm_l": [
+     0.1598,
+     1.218,
+     -0.0551
+    ],
+    "forearm_r": [
+     -0.1598,
+     1.218,
+     -0.0551
+    ],
+    "head": [
+     0.0003,
+     1.4928,
+     -0.0424
+    ],
+    "hips": [
+     0.0,
+     1.0273,
+     -0.0443
+    ],
+    "shin_l": [
+     0.0952,
+     0.5555,
+     -0.0859
+    ],
+    "shin_r": [
+     -0.0952,
+     0.5555,
+     -0.0859
+    ],
+    "spine": [
+     0.0003,
+     1.0965,
+     -0.062
+    ],
+    "thigh_l": [
+     0.0952,
+     1.0273,
+     -0.0443
+    ],
+    "thigh_r": [
+     -0.0952,
+     1.0273,
+     -0.0443
+    ],
+    "upper_arm_l": [
+     0.1154,
+     1.4267,
+     -0.0588
+    ],
+    "upper_arm_r": [
+     -0.1154,
+     1.4267,
+     -0.0588
+    ]
+   },
+   "top": 1.9342,
+   "triangles": {
+    "Face": 398,
+    "Hair0": 246,
+    "Hair1": 700,
+    "Hair2": 699,
+    "Hair3": 698,
+    "Hair4": 700,
+    "Hair5": 700,
+    "Hat1": 320,
+    "Hat1Under": 349,
+    "Hat2": 500,
+    "Hat2Under": 349,
+    "Outfit0_Feet": 300,
+    "Outfit0_Legs": 500,
+    "Outfit0_Top": 1299,
+    "Outfit1_Feet": 300,
+    "Outfit1_Legs": 482,
+    "Outfit1_Top": 1300,
+    "Outfit2_Feet": 300,
+    "Outfit2_Legs": 500,
+    "Outfit2_Top": 1299,
+    "Outfit3_Feet": 300,
+    "Outfit3_Legs": 500,
+    "Outfit3_Top": 1299,
+    "Outfit4_Feet": 300,
+    "Outfit4_Legs": 500,
+    "Outfit4_Top": 1299,
+    "Outfit5_Feet": 300,
+    "Outfit5_Legs": 498,
+    "Outfit5_Top": 1295,
+    "Outfit6_Feet": 300,
+    "Outfit6_Legs": 500,
+    "Outfit6_Top": 1299,
+    "Outfit7_Feet": 300,
+    "Outfit7_Legs": 500,
+    "Outfit7_Top": 1299
+   }
+  }
+ }
+}

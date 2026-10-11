@@ -212,6 +212,8 @@ func _make_member(f: Dictionary, turf_i: int, leader: bool, at: Vector3, seed: i
 			p[key] = int(look[key])
 	if leader and look.has("leader_hat"):
 		p["hat"] = int(look["leader_hat"])
+	if look.has("outfit"):
+		p["outfit"] = KitCharacter.index_of(int(p["body"]), "outfit", str(look["outfit"]))
 	m.rig = CharacterRig.new()
 	m.rig.profile = p
 	m.add_child(m.rig)
