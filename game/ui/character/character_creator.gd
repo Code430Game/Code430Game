@@ -10,8 +10,8 @@ signal profile_changed(profile: Dictionary)
 signal closed(profile: Dictionary)
 
 const FIELD_ROWS: Array = [
-	["skin", "Skin"], ["hair", "Hair"], ["hair_colour", "Hair colour"], ["top", "Top"],
-	["jacket", "Jacket"], ["jacket_colour", "Jacket colour"], ["bottom", "Trousers"], ["shoes", "Shoes"],
+	["skin", "Skin"], ["hair", "Hair"], ["hair_colour", "Hair colour"], ["outfit", "Outfit"],
+	["top", "Top"], ["jacket_colour", "Accent colour"], ["bottom", "Trousers"], ["shoes", "Shoes"],
 	["hat", "Hat"], ["beard", "Beard"], ["glasses", "Glasses"], ["body", "body.label"], ["height", "Height"], ["build", "Build"],
 ]
 const ACTION_ROWS: Array = [

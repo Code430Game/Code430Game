@@ -11,7 +11,7 @@
     "dystopia": {"name": "the Double Cross", "melee": "melee", "ranged": "gun", "ranged_share": 0.5, "tag": "Wrong block, meat.", "descriptors": {"violence": "strong", "crime": "strong", "dystopia_tech": "mild"}},
     "clean": {"name": "the Double Cross crew", "melee": "melee", "ranged": "gun", "ranged_share": 0.5, "tag": "Tag, you're it!", "descriptors": {"violence": "mild", "crime": "mild"}}
    },
-   "look": {"top": 5, "bottom": 5, "jacket": 1, "jacket_colour": 0, "hat": 0, "leader_hat": 2},
+   "look": {"top": 5, "bottom": 5, "jacket": 1, "jacket_colour": 0, "hat": 0, "leader_hat": 2, "outfit": "punk"},
    "car": {"catalogue_id": "sedan", "colour": [0.1, 0.1, 0.12]},
    "crew": {"members": 5, "leader_health": 2.0},
    "sight_m": 28.0,

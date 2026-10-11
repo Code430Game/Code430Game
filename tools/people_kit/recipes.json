@@ -1,0 +1,89 @@
+{
+ "about": "How the Quaternius modular men and women become the game's people. Names on the left are the creator's choices; 'from' is a mesh in the pack's master .blend and 'materials' the kit materials taken from it. tint maps a kit material to a profile colour (Top, Accent, Bottom, Shoes). Edit, run scripts/build-people.sh, look at build/people_kit/lineup.png.",
+ "height_m": 1.80,
+ "arm_hang_deg": 78,
+ "budget": {"face": 500, "hair": 700, "beard": 300, "hat": 500, "under": 350, "top": 1300, "legs": 500, "feet": 300},
+ "beard_region": {"below_z": 1.665, "front_y": -0.05},
+ "packs": [
+  {
+   "id": "men", "body": 0, "source": "modular_men/Humans_Master.blend",
+   "face": {"from": "Suit_Head", "roles": {"Skin": "Skin", "Eye": "Eye", "Eyebrows": "Hair"}},
+   "hair": [
+    {"name": "bald"},
+    {"name": "short", "from": "Casual_Head", "materials": ["Hair"]},
+    {"name": "long", "from": "Adventurer_Head", "materials": ["Hair"], "region": "not_beard"},
+    {"name": "side part", "from": "Suit_Head", "materials": ["Hair"]},
+    {"name": "mohawk", "from": "Punk_Head", "materials": ["Red", "Red_Dark"]},
+    {"name": "ponytail", "from": "Casual2_Head", "materials": ["Hair"]}
+   ],
+   "beard": [
+    {"name": "none"},
+    {"name": "stubble", "from": "Casual2_Head", "materials": ["Skin_Darker"], "role": "Stubble"},
+    {"name": "full", "from": "Adventurer_Head", "materials": ["Hair"], "region": "beard"}
+   ],
+   "hat": [
+    {"name": "none"},
+    {"name": "hard hat", "from": "Worker_Head", "materials": ["Worker_Yellow"], "under": ["Eyebrows"]},
+    {"name": "sun hat", "from": "Farmer_Head", "materials": ["Beige", "Red"], "under": ["Eyebrows"]}
+   ],
+   "outfits": [
+    {"name": "casual", "top": "Casual_Body", "legs": "Casual_Legs", "feet": "Casual_Feet",
+     "tint": {"top": {"Purple": "Top"}, "legs": {"LightBlue": "Bottom"}, "feet": {"Purple": "Shoes"}}},
+    {"name": "tee", "top": "Casual2_Body", "legs": "Casual2_Legs", "feet": "Casual2_Feet",
+     "tint": {"top": {"LightBrown": "Top"}, "legs": {"LightBlue": "Bottom"}, "feet": {"Red_Dark": "Shoes"}}},
+    {"name": "suit", "top": "Suit_Body", "legs": "Suit_Legs", "feet": "Suit_Feet",
+     "tint": {"top": {"Suit": "Top", "Tie": "Accent"}, "legs": {"Suit": "Bottom"}, "feet": {"Black": "Shoes"}}},
+    {"name": "worker", "top": "Worker_Body", "legs": "Worker_Legs", "feet": "Worker_Feet",
+     "tint": {"top": {"LightBrown": "Top", "Worker_Vest": "Accent"}, "legs": {"Brown": "Bottom"}, "feet": {"Grey": "Shoes"}}},
+    {"name": "punk", "top": "Punk_Body", "legs": "Punk_Legs", "feet": "Punk_Feet",
+     "tint": {"top": {"White": "Top", "Black": "Accent"}, "legs": {"LightBlue": "Bottom"}, "feet": {"Black": "Shoes"}}},
+    {"name": "overalls", "top": "Farmer_Body", "legs": "Farmer_Pants", "feet": "Farmer_Feet",
+     "tint": {"top": {"Beige": "Top", "LightBlue": "Bottom"}, "legs": {"LightBlue": "Bottom"}, "feet": {"Brown": "Shoes"}}},
+    {"name": "beach", "top": "Beach_Body", "legs": "Beach_Legs", "feet": "Beach_Feet",
+     "tint": {"top": {"LightBrown": "Top"}, "legs": {"Red_Dark": "Bottom"}, "feet": {"Red_Dark": "Shoes"}}},
+    {"name": "uniform", "top": "Swat_Body", "legs": "Swat_Legs", "feet": "Swat_Feet",
+     "tint": {"top": {"Swat": "Top", "Swat_Black": "Accent"}, "legs": {"Swat": "Bottom"}, "feet": {"Swat_Black": "Shoes"}}}
+   ]
+  },
+  {
+   "id": "women", "body": 1, "source": "modular_women/Women_Master.blend",
+   "face": {"from": "Suit_Head", "roles": {"Skin": "Skin", "Brown": "Eye", "Hair_Brown": "Hair"}},
+   "hair": [
+    {"name": "crop", "from": "Adventurer_Head", "materials": ["Hair_Brown"]},
+    {"name": "bob", "from": "Casual_Head", "materials": ["Hair_Blond"]},
+    {"name": "long", "from": "Witch_Head", "materials": ["Hair_Black"]},
+    {"name": "bun", "from": "Formad_Head", "materials": ["Red"]},
+    {"name": "mohawk", "from": "Punk_Head", "materials": ["Pink"]},
+    {"name": "shoulder", "from": "Soldier_Head", "materials": ["Hair_Brown"]}
+   ],
+   "beard": [
+    {"name": "none"},
+    {"name": "none"},
+    {"name": "none"}
+   ],
+   "hat": [
+    {"name": "none"},
+    {"name": "hard hat", "from": "Worker_Head", "materials": ["Worker_Yellow"], "under": ["DarkBrown"]},
+    {"name": "hood", "from": "Medieval_Head", "materials": ["DarkBrown"], "under": ["White"]}
+   ],
+   "outfits": [
+    {"name": "casual", "top": "Casual_Body", "legs": "Casual_Legs", "feet": "Casual_Feet",
+     "tint": {"top": {"White": "Top"}, "legs": {"Orange": "Bottom"}, "feet": {"Grey": "Shoes"}}},
+    {"name": "dress", "top": "Formal_Body", "legs": "Formal_Legs", "feet": "Formal_Feet",
+     "tint": {"top": {"LimeGreen": "Top", "Gold": "Accent"}, "legs": {"LimeGreen": "Top"}, "feet": {"Red": "Shoes"}}},
+    {"name": "suit", "top": "Suit_Body", "legs": "Suit_Legs", "feet": "Suit_Feet",
+     "tint": {"top": {"Black": "Top", "White": "Accent"}, "legs": {"Black": "Bottom"}, "feet": {"Black": "Shoes"}}},
+    {"name": "worker", "top": "Worker_Body", "legs": "Worker_Legs", "feet": "Worker_Feet",
+     "tint": {"top": {"White": "Top", "Worker_Vest": "Accent"}, "legs": {"Brown_02": "Bottom"}, "feet": {"Black": "Shoes"}}},
+    {"name": "punk", "top": "Punk_Body", "legs": "Punk_Legs", "feet": "Punk_Feet",
+     "tint": {"top": {"Pink": "Top", "Black": "Accent"}, "legs": {"Black": "Bottom"}, "feet": {"Black": "Shoes"}}},
+    {"name": "outdoor", "top": "Adventurer_Body", "legs": "Adventurer_Legs", "feet": "Adventurer_Feet",
+     "tint": {"top": {"LightGreen": "Top", "White": "Accent"}, "legs": {"Brown_02": "Bottom"}, "feet": {"Brown_02": "Shoes"}}},
+    {"name": "jumpsuit", "top": "SciFi_Body", "legs": "SciFi_Legs", "feet": "SciFi_Feet",
+     "tint": {"top": {"Blue": "Top", "LightBlue": "Accent"}, "legs": {"Blue": "Bottom", "LightBlue": "Accent"}, "feet": {"Black": "Shoes"}}},
+    {"name": "uniform", "top": "Soldier_Body", "legs": "Soldier_Legs", "feet": "Soldier_Feet",
+     "tint": {"top": {"Swat": "Top", "Black": "Accent"}, "legs": {"Swat": "Bottom"}, "feet": {"Black": "Shoes"}}}
+   ]
+  }
+ ]
+}

@@ -3,7 +3,7 @@ extends RefCounted
 ## A player's look as a plain dictionary so it travels over the network and into JSON as is.
 ## Colour fields are palette indices; height and build are scales about 1.0.
 
-const FIELDS: PackedStringArray = ["skin", "hair", "hair_colour", "top", "bottom", "shoes", "hat", "height", "build", "beard", "glasses", "jacket", "jacket_colour", "body"]
+const FIELDS: PackedStringArray = ["skin", "hair", "hair_colour", "top", "bottom", "shoes", "hat", "height", "build", "beard", "glasses", "jacket", "jacket_colour", "body", "outfit"]
 ## Body types (CharacterMesh.BODIES): 0 is body A (the original proportions), 1 is body B. Their
 ## names on screen come from strings.v0.json per tone (ContentMode.text), never from code.
 const BODY_COUNT := 2
@@ -31,6 +31,9 @@ const HAIR_COLOUR_NAMES: PackedStringArray = ["black", "brown", "chestnut", "blo
 const HAT_NAMES: PackedStringArray = ["none", "cap", "beanie"]
 const SHOE_COLOURS: Array[Color] = [Color(0.12, 0.10, 0.09), Color(0.92, 0.92, 0.90), Color(0.45, 0.28, 0.16), Color(0.80, 0.20, 0.18)]
 const SHOE_NAMES: PackedStringArray = ["black", "white", "brown", "red"]
+
+## Kit outfits only roles wear (police); random people never draw them.
+const ROLE_OUTFITS: PackedStringArray = ["uniform"]
 
 const HEIGHT_MIN := 0.90
 const HEIGHT_MAX := 1.10
@@ -146,6 +149,14 @@ static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 	p["body"] = 0 if rng.randf() < body_a_share() else 1
 	if p["body"] == 1:
 		p["height"] = snappedf(clampf(float(p["height"]) - HEIGHT_STEP * BODY_B_HEIGHT_STEPS, HEIGHT_MIN, HEIGHT_MAX), HEIGHT_STEP)
+	# The kit outfit (adopt-art-kit): an everyday one; the uniform is for roles that ask for it.
+	var everyday := PackedStringArray()
+	for name in KitCharacter.choices(int(p["body"]), "outfit"):
+		if not ROLE_OUTFITS.has(name):
+			everyday.append(name)
+	if not everyday.is_empty():
+		var pick := everyday[rng.randi_range(0, everyday.size() - 1)]
+		p["outfit"] = KitCharacter.index_of(int(p["body"]), "outfit", pick)
 	return p
 
 
@@ -196,6 +207,10 @@ static func step(p: Dictionary, key: String, delta: int) -> Dictionary:
 ## Readable value for the creator's rows.
 static func label(p: Dictionary, key: String) -> String:
 	var v: Variant = p.get(key, 0)
+	if key in ["hair", "beard", "hat", "outfit"] and KitCharacter.active():
+		var names := KitCharacter.choices(int(normalise(p)["body"]), key)
+		if not names.is_empty():
+			return names[clampi(int(v), 0, names.size() - 1)]
 	match key:
 		"skin":
 			return _palette_label("skin", int(v))
@@ -265,6 +280,8 @@ static func _count(key: String) -> int:
 			return HAT_NAMES.size()
 		"body":
 			return BODY_COUNT
+		"outfit":
+			return maxi(KitCharacter.count("outfit"), 1)
 	return 1
 
 

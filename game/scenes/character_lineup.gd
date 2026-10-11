@@ -59,7 +59,7 @@ func _ready() -> void:
 		cam.position = Vector3(-6.5, 1.6, 0.8)
 		cam.look_at(Vector3(0, 1.0, 0.8))
 	else:
-		cam.position = Vector3(0.0, 1.3, 6.4)
+		cam.position = Vector3(0.0, 1.3, 7.6)
 		cam.look_at(Vector3(0, 0.9, 0.0))
 	cam.fov = 50.0
 	cam.current = true

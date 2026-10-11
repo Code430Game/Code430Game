@@ -11,9 +11,16 @@ func before_test() -> void:
 
 
 func after_test() -> void:
+	KitCharacter.enabled = true
 	get_tree().paused = false
 	if FileAccess.file_exists(_path):
 		DirAccess.remove_absolute(_path)
+
+
+## The primitive body (before the art kit, and still the fallback without it): the tests of its
+## jacket, hair cap and body B shapes run on it.
+func _primitive() -> void:
+	KitCharacter.enabled = false
 
 
 func _joy(button: int) -> void:
@@ -118,9 +125,10 @@ func test_creator_changes_the_profile_live_and_saves_last_on_done() -> void:
 	await get_tree().process_frame
 	assert_bool(get_tree().paused).is_true()
 	await _joy(JOY_BUTTON_DPAD_RIGHT)  # skin 2 -> 3 on the first row
-	await _joy(JOY_BUTTON_DPAD_DOWN)
-	await _joy(JOY_BUTTON_DPAD_DOWN)
-	await _joy(JOY_BUTTON_DPAD_DOWN)
+	for row in range(CharacterCreator.FIELD_ROWS.size()):
+		if CharacterCreator.FIELD_ROWS[row][0] == "top":
+			break
+		await _joy(JOY_BUTTON_DPAD_DOWN)
 	await _joy(JOY_BUTTON_DPAD_LEFT)  # top 0 -> last colour
 	assert_int(creator.profile["skin"]).is_equal(3)
 	assert_int(creator.profile["top"]).is_equal(CharacterProfile.palette("cloth").size() - 1)
@@ -146,6 +154,7 @@ func test_knees_bend_backward_and_elbows_forward() -> void:
 
 
 func test_jacket_is_open_over_the_shirt() -> void:
+	_primitive()
 	# In the chest band, down the front centre line only the shirt colour shows, and the
 	# jacket colour sits further forward than the shirt does: an open coat over a full shirt.
 	var profile := {"hair": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 1, "top": 0, "bottom": 5, "jacket_colour": 3, "height": 1.0, "build": 1.0}
@@ -182,6 +191,7 @@ func test_jacket_is_open_over_the_shirt() -> void:
 
 
 func test_jacket_front_opens_wide_enough_not_to_read_as_a_tie() -> void:
+	_primitive()
 	# An 8 cm gap between the fronts passed the test above but still read as a tie on the Deck
 	# (human, 2026-10-02): no jacket colour on the front within 10 cm of the centre line.
 	var profile := {"hair": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 1, "top": 0, "bottom": 5, "jacket_colour": 3, "height": 1.0, "build": 1.0}
@@ -242,6 +252,7 @@ func test_character_pack_palettes_extend_the_built_ins_and_fall_back_when_disabl
 
 
 func test_hair_stops_above_the_eyes_and_shirt_stops_at_the_waist() -> void:
+	_primitive()
 	var profile := {"hair": 2, "hair_colour": 0, "hat": 0, "beard": 0, "glasses": 0, "jacket": 0, "top": 0, "bottom": 2, "height": 1.0, "build": 1.0}
 	var mesh := CharacterMesh.build(profile)
 	var arrays := mesh.surface_get_arrays(0)
@@ -270,6 +281,7 @@ func test_hair_stops_above_the_eyes_and_shirt_stops_at_the_waist() -> void:
 
 ## add-character-features 1.1: body A is today's body exactly; body B is reshaped and joined.
 func test_an_old_profile_builds_the_same_body_and_body_b_differs() -> void:
+	_primitive()
 	var old := {"skin": 2, "top": 1, "height": 1.0, "build": 1.0}  # saved before bodies existed
 	var with_a := old.merged({"body": 0})
 	var m_old := CharacterMesh.build(old)

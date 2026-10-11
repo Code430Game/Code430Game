@@ -1,9 +1,12 @@
 class_name CharacterMesh
 extends RefCounted
-## A low-poly person built from primitives into one vertex-coloured surface (one draw call).
-## Every part belongs to one bone of a small rig (see BONES) so a Skeleton3D can walk it;
-## `build` with a pose bakes the bones in instead, for static bodies (pedestrian pools).
-## Stands on y = 0, faces -Z. Height scales everything vertically; build scales widths.
+## A low-poly person in one vertex-coloured surface (one draw call). Every part belongs to one
+## bone of a small rig (see BONES) so a Skeleton3D can walk it; `build` with a pose bakes the
+## bones in instead, for static bodies (pedestrian pools). Stands on y = 0, faces -Z. Height
+## scales everything vertically; build scales widths.
+##
+## The parts come from the art kit when it is there (KitCharacter, adopt-art-kit stage 2: the
+## pivots too); otherwise the body is built from primitives, as it was before the kit.
 
 ## Hair cap thresholds on the unit head sphere: front above the brows, back down to the nape.
 const HAIRLINE_FRONT := 0.42
@@ -30,6 +33,8 @@ const MOUTH_COLOR := Color(0.55, 0.30, 0.28)
 ## Jacket front panels as (centre x, width) in metres on the unscaled body: an open front
 ## 24 cm wide, so the shirt reads as a shirt and not a tie.
 const JACKET_FRONT := Vector2(0.165, 0.09)
+## How far in front of the kit's eyes the glasses frames sit.
+const KIT_GLASSES_OUT := 0.03
 
 static var _sphere_arrays: Array = []
 static var _capsule_arrays: Array = []
@@ -58,6 +63,8 @@ static func bone_index(name: String) -> int:
 static func bone_pivot(i: int, profile: Dictionary) -> Vector3:
 	var p := CharacterProfile.normalise(profile)
 	var s := Vector3(float(p["build"]), float(p["height"]), float(p["build"]))
+	if KitCharacter.active():
+		return KitCharacter.pivot(int(p["body"]), BONES[i][0]) * s
 	return body_shape(BONES[i][2] as Vector3, BONES[i][0], int(p["body"])) * s
 
 
@@ -178,6 +185,8 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 		st.set_custom_format(0, SurfaceTool.CUSTOM_R_FLOAT)
 	var b := _Builder.new(st, p, pose, skinned, s)
 	b.bone_channel = bone_channel
+	if KitCharacter.active():
+		return _build_kit(b, p)
 	# Legs and shoes
 	for side: float in [-1.0, 1.0]:
 		var thigh := "thigh_l" if side > 0.0 else "thigh_r"
@@ -250,6 +259,24 @@ static func build(profile: Dictionary, pose: Dictionary = {}, skinned: bool = fa
 	return mesh
 
 
+## The kit body: the profile's parts from KitCharacter, plus glasses in front of its eyes.
+static func _build_kit(b: _Builder, p: Dictionary) -> ArrayMesh:
+	b.kit = true
+	KitCharacter.each_vertex(p, b.emit_index)
+	if int(p["glasses"]) == 1:
+		var eyes: Dictionary = KitCharacter.pack(int(p["body"])).get("eyes", {})
+		var c: Array = eyes.get("centre", [0.0, 1.67, -0.14])
+		var centre := Vector3(float(c[0]), float(c[1]), float(c[2]) - KIT_GLASSES_OUT)
+		var half := float(eyes.get("half_spacing", 0.05))
+		for side: float in [-1.0, 1.0]:
+			b.box(centre + Vector3(side * half, 0.0, 0.0), Vector3(0.056, 0.042, 0.008), FRAME_COLOR, "head", true)
+		b.box(centre + Vector3(0.0, 0.005, 0.0), Vector3(2.0 * half - 0.05, 0.008, 0.008), FRAME_COLOR, "head")
+	var mesh := ArrayMesh.new()
+	b.st.commit(mesh)
+	mesh.surface_set_material(0, material())
+	return mesh
+
+
 ## Inverse bind transforms for a Skeleton3D skin, in bone order.
 static func skin_for(profile: Dictionary) -> Skin:
 	var skin := Skin.new()
@@ -297,6 +324,7 @@ class _Builder:
 	var pose: Dictionary
 	var skinned: bool
 	var bone_channel: bool = false
+	var kit: bool = false  # kit parts are already shaped for their body: no body_shape
 	var scale: Vector3
 	var _bone_xf: Dictionary = {}  # name -> posed transform * inverse bind, model space
 
@@ -312,9 +340,13 @@ class _Builder:
 				_bone_xf[name] = CharacterMesh.bone_global(i, p, pose) * Transform3D(Basis(), -CharacterMesh.bone_pivot(i, p))
 
 	func _emit(v: Vector3, n: Vector3, color: Color, bone: String) -> void:
-		var pos := CharacterMesh.body_shape(v, bone, int(profile["body"])) * scale
+		emit_index(v if kit else CharacterMesh.body_shape(v, bone, int(profile["body"])), n, color, CharacterMesh.bone_index(bone))
+
+	## A vertex of bone `idx`, already shaped for the body, at scale 1 in the rest pose.
+	func emit_index(v: Vector3, n: Vector3, color: Color, idx: int) -> void:
+		var pos := v * scale
+		var bone: String = CharacterMesh.BONES[idx][0]
 		if skinned:
-			var idx := CharacterMesh.bone_index(bone)
 			st.set_bones(PackedInt32Array([idx, 0, 0, 0]))
 			st.set_weights(PackedFloat32Array([1.0, 0.0, 0.0, 0.0]))
 		else:
@@ -322,7 +354,7 @@ class _Builder:
 			pos = xf * pos
 			n = (xf.basis * n).normalized()
 		if bone_channel:
-			st.set_custom(0, Color(float(CharacterMesh.bone_index(bone)), 0.0, 0.0, 0.0))
+			st.set_custom(0, Color(float(idx), 0.0, 0.0, 0.0))
 		st.set_color(color)
 		st.set_normal(n)
 		st.add_vertex(pos)

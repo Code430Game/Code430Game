@@ -611,6 +611,7 @@ func _make_medic(at: Vector3, k: int) -> Node3D:
 	p["jacket"] = 1
 	p["jacket_colour"] = 3  # yellow high-visibility
 	p["hat"] = 0
+	p["outfit"] = KitCharacter.index_of(int(p["body"]), "outfit", "worker")  # the vest takes the yellow
 	rig.profile = p
 	m.add_child(rig)
 	m.set_meta("rig", rig)
