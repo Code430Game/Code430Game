@@ -79,6 +79,10 @@ func build(profile: Dictionary) -> void:
 		var spec: Dictionary = BODIES[name]
 		var pivot := CharacterMesh.bone_pivot(i, _profile)
 		var centre := (spec["c"] as Vector3) * s
+		var kit_box := AABB()
+		if KitCharacter.active():  # the kit body's own extents (adopt-art-kit)
+			kit_box = KitCharacter.bone_box(int(_profile["body"]), name)
+			centre = kit_box.get_center() * s
 		var pb := PhysicalBone3D.new()
 		pb.name = name
 		pb.bone_name = name
@@ -104,18 +108,21 @@ func build(profile: Dictionary) -> void:
 		else:
 			pb.joint_type = PhysicalBone3D.JOINT_TYPE_NONE
 		var shape := CollisionShape3D.new()
+		var size := kit_box.size
 		if spec.has("box"):
 			var box := BoxShape3D.new()
-			box.size = (spec["box"] as Vector3) * s
+			box.size = (size if kit_box.has_volume() else spec["box"] as Vector3) * s
 			shape.shape = box
 		elif spec.has("sphere"):
 			var sphere := SphereShape3D.new()
-			sphere.radius = float(spec["sphere"]) * s.x
+			sphere.radius = (minf(size.x, size.y) * 0.5 if kit_box.has_volume() else float(spec["sphere"])) * s.x
 			shape.shape = sphere
 		else:
 			var capsule := CapsuleShape3D.new()
-			capsule.radius = float(spec["capsule"][0]) * s.x
-			capsule.height = maxf(float(spec["capsule"][1]) * s.y, capsule.radius * 2.0)
+			# The kit's arms hang a little outwards and its feet reach forwards, so the box is
+			# wider than the limb: the narrower side, a little in, makes the radius.
+			capsule.radius = (minf(size.x, size.z) * 0.4 if kit_box.has_volume() else float(spec["capsule"][0])) * s.x
+			capsule.height = maxf((size.y if kit_box.has_volume() else float(spec["capsule"][1])) * s.y, capsule.radius * 2.0)
 			shape.shape = capsule
 		pb.add_child(shape)
 		simulator.add_child(pb)

@@ -22,8 +22,8 @@ files came from Poly Pizza, which lists each model as by Quaternius under CC0 (P
 | SportsCar.glb | Sports Car | https://poly.pizza/m/OyqKvX9xNh |
 | SportsCar2.glb | Sports Car | https://poly.pizza/m/1mkmFkAz5v |
 
-TODO: add the pack's own `License.txt` from the Drive folder (file id
-`1CqsvhpIzBNSDlZsBWdJcJNC1B-TE3cXK`) once the quota resets.
+The pack's own `License.txt` (CC0 1.0 Universal) came from the same Drive folder, "Realistic
+Car Pack - Nov 2018", on 2026-10-11 once the quota allowed; it is kept here.
 
 ## Files (sha256)
 ```
