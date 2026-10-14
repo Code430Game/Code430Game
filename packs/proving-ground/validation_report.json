@@ -2628,6 +2628,11 @@
     "levels": 2490,
     "tag": 15
    },
+   "house_types": {
+    "detached": 642,
+    "semi": 471,
+    "terrace": 756
+   },
    "skipped": []
   },
   "classes": {

@@ -10,6 +10,7 @@ import argparse
 import json
 import logging
 import sys
+from collections import Counter
 from pathlib import Path
 
 from osm_import.barriers import build_barriers
@@ -19,6 +20,7 @@ from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.export import pedestrian_to_list
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.garages import build_garages
+from osm_import.houses import build_house_hints
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pack import (
     ChunkSampler,
@@ -116,10 +118,12 @@ def _import(args: argparse.Namespace) -> int:
                 b_payload, meta = fetch_query(buildings_query(bbox), bbox, args.cache_dir)
                 sources.append(_source("buildings", meta))
             buildings = build_buildings(b_payload, bbox, proj, elevation, cfg.buildings)
+            houses = build_house_hints(buildings, result.graph)
             result.report.summary["buildings"] = {
                 "footprints": len(buildings.buildings),
                 "skipped": buildings.skipped[:20],
                 "height_sources": buildings.height_sources,
+                "house_types": dict(sorted(Counter(h.type for h in houses.values()).items())),
             }
         chunks, tstats = build_terrain(
             result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m, buildings, cfg

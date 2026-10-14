@@ -30,7 +30,22 @@
           "roof_shape": {"type": "string"},
           "roof_levels": {"type": "number", "minimum": 0},
           "levels": {"type": "number", "minimum": 0},
-          "shopfront": {"type": "boolean"}
+          "shopfront": {"type": "boolean"},
+          "house": {
+            "description": "Set on house footprints only: the type to build, the outer-ring edge the front door faces (rings[0][i] to rings[0][i+1]), the door point, the distance from that wall to the street's edge (null with no street in reach), the street's road edge id and the edges shared with a neighbour (party walls).",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "storeys", "front_edge", "door", "setback_m", "street", "party_walls"],
+            "properties": {
+              "type": {"enum": ["detached", "cottage", "bungalow", "semi", "terrace"]},
+              "storeys": {"type": "number", "exclusiveMinimum": 0},
+              "front_edge": {"type": "integer", "minimum": 0},
+              "door": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "setback_m": {"type": ["number", "null"], "minimum": 0},
+              "street": {"type": ["string", "null"]},
+              "party_walls": {"type": "array", "items": {"type": "integer", "minimum": 0}}
+            }
+          }
         }
       }
     }
