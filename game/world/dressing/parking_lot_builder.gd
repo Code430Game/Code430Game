@@ -461,12 +461,17 @@ static func build_chunk(lots: Array, coord: Vector2i, heights: TerrainBuilder.Ch
 ## holes wound opposite to their outer polygon; a cell can only get one when a lot hole lies
 ## wholly inside it (rare at 4 m), and then the cell piece is kept uncut.
 static func _clip_to_lot(cell: PackedVector2Array, lot: Lot) -> Array[PackedVector2Array]:
+	return clip_to_rings(cell, lot.outer, lot.holes)
+
+
+## The parts of a convex cell inside the polygon `outer` minus `holes` (lots, yards).
+static func clip_to_rings(cell: PackedVector2Array, outer: PackedVector2Array, holes: Array[PackedVector2Array]) -> Array[PackedVector2Array]:
 	var cw := Geometry2D.is_polygon_clockwise(cell)
 	var pieces: Array[PackedVector2Array] = []
-	for p in Geometry2D.intersect_polygons(cell, lot.outer):
+	for p in Geometry2D.intersect_polygons(cell, outer):
 		if Geometry2D.is_polygon_clockwise(p) == cw:
 			pieces.append(p)
-	for h in lot.holes:
+	for h in holes:
 		var next: Array[PackedVector2Array] = []
 		for piece in pieces:
 			var cut := Geometry2D.clip_polygons(piece, h)
@@ -519,17 +524,18 @@ static func _add_strip(tris: RoadMeshBuilder.ChunkTriangles, a: Vector2, b: Vect
 	_add_up(tris, top[0], top[2], top[3], color)
 	if height <= 0.0:
 		return
+	var inside := (bottom[0] + bottom[1] + bottom[2] + bottom[3] + top[0] + top[1] + top[2] + top[3]) / 8.0
 	for i in range(4):
 		var j := (i + 1) % 4
-		_add_side(tris, bottom[i], bottom[j], top[j], top[i], color)
+		_add_side(tris, bottom[i], bottom[j], top[j], top[i], color, inside)
 
 
-## An upright quad facing away from the strip's centre line (outward).
-static func _add_side(tris: RoadMeshBuilder.ChunkTriangles, a: Vector3, b: Vector3, c: Vector3, d: Vector3, color: Color) -> void:
-	var centre := (a + b + c + d) * 0.25
+## An upright quad facing away from `inside` (the middle of the strip it walls in). Measuring
+## from the quad's own centre left the way it faced to chance: half the sides of a strip were
+## inside out, which the 10 cm kerbs hid and the hedges showed.
+static func _add_side(tris: RoadMeshBuilder.ChunkTriangles, a: Vector3, b: Vector3, c: Vector3, d: Vector3, color: Color, inside: Vector3) -> void:
 	var out := Vector3(-(b - a).z, 0.0, (b - a).x)  # one of the two horizontal normals
-	var probe := (a + b) * 0.5
-	if out.dot(probe - centre) < 0.0:
+	if out.dot((a + b) * 0.5 - inside) < 0.0:
 		out = -out
 	# Emit so the cross product points inward (against `out`).
 	if (b - a).cross(c - a).dot(out) > 0.0:

@@ -7,7 +7,7 @@
 - [ ] 2.1 House types in `building_builder.gd`: detached front gable, cottage with dormer, bungalow, semi and terrace rows with shared roof lines; realistic heights; tests on each type's shape
 - [ ] 2.2 `house_parts.gd`: door facing the street, porch or stoop with steps, window frames, sills and lintels, chimneys; LOD0 only; tests
 - [ ] 2.3 Materials palette (brick, clapboard, stone trim) with tagged material and colour first; tests
-- [ ] 2.4 Yards: lawn, path to the door, hedges and shrubs; fences as one MultiMesh per chunk; tests
+- [x] 2.4 Yards: lawn, path to the door, hedges and shrubs; fences as one MultiMesh per chunk; tests. `game/world/dressing/yard_builder.gd`: lawns (front, back and side in three mown greens) clipped to the 4 m terrain cells and draped like parking lots; a 1.1 m path from the door; a hedge along the frontage on about 35% of front lawns (gap at the path), else a shrub each side of the door; fence panels and posts (1.6 m) on the ground. Fences and hedges are one merged mesh per chunk rather than a MultiMesh: one draw either way, and the GLB chunk cache keeps plain meshes only. Both collide; everything is LOD0 to 400 m, in the plain barrier material. Fixed on the way: `ParkingLotBuilder._add_side` faced half of every strip's sides inward (unseen on 10 cm kerbs, obvious on hedges). Proving-ground screenshots before and after (street and high view) in the PR
 - [ ] 2.5 Before and after screenshots on a Glebe street, a Sandy Hill terrace row and a corner lot
 
 ## 3. Verification
