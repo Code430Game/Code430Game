@@ -11,6 +11,14 @@ Map, story and character packs other than the built-in ones SHALL each live in t
 - **WHEN** a contributor maps the Glebe after Centretown
 - **THEN** the Glebe is a new pack in the same `Location-OttawaOnCa` repository, sharing the city's origin, rather than a new repository
 
+#### Scenario: Districts that can be stitched
+- **WHEN** the Glebe is added beside Centretown
+- **THEN** it uses Ottawa's origin and a border on the 256 m chunk grid that doesn't overlap Centretown's, and the importer refuses a border that does
+
+#### Scenario: A file near GitHub's limit
+- **WHEN** a district's buildings file passes 90 MB
+- **THEN** the pack repository's CI fails and asks for the district to be split, before GitHub would refuse the push
+
 #### Scenario: A pack release
 - **WHEN** a pack repository tags a release
 - **THEN** its CI validates the pack with the pinned game version and publishes a zip of the pack with its sha256

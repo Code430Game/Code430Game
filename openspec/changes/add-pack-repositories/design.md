@@ -40,6 +40,12 @@
   under `packs/<district>/`, so Centretown and later the Glebe sit together, share the city's
   origin and inputs, and can meet at their edges. Our first pack covers only Centretown, not
   all of Ottawa. If one city grows too big, that city can split by district on its own.
+- **Districts are laid out so they can be stitched later** (playing neighbouring districts as
+  one map is its own change, `add-district-stitching`): every district in a city uses the
+  city's pinned origin, and its border lies on the 256 m chunk grid of that origin, with no
+  overlap between districts, so each chunk belongs to exactly one district. The region file
+  gives the border in chunk coordinates; the importer clips OSM data to it and refuses a
+  border that is off the grid or overlaps a sibling district in the same repository.
 - Every pack repository carries a GitHub topic for its kind (`code430-location`,
   `code430-story`, `code430-ads`, `code430-characters`), so packs in people's own accounts
   (a story for friends usually lives there) are found by topic search, and a later Packs-tab
@@ -145,6 +151,29 @@ packs now?"):
   row with the on-screen keyboard. It runs the same steps in the game (HTTPRequest, sha256,
   the loader's manifest checks) and accepts data-only packs only. Network access from the game
   is new, so that stage starts with a short design note on what the game may fetch.
+
+## Repository size
+GitHub's limits (as documented in 2026; check again before relying on them): a pushed file
+over 50 MB gets a warning and one over 100 MB is refused; a repository should stay under about
+1 GB and well under 5 GB; release assets can be up to 2 GB each. Git LFS is not used: its
+free storage and bandwidth are small, and every clone and fork would draw on it.
+
+Today Centretown is about 10 km² and 28 MB on disk (largest file `buildings.v0.json`, 9.9 MB
+indented, 4 MB minified), and the game repository's whole history, with every Ottawa
+re-export, packs to 36 MB, because the importer's output is sorted and deterministic, so git
+stores each re-export as a small delta. With yards it will be about 40 MB. A city of ten
+districts would be about 400 MB on disk and should stay well under the 1 GB guideline if
+re-exports stay deterministic. To keep it so:
+- the importer writes files sorted and stable (already checked byte for byte on the proving
+  ground), so history grows by what changed, not by whole files;
+- `chunks/` and other generated caches are never committed (`.gitignore` in the template);
+- `pack_tools size check` in each pack repository's CI warns when a file passes 40 MB or the
+  pack passes 250 MB, and fails at 90 MB per file, so a district is split before GitHub
+  refuses a push;
+- players and the game's lock file fetch release zips (much smaller compressed, up to 2 GB
+  each), not clones, so a big history only costs the people editing that city;
+- if a city's history ever does grow too large, it can be squashed into a fresh repository
+  without touching the packs' ids or versions.
 
 ## Tests and CI after the move
 - Game tests that read Ottawa (`test_in_ottawa_*`, `test_osm_golden` inputs, the streaming
