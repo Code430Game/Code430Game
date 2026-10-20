@@ -56,6 +56,7 @@ class Building:
     roof_levels: float = 0.0
     levels: float = 0.0  # building:levels, 0 when untagged
     shopfront: bool = False  # a shop or amenity at street level
+    house: dict | None = None  # houses.HouseHint.to_dict(), set by houses.build_house_hints
 
 
 SHOPFRONT_AMENITIES = {
@@ -125,6 +126,7 @@ class BuildingsResult:
                     "levels": b.levels,
                     "shopfront": b.shopfront,
                 }
+                | ({"house": b.house} if b.house is not None else {})
                 for b in sorted(self.buildings, key=lambda b: b.id)
             ],
         }

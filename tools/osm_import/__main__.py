@@ -10,6 +10,7 @@ import argparse
 import json
 import logging
 import sys
+from collections import Counter
 from pathlib import Path
 
 from osm_import.barriers import build_barriers
@@ -19,6 +20,7 @@ from osm_import.elevation import FlatSource, SyntheticSource, hrdem_source
 from osm_import.export import pedestrian_to_list
 from osm_import.fetch import DEFAULT_CACHE_DIR, fetch_bbox, fetch_query
 from osm_import.garages import build_garages
+from osm_import.houses import build_house_hints
 from osm_import.osm_data import BBox, OsmData
 from osm_import.pack import (
     ChunkSampler,
@@ -34,6 +36,7 @@ from osm_import.services import build_services, services_query
 from osm_import.validation import render_markdown
 from osm_import.vegetation import build_vegetation, vegetation_query
 from osm_import.water import build_water, water_query
+from osm_import.yards import build_yards
 
 
 def _source(layer: str, meta: dict | None, path: Path | None = None) -> dict:
@@ -116,10 +119,12 @@ def _import(args: argparse.Namespace) -> int:
                 b_payload, meta = fetch_query(buildings_query(bbox), bbox, args.cache_dir)
                 sources.append(_source("buildings", meta))
             buildings = build_buildings(b_payload, bbox, proj, elevation, cfg.buildings)
+            houses = build_house_hints(buildings, result.graph)
             result.report.summary["buildings"] = {
                 "footprints": len(buildings.buildings),
                 "skipped": buildings.skipped[:20],
                 "height_sources": buildings.height_sources,
+                "house_types": dict(sorted(Counter(h.type for h in houses.values()).items())),
             }
         chunks, tstats = build_terrain(
             result.graph, elevation, proj.bbox_local(bbox), water, cfg.water_depth_m, buildings, cfg
@@ -165,6 +170,11 @@ def _import(args: argparse.Namespace) -> int:
                 cfg.parking.get("garages"),
             )
             result.report.summary["parking"] = parking.counts()
+        # Yards after parking: lots, like roads and other buildings, are not yard.
+        yards = None
+        if buildings is not None:
+            yards = build_yards(buildings, result.graph, parking, water)
+            result.report.summary["yards"] = yards.counts()
         # Vegetation last: it keeps off the final roads, sidewalks, buildings and water, and
         # stands on the finished terrain.
         if args.vegetation_json:
@@ -215,6 +225,7 @@ def _import(args: argparse.Namespace) -> int:
             vegetation,
             services,
             spawn=getattr(args, "spawn", None),
+            yards=yards,
         )
         # Pack extras the importer does not produce (a lap timer, a gang's turf) ride along.
         for extra in getattr(args, "extras", None) or []:

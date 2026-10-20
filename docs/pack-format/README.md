@@ -117,9 +117,10 @@ item (a billboard goes blank). First item type: billboard ads in `ads.v0.json`
 | `road_graph.v0.json` | yes | Nodes and edges with polylines, plus pedestrian ways with kind and width; schema `road_graph.schema.v0.json`. |
 | `terrain.json` + `terrain/*.png` | yes | 256 m chunks of 65×65 height samples at 4 m, height in the R and G bytes, min/max per chunk. |
 | `water.v0.json` | no | Pre-triangulated water polygons with a surface height; schema `water.schema.v0.json`. |
-| `buildings.v0.json` | no | Building footprints with height and ground height, roof pre-triangulated; schema `buildings.schema.v0.json`. |
+| `buildings.v0.json` | no | Building footprints with height and ground height, roof pre-triangulated; houses carry a `house` hint (type, front wall, door, setback, party walls); schema `buildings.schema.v0.json`. |
 | `ads.v0.json` | no | Billboard ads with per-mode variants; schema `ads.schema.v0.json`. |
 | `parking.v0.json` | no | Parking lots (rings, kind, capacity, operator, stall direction, aisles inside, entrances, ground height) and street-side bays along edges; schema `parking.schema.v0.json`. |
+| `yards.v0.json` | no | Per house: front lawn, backyard and side-yard polygons, a path from the door, the lawn's frontage along the street; fence lines where backyards meet; schema `yards.schema.v0.json` (update-houses-and-yards). |
 | `vehicles.v0.json` | no | Vehicles merged after the base catalogue (same id replaces): body class, dimensions, mass and handling, palette, spawn weights by road group and hour, liveries with per-mode variants; schema `vehicles.schema.v0.json`. Any pack type may ship one. |
 | `turf.v0.json` | no | Ground a faction holds: rings in local metres, optionally the faction id and a centre; schema `turf.schema.v0.json` (add-hostile-gang). |
 | `factions.v0.json` | no | Factions merged after the base game's (`game/core/content/factions.v0.json`, same id replaces): crew size, look, car, per-mode weapon variants by weapon id, threat and heat tunables; schema `factions.schema.v0.json`. Any pack type may ship one. |

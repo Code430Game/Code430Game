@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/yards.schema.v0.json",
+  "title": "Code 430 yards v0",
+  "description": "Optional file in a map pack. Per house (by building id): front lawn, backyard and side-yard polygons, a path from the door across the front lawn, and the front lawn's frontage along the street; plus fence lines where two backyards meet. Local metres, x east, z south; 2D (the game drapes them on its terrain).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "yards", "fences"],
+  "$defs": {
+    "point": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+    "ring": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/point"}},
+    "polygon": {"description": "Outer ring (counter-clockwise in x,z) first, then holes; not closed.", "type": "array", "minItems": 1, "items": {"$ref": "#/$defs/ring"}},
+    "line": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/point"}}
+  },
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "yards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["house", "front", "back", "side", "path", "frontage"],
+        "properties": {
+          "house": {"description": "The building id in buildings.v0.json.", "type": "string", "pattern": "^[wr][0-9]+\\.[0-9]+$"},
+          "front": {"type": "array", "items": {"$ref": "#/$defs/polygon"}},
+          "back": {"type": "array", "items": {"$ref": "#/$defs/polygon"}},
+          "side": {"type": "array", "items": {"$ref": "#/$defs/polygon"}},
+          "path": {"description": "Door, then where the path meets the lawn's edge; empty when there is no front lawn to cross.", "type": "array", "maxItems": 2, "items": {"$ref": "#/$defs/point"}},
+          "frontage": {"description": "Parts of the front lawn's edge along a street or sidewalk (where a hedge can grow).", "type": "array", "items": {"$ref": "#/$defs/line"}}
+        }
+      }
+    },
+    "fences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "houses", "points"],
+        "properties": {
+          "id": {"type": "string"},
+          "houses": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2},
+          "points": {"$ref": "#/$defs/line"}
+        }
+      }
+    }
+  }
+}

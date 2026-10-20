@@ -39,6 +39,7 @@ from osm_import.services import ServicesResult
 from osm_import.underpasses import dig_underpasses
 from osm_import.vegetation import VegetationResult
 from osm_import.water import WaterResult
+from osm_import.yards import YardsResult
 
 CHUNK_SIZE_M = 256.0
 TERRAIN_RES_M = 4.0
@@ -567,6 +568,7 @@ def write_pack(
     vegetation: VegetationResult | None = None,
     services: ServicesResult | None = None,
     spawn: dict | None = None,
+    yards: YardsResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
     fixed start on the manifest for packs whose author chose one."""
@@ -672,6 +674,9 @@ def write_pack(
     if services is not None:
         paths["services"] = out_dir / "services.v0.json"
         dump_json(services.to_dict(), paths["services"])
+    if yards is not None:
+        paths["yards"] = out_dir / "yards.v0.json"
+        dump_json(yards.to_dict(), paths["yards"])
     return paths
 
 

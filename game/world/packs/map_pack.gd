@@ -20,7 +20,7 @@ const LOD_FADE_M := 40.0
 ## (terrain LOD1/LOD2, roads LOD1, buildings LOD1, water); NEAR adds LOD0 detail and collision.
 enum Tier { NONE = 0, FAR = 1, NEAR = 2 }
 ## Child names that only exist at the NEAR tier (dropped on a downgrade).
-const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "bridges_lod0", "garages_lod0", "garage_lights", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor", "parking_markings_lod0", "parking_props_lod0", "parking_signs"]
+const NEAR_ROLES := ["roads_lod0", "junctions_lod0", "markings_lod0", "barriers_lod0", "bridges_lod0", "garages_lod0", "garage_lights", "sidewalks_lod0", "underpasses_lod0", "buildings_lod0", "terrain_lod0", "collision", "water_floor", "parking_markings_lod0", "parking_props_lod0", "parking_signs", "yards_lod0", "yards_props_lod0"]
 const SPAWN_MIN_EDGE_M := 150.0  # spawn edges shorter than this are usually bbox stubs
 const WATER_LAYER_BIT := 2  # physics layer 2: wading floors; only people carry it in their mask
 const WADE_DEPTH_M := 1.0  # how far below the surface a person stands in water
@@ -64,6 +64,7 @@ var services: Array[Services.Place] = []  # police stations, hospitals, fire sta
 var turfs: Array[Turf] = []  # ground a faction holds (add-hostile-gang)
 var parking_lots: Array[ParkingLotBuilder.Lot] = []
 var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the chunk
+var yard_chunks: Dictionary = {}  # Vector2i -> {"yards", "fences"} (YardBuilder.by_chunk)
 
 
 var _content_hash: String = ""  # cached per load: the pack files cannot change underneath a loaded pack
@@ -119,6 +120,7 @@ func load(dir: String) -> bool:
 	bridge_chunks = BridgeBuilder.build(bridges)
 	parking_lots = ParkingLotBuilder.load_lots(dir, graph)
 	parking_chunks = ParkingLotBuilder.by_chunk(parking_lots, RoadGeometry.CHUNK_SIZE_M)
+	yard_chunks = YardBuilder.by_chunk(YardBuilder.load_yards(dir), RoadGeometry.CHUNK_SIZE_M)
 	# Garages after the surface lots' chunks: their stalls join parking_lots (for parked cars)
 	# but are drawn by GarageBuilder at floor height, not draped on the terrain.
 	vegetation_chunks = VegetationBuilder.load_by_chunk(dir, RoadGeometry.CHUNK_SIZE_M)
@@ -372,6 +374,17 @@ func build_chunk_meshes(coord: Vector2i, heights: TerrainBuilder.ChunkHeights, r
 			chunk.add_child(_mesh_instance("parking_props_lod0", (lots["props"] as RoadMeshBuilder.ChunkTriangles).to_mesh(), road_material, 0.0, ROAD_LOD0_END_M))
 		if near:
 			labels = lots["labels"]
+	# Yards in plain vertex colour (the barrier material): the asphalt grain streaked the hedges.
+	if near and yard_chunks.has(coord):
+		var yards := YardBuilder.build_chunk(yard_chunks[coord], coord, heights, RoadGeometry.CHUNK_SIZE_M)
+		if not (yards["lawns"] as RoadMeshBuilder.ChunkTriangles).is_empty():
+			var lawn_mi := _mesh_instance("yards_lod0", (yards["lawns"] as RoadMeshBuilder.ChunkTriangles).to_mesh(), barrier_material, 0.0, YardBuilder.VISIBLE_TO_M)
+			lawn_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			chunk.add_child(lawn_mi)
+		if not (yards["props"] as RoadMeshBuilder.ChunkTriangles).is_empty():
+			var myp: ArrayMesh = (yards["props"] as RoadMeshBuilder.ChunkTriangles).to_mesh()
+			chunk.add_child(_mesh_instance("yards_props_lod0", myp, barrier_material, 0.0, YardBuilder.VISIBLE_TO_M))
+			collision_meshes.append(myp)
 	var holes: Array = terrain_holes.get(coord, [])
 	var t1 := TerrainBuilder.build_mesh(heights, 1, holes)
 	var t2 := TerrainBuilder.build_mesh(heights, 2, holes)
