@@ -98,7 +98,7 @@ MUTATIONS = [
     (("diagnostics", "machine", "resolution"), [1280]),
     (("diagnostics", "place", "x"), "237"),
     (("diagnostics", "frame_time", "avg_ms"), -1),
-    (("reporter_id",), "Ryan"),
+    (("reporter_id",), "Alex"),
 ]
 
 
