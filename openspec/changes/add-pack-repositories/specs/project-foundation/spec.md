@@ -1,11 +1,15 @@
 ## ADDED Requirements
 
 ### Requirement: Packs In Their Own Repositories
-Map, story and character packs other than the built-in ones SHALL each live in their own repository under the project's organisation, with the inputs that rebuild them, their own licence and attribution, a CI check by the game's pack validator, and tagged releases carrying a zip and its sha256.
+Map, story and character packs other than the built-in ones SHALL each live in their own repository under the project's packs organisation, named `<Kind>-<Name>` with a GitHub topic for their kind (a location repository being a city that holds one pack per district), with the inputs that rebuild them, their own licence and attribution, a CI check by the game's pack validator, and tagged releases carrying a zip and its sha256.
 
 #### Scenario: Two people work on different regions
 - **WHEN** one contributor rebuilds the Ottawa pack while another edits a story pack
 - **THEN** each works in that pack's own repository and neither change touches the game repository
+
+#### Scenario: A second district joins a city
+- **WHEN** a contributor maps the Glebe after Centretown
+- **THEN** the Glebe is a new pack in the same `Location-OttawaOnCa` repository, sharing the city's origin, rather than a new repository
 
 #### Scenario: A pack release
 - **WHEN** a pack repository tags a release
