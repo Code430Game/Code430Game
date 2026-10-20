@@ -19,10 +19,10 @@ func after_test() -> void:
 
 
 func test_redactor_replaces_home_and_account_name() -> void:
-	var r := Diagnostics.Redactor.new("/Users/rjackson", "rjackson")
-	assert_str(r.redact("loaded /Users/rjackson/Games/code430/packs as rjackson")).is_equal("loaded ~/Games/code430/packs as <user>")
-	assert_str(r.redact("RJackson logged in")).is_equal("<user> logged in")
-	assert_str(r.redact("rjacksonville")).is_equal("rjacksonville")  # whole words only
+	var r := Diagnostics.Redactor.new("/Users/jdoe", "jdoe")
+	assert_str(r.redact("loaded /Users/jdoe/Games/code430/packs as jdoe")).is_equal("loaded ~/Games/code430/packs as <user>")
+	assert_str(r.redact("JDoe logged in")).is_equal("<user> logged in")
+	assert_str(r.redact("jdoesville")).is_equal("jdoesville")  # whole words only
 
 
 func test_generic_deck_account_keeps_words_but_not_home() -> void:

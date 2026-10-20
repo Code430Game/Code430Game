@@ -18831,7 +18831,7 @@
 "generator": "Overpass API 0.7.62.11 87bfad18",
 "kind": "file",
 "osm_base_timestamp": "2026-07-15T15:22:01Z",
-"path": "/private/tmp/claude-501/-Users-rjackson-Projects-Code430/75f6b81a-21a6-46a0-b1c9-b598e7141d09/scratchpad/osm/district.json",
+"path": "osm/district.json",
 "attribution": "\u00a9 OpenStreetMap contributors",
 "license": "ODbL-1.0",
 "note": "Cropped from an Overpass extract of Ottawa Centretown (bbox 45.405,-75.715,45.435,-75.675) fetched 2026-09-30 from overpass.kumi.systems. Fixture bbox 45.4095,-75.6900,45.4145,-75.6830: Highway 417 at the Metcalfe Street exit."
