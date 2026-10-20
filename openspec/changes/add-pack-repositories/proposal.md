@@ -1,0 +1,81 @@
+# Change: Packs in their own repositories, under a project organisation
+
+**Status: proposed 2026-10-20 (human: "there should be an open spec to transition our packs to individual github repos. So ottawa would become a repo. This will allow multiple people to work on different regions and stories." and "we should look at moving this to its final repo").**
+
+**Needs the human before it starts:** the organisation's name and its creation on GitHub
+(see `design.md`, Organisation). `code430` is taken by a dormant user account, so the name is
+open. Check every candidate on GitHub before accepting it.
+
+## Why
+Everything lives in one repository today: the game, the importer, and every pack. The Ottawa
+pack is 28 MB of the checkout and most of the churn: each re-export rewrites
+`buildings.v0.json`, `road_graph.v0.json` and the terrain, and the history keeps every copy. Two
+people working on different regions or stories would be editing the same repository and the
+same CI, and a story writer would have to clone a city they don't touch. Map data is also under
+a different licence (OpenStreetMap's ODbL) from the game, and that is clearer when it sits in
+its own repository. The pack loader (`add-pack-loader`) already finds packs by folder, checks
+their manifests and dependencies, and compares them in co-op, so packs can move out without the
+game caring where they came from.
+
+## What Changes
+- **A project organisation on GitHub.** The game repository moves from `rjksn/Code430` to
+  `<org>/<game>` by GitHub's repository transfer, which keeps issues, pull requests, stars and
+  redirects from the old URL. Packs get their own repositories under the same organisation.
+- **One repository per pack.**
+  - Map packs are named for their place, `<City><Region><Country>` (`OttawaOnCanada`). A
+    region repository can hold more than one district pack later.
+  - Story packs are named `Story<Name>`, character packs `Characters<Name>`.
+  - Each pack repository has:
+    - the pack folder;
+    - the importer inputs that rebuild it: the region file, overrides and fixtures;
+    - its own README, LICENSE and attribution (ODbL for OpenStreetMap-derived data);
+    - a CI workflow that validates it with the game's pack validator at a pinned game version;
+    - tagged releases with a zip and a sha256.
+- **The game pins its packs.** A `packs.lock.json` in the game repository lists each pack's
+  repository, tag, commit and sha256. `scripts/fetch-packs.sh` puts those packs in `packs/`
+  (now ignored by git), and local CI, GitHub CI and `package-linux.sh` run it first. The tests
+  that read Ottawa use the pinned pack.
+- **What stays in the game repository:**
+  - the importer (`tools/osm_import`) and the pack tools;
+  - `code430.proving-ground`, the test district, built from committed inputs and checked by
+    the tests on every run;
+  - `code430.characters`, the built-in palettes and presets;
+  - `packs/example`.
+
+  A pack repository records which importer commit built it (`build.importer` in `pack.json`).
+- **Install a pack from a repository.**
+  - `scripts/install-pack.sh <owner>/<repo>[@tag]` downloads a release, checks its sha256,
+    runs the validator, and puts the pack in the user pack folder (`user://packs`). The game
+    lists it on the Packs tab as it does any pack.
+  - In-game install from the Packs tab is a later stage (see `design.md`). It only takes
+    data-only packs, as the loader does now.
+- **A template repository** (`PackTemplate`) for new regions and stories. `CONTRIBUTING.md`
+  gains "Make a region" and "Write a story pack" sections pointing at it.
+- **Moving Ottawa out:**
+  - `OttawaOnCanada` starts from the current pack, with its history split out of this
+    repository (`git filter-repo --path packs/ottawa-centretown`) so blame still works;
+  - `packs/ottawa-centretown` then leaves the game repository;
+  - the game's old history is not rewritten: forks, pull request links and the 36 MB of
+    packed history stay as they are.
+- **Not in this change:** a pack browser or registry service, paid or private packs, code in
+  packs (system packs stay refused), splitting the importer into its own repository.
+
+## Impact
+- Affected specs: `project-foundation` (ADDED: Packs In Their Own Repositories; ADDED: Pinned
+  Pack Sources; ADDED: Installing A Pack From A Repository).
+- Affected code and config:
+  - `packs.lock.json`, `scripts/fetch-packs.sh` and `scripts/install-pack.sh` (new);
+  - `scripts/ci-local.sh`, `scripts/package-linux.sh`, `.github/workflows/*`, `.gitignore`;
+  - `tools/pack_tools` (lock check, release zip and sha256), `pack.json` `build.importer`;
+  - `PackLocator` (unchanged search directories; the user folder is where installs land);
+  - README, CONTRIBUTING, `docs/pack-format/README.md`, `docs/open-work.md`.
+- Outside the code, done by the human or with their approval:
+  - create the organisation and transfer the repository;
+  - re-register the self-hosted runner under the organisation, or move public repositories
+    back to GitHub-hosted runners, which are free for public repositories;
+  - point the report relay's `REPO` and the "Code 430 Reporter" GitHub App installation at
+    the new repository;
+  - move the `relay-production` environment and its secrets if the transfer doesn't carry
+    them.
+- Depends on `add-pack-loader` (built; its Deck check 4.3 is still open). `add-story-pack`'s
+  First Ride becomes the first `Story` repository.
