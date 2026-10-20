@@ -21,7 +21,7 @@ from osm_import.osm_data import BBox, OsmData
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "code430-osm-import/0.1 (+https://github.com/rjksn/Code430)"
+USER_AGENT = "code430-osm-import/0.1 (+https://github.com/Code430Game/Code430Game)"
 DEFAULT_ENDPOINTS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",

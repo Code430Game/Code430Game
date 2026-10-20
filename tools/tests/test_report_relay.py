@@ -214,8 +214,8 @@ def test_app_jwt_is_signed_rs256_with_github_claims(rsa_key):
 
 
 def test_defuse_breaks_mentions_html_and_links():
-    out = render.defuse("@rjksn look <script>x</script> at https://evil.example/a?b=1")
-    assert "@\u200brjksn" in out
+    out = render.defuse("@octocat look <script>x</script> at https://evil.example/a?b=1")
+    assert "@\u200boctocat" in out
     assert "<script>" not in out and "&lt;script&gt;" in out
     assert "`https://evil.example/a?b=1`" in out
 
@@ -224,10 +224,11 @@ def test_body_has_screenshot_ids_diagnostics_and_marker():
     report = copy.deepcopy(EXAMPLE)
     report["reporter_id"] = "3fa9c2d1"
     text = render.body(
-        report, "https://github.com/rjksn/Code430/blob/issue-attachments/reports/x.jpg?raw=true"
+        report,
+        "https://github.com/Code430Game/Code430Game/blob/issue-attachments/reports/x.jpg?raw=true",
     )
     assert (
-        "![screenshot](https://github.com/rjksn/Code430/blob/issue-attachments/reports/x.jpg?raw=true)"
+        "![screenshot](https://github.com/Code430Game/Code430Game/blob/issue-attachments/reports/x.jpg?raw=true)"
         in text
     )
     assert "junction `c901050337`" in text and "edge `w435115744.0`" in text
@@ -318,7 +319,7 @@ class FakeGitHub:
         path = url.removeprefix("https://api.github.com")
         payload = json.loads(body) if body else {}
         ok = lambda status, data: (status, json.dumps(data).encode())
-        if path == "/repos/rjksn/Code430/installation":
+        if path == "/repos/Code430Game/Code430Game/installation":
             assert (
                 headers["Authorization"].startswith("Bearer ")
                 and headers["Authorization"].count(".") == 2
@@ -328,30 +329,30 @@ class FakeGitHub:
             self.tokens_minted += 1
             return ok(201, {"token": f"ghs_{self.tokens_minted}"})
         assert headers["Authorization"].startswith("Bearer ghs_"), path
-        if path.startswith("/repos/rjksn/Code430/issues?"):
+        if path.startswith("/repos/Code430Game/Code430Game/issues?"):
             assert "labels=in-game-report" in path
             self.lookups += 1
             return ok(200, list(reversed(self.issues)))
-        if path == "/repos/rjksn/Code430/issues" and method == "POST":
+        if path == "/repos/Code430Game/Code430Game/issues" and method == "POST":
             if self.fail_create:
                 return ok(500, {})
             issue = {
-                "html_url": f"https://github.com/rjksn/Code430/issues/{len(self.issues) + 1}",
+                "html_url": f"https://github.com/Code430Game/Code430Game/issues/{len(self.issues) + 1}",
                 **payload,
             }
             self.issues.append(issue)
             return ok(201, issue)
-        if path == "/repos/rjksn/Code430/git/ref/heads/issue-attachments":
+        if path == "/repos/Code430Game/Code430Game/git/ref/heads/issue-attachments":
             return ok(200 if self.branch_exists else 404, {})
-        if path == "/repos/rjksn/Code430/git/trees":
+        if path == "/repos/Code430Game/Code430Game/git/trees":
             return ok(201, {"sha": "tree1"})
-        if path == "/repos/rjksn/Code430/git/commits":
+        if path == "/repos/Code430Game/Code430Game/git/commits":
             assert payload["parents"] == []
             return ok(201, {"sha": "commit1"})
-        if path == "/repos/rjksn/Code430/git/refs":
+        if path == "/repos/Code430Game/Code430Game/git/refs":
             self.branch_exists = True
             return ok(201, {})
-        if path.startswith("/repos/rjksn/Code430/contents/reports/") and method == "PUT":
+        if path.startswith("/repos/Code430Game/Code430Game/contents/reports/") and method == "PUT":
             assert self.branch_exists and payload["branch"] == "issue-attachments"
             if self.conflicts:
                 self.conflicts -= 1
@@ -373,7 +374,11 @@ class Relay:
             return b"sig"
 
         self.github = GitHub(
-            http=self.gh_fake, app_id="1", signer=signer, repo="rjksn/Code430", retry_delay_s=0.0
+            http=self.gh_fake,
+            app_id="1",
+            signer=signer,
+            repo="Code430Game/Code430Game",
+            retry_delay_s=0.0,
         )
         self.store = MemoryStore(lambda: self.now)
         self.cfg = Config(enabled=enabled, salt="pepper", limits=limits or Limits())
@@ -412,7 +417,7 @@ def test_report_is_filed_with_screenshot_labels_and_marker():
     resp = relay.post(EXAMPLE, tiny_jpeg(1280, 800))
     assert resp.status == 201
     assert resp.payload == {
-        "issue_url": "https://github.com/rjksn/Code430/issues/1",
+        "issue_url": "https://github.com/Code430Game/Code430Game/issues/1",
         "report_id": EXAMPLE["id"],
     }
     issue = relay.gh_fake.issues[0]
@@ -427,7 +432,7 @@ def test_branch_and_token_are_set_up_once():
     relay = Relay()
     relay.post(report_with_id(1), tiny_jpeg(64, 40))
     relay.post(report_with_id(2), tiny_jpeg(64, 40))
-    assert relay.github.calls.count("POST /repos/rjksn/Code430/git/refs") == 1
+    assert relay.github.calls.count("POST /repos/Code430Game/Code430Game/git/refs") == 1
     assert relay.gh_fake.tokens_minted == 1
     relay.now += 3600  # the token has expired
     relay.post(report_with_id(3))
@@ -525,7 +530,9 @@ def test_screenshot_commit_retries_when_reports_race_on_the_branch():
     relay.gh_fake.conflicts = 2
     assert relay.post(EXAMPLE, tiny_jpeg(64, 40)).status == 201
     assert (
-        relay.github.calls.count(f"PUT /repos/rjksn/Code430/contents/reports/{EXAMPLE['id']}.jpg")
+        relay.github.calls.count(
+            f"PUT /repos/Code430Game/Code430Game/contents/reports/{EXAMPLE['id']}.jpg"
+        )
         == 3
     )
 

@@ -44,7 +44,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   the work Mac. On the machine that is:
   1. `cd tools/report_relay && uv run pywrangler deploy` (use `nvm exec 22` if needed);
   2. check `/health`;
-  3. run `scripts/setup-report-labels.sh` with the rjksn account (creates the `tag:*` labels);
+  3. run `scripts/setup-report-labels.sh` with an account that can admin the repository (creates the `tag:*` labels);
   4. resend from Saved reports on the Deck.
 - **Ramp lane markings woven into the motorway's** (human: "I wonder if some of those off
   ramps need to be laid under the main road way since the on ramp's lane markings are displayed
