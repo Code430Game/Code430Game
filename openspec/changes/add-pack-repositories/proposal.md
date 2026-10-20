@@ -2,9 +2,15 @@
 
 **Status: proposed 2026-10-20 (human: "there should be an open spec to transition our packs to individual github repos. So ottawa would become a repo. This will allow multiple people to work on different regions and stories." and "we should look at moving this to its final repo").**
 
-**Needs the human before it starts:** the organisation's name and its creation on GitHub
-(see `design.md`, Organisation). `code430` is taken by a dormant user account, so the name is
-open. Check every candidate on GitHub before accepting it.
+**Organisation:** `Code430Game`, created by the human on 2026-10-20; the game moved to
+`Code430Game/Code430Game` the same day. Check any new repository name on GitHub before using it.
+
+**Layers added 2026-10-20** (human: "we want to encourage others to write their own stories in
+the ottawa location. I wonder if we create basic versions of each and then say the ottawa pack
+could reference a generic billboards for now. Then ideally someone could write their own …
+story that uses the map and ads but makes a funny version for their friends where it places
+them and items at their own locations in the map." and "I think we would need to mark a center
+point or something if we reexport").
 
 ## Why
 Everything lives in one repository today: the game, the importer, and every pack. The Ottawa
@@ -31,6 +37,32 @@ game caring where they came from.
     - its own README, LICENSE and attribution (ODbL for OpenStreetMap-derived data);
     - a CI workflow that validates it with the game's pack validator at a pinned game version;
     - tagged releases with a zip and a sha256.
+- **Packs in layers, with basic versions of each.** Each layer depends on the one below and may
+  replace what it ships by id. The loader already orders packs by dependency; ads, placements and
+  turf gain the "same id replaces" rule vehicles and factions have.
+  - **The game:** code (gang behaviour, police, missions), the base factions, tone modes,
+    strings and population, and the characters pack.
+  - **`code430.ads-generic`:** billboards that suit any city, in their own small repository.
+  - **Map packs (`OttawaOnCanada`):** the place. They hold the OSM data, terrain, hand fixes,
+    and later the landmark models. They depend on `ads-generic` and may add ads of their own
+    (Ottawa-only jokes).
+  - **Story packs:** what happens there. Missions, dialogue, the story's gangs and their turf,
+    and placements: named characters, items and cars at spots on the map. A story depends on a
+    map, and it can replace that map's ads by id. A funny version for friends is a small story
+    pack on top of the map, and it never copies or edits the map.
+  - **`StoryFirstRide`** (from `add-story-pack`) is the example story and the template others
+    copy.
+- **A map keeps its centre.** Every map coordinate is metres from the manifest's `map.origin`,
+  which the importer now takes from the bounding box's centre, so widening a map would move
+  everything. The region file pins the origin, and a re-export that would move an existing
+  pack's origin is refused unless asked for (`--new-origin`). Story placements and turf are
+  written in latitude and longitude; the game converts them with the map's own projection at
+  load. That way stories survive re-exports, and authors can take spots from any web map.
+- **Privacy in stories.** The story template and `CONTRIBUTING.md` say not to publish real
+  people's names or home locations: put characters near a park, a shop or a landmark instead. A
+  personal story with friends' homes is meant to be shared offline (a folder or a private
+  repository, which installs the same way). The pack validator warns when a story places a
+  named character inside a residential building.
 - **The game pins its packs.** A `packs.lock.json` in the game repository lists each pack's
   repository, tag, commit and sha256. `scripts/fetch-packs.sh` puts those packs in `packs/`
   (now ignored by git), and local CI, GitHub CI and `package-linux.sh` run it first. The tests
@@ -52,6 +84,8 @@ game caring where they came from.
 - **A template repository** (`PackTemplate`) for new regions and stories. `CONTRIBUTING.md`
   gains "Make a region" and "Write a story pack" sections pointing at it.
 - **Moving Ottawa out:**
+  - its billboards move to `code430.ads-generic`, except any that only make sense in Ottawa,
+    which stay in the map;
   - `OttawaOnCanada` starts from the current pack, with its history split out of this
     repository (`git filter-repo --path packs/ottawa-centretown`) so blame still works;
   - `packs/ottawa-centretown` then leaves the game repository;
@@ -62,12 +96,16 @@ game caring where they came from.
 
 ## Impact
 - Affected specs: `project-foundation` (ADDED: Packs In Their Own Repositories; ADDED: Pinned
-  Pack Sources; ADDED: Installing A Pack From A Repository).
+  Pack Sources; ADDED: Installing A Pack From A Repository; ADDED: Packs In Layers; ADDED: A Map
+  Keeps Its Origin; ADDED: Story Placements And Privacy).
 - Affected code and config:
   - `packs.lock.json`, `scripts/fetch-packs.sh` and `scripts/install-pack.sh` (new);
   - `scripts/ci-local.sh`, `scripts/package-linux.sh`, `.github/workflows/*`, `.gitignore`;
   - `tools/pack_tools` (lock check, release zip and sha256), `pack.json` `build.importer`;
   - `PackLocator` (unchanged search directories; the user folder is where installs land);
+  - `PackLoader.items()` (ads, placements and turf replace by id in dependency order), a
+    placements file and schema, lat/lon conversion through the map's projection;
+  - the importer (pinned origin from the region file, `--new-origin`);
   - README, CONTRIBUTING, `docs/pack-format/README.md`, `docs/open-work.md`.
 - Outside the code, done by the human or with their approval:
   - create the organisation and transfer the repository;
