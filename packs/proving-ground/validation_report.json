@@ -2628,6 +2628,11 @@
     "levels": 2490,
     "tag": 15
    },
+   "house_types": {
+    "detached": 642,
+    "semi": 471,
+    "terrace": 756
+   },
    "skipped": []
   },
   "classes": {
@@ -2721,6 +2726,14 @@
   "water": {
    "polygons": 1,
    "skipped": []
+  },
+  "yards": {
+   "fence_km": 31.66,
+   "fences": 2819,
+   "with_back": 1833,
+   "with_front": 1865,
+   "with_path": 1768,
+   "yards": 1869
   }
  }
 }

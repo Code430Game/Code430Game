@@ -7,7 +7,7 @@ extends RefCounted
 
 const BUILD_MANIFEST := "build.json"
 ## Bump whenever mesh generation changes, so chunks built by older code are rebuilt.
-const GENERATOR_VERSION := 9
+const GENERATOR_VERSION := 10
 
 
 ## Pack files that never feed chunk geometry: the manifest, ads, service places, importer
@@ -130,11 +130,11 @@ static func import_chunk_parts(path: String, materials: Dictionary, tier: int) -
 				mi.material_override = materials.get("building") if materials.get("building") != null else BuildingBuilder.material()
 			elif role == "sidewalks_lod0":
 				mi.material_override = materials.get("sidewalk") if materials.get("sidewalk") != null else SidewalkBuilder.material()
-			elif role == "barriers_lod0":
+			elif role == "barriers_lod0" or role.begins_with("yards"):
 				mi.material_override = materials.get("barrier") if materials.get("barrier") != null else BarrierBuilder.material()
 			else:
 				mi.material_override = materials.get("terrain") if role.begins_with("terrain") else materials.get("road")
-			if near and role in ["roads_lod0", "junctions_lod0", "terrain_lod0", "buildings_lod0", "sidewalks_lod0", "barriers_lod0"]:  # LOD0 terrain: see MapPack.build_chunk_meshes (#27)
+			if near and role in ["roads_lod0", "junctions_lod0", "terrain_lod0", "buildings_lod0", "sidewalks_lod0", "barriers_lod0", "yards_props_lod0"]:  # LOD0 terrain: see MapPack.build_chunk_meshes (#27)
 				if role == "terrain_lod0":
 					collision_meshes.append_array(MapPack.split_for_collision(mi.mesh, 4))
 				else:
@@ -151,6 +151,8 @@ static func _ranges_for(role: String) -> Vector2:
 			return Vector2(0.0, 350.0)
 		"parking_props_lod0":
 			return Vector2(0.0, MapPack.ROAD_LOD0_END_M)
+		"yards_lod0", "yards_props_lod0":
+			return Vector2(0.0, YardBuilder.VISIBLE_TO_M)
 		"roads_lod0":
 			return Vector2(0.0, MapPack.ROAD_LOD0_END_M)
 		"roads_lod1":
