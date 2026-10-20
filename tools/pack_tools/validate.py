@@ -105,6 +105,7 @@ GENERATED = [
     (PARKING_NAME, PARKING_SCHEMA_PATH, [("lots", "id"), ("garages", "id")]),
     (VEGETATION_NAME, VEGETATION_SCHEMA_PATH, [("areas", "id")]),
     (SERVICES_NAME, SERVICES_SCHEMA_PATH, [("places", "id")]),
+    ("yards.v0.json", FORMAT_DIR / "yards.schema.v0.json", [("yards", "house"), ("fences", "id")]),
     # Pack extras a district's author writes by hand or by generator (add-proving-ground).
     ("lap.v0.json", LAP_SCHEMA_PATH, [("laps", "id")]),
     ("turf.v0.json", TURF_SCHEMA_PATH, [("turfs", "id")]),

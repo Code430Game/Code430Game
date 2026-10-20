@@ -31,13 +31,19 @@ def _house(wid, x0, z0, x1, z1, **tags):
     }
 
 
-def _run(houses, ways=STREET):
+def _build(houses, ways=STREET):
+    """(buildings, hints, graph) for house ways on a street map."""
     data = make_data(ways)
     fr = filter_ways(data, CFG)
     proj = Projector.for_bbox(BBOX)
     graph = build_graph(data, fr.drivable, fr.pedestrian, proj, CFG)
     result = build_buildings({"elements": houses}, BBOX, proj, FlatSource(30.0), CFG.buildings)
-    return result, build_house_hints(result, graph)
+    return result, build_house_hints(result, graph), graph
+
+
+def _run(houses, ways=STREET):
+    result, hints, _ = _build(houses, ways)
+    return result, hints
 
 
 def _front_mid(result, hints, bid):

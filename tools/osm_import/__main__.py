@@ -36,6 +36,7 @@ from osm_import.services import build_services, services_query
 from osm_import.validation import render_markdown
 from osm_import.vegetation import build_vegetation, vegetation_query
 from osm_import.water import build_water, water_query
+from osm_import.yards import build_yards
 
 
 def _source(layer: str, meta: dict | None, path: Path | None = None) -> dict:
@@ -169,6 +170,11 @@ def _import(args: argparse.Namespace) -> int:
                 cfg.parking.get("garages"),
             )
             result.report.summary["parking"] = parking.counts()
+        # Yards after parking: lots, like roads and other buildings, are not yard.
+        yards = None
+        if buildings is not None:
+            yards = build_yards(buildings, result.graph, parking, water)
+            result.report.summary["yards"] = yards.counts()
         # Vegetation last: it keeps off the final roads, sidewalks, buildings and water, and
         # stands on the finished terrain.
         if args.vegetation_json:
@@ -219,6 +225,7 @@ def _import(args: argparse.Namespace) -> int:
             vegetation,
             services,
             spawn=getattr(args, "spawn", None),
+            yards=yards,
         )
         # Pack extras the importer does not produce (a lap timer, a gang's turf) ride along.
         for extra in getattr(args, "extras", None) or []:
