@@ -1,6 +1,8 @@
 ## 0. Organisation (the human)
-- [ ] 0.1 **Stop: the human picks the organisation's name (checked free on GitHub right before) and creates it on github.com**
+- [x] 0.1 **Stop: the human picks the organisation's name (checked free on GitHub right before) and creates it on github.com**
+  - 2026-10-20: `Code430Game` (checked free that day), created by the human on the free plan.
 - [ ] 0.2 Transfer `rjksn/Code430` to the organisation (with the human's go-ahead); update the local remote, the relay's `REPO` and GitHub App installation, the self-hosted runner, and the `relay-production` environment; CI green on the moved repository
+  - 2026-10-20: transferred to `Code430Game/Code430Game` (private) by API after a PII scan (gitleaks over all refs, pattern scans of every blob, issues and comments; example names tidied in #124). The self-hosted runner, the `relay-production` environment, issues and PRs moved with it; the local remote points at the new URL; repository references updated. Left: the human transfers the "Code 430 Reporter" GitHub App to the organisation and installs it on the repository, then the relay is redeployed from the Mac with the new `REPO`
 
 ## 1. Pack repositories
 - [ ] 1.1 `PackTemplate`: layout, README, LICENSE choices (ODbL for map data), `pack.yml` (validate at a pinned game tag, release zip and sha256 on tag); `tools/pack_tools` release command; tests

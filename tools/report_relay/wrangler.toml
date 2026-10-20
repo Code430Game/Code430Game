@@ -9,7 +9,7 @@ workers_dev = true
 
 [vars]
 APP_ID = "5176749"            # the GitHub App's id, from its settings page
-REPO = "rjksn/Code430"
+REPO = "Code430Game/Code430Game"
 RELAY_ENABLED = "true" # the kill switch: "false" refuses every report with 503
 
 # Created with `uv run pywrangler kv namespace create REPORT_LIMITS` (not secret).

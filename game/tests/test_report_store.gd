@@ -118,16 +118,16 @@ func test_prune_deletes_only_old_sent_reports() -> void:
 
 func test_handoff_url_is_prefilled_and_short() -> void:
 	var report := _report({"description": "x".repeat(4000)})
-	var url := ReportStore.handoff_url("rjksn/Code430", report)
-	assert_str(url).starts_with("https://github.com/rjksn/Code430/issues/new?labels=in-game-report%2Cneeds-triage%2Carea%3Aroads%2Cseverity%3Aannoying&title=Report%3A%20Roads%20and%20junctions")
+	var url := ReportStore.handoff_url("Code430Game/Code430Game", report)
+	assert_str(url).starts_with("https://github.com/Code430Game/Code430Game/issues/new?labels=in-game-report%2Cneeds-triage%2Carea%3Aroads%2Cseverity%3Aannoying&title=Report%3A%20Roads%20and%20junctions")
 	assert_int(url.length()).is_less_equal(ReportStore.HANDOFF_URL_MAX)
-	var short := ReportStore.handoff_url("rjksn/Code430", _report({"description": "Curb inside."}))
+	var short := ReportStore.handoff_url("Code430Game/Code430Game", _report({"description": "Curb inside."}))
 	assert_str(short.uri_decode()).contains("Curb inside.")
 	assert_str(short.uri_decode()).contains("c901050337")
 	# A dev build has no date: the build row has no empty gap.
 	assert_str(short.uri_decode()).not_contains(", ,")
 	# No description: no blank gap where it would go.
-	var empty := ReportStore.handoff_url("rjksn/Code430", _report()).uri_decode()
+	var empty := ReportStore.handoff_url("Code430Game/Code430Game", _report()).uri_decode()
 	assert_str(empty).not_contains("\n\n\n")
 
 
@@ -140,7 +140,7 @@ func test_tags_are_optional_ordered_and_fit_the_schema() -> void:
 	assert_array(ReportSchema.check(report, ReportSchema.schema())).is_empty()
 	assert_str(report["title"]).is_equal("Report: Roads and junctions · Annoying · Elgin Street (x 237, z 18) · Stuck, Police")
 	assert_str(report["description"]).is_equal("")
-	var url := ReportStore.handoff_url("rjksn/Code430", report)
+	var url := ReportStore.handoff_url("Code430Game/Code430Game", report)
 	assert_str(url).contains("tag%3Astuck")
 	assert_str(url.uri_decode()).contains("**Tags:** Stuck, Police")
 

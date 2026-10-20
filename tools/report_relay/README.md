@@ -14,7 +14,7 @@ with `nvm exec 22`, for example `nvm exec 22 uv run pywrangler deploy`.
 1. **GitHub App.** github.com → Settings → Developer settings → GitHub Apps → New GitHub App.
    - Name: for example "Code 430 Reporter". Homepage: the repo URL. Webhook: off.
    - Repository permissions: Issues read and write, Contents read and write, Metadata read.
-   - Install it on `rjksn/Code430` only. Note the App id, and generate a private key (a `.pem`
+   - Install it on `Code430Game/Code430Game` only. Note the App id, and generate a private key (a `.pem`
      file download). Keep the key out of the repo.
 2. **Labels.** From the repo root: `scripts/setup-report-labels.sh` (uses `gh`).
 3. **Cloudflare.** From this folder:

@@ -52,10 +52,10 @@ func _save(with_shot: bool = false, t: float = T0) -> String:
 
 func test_filed_report_is_marked_sent_with_its_issue() -> void:
 	var id := _save(true)
-	_answers = [{"code": 201, "body": '{"issue_url": "https://github.com/rjksn/Code430/issues/9", "report_id": "%s"}' % id}]
+	_answers = [{"code": 201, "body": '{"issue_url": "https://github.com/Code430Game/Code430Game/issues/9", "report_id": "%s"}' % id}]
 	var state := await _client.send(id)
 	assert_str(state["state"]).is_equal("sent")
-	assert_str(_store.state_of(id)["issue_url"]).is_equal("https://github.com/rjksn/Code430/issues/9")
+	assert_str(_store.state_of(id)["issue_url"]).is_equal("https://github.com/Code430Game/Code430Game/issues/9")
 	assert_str(_calls[0][0]).is_equal("https://relay.example.workers.dev/v1/report")
 	var body: String = (_calls[0][2] as PackedByteArray).get_string_from_ascii()
 	assert_str(body).contains('name="report"')
@@ -82,7 +82,7 @@ func test_lost_answer_backs_off_then_the_same_report_is_resent() -> void:
 	assert_float(state["retry_at"]).is_equal(T0 + RelayClient.BACKOFF_BASE_S)
 	assert_array(_store.due(T0 + 1)).is_empty()
 	_now = T0 + 120
-	_answers = [{"code": 200, "body": '{"issue_url": "https://github.com/rjksn/Code430/issues/9"}'}]
+	_answers = [{"code": 200, "body": '{"issue_url": "https://github.com/Code430Game/Code430Game/issues/9"}'}]
 	await _client.send_due()
 	assert_str(_store.state_of(id)["state"]).is_equal("sent")
 	# Both requests carried the same report id, which is what the relay deduplicates on.
