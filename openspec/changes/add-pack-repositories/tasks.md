@@ -9,6 +9,13 @@
 - [ ] 1.2 `pack.json` `build.importer` and `build.inputs`, written by the importer; schema and validator; tests
 - [ ] 1.3 `OttawaOnCanada`: history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/`, region file and overrides beside it, CI green, first release
 
+## 1b. Layers
+- [ ] 1.4 Same-id replacement for ads, placements and turf in `PackLoader.items()` in dependency order, with a logged conflict when unrelated packs share an id; tests
+- [ ] 1.5 `code430.ads-generic` (the current billboards less any Ottawa-only ones) in its own repository; the Ottawa pack depends on it
+- [ ] 1.6 Pinned origin: `origin` in region files, the importer refuses a moved origin without `--new-origin`; Ottawa's current origin written into its region file; tests
+- [ ] 1.7 `placements.v0.json` (characters, items, cars at lat/lon) and lat/lon turf for story packs; schema, validator (the residential-building warning), the game converts through the map's projection; tests
+- [ ] 1.8 Privacy guidance in the story template and `CONTRIBUTING.md`; offline sharing documented
+
 ## 2. The game pins its packs
 - [ ] 2.1 `packs.lock.json` and its schema; `scripts/fetch-packs.sh` (release zip, sha256, skip when current, `--source` to clone); `pack_tools lock check`; tests
 - [ ] 2.2 `scripts/ci-local.sh`, GitHub CI and `package-linux.sh` fetch first; tests that read Ottawa fail with a fetch hint when it is missing; a clean clone builds and passes

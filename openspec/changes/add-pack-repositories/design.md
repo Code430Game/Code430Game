@@ -41,6 +41,42 @@ OttawaOnCanada/
 - A release is a zip of `packs/<id>/` (without `chunks/`, which the game builds), its sha256,
   and the pack version from `pack.json` as the tag (`ottawa-centretown-v0.4.0`).
 
+## Layers
+```
+Game (code, base factions, tones, characters)
+  └ code430.ads-generic            billboards for any city
+      └ OttawaOnCanada              the place (+ Ottawa-only ads)
+          ├ StoryFirstRide          example story: missions, Double Cross turf, placements
+          └ a friend's story        replaces ads, places friends and items (shared offline)
+```
+- Later packs replace earlier ones by id, in the loader's dependency order: a story's ad
+  `ad.coffee` replaces the map's or the generic pack's. Without a dependency between two packs
+  that ship the same id, the loader keeps the first by pack id and logs a conflict, so the
+  outcome never depends on folder order.
+- A placements file (`placements.v0.json`) lists characters (a profile or preset, a name,
+  lines), items and parked cars, each with `lat`, `lon`, an optional heading and an optional
+  tone list. Turf rings in story packs use the same lat/lon form; map-pack turf keeps local
+  metres (it moves with its own map).
+
+## Stable origin
+- Today `Projector.for_bbox` puts the origin at the bounding box's centre, so a wider or
+  shifted re-export moves every local coordinate.
+- The region file gains `origin: {lat, lon}`. The importer uses it when present (rounded to
+  the metre in the map's UTM zone as now), and refuses to write over a pack whose
+  `map.origin` differs unless `--new-origin` is given. A new origin bumps the pack's major
+  version, so dependent stories pin a range that excludes it.
+- Ottawa's current origin (lat 45.4200027, lon -75.6950007) is written into its region file
+  when it moves out, so nothing shifts.
+
+## Privacy in stories
+- The template's README and `CONTRIBUTING.md`: no real people's names or home locations in a
+  published pack. Use public places instead (a park, a shop, a landmark).
+- Personal stories are shared offline: copy the folder into the user pack folder, or install
+  from a private repository (`install-pack.sh` takes a token from `gh auth` when it has one).
+- `pack_tools validate` warns (not errors) when a story places a named character inside a
+  `building=house|detached|semidetached_house|terrace|apartments|residential` footprint of the
+  map it depends on.
+
 ## The lock file
 ```json
 {"schema_version": 0, "packs": [
@@ -90,6 +126,8 @@ OttawaOnCanada/
 1. The organisation's name (and whether the game itself is renamed).
 2. Do the proving ground and the characters pack stay in the game repository (proposed), or
    move too?
+5. Region names with short codes (`OttawaOnCa`) or the full country (`OttawaOnCanada`)?
+   Whichever is picked, every region repository follows it.
 3. Public from the start, or private until the game goes public? Private repositories use the
    self-hosted runner and count against Actions minutes; public ones don't.
 4. Should the Ottawa repository keep the pack's history (filter-repo, proposed) or start
