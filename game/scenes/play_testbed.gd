@@ -1045,6 +1045,7 @@ func _setup_maps() -> void:
 	_minimap.garages = _pack.garages
 	_set_map_heading(Players.local_controlled_body() == _player)
 	_setup_weather_strip()
+	_setup_map_credits()
 	_overview.renderer = _map_renderer
 	_overview.graph = _pack.graph
 	_overview.player = Players.local_controlled_body()
@@ -1601,6 +1602,25 @@ func _set_map_heading(on_foot: bool) -> void:
 			return -cam.global_basis.z if cam != null else -_player.global_basis.z
 	_minimap.heading_source = source
 	_overview.heading_source = source
+
+
+## The map pack's OpenStreetMap credit under the minimap (ODbL); the full map lists every
+## attribution line in its corner (MapCredits).
+func _setup_map_credits() -> void:
+	_overview.set_credits(MapCredits.lines(_pack.manifest))
+	var text := MapCredits.short_line(_pack.manifest)
+	if text == "" or _minimap.get_node_or_null("../MapCredit") != null:
+		return
+	var credit := MapCredits.label(text, MapCredits.SHORT_PX)
+	credit.name = "MapCredit"
+	credit.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	credit.offset_left = _minimap.offset_left
+	credit.offset_right = _minimap.offset_right
+	credit.offset_top = _minimap.offset_bottom + 2.0
+	credit.offset_bottom = _minimap.offset_bottom + 2.0 + MapCredits.SHORT_PX + 6.0
+	credit.visibility_layer = _minimap.visibility_layer
+	_minimap.get_parent().add_child(credit)
+	_minimap.visibility_changed.connect(func() -> void: credit.visible = _minimap.visible)
 
 
 ## The weather forecast strip directly above the minimap, the minimap's width; the overview

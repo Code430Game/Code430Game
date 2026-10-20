@@ -61,6 +61,8 @@ var _back_armed: bool = false
 var _focus_locked: bool = false
 var _hover_hidden: bool = false  # just picked a place: its label, not the road's, until the cursor moves
 
+var credits: Label  # the pack's attribution lines, bottom left (MapCredits)
+
 @onready var _view: Control = $View
 @onready var _label: Label = $View/HoverLabel
 @onready var _column: VBoxContainer = $View/Column
@@ -97,6 +99,19 @@ func _ready() -> void:
 	legend.back_out.connect(close)
 	_column.add_child(legend)
 	_column.move_child(legend, _title_bar.get_index() + 1)
+	credits = MapCredits.label("", MapCredits.FULL_PX)
+	credits.name = "Credits"
+	credits.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	credits.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	credits.offset_left = 16.0
+	credits.offset_bottom = -12.0
+	_view.add_child(credits)
+
+
+## The map data's credits, one line each, in the bottom-left corner.
+func set_credits(lines: PackedStringArray) -> void:
+	if credits != null:
+		credits.text = "\n".join(lines)
 
 
 func _input(event: InputEvent) -> void:
