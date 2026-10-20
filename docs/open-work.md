@@ -33,6 +33,7 @@ Large:
 | `add-rail` | the Confederation Line with trains | nothing | importer rail, track builder, trains, co-op |
 | `add-character-features` | more clothes and hair, crowd LODs | `add-character-detail` (built, awaiting its Deck try) | character profile/mesh/rig, pedestrian shader |
 | `add-story-pack` | the first mission, "First Ride", with the Double Cross crew as the antagonist | `add-pack-loader` (merged #100), `add-hostile-gang` (merged #97) | missions, markers, co-op |
+| `add-pack-repositories` | each region, story and character pack in its own repository under a project organisation; the game pins them in a lock file; install a pack from a repository | the human names and creates the organisation (`code430` is taken); `add-pack-loader` (merged #100) | CI, packaging, pack tools, docs; moves `packs/ottawa-centretown` out |
 | `update-audio-pass` | positional city sound, engine per class | the maintainer schedules an audio round | audio, traffic, emergency managers |
 
 ## Files several changes touch
