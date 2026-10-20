@@ -32,3 +32,24 @@ A player SHALL be able to install a data-only pack from a GitHub repository's re
 #### Scenario: A tampered download
 - **WHEN** a downloaded release does not match its published sha256
 - **THEN** nothing is installed and the reason is shown
+
+### Requirement: Packs In Layers
+Packs SHALL build on each other through dependencies (game, generic content, map, story), and a pack SHALL replace an ad, placement or turf of a pack it depends on when it ships the same id.
+
+#### Scenario: A story replaces a billboard
+- **WHEN** a story pack that depends on the Ottawa map ships an ad with the same id as one of the map's ads
+- **THEN** the story's ad is shown on the billboards and the map pack is unchanged
+
+### Requirement: A Map Keeps Its Origin
+Re-exporting a map pack SHALL keep its origin unless a new origin is asked for, and story packs SHALL place things in latitude and longitude converted through the map's projection.
+
+#### Scenario: A wider re-export
+- **WHEN** the Ottawa map is re-exported with a larger bounding box
+- **THEN** its origin stays where it was and a story's characters stand at the same spots
+
+### Requirement: Story Placements And Privacy
+Story packs SHALL be able to place named characters, items and cars on a map they depend on, and the pack tools SHALL warn when a published story places a named character inside a residential building.
+
+#### Scenario: A story for friends
+- **WHEN** someone writes a story that places their friends at spots on the Ottawa map
+- **THEN** the characters appear there in the game, and the validator warns about any placed inside a house
