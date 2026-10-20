@@ -7,7 +7,8 @@
 ## 1. Pack repositories
 - [ ] 1.1 `Code430Packs/PackTemplate`: layout, README, LICENSE choices (ODbL for map data), `pack.yml` (validate at a pinned game tag, release zip and sha256 on tag); `tools/pack_tools` release command; tests
 - [ ] 1.2 `pack.json` `build.importer` and `build.inputs`, written by the importer; schema and validator; tests
-- [ ] 1.3 `Code430Packs/Location-OttawaOnCa` (topic `code430-location`): history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/centretown`, region file and overrides beside it, CI green, first release
+- [ ] 1.2b Pack versions: the major, minor and patch rules in `docs/pack-format/README.md`; `pack_tools version check` against the last release tag (files changed without a bump, removed or renamed ids or a moved origin without a major bump, tag equals `<folder>-v<version>`); run in the template's CI; tests
+- [ ] 1.3 `Code430Packs/Location-OttawaOnCa` (topic `code430-location`): history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/centretown`, region file and overrides beside it, CI green, first release at `0.2.0`
 
 ## 1b. Layers
 - [ ] 1.4 Same-id replacement for ads, placements and turf in `PackLoader.items()` in dependency order, with a logged conflict when unrelated packs share an id; tests

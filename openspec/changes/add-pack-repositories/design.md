@@ -100,6 +100,28 @@ Game (code, base factions, tones, characters)
   `building=house|detached|semidetached_house|terrace|apartments|residential` footprint of the
   map it depends on.
 
+## Pack versions
+Every `pack.json` already has a semantic `version`, dependencies already name a range
+(`^1.2`), and the loader already checks both and `engine_api`. Nothing makes anyone bump it
+(Ottawa is still `0.1.0` after many re-exports), so once stories depend on maps the number
+would mean nothing. From the split on (human, 2026-10-20: "Should we add versioning to the
+packs now?"):
+- **Major:** something a pack built on this one can break on: an id that a story or ad
+  replacement could reference is removed or renamed (buildings, turf, ads, placements, spawn
+  points), the map origin moves (`--new-origin`), or the pack needs a new `engine_api`.
+- **Minor:** new or changed content that keeps every id working: a re-export with more
+  buildings, new yards, a new ad.
+- **Patch:** fixes that add no content: a wrong height, a misplaced bench, typos.
+- While a pack is `0.x`, the minor number counts as the major one, as semver's `^0.2` does,
+  so a pack can stay `0.x` until its maintainer calls it stable.
+- **CI enforces it.** `pack_tools version check` compares the pack with its last release tag:
+  if the files changed and the version didn't, CI fails; if ids were removed or renamed, or
+  the origin moved, it requires a new major (or minor while `0.x`). A release tag must equal
+  `<pack folder>-v<version>`.
+- `Location-OttawaOnCa`'s Centretown starts at `0.2.0` (houses and yards since `0.1.0`).
+- Story packs depend on a map with a range (`{"id": "code430.ottawa-centretown", "version":
+  "^0.2"}`), so a map's minor release reaches them and a breaking one does not.
+
 ## The lock file
 ```json
 {"schema_version": 0, "packs": [

@@ -60,6 +60,11 @@ game caring where they came from.
     pack on top of the map, and it never copies or edits the map.
   - **`Story-FirstRide`** (from `add-story-pack`) is the example story and the template others
     copy.
+- **Pack versions mean something.** `pack.json` versions and dependency ranges already
+  exist; now a breaking change (a removed or renamed id, a moved origin, a new `engine_api`)
+  needs a major bump, new content a minor one and fixes a patch, and each pack's CI refuses a
+  changed pack without a bump. Stories depend on a map with a range (`^0.2`), so they get a
+  map's fixes and new content but not its breaking releases.
 - **A map keeps its centre.** Every map coordinate is metres from the manifest's `map.origin`,
   which the importer now takes from the bounding box's centre, so widening a map would move
   everything. The region file pins the origin, and a re-export that would move an existing
@@ -106,7 +111,7 @@ game caring where they came from.
 ## Impact
 - Affected specs: `project-foundation` (ADDED: Packs In Their Own Repositories; ADDED: Pinned
   Pack Sources; ADDED: Installing A Pack From A Repository; ADDED: Packs In Layers; ADDED: A Map
-  Keeps Its Origin; ADDED: Story Placements And Privacy).
+  Keeps Its Origin; ADDED: Story Placements And Privacy; ADDED: Pack Versions).
 - Affected code and config:
   - `packs.lock.json`, `scripts/fetch-packs.sh` and `scripts/install-pack.sh` (new);
   - `scripts/ci-local.sh`, `scripts/package-linux.sh`, `.github/workflows/*`, `.gitignore`;

@@ -57,3 +57,14 @@ Story packs SHALL be able to place named characters, items and cars on a map the
 #### Scenario: A story for friends
 - **WHEN** someone writes a story that places their friends at spots on the Ottawa map
 - **THEN** the characters appear there in the game, and the validator warns about any placed inside a house
+
+### Requirement: Pack Versions
+Each pack repository SHALL bump its pack's semantic version for every release that changes the pack: major for a removed or renamed id, a moved map origin or a new `engine_api` (minor while the version is `0.x`), minor for new or changed content, patch for fixes, and its CI SHALL refuse a changed pack whose version was not bumped as these rules require.
+
+#### Scenario: A re-export without a bump
+- **WHEN** a contributor re-exports Centretown and opens a pull request without changing the version
+- **THEN** the pack repository's CI fails and says which bump the change needs
+
+#### Scenario: A breaking map release
+- **WHEN** Centretown removes building ids that a story could place characters in
+- **THEN** CI requires the next breaking version, and a story depending on `^0.2` keeps the last `0.2.x` release
