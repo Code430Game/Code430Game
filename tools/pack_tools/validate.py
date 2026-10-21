@@ -216,10 +216,12 @@ def validate_manifest(manifest: dict, validator: Draft202012Validator) -> list[s
     for err in sorted(validator.iter_errors(manifest), key=lambda e: list(e.path)):
         where = "/".join(str(p) for p in err.path) or "(root)"
         errors.append(f"{where}: {err.message}")
-    if manifest.get("type") == "map":
+    # OpenStreetMap data is ODbL; a map pack under another licence (a generated test
+    # district) has no OpenStreetMap data to credit.
+    if manifest.get("type") == "map" and manifest.get("license", "ODbL-1.0") == "ODbL-1.0":
         credits = manifest.get("attribution", [])
         if not any(OSM_CREDIT in line for line in credits if isinstance(line, str)):
-            errors.append(f"attribution: map packs must credit '{OSM_CREDIT}'")
+            errors.append(f"attribution: ODbL map packs must credit '{OSM_CREDIT}'")
     return errors
 
 

@@ -85,7 +85,7 @@ naming the first pack that differs or is missing on either side.
 | `type` | yes | `map`, `character`, `story`, or `system`. |
 | `engine_api` | yes | Pack API major version the pack targets. Currently `0`. |
 | `license` | yes | SPDX identifier for the pack's own content. Map packs derived from OpenStreetMap use `ODbL-1.0`. |
-| `attribution` | yes | Credit lines shown in-game. Map packs must include `© OpenStreetMap contributors`. |
+| `attribution` | yes | Credit lines shown in-game. Map packs under `ODbL-1.0` (OpenStreetMap data) must include `© OpenStreetMap contributors`. |
 | `description` | no | Short text. |
 | `authors` | no | List of names or handles. |
 | `dependencies` | no | Packs this pack needs: `[{"id": "...", "version": "^1.0"}]`. |

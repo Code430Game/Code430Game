@@ -91,7 +91,7 @@ def test_data_only_pack_accepts_allowed_files(tmp_path: Path) -> None:
 
 
 def test_map_pack_requires_osm_credit_and_map_block(tmp_path: Path) -> None:
-    write_pack(tmp_path, "map", {**GOOD, "type": "map"})
+    write_pack(tmp_path, "map", {**GOOD, "type": "map", "license": "ODbL-1.0"})
     errors = errors_for(tmp_path)
     assert any(OSM_CREDIT in e for e in errors)
     assert any("'map' is a required property" in e for e in errors)
@@ -103,6 +103,20 @@ def test_map_pack_valid(tmp_path: Path) -> None:
         "type": "map",
         "license": "ODbL-1.0",
         "attribution": [OSM_CREDIT, "Elevation: Natural Resources Canada"],
+        "map": {
+            "crs": "EPSG:32618",
+            "origin": {"easting": 445000.0, "northing": 5028000.0, "lat": 45.42, "lon": -75.695},
+            "bbox": [45.405, -75.715, 45.435, -75.675],
+        },
+    }
+    write_pack(tmp_path, "map", manifest)
+    assert errors_for(tmp_path) == []
+
+
+def test_a_generated_map_pack_under_another_licence_needs_no_osm_credit(tmp_path: Path) -> None:
+    manifest = {
+        **GOOD,
+        "type": "map",
         "map": {
             "crs": "EPSG:32618",
             "origin": {"easting": 445000.0, "northing": 5028000.0, "lat": 45.42, "lon": -75.695},
