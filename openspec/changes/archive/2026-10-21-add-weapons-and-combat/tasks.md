@@ -16,4 +16,5 @@
 ## 3. Verification
 - [x] 3.1 Deck benchmark: 30 s of firing on a busy street with the decal pool full; frame avg and p99 against main
   - 2026-10-05, idle Deck, deck preset: route avg 13.11 ms, p99 17.78. 30 s firing from the start in gritty (`--weapon=2 --shoot=120`, mark pool full) avg 12.47, p99 17.50; the same in clean with paintballs avg 12.47, p99 17.52. No cost from weapons
-- [ ] 3.2 Human tries all three tones on the Deck (feedback goes to the backlog; not a merge gate)
+- [x] 3.2 Human tries all three tones on the Deck (feedback goes to the backlog; not a merge gate)
+  - 2026-10-21 Deck: the human: "All weapons work".

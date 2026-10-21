@@ -11,7 +11,8 @@
   - 2026-10-07: the kinds (Police 2, Hospital 2, Fire station 2, Ambulance post 3, Security 2, Helipad 1, Parking garage 16); Police opened (474 Elgin Street, Ottawa Police Headquarters, 140 m; 50 Rideau Street, 1.7 km); each picked and centred with its ring and name.
 
 ## 3. Check
-- [ ] 3.1 Human finds the police station from the map on the Deck
+- [x] 3.1 Human finds the police station from the map on the Deck
+  - 2026-10-21 Deck: the human: "Map legend works".
   - 2026-10-07, first thought before trying it (human): "since these are listed under the sections we might not need the names and instead something like 85 Rideau St is good enough. But say the hospitals could be interesting being labeled with the proper names."
   - If confirmed, make it per kind in `place_icons.json` (`label: "address" | "name"`): the address alone for police, fire, ambulance, security and garages, with short street suffixes ("St", "Ave"); the proper name first for hospitals.
   - 2026-10-07 after trying it (human): "The legends look good. Can we mention for the parking if it's underground? I am thinking those might be useful for hiding from the heli. ... the only thing for the parking ones is the on Kent, I wonder if we just say Kent St Parking?" Done: garages read "<street> Parking" from their nearest street (bridges and tunnels skipped), shortened like a sign ("Laurier Ave W"), with "Underground · heli cover" underneath. Two on one street get the cross street's bare name ("Queen St Parking (Metcalfe)"), and are numbered if still alike. Template, note, suffixes and cross format live in `place_icons.json`; other kinds keep their names and addresses (labels "look good"). One stays odd because of its data: "Pont du Portage Bridge Parking" (OSM names the approach road that and doesn't tag it as a bridge).

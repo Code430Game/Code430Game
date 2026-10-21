@@ -9,4 +9,5 @@
   - 2026-10-05: map screenshot shared (icons: P police, S security, + hospital, F fire, A ambulance, H helipad; drawn over everything). The busted and wasted banner names the station or hospital
 
 ## 3. Verification
-- [ ] 3.1 Human gets busted and wasted on the Deck (feedback to the backlog)
+- [x] 3.1 Human gets busted and wasted on the Deck (feedback to the backlog)
+  - 2026-10-21 Deck: the human: "You get arrested and killed".

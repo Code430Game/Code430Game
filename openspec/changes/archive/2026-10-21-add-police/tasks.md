@@ -14,4 +14,5 @@
 ## 3. Verification
 - [x] 3.1 Deck benchmark during a 3-star chase against main
   - 2026-10-05, idle Deck, deck preset: route with no chase avg 12.96 ms, p99 18.21. A 3-star chase on foot at the start (`--wanted=3`, 4 police cars) avg 13.81, p99 18.66, physics mean 14.3. About 0.85 ms for four chasing cars
-- [ ] 3.2 Human tries a chase in clean and gritty on the Deck (feedback to the backlog; not a merge gate)
+- [x] 3.2 Human tries a chase in clean and gritty on the Deck (feedback to the backlog; not a merge gate)
+  - 2026-10-21 Deck: the human: "seem fine. There are issues but for later."

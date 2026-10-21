@@ -15,3 +15,4 @@
 - [x] 4.1 Deck benchmark in rain at 23:00 on the usual route; sky and particle cost stated against the clear-day run; no regression past budget (the Deck was in the human's hands on 2026-10-08; run `scripts/deck-bench.sh --ref main --ref change/add-weather --change add-weather --task 4.1 --extra "--weather=rain --time=23"`)
   - 2026-10-08 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck --pack=code430.proving-ground --weather=rain`): working-tree 02fe38d: render cpu 1.28 / gpu 9.70 ms measured, physics mean 10.52 ms (max 22.70), frame avg 11.14 / p99 19.33 ms (paced), first playable 306 ms.
 - [ ] 4.2 **Stop: human drives through a rain storm and a snowfall on the Deck**
+  - 2026-10-21 Deck: not done: no rain or snow came during play; to investigate.

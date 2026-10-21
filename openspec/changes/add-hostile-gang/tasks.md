@@ -16,3 +16,4 @@
 - [x] 4.1 Deck benchmark in the turf during a fight (proving ground, then the Market turf). Not run on 2026-10-08: the Deck did not resolve on the network. Command when it does: `scripts/deck-bench.sh --pack code430.proving-ground --extra "--spawn=650,475 --gang=5" --change add-hostile-gang --task 4.1`. No Market turf exists yet (the Ottawa pack was off limits this round)
   - 2026-10-08 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck --pack=code430.proving-ground --gang=1`): working-tree 7aa89e3: render cpu 1.19 / gpu 8.98 ms measured, physics mean 9.93 ms (max 21.48), frame avg 10.14 / p99 16.67 ms (paced), first playable 273 ms.
 - [ ] 4.2 **Stop: human walks into the turf on the Deck in gritty and in clean, fights, runs, and says whether the gang is fun and fair**
+  - 2026-10-21 Deck: not done: the human saw no gang ("No gang"); to investigate.

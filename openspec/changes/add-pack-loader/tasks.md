@@ -25,3 +25,4 @@
   - Not run on 2026-10-08: the Deck was being deployed to by another process. Command: `scripts/deck-bench.sh --ref main --ref change/add-pack-loader --change add-pack-loader --task 4.2`; compare the "first play" column as well as the measured render line.
   - 2026-10-08 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck --pack=code430.proving-ground`): working-tree 02fe38d: render cpu 1.19 / gpu 9.55 ms measured, physics mean 10.73 ms (max 23.53), frame avg 10.98 / p99 18.52 ms (paced), first playable 302 ms.
 - [ ] 4.3 **Stop: human opens the Packs list on the Deck, disables the character pack, restarts and sees the built-in palette**
+  - 2026-10-21 Deck: not done: the human doesn't remember trying it.
