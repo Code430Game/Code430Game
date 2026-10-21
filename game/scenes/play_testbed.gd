@@ -12,6 +12,7 @@ const PACK_ID := "code430.ottawa-centretown"
 const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const PLAYER_SCENE := preload("res://actors/player/player.tscn")
 const ON_FOOT_OFFSET_M := 2.2
+const GO_TO_STEP_M := 4.0  # "Go to": how far from the place, toward its street, the player stands
 const FALL_BELOW_GROUND_M := 25.0  # on foot this far under the terrain: fell out of the world
 const BENCH_WARMUP_S := 3.0
 const HORN_STARTLE_M := 25.0  # pedestrians this close turn to look when the horn sounds
@@ -136,6 +137,7 @@ var _road_label: String = ""
 var _road_label_next: float = 0.0
 var _open_map_on_start: bool = false
 var _map_pick: String = ""  # --map-pick=kind[,n]: open that kind in the legend and pick place n
+var _go_to_pick: String = ""  # --go-to=kind[,n]: the legend's "Go to" on place n of that kind (turns on Tester options for the run)
 
 
 func _ready() -> void:
@@ -459,6 +461,8 @@ func _setup_weather() -> void:
 		_weather_pin = ""
 	_weather.setup(seed, _weather_pin if _weather_pin != "" else _weather_start, _weather_pin != "")
 	add_child(_weather)
+	_pause_menu.weather = _weather  # the Testing tab (add-world-menu)
+	_pause_menu.day_night = _day_night
 	_setup_weather_strip()  # the maps were wired before the sky existed
 	# Outputs: the shared ground, terrain and facade materials take wetness and snow; the
 	# particle box follows the camera; traffic reads the speed table.
@@ -560,6 +564,33 @@ func _caught(how: String) -> void:
 	_shooter.reset()
 	_shooter.weapons.refill()
 	_update_stars()
+
+
+## "Go to" from the map legend (add-world-menu, Tester options): the player on foot a few
+## metres from the place toward its street, facing the street; refused while wanted.
+func _go_to_place(place: Services.Place) -> void:
+	if _wanted != null and _wanted.stars > 0:
+		_overview.legend.show_note("Lose the police first")
+		return
+	var at := place.at
+	if place.kind == "turf" and _factions != null:
+		# A turf's centre is often inside a block's building: go to where its crew gathers.
+		for t: Turf in _factions.turfs:
+			if "turf:%s" % t.id == place.id:
+				at = _factions.home(t)
+	var toward := Vector3.ZERO
+	var node: RoadGraph.RoadNode = _pack.graph.nodes.get(place.road_node) if place.road_node != "" else null
+	if node != null:
+		toward = Vector3(node.position.x - at.x, 0.0, node.position.z - at.z)
+	if toward.length() > 1.0:
+		at += toward.normalized() * minf(GO_TO_STEP_M, toward.length() * 0.5)
+	at.y = _pack.ground_height(at.x, at.z)
+	_overview.close()
+	if _player.is_driving():
+		_player.try_exit_vehicle()
+	_place_player(at)
+	if toward.length() > 1.0:
+		_player.rotation.y = atan2(-toward.x, -toward.z)
 
 
 ## Puts the player on foot 1 m above `at`, building the ground there first: after a jump across
@@ -1051,8 +1082,10 @@ func _setup_maps() -> void:
 	_overview.player = Players.local_controlled_body()
 	var places: Array = _pack.services.duplicate()
 	places.append_array(Services.garage_places(_pack.parking_lots, _pack.graph, PlaceIcons.num("garage_street_m", 120.0)))
+	places.append_array(Services.turf_places(_pack.turfs, _pack.ground_height))
 	PlaceIcons.assign_titles(places)
 	_overview.places = places
+	_overview.legend.go_to_requested.connect(_go_to_place)
 	_minimap.places = places
 	var t0 := Time.get_ticks_msec()
 	await _map_renderer.render(self, _pack.graph, _pack.water_polygons, _pack.buildings, _pack.parking_lots, _pack.green_areas, _pack.turfs)
@@ -1066,6 +1099,13 @@ func _setup_maps() -> void:
 		if _map_pick.contains(","):
 			_overview.legend.select(int(_map_pick.get_slice(",", 1)))
 			_overview.legend.accept()
+	if _go_to_pick != "":
+		_overview.open()
+		var kinds := _overview.legend.kinds_present()
+		_overview.legend.select(maxi(kinds.find(_go_to_pick.get_slice(",", 0)), 0))
+		_overview.legend.accept()
+		_overview.legend.select(int(_go_to_pick.get_slice(",", 1)) if _go_to_pick.contains(",") else 0)
+		_overview.legend.go_to()
 
 
 ## Local-metre bounds of the loaded pack: min_x, min_z, max_x, max_z, from the terrain chunks.
@@ -1211,6 +1251,9 @@ func _parse_args() -> void:
 			_open_map_on_start = true
 		elif arg.begins_with("--map-pick="):
 			_map_pick = arg.get_slice("=", 1)
+		elif arg.begins_with("--go-to="):
+			_go_to_pick = arg.get_slice("=", 1)
+			Settings.tester_for_run = true
 		elif arg == "--drive":
 			_start_in_car = true
 		elif arg.begins_with("--traffic="):

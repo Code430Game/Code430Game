@@ -17,6 +17,22 @@ class Place:
 	var title: String  # the name the maps show when the kind has a title (PlaceIcons.assign_titles)
 
 
+## The pack's gang turfs as places for the legend (add-world-menu): kind "turf", at the turf's
+## centre on the ground, named after the crew's ground ("The Double Cross").
+static func turf_places(turfs: Array, ground: Callable = Callable()) -> Array[Place]:
+	var out: Array[Place] = []
+	for t: Turf in turfs:
+		var p := Place.new()
+		p.id = "turf:%s" % t.id
+		p.kind = "turf"
+		p.name = t.name.capitalize() if t.name.begins_with("the ") else t.name
+		var y := float(ground.call(t.centre.x, t.centre.y)) if ground.is_valid() else t.ground_y
+		p.at = Vector3(t.centre.x, y, t.centre.y)
+		p.address = "Gang turf"
+		out.append(p)
+	return out
+
+
 static func load_places(pack_dir: String) -> Array[Place]:
 	var out: Array[Place] = []
 	var path := pack_dir.path_join("services.v0.json")

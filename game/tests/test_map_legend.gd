@@ -334,3 +334,51 @@ func test_the_road_label_stays_off_the_column() -> void:
 	map.call("_place_hover_label")
 	assert_float(label.position.x).is_greater(640.0 - 300.0)
 	map.close()
+
+
+func _key_y() -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = "interact"
+	ev.pressed = true
+	return ev
+
+
+## add-world-menu: with Tester options on, Y on a place asks to go there; off, Y does nothing.
+func test_go_to_is_offered_only_with_tester_options() -> void:
+	var was := Settings.tester_options
+	Settings.tester_options = false
+	var map := _map(_places())
+	var asked: Array = []
+	map.legend.go_to_requested.connect(func(p: Services.Place) -> void: asked.append(p))
+	map.legend.select(map.legend.kinds_present().find("police"))
+	map.legend.accept()
+	assert_bool(map.legend_input(_key_y())).is_false()
+	assert_array(asked).is_empty()
+	map.close()
+	Settings.tester_options = true
+	map.open()
+	assert_bool(map.legend.go_to_enabled).is_true()
+	map.legend.select(map.legend.kinds_present().find("police"))
+	map.legend.accept()
+	assert_bool(map.legend_input(_key_y())).is_true()
+	assert_int(asked.size()).is_equal(1)
+	assert_str((asked[0] as Services.Place).id).is_equal("p2")  # nearest first
+	map.legend.show_note("Lose the police first")
+	assert_str(map.legend._note.text).is_equal("Lose the police first")
+	Settings.tester_options = was
+
+
+func test_turfs_are_places_of_their_own_kind() -> void:
+	var t := Turf.new()
+	t.id = "double-cross"
+	t.name = "the Double Cross"
+	t.centre = Vector2(650, 475)
+	var places := Services.turf_places([t], func(_x: float, _z: float) -> float: return 62.5)
+	assert_int(places.size()).is_equal(1)
+	var p: Services.Place = places[0]
+	assert_str(p.kind).is_equal("turf")
+	assert_str(p.id).is_equal("turf:double-cross")
+	assert_str(p.name).is_equal("The Double Cross")
+	assert_vector(p.at).is_equal(Vector3(650, 62.5, 475))
+	var map := _map(places)
+	assert_bool(map.legend.kinds_present().has("turf")).is_true()

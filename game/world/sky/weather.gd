@@ -86,6 +86,34 @@ func setup(rng_seed: int, start: String = "", pin: bool = false) -> void:
 	_enter(first)
 
 
+## Blends to `id` over its transition and holds it (the Testing tab, add-world-menu): the
+## table isn't consulted until `release()`. Snow is allowed at any hour when held.
+func hold(id: String) -> void:
+	if not states.has(id):
+		return
+	if t < 1.0 and t >= 0.5:
+		state = next_state  # mid-blend: carry on from the nearer end
+	pinned = true
+	upcoming = ""
+	elapsed = 0.0
+	if id == state:
+		next_state = state
+		t = 1.0
+	else:
+		next_state = id
+		t = 0.0
+
+
+## Lets the table walk again from the current state (the Testing tab's Auto).
+func release() -> void:
+	if not pinned:
+		return
+	pinned = false
+	if t >= 1.0:
+		elapsed = 0.0
+		_enter(state)
+
+
 func _enter(id: String) -> void:
 	var s: Dictionary = states[id]
 	var d: Array = s.get("duration_s", [600, 600])
