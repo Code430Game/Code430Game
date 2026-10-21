@@ -13,6 +13,7 @@ Medium:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
+| `add-world-menu` | a World tab in the pause menu (weather, time, day length) and "Go to" a place from the map legend, so any feature can be checked in minutes | nothing | pause menu, weather, clock, map legend, testbed, co-op sync |
 | `add-play-log` | the game logs what happened (ambulance arrived, rain started, traffic lights at night) so Deck checks are confirmed from the log; testers can attach it to reports | nothing | new `game/core/playlog/`, one-line calls in the gameplay systems, `tools/playlog`, the report form |
 | `update-parking` | lot layout passes, street-side parking lanes | the maintainer's lot screenshots for the layout half | importer parking, lot builder, lanes and markings |
 | `add-district-edge` | proper closures and a fog fade at the map edge | nothing | importer barriers, edge builder, traffic |

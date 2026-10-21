@@ -8,8 +8,9 @@ Each entry names the place (local x,z where known) so a fresh session can go str
 Deck session answers (the human, on the clean-clone build of the rewritten history):
 
 - **Traffic has no headlights at night (human: "Night is fine only you have headlights iirc").**
-  `update-traffic-headlights` 2.2 is not passed. Check traffic agents get the night light state
-  on the Deck preset (the preset may cull them).
+  Checked on the Deck: they do. The pools are ahead of each car, so cars driving the player's
+  way hide theirs, and they are faint beside the player's beams. Brighter pools, or lit
+  headlamp glow on the car bodies, if the human wants them to read more.
 - **No gang seen (human: "No gang"; then "I played the proving ground and they were not
   there ... I drove through it [the striped area] and nothing happened").** `add-hostile-gang`
   4.2 open. Two causes:
