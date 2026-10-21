@@ -13,6 +13,7 @@ Medium:
 
 | Change | What | Depends on | Touches |
 |---|---|---|---|
+| `add-play-log` | the game logs what happened (ambulance arrived, rain started, traffic lights at night) so Deck checks are confirmed from the log; testers can attach it to reports | nothing | new `game/core/playlog/`, one-line calls in the gameplay systems, `tools/playlog`, the report form |
 | `update-parking` | lot layout passes, street-side parking lanes | the maintainer's lot screenshots for the layout half | importer parking, lot builder, lanes and markings |
 | `add-district-edge` | proper closures and a fog fade at the map edge | nothing | importer barriers, edge builder, traffic |
 | `add-underpass-interiors` | lights, retaining walls, tone-gated shelters | nothing | underpass builder, pedestrians, content modes |
