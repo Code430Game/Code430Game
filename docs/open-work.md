@@ -85,6 +85,15 @@ maintainer:
 - a hosting profile (5.1);
 - a four-player session (5.2).
 
+## To propose
+
+Ideas the maintainer wants on the list, with no OpenSpec change yet:
+- **Splash screen:** Godot's boot splash (`application/boot_splash/*` in `project.godot`) for
+  the engine's start, then a short skippable logo scene before the menu, with the pack credits
+  line. Needs a logo; `game/icon.svg` is a placeholder.
+- **Game website:** `Code430Game/Code430Game.github.io` on GitHub Pages; later a pack directory
+  from the `code430-*` topics in `Code430Packs`.
+
 ## Small fixes (no proposal needed, open a `fix/` PR)
 
 - **Signs (billboards) in the middle of roads:** check the rule from `19d8c7f` holds wherever
