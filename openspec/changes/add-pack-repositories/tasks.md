@@ -38,5 +38,6 @@
 - [ ] 3.2 Design note and tasks for installing from the Packs tab (stage 2)
 
 ## 4. Verification
-- [ ] 4.1 Deck: package from a clean clone with fetched packs, deploy, benchmark against the previous build (unchanged)
+- [x] 4.1 Deck: package from a clean clone with fetched packs, deploy, benchmark against the previous build (unchanged)
+  - 2026-10-21: a clean clone of the rewritten history (no Ottawa folder) fetched `centretown-v0.2.0` while packaging (112 MB), deployed; the human played it ("the test worked"). No benchmark run: the game code and Centretown's files are the same as the previous build's.
 - [ ] 4.2 **Stop: the human installs a pack from a repository on the Deck and sees it on the Packs tab**
