@@ -4,3 +4,4 @@
 ## 2. Verification
 - [ ] 2.1 Deck benchmark at night (`--extra "--time=22"`) against main
 - [ ] 2.2 Human drives at night on the Deck
+  - 2026-10-21 Deck: not passed: "Night is fine only you have headlights iirc", so traffic shows no headlights; to investigate.

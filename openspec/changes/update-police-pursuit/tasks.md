@@ -20,6 +20,7 @@
 - [x] 4.1 Mac screenshots: the badge seen (helicopter, ground units), hidden mid-ring, and the minimap marker states; day and night
   - 2026-10-06: seen by day at three stars (car and helicopter marks, solid eye; near cars solid and far ones hollow on the minimap); hidden under the 417 at x 767, z 911 by day at one star (hollow eye, ring about half at 6 s of 12); the same spot at night at three stars (hidden, the helicopter's ring dashed while it searches, cars hollow). Mac benchmark (deck preset, 40 s autodrive): render CPU 0.35 ms, physics mean 3.97 ms; with `--wanted=3`: 0.39 ms and 4.03 ms.
 - [ ] 4.2 Deck benchmark: no change while not wanted; a 3-star chase within budget
-- [ ] 4.3 Human plays a chase on the Deck by day and by night and says whether the badge reads, whether hiding and outrunning feel fair, and whether a daytime helicopter cue is still needed
+- [x] 4.3 Human plays a chase on the Deck by day and by night and says whether the badge reads, whether hiding and outrunning feel fair, and whether a daytime helicopter cue is still needed
+  - 2026-10-21 Deck: the human: "Police chase is fine, hiding from heli really hard."
   - 2026-10-06 Deck (aa69377), partly done: "The hiding worked, the timers there worked too. It makes it a lot easier to know what you're hiding from." Still to judge: outrunning the helicopter in the open, and night.
   - Daytime cue (human, 2026-10-06): "The minimap is the real indicator for the helicopter, like… ideally a shadow would be wicked too. The sounds would be wicked too." No cue added here. The rotor goes in `update-audio-pass` (widened), and the shadow is in the backlog.

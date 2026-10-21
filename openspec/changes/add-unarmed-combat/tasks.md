@@ -10,4 +10,5 @@
 
 ## 2. Verification
 - [ ] 2.1 Deck benchmark: no change on the usual route
-- [ ] 2.2 Human tries fists and kicks in clean and gritty on the Deck
+- [x] 2.2 Human tries fists and kicks in clean and gritty on the Deck
+  - 2026-10-21 Deck: the human: "You can punch and kick".

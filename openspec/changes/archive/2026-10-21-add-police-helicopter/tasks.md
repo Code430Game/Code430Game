@@ -6,4 +6,5 @@
 
 ## 2. Verification
 - [x] 2.1 Deck benchmark: a 3-star chase at night (2026-10-05, `--benchmark=40 --autodrive --preset=deck --wanted=3 --time=22`: avg 12.58 / 13.00 ms, p99 25.0 / 21.0 ms over two runs; the helicopter was up for 42 of 43 logged seconds. The day chase without it was 13.81 ms.)
-- [ ] 2.2 Human tries to lose the helicopter on the Deck
+- [x] 2.2 Human tries to lose the helicopter on the Deck
+  - 2026-10-21 Deck: the human tried and could not lose it ("Heli not lost"; "hiding from heli really hard"); balance to the backlog.

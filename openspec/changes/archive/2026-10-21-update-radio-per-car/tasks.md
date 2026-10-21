@@ -8,4 +8,5 @@
   - Tests: station on `take_car` (`test_traffic`), `ParkedCars.take` and `release_key` (`test_parked_cars`), `release_near` (`test_coop`), spawned patrol cars and ambulances (`test_police`, `test_ambulance`), and the pick's spread and determinism (`test_radio`).
 
 ## 2. Verification
-- [ ] 2.1 Human swaps between two cars on the Deck and hears each keep its station
+- [x] 2.1 Human swaps between two cars on the Deck and hears each keep its station
+  - 2026-10-21 Deck: the human: "Radio is fine. It switches."

@@ -24,4 +24,5 @@
 - [x] 3.1 Before and after Mac screenshots of every menu and tab, in clean and gritty
   - After shots: every pause tab, the creator, the report form and the map in gritty, plus the Game, Controls and Options tabs in clean.
   - Before shots: the pause menu (Game and Controls tabs) from main. Before shots of the creator, report form and map were skipped, because the agent's sandbox did not allow a second checkout of main.
-- [ ] 3.2 Human looks through the menus on the Deck
+- [x] 3.2 Human looks through the menus on the Deck
+  - 2026-10-21 Deck: the human: "Menues are fine".

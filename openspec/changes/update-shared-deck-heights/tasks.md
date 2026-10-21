@@ -44,3 +44,4 @@ elevated"):
 
 ## 2. Verification
 - [ ] 2.1 Human drives the Mackenzie King Bridge on the Deck
+  - 2026-10-21 Deck: not done: the Mackenzie King Bridge wasn't revisited.

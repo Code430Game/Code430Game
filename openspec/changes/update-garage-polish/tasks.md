@@ -6,3 +6,4 @@
 
 ## 2. Verification
 - [ ] 2.1 Human drives into the NAC garage on the Deck and watches the minimap
+  - 2026-10-21 Deck: not done: the NAC garage wasn't tried; the other garages had issues, already reported.

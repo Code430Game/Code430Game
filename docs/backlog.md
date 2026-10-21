@@ -3,6 +3,25 @@
 Things seen while driving that are not yet an OpenSpec change. Newest first.
 Each entry names the place (local x,z where known) so a fresh session can go straight there.
 
+## 2026-10-21
+
+Deck session answers (the human, on the clean-clone build of the rewritten history):
+
+- **Traffic has no headlights at night (human: "Night is fine only you have headlights iirc").**
+  `update-traffic-headlights` 2.2 is not passed. Check traffic agents get the night light state
+  on the Deck preset (the preset may cull them).
+- **No gang seen (human: "No gang").** `add-hostile-gang` 4.2 open. The 2026-10-08 underground
+  fix is merged; check the turf spawns on Centretown and on the proving ground.
+- **No helicopter to fly (human: "No heli").** `add-flyable-helicopter` 4.3 open. Check where
+  the stealable helicopter spawns and whether the Deck preset or the pack has one.
+- **No rain or snow during play.** `add-weather` 4.2 open. Check how often weather starts
+  without `--weather=`; the human may need a menu or flag to bring it on.
+- **The police helicopter is very hard to hide from (human: "hiding from heli really hard").**
+  Balance: cover under bridges, garages and tunnels, and how fast it loses sight.
+- **Police "issues but for later"** (human); ask for details at the next police round.
+- **Proving ground still has gaps** (human: "iirc there were still gaps") after the density pass.
+- **Garages other than the NAC had issues**, already reported by the human.
+
 ## 2026-10-08
 
 - **The gang was underground on the Deck (human: "I did not see the gang in the marked area").**

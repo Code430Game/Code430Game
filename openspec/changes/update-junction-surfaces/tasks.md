@@ -29,4 +29,5 @@
 
 ## 3. Verification
 - [ ] 3.1 Deck benchmark against main
-- [ ] 3.2 Human drives the junctions they found on the Deck
+- [x] 3.2 Human drives the junctions they found on the Deck
+  - 2026-10-21 Deck: the human: "Most junctions are better".

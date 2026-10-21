@@ -5,7 +5,7 @@ Every change below is ready to pick up: an OpenSpec change in `openspec/changes/
 `CONTRIBUTING.md` first, then the change's folder. Claim a change before starting
 (`CONTRIBUTING.md`, Claiming work).
 
-Updated 2026-10-10.
+Updated 2026-10-21.
 
 ## Ready to build
 
@@ -56,26 +56,17 @@ Built and merged; each is archived once it has been played on the Deck. The Deck
 tasks among them can be run with `scripts/deck-bench.sh --change <id> --task <n.n>` (it needs
 the Deck on the network and the game closed); the "human tries it" tasks still need the
 maintainer:
-- `add-weapons-and-combat` 3.2
-- `add-police` 3.2
-- `add-police-helicopter` 2.2
-- `add-emergency-services` 3.1
-- `add-ambulance-response` 2.2
 - `add-road-shoulders` 3.2 (now with the 1.4 infill and gores)
-- `update-radio-per-car` 2.1
 - `update-garage-polish` 2.1 (`--spawn=97,62.6,-377` starts on the NAC garage floor)
-- `add-unarmed-combat` 2.1 and 2.2
+- `add-unarmed-combat` 2.1 (Deck benchmark; the human's try is in)
 - `add-weapon-selector` 2.1 (Deck benchmark; the human's try is in)
-- `update-junction-surfaces` 3.1 and 3.2
-- `update-police-pursuit` 4.2 and 4.3 (the human's first notes are in)
+- `update-junction-surfaces` 3.1 (Deck benchmark; the human's try is in)
+- `update-police-pursuit` 4.2 (Deck benchmark; the human's try is in)
 - `add-police-combat` 3.2 and 3.3
-- `update-menu-design` 3.2
-- `add-map-legend` 3.1
 - `add-flyable-helicopter` 4.2 and 4.3
 - `update-shared-deck-heights` 2.1
-- `update-proving-ground-dressing` 2.3 (now with the density pass #104: smaller blocks, frontage roads)
 - `add-hostile-gang` 4.2
-- `add-pack-loader` 4.2 (Deck benchmark) and 4.3
+- `add-pack-loader` 4.3
 - `add-weather` 4.1 (Deck benchmark, `--extra "--weather=rain"`) and 4.2
 - `update-traffic-headlights` 2.1 (Deck benchmark, `--extra "--time=22"`) and 2.2
 

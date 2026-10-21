@@ -2,7 +2,9 @@
 
 ## Purpose
 Double Cross, a small fictional district generated from code into its own map pack, byte-identical on every run. It has one of every road and place feature the game handles, plus a figure-eight loop with a lap timer, so a change can be proved and benchmarked in minutes, away from the drift of live OpenStreetMap data.
+
 ## Requirements
+
 ### Requirement: Generated Test District
 The repository SHALL contain a generator that produces a small fictional district as OpenStreetMap-shaped data, and the normal import pipeline with a synthetic elevation source SHALL turn it into the map pack `code430.proving-ground`, byte-identical on every run, with the generated pack committed and CI failing when a regeneration differs.
 
@@ -15,7 +17,7 @@ The repository SHALL contain a generator that produces a small fictional distric
 - **THEN** the committed pack updates and the diff shows exactly what changed in the district
 
 ### Requirement: One Of Everything
-The proving ground SHALL contain at least one instance of every map feature the Ottawa pack exercises: signals and stop signs, a one-way pair, a bus lane with stops and a bus loop, sidewalks and crossings, an underpass, a road bridge and a footbridge, highway ramps with gores and shoulders, a dead end at the map edge, a surface lot with aisles, kerb parking, a multi-storey garage with an underground entrance, driveways and houses, shopfronts, a police station with a helipad, a hospital with an ambulance bay, a fire station, a park with trees and a tree row, water, and a rail stub with a station.
+The proving ground SHALL contain at least one instance of every map feature the Ottawa pack exercises: signals and stop signs, a one-way pair, a bus lane with stops and a bus loop, sidewalks and crossings, an underpass, a road bridge and a footbridge, highway ramps with gores and shoulders, a dead end at the map edge, a surface lot with aisles, kerb parking, a multi-storey garage with an underground entrance, driveways and houses, shopfronts, a police station with a helipad, a hospital with an ambulance bay, a fire station, a park with trees and a tree row, water, and a rail stub with a station; and it SHALL be dressed as a town, with buildings on every block of every grid (houses, semis and terraces in the residential grid; shopfronts, apartment blocks and a few towers in the main city; offices and a warehouse row in the city) and tree rows along every avenue and the bank road, none of it placed on a road, a bank, the greenbelt, the park or the turf block.
 
 #### Scenario: Feature checklist
 - **WHEN** the feature checklist test runs against the committed pack
@@ -24,6 +26,14 @@ The proving ground SHALL contain at least one instance of every map feature the 
 #### Scenario: Emergency services in one place
 - **WHEN** a change needs a helipad, a hospital and a fire station within a short drive
 - **THEN** the proving ground has all three within 600 m of the spawn
+
+#### Scenario: Every block built on
+- **WHEN** the dressing counts run against the committed pack
+- **THEN** each grid meets its minimum building and tree-row counts and no footprint overlaps a road ribbon, a bank, the greenbelt, the park or the turf
+
+#### Scenario: Deck budget
+- **WHEN** the loop benchmark runs on the Deck with the dressed pack
+- **THEN** render time stays within the budget and the per-chunk vegetation caps are respected
 
 ### Requirement: Drivable Loop With A Lap Timer
 The proving ground's main route SHALL be a closed two-lane ring road with a start line, with the town grid inside it joined to the ring by side streets at signalled and stop-controlled junctions, and the game SHALL time laps across that line, showing the current and best lap on the HUD only while the player is on the loop.
@@ -50,4 +60,3 @@ The testbed SHALL start on the pack named by `--pack=<id>`, else by the `map_pac
 #### Scenario: Missing pack
 - **WHEN** `--pack` names a pack that is not installed
 - **THEN** the HUD says which pack was not found and where it looked
-

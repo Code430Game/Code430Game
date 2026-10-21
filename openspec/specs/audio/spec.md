@@ -52,3 +52,10 @@ The player's car SHALL sound a synthesised horn while the horn action is held, a
 #### Scenario: Horn while driving
 - **WHEN** the player holds the horn button in a car
 - **THEN** a horn tone plays until release and nearby pedestrians look toward the car
+
+### Requirement: Station Per Car
+Each drivable car SHALL keep its own radio station: the player's car keeps the station they chose, and a taken car plays the station its owner left on.
+
+#### Scenario: Swapping cars
+- **WHEN** the player leaves their car on Redline FM, takes a traffic car, then returns to their car
+- **THEN** the taken car plays its own station and the player's car is on Redline FM again
