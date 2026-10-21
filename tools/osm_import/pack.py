@@ -569,9 +569,11 @@ def write_pack(
     services: ServicesResult | None = None,
     spawn: dict | None = None,
     yards: YardsResult | None = None,
+    build: dict | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
-    fixed start on the manifest for packs whose author chose one."""
+    fixed start on the manifest for packs whose author chose one. `build` ({importer, inputs})
+    records which importer commit and which input snapshots made the pack."""
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "terrain").mkdir(exist_ok=True)
     attribution = [OSM_ATTRIBUTION]
@@ -600,6 +602,8 @@ def write_pack(
             "bbox": bbox.as_list(),
         },
     }
+    if build:
+        manifest["build"] = build
     if spawn:
         manifest["map"]["spawn"] = {
             "x": float(spawn["x"]),
