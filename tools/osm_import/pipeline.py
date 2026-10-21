@@ -45,8 +45,10 @@ def run_pipeline(
     cfg: ImportConfig,
     config_name: str = "road_classes.json",
     elevation: ElevationSource | None = None,
+    proj: Projector | None = None,
 ) -> PipelineResult:
-    """Filter, project, build, cluster, elevate, validate. Does not touch disk."""
+    """Filter, project, build, cluster, elevate, validate. Does not touch disk. `proj`
+    defaults to a frame on the bbox centre."""
     fr = filter_ways(data, cfg)
     log.info(
         "filter: %d drivable, %d pedestrian, dropped %s",
@@ -54,7 +56,7 @@ def run_pipeline(
         len(fr.pedestrian),
         fr.dropped,
     )
-    proj = Projector.for_bbox(bbox)
+    proj = proj or Projector.for_bbox(bbox)
     graph = build_graph(data, fr.drivable, fr.pedestrian, proj, cfg)
     log.info("graph: %d nodes, %d edges before clustering", len(graph.nodes), len(graph.edges))
     stats = cluster_junctions(graph, cfg)

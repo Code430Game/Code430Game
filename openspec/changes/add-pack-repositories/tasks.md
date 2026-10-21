@@ -10,14 +10,15 @@
   - 2026-10-21: written only with `--build-stamp` (the proving ground is checked byte for byte, so it stays unstamped); `inputs` comes from the road graph's per-layer sources
 - [x] 1.2b Pack versions: the major, minor and patch rules in `docs/pack-format/README.md`; `pack_tools version check` against the last release tag (files changed without a bump, removed or renamed ids or a moved origin without a major bump, tag equals `<folder>-v<version>`); run in the template's CI; tests
   - 2026-10-21: `python -m pack_tools version check PACK (--ref TAG | --old DIR) [--tag TAG]` in `tools/pack_tools/versions.py`; ids come from the validator's tables; the template's CI wiring is part of 1.1
-- [ ] 1.2c District borders on the chunk grid of the city's origin, in chunk coordinates in the region file; the importer clips to them and refuses an off-grid or overlapping border; `pack_tools size check` (warn at 40 MB per file or 250 MB per pack, fail at 90 MB per file); tests
-  - 2026-10-21: the size limits are done, as part of every validation run (`size_problems` in `validate.py`), not a separate command; the borders wait for the pinned origin (1.6)
+- [x] 1.2c District borders on the chunk grid of the city's origin, in chunk coordinates in the region file; the importer clips to them and refuses an off-grid or overlapping border; `pack_tools size check` (warn at 40 MB per file or 250 MB per pack, fail at 90 MB per file); tests
+  - 2026-10-21: the size limits are done, as part of every validation run (`size_problems` in `validate.py`), not a separate command; borders in `tools/osm_import/region.py` (`border.chunks`, the lat/lon box around it for the import, `map.border` in pack.json, overlap with sibling region files refused). Centretown keeps its bbox until its next re-export moves it onto the grid (a breaking change, 0.3.0)
 - [ ] 1.3 `Code430Packs/Location-OttawaOnCa` (topic `code430-location`): history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/centretown`, region file and overrides beside it, CI green, first release at `0.2.0`
 
 ## 1b. Layers
 - [ ] 1.4 Same-id replacement for ads, placements and turf in `PackLoader.items()` in dependency order, with a logged conflict when unrelated packs share an id; tests
 - [ ] 1.5 `code430.ads-generic` (the current billboards less any Ottawa-only ones) in `Code430Packs/Ads-Generic`; the Ottawa pack depends on it
-- [ ] 1.6 Pinned origin: `origin` in region files, the importer refuses a moved origin without `--new-origin`; Ottawa's current origin written into its region file; tests
+- [x] 1.6 Pinned origin: `origin` in region files, the importer refuses a moved origin without `--new-origin`; Ottawa's current origin written into its region file; tests
+  - 2026-10-21: `Projector.for_origin`; `check_origin` refuses a moved origin (crs, easting, northing) before any work; `regions/ottawa-centretown.json` pins lat 45.4200027, lon -75.6950007, which gives back the pack's 445625, 5029844
 - [ ] 1.7 `placements.v0.json` (characters, items, cars at lat/lon) and lat/lon turf for story packs; schema, validator (the residential-building warning), the game converts through the map's projection; tests
 - [ ] 1.8 Privacy guidance in the story template and `CONTRIBUTING.md`; offline sharing documented
 

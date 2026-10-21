@@ -33,6 +33,13 @@ from osm_import.pack import (
 from osm_import.parking import build_parking, parking_query
 from osm_import.pipeline import load_cfg, run_pipeline, write_outputs
 from osm_import.projection import Projector
+from osm_import.region import (
+    RegionError,
+    border_of,
+    check_origin,
+    check_siblings,
+    projector_for,
+)
 from osm_import.services import build_services, services_query
 from osm_import.validation import render_markdown
 from osm_import.vegetation import build_vegetation, vegetation_query
@@ -84,10 +91,12 @@ def build_stamp(sources: list[dict], commit: str) -> dict:
 
 
 def _import(args: argparse.Namespace) -> int:
+    region = None
     if args.region is not None:
         region = json.loads(args.region.read_text(encoding="utf-8"))
-        s, w, n, e = region["bbox"]
-        args.bbox = f"{s},{w},{n},{e}"
+        if region.get("bbox") is not None:
+            s, w, n, e = region["bbox"]
+            args.bbox = f"{s},{w},{n},{e}"
         args.pack_id = region.get("pack_id", args.pack_id)
         args.pack_name = args.pack_name or region.get("pack_name") or region.get("name")
         args.title = args.title or region.get("pack_name") or region.get("name")
@@ -111,26 +120,36 @@ def _import(args: argparse.Namespace) -> int:
         args.extras = [base / rel for rel in region.get("extras", [])]
         args.spawn = region.get("spawn")
         args.synthetic = region.get("synthetic")
-    bbox = BBox.parse(args.bbox)
+    try:
+        if region is not None:
+            check_siblings(args.region, region)
+            proj, bbox = projector_for(region, BBox.parse(args.bbox) if args.bbox else None)
+        else:
+            bbox = BBox.parse(args.bbox)
+            proj = Projector.for_bbox(bbox)
+        if args.pack_out:
+            check_origin(args.pack_out, proj.frame, args.new_origin)
+    except RegionError as exc:
+        parser_error(str(exc))
+    border = border_of(region) if region is not None else None
     cfg, cfg_name = load_cfg(args.config)
     if args.osm_json:
         data = OsmData.load(args.osm_json)
     else:
         data = fetch_bbox(bbox, cache_dir=args.cache_dir)
     if args.dem == "hrdem":
-        elevation = hrdem_source(bbox, Projector.for_bbox(bbox), args.cache_dir)
+        elevation = hrdem_source(bbox, proj, args.cache_dir)
     elif args.dem == "synthetic":
         elevation = SyntheticSource(**(getattr(args, "synthetic", None) or {}))
     elif args.dem == "flat":
         elevation = FlatSource()
     else:
         elevation = None
-    result = run_pipeline(data, bbox, cfg, cfg_name, elevation)
+    result = run_pipeline(data, bbox, cfg, cfg_name, elevation, proj)
     title = args.title or bbox.overpass()
     if args.pack_out:
         if elevation is None:
             parser_error("--pack-out needs an elevation source (use --dem flat for a test pack)")
-        proj = Projector.for_bbox(bbox)
         sources = result.graph_dict["meta"]["sources"]
         sources[:] = [_source("roads", src) for src in sources]
         water = None
@@ -262,6 +281,7 @@ def _import(args: argparse.Namespace) -> int:
             services,
             spawn=getattr(args, "spawn", None),
             yards=yards,
+            border=border,
             build=build_stamp(result.graph_dict["meta"]["sources"], importer_commit())
             if args.build_stamp
             else None,
@@ -330,6 +350,11 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--pack-id", default="code430.map", help="Pack id for pack.json")
     imp.add_argument("--pack-name", help="Pack display name (defaults to --title)")
     imp.add_argument("--pack-version", default="0.1.0")
+    imp.add_argument(
+        "--new-origin",
+        action="store_true",
+        help="Allow a re-export that moves the pack's map.origin (a breaking change)",
+    )
     imp.add_argument(
         "--build-stamp",
         action="store_true",
