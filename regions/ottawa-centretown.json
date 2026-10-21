@@ -1,6 +1,15 @@
 {
   "name": "ottawa-centretown",
-  "bbox": [45.405, -75.715, 45.435, -75.675],
+  "bbox": [
+    45.405,
+    -75.715,
+    45.435,
+    -75.675
+  ],
+  "origin": {
+    "lat": 45.4200027,
+    "lon": -75.6950007
+  },
   "pack_id": "code430.ottawa-centretown",
   "pack_name": "Ottawa Centretown",
   "dem": "hrdem"
