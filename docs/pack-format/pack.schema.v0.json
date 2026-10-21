@@ -200,6 +200,24 @@
           "minItems": 4,
           "maxItems": 4
         },
+        "border": {
+          "description": "The district's extent on the chunk grid of its city's origin: chunks x0..x1-1 by z0..z1-1 (256 m each). Districts of one city don't overlap, so every chunk belongs to one district.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "chunks"
+          ],
+          "properties": {
+            "chunks": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          }
+        },
         "spawn": {
           "description": "Optional fixed start: local metres and a compass heading (0 north, 90 east). Without it the game picks a spot on the highway.",
           "type": "object",

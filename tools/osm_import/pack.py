@@ -570,6 +570,7 @@ def write_pack(
     spawn: dict | None = None,
     yards: YardsResult | None = None,
     build: dict | None = None,
+    border: tuple[int, int, int, int] | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
     fixed start on the manifest for packs whose author chose one. `build` ({importer, inputs})
@@ -602,6 +603,8 @@ def write_pack(
             "bbox": bbox.as_list(),
         },
     }
+    if border is not None:
+        manifest["map"]["border"] = {"chunks": list(border)}
     if build:
         manifest["build"] = build
     if spawn:

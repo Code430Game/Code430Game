@@ -1,7 +1,9 @@
 """WGS84 -> UTM 18N (EPSG:32618) -> local metres, Y up.
 
 Local frame: x = east, y = up, z = south (so -z is north, matching Godot's
-forward). Origin is the projected bbox centre rounded to whole metres.
+forward). The origin is a point rounded to whole metres in its UTM zone: the region's pinned
+`origin` when it has one (add-pack-repositories: a map keeps its centre across re-exports),
+otherwise the bbox centre.
 """
 
 from __future__ import annotations
@@ -53,7 +55,12 @@ class Projector:
     def for_bbox(cls, bbox: BBox) -> Projector:
         """Frame whose origin is the projected bbox centre, rounded to metres, in the UTM
         zone of that centre (EPSG:326xx north, 327xx south)."""
-        lat, lon = bbox.center
+        return cls.for_origin(*bbox.center)
+
+    @classmethod
+    def for_origin(cls, lat: float, lon: float) -> Projector:
+        """Frame whose origin is this point, projected and rounded to metres, in its UTM
+        zone. A pack's own `origin` lat/lon gives back the same frame."""
         crs = utm_crs_for(lat, lon)
         fwd = Transformer.from_crs(SOURCE_CRS, crs, always_xy=True)
         inv = Transformer.from_crs(crs, SOURCE_CRS, always_xy=True)
@@ -66,6 +73,13 @@ class Projector:
         """Returns (x, z) in local metres; y (elevation) is added later."""
         e, n = self._fwd.transform(lon, lat)
         return e - self.frame.origin_easting, self.frame.origin_northing - n
+
+    def to_latlon(self, x: float, z: float) -> tuple[float, float]:
+        """The inverse of to_local: (lat, lon) of a local point."""
+        lon, lat = self._inv.transform(
+            x + self.frame.origin_easting, self.frame.origin_northing - z
+        )
+        return lat, lon
 
     def bbox_local(self, bbox: BBox) -> tuple[float, float, float, float]:
         """Axis-aligned local bounds (min_x, min_z, max_x, max_z) of the bbox corners."""
