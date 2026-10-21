@@ -6,9 +6,12 @@
 
 ## 1. Pack repositories
 - [ ] 1.1 `Code430Packs/PackTemplate`: layout, README, LICENSE choices (ODbL for map data), `pack.yml` (validate at a pinned game tag, release zip and sha256 on tag); `tools/pack_tools` release command; tests
-- [ ] 1.2 `pack.json` `build.importer` and `build.inputs`, written by the importer; schema and validator; tests
-- [ ] 1.2b Pack versions: the major, minor and patch rules in `docs/pack-format/README.md`; `pack_tools version check` against the last release tag (files changed without a bump, removed or renamed ids or a moved origin without a major bump, tag equals `<folder>-v<version>`); run in the template's CI; tests
+- [x] 1.2 `pack.json` `build.importer` and `build.inputs`, written by the importer; schema and validator; tests
+  - 2026-10-21: written only with `--build-stamp` (the proving ground is checked byte for byte, so it stays unstamped); `inputs` comes from the road graph's per-layer sources
+- [x] 1.2b Pack versions: the major, minor and patch rules in `docs/pack-format/README.md`; `pack_tools version check` against the last release tag (files changed without a bump, removed or renamed ids or a moved origin without a major bump, tag equals `<folder>-v<version>`); run in the template's CI; tests
+  - 2026-10-21: `python -m pack_tools version check PACK (--ref TAG | --old DIR) [--tag TAG]` in `tools/pack_tools/versions.py`; ids come from the validator's tables; the template's CI wiring is part of 1.1
 - [ ] 1.2c District borders on the chunk grid of the city's origin, in chunk coordinates in the region file; the importer clips to them and refuses an off-grid or overlapping border; `pack_tools size check` (warn at 40 MB per file or 250 MB per pack, fail at 90 MB per file); tests
+  - 2026-10-21: the size limits are done, as part of every validation run (`size_problems` in `validate.py`), not a separate command; the borders wait for the pinned origin (1.6)
 - [ ] 1.3 `Code430Packs/Location-OttawaOnCa` (topic `code430-location`): history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/centretown`, region file and overrides beside it, CI green, first release at `0.2.0`
 
 ## 1b. Layers

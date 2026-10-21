@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -45,6 +46,41 @@ def _source(layer: str, meta: dict | None, path: Path | None = None) -> dict:
     if path is not None:
         return {"kind": "file", "layer": layer, "path": path.name}
     return dict(sorted({**(meta or {}), "layer": layer}.items()))
+
+
+def importer_commit() -> str:
+    """The game commit this importer runs from, with `-dirty` when tools/osm_import has
+    uncommitted changes; "unknown" outside a git checkout."""
+    here = Path(__file__).resolve().parent
+    try:
+        head = subprocess.run(
+            ["git", "rev-parse", "--short=12", "HEAD"],
+            cwd=here,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        dirty = subprocess.run(
+            ["git", "status", "--porcelain", "--", "."],
+            cwd=here,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+    return head + ("-dirty" if dirty else "")
+
+
+def build_stamp(sources: list[dict], commit: str) -> dict:
+    """pack.json `build`: the importer commit and, per input layer, the OSM snapshot time
+    (or the file name for a layer read from disk), so a diff shows whether data or code moved."""
+    inputs = {}
+    for s in sources:
+        layer = str(s.get("layer", ""))
+        if layer:
+            inputs[layer] = s.get("osm_base_timestamp") or s.get("path")
+    return {"importer": commit, "inputs": dict(sorted(inputs.items()))}
 
 
 def _import(args: argparse.Namespace) -> int:
@@ -226,6 +262,9 @@ def _import(args: argparse.Namespace) -> int:
             services,
             spawn=getattr(args, "spawn", None),
             yards=yards,
+            build=build_stamp(result.graph_dict["meta"]["sources"], importer_commit())
+            if args.build_stamp
+            else None,
         )
         # Pack extras the importer does not produce (a lap timer, a gang's turf) ride along.
         for extra in getattr(args, "extras", None) or []:
@@ -291,6 +330,11 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--pack-id", default="code430.map", help="Pack id for pack.json")
     imp.add_argument("--pack-name", help="Pack display name (defaults to --title)")
     imp.add_argument("--pack-version", default="0.1.0")
+    imp.add_argument(
+        "--build-stamp",
+        action="store_true",
+        help="Record the importer commit and input snapshot times in pack.json `build`",
+    )
     imp.add_argument(
         "--water",
         action=argparse.BooleanOptionalAction,
