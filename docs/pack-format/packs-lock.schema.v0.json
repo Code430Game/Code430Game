@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.invalid/packs-lock.schema.v0.json",
+  "title": "Code 430 packs.lock.json, version 0",
+  "description": "The pack releases the game builds and tests with. scripts/fetch-packs.sh downloads each into packs/<folder>.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "packs"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "folder", "repo", "tag", "commit", "asset", "sha256"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$"},
+          "folder": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$", "description": "Folder under packs/."},
+          "repo": {"type": "string", "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$", "description": "owner/name on GitHub."},
+          "tag": {"type": "string", "pattern": "^[a-z0-9-]+-v\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$", "description": "<pack folder in its repository>-v<version>."},
+          "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$", "description": "The commit the tag points at, for pack authors cloning the source."},
+          "asset": {"type": "string", "minLength": 1, "description": "The release zip's file name."},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  }
+}

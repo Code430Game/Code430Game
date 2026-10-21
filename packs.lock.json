@@ -1,0 +1,14 @@
+{
+  "schema_version": 0,
+  "packs": [
+    {
+      "id": "code430.ottawa-centretown",
+      "folder": "ottawa-centretown",
+      "repo": "Code430Packs/Location-OttawaOnCa",
+      "tag": "centretown-v0.2.0",
+      "commit": "76cd0dcbcd6fa1409de443177f896711c261e4f5",
+      "asset": "centretown-v0.2.0.zip",
+      "sha256": "309bfc490c36c1be75c0814eb03985978f3df5743aae328a27b91e32ef292ba4"
+    }
+  ]
+}

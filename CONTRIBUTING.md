@@ -81,6 +81,21 @@ with only the proposal. The maintainer approves the direction before code is wri
 - **Shared files:** some files are touched by several open changes (listed in
   `docs/open-work.md`). Keep edits there small and rebase often.
 
+## Make a region or write a story pack
+Packs live in their own repositories in the
+[Code430Packs](https://github.com/Code430Packs) organisation, or in your own account. Start from
+[PackTemplate](https://github.com/Code430Packs/PackTemplate) (**Use this template**); its README
+covers names, layout, versions and releases.
+
+- **A region** is a city: `Location-<City><Subdivision><Country>`, one pack per district,
+  sharing the city's pinned origin and its chunk grid. Build districts with this repository's
+  importer (`tools/osm_import`, see the README's "Build a map pack").
+- **A story pack** depends on a map and never copies it. Don't publish real people's names or
+  where they live: put characters near a park, a shop or a landmark. A personal story with
+  friends' homes is for sharing offline (a folder, or a private repository).
+- To try a pack in the game, put it in `user://packs` or under `packs/`; to make the game
+  build and test with a new release, update `packs.lock.json` and run `scripts/fetch-packs.sh`.
+
 ## Opening the PR
 
 - Title in Conventional Commits form with the change id, for example

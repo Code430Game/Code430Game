@@ -17,6 +17,15 @@ Not yet built: missions, a pack browser, and an economy. `docs/open-work.md` lis
 - Godot `4.7.2-stable` (see `.godot-version`). macOS: `brew install --cask godot`. Others: https://godotengine.org/download.
 - Python 3.11+ and [uv](https://docs.astral.sh/uv/) for the tools.
 
+## Get the packs
+The Ottawa map lives in its own repository,
+[Code430Packs/Location-OttawaOnCa](https://github.com/Code430Packs/Location-OttawaOnCa). The
+game pins the release it uses in `packs.lock.json`; fetch it once after cloning, and again
+when the lock changes (CI and packaging do this themselves):
+```
+scripts/fetch-packs.sh
+```
+
 ## Open the project
 ```
 godot --path game --editor
@@ -33,16 +42,22 @@ godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/
 ```
 More testbed flags: `--traffic=N` caps traffic cars (0 disables), `--spawn=x,z` starts on the nearest road to a local coordinate (`--spawn=x,y,z` puts the player on foot exactly there, such as a garage floor), `--topdown=<height>` looks straight down, `--graph` shows the road graph overlay, `--telemetry` prints the car state every second, `--junction-report` prints junctions whose surface bulges into the grass, leaves part of a road uncovered, falls back to a hull or has terrain above it, with x, z (headless: `godot --headless --path game -s res://world/build/junction_report.gd`).
 
-## Build the map pack
+## Build a map pack
+Map packs are built in their own repositories (start one from
+[Code430Packs/PackTemplate](https://github.com/Code430Packs/PackTemplate)). From this
+checkout, rebuild a district of one of them with its region file:
 ```
 cd tools
-uv run python -m osm_import --bbox 45.405,-75.715,45.435,-75.675 --pack-out ../packs/ottawa-centretown \
-  --pack-id code430.ottawa-centretown --pack-name "Ottawa Centretown" --title "Ottawa Centretown starter district"
+uv run python -m osm_import --region <Location repo>/regions/centretown.json \
+  --pack-out <Location repo>/packs/centretown --pack-version <next version> --build-stamp
 ```
 That fetches OpenStreetMap roads, water, and buildings plus NRCan elevation data (cached, gitignored; set `CODE430_OSM_CACHE=/path` to keep the cache on a shared volume, or pass `--cache-dir`), and writes the road graph, terrain heightmaps, water and building files, manifest, and validation report. Optionally pre-build the chunk meshes as GLB so the game loads faster:
 ```
 godot --headless --path game -s res://world/build/pack_builder.gd -- code430.ottawa-centretown
 ```
+To play a new release here, tag it in the pack's repository, then update its entry in
+`packs.lock.json` (tag, commit, sha256 from the release's `.sha256` file) and run
+`scripts/fetch-packs.sh`.
 
 Debug overlay: press F3, or hold Back (View) and press X on a gamepad. It shows fps, frame time, draw calls, and the active preset.
 
