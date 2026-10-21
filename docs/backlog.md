@@ -10,12 +10,27 @@ Deck session answers (the human, on the clean-clone build of the rewritten histo
 - **Traffic has no headlights at night (human: "Night is fine only you have headlights iirc").**
   `update-traffic-headlights` 2.2 is not passed. Check traffic agents get the night light state
   on the Deck preset (the preset may cull them).
-- **No gang seen (human: "No gang").** `add-hostile-gang` 4.2 open. The 2026-10-08 underground
-  fix is merged; check the turf spawns on Centretown and on the proving ground.
-- **No helicopter to fly (human: "No heli").** `add-flyable-helicopter` 4.3 open. Check where
-  the stealable helicopter spawns and whether the Deck preset or the pack has one.
-- **No rain or snow during play.** `add-weather` 4.2 open. Check how often weather starts
-  without `--weather=`; the human may need a menu or flag to bring it on.
+- **No gang seen (human: "No gang"; then "I played the proving ground and they were not
+  there ... I drove through it [the striped area] and nothing happened").** `add-hostile-gang`
+  4.2 open. Two causes:
+  - Fixed on `fix/turf-hatch-and-credit`: the map drew the turf's stripes *outside* its ring
+    (`clip_polyline_with_polygon` keeps what's outside; `intersect_...` was meant), so the
+    striped land beside the turf looked like the turf and the turf itself looked plain.
+  - Centretown has no turf at all; the only crew is Double Cross's on the proving ground
+    (x 550..750, z 400..550). Ottawa's first turf belongs in a story pack (lat/lon turf,
+    `add-pack-repositories` 1.7).
+  - Open question: a crew sees 28 m and warns for 2 s before it attacks, so a car driving
+    through never sets it off. Decide whether a crew reacts to a passing car (shouts, throws,
+    shoots at it in gritty).
+- **No helicopter to fly (human: "No heli").** `add-flyable-helicopter` 4.3 open. Not a bug:
+  it parks on Centretown's one helipad by the river (about x -939, z -1009), far from the start;
+  the legend lists it under Helipad. A "Go to" in the legend would make it quick to reach.
+- **No rain or snow during play.** `add-weather` 4.2 open. Not a bug: clear lasts 15 to 40 min
+  and is followed by clear 60% of the time, and rain only follows overcast, so most sessions
+  end dry. A weather choice in the pause menu would let a player bring it on.
+- **Proving ground credit ran into the HUD** (seen in a screenshot after #133): the long credit
+  line overlapped the coordinates. Fixed on `fix/turf-hatch-and-credit`: "Double Cross by
+  Code 430 contributors".
 - **The police helicopter is very hard to hide from (human: "hiding from heli really hard").**
   Balance: cover under bridges, garages and tunnels, and how fast it loses sight.
 - **Police "issues but for later"** (human); ask for details at the next police round.

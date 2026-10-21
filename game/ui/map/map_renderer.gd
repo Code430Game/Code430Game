@@ -50,6 +50,24 @@ static func road_width_px(road_class: String) -> float:
 ## Draws the map into `texture`. Must be called from a node in the tree; awaits one frame.
 ## Place markers (services, garages) aren't baked in: the maps draw them with PlaceIcons at
 ## screen size so they stay sharp at any zoom (add-map-legend).
+## A turf's hatching: diagonal lines every `step` pixels, kept to the inside of the ring `pts`.
+static func turf_hatch(pts: PackedVector2Array, step: float) -> Array[PackedVector2Array]:
+	var out: Array[PackedVector2Array] = []
+	if pts.size() < 3:
+		return out
+	var r := Rect2(pts[0], Vector2.ZERO)
+	for p in pts:
+		r = r.expand(p)
+	var x := r.position.x - r.size.y
+	while x < r.end.x:
+		var line := PackedVector2Array([Vector2(x, r.end.y), Vector2(x + r.size.y, r.position.y)])
+		for seg in Geometry2D.intersect_polyline_with_polygon(line, pts):
+			if seg.size() >= 2:
+				out.append(seg)
+		x += step
+	return out
+
+
 func render(host: Node, graph: RoadGraph, water: Array[WaterBuilder.WaterPolygon], buildings: Array[BuildingBuilder.Building] = [], lots: Array = [], green: Array = [], turfs: Array = []) -> void:
 	var viewport := SubViewport.new()
 	viewport.size = size_px
@@ -93,19 +111,8 @@ class MapCanvas:
 			return
 		var col := PlaceIcons.color("turf")
 		draw_colored_polygon(pts, Color(col, 0.18))
-		var r := Rect2(pts[0], Vector2.ZERO)
-		for p in pts:
-			r = r.expand(p)
-		var step := 6.0
-		var x := r.position.x - r.size.y
-		while x < r.end.x:
-			var a := Vector2(x, r.end.y)
-			var b := Vector2(x + r.size.y, r.position.y)
-			var clipped := Geometry2D.clip_polyline_with_polygon(PackedVector2Array([a, b]), pts)
-			for seg in clipped:
-				if seg.size() >= 2:
-					draw_polyline(seg, Color(col, 0.45), 1.0, true)
-			x += step
+		for seg in MapRenderer.turf_hatch(pts, 6.0):
+			draw_polyline(seg, Color(col, 0.45), 1.0, true)
 		var edge := pts.duplicate()
 		edge.append(pts[0])
 		draw_polyline(edge, col, 2.0, true)
