@@ -17,36 +17,65 @@
   `-f new_name=<game>`). GitHub redirects the old URL and remotes; local clones keep working
   but should be pointed at the new URL.
 
+## Packs organisation
+- Packs live in a second organisation, `Code430Packs` (checked free and created by the human
+  on 2026-10-20), and the game organisation keeps only code: the game and, later, tools such as
+  a map generator. City maintainers can get write access to their pack repository without any
+  access to the game, its relay secrets or its runner, and hundreds of pack repositories don't
+  bury the game's.
+- Pack repositories are public data checked only by the validator, so their CI runs on
+  GitHub-hosted runners (free for public repositories), never on the game's self-hosted one.
+- A fine-grained token covers one resource owner, so a machine that works on both needs one
+  token for `Code430Game` and one for `Code430Packs`.
+
 ## Repository names
-- Map: `<City><Region><Country>` in PascalCase with the region's postal abbreviation:
-  `OttawaOnCanada`, `GatineauQcCanada`. A region repository holds one pack per district under
-  `packs/<pack-id>/`, so Centretown and later the Glebe can sit together and share inputs.
-- Story: `Story<Name>` (`StoryFirstRide`). Characters: `Characters<Name>`.
+- `<Kind>-<Name>`, so GitHub's alphabetical list groups each kind:
+  - Location (a map): `Location-<City><Subdivision><Country>`, with ISO 3166 codes for the
+    subdivision (ISO 3166-2) and the country (ISO 3166-1 alpha-2) in PascalCase:
+    `Location-OttawaOnCa`, `Location-GatineauQcCa`, `Location-PortlandOrUs`. Codes rather
+    than names, so every city has exactly one spelling that anyone can look up.
+  - Story: `Story-<Name>` (`Story-FirstRide`). Ads: `Ads-<Name>` (`Ads-Generic`). Characters:
+    `Characters-<Name>`.
+- A location repository is a city, and its packs are districts: it holds one pack per district
+  under `packs/<district>/`, so Centretown and later the Glebe sit together, share the city's
+  origin and inputs, and can meet at their edges. Our first pack covers only Centretown, not
+  all of Ottawa. If one city grows too big, that city can split by district on its own.
+- **Districts are laid out so they can be stitched later** (playing neighbouring districts as
+  one map is its own change, `add-district-stitching`): every district in a city uses the
+  city's pinned origin, and its border lies on the 256 m chunk grid of that origin, with no
+  overlap between districts, so each chunk belongs to exactly one district. The region file
+  gives the border in chunk coordinates; the importer clips OSM data to it and refuses a
+  border that is off the grid or overlaps a sibling district in the same repository.
+- Every pack repository carries a GitHub topic for its kind (`code430-location`,
+  `code430-story`, `code430-ads`, `code430-characters`), so packs in people's own accounts
+  (a story for friends usually lives there) are found by topic search, and a later Packs-tab
+  browser can use the same search.
+- Check every new repository name on GitHub before using it.
 - Pack ids stay as they are (`code430.ottawa-centretown`). The id is what saves, co-op and
   dependencies use; the repository name is only where the pack is hosted.
 
 ## Pack repository layout
 ```
-OttawaOnCanada/
-  packs/ottawa-centretown/     the pack, as today (pack.json, *.v0.json, terrain/)
+Location-OttawaOnCa/
+  packs/centretown/            the pack, as today (pack.json, *.v0.json, terrain/)
   regions/centretown.json      importer inputs (bbox, sources, overrides)
   LICENSE                      ODbL 1.0 for the data; attribution in pack.json
   README.md                    what it covers, how to rebuild, which game version
   .github/workflows/pack.yml   validate at the pinned game tag; release on tag
 ```
 - A rebuild is `python -m osm_import --region regions/centretown.json --pack-out
-  packs/ottawa-centretown`, run from a checkout of the game at the pinned tag. `pack.json`
+  packs/centretown`, run from a checkout of the game at the pinned tag. `pack.json`
   gains `build.importer` (game commit) and `build.inputs` (the cached source dates), so a
   diff can show whether data or code changed.
 - A release is a zip of `packs/<id>/` (without `chunks/`, which the game builds), its sha256,
-  and the pack version from `pack.json` as the tag (`ottawa-centretown-v0.4.0`).
+  and the pack version from `pack.json` as the tag (`centretown-v0.4.0`).
 
 ## Layers
 ```
 Game (code, base factions, tones, characters)
-  └ code430.ads-generic            billboards for any city
-      └ OttawaOnCanada              the place (+ Ottawa-only ads)
-          ├ StoryFirstRide          example story: missions, Double Cross turf, placements
+  └ Ads-Generic                    billboards for any city
+      └ Location-OttawaOnCa         the place (+ Ottawa-only ads)
+          ├ Story-FirstRide         example story: missions, Double Cross turf, placements
           └ a friend's story        replaces ads, places friends and items (shared offline)
 ```
 - Later packs replace earlier ones by id, in the loader's dependency order: a story's ad
@@ -77,11 +106,33 @@ Game (code, base factions, tones, characters)
   `building=house|detached|semidetached_house|terrace|apartments|residential` footprint of the
   map it depends on.
 
+## Pack versions
+Every `pack.json` already has a semantic `version`, dependencies already name a range
+(`^1.2`), and the loader already checks both and `engine_api`. Nothing makes anyone bump it
+(Ottawa is still `0.1.0` after many re-exports), so once stories depend on maps the number
+would mean nothing. From the split on (human, 2026-10-20: "Should we add versioning to the
+packs now?"):
+- **Major:** something a pack built on this one can break on: an id that a story or ad
+  replacement could reference is removed or renamed (buildings, turf, ads, placements, spawn
+  points), the map origin moves (`--new-origin`), or the pack needs a new `engine_api`.
+- **Minor:** new or changed content that keeps every id working: a re-export with more
+  buildings, new yards, a new ad.
+- **Patch:** fixes that add no content: a wrong height, a misplaced bench, typos.
+- While a pack is `0.x`, the minor number counts as the major one, as semver's `^0.2` does,
+  so a pack can stay `0.x` until its maintainer calls it stable.
+- **CI enforces it.** `pack_tools version check` compares the pack with its last release tag:
+  if the files changed and the version didn't, CI fails; if ids were removed or renamed, or
+  the origin moved, it requires a new major (or minor while `0.x`). A release tag must equal
+  `<pack folder>-v<version>`.
+- `Location-OttawaOnCa`'s Centretown starts at `0.2.0` (houses and yards since `0.1.0`).
+- Story packs depend on a map with a range (`{"id": "code430.ottawa-centretown", "version":
+  "^0.2"}`), so a map's minor release reaches them and a breaking one does not.
+
 ## The lock file
 ```json
 {"schema_version": 0, "packs": [
-  {"id": "code430.ottawa-centretown", "repo": "<org>/OttawaOnCanada",
-   "tag": "ottawa-centretown-v0.4.0", "commit": "<sha>", "sha256": "<zip sha256>"}]}
+  {"id": "code430.ottawa-centretown", "repo": "Code430Packs/Location-OttawaOnCa",
+   "tag": "centretown-v0.4.0", "commit": "<sha>", "sha256": "<zip sha256>"}]}
 ```
 - `scripts/fetch-packs.sh` downloads each release zip (or clones at the commit when
   `--source` is given, for pack authors), checks the sha256, unpacks into `packs/<folder>`,
@@ -101,6 +152,29 @@ Game (code, base factions, tones, characters)
   the loader's manifest checks) and accepts data-only packs only. Network access from the game
   is new, so that stage starts with a short design note on what the game may fetch.
 
+## Repository size
+GitHub's limits (as documented in 2026; check again before relying on them): a pushed file
+over 50 MB gets a warning and one over 100 MB is refused; a repository should stay under about
+1 GB and well under 5 GB; release assets can be up to 2 GB each. Git LFS is not used: its
+free storage and bandwidth are small, and every clone and fork would draw on it.
+
+Today Centretown is about 10 km² and 28 MB on disk (largest file `buildings.v0.json`, 9.9 MB
+indented, 4 MB minified), and the game repository's whole history, with every Ottawa
+re-export, packs to 36 MB, because the importer's output is sorted and deterministic, so git
+stores each re-export as a small delta. With yards it will be about 40 MB. A city of ten
+districts would be about 400 MB on disk and should stay well under the 1 GB guideline if
+re-exports stay deterministic. To keep it so:
+- the importer writes files sorted and stable (already checked byte for byte on the proving
+  ground), so history grows by what changed, not by whole files;
+- `chunks/` and other generated caches are never committed (`.gitignore` in the template);
+- `pack_tools size check` in each pack repository's CI warns when a file passes 40 MB or the
+  pack passes 250 MB, and fails at 90 MB per file, so a district is split before GitHub
+  refuses a push;
+- players and the game's lock file fetch release zips (much smaller compressed, up to 2 GB
+  each), not clones, so a big history only costs the people editing that city;
+- if a city's history ever does grow too large, it can be squashed into a fresh repository
+  without touching the packs' ids or versions.
+
 ## Tests and CI after the move
 - Game tests that read Ottawa (`test_in_ottawa_*`, `test_osm_golden` inputs, the streaming
   and benchmark tests) use the fetched pack. When it is absent they fail with a message to
@@ -116,7 +190,7 @@ Game (code, base factions, tones, characters)
 1. The human creates the organisation (name checked on GitHub first).
 2. Transfer the game repository; update the local remote, the relay's `REPO`, the GitHub App
    installation, the runner, and the `relay-production` environment.
-3. Create `PackTemplate`, then `OttawaOnCanada` from the split-out history, with its CI and
+3. Create `PackTemplate`, then `Location-OttawaOnCa` from the split-out history, with its CI and
    first release.
 4. Add `packs.lock.json` and `fetch-packs.sh`, wire them into CI and packaging, prove a clean
    clone builds and passes, then remove `packs/ottawa-centretown` from the game repository.
@@ -126,8 +200,9 @@ Game (code, base factions, tones, characters)
 1. The organisation's name (and whether the game itself is renamed).
 2. Do the proving ground and the characters pack stay in the game repository (proposed), or
    move too?
-5. Region names with short codes (`OttawaOnCa`) or the full country (`OttawaOnCanada`)?
-   Whichever is picked, every region repository follows it.
+5. Region names: decided 2026-10-20, `Location-<City><Subdivision><Country>` with ISO 3166
+   codes in the `Code430Packs` organisation (human: "Code430Packs/location-ottawaonca (with
+   nicer casing)").
 3. Public from the start, or private until the game goes public? Private repositories use the
    self-hosted runner and count against Actions minutes; public ones don't.
 4. Should the Ottawa repository keep the pack's history (filter-repo, proposed) or start
