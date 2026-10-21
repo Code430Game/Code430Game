@@ -9,6 +9,7 @@ OUT="$ROOT/build/linux"
 WITH_CHUNKS=false
 [ "${1:-}" = "--with-chunks" ] && WITH_CHUNKS=true
 
+"$ROOT/scripts/fetch-packs.sh"  # the packs pinned in packs.lock.json
 rm -rf "$OUT"
 mkdir -p "$OUT/packs"
 "$ROOT/scripts/stamp-build.sh"

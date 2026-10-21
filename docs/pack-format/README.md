@@ -139,6 +139,15 @@ The validator also checks sizes against GitHub's limits: a file over 40 MB is a 
 over 90 MB an error (GitHub refuses files over 100 MB), and a pack over 250 MB is a warning.
 `chunks/` isn't counted. When a district gets near these, split it.
 
+## The lock file (`packs.lock.json`)
+The game repository pins the pack releases it builds and tests with (schema
+`packs-lock.schema.v0.json`): each entry names the pack `id`, the `folder` under `packs/`, the
+pack's `repo`, release `tag`, the tag's `commit`, the release `asset` and its `sha256`.
+`scripts/fetch-packs.sh` (`python -m pack_tools lock fetch`) downloads each zip, checks the
+hash, and unpacks it, keeping the folder's `chunks/` cache; `python -m pack_tools lock check`
+fails when a locked pack is missing, stale, or doesn't match its entry. Fetched folders are
+ignored by git.
+
 ## Pack versions
 A pack's `version` tells packs built on it what changed. Compare with the last release:
 

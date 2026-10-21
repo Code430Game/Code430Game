@@ -9,7 +9,7 @@
   "attribution": ["Story Alpha by the tests"],
   "supported_modes": ["clean", "gritty", "dystopia"],
   "max_descriptors": {"crime": "strong"},
-  "dependencies": [{"id": "code430.ottawa-centretown", "version": "^0.1"}],
+  "dependencies": [{"id": "code430.ottawa-centretown", "version": "^0.2"}],
   "story": {"map": "code430.ottawa-centretown"},
   "content": [{"type": "ads", "path": "ads/promo.json"}]
 }
