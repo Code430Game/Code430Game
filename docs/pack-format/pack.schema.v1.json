@@ -101,6 +101,32 @@
       },
       "minItems": 1
     },
+    "build": {
+      "description": "How the importer built this map pack (`--build-stamp`): the game commit the importer ran from and, per input layer, the OpenStreetMap snapshot time or the input file's name.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "importer",
+        "inputs"
+      ],
+      "properties": {
+        "importer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          }
+        }
+      }
+    },
     "trusted": {
       "description": "True only for system packs, which run code. The game warns before enabling.",
       "type": "boolean",

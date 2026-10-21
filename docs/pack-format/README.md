@@ -81,7 +81,7 @@ naming the first pack that differs or is missing on either side.
 | `schema_version` | yes | Always `0` for this schema. |
 | `id` | yes | Unique id, lowercase with dots, for example `code430.ottawa-centretown`. |
 | `name` | yes | Display name. |
-| `version` | yes | Semantic version, for example `0.1.0`. |
+| `version` | yes | Semantic version, for example `0.1.0`. Bumped by the rules in [Pack versions](#pack-versions). |
 | `type` | yes | `map`, `character`, `story`, or `system`. |
 | `engine_api` | yes | Pack API major version the pack targets. Currently `0`. |
 | `license` | yes | SPDX identifier for the pack's own content. Map packs derived from OpenStreetMap use `ODbL-1.0`. |
@@ -92,6 +92,7 @@ naming the first pack that differs or is missing on either side.
 | `trusted` | system only | Must be `true` for system packs and absent or `false` otherwise. |
 | `homepage` | no | URL. |
 | `map` | map only | `crs` (for example `EPSG:32618`), `origin` (`easting`, `northing`, `lat`, `lon`), optional `bbox`. |
+| `build` | no | Written by the importer with `--build-stamp`: `importer` (the game commit it ran from, `-dirty` when `tools/osm_import` had local changes) and `inputs` (per layer, the OpenStreetMap snapshot time or the input file's name), so a diff shows whether the data or the code changed. |
 
 | `supported_modes` | no | Tone modes the pack's content supports, for example `["clean", "gritty", "dystopia"]`. The game warns when the active mode is missing. |
 | `max_descriptors` | no | Strongest level per content descriptor anywhere in the pack, for registry filtering. |
@@ -133,3 +134,29 @@ cd tools
 uv run python -m pack_tools.validate ../packs
 ```
 Exit code is non-zero on any error. Each error names the pack and the field or file.
+
+The validator also checks sizes against GitHub's limits: a file over 40 MB is a warning and one
+over 90 MB an error (GitHub refuses files over 100 MB), and a pack over 250 MB is a warning.
+`chunks/` isn't counted. When a district gets near these, split it.
+
+## Pack versions
+A pack's `version` tells packs built on it what changed. Compare with the last release:
+
+| Bump | When |
+|---|---|
+| major | Something a pack built on this one can break on: an id is removed or renamed (buildings, turf, ads, parking, yards, ...), the map origin moves, or `engine_api` changes. |
+| minor | New ids, nothing removed: a re-export with more buildings, a new ad. |
+| patch | Files changed but no ids were added or removed: a wrong height, a moved bench. |
+
+While a pack is `0.x`, the minor number counts as the major one, as semver's `^0.2` does: a
+breaking change goes from `0.2.x` to `0.3.0`, anything else from `0.2.0` to `0.2.1`. Packs that
+depend on a map name a range (`"^0.2"`) so they get its fixes and new content but not its
+breaking releases. Changing only `version` or `build` in `pack.json` isn't a content change.
+
+```
+cd tools
+uv run python -m pack_tools version check ../packs/centretown --ref centretown-v0.2.0 --tag centretown-v0.2.1
+```
+`--ref` is the last release's git tag (or `--old DIR` a copy of it); leave both out for a first
+release. `--tag` checks the tag being made reads `<pack folder>-v<version>`. It fails when the
+pack changed without the bump it needs and says which version would do.

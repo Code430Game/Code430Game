@@ -138,6 +138,40 @@ IGNORED_NAMES = {".DS_Store", ".gitkeep"}
 _SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$")
 
 
+# GitHub warns on a pushed file over 50 MB and refuses one over 100 MB; warn early, fail
+# before GitHub would, and warn when a whole pack gets big (add-pack-repositories).
+MB = 1024 * 1024
+FILE_WARN_BYTES = 40 * MB
+FILE_FAIL_BYTES = 90 * MB
+PACK_WARN_BYTES = 250 * MB
+
+
+def size_problems(pack_dir: Path) -> tuple[list[str], list[str]]:
+    """(errors, warnings) for files near GitHub's limits; `chunks/` (built by the game, never
+    committed) is not counted."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    total = 0
+    for p in sorted(pack_dir.rglob("*")):
+        rel = p.relative_to(pack_dir)
+        if not p.is_file() or "chunks" in rel.parts:
+            continue
+        size = p.stat().st_size
+        total += size
+        if size > FILE_FAIL_BYTES:
+            errors.append(
+                f"{rel.as_posix()}: {size / MB:.0f} MB, over the {FILE_FAIL_BYTES // MB} MB limit "
+                "(GitHub refuses files over 100 MB); split the district"
+            )
+        elif size > FILE_WARN_BYTES:
+            warnings.append(
+                f"{rel.as_posix()}: {size / MB:.0f} MB; plan a split before {FILE_FAIL_BYTES // MB} MB"
+            )
+    if total > PACK_WARN_BYTES:
+        warnings.append(f"the pack is {total / MB:.0f} MB; plan a split before it reaches 1 GB")
+    return errors, warnings
+
+
 @dataclass
 class PackReport:
     """Validation outcome for one pack folder."""
@@ -656,6 +690,9 @@ def validate_pack(pack_dir: Path, validator: Draft202012Validator | None = None)
     report.errors.extend(errors)
     report.warnings.extend(warnings)
     report.errors.extend(validate_generated(pack_dir))
+    size_errors, size_warnings = size_problems(pack_dir)
+    report.errors.extend(size_errors)
+    report.warnings.extend(size_warnings)
     return report
 
 
