@@ -19,6 +19,10 @@ case "$ACTUAL" in
   *) echo "WARNING: godot reports '$ACTUAL', expected $PINNED" ;;
 esac
 
+step "Locked packs (packs.lock.json)"
+"$ROOT/scripts/fetch-packs.sh"
+( cd "$ROOT/tools" && uv run python -m pack_tools lock check )
+
 step "Python tools: ruff + pytest"
 ( cd "$ROOT/tools" && uv sync --frozen --quiet && uv run ruff check . && uv run ruff format --check . && uv run pytest -q )
 

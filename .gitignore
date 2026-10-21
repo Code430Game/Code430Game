@@ -63,3 +63,7 @@ tools/report_relay/.venv-workers/
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# Packs pinned in packs.lock.json, fetched by scripts/fetch-packs.sh (their own repositories)
+packs/ottawa-centretown/
+packs/.fetched/
