@@ -80,6 +80,8 @@ func test_every_selection_stays_inside_the_panel_padding() -> void:
 	var vp: SubViewport = auto_free(SubViewport.new())
 	vp.size = Vector2i(1280, 800)
 	add_child(vp)
+	var tester_was := Settings.tester_for_run
+	Settings.tester_for_run = true  # the Testing tab is checked too (add-world-menu)
 	var menu: PauseMenu = PAUSE_SCENE.instantiate()
 	vp.add_child(menu)
 	menu.open()
@@ -107,5 +109,6 @@ func test_every_selection_stays_inside_the_panel_padding() -> void:
 	menu.show_tab(PauseMenu.CONTROLS_TAB)
 	assert_str(menu.hint_text()).contains("rebind")
 	menu.close()
+	Settings.tester_for_run = tester_was
 	await get_tree().process_frame  # rows the Controls tab rebuilt are freed at the frame's end
 	menu.free()

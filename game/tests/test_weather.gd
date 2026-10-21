@@ -215,3 +215,45 @@ func test_cloud_noise_is_seamless_and_deterministic() -> void:
 		names.append(str(u["name"]))
 	assert_bool(names.has("cloud_coverage")).is_true()
 	assert_bool(names.has("cloud_noise")).is_true()
+
+
+func test_a_held_state_blends_in_and_outlasts_its_duration() -> void:
+	var w := _controller(3, "clear")
+	w.hour = 12.0
+	w.hold("rain")
+	assert_str(w.next_state).is_equal("rain")
+	assert_float(w.t).is_equal(0.0)
+	for i in range(3 * 3600):
+		w.step(1.0)
+	assert_str(w.state).is_equal("rain")  # three hours, far past any drawn duration
+	assert_float(w.t).is_equal(1.0)
+	assert_str(w.upcoming).is_empty()
+
+
+func test_snow_can_be_held_at_noon() -> void:
+	var w := _controller(3, "clear")
+	w.hour = 12.0
+	w.hold("snow")
+	for i in range(600):
+		w.step(1.0)
+	assert_str(w.state).is_equal("snow")
+
+
+func test_release_lets_the_table_walk_again() -> void:
+	var w := _controller(5, "clear")
+	w.hour = 12.0
+	w.hold("fog")
+	for i in range(600):
+		w.step(1.0)
+	w.release()
+	assert_bool(w.pinned).is_false()
+	assert_str(w.upcoming).is_not_empty()
+	var seen := _sequence(w, 6 * 3600, 12.0)
+	assert_int(seen.size()).is_greater(1)
+
+
+func test_holding_the_current_state_settles_at_once() -> void:
+	var w := _controller(5, "clear")
+	w.hold("clear")
+	assert_float(w.t).is_equal(1.0)
+	assert_bool(w.pinned).is_true()

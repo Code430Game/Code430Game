@@ -113,6 +113,12 @@ it, A randomises, loads, saves or deletes a preset, B keeps the body and returns
 and colour, top, jacket and its colour, trousers, shoes, hat, beard, glasses, height, build. The first start
 gives you a random body; the last one you made is loaded next time. Saved in `user://characters.json`.
 
+**Tester options** on the Settings tab (off by default, saved) shows the **Testing** tab, last:
+Weather (Auto, or a state held until Auto), Time (Auto, or a fixed hour that stops the clock)
+and Day length, each changed with left and right; a co-op guest sees the host's, greyed. It
+also offers **Y: Go to** on a place in the full map's legend, gang turfs included: the player
+stands beside it on foot, facing its street. Refused while wanted ("Lose the police first").
+
 Co-op has its own tab in the pause menu: **Host co-op game** shows the address friends join at;
 **Join game** uses the address field (right on the Join line focuses it for the Deck's
 on-screen keyboard). Command-line equivalents: `--host[=port]` and `--join=address[:port]`.
@@ -126,7 +132,8 @@ creator once the world is up, `--screenshot=path` saves a PNG when the benchmark
 `--fly-input=x,z,climb,yaw` holds those controls (screenshots).
 `--radio=hilltop|redline|quest|crypt|chatter|off` tunes the car radio at start. `--record-music=path.wav` records the Music bus
 until the benchmark ends.
-`--menu=game|coop|controls|options|settings[,keyboard]` opens the pause menu on that tab once the world is up.
+`--menu=game|coop|controls|options|settings|packs|testing[,keyboard]` opens the pause menu on that tab once the world is up.
 `--map` opens the full map; `--map-pick=kind[,n]` also opens that kind in its legend (police, hospital, fire_station, ambulance, security, helipad, garage) and picks place n.
+`--tester` turns on Tester options for one run; `--go-to=kind[,n]` (it implies `--tester`) does the legend's "Go to" on place n of that kind (turf included) once the map is up.
 `--report` opens "Report a problem" once the world is up, and `--report-send` also saves (and,
 with a relay configured, sends) the report.

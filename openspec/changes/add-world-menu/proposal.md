@@ -1,8 +1,11 @@
-# Change: World tab (weather, time) and "Go to" a place
+# Change: Testing tab (weather, time) and "Go to" a place
 
 **Status: proposed 2026-10-21 after the Deck answers: no rain or snow came in a session, the
 flyable helicopter was too far to find, and the gang's turf was hard to reach. The maintainer
-wants fewer checks answered from memory, and testers will need the same shortcuts.**
+wants fewer checks answered from memory, and testers will need the same shortcuts. The human
+chose a hidden Testing tab over a player-facing World tab (2026-10-21: "I think a testing tab.
+We can merge it in, but i feel like weather isn't something that players want to change too
+much.").**
 
 ## Why
 Weather walks a table that is rarely wet within one session (clear lasts 15 to 40 minutes and
@@ -11,27 +14,30 @@ over a kilometre from the start, and so is the Double Cross turf. Command-line f
 of this on the Mac, but nobody can pass flags from Steam's Game Mode, and testers won't.
 
 ## What Changes
-- **A World tab in the pause menu**, after Options:
+- **A Testing tab in the pause menu**, last, shown only when **Tester options** is on in the
+  Settings tab (saved in `settings.cfg`, off by default; `--tester` turns it on for a run).
+  With it off, the weather and clock behave exactly as now. It holds:
   - **Weather:** Auto (the table, as now), Clear, Overcast, Rain, Snow, Fog. Picking one blends
     to it over its usual transition and holds it; Auto lets the table walk again from there.
   - **Time:** Auto (the clock runs), or a fixed hour (06:00, 09:00, 12:00, 17:00, 20:00,
     22:00, 02:00). A fixed hour sets the clock and stops it; Auto starts it from that hour.
   - **Day length:** the minutes a game day takes (as `--day-minutes`), a few steps.
   - Snow ignores `snow_hours` when picked here.
-- **"Go to" in the map legend.**
+- **"Go to" in the map legend**, also only with Tester options on.
   - On a place in a kind's list (garage, helipad, hospital, police station...), Y "Go to"
     moves the player there on foot, beside it, facing the street.
   - Turfs get a legend kind of their own ("Gang turf"), so "Go to" reaches them too.
   - Refused while wanted (stars above 0), with a line saying why, so it can't end a chase.
-- **Co-op.** Weather and time are host-owned already: on a guest the World tab shows the
+- **Co-op.** Weather and time are host-owned already: on a guest the Testing tab shows the
   host's choice, greyed out. "Go to" is per player and works for guests.
 - **The play log** (`add-play-log`, if built first) logs each pick, so a check knows the
   weather or the hour was chosen, not waited for.
 
 ## Impact
-- Affected specs: `menus` (ADDED: World Tab), `wayfinding` (ADDED: Go To A Place).
+- Affected specs: `menus` (ADDED: Testing Tab), `wayfinding` (ADDED: Go To A Place).
 - Affected code:
-  - `game/ui/pause/pause_menu.gd` (the tab);
+  - `game/ui/pause/pause_menu.gd` (the tab, the Tester options row);
+  - `game/core/settings/settings.gd` (`tester` saved);
   - `game/world/sky/weather.gd` (hold a picked state, release to Auto);
   - `game/world/sky/day_night.gd` (fixed hour, stopped clock);
   - `game/ui/map/map_legend.gd` and `place_icons.json` (Go to, the turf kind);

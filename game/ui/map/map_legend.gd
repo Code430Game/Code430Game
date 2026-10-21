@@ -10,6 +10,8 @@ extends PanelContainer
 ## MenuTheme; kinds, names and icons from PlaceIcons.
 
 signal place_chosen(place: Services.Place)
+## Y on a place with Tester options on (add-world-menu): the scene moves the player there.
+signal go_to_requested(place: Services.Place)
 signal back_out
 
 enum Level { KINDS, PLACES }
@@ -25,6 +27,8 @@ var max_height: float = 640.0
 var level: Level = Level.KINDS
 var kind: String = ""  # the kind open at the PLACES level
 var selected: int = 0
+## Offer "Go to" on places (Tester options, add-world-menu).
+var go_to_enabled: bool = false
 
 var _title: Label
 var _note: Label
@@ -134,6 +138,20 @@ func accept() -> void:
 		place_chosen.emit(e)
 
 
+## Y on the selected place: asks the scene to move the player there (Tester options only).
+func go_to() -> void:
+	if not go_to_enabled or level != Level.PLACES or _entries.is_empty():
+		return
+	var e: Variant = _entries[selected]
+	if e is Services.Place:
+		go_to_requested.emit(e)
+
+
+## A line under the title until the list is rebuilt (the scene's "Lose the police first").
+func show_note(text: String) -> void:
+	_note.text = text
+
+
 ## B: from a kind's places back to the kinds (that kind selected); from the kinds, `back_out`.
 func back() -> void:
 	if level == Level.PLACES:
@@ -163,7 +181,7 @@ func rebuild() -> void:
 			_add_row(k, PlaceIcons.label(k), "", str(n), k)
 	else:
 		_title.text = PlaceIcons.label(kind)
-		_note.text = "Nearest first.  B back to all places"
+		_note.text = "Nearest first.  Y go to.  B back to all places" if go_to_enabled else "Nearest first.  B back to all places"
 		var from := origin.global_position if origin != null and origin.is_inside_tree() else Vector3.INF
 		for p: Services.Place in places_of(kind):
 			var main := p.address if p.address != "" else "No street address"

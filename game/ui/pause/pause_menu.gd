@@ -17,13 +17,14 @@ signal host_requested
 signal join_requested(address: String)
 signal report_requested
 
-const TABS: PackedStringArray = ["Game", "Co-op", "Controls", "Options", "Settings", "Packs"]
+const TABS: PackedStringArray = ["Game", "Co-op", "Controls", "Options", "Settings", "Packs", "Testing"]
 const GAME_TAB := 0
 const COOP_TAB := 1
 const CONTROLS_TAB := 2
 const OPTIONS_TAB := 3
 const SETTINGS_TAB := 4
 const PACKS_TAB := 5
+const TESTING_TAB := 6  # only with Tester options on (add-world-menu)
 ## Rows of the Game tab.
 const REPORT_ROW := 2
 const QUIT_ROW := 3
@@ -36,6 +37,9 @@ const MUSIC_STEP_DB := 2.0
 const MUSIC_MIN_DB := -40.0
 const MUSIC_MAX_DB := 6.0
 const PRESETS: PackedStringArray = ["auto", "deck", "high"]
+## The Testing tab's choices: "auto" leaves the weather table or the clock running.
+const TEST_HOURS: PackedFloat32Array = [-1.0, 6.0, 9.0, 12.0, 17.0, 20.0, 22.0, 2.0]
+const TEST_DAY_MINUTES: PackedFloat32Array = [6.0, 12.0, 24.0, 48.0, 96.0]
 
 @onready var _address: LineEdit = $Panel/VBox/Pages/Coop/Address
 @onready var _players: Label = $Panel/VBox/Pages/Coop/Players
@@ -46,6 +50,9 @@ const PRESETS: PackedStringArray = ["auto", "deck", "high"]
 var overview_map: OverviewMap
 ## The radio whose music volume the Options tab sets (the scene hands it over).
 var radio: Radio
+## What the Testing tab changes (the scene hands them over); a guest's mirror the host.
+var weather: WeatherController
+var day_night: DayNight
 var tab: int = GAME_TAB
 ## Controller layout on the Controls tab, or keyboard and mouse; follows the last input.
 var showing_pad: bool = true
@@ -57,7 +64,7 @@ var captured_frame_stats: Dictionary = {}
 
 var _pages: Array[Control] = []
 var _rows: Array = []  # per tab: Array[Button]
-var _selected: PackedInt32Array = [0, 0, 0, 0, 0, 0]
+var _selected: PackedInt32Array = PackedInt32Array([0, 0, 0, 0, 0, 0, 0])  # one per tab in TABS
 var _tab_labels: Array[Button] = []
 var _controls_list: VBoxContainer
 var _controls_scroll: ScrollContainer
@@ -81,8 +88,8 @@ func _ready() -> void:
 	var coop: Array[Button] = [$Panel/VBox/Pages/Coop/Host, $Panel/VBox/Pages/Coop/Join]
 	coop[HOST_ROW].pressed.connect(func() -> void: host_requested.emit())
 	coop[JOIN_ROW].pressed.connect(func() -> void: join_requested.emit(_address.text.strip_edges()))
-	_pages = [$Panel/VBox/Pages/Game, $Panel/VBox/Pages/Coop, _build_controls_page(), _build_options_page(), _build_settings_page(), _build_packs_page()]
-	_rows = [game, coop, [], [], [], []]
+	_pages = [$Panel/VBox/Pages/Game, $Panel/VBox/Pages/Coop, _build_controls_page(), _build_options_page(), _build_settings_page(), _build_packs_page(), _build_testing_page()]
+	_rows = [game, coop, [], [], [], [], []]
 	for i in range(TABS.size()):
 		var b := Button.new()
 		b.text = TABS[i]
@@ -95,6 +102,7 @@ func _ready() -> void:
 	_rebuild_controls()
 	_rebuild_options()
 	_rebuild_settings()
+	_rebuild_testing()
 	show_tab(GAME_TAB)
 
 
@@ -112,16 +120,23 @@ func selected_row() -> int:
 	return _selected[tab]
 
 
-func show_tab(index: int) -> void:
+## Shows tab `index`; a hidden tab (Testing, while Tester options is off) is passed over in the
+## direction `dir` that LB/RB moved.
+func show_tab(index: int, dir: int = 1) -> void:
 	tab = posmod(index, TABS.size())
+	if tab == TESTING_TAB and not Settings.tester():
+		tab = posmod(tab + (1 if dir >= 0 else -1), TABS.size())
 	capturing = ""
 	for i in range(_pages.size()):
 		_pages[i].visible = i == tab
 		_tab_labels[i].button_pressed = i == tab
+		_tab_labels[i].visible = i != TESTING_TAB or Settings.tester()
 	if tab == CONTROLS_TAB:
 		_rebuild_controls()
 	elif tab == PACKS_TAB:
 		_rebuild_packs()
+	elif tab == TESTING_TAB:
+		_rebuild_testing()
 	_update_hint()
 	_highlight()
 
@@ -146,7 +161,7 @@ func _input(event: InputEvent) -> void:
 	if _is_tab_press(event, true):
 		show_tab(tab + 1)
 	elif _is_tab_press(event, false):
-		show_tab(tab - 1)
+		show_tab(tab - 1, -1)
 	elif event.is_action_pressed("ui_cancel"):
 		close()
 	elif event.is_action_pressed("ui_accept"):
@@ -458,15 +473,23 @@ func _rebuild_settings() -> void:
 		graphics.set_meta("step", func(d: int) -> void: _step_preset(d))
 		graphics.pressed.connect(func() -> void: _step_preset(1))
 		page.add_child(graphics)
+		var tester := _row_button("")
+		tester.set_meta("step", func(_d: int) -> void: _toggle_tester())
+		tester.pressed.connect(_toggle_tester)
+		page.add_child(tester)
 		var note := Label.new()
 		note.name = "Note"
 		note.theme_type_variation = MenuTheme.NOTE
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		page.add_child(note)
-		_rows[SETTINGS_TAB] = [graphics]
+		_rows[SETTINGS_TAB] = [graphics, tester]
 	var current := Settings.preset_override
 	var shown := "Auto (%s)" % Settings.resolve_preset_name().capitalize() if current == Settings.PRESET_AUTO else current.capitalize()
 	_set_text(_rows[SETTINGS_TAB][0], "Graphics: <  %s  >" % shown)
+	var tester_text := "On" if Settings.tester_options else "Off"
+	if Settings.tester_for_run and not Settings.tester_options:
+		tester_text = "On for this run (--tester)"
+	_set_text(_rows[SETTINGS_TAB][1], "Tester options: <  %s  >" % tester_text)
 	(page.get_node("Note") as Label).text = "Auto picks Deck on a Steam Deck (%s here) and High elsewhere. Saved for next time." % ("detected" if Settings.is_steam_deck else "not detected")
 
 
@@ -475,6 +498,135 @@ func _step_preset(delta: int) -> void:
 	Settings.set_preset_override(PRESETS[posmod(maxi(i, 0) + delta, PRESETS.size())])
 	_rebuild_settings()
 	_highlight()
+
+
+## Tester options on or off: shows or hides the Testing tab and the legend's "Go to". Saved.
+func _toggle_tester() -> void:
+	Settings.tester_options = not Settings.tester_options
+	Settings.save_settings()
+	if not Settings.tester():
+		_release_testing()
+	_rebuild_settings()
+	show_tab(tab)
+
+
+# --- Testing tab (add-world-menu) ---
+
+func _build_testing_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Testing"
+	page.set_anchors_preset(Control.PRESET_FULL_RECT)
+	page.add_theme_constant_override("separation", 6)
+	_pages_root.add_child(page)
+	return page
+
+
+## The weather choices: Auto, then every state in the table's order.
+func weather_choices() -> PackedStringArray:
+	var out := PackedStringArray(["auto"])
+	if weather != null:
+		out.append_array(weather.order)
+	return out
+
+
+## True on a co-op guest: the host's weather and clock apply, shown greyed.
+func _testing_locked() -> bool:
+	return weather != null and weather.mirror
+
+
+func _rebuild_testing() -> void:
+	var page := _pages[TESTING_TAB]
+	if (_rows[TESTING_TAB] as Array).is_empty():
+		var w := _row_button("")
+		w.set_meta("step", func(d: int) -> void: _step_weather(d))
+		w.pressed.connect(func() -> void: _step_weather(1))
+		var h := _row_button("")
+		h.set_meta("step", func(d: int) -> void: _step_hour(d))
+		h.pressed.connect(func() -> void: _step_hour(1))
+		var m := _row_button("")
+		m.set_meta("step", func(d: int) -> void: _step_day_minutes(d))
+		m.pressed.connect(func() -> void: _step_day_minutes(1))
+		for b in [w, h, m]:
+			page.add_child(b)
+		var note := Label.new()
+		note.name = "Note"
+		note.theme_type_variation = MenuTheme.NOTE
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		page.add_child(note)
+		_rows[TESTING_TAB] = [w, h, m]
+	var rows_now: Array = _rows[TESTING_TAB]
+	var locked := _testing_locked()
+	var arrows := func(text: String) -> String: return text if locked else "<  %s  >" % text
+	var weather_text := "(not running)"
+	if weather != null:
+		weather_text = weather.next_state.capitalize() if weather.pinned else "Auto (%s)" % weather.state.capitalize()
+	_set_text(rows_now[0], "Weather: %s" % arrows.call(weather_text))
+	var hour_text := "(not running)"
+	var minutes_text := "(not running)"
+	if day_night != null:
+		hour_text = "Fixed %s" % day_night.clock_text() if not day_night.running else "Auto (%s)" % day_night.clock_text()
+		minutes_text = "%d min a day" % int(day_night.day_minutes())
+	_set_text(rows_now[1], "Time: %s" % arrows.call(hour_text))
+	_set_text(rows_now[2], "Day length: %s" % arrows.call(minutes_text))
+	for b: Button in rows_now:
+		b.disabled = locked
+	(page.get_node("Note") as Label).text = "The host's weather and time apply to everyone." if locked else "For testing: a picked weather holds until Auto; a fixed hour stops the clock. Turn Tester options off in Settings to hide this tab."
+
+
+func _step_weather(delta: int) -> void:
+	if weather == null or _testing_locked():
+		return
+	var choices := weather_choices()
+	var current := weather.next_state if weather.pinned else "auto"
+	var pick := choices[posmod(maxi(choices.find(current), 0) + delta, choices.size())]
+	if pick == "auto":
+		weather.release()
+	else:
+		weather.hold(pick)
+	_rebuild_testing()
+	_highlight()
+
+
+func _step_hour(delta: int) -> void:
+	if day_night == null or _testing_locked():
+		return
+	var current := -1.0 if day_night.running else day_night.hour
+	var i := 0
+	for k in range(TEST_HOURS.size()):
+		if is_equal_approx(TEST_HOURS[k], current):
+			i = k
+	var pick := TEST_HOURS[posmod(i + delta, TEST_HOURS.size())]
+	if pick < 0.0:
+		day_night.run()
+	else:
+		day_night.fix_hour(pick)
+	_rebuild_testing()
+	_highlight()
+
+
+func _step_day_minutes(delta: int) -> void:
+	if day_night == null or _testing_locked():
+		return
+	var i := 0
+	var best := INF
+	for k in range(TEST_DAY_MINUTES.size()):
+		var d := absf(TEST_DAY_MINUTES[k] - day_night.day_minutes())
+		if d < best:
+			best = d
+			i = k
+	day_night.set_day_minutes(TEST_DAY_MINUTES[clampi(i + delta, 0, TEST_DAY_MINUTES.size() - 1)])
+	_rebuild_testing()
+	_highlight()
+
+
+## Tester options turned off: the weather table and the clock run again.
+func _release_testing() -> void:
+	if _testing_locked():
+		return
+	if weather != null:
+		weather.release()
+	if day_night != null:
+		day_night.run()
 
 
 # --- Packs tab (add-pack-loader) ---
@@ -607,7 +759,8 @@ func open() -> void:
 	capture()
 	MenuTheme.refresh_accent()
 	visible = true
-	_selected = PackedInt32Array([0, 0, 0, 0, 0, 0])
+	_selected = PackedInt32Array()
+	_selected.resize(TABS.size())
 	_rebuild_options()
 	_rebuild_settings()
 	show_tab(GAME_TAB)

@@ -50,6 +50,7 @@ func _restore_settings() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.settings_path))
 	Settings.settings_path = _settings_path_before
 	Settings.binding_overrides = {}
+	Settings.tester_options = false
 	InputMap.load_from_project_settings()
 
 
@@ -276,3 +277,58 @@ func test_packs_tab_toggles_a_character_pack_with_the_controller() -> void:
 	PackLoader.enabled_path = saved_path
 	PackLoader.active_map = saved_map
 	PackLoader.reload()
+
+
+func test_the_testing_tab_is_hidden_until_tester_options_is_on() -> void:
+	Settings.tester_options = false
+	var menu := await _open()
+	menu.show_tab(PauseMenu.PACKS_TAB)
+	await _press(JOY_BUTTON_RIGHT_SHOULDER)
+	assert_int(menu.tab).is_equal(PauseMenu.GAME_TAB)  # passes over the hidden tab
+	menu.show_tab(PauseMenu.TESTING_TAB)
+	assert_int(menu.tab).is_not_equal(PauseMenu.TESTING_TAB)
+	# Tester options from the Settings tab's second row: saved, and the tab appears.
+	menu.show_tab(PauseMenu.SETTINGS_TAB)
+	await _press(JOY_BUTTON_DPAD_DOWN)
+	await _press(JOY_BUTTON_A)
+	assert_bool(Settings.tester_options).is_true()
+	var cfg := ConfigFile.new()
+	assert_int(cfg.load(Settings.settings_path)).is_equal(OK)
+	assert_bool(bool(cfg.get_value(Settings.SECTION_TESTING, Settings.KEY_TESTER, false))).is_true()
+	menu.show_tab(PauseMenu.PACKS_TAB)
+	await _press(JOY_BUTTON_RIGHT_SHOULDER)
+	assert_int(menu.tab).is_equal(PauseMenu.TESTING_TAB)
+	menu.close()
+	_restore_settings()
+
+
+func test_the_testing_tab_holds_weather_and_fixes_the_hour() -> void:
+	Settings.tester_options = true
+	var menu := await _open()
+	var w: WeatherController = auto_free(WeatherController.new())
+	add_child(w)
+	w.set_process(false)
+	w.setup(1, "clear")
+	var dn: DayNight = auto_free(DayNight.new())
+	add_child(dn)
+	dn.set_process(false)
+	menu.weather = w
+	menu.day_night = dn
+	menu.show_tab(PauseMenu.TESTING_TAB)
+	await _press(JOY_BUTTON_DPAD_RIGHT)  # Auto -> the table's first state
+	assert_bool(w.pinned).is_true()
+	assert_str(w.next_state).is_equal(menu.weather_choices()[1])
+	await _press(JOY_BUTTON_DPAD_LEFT)  # back to Auto
+	assert_bool(w.pinned).is_false()
+	await _press(JOY_BUTTON_DPAD_DOWN)
+	await _press(JOY_BUTTON_DPAD_RIGHT)  # Auto -> 06:00
+	assert_bool(dn.running).is_false()
+	assert_str(dn.clock_text()).is_equal("06:00")
+	# A guest sees the host's choice and can't change it.
+	w.mirror = true
+	menu.show_tab(PauseMenu.TESTING_TAB)
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	assert_str(dn.clock_text()).is_equal("06:00")
+	assert_bool((menu.rows(PauseMenu.TESTING_TAB)[0] as Button).disabled).is_true()
+	menu.close()
+	_restore_settings()

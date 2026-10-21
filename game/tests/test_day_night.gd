@@ -72,3 +72,20 @@ func test_weather_dims_the_sun_drives_the_sky_shader_and_the_fog() -> void:
 	dn.weather_coverage = 0.1
 	dn.apply()
 	assert_object(sun.light_projector).is_null()
+
+
+func test_a_fixed_hour_stays_put_and_run_starts_the_clock_again() -> void:
+	var dn: DayNight = auto_free(DayNight.new())
+	dn.config = {"day_minutes": 1.0, "start_hour": 14.0, "dusk_width_deg": 10.0, "night_lights_from_elevation_deg": 4.0, "sun_max_elevation_deg": 62.0}
+	add_child(dn)
+	dn.set_process(false)
+	dn.fix_hour(22.0)
+	assert_str(dn.clock_text()).is_equal("22:00")
+	assert_float(dn.night_factor()).is_equal(1.0)
+	dn._process(30.0)
+	assert_str(dn.clock_text()).is_equal("22:00")
+	dn.run()
+	dn._process(30.0)  # half a one-minute day: twelve hours on
+	assert_str(dn.clock_text()).is_equal("10:00")
+	dn.set_day_minutes(48.0)
+	assert_float(dn.day_minutes()).is_equal(48.0)

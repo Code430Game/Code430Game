@@ -30,7 +30,7 @@ const HINT_ROWS := [
 	[["LT / RT", "zoom"], ["Up / Down", "places"]],
 	[["A", "open"], ["B", "back"], ["View / M", "close"]],
 ]
-const LEGEND_ACTIONS := ["ui_up", "ui_down", "ui_accept", "ui_cancel"]
+const LEGEND_ACTIONS := ["ui_up", "ui_down", "ui_accept", "ui_cancel", "interact"]
 
 var renderer: MapRenderer
 var graph: RoadGraph
@@ -152,6 +152,10 @@ func legend_input(event: InputEvent) -> bool:
 					legend.accept()
 				"ui_cancel":
 					legend.back()
+				"interact":
+					if not legend.go_to_enabled:
+						return false
+					legend.go_to()
 			return true
 	return false
 
@@ -213,6 +217,7 @@ func open() -> void:
 	_focus_locked = false
 	if legend != null:
 		legend.origin = player
+		legend.go_to_enabled = Settings.tester()
 		legend.max_height = legend_room()
 		legend.reset()
 	MenuTheme.refresh_accent()

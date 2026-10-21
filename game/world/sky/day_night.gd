@@ -82,6 +82,27 @@ func night_factor() -> float:
 	return _night_factor
 
 
+## Sets the clock to `h` and stops it there (the Testing tab, add-world-menu).
+func fix_hour(h: float) -> void:
+	hour = fposmod(h, 24.0)
+	running = false
+	apply()
+
+
+## Starts the clock again from the current hour.
+func run() -> void:
+	running = true
+
+
+## Real minutes a game day takes.
+func day_minutes() -> float:
+	return float(config.get("day_minutes", 24.0))
+
+
+func set_day_minutes(minutes: float) -> void:
+	config["day_minutes"] = maxf(minutes, 1.0)
+
+
 ## Clock text for the HUD.
 func clock_text() -> String:
 	var h := int(floor(hour)) % 24

@@ -19,6 +19,9 @@ const SECTION_CONTROLS := "controls"
 ## The map pack to start on; empty means the testbed's default (add-proving-ground).
 const SECTION_MAP := "map"
 const KEY_PACK := "pack"
+## Tester options (add-world-menu): the pause menu's Testing tab and the legend's "Go to".
+const SECTION_TESTING := "testing"
+const KEY_TESTER := "tester"
 const PRESET_AUTO := "auto"
 const PRESET_DECK := "deck"
 const PRESET_HIGH := "high"
@@ -61,11 +64,15 @@ var is_steam_deck: bool = false
 var binding_overrides: Dictionary = {}
 ## The saved map pack id, or "" for the default.
 var map_pack: String = ""
+## Tester options, saved; `--tester` on the command line turns them on for one run.
+var tester_options: bool = false
+var tester_for_run: bool = false
 
 
 func _ready() -> void:
 	presets = load_presets(PRESETS_PATH)
 	is_steam_deck = DeckDetector.is_steam_deck(DeckDetector.collect_facts())
+	tester_for_run = OS.get_cmdline_user_args().has("--tester")
 	load_settings()
 	apply_bindings()  # autoloads are ready before the first scene reads the input map
 	apply_preset(resolve_preset_name())
@@ -109,10 +116,16 @@ func load_settings() -> void:
 			var d: Variant = cfg.get_value(SECTION_CONTROLS, key)
 			if d is Dictionary:
 				binding_overrides[key] = d
+	tester_options = bool(cfg.get_value(SECTION_TESTING, KEY_TESTER, false))
 	map_pack = ""
 	var pack: Variant = cfg.get_value(SECTION_MAP, KEY_PACK, "")
 	if typeof(pack) == TYPE_STRING:
 		map_pack = pack
+
+
+## True when the Testing tab and "Go to" should show: saved on, or `--tester` this run.
+func tester() -> bool:
+	return tester_options or tester_for_run
 
 
 ## Writes the current override to disk.
@@ -120,6 +133,7 @@ func save_settings() -> Error:
 	var cfg := ConfigFile.new()
 	cfg.load(settings_path)
 	cfg.set_value(SECTION_GRAPHICS, KEY_PRESET, preset_override)
+	cfg.set_value(SECTION_TESTING, KEY_TESTER, tester_options)
 	if map_pack != "":
 		cfg.set_value(SECTION_MAP, KEY_PACK, map_pack)
 	elif cfg.has_section_key(SECTION_MAP, KEY_PACK):
