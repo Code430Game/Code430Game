@@ -120,6 +120,10 @@ def _import(args: argparse.Namespace) -> int:
         args.extras = [base / rel for rel in region.get("extras", [])]
         args.spawn = region.get("spawn")
         args.synthetic = region.get("synthetic")
+        # A region that isn't OpenStreetMap data names its own licence and credit.
+        args.license = {k: region[k] for k in ("license", "attribution") if k in region} or None
+        if args.license and region.get("description"):
+            args.license["description"] = region["description"]
     try:
         if region is not None:
             check_siblings(args.region, region)
@@ -282,6 +286,7 @@ def _import(args: argparse.Namespace) -> int:
             spawn=getattr(args, "spawn", None),
             yards=yards,
             border=border,
+            license=getattr(args, "license", None),
             build=build_stamp(result.graph_dict["meta"]["sources"], importer_commit())
             if args.build_stamp
             else None,

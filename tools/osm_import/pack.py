@@ -571,13 +571,17 @@ def write_pack(
     yards: YardsResult | None = None,
     build: dict | None = None,
     border: tuple[int, int, int, int] | None = None,
+    license: dict | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
     fixed start on the manifest for packs whose author chose one. `build` ({importer, inputs})
-    records which importer commit and which input snapshots made the pack."""
+    records which importer commit and which input snapshots made the pack. `license`
+    ({license, attribution, description}) is for a pack that isn't OpenStreetMap data, such as
+    a generated test district: it replaces the ODbL licence and the OpenStreetMap credit."""
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "terrain").mkdir(exist_ok=True)
-    attribution = [OSM_ATTRIBUTION]
+    license = license or {}
+    attribution = list(license.get("attribution") or [OSM_ATTRIBUTION])
     if elevation_attribution:
         attribution.append(elevation_attribution)
     manifest = {
@@ -587,10 +591,13 @@ def write_pack(
         "version": version,
         "type": "map",
         "engine_api": 0,
-        "description": "Generated from OpenStreetMap by tools/osm_import. Roads, junctions, and terrain for one district.",
+        "description": license.get(
+            "description",
+            "Generated from OpenStreetMap by tools/osm_import. Roads, junctions, and terrain for one district.",
+        ),
         "authors": ["Code 430 contributors"],
         "dependencies": [],
-        "license": "ODbL-1.0",
+        "license": license.get("license", "ODbL-1.0"),
         "attribution": attribution,
         "map": {
             "crs": frame.crs,

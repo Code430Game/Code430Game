@@ -25,8 +25,12 @@ JSON file per layer (`osm`, `water`, `buildings`, `parking`, `bridges`, `service
 (a lap timer, a gang's turf), `"spawn"` fixes where the game starts (`x`, `z` in local metres,
 `heading_deg` with 0 north and 90 east), and with `"dem": "synthetic"` a `"synthetic"` object
 sets the analytic terrain (`base`, `slope_x`, `hill_height`, `hill_radius`, `hill_x`, `hill_z`).
+A region that isn't OpenStreetMap data names its own `"license"` and `"attribution"` (and its
+`"description"` then goes on the pack); without them a pack is ODbL 1.0 and credits
+OpenStreetMap.
 
 The Double Cross proving ground (`proving-ground.json`, inputs under `proving-ground/`) is such
-a region: `tools/proving_ground` writes the inputs and `scripts/regen-proving-ground.sh`
+a region, licensed CC BY-SA 4.0 like the game's other assets since our own code generates
+it: `tools/proving_ground` writes the inputs and `scripts/regen-proving-ground.sh`
 rebuilds `packs/proving-ground` from them. Never edit the inputs by hand; change the generator
 and regenerate (CI checks that the committed files match a fresh run).

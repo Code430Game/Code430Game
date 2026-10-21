@@ -20,6 +20,12 @@ def _load(name: str) -> dict:
     return json.loads((PACK / name).read_text(encoding="utf-8"))
 
 
+def test_the_generated_district_is_not_labelled_as_openstreetmap_data():
+    manifest = _load("pack.json")
+    assert manifest["license"] == "CC-BY-SA-4.0"
+    assert not any("OpenStreetMap" in line for line in manifest["attribution"])
+
+
 def test_committed_pack_matches_a_fresh_import(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """The whole pipeline from the committed inputs, offline, gives the committed pack."""
 
