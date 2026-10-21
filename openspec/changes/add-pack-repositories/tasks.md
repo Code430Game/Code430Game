@@ -1,17 +1,19 @@
 ## 0. Organisation (the human)
 - [x] 0.1 **Stop: the human picks the organisation's name (checked free on GitHub right before) and creates it on github.com**
-  - 2026-10-20: `Code430Game` (checked free that day), created by the human on the free plan.
-- [ ] 0.2 Transfer `rjksn/Code430` to the organisation (with the human's go-ahead); update the local remote, the relay's `REPO` and GitHub App installation, the self-hosted runner, and the `relay-production` environment; CI green on the moved repository
-  - 2026-10-20: transferred to `Code430Game/Code430Game` (private) by API after a PII scan (gitleaks over all refs, pattern scans of every blob, issues and comments; example names tidied in #124). The self-hosted runner, the `relay-production` environment, issues and PRs moved with it; the local remote points at the new URL; repository references updated. Left: the human transfers the "Code 430 Reporter" GitHub App to the organisation and installs it on the repository, then the relay is redeployed from the Mac with the new `REPO`
+  - 2026-10-20: `Code430Game` (checked free that day), created by the human on the free plan. `Code430Packs` for the pack repositories, checked free and created the same day.
+- [x] 0.2 Transfer `rjksn/Code430` to the organisation (with the human's go-ahead); update the local remote, the relay's `REPO` and GitHub App installation, the self-hosted runner, and the `relay-production` environment; CI green on the moved repository
+  - 2026-10-20: transferred to `Code430Game/Code430Game` (private) by API after a PII scan (gitleaks over all refs, pattern scans of every blob, issues and comments; example names tidied in #124). The self-hosted runner, the `relay-production` environment, issues and PRs moved with it; the local remote points at the new URL; repository references updated. Left: the human transfers the "Code 430 Reporter" GitHub App to the organisation and installs it on the repository, then the relay is redeployed from the Mac with the new `REPO`. 2026-10-20: the App moved to `Code430Game` and is installed on the repository; the relay was redeployed and a test report filed issue #127 on the new repository
 
 ## 1. Pack repositories
-- [ ] 1.1 `PackTemplate`: layout, README, LICENSE choices (ODbL for map data), `pack.yml` (validate at a pinned game tag, release zip and sha256 on tag); `tools/pack_tools` release command; tests
+- [ ] 1.1 `Code430Packs/PackTemplate`: layout, README, LICENSE choices (ODbL for map data), `pack.yml` (validate at a pinned game tag, release zip and sha256 on tag); `tools/pack_tools` release command; tests
 - [ ] 1.2 `pack.json` `build.importer` and `build.inputs`, written by the importer; schema and validator; tests
-- [ ] 1.3 `OttawaOnCanada`: history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/`, region file and overrides beside it, CI green, first release
+- [ ] 1.2b Pack versions: the major, minor and patch rules in `docs/pack-format/README.md`; `pack_tools version check` against the last release tag (files changed without a bump, removed or renamed ids or a moved origin without a major bump, tag equals `<folder>-v<version>`); run in the template's CI; tests
+- [ ] 1.2c District borders on the chunk grid of the city's origin, in chunk coordinates in the region file; the importer clips to them and refuses an off-grid or overlapping border; `pack_tools size check` (warn at 40 MB per file or 250 MB per pack, fail at 90 MB per file); tests
+- [ ] 1.3 `Code430Packs/Location-OttawaOnCa` (topic `code430-location`): history split out with `git filter-repo --path packs/ottawa-centretown` into `packs/centretown`, region file and overrides beside it, CI green, first release at `0.2.0`
 
 ## 1b. Layers
 - [ ] 1.4 Same-id replacement for ads, placements and turf in `PackLoader.items()` in dependency order, with a logged conflict when unrelated packs share an id; tests
-- [ ] 1.5 `code430.ads-generic` (the current billboards less any Ottawa-only ones) in its own repository; the Ottawa pack depends on it
+- [ ] 1.5 `code430.ads-generic` (the current billboards less any Ottawa-only ones) in `Code430Packs/Ads-Generic`; the Ottawa pack depends on it
 - [ ] 1.6 Pinned origin: `origin` in region files, the importer refuses a moved origin without `--new-origin`; Ottawa's current origin written into its region file; tests
 - [ ] 1.7 `placements.v0.json` (characters, items, cars at lat/lon) and lat/lon turf for story packs; schema, validator (the residential-building warning), the game converts through the map's projection; tests
 - [ ] 1.8 Privacy guidance in the story template and `CONTRIBUTING.md`; offline sharing documented

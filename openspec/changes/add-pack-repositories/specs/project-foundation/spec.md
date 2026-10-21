@@ -1,11 +1,23 @@
 ## ADDED Requirements
 
 ### Requirement: Packs In Their Own Repositories
-Map, story and character packs other than the built-in ones SHALL each live in their own repository under the project's organisation, with the inputs that rebuild them, their own licence and attribution, a CI check by the game's pack validator, and tagged releases carrying a zip and its sha256.
+Map, story and character packs other than the built-in ones SHALL each live in their own repository under the project's packs organisation, named `<Kind>-<Name>` with a GitHub topic for their kind (a location repository being a city that holds one pack per district), with the inputs that rebuild them, their own licence and attribution, a CI check by the game's pack validator, and tagged releases carrying a zip and its sha256.
 
 #### Scenario: Two people work on different regions
 - **WHEN** one contributor rebuilds the Ottawa pack while another edits a story pack
 - **THEN** each works in that pack's own repository and neither change touches the game repository
+
+#### Scenario: A second district joins a city
+- **WHEN** a contributor maps the Glebe after Centretown
+- **THEN** the Glebe is a new pack in the same `Location-OttawaOnCa` repository, sharing the city's origin, rather than a new repository
+
+#### Scenario: Districts that can be stitched
+- **WHEN** the Glebe is added beside Centretown
+- **THEN** it uses Ottawa's origin and a border on the 256 m chunk grid that doesn't overlap Centretown's, and the importer refuses a border that does
+
+#### Scenario: A file near GitHub's limit
+- **WHEN** a district's buildings file passes 90 MB
+- **THEN** the pack repository's CI fails and asks for the district to be split, before GitHub would refuse the push
 
 #### Scenario: A pack release
 - **WHEN** a pack repository tags a release
@@ -53,3 +65,14 @@ Story packs SHALL be able to place named characters, items and cars on a map the
 #### Scenario: A story for friends
 - **WHEN** someone writes a story that places their friends at spots on the Ottawa map
 - **THEN** the characters appear there in the game, and the validator warns about any placed inside a house
+
+### Requirement: Pack Versions
+Each pack repository SHALL bump its pack's semantic version for every release that changes the pack: major for a removed or renamed id, a moved map origin or a new `engine_api` (minor while the version is `0.x`), minor for new or changed content, patch for fixes, and its CI SHALL refuse a changed pack whose version was not bumped as these rules require.
+
+#### Scenario: A re-export without a bump
+- **WHEN** a contributor re-exports Centretown and opens a pull request without changing the version
+- **THEN** the pack repository's CI fails and says which bump the change needs
+
+#### Scenario: A breaking map release
+- **WHEN** Centretown removes building ids that a story could place characters in
+- **THEN** CI requires the next breaking version, and a story depending on `^0.2` keeps the last `0.2.x` release
