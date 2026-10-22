@@ -1,11 +1,11 @@
 {
-  "_comment": "Impact kinds: what a hit leaves on the world, how it sounds, and what it does to a person. Distances in metres, times in seconds.",
+  "_comment": "Impact kinds: what a hit leaves on the world, how it sounds, what it does to a person, and the health a hit takes from a car (vehicle_damage, add-vehicle-and-building-damage). Distances in metres, times in seconds.",
   "impacts": {
-    "bullet": {"decal": "hole", "sound": "shot", "lethal_push": 520.0},
-    "blade": {"decal": "", "sound": "swish", "lethal_push": 260.0},
-    "energy": {"decal": "scorch", "sound": "zap", "lethal_push": 600.0},
-    "paint": {"decal": "splat", "sound": "pop", "lethal_push": 0.0},
-    "fist": {"decal": "", "sound": "thud", "lethal_push": 180.0}
+    "bullet": {"decal": "hole", "sound": "shot", "lethal_push": 520.0, "vehicle_damage": 9.0},
+    "blade": {"decal": "", "sound": "swish", "lethal_push": 260.0, "vehicle_damage": 3.0},
+    "energy": {"decal": "scorch", "sound": "zap", "lethal_push": 600.0, "vehicle_damage": 11.0},
+    "paint": {"decal": "splat", "sound": "pop", "lethal_push": 0.0, "vehicle_damage": 0.0},
+    "fist": {"decal": "", "sound": "thud", "lethal_push": 180.0, "vehicle_damage": 1.0}
   },
   "_fists": "Empty hands (add-unarmed-combat): a tap of fire is a punch, alternating hands; fire held kick_hold_s and released is a kick. Reach is from the body's centre. Where the tone allows violence, punches_to_down punches on one person within combo_window_s, or one kick, knock them down; anywhere else, and before then, a hit is a shove: they stumble for stumble_s and run off.",
   "fists": {

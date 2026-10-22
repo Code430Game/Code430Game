@@ -135,6 +135,7 @@ var _lap: LapTimer  # laps across the pack's start line (add-proving-ground), lo
 var _lap_label: Label
 var _spawn_on_foot_at: Vector3 = Vector3.INF  # --spawn=x,y,z: the player starts on foot exactly here (a garage floor)
 var _car_id: String = ""  # --car=<vehicle id>: start in this catalogue vehicle (default: the catalogue's)
+var _start_damage: float = 0.0  # --damage=N: the start car takes N health of hits around its body (screenshots)
 var _road_label: String = ""
 var _road_label_next: float = 0.0
 var _open_map_on_start: bool = false
@@ -248,6 +249,8 @@ func _ready() -> void:
 	_spawn_transform = spawn
 	_car.recover_callback = _recover_car
 	_car.global_transform = spawn
+	if _start_damage > 0.0:
+		_damage_around(_car, _start_damage)
 	_car.set_spawn(spawn)
 	_camera.target = _car
 	_camera.global_position = spawn.origin + spawn.basis.z * 8.0 + Vector3.UP * 3.0
@@ -712,7 +715,32 @@ func _setup_combat() -> void:
 	_shooter.tile.position = Vector2(-20.0 - _shooter.tile.size.x, 86.0)
 	$HUD.add_child(_shooter.tile)
 	add_child(_shooter)
+	add_to_group(VehicleDamage.BLAST_GROUP)
 	_setup_wanted()
+
+
+## A wreck exploded at `at` (add-vehicle-and-building-damage; vehicles in reach were already
+## flung and damaged by the wreck): the flash, fire, scorch and boom; the player on foot hurt
+## and thrown by distance; walkers in reach knocked down, and everyone near runs.
+func on_blast(at: Vector3, radius: float, source: Node) -> void:
+	if _combat_effects != null:
+		var spark: bool = source != null and "damage" in source and source.damage != null and source.damage.wreck_outcome == "spark"
+		_combat_effects.blast(at, Color(0.6, 0.85, 1.0) if spark else Color(1.0, 0.6, 0.25))
+	if _player != null and not _player.is_driving():
+		var off := _player.global_position - at
+		var k := 1.0 - off.length() / radius
+		if k > 0.0:
+			_player.velocity += (Vector3(off.x, 0.0, off.z).normalized() * 9.0 + Vector3.UP * 5.0) * k
+			_hurt(VehicleDamage.tun("blast_player_damage") * k)
+	if _peds != null:
+		for a in _peds.agents:
+			if a.state != Pedestrian.State.WALKING:
+				continue
+			var off: Vector3 = a.position() - at
+			if off.length() < radius * 0.7:
+				var push := (Vector3(off.x, 0.0, off.z).normalized() * 500.0 + Vector3.UP * 250.0) * (1.0 - off.length() / radius)
+				_peds.knock_down(a, push, a.position() + Vector3.UP * 1.0)
+		_peds.flee(at, radius * 5.0)
 
 
 ## The wanted level (add-police): crimes from weapons, car hits and car theft; stars on the HUD.
@@ -1149,6 +1177,17 @@ func _spawn_on_edge(hit: Dictionary) -> Transform3D:
 	return Transform3D(Basis.looking_at(forward, Vector3.UP), hit["point"] + offset + Vector3.UP * 1.0)
 
 
+## --damage: `amount` health of hits of 20 taken front, right, rear and left in turn.
+func _damage_around(car: VehicleBody3D, amount: float) -> void:
+	var l: float = car.length_m * 0.5
+	var spots := [Vector3(-0.4, 0.6, -l), Vector3(0.9, 0.7, 0.3), Vector3(0.3, 0.6, l), Vector3(-0.9, 0.7, -0.6)]
+	var i := 0
+	while amount > 0.0:
+		car.damage.take(minf(amount, 20.0), spots[i % spots.size()])
+		amount -= 20.0
+		i += 1
+
+
 ## Puts a rolled or lost car back on the nearest road, or at the spawn if none is near.
 func _recover_car(car: VehicleBody3D) -> void:
 	var hit := _pack.graph.nearest_edge(car.global_position, 80.0)
@@ -1274,6 +1313,8 @@ func _parse_args() -> void:
 			_parking_occupancy = float(arg.get_slice("=", 1))
 		elif arg.begins_with("--car="):
 			_car_id = arg.get_slice("=", 1)
+		elif arg.begins_with("--damage="):
+			_start_damage = float(arg.get_slice("=", 1))
 		elif arg.begins_with("--peds="):
 			_peds_cap = int(arg.get_slice("=", 1))
 		elif arg.begins_with("--knockdown-every="):
@@ -1474,6 +1515,8 @@ func _process(delta: float) -> void:
 	var driving := _player != null and _player.is_driving()
 	_camera.look_behind = in_play and driving and Input.is_action_pressed("look_behind")
 	var on_foot := in_play and _player != null and not driving
+	if driving and _player.vehicle != null and _player.vehicle.has_method("can_enter") and not _player.vehicle.can_enter() and _player.vehicle.linear_velocity.length() < 3.0:
+		_player.try_exit_vehicle()  # a wreck that will burn: out before it does
 	_reset_ring.progress = _driven_car().reset_progress() if driving else _step_foot_reset(on_foot and Input.is_action_pressed("reset_vehicle"), delta)
 	if _wanted != null:
 		_wanted.target = Players.local_controlled_body()

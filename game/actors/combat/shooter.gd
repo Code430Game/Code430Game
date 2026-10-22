@@ -502,6 +502,11 @@ func hit(w: Dictionary, collider: Object, pos: Vector3, normal: Vector3, from: V
 			peds.paint(a, _paint_index, from, float(weapons.config.get("flee_s", 6.0)))
 			hit_person.emit(a, w, false)
 		return
+	var dmg: VehicleDamage = collider.get("damage") if collider is VehicleBody3D and "damage" in collider else null
+	if dmg != null:
+		# add-vehicle-and-building-damage: a hit on a car (paint does nothing to it).
+		dmg.take(float(imp.get("vehicle_damage", 0.0)), (collider as Node3D).to_local(pos))
+		return
 	if effects != null and collider is StaticBody3D:
 		_paint_index = (_paint_index + 1) % 4
 		effects.mark(str(imp.get("decal", "")), pos, normal, _paint_index)

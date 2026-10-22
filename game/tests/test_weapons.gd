@@ -136,3 +136,20 @@ func test_the_mark_pool_recycles_oldest_first() -> void:
 	assert_int(fx.marks_shown()).is_equal(3)
 	fx.clear_marks()
 	assert_int(fx.marks_shown()).is_equal(0)
+
+
+func test_a_shot_damages_a_car_and_paint_does_not() -> void:
+	# add-vehicle-and-building-damage: hits on a car take its impact kind's vehicle_damage.
+	var s := _shooter()
+	var car: VehicleBody3D = auto_free(load("res://actors/vehicles/placeholder_car.tscn").instantiate())
+	add_child(car)
+	car.global_position = Vector3(10, 0, 0)
+	_use_mode("gritty")
+	s.weapons.slot = 2
+	s.hit(s.weapons.current(), car, Vector3(9.1, 0.8, 0), Vector3.LEFT, Vector3(0, 1, 0))
+	assert_float(car.damage.health).is_less(VehicleDamage.MAX_HEALTH)
+	_use_mode("clean")
+	car.damage.mend()
+	s.weapons.slot = 2
+	s.hit(s.weapons.current(), car, Vector3(9.1, 0.8, 0), Vector3.LEFT, Vector3(0, 1, 0))
+	assert_float(car.damage.health).is_equal(VehicleDamage.MAX_HEALTH)

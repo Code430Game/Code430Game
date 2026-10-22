@@ -52,6 +52,85 @@ static func build(entry: Dictionary, lod: int = Lod.LOD0, with_wheels: bool = tr
 	return b.commit()
 
 
+## A copy of `mesh` pushed in around each of `dents` ([{"at": Vector3, "depth": float}] in the
+## mesh's frame, add-vehicle-and-building-damage): vertices within `radius` of a dent move
+## toward the body's middle line by up to its depth, easing to none at the edge. Each surface
+## keeps its material. Moved triangles get new flat normals, so the crumple catches the light,
+## and the paint (surface 0's vertex colour) is scraped darker around each dent. `mesh` itself
+## is untouched, so cars that share it are not dented.
+static func dented(mesh: ArrayMesh, dents: Array, radius: float) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for si in range(mesh.get_surface_count()):
+		var arrays := mesh.surface_get_arrays(si)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var moved := PackedByteArray()
+		moved.resize(verts.size())
+		var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR] if arrays[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+		for vi in range(verts.size()):
+			var v := verts[vi]
+			verts[vi] = dent_point(v, dents, radius)
+			if verts[vi] != v:
+				moved[vi] = 1
+				if si == 0 and vi < colors.size():
+					colors[vi] = colors[vi] * scrape_shade(v, dents, radius)
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		if si == 0 and not colors.is_empty():
+			arrays[Mesh.ARRAY_COLOR] = colors
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL] if arrays[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+		if normals.size() == verts.size() and mesh.surface_get_primitive_type(si) == Mesh.PRIMITIVE_TRIANGLES:
+			var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			var tris := idx.size() if not idx.is_empty() else verts.size()
+			for t in range(0, tris - 2, 3):
+				var i0 := idx[t] if not idx.is_empty() else t
+				var i1 := idx[t + 1] if not idx.is_empty() else t + 1
+				var i2 := idx[t + 2] if not idx.is_empty() else t + 2
+				if moved[i0] == 0 and moved[i1] == 0 and moved[i2] == 0:
+					continue
+				# Godot winds front faces clockwise: the normal is (c - a) x (b - a).
+				var n := (verts[i2] - verts[i0]).cross(verts[i1] - verts[i0])
+				if n.length() < 1e-8:
+					continue
+				n = n.normalized()
+				if n.dot(normals[i0] + normals[i1] + normals[i2]) < 0.0:
+					n = -n  # keep it on the side the old normals faced
+				normals[i0] = n
+				normals[i1] = n
+				normals[i2] = n
+			arrays[Mesh.ARRAY_NORMAL] = normals
+		out.add_surface_from_arrays(mesh.surface_get_primitive_type(si), arrays)
+		out.surface_set_material(si, mesh.surface_get_material(si))
+	return out
+
+
+## How much a scrape darkens the paint at `v`: 1 untouched, down to 0.3 at a dent's middle.
+static func scrape_shade(v: Vector3, dents: Array, radius: float) -> float:
+	var shade := 1.0
+	for d: Dictionary in dents:
+		var k := 1.0 - v.distance_to(d["at"]) / radius
+		if k > 0.0:
+			shade = minf(shade, lerpf(1.0, 0.3, k))
+	return shade
+
+
+## `v` moved by `dents` (see dented): toward the middle line at the dent's height, never past it.
+static func dent_point(v: Vector3, dents: Array, radius: float) -> Vector3:
+	for d: Dictionary in dents:
+		var at: Vector3 = d["at"]
+		var dist := v.distance_to(at)
+		if dist >= radius:
+			continue
+		var inward: Vector3
+		if absf(at.x) * 2.0 > absf(at.z):
+			inward = Vector3(-at.x, 0.0, 0.0)  # a side hit pushes the side in
+		else:
+			inward = Vector3(0.0, 0.0, -at.z)  # a front or rear hit pushes it back
+		if inward.length() < 0.001:
+			inward = Vector3.DOWN  # straight down onto the roof
+		var k := 1.0 - dist / radius
+		v += inward.normalized() * float(d["depth"]) * k * k
+	return v
+
+
 ## Wheel centre positions (x, y, z) for an entry, front left first: for wheel nodes and tests.
 static func wheel_positions(entry: Dictionary) -> Array[Vector3]:
 	var d: Dictionary = entry.get("dims", {})
@@ -97,6 +176,19 @@ static func dark_material() -> StandardMaterial3D:
 		_dark.roughness = 0.3
 		_dark.metallic = 0.1
 	return _dark
+
+
+static var _broken: StandardMaterial3D
+
+
+## A smashed light (add-vehicle-and-building-damage): dark, dull and never glowing, whatever the
+## lens's vertex colour.
+static func broken_light_material() -> StandardMaterial3D:
+	if _broken == null:
+		_broken = StandardMaterial3D.new()
+		_broken.albedo_color = Color(0.06, 0.06, 0.065)
+		_broken.roughness = 0.9
+	return _broken
 
 
 ## Headlights: lens texture, glow after dusk (DayNight raises the energy).
