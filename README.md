@@ -106,6 +106,15 @@ Manual route:
 5. In Steam (Desktop Mode): Games > Add a Non-Steam Game to My Library > Browse to `code430.x86_64`. Optional: in its properties, set Launch Options to `--fullscreen`.
 6. Switch back to Game Mode and launch it from the Non-Steam tab. The `deck` graphics preset is selected automatically; F3 has no key on the Deck, so use Back + X for the overlay.
 
+### Windows
+
+`scripts/package.sh windows --zip` exports `build/windows/` (`code430.exe`, `code430.pck`,
+`packs/`) and zips it to `build/code430-windows-<commit>.zip`. Unzip it anywhere and run
+`code430.exe`; the `packs` folder must stay beside it. The build isn't code-signed, so Windows
+SmartScreen warns the first time: More info > Run anyway. A controller works (Xbox layout); so do
+keyboard and mouse (see `docs/controls.md`). `scripts/package.sh linux` is the Deck build
+(`scripts/package-linux.sh` still works).
+
 ## Repo layout
 ```
 game/                 Godot project (res:// root)
