@@ -123,6 +123,13 @@ def _polygons(geom) -> list[Polygon]:
     return []
 
 
+def _polygonal(geom):
+    """The polygon parts of `geom` as one geometry. `make_valid` turns a degenerate outline (a
+    sliver, a repeated point) into lines or a collection, and GEOS refuses an overlay that mixes
+    those with polygons ("Overlay input is mixed-dimension"; Ottawa had them)."""
+    return unary_union(_polygons(geom))
+
+
 def _lines(geom) -> list[LineString]:
     if geom.is_empty:
         return []
@@ -201,9 +208,11 @@ def _obstacles(
             streets.append(g)
     for b in buildings.buildings:
         if b.id not in houses:
-            out.append(make_valid(Polygon(b.rings[0], b.rings[1:])))
+            out.append(_polygonal(make_valid(Polygon(b.rings[0], b.rings[1:]))))
     if parking is not None:
-        out.extend(make_valid(Polygon(lot.rings[0], lot.rings[1:])) for lot in parking.lots)
+        out.extend(
+            _polygonal(make_valid(Polygon(lot.rings[0], lot.rings[1:]))) for lot in parking.lots
+        )
     if water is not None:
         for wp in water.polygons:
             v, t = wp.vertices, wp.triangles
@@ -223,7 +232,7 @@ def build_yards(
     houses = [b for b in buildings.buildings if b.house is not None]
     if not houses:
         return result
-    polys = [make_valid(Polygon(b.rings[0])) for b in houses]
+    polys = [_polygonal(make_valid(Polygon(b.rings[0]))) for b in houses]
     house_ids = {b.id for b in houses}
     obstacles, streets = _obstacles(buildings, house_ids, graph, parking, water)
     obstacle_tree = STRtree(obstacles)
@@ -244,12 +253,16 @@ def build_yards(
     for i, b in enumerate(houses):
         h = b.house
         house = polys[i]
-        lot = shapely.intersection(
-            _cells_union(by_house[i]),
-            house.buffer(LOT_REACH_M),
-            grid_size=GRID_M,
+        lot = _polygonal(
+            shapely.intersection(
+                _cells_union(by_house[i]),
+                house.buffer(LOT_REACH_M),
+                grid_size=GRID_M,
+            )
         )
-        cut = [obstacles[j] for j in obstacle_tree.query(lot)]
+        if lot.is_empty or house.is_empty:
+            continue
+        cut = [obstacles[j] for j in obstacle_tree.query(lot) if not obstacles[j].is_empty]
         if cut:
             lot = shapely.difference(
                 lot, shapely.union_all(cut, grid_size=GRID_M), grid_size=GRID_M
