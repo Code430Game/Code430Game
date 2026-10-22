@@ -14,8 +14,10 @@ chunk belongs to exactly one district. This change lets the game play a set of n
 districts together.
 
 ## What Changes
-- **A map is one or more districts.** A map pack may name sibling districts it can be played
-  with (`map.neighbours`, pack ids). The scene can name a set of map packs to play together;
+- **A map is one or more districts.** The map in play is joined by every installed map pack of
+  the same city (same origin and projection, a border that overlaps none already taken): found,
+  not listed, so installing a neighbouring district is enough. (Planned as `map.neighbours`;
+  changed 2026-10-22 while building it.) The scene can name a set of map packs to play together;
   they must share an origin and projection, and their borders must not overlap. The loader
   refuses a set that breaks either rule, with the reason on the Packs tab.
 - **Chunks come from the district that owns them.** The streamer looks up each chunk's owner

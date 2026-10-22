@@ -1,0 +1,40 @@
+{
+  "name": "test-east",
+  "origin": {
+    "lat": 45.0,
+    "lon": -75.0
+  },
+  "border": {
+    "chunks": [
+      1,
+      -2,
+      2,
+      0
+    ]
+  },
+  "pack_id": "test.district-east",
+  "pack_name": "Test district east",
+  "dem": "synthetic",
+  "synthetic": {
+    "base": 60.0,
+    "slope_x": 0.004,
+    "hill_height": 9.0,
+    "hill_radius": 320.0,
+    "hill_x": -380.0,
+    "hill_z": -330.0
+  },
+  "inputs": {
+    "osm": "../proving-ground/osm.json",
+    "water": "../proving-ground/water.json",
+    "buildings": "../proving-ground/buildings.json",
+    "parking": "../proving-ground/parking.json",
+    "bridges": "../proving-ground/bridges.json",
+    "services": "../proving-ground/services.json",
+    "vegetation": "../proving-ground/vegetation.json"
+  },
+  "description": "A slice of the Double Cross proving ground for the district stitching tests (add-district-stitching).",
+  "license": "CC-BY-SA-4.0",
+  "attribution": [
+    "Double Cross by Code 430 contributors"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+ "fences": [],
+ "schema_version": 0,
+ "units": "metres, x east, z south; polygons are rings (outer first, then holes), not closed",
+ "yards": []
+}

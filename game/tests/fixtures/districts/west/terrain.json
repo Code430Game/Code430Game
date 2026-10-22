@@ -1,0 +1,51 @@
+{
+ "chunk_size_m": 256.0,
+ "chunks": [
+  {
+   "cx": 0,
+   "cz": -3,
+   "file": "terrain/chunk_0_-3.png",
+   "max_y": 61.59,
+   "min_y": 60.337
+  },
+  {
+   "cx": 1,
+   "cz": -3,
+   "file": "terrain/chunk_1_-3.png",
+   "max_y": 62.051,
+   "min_y": 61.051
+  },
+  {
+   "cx": 0,
+   "cz": -2,
+   "file": "terrain/chunk_0_-2.png",
+   "max_y": 62.168,
+   "min_y": 61.004
+  },
+  {
+   "cx": 1,
+   "cz": -2,
+   "file": "terrain/chunk_1_-2.png",
+   "max_y": 62.052,
+   "min_y": 61.149
+  },
+  {
+   "cx": 0,
+   "cz": -1,
+   "file": "terrain/chunk_0_-1.png",
+   "max_y": 67.793,
+   "min_y": 35.518
+  },
+  {
+   "cx": 1,
+   "cz": -1,
+   "file": "terrain/chunk_1_-1.png",
+   "max_y": 62.052,
+   "min_y": 61.069
+  }
+ ],
+ "encoding": "rgb8: height = (R*256 + G) / 65535 * (max_y - min_y) + min_y; row 0 is the north edge (min z)",
+ "resolution_m": 4.0,
+ "samples_per_chunk": 65,
+ "schema_version": 0
+}

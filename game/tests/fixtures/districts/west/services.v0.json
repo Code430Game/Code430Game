@@ -1,0 +1,18 @@
+{
+ "places": [
+  {
+   "address": "3 Station Avenue",
+   "at": [
+    250.3,
+    61.17,
+    -349.67
+   ],
+   "id": "w50004",
+   "kind": "fire_station",
+   "name": "Double Cross Fire Hall",
+   "road_node": "n101217"
+  }
+ ],
+ "schema_version": 0,
+ "units": "metres, x east, z south; y the ground"
+}

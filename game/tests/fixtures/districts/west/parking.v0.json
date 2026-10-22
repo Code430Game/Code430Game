@@ -1,0 +1,7 @@
+{
+ "bays": [],
+ "garages": [],
+ "lots": [],
+ "schema_version": 0,
+ "units": "metres, x east, z south; ground_y vertical"
+}

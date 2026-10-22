@@ -1,0 +1,40 @@
+{
+ "attribution": [
+  "Double Cross by Code 430 contributors"
+ ],
+ "authors": [
+  "Code 430 contributors"
+ ],
+ "dependencies": [],
+ "description": "A slice of the Double Cross proving ground for the district stitching tests (add-district-stitching).",
+ "engine_api": 0,
+ "id": "test.district-west",
+ "license": "CC-BY-SA-4.0",
+ "map": {
+  "bbox": [
+   44.9999964,
+   -75.0,
+   45.0046054,
+   -74.9967516
+  ],
+  "border": {
+   "chunks": [
+    0,
+    -2,
+    1,
+    0
+   ]
+  },
+  "crs": "EPSG:32618",
+  "origin": {
+   "easting": 500000.0,
+   "lat": 44.9999964,
+   "lon": -75.0,
+   "northing": 4982950.0
+  }
+ },
+ "name": "Test district west",
+ "schema_version": 0,
+ "type": "map",
+ "version": "0.1.0"
+}

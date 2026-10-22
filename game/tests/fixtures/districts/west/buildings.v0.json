@@ -1,0 +1,1941 @@
+{
+ "buildings": [
+  {
+   "colour": "",
+   "ground_y": 61.17,
+   "height_m": 6.4,
+   "id": "w20026.0",
+   "kind": "fire_station",
+   "levels": 0.0,
+   "material": "",
+   "name": "Double Cross Fire Hall",
+   "osm_id": 20026,
+   "rings": [
+    [
+     [
+      220.27,
+      -369.64
+     ],
+     [
+      256.02,
+      -369.64
+     ],
+     [
+      256.02,
+      -329.71
+     ],
+     [
+      220.27,
+      -329.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 60.87,
+   "height_m": 19.2,
+   "id": "w20038.0",
+   "kind": "office",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20038,
+   "rings": [
+    [
+     [
+      80.1,
+      -52.29
+     ],
+     [
+      80.1,
+      -70.25
+     ],
+     [
+      100.13,
+      -70.25
+     ],
+     [
+      100.13,
+      -52.29
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.93,
+   "height_m": 19.2,
+   "id": "w20080.0",
+   "kind": "apartments",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20080,
+   "rings": [
+    [
+     [
+      12.01,
+      -367.63
+     ],
+     [
+      12.01,
+      -385.6
+     ],
+     [
+      28.03,
+      -385.6
+     ],
+     [
+      28.03,
+      -367.63
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.96,
+   "height_m": 9.6,
+   "id": "w20081.0",
+   "kind": "apartments",
+   "levels": 3.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20081,
+   "rings": [
+    [
+     [
+      12.01,
+      -343.68
+     ],
+     [
+      12.01,
+      -361.65
+     ],
+     [
+      28.03,
+      -361.65
+     ],
+     [
+      28.03,
+      -343.68
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.97,
+   "height_m": 9.6,
+   "id": "w20082.0",
+   "kind": "apartments",
+   "levels": 3.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20082,
+   "rings": [
+    [
+     [
+      12.01,
+      -319.73
+     ],
+     [
+      12.01,
+      -337.69
+     ],
+     [
+      28.03,
+      -337.69
+     ],
+     [
+      28.03,
+      -319.73
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.76,
+   "height_m": 9.6,
+   "id": "w20236.0",
+   "kind": "retail",
+   "levels": 3.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20236,
+   "rings": [
+    [
+     [
+      30.03,
+      -372.62
+     ],
+     [
+      30.03,
+      -388.58
+     ],
+     [
+      42.05,
+      -388.58
+     ],
+     [
+      42.05,
+      -372.62
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 61.79,
+   "height_m": 6.4,
+   "id": "w20287.0",
+   "kind": "retail",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20287,
+   "rings": [
+    [
+     [
+      18.02,
+      -410.55
+     ],
+     [
+      18.02,
+      -426.51
+     ],
+     [
+      30.03,
+      -426.51
+     ],
+     [
+      30.03,
+      -410.55
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 61.68,
+   "height_m": 6.4,
+   "id": "w20288.0",
+   "kind": "retail",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20288,
+   "rings": [
+    [
+     [
+      30.03,
+      -410.55
+     ],
+     [
+      30.03,
+      -426.51
+     ],
+     [
+      42.05,
+      -426.51
+     ],
+     [
+      42.05,
+      -410.55
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": true
+  },
+  {
+   "colour": "",
+   "ground_y": 61.39,
+   "height_m": 16.0,
+   "id": "w20289.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20289,
+   "rings": [
+    [
+     [
+      78.09,
+      -370.62
+     ],
+     [
+      78.09,
+      -388.58
+     ],
+     [
+      98.12,
+      -388.58
+     ],
+     [
+      98.12,
+      -370.62
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.27,
+   "height_m": 16.0,
+   "id": "w20290.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20290,
+   "rings": [
+    [
+     [
+      104.12,
+      -370.62
+     ],
+     [
+      104.12,
+      -388.58
+     ],
+     [
+      124.15,
+      -388.59
+     ],
+     [
+      124.15,
+      -370.62
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.19,
+   "height_m": 16.0,
+   "id": "w20291.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20291,
+   "rings": [
+    [
+     [
+      130.16,
+      -370.62
+     ],
+     [
+      130.16,
+      -388.59
+     ],
+     [
+      150.18,
+      -388.59
+     ],
+     [
+      150.18,
+      -370.62
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.14,
+   "height_m": 16.0,
+   "id": "w20292.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20292,
+   "rings": [
+    [
+     [
+      156.19,
+      -370.62
+     ],
+     [
+      156.19,
+      -388.59
+     ],
+     [
+      176.21,
+      -388.59
+     ],
+     [
+      176.21,
+      -370.62
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.29,
+   "height_m": 12.0,
+   "id": "w20315.0",
+   "kind": "warehouse",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20315,
+   "rings": [
+    [
+     [
+      76.09,
+      -410.55
+     ],
+     [
+      76.09,
+      -438.48
+     ],
+     [
+      116.14,
+      -438.49
+     ],
+     [
+      116.14,
+      -410.55
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.14,
+   "height_m": 11.0,
+   "id": "w20316.0",
+   "kind": "warehouse",
+   "levels": 1.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20316,
+   "rings": [
+    [
+     [
+      128.15,
+      -410.55
+     ],
+     [
+      128.15,
+      -438.49
+     ],
+     [
+      168.2,
+      -438.49
+     ],
+     [
+      168.2,
+      -410.55
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.16,
+   "height_m": 11.0,
+   "id": "w20317.0",
+   "kind": "warehouse",
+   "levels": 2.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20317,
+   "rings": [
+    [
+     [
+      232.28,
+      -438.49
+     ],
+     [
+      256.02,
+      -438.49
+     ],
+     [
+      256.02,
+      -410.55
+     ],
+     [
+      232.28,
+      -410.55
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.06,
+   "height_m": 25.6,
+   "id": "w20378.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20378,
+   "rings": [
+    [
+     [
+      224.28,
+      -71.26
+     ],
+     [
+      224.28,
+      -89.22
+     ],
+     [
+      244.31,
+      -89.22
+     ],
+     [
+      244.31,
+      -71.26
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.11,
+   "height_m": 12.8,
+   "id": "w20379.0",
+   "kind": "office",
+   "levels": 4.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20379,
+   "rings": [
+    [
+     [
+      250.31,
+      -89.22
+     ],
+     [
+      256.02,
+      -89.22
+     ],
+     [
+      256.02,
+      -71.26
+     ],
+     [
+      250.31,
+      -71.26
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.09,
+   "height_m": 25.6,
+   "id": "w20407.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20407,
+   "rings": [
+    [
+     [
+      224.28,
+      -111.17
+     ],
+     [
+      224.28,
+      -129.13
+     ],
+     [
+      244.31,
+      -129.13
+     ],
+     [
+      244.31,
+      -111.17
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.13,
+   "height_m": 25.6,
+   "id": "w20408.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20408,
+   "rings": [
+    [
+     [
+      250.31,
+      -129.13
+     ],
+     [
+      256.02,
+      -129.13
+     ],
+     [
+      256.02,
+      -111.17
+     ],
+     [
+      250.31,
+      -111.17
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.08,
+   "height_m": 25.6,
+   "id": "w20423.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20423,
+   "rings": [
+    [
+     [
+      210.26,
+      -149.09
+     ],
+     [
+      210.26,
+      -169.05
+     ],
+     [
+      228.28,
+      -169.05
+     ],
+     [
+      228.28,
+      -149.09
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.13,
+   "height_m": 16.0,
+   "id": "w20424.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20424,
+   "rings": [
+    [
+     [
+      210.26,
+      -226.93
+     ],
+     [
+      210.26,
+      -246.88
+     ],
+     [
+      228.28,
+      -246.88
+     ],
+     [
+      228.28,
+      -226.93
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.14,
+   "height_m": 22.4,
+   "id": "w20425.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20425,
+   "rings": [
+    [
+     [
+      210.26,
+      -252.87
+     ],
+     [
+      210.25,
+      -272.83
+     ],
+     [
+      228.28,
+      -272.83
+     ],
+     [
+      228.28,
+      -252.87
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.01,
+   "height_m": 12.8,
+   "id": "w20426.0",
+   "kind": "office",
+   "levels": 4.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20426,
+   "rings": [
+    [
+     [
+      172.22,
+      -123.14
+     ],
+     [
+      172.22,
+      -143.11
+     ],
+     [
+      190.24,
+      -143.11
+     ],
+     [
+      190.24,
+      -123.14
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.04,
+   "height_m": 19.2,
+   "id": "w20427.0",
+   "kind": "office",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20427,
+   "rings": [
+    [
+     [
+      172.22,
+      -149.09
+     ],
+     [
+      172.21,
+      -169.04
+     ],
+     [
+      190.24,
+      -169.04
+     ],
+     [
+      190.24,
+      -149.09
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.07,
+   "height_m": 25.6,
+   "id": "w20428.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20428,
+   "rings": [
+    [
+     [
+      172.21,
+      -175.03
+     ],
+     [
+      172.21,
+      -194.99
+     ],
+     [
+      190.24,
+      -194.99
+     ],
+     [
+      190.24,
+      -175.03
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.09,
+   "height_m": 22.4,
+   "id": "w20429.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20429,
+   "rings": [
+    [
+     [
+      172.21,
+      -200.98
+     ],
+     [
+      172.21,
+      -220.94
+     ],
+     [
+      190.24,
+      -220.94
+     ],
+     [
+      190.24,
+      -200.98
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.11,
+   "height_m": 16.0,
+   "id": "w20430.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20430,
+   "rings": [
+    [
+     [
+      172.21,
+      -226.93
+     ],
+     [
+      172.21,
+      -246.88
+     ],
+     [
+      190.24,
+      -246.88
+     ],
+     [
+      190.24,
+      -226.93
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.12,
+   "height_m": 16.0,
+   "id": "w20431.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20431,
+   "rings": [
+    [
+     [
+      172.21,
+      -252.87
+     ],
+     [
+      172.21,
+      -272.83
+     ],
+     [
+      190.24,
+      -272.83
+     ],
+     [
+      190.24,
+      -252.87
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.13,
+   "height_m": 12.8,
+   "id": "w20432.0",
+   "kind": "office",
+   "levels": 4.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20432,
+   "rings": [
+    [
+     [
+      172.21,
+      -278.82
+     ],
+     [
+      172.21,
+      -298.78
+     ],
+     [
+      190.24,
+      -298.78
+     ],
+     [
+      190.24,
+      -278.82
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.14,
+   "height_m": 12.8,
+   "id": "w20433.0",
+   "kind": "office",
+   "levels": 4.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20433,
+   "rings": [
+    [
+     [
+      172.21,
+      -304.76
+     ],
+     [
+      172.21,
+      -324.72
+     ],
+     [
+      190.23,
+      -324.72
+     ],
+     [
+      190.24,
+      -304.76
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.14,
+   "height_m": 19.2,
+   "id": "w20434.0",
+   "kind": "office",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20434,
+   "rings": [
+    [
+     [
+      172.21,
+      -330.71
+     ],
+     [
+      172.21,
+      -350.67
+     ],
+     [
+      190.23,
+      -350.67
+     ],
+     [
+      190.23,
+      -330.71
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.12,
+   "height_m": 22.4,
+   "id": "w20471.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20471,
+   "rings": [
+    [
+     [
+      210.25,
+      -424.51
+     ],
+     [
+      210.25,
+      -444.48
+     ],
+     [
+      228.27,
+      -444.48
+     ],
+     [
+      228.27,
+      -424.51
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.11,
+   "height_m": 22.4,
+   "id": "w20472.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20472,
+   "rings": [
+    [
+     [
+      210.25,
+      -450.46
+     ],
+     [
+      210.25,
+      -470.41
+     ],
+     [
+      228.27,
+      -470.41
+     ],
+     [
+      228.27,
+      -450.46
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.09,
+   "height_m": 22.4,
+   "id": "w20473.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20473,
+   "rings": [
+    [
+     [
+      210.25,
+      -476.4
+     ],
+     [
+      210.25,
+      -496.36
+     ],
+     [
+      228.27,
+      -496.36
+     ],
+     [
+      228.27,
+      -476.4
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.08,
+   "height_m": 19.2,
+   "id": "w20474.0",
+   "kind": "office",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20474,
+   "rings": [
+    [
+     [
+      210.25,
+      -502.35
+     ],
+     [
+      210.25,
+      -512.01
+     ],
+     [
+      228.27,
+      -512.01
+     ],
+     [
+      228.27,
+      -502.35
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.1,
+   "height_m": 22.4,
+   "id": "w20477.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20477,
+   "rings": [
+    [
+     [
+      172.21,
+      -424.51
+     ],
+     [
+      172.21,
+      -444.47
+     ],
+     [
+      190.23,
+      -444.47
+     ],
+     [
+      190.23,
+      -424.51
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.08,
+   "height_m": 19.2,
+   "id": "w20478.0",
+   "kind": "office",
+   "levels": 6.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20478,
+   "rings": [
+    [
+     [
+      172.21,
+      -450.46
+     ],
+     [
+      172.21,
+      -470.41
+     ],
+     [
+      190.23,
+      -470.41
+     ],
+     [
+      190.23,
+      -450.46
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.05,
+   "height_m": 12.8,
+   "id": "w20479.0",
+   "kind": "office",
+   "levels": 4.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20479,
+   "rings": [
+    [
+     [
+      172.21,
+      -476.4
+     ],
+     [
+      172.21,
+      -496.36
+     ],
+     [
+      190.23,
+      -496.36
+     ],
+     [
+      190.23,
+      -476.4
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.03,
+   "height_m": 25.6,
+   "id": "w20480.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 20480,
+   "rings": [
+    [
+     [
+      172.21,
+      -502.35
+     ],
+     [
+      172.21,
+      -512.01
+     ],
+     [
+      190.23,
+      -512.01
+     ],
+     [
+      190.23,
+      -502.35
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.12,
+   "height_m": 22.4,
+   "id": "w21845.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 21845,
+   "rings": [
+    [
+     [
+      226.28,
+      -172.05
+     ],
+     [
+      226.28,
+      -190.01
+     ],
+     [
+      246.31,
+      -190.01
+     ],
+     [
+      246.31,
+      -172.05
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.16,
+   "height_m": 22.4,
+   "id": "w21846.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 21846,
+   "rings": [
+    [
+     [
+      252.31,
+      -190.01
+     ],
+     [
+      256.02,
+      -190.01
+     ],
+     [
+      256.02,
+      -172.05
+     ],
+     [
+      252.31,
+      -172.05
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.17,
+   "height_m": 16.0,
+   "id": "w21867.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 21867,
+   "rings": [
+    [
+     [
+      252.31,
+      -227.92
+     ],
+     [
+      256.02,
+      -227.92
+     ],
+     [
+      256.02,
+      -209.97
+     ],
+     [
+      252.31,
+      -209.97
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.19,
+   "height_m": 25.6,
+   "id": "w21883.0",
+   "kind": "office",
+   "levels": 8.0,
+   "material": "",
+   "name": null,
+   "osm_id": 21883,
+   "rings": [
+    [
+     [
+      252.31,
+      -289.8
+     ],
+     [
+      256.02,
+      -289.8
+     ],
+     [
+      256.02,
+      -271.84
+     ],
+     [
+      252.31,
+      -271.84
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.17,
+   "height_m": 16.0,
+   "id": "w21899.0",
+   "kind": "office",
+   "levels": 5.0,
+   "material": "",
+   "name": null,
+   "osm_id": 21899,
+   "rings": [
+    [
+     [
+      226.28,
+      -309.76
+     ],
+     [
+      226.27,
+      -327.72
+     ],
+     [
+      246.3,
+      -327.72
+     ],
+     [
+      246.3,
+      -309.76
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  },
+  {
+   "colour": "",
+   "ground_y": 61.19,
+   "height_m": 22.4,
+   "id": "w21900.0",
+   "kind": "office",
+   "levels": 7.0,
+   "material": "",
+   "name": null,
+   "osm_id": 21900,
+   "rings": [
+    [
+     [
+      252.31,
+      -327.72
+     ],
+     [
+      256.02,
+      -327.72
+     ],
+     [
+      256.02,
+      -309.76
+     ],
+     [
+      252.31,
+      -309.76
+     ]
+    ]
+   ],
+   "roof_levels": 0.0,
+   "roof_shape": "",
+   "roof_triangles": [
+    2,
+    3,
+    0,
+    2,
+    0,
+    1
+   ],
+   "roof_vertices": [],
+   "shopfront": false
+  }
+ ],
+ "schema_version": 0,
+ "units": "metres, x east, z south; ground_y and height_m vertical"
+}

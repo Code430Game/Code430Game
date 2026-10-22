@@ -26,6 +26,7 @@ class Barrier:
 	var height_m: float
 	var edge_id: String
 	var points: PackedVector3Array
+	var border_side: String = ""  # a roadblock where the district border cut the road (add-district-stitching)
 
 
 ## Reads barriers.v0.json; empty when the pack has none.
@@ -44,6 +45,7 @@ static func load_barriers(pack_dir: String) -> Array[Barrier]:
 		bar.kind = b["kind"]
 		bar.height_m = float(b["height_m"])
 		bar.edge_id = b["edge_id"]
+		bar.border_side = str(b.get("border_side", ""))
 		for p in b["points"]:
 			bar.points.append(Vector3(float(p[0]), float(p[1]), float(p[2])))
 		out.append(bar)
