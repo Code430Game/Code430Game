@@ -67,12 +67,19 @@ var parking_chunks: Dictionary = {}  # Vector2i -> Array of lots overlapping the
 var yard_chunks: Dictionary = {}  # Vector2i -> {"yards", "fences"} (YardBuilder.by_chunk)
 
 
+## The pack ids of the districts played together (add-district-stitching); empty for one.
+var districts: PackedStringArray = []
+## Why the districts asked for couldn't be played together ("" when they could).
+var set_refusal: String = ""
+## How many border crossings joined between the districts.
+var joined_crossings: int = 0
 var _content_hash: String = ""  # cached per load: the pack files cannot change underneath a loaded pack
 var content_hash_runs: int = 0  # how many times the files were hashed, for tests
 
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
 func load(dir: String) -> bool:
+	districts = []
 	pack_dir = dir
 	_content_hash = ""
 	var manifest_path := dir.path_join("pack.json")
@@ -156,6 +163,218 @@ func load(dir: String) -> bool:
 			terrain_holes[coord] = []
 		(terrain_holes[coord] as Array).append_array(garage_holes[coord])
 	return terrain_index.size() > 0
+
+
+## Loads neighbouring districts of one city as one map (add-district-stitching): each loads
+## as on its own, then the map takes the joined road graph (DistrictSet.merge_graphs, its
+## junctions, markings and footways rebuilt), each terrain chunk from the district owning it,
+## and each building, barrier, bridge, lot, garage and place from the district holding its
+## centre (each district's files run a little past its border). Roadblocks where crossings
+## joined go. One directory loads as `load`. False, with `set_refusal`, when they don't fit.
+func load_districts(dirs: PackedStringArray) -> bool:
+	set_refusal = ""
+	if dirs.size() == 1:
+		return self.load(dirs[0])
+	if dirs.is_empty():
+		return false
+	var parts: Array[MapPack] = []
+	var manifests: Array = []
+	for d in dirs:
+		var p := MapPack.new()
+		if not p.load(d):
+			set_refusal = "%s did not load" % d
+			return false
+		parts.append(p)
+		manifests.append(p.manifest)
+	set_refusal = DistrictSet.refusal(manifests)
+	if set_refusal != "":
+		push_error("MapPack: districts can't be played together: %s" % set_refusal)
+		return false
+	var rects: Array[Rect2i] = []
+	for m: Dictionary in manifests:
+		rects.append(DistrictSet.border_rect(m["map"]["border"]))
+	var graphs: Array = []
+	var borders: Array = []
+	for d in dirs:
+		graphs.append(_read_json(d.path_join("road_graph.v0.json")))
+		borders.append(_read_json(d.path_join("border.v0.json")))
+	var merged := DistrictSet.merge_graphs(graphs, borders, rects)
+	joined_crossings = int(merged["pairs"])
+	var base: MapPack = parts[0]
+	pack_dir = base.pack_dir
+	_content_hash = ""
+	manifest = base.manifest.duplicate(true)
+	districts = PackedStringArray()
+	ads = []
+	for p in parts:
+		districts.append(str(p.manifest.get("id", "")))
+		ads.append_array(p.ads)
+	manifest["districts"] = Array(districts)
+	graph = RoadGraph.from_dict(merged["graph"])
+	junctions = JunctionBuilder.build_all(graph)
+	road_material = base.road_material
+	terrain_material = base.terrain_material
+	water_material = base.water_material
+	marking_material = base.marking_material
+	building_material = base.building_material
+	sidewalk_material = base.sidewalk_material
+	barrier_material = base.barrier_material
+	bridge_material = base.bridge_material
+	garage_material = base.garage_material
+	garage_light_material = base.garage_light_material
+	marking_visible_to_m = base.marking_visible_to_m
+	# Terrain: each chunk from its owner, read from that district's folder.
+	terrain_index = base.terrain_index.duplicate(true)
+	var chunks: Array = []
+	for k in range(parts.size()):
+		for entry: Dictionary in parts[k].terrain_index.get("chunks", []):
+			if DistrictSet.owner_of(Vector2i(int(entry["cx"]), int(entry["cz"])), rects) == k:
+				var e := entry.duplicate()
+				e["dir"] = parts[k].pack_dir
+				chunks.append(e)
+	terrain_index["chunks"] = chunks
+	_height_chunks.clear()
+	water_polygons = []
+	var seen_water := {}
+	for p in parts:
+		for w in p.water_polygons:
+			if not seen_water.has(w.id):
+				seen_water[w.id] = true
+				water_polygons.append(w)
+	water_chunks = _owned_chunks(parts, rects, func(p: MapPack) -> Dictionary: return p.water_chunks)
+	vegetation_chunks = _owned_chunks(parts, rects, func(p: MapPack) -> Dictionary: return p.vegetation_chunks)
+	yard_chunks = _owned_chunks(parts, rects, func(p: MapPack) -> Dictionary: return p.yard_chunks)
+	var markings := MarkingBuilder.new()
+	marking_chunks = markings.build(graph, junctions) if markings.load_rules() else {}
+	# A building on the border is in both districts' files, and one copy may be cut at that
+	# district's import edge: keep one per id, the larger, from the district holding its centre.
+	var by_id := {}
+	for k in range(parts.size()):
+		for b in parts[k].buildings:
+			if b.rings.is_empty() or _owner_xz(_centre(b.rings[0]), rects) == -1:
+				continue
+			var area := absf(_area(b.rings[0]))
+			if not by_id.has(b.id) or area > float(by_id[b.id][1]):
+				by_id[b.id] = [b, area]
+	buildings = []
+	var building_ids: Array = by_id.keys()
+	building_ids.sort()
+	for id: String in building_ids:
+		buildings.append(by_id[id][0])
+	building_chunks = BuildingBuilder.build(buildings)
+	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
+	underpass_chunks = UnderpassBuilder.build(graph.pedestrian)
+	terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
+	barriers = []
+	for k in range(parts.size()):
+		for bar in parts[k].barriers:
+			if bar.points.is_empty() or _owner_xz(Vector2(bar.points[0].x, bar.points[0].z), rects) != k:
+				continue
+			if bar.kind == "roadblock" and bar.border_side != "" and _at_joined(bar, merged["joined"]):
+				continue  # the road carries on into the next district here
+			barriers.append(bar)
+	barrier_chunks = BarrierBuilder.build(barriers)
+	bridges = []
+	for k in range(parts.size()):
+		for br in parts[k].bridges:
+			var at := Vector2.ZERO
+			if not br.decks.is_empty() and not br.decks[0].points.is_empty():
+				at = Vector2(br.decks[0].points[0].x, br.decks[0].points[0].z)
+			if _owner_xz(at, rects) == k:
+				bridges.append(br)
+	bridge_chunks = BridgeBuilder.build(bridges)
+	garages = []
+	var garage_lots := {}
+	for k in range(parts.size()):
+		for g in parts[k].garages:
+			if g.lot != null:
+				garage_lots[g.lot] = true
+			if _owner_xz(Vector2(g.start.x, g.start.z), rects) == k:
+				garages.append(g)
+	parking_lots = []
+	for k in range(parts.size()):
+		for lot in parts[k].parking_lots:
+			if not garage_lots.has(lot) and _owner_xz(lot.bounds.get_center(), rects) == k:
+				parking_lots.append(lot)
+	parking_chunks = ParkingLotBuilder.by_chunk(parking_lots, RoadGeometry.CHUNK_SIZE_M)
+	var built := GarageBuilder.build(garages)
+	garage_chunks = built["structure"]
+	garage_light_chunks = built["lights"]
+	GarageBuilder.clear_ramps(parking_lots, garages)
+	for g in garages:
+		if g.lot != null:
+			parking_lots.append(g.lot)
+	var garage_holes := GarageBuilder.holes_by_chunk(garages)
+	for coord: Vector2i in garage_holes:
+		if not terrain_holes.has(coord):
+			terrain_holes[coord] = []
+		(terrain_holes[coord] as Array).append_array(garage_holes[coord])
+	green_areas = []
+	services = []
+	turfs = []
+	var seen := {}
+	for k in range(parts.size()):
+		var p: MapPack = parts[k]
+		for a: Variant in p.green_areas:
+			green_areas.append(a)
+		for place in p.services:
+			if not seen.has("s:" + place.id) and _owner_xz(Vector2(place.at.x, place.at.z), rects) == k:
+				seen["s:" + place.id] = true
+				services.append(place)
+		for t in p.turfs:
+			if not seen.has("t:" + t.id):
+				seen["t:" + t.id] = true
+				turfs.append(t)
+	return not chunks.is_empty()
+
+
+static func _read_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return parsed if parsed is Dictionary else {}
+
+
+## From each district, its chunk-keyed entries for the chunks it owns.
+static func _owned_chunks(parts: Array[MapPack], rects: Array[Rect2i], field: Callable) -> Dictionary:
+	var out := {}
+	for k in range(parts.size()):
+		var d: Dictionary = field.call(parts[k])
+		for coord: Variant in d:
+			if coord is Vector2i and DistrictSet.owner_of(coord, rects) == k:
+				out[coord] = d[coord]
+	return out
+
+
+static func _owner_xz(p: Vector2, rects: Array[Rect2i]) -> int:
+	return DistrictSet.owner_of(DistrictSet.chunk_of(p.x, p.y), rects)
+
+
+static func _area(ring: PackedVector2Array) -> float:
+	var a := 0.0
+	for i in range(ring.size()):
+		var p := ring[i]
+		var q := ring[(i + 1) % ring.size()]
+		a += p.x * q.y - q.x * p.y
+	return a * 0.5
+
+
+static func _centre(ring: PackedVector2Array) -> Vector2:
+	var c := Vector2.ZERO
+	for v in ring:
+		c += v
+	return c / maxf(ring.size(), 1)
+
+
+static func _at_joined(bar: BarrierBuilder.Barrier, joined: Array) -> bool:
+	for j: Dictionary in joined:
+		if not (bar.edge_id in j["edges"]):
+			continue
+		var at: Vector3 = j["at"]
+		var mid := (bar.points[0] + bar.points[bar.points.size() - 1]) * 0.5
+		if Vector2(mid.x, mid.z).distance_to(Vector2(at.x, at.z)) < 6.0:
+			return true
+	return false
 
 
 ## SHA-256 over pack.json plus every file's relative path and contents, for co-op pack

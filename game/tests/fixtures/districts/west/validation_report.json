@@ -1,0 +1,574 @@
+{
+ "components": [
+  {
+   "classes": {
+    "motorway": 2,
+    "parking": 1,
+    "residential": 6,
+    "secondary": 2,
+    "tertiary": 4
+   },
+   "edges": 15,
+   "likely_cause": "main network",
+   "nodes": 16,
+   "sample_names": [
+    "Depot Avenue",
+    "Double Cross Highway",
+    "Double Cross Loop",
+    "Fire Hall Drive",
+    "Fourth Street",
+    "Quay Avenue",
+    "Riverside Avenue",
+    "Station Avenue"
+   ],
+   "sample_way_ids": [
+    1001,
+    1007,
+    1008,
+    1013,
+    1026,
+    1027,
+    1032,
+    1077
+   ],
+   "touches_bbox_edge": true
+  },
+  {
+   "classes": {
+    "motorway": 3,
+    "motorway_link": 1,
+    "secondary": 1
+   },
+   "edges": 5,
+   "likely_cause": "cut by bbox edge",
+   "nodes": 6,
+   "sample_names": [
+    "City Entrance",
+    "Double Cross Highway",
+    "Double Cross Loop"
+   ],
+   "sample_way_ids": [
+    1000,
+    1005,
+    1006,
+    1070
+   ],
+   "touches_bbox_edge": true
+  }
+ ],
+ "dead_ends": {
+  "bbox_edge": [
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1000.0",
+    "name": "Double Cross Loop",
+    "node_id": "b1",
+    "osm_node_id": 0,
+    "osm_way_id": 1000,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1089.0",
+    "name": "Quay Avenue",
+    "node_id": "b10",
+    "osm_node_id": 0,
+    "osm_way_id": 1089,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1090.0",
+    "name": "Depot Avenue",
+    "node_id": "b11",
+    "osm_node_id": 0,
+    "osm_way_id": 1090,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1001.4",
+    "name": "Double Cross Loop",
+    "node_id": "b2",
+    "osm_node_id": 0,
+    "osm_way_id": 1001,
+    "road_class": "secondary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1005.1",
+    "name": "Double Cross Highway",
+    "node_id": "b3",
+    "osm_node_id": 0,
+    "osm_way_id": 1005,
+    "road_class": "motorway"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1006.0",
+    "name": "Double Cross Highway",
+    "node_id": "b4",
+    "osm_node_id": 0,
+    "osm_way_id": 1006,
+    "road_class": "motorway"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1007.0",
+    "name": "Double Cross Highway",
+    "node_id": "b5",
+    "osm_node_id": 0,
+    "osm_way_id": 1007,
+    "road_class": "motorway"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1013.12",
+    "name": "Station Avenue",
+    "node_id": "b6",
+    "osm_node_id": 0,
+    "osm_way_id": 1013,
+    "road_class": "tertiary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1026.0",
+    "name": "Riverside Avenue",
+    "node_id": "b7",
+    "osm_node_id": 0,
+    "osm_way_id": 1026,
+    "road_class": "tertiary"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1032.0",
+    "name": "Top Bend",
+    "node_id": "b8",
+    "osm_node_id": 0,
+    "osm_way_id": 1032,
+    "road_class": "residential"
+   },
+   {
+    "category": "bbox_edge",
+    "edge_id": "w1070.0",
+    "name": "City Entrance",
+    "node_id": "b9",
+    "osm_node_id": 0,
+    "osm_way_id": 1070,
+    "road_class": "motorway_link"
+   }
+  ],
+  "declared_noexit": [],
+  "likely_real": [],
+  "parking": [
+   {
+    "category": "parking",
+    "edge_id": "w1077.0",
+    "name": "Fire Hall Drive",
+    "node_id": "n101217",
+    "osm_node_id": 101217,
+    "osm_way_id": 1077,
+    "road_class": "parking"
+   }
+  ],
+  "suspicious": []
+ },
+ "elevation": {
+  "aligned_dropped": 1,
+  "aligned_vertices": 5,
+  "anchorless_spans": 0,
+  "bound_conflicts": 0,
+  "clearance_raised": [],
+  "clearance_short": [],
+  "clearance_shortfalls": [],
+  "contaminated_vertices": 34,
+  "edges_over_grade": [],
+  "fixed_vertices": 230,
+  "free_vertices": 1369,
+  "inferred_bridges": [],
+  "max_residual_grade": 0.08,
+  "max_shared_step": 0.665,
+  "max_y": 70.083,
+  "min_y": 56.555,
+  "share_followers": 4,
+  "share_rounds_exhausted": false,
+  "shared_deck_vertices": 225,
+  "shared_ground_vertices": 6,
+  "shared_groups": 112,
+  "shared_step_left": 0.269,
+  "tie_rounds": 2,
+  "vertices_clamped": 54
+ },
+ "junction_clusters": [
+  {
+   "max_arm_offset_m": 4.988,
+   "node_id": "c100666",
+   "osm_node_ids": [
+    100666,
+    100863
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.744,
+   "node_id": "c100412",
+   "osm_node_ids": [
+    100412,
+    100460
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.394,
+   "node_id": "c100826",
+   "osm_node_ids": [
+    100826,
+    100827
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.238,
+   "node_id": "c100899",
+   "osm_node_ids": [
+    100899,
+    100900
+   ]
+  },
+  {
+   "max_arm_offset_m": 2.155,
+   "node_id": "c100587",
+   "osm_node_ids": [
+    100587,
+    100588
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.672,
+   "node_id": "c100589",
+   "osm_node_ids": [
+    100589,
+    100590
+   ]
+  },
+  {
+   "max_arm_offset_m": 1.6,
+   "node_id": "c100719",
+   "osm_node_ids": [
+    100719,
+    100720
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100582",
+   "osm_node_ids": [
+    100582,
+    100583
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100679",
+   "osm_node_ids": [
+    100679,
+    100680
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100704",
+   "osm_node_ids": [
+    100704,
+    100705
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100709",
+   "osm_node_ids": [
+    100709,
+    100824
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100737",
+   "osm_node_ids": [
+    100737,
+    100738
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100744",
+   "osm_node_ids": [
+    100744,
+    100745
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100757",
+   "osm_node_ids": [
+    100757,
+    100758
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100759",
+   "osm_node_ids": [
+    100759,
+    100761
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100816",
+   "osm_node_ids": [
+    100816,
+    100817
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100819",
+   "osm_node_ids": [
+    100819,
+    100820
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100838",
+   "osm_node_ids": [
+    100838,
+    100839
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100842",
+   "osm_node_ids": [
+    100842,
+    100843
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100851",
+   "osm_node_ids": [
+    100851,
+    100852
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100881",
+   "osm_node_ids": [
+    100881,
+    100882
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100906",
+   "osm_node_ids": [
+    100906,
+    100907
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c100911",
+   "osm_node_ids": [
+    100911,
+    100912
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101253",
+   "osm_node_ids": [
+    101253,
+    101254
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101267",
+   "osm_node_ids": [
+    101267,
+    101268
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101325",
+   "osm_node_ids": [
+    101325,
+    101326
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101333",
+   "osm_node_ids": [
+    101333,
+    101334
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101341",
+   "osm_node_ids": [
+    101341,
+    101342
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101351",
+   "osm_node_ids": [
+    101351,
+    101352
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101355",
+   "osm_node_ids": [
+    101355,
+    101356
+   ]
+  },
+  {
+   "max_arm_offset_m": 0.0,
+   "node_id": "c101370",
+   "osm_node_ids": [
+    101370,
+    101371
+   ]
+  }
+ ],
+ "one_way_traps": [],
+ "ramps": [],
+ "summary": {
+  "barriers": {
+   "guardrail": 2,
+   "median": 2,
+   "parapet": 2,
+   "roadblock": 11
+  },
+  "bridges": {
+   "abutments": 2,
+   "bridges": 1,
+   "infill_strips": 0,
+   "kinds": {
+    "over_road": 1
+   },
+   "piers": 3,
+   "piers_skipped": 0,
+   "walkways_lifted": 0,
+   "walkways_on_decks": 0
+  },
+  "buildings": {
+   "footprints": 45,
+   "height_sources": {
+    "default": 6,
+    "levels": 2490,
+    "tag": 15
+   },
+   "house_types": {},
+   "skipped": []
+  },
+  "classes": {
+   "motorway": 5,
+   "motorway_link": 1,
+   "parking": 1,
+   "residential": 6,
+   "secondary": 3,
+   "tertiary": 4
+  },
+  "components": 2,
+  "dead_ends": {
+   "bbox_edge": 11,
+   "declared_noexit": 0,
+   "likely_real": 0,
+   "parking": 1,
+   "suspicious": 0
+  },
+  "defaulted_fields": {
+   "lanes": 1,
+   "speed_kph": 1,
+   "width": 20
+  },
+  "edges": 20,
+  "largest_component_nodes": 16,
+  "largest_scc_nodes": 14,
+  "nodes": 22,
+  "one_way_traps": 0,
+  "oneway_dead_ends": 0,
+  "parking": {
+   "bays": 0,
+   "door_tier": 0,
+   "garage_tier": 0,
+   "garages": 0,
+   "kinds": {},
+   "lots": 0,
+   "skipped": 0,
+   "with_aisles": 0,
+   "with_capacity": 0
+  },
+  "ramp_problems": 0,
+  "service_addresses": {
+   "building": 0,
+   "none": 0,
+   "street": 0,
+   "tags": 1
+  },
+  "services": {
+   "fire_station": 1
+  },
+  "terrain": {
+   "cells_carved": 162,
+   "cells_flattened": 2069,
+   "cells_lowered_for_water": 0,
+   "cells_lowered_under_decks": 412,
+   "cells_under_buildings": 1094,
+   "chunks": 6,
+   "underpasses": {
+    "tunnels": 0,
+    "uncovered": 0
+   }
+  },
+  "total_length_km": 1.71,
+  "vegetation": {
+   "areas": 1,
+   "bushes": 37,
+   "chunks_over_400_trees": 0,
+   "max_trees_in_a_chunk": 62,
+   "skipped": {
+    "frontage on a road, sidewalk, building or water": 2,
+    "outside the district": 2784,
+    "row on a road, sidewalk, building or water": 2,
+    "scatter on a road, sidewalk, building or water": 2
+   },
+   "trees": 81,
+   "trees_by_source": {
+    "row": 78,
+    "scatter": 3
+   }
+  },
+  "water": {
+   "polygons": 0,
+   "skipped": []
+  },
+  "yards": {
+   "fence_km": 0.0,
+   "fences": 0,
+   "with_back": 0,
+   "with_front": 0,
+   "with_path": 0,
+   "yards": 0
+  }
+ }
+}

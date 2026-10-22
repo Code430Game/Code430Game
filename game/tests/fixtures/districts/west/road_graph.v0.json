@@ -1,0 +1,1719 @@
+{
+ "bus_stops": [],
+ "edges": [
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100000",
+   "id": "w1000.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 120.153,
+   "name": "Double Cross Loop",
+   "oneway": false,
+   "osm_way_id": 1000,
+   "polyline": [
+    [
+     120.153,
+     60.825,
+     -40.315
+    ],
+    [
+     80.73,
+     60.822,
+     -40.314
+    ],
+    [
+     41.299,
+     60.866,
+     -40.314
+    ],
+    [
+     1.876,
+     60.989,
+     -40.314
+    ],
+    [
+     0.0,
+     60.995,
+     -40.314
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "b1",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "b2",
+   "id": "w1001.4",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 29.938,
+   "name": "Double Cross Loop",
+   "oneway": false,
+   "osm_way_id": 1001,
+   "polyline": [
+    [
+     0.0,
+     61.994,
+     -429.497
+    ],
+    [
+     0.0,
+     62.096,
+     -399.559
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "n100088",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "secondary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100088",
+   "id": "w1001.5",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 99.79,
+   "name": "Double Cross Loop",
+   "oneway": false,
+   "osm_way_id": 1001,
+   "polyline": [
+    [
+     0.0,
+     62.096,
+     -399.559
+    ],
+    [
+     0.0,
+     62.103,
+     -397.071
+    ],
+    [
+     0.0,
+     62.171,
+     -364.633
+    ],
+    [
+     0.0,
+     62.197,
+     -332.207
+    ],
+    [
+     0.0,
+     62.177,
+     -299.77
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "n100092",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "b3",
+   "id": "w1005.1",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 5.684,
+   "name": "Double Cross Highway",
+   "oneway": true,
+   "osm_way_id": 1005,
+   "polyline": [
+    [
+     256.0,
+     61.103,
+     -46.307
+    ],
+    [
+     250.316,
+     61.086,
+     -46.306
+    ]
+   ],
+   "shoulder_left_m": 1.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 100,
+   "to": "n100247",
+   "tunnel": false,
+   "width_m": 8.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100247",
+   "id": "w1005.2",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 136.15,
+   "name": "Double Cross Highway",
+   "oneway": true,
+   "osm_way_id": 1005,
+   "polyline": [
+    [
+     250.316,
+     61.086,
+     -46.306
+    ],
+    [
+     240.306,
+     61.057,
+     -46.306
+    ],
+    [
+     210.262,
+     60.978,
+     -46.305
+    ],
+    [
+     180.226,
+     60.912,
+     -46.304
+    ],
+    [
+     150.189,
+     60.864,
+     -46.303
+    ],
+    [
+     120.153,
+     60.837,
+     -46.303
+    ],
+    [
+     120.153,
+     60.825,
+     -40.315
+    ]
+   ],
+   "shoulder_left_m": 1.0,
+   "shoulder_right_m": 2.5,
+   "speed_kph": 100,
+   "to": "n100000",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100000",
+   "id": "w1006.0",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 141.834,
+   "name": "Double Cross Highway",
+   "oneway": true,
+   "osm_way_id": 1006,
+   "polyline": [
+    [
+     120.153,
+     60.825,
+     -40.315
+    ],
+    [
+     120.153,
+     60.814,
+     -34.327
+    ],
+    [
+     150.19,
+     60.847,
+     -34.328
+    ],
+    [
+     180.226,
+     60.9,
+     -34.329
+    ],
+    [
+     210.262,
+     60.969,
+     -34.33
+    ],
+    [
+     240.307,
+     61.051,
+     -34.331
+    ],
+    [
+     256.0,
+     61.099,
+     -34.331
+    ]
+   ],
+   "shoulder_left_m": 1.0,
+   "shoulder_right_m": 2.5,
+   "speed_kph": 100,
+   "to": "b4",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": true,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "b5",
+   "id": "w1007.0",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 1,
+   "length_m": 93.003,
+   "name": "Double Cross Highway",
+   "oneway": true,
+   "osm_way_id": 1007,
+   "polyline": [
+    [
+     6.006,
+     68.339,
+     0.0
+    ],
+    [
+     6.006,
+     68.335,
+     -4.388
+    ],
+    [
+     6.006,
+     68.311,
+     -33.926
+    ],
+    [
+     6.006,
+     68.287,
+     -63.465
+    ],
+    [
+     6.006,
+     68.263,
+     -93.003
+    ]
+   ],
+   "shoulder_left_m": 1.0,
+   "shoulder_right_m": 2.5,
+   "speed_kph": 100,
+   "to": "n100385",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "motorway",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100385",
+   "id": "w1008.0",
+   "lanes_backward": 0,
+   "lanes_forward": 2,
+   "layer": 0,
+   "length_m": 212.772,
+   "name": "Double Cross Highway",
+   "oneway": true,
+   "osm_way_id": 1008,
+   "polyline": [
+    [
+     6.006,
+     68.263,
+     -93.003
+    ],
+    [
+     6.006,
+     67.082,
+     -122.541
+    ],
+    [
+     6.006,
+     65.9,
+     -152.079
+    ],
+    [
+     6.006,
+     64.719,
+     -181.617
+    ],
+    [
+     6.006,
+     63.537,
+     -211.155
+    ],
+    [
+     6.005,
+     62.355,
+     -240.693
+    ],
+    [
+     6.005,
+     62.052,
+     -270.231
+    ],
+    [
+     6.005,
+     62.106,
+     -299.77
+    ],
+    [
+     0.0,
+     62.177,
+     -299.77
+    ]
+   ],
+   "shoulder_left_m": 1.0,
+   "shoulder_right_m": 2.5,
+   "speed_kph": 100,
+   "to": "n100092",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100088",
+   "id": "w1013.10",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 200.241,
+   "name": "Station Avenue",
+   "oneway": false,
+   "osm_way_id": 1013,
+   "polyline": [
+    [
+     0.0,
+     62.096,
+     -399.559
+    ],
+    [
+     100.121,
+     61.304,
+     -399.56
+    ],
+    [
+     200.241,
+     61.121,
+     -399.562
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "n100432",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100432",
+   "id": "w1013.11",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 50.06,
+   "name": "Station Avenue",
+   "oneway": false,
+   "osm_way_id": 1013,
+   "polyline": [
+    [
+     200.241,
+     61.121,
+     -399.562
+    ],
+    [
+     250.302,
+     61.179,
+     -399.564
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "n100433",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100433",
+   "id": "w1013.12",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 5.698,
+   "name": "Station Avenue",
+   "oneway": false,
+   "osm_way_id": 1013,
+   "polyline": [
+    [
+     250.302,
+     61.179,
+     -399.564
+    ],
+    [
+     256.0,
+     61.192,
+     -399.564
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "b6",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "tertiary",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100491",
+   "id": "w1026.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 55.749,
+   "name": "Riverside Avenue",
+   "oneway": false,
+   "osm_way_id": 1026,
+   "polyline": [
+    [
+     200.251,
+     61.002,
+     -100.193
+    ],
+    [
+     256.0,
+     61.145,
+     -100.195
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 50,
+   "to": "b7",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100491",
+   "id": "w1027.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 99.79,
+   "name": "Fourth Street",
+   "oneway": false,
+   "osm_way_id": 1027,
+   "polyline": [
+    [
+     200.251,
+     61.002,
+     -100.193
+    ],
+    [
+     200.248,
+     61.086,
+     -199.983
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 40,
+   "to": "n100503",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100503",
+   "id": "w1027.1",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 99.79,
+   "name": "Fourth Street",
+   "oneway": false,
+   "osm_way_id": 1027,
+   "polyline": [
+    [
+     200.248,
+     61.086,
+     -199.983
+    ],
+    [
+     200.245,
+     61.134,
+     -299.773
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 40,
+   "to": "n100504",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100504",
+   "id": "w1027.2",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 99.79,
+   "name": "Fourth Street",
+   "oneway": false,
+   "osm_way_id": 1027,
+   "polyline": [
+    [
+     200.245,
+     61.134,
+     -299.773
+    ],
+    [
+     200.241,
+     61.121,
+     -399.562
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 40,
+   "to": "n100432",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100432",
+   "id": "w1032.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 112.438,
+   "name": "Top Bend",
+   "oneway": false,
+   "osm_way_id": 1032,
+   "polyline": [
+    [
+     200.241,
+     61.121,
+     -399.562
+    ],
+    [
+     200.238,
+     61.034,
+     -512.0
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 40,
+   "to": "b8",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "motorway_link",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "b9",
+   "id": "w1070.0",
+   "lanes_backward": 0,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 5.864,
+   "name": "City Entrance",
+   "oneway": true,
+   "osm_way_id": 1070,
+   "polyline": [
+    [
+     256.0,
+     61.104,
+     -49.497
+    ],
+    [
+     250.316,
+     61.086,
+     -48.056
+    ]
+   ],
+   "shoulder_left_m": 0.6,
+   "shoulder_right_m": 1.5,
+   "speed_kph": 60,
+   "to": "n100247",
+   "tunnel": false,
+   "width_m": 5.6
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "parking",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "lanes",
+    "speed_kph",
+    "width"
+   ],
+   "from": "n100433",
+   "id": "w1077.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 29.927,
+   "name": "Fire Hall Drive",
+   "oneway": false,
+   "osm_way_id": 1077,
+   "polyline": [
+    [
+     250.302,
+     61.179,
+     -399.564
+    ],
+    [
+     250.303,
+     61.184,
+     -369.637
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 15,
+   "to": "n101217",
+   "tunnel": false,
+   "width_m": 3.5
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100503",
+   "id": "w1089.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 55.752,
+   "name": "Quay Avenue",
+   "oneway": false,
+   "osm_way_id": 1089,
+   "polyline": [
+    [
+     200.248,
+     61.086,
+     -199.983
+    ],
+    [
+     256.0,
+     61.196,
+     -199.985
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 40,
+   "to": "b10",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "access": null,
+   "bridge": false,
+   "bus": "",
+   "bus_lane": -1,
+   "class": "residential",
+   "control_from": "none",
+   "control_to": "none",
+   "defaulted_fields": [
+    "width"
+   ],
+   "from": "n100504",
+   "id": "w1090.0",
+   "lanes_backward": 1,
+   "lanes_forward": 1,
+   "layer": 0,
+   "length_m": 55.755,
+   "name": "Depot Avenue",
+   "oneway": false,
+   "osm_way_id": 1090,
+   "polyline": [
+    [
+     200.245,
+     61.134,
+     -299.773
+    ],
+    [
+     256.0,
+     61.226,
+     -299.775
+    ]
+   ],
+   "shoulder_left_m": 0.0,
+   "shoulder_right_m": 0.0,
+   "speed_kph": 40,
+   "to": "b11",
+   "tunnel": false,
+   "width_m": 7.0
+  }
+ ],
+ "gores": [
+  {
+   "half_m": [
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.037,
+    4.038,
+    4.038,
+    4.038,
+    4.038,
+    4.038,
+    4.038,
+    4.038,
+    4.038,
+    4.038
+   ],
+   "id": "gore:w1005.1:w1069.0:r0",
+   "points": [
+    [
+     591.37,
+     62.546,
+     -54.066
+    ],
+    [
+     589.493,
+     62.528,
+     -54.066
+    ],
+    [
+     587.616,
+     62.51,
+     -54.066
+    ],
+    [
+     585.739,
+     62.491,
+     -54.066
+    ],
+    [
+     583.861,
+     62.473,
+     -54.066
+    ],
+    [
+     581.984,
+     62.454,
+     -54.065
+    ],
+    [
+     580.107,
+     62.436,
+     -54.065
+    ],
+    [
+     578.229,
+     62.417,
+     -54.065
+    ],
+    [
+     576.352,
+     62.399,
+     -54.065
+    ],
+    [
+     574.475,
+     62.38,
+     -54.065
+    ],
+    [
+     572.598,
+     62.362,
+     -54.065
+    ],
+    [
+     570.72,
+     62.343,
+     -54.064
+    ],
+    [
+     568.843,
+     62.34,
+     -54.064
+    ],
+    [
+     566.966,
+     62.336,
+     -54.064
+    ],
+    [
+     565.089,
+     62.332,
+     -54.064
+    ],
+    [
+     563.211,
+     62.328,
+     -54.064
+    ],
+    [
+     561.334,
+     62.325,
+     -54.064
+    ],
+    [
+     559.457,
+     62.321,
+     -54.063
+    ],
+    [
+     557.58,
+     62.317,
+     -54.063
+    ],
+    [
+     555.702,
+     62.314,
+     -54.063
+    ],
+    [
+     553.825,
+     62.31,
+     -54.063
+    ],
+    [
+     551.948,
+     62.306,
+     -54.063
+    ],
+    [
+     550.07,
+     62.302,
+     -54.063
+    ],
+    [
+     548.193,
+     62.299,
+     -54.063
+    ],
+    [
+     546.316,
+     62.295,
+     -54.062
+    ],
+    [
+     544.439,
+     62.291,
+     -54.062
+    ],
+    [
+     542.561,
+     62.287,
+     -54.062
+    ],
+    [
+     540.684,
+     62.284,
+     -54.062
+    ],
+    [
+     538.807,
+     62.28,
+     -54.062
+    ],
+    [
+     536.93,
+     62.276,
+     -54.062
+    ],
+    [
+     535.052,
+     62.272,
+     -54.062
+    ],
+    [
+     533.175,
+     62.269,
+     -54.061
+    ],
+    [
+     531.298,
+     62.265,
+     -54.061
+    ],
+    [
+     529.421,
+     62.261,
+     -54.061
+    ],
+    [
+     527.543,
+     62.257,
+     -54.061
+    ],
+    [
+     525.666,
+     62.254,
+     -54.061
+    ]
+   ]
+  },
+  {
+   "half_m": [
+    3.875,
+    3.828,
+    3.782,
+    3.735,
+    3.688,
+    3.641,
+    3.595,
+    3.548,
+    3.501,
+    3.454,
+    3.407,
+    3.361,
+    3.314,
+    3.267,
+    3.22,
+    3.174,
+    3.127,
+    3.08,
+    3.033,
+    2.987,
+    2.94,
+    2.646,
+    2.461,
+    2.237,
+    2.014,
+    1.79,
+    1.567,
+    1.344,
+    1.12,
+    0.897,
+    0.673,
+    0.45
+   ],
+   "id": "gore:w1005.1:w1070.0:r0",
+   "points": [
+    [
+     330.415,
+     61.352,
+     -53.885
+    ],
+    [
+     328.537,
+     61.345,
+     -53.838
+    ],
+    [
+     326.66,
+     61.338,
+     -53.791
+    ],
+    [
+     324.783,
+     61.332,
+     -53.745
+    ],
+    [
+     322.906,
+     61.325,
+     -53.698
+    ],
+    [
+     321.028,
+     61.319,
+     -53.651
+    ],
+    [
+     319.151,
+     61.312,
+     -53.604
+    ],
+    [
+     317.274,
+     61.306,
+     -53.557
+    ],
+    [
+     315.396,
+     61.299,
+     -53.51
+    ],
+    [
+     313.519,
+     61.292,
+     -53.463
+    ],
+    [
+     311.642,
+     61.286,
+     -53.417
+    ],
+    [
+     309.765,
+     61.279,
+     -53.37
+    ],
+    [
+     307.887,
+     61.273,
+     -53.323
+    ],
+    [
+     306.01,
+     61.266,
+     -53.276
+    ],
+    [
+     304.133,
+     61.26,
+     -53.229
+    ],
+    [
+     302.256,
+     61.253,
+     -53.182
+    ],
+    [
+     300.378,
+     61.247,
+     -53.135
+    ],
+    [
+     298.501,
+     61.241,
+     -53.089
+    ],
+    [
+     296.624,
+     61.234,
+     -53.042
+    ],
+    [
+     294.747,
+     61.228,
+     -52.995
+    ],
+    [
+     292.869,
+     61.222,
+     -52.948
+    ],
+    [
+     290.992,
+     61.212,
+     -52.654
+    ],
+    [
+     289.115,
+     61.207,
+     -52.469
+    ],
+    [
+     287.238,
+     61.201,
+     -52.245
+    ],
+    [
+     285.36,
+     61.195,
+     -52.022
+    ],
+    [
+     283.483,
+     61.189,
+     -51.798
+    ],
+    [
+     281.606,
+     61.183,
+     -51.575
+    ],
+    [
+     279.729,
+     61.176,
+     -51.351
+    ],
+    [
+     277.851,
+     61.17,
+     -51.128
+    ],
+    [
+     275.974,
+     61.164,
+     -50.904
+    ],
+    [
+     274.097,
+     61.158,
+     -50.681
+    ],
+    [
+     272.219,
+     61.152,
+     -50.457
+    ]
+   ]
+  }
+ ],
+ "meta": {
+  "attribution": [
+   "© OpenStreetMap contributors"
+  ],
+  "bbox": [
+   44.9999964,
+   -75.0,
+   45.0046054,
+   -74.9967516
+  ],
+  "config": "road_classes.json",
+  "elevation": {
+   "base": 60.0,
+   "bridge_clearance_m": 6.0,
+   "hill_centre": [
+    -380.0,
+    -330.0
+   ],
+   "hill_height": 9.0,
+   "hill_radius": 320.0,
+   "kind": "synthetic",
+   "slope_x": 0.004
+  },
+  "generator": "code430 osm_import",
+  "license": "ODbL-1.0",
+  "notes": {
+   "edges_removed_in_clusters": 32,
+   "filter_dropped": {
+    "highway=None": 1
+   },
+   "forks": 4,
+   "junction_clusters": 31,
+   "merges": 2,
+   "nodes_merged": 62,
+   "splits": 0
+  },
+  "origin": {
+   "crs": "EPSG:32618",
+   "easting": 500000.0,
+   "lat": 44.9999964,
+   "lon": -75.0,
+   "northing": 4982950.0
+  },
+  "schema_version": 0,
+  "sources": [
+   {
+    "generator": "code430 proving_ground",
+    "kind": "file",
+    "layer": "roads",
+    "path": "osm.json"
+   },
+   {
+    "kind": "file",
+    "layer": "water",
+    "path": "water.json"
+   },
+   {
+    "kind": "file",
+    "layer": "buildings",
+    "path": "buildings.json"
+   },
+   {
+    "kind": "file",
+    "layer": "bridges",
+    "path": "bridges.json"
+   },
+   {
+    "kind": "file",
+    "layer": "parking",
+    "path": "parking.json"
+   },
+   {
+    "kind": "file",
+    "layer": "vegetation",
+    "path": "vegetation.json"
+   },
+   {
+    "kind": "file",
+    "layer": "services",
+    "path": "services.json"
+   }
+  ],
+  "units": "metres, x east, y up, z south"
+ },
+ "nodes": [
+  {
+   "control": "none",
+   "ground_y": 60.995,
+   "id": "b1",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    0.0,
+    60.995,
+    -40.314
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.196,
+   "id": "b10",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.196,
+    -199.985
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.226,
+   "id": "b11",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.226,
+    -299.775
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.994,
+   "id": "b2",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    0.0,
+    61.994,
+    -429.497
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.103,
+   "id": "b3",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.103,
+    -46.307
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.099,
+   "id": "b4",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.099,
+    -34.331
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 68.339,
+   "id": "b5",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    6.006,
+    68.339,
+    0.0
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.192,
+   "id": "b6",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.192,
+    -399.564
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.145,
+   "id": "b7",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.145,
+    -100.195
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.034,
+   "id": "b8",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    200.238,
+    61.034,
+    -512.0
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.104,
+   "id": "b9",
+   "junction_type": "dead_end",
+   "osm_node_ids": [],
+   "position": [
+    256.0,
+    61.104,
+    -49.497
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 60.825,
+   "id": "n100000",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100000
+   ],
+   "position": [
+    120.153,
+    60.825,
+    -40.315
+   ]
+  },
+  {
+   "control": "signals",
+   "ground_y": 62.096,
+   "id": "n100088",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100088
+   ],
+   "position": [
+    0.0,
+    62.096,
+    -399.559
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 62.177,
+   "id": "n100092",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100092
+   ],
+   "position": [
+    0.0,
+    62.177,
+    -299.77
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.086,
+   "id": "n100247",
+   "junction_type": "merge",
+   "osm_node_ids": [
+    100247
+   ],
+   "position": [
+    250.316,
+    61.086,
+    -46.306
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.239,
+   "id": "n100385",
+   "junction_type": "pass_through",
+   "osm_node_ids": [
+    100385
+   ],
+   "position": [
+    6.006,
+    68.263,
+    -93.003
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.121,
+   "id": "n100432",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100432
+   ],
+   "position": [
+    200.241,
+    61.121,
+    -399.562
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.179,
+   "id": "n100433",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100433
+   ],
+   "position": [
+    250.302,
+    61.179,
+    -399.564
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.002,
+   "id": "n100491",
+   "junction_type": "pass_through",
+   "osm_node_ids": [
+    100491
+   ],
+   "position": [
+    200.251,
+    61.002,
+    -100.193
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.086,
+   "id": "n100503",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100503
+   ],
+   "position": [
+    200.248,
+    61.086,
+    -199.983
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.134,
+   "id": "n100504",
+   "junction_type": "junction",
+   "osm_node_ids": [
+    100504
+   ],
+   "position": [
+    200.245,
+    61.134,
+    -299.773
+   ]
+  },
+  {
+   "control": "none",
+   "ground_y": 61.184,
+   "id": "n101217",
+   "junction_type": "dead_end",
+   "osm_node_ids": [
+    101217
+   ],
+   "position": [
+    250.303,
+    61.184,
+    -369.637
+   ]
+  }
+ ],
+ "pedestrian_ways": []
+}

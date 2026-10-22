@@ -57,7 +57,8 @@ func setup(p: MapPack, w: Node3D) -> void:
 	_entries.clear()
 	for entry in pack.terrain_index.get("chunks", []):
 		_entries[Vector2i(int(entry["cx"]), int(entry["cz"]))] = entry
-	use_glb = GlbChunks.chunks_are_current(pack.pack_dir)
+	# A set of districts builds its chunks: one district's cache doesn't know its neighbours.
+	use_glb = pack.districts.is_empty() and GlbChunks.chunks_are_current(pack.pack_dir)
 	if not use_glb and DirAccess.dir_exists_absolute(pack.pack_dir.path_join("chunks")):
 		push_warning("ChunkStreamer: %s/chunks is stale or unverified; generating meshes" % pack.pack_dir)
 

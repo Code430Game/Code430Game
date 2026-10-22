@@ -201,9 +201,13 @@ func _ready() -> void:
 		return
 	print("packs: %s" % ", ".join(PackLoader.loaded_ids))
 	_pack = MapPack.new()
-	if not _pack.load(dir):
-		_hud.text = "Failed to load pack at %s" % dir
+	# The map's neighbouring districts, when installed, load with it as one map.
+	var dirs := PackLoader.district_dirs(_pack_id)
+	if not _pack.load_districts(dirs):
+		_hud.text = "Failed to load pack at %s%s" % [dir, (": " + _pack.set_refusal) if _pack.set_refusal != "" else ""]
 		return
+	if not _pack.districts.is_empty():
+		print("districts: %s, %d crossings joined" % [", ".join(_pack.districts), _pack.joined_crossings])
 	VehicleCatalogue.merge_pack_dir(dir)  # a pack may add vehicles
 	_lap = LapTimer.new()
 	if _lap.load(dir):

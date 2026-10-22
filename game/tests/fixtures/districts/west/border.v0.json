@@ -1,0 +1,260 @@
+{
+ "chunks": [
+  0,
+  -2,
+  1,
+  0
+ ],
+ "crossings": [
+  {
+   "bridge": false,
+   "class": "tertiary",
+   "edge": "w1013.12",
+   "heading": [
+    1.0,
+    -0.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b6",
+   "osm_way_id": 1013,
+   "position": [
+    256.0,
+    61.192,
+    -399.564
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "bridge": false,
+   "class": "residential",
+   "edge": "w1090.0",
+   "heading": [
+    1.0,
+    -0.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b11",
+   "osm_way_id": 1090,
+   "position": [
+    256.0,
+    61.226,
+    -299.775
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "bridge": false,
+   "class": "residential",
+   "edge": "w1089.0",
+   "heading": [
+    1.0,
+    -0.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b10",
+   "osm_way_id": 1089,
+   "position": [
+    256.0,
+    61.196,
+    -199.985
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "bridge": false,
+   "class": "tertiary",
+   "edge": "w1026.0",
+   "heading": [
+    1.0,
+    -0.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b7",
+   "osm_way_id": 1026,
+   "position": [
+    256.0,
+    61.145,
+    -100.195
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "bridge": false,
+   "class": "motorway_link",
+   "edge": "w1070.0",
+   "heading": [
+    0.9694,
+    -0.2456
+   ],
+   "lanes_in": 1,
+   "lanes_out": 0,
+   "layer": 0,
+   "node": "b9",
+   "osm_way_id": 1070,
+   "position": [
+    256.0,
+    61.104,
+    -49.497
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 5.6
+  },
+  {
+   "bridge": false,
+   "class": "motorway",
+   "edge": "w1005.1",
+   "heading": [
+    1.0,
+    -0.0
+   ],
+   "lanes_in": 2,
+   "lanes_out": 0,
+   "layer": 0,
+   "node": "b3",
+   "osm_way_id": 1005,
+   "position": [
+    256.0,
+    61.103,
+    -46.307
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 8.0
+  },
+  {
+   "bridge": false,
+   "class": "motorway",
+   "edge": "w1006.0",
+   "heading": [
+    1.0,
+    -0.0
+   ],
+   "lanes_in": 0,
+   "lanes_out": 2,
+   "layer": 0,
+   "node": "b4",
+   "osm_way_id": 1006,
+   "position": [
+    256.0,
+    61.099,
+    -34.331
+   ],
+   "side": "east",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "bridge": false,
+   "class": "residential",
+   "edge": "w1032.0",
+   "heading": [
+    -0.0,
+    -1.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b8",
+   "osm_way_id": 1032,
+   "position": [
+    200.238,
+    61.034,
+    -512.0
+   ],
+   "side": "north",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "bridge": true,
+   "class": "motorway",
+   "edge": "w1007.0",
+   "heading": [
+    0.0,
+    1.0
+   ],
+   "lanes_in": 2,
+   "lanes_out": 0,
+   "layer": 1,
+   "node": "b5",
+   "osm_way_id": 1007,
+   "position": [
+    6.006,
+    68.339,
+    0.0
+   ],
+   "side": "south",
+   "tunnel": false,
+   "width_m": 10.5
+  },
+  {
+   "bridge": false,
+   "class": "secondary",
+   "edge": "w1001.4",
+   "heading": [
+    0.0,
+    -1.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b2",
+   "osm_way_id": 1001,
+   "position": [
+    0.0,
+    61.994,
+    -429.497
+   ],
+   "side": "west",
+   "tunnel": false,
+   "width_m": 7.0
+  },
+  {
+   "bridge": false,
+   "class": "secondary",
+   "edge": "w1000.0",
+   "heading": [
+    -1.0,
+    -0.0
+   ],
+   "lanes_in": 1,
+   "lanes_out": 1,
+   "layer": 0,
+   "node": "b1",
+   "osm_way_id": 1000,
+   "position": [
+    0.0,
+    60.995,
+    -40.314
+   ],
+   "side": "west",
+   "tunnel": false,
+   "width_m": 7.0
+  }
+ ],
+ "rect": [
+  0.0,
+  -512.0,
+  256.0,
+  0.0
+ ],
+ "schema_version": 0,
+ "units": "metres, local x east and z south"
+}

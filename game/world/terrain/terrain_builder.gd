@@ -45,7 +45,8 @@ static func load_index(pack_dir: String) -> Dictionary:
 ## Decodes one chunk entry from the index.
 static func load_chunk(pack_dir: String, index: Dictionary, entry: Dictionary) -> ChunkHeights:
 	var img := Image.new()
-	var bytes := FileAccess.get_file_as_bytes(pack_dir.path_join(entry["file"]))
+	# A chunk of a neighbouring district played with this one names its own folder.
+	var bytes := FileAccess.get_file_as_bytes(str(entry.get("dir", pack_dir)).path_join(entry["file"]))
 	if img.load_png_from_buffer(bytes) != OK:
 		push_error("TerrainBuilder: bad PNG %s" % entry["file"])
 		return null

@@ -78,6 +78,8 @@ var packs: Dictionary = {}
 var loaded_ids: PackedStringArray = PackedStringArray()
 ## Id of the map pack in play, named by the scene; "" before a map is chosen.
 var active_map: String = ""
+## The active map's neighbouring districts, loaded with it (district_ids; add-district-stitching).
+var active_districts: PackedStringArray = PackedStringArray()
 ## `--packs=`: the enabled set for this run only, never saved.
 var pinned: PackedStringArray = PackedStringArray()
 var _pinned: bool = false
@@ -353,6 +355,7 @@ func enabled_ids() -> PackedStringArray:
 ## non-map pack in dependency order (ties by id). Disabled packs get a readable reason.
 func _resolve() -> void:
 	loaded_ids.clear()
+	active_districts = district_ids(active_map) if active_map != "" else PackedStringArray()
 	var candidates: Array[String] = []
 	for id: String in packs:
 		var info: PackInfo = packs[id]
@@ -363,13 +366,13 @@ func _resolve() -> void:
 		if not info.valid:
 			continue
 		if info.is_map():
-			if id == active_map:
+			if id == active_map or id in active_districts:
 				candidates.append(id)
 			continue
 		if not info.enabled:
 			continue
 		var story: Variant = info.manifest.get("story", null)
-		if story is Dictionary and active_map != "" and str(story.get("map", "")) != "" and str(story.get("map", "")) != active_map:
+		if story is Dictionary and active_map != "" and str(story.get("map", "")) != "" and str(story.get("map", "")) != active_map and not (str(story.get("map", "")) in active_districts):
 			info.reason = "placed on %s, not the map in play" % str(story.get("map", ""))
 			continue
 		candidates.append(id)
@@ -539,6 +542,43 @@ func resolve(ref: String) -> String:
 
 
 ## The folder of a discovered map pack by id, or "" (the scene loads the map from it).
+## The neighbouring districts played with map `id` (add-district-stitching): every other
+## valid map pack of the same city (same origin and projection, a border on its chunk grid)
+## whose border overlaps none already in the set, by id. Found, not listed: installing a
+## neighbouring district is enough.
+func district_ids(id: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	if not packs.has(id) or not (packs[id] as PackInfo).is_map():
+		return out
+	var set_manifests: Array = [(packs[id] as PackInfo).manifest]
+	if not ((set_manifests[0] as Dictionary).get("map", {}) as Dictionary).has("border"):
+		return out
+	var others: Array = packs.keys()
+	others.sort()
+	for other: String in others:
+		var info: PackInfo = packs[other]
+		if other == id or not info.is_map() or not info.valid:
+			continue
+		var trial := set_manifests.duplicate()
+		trial.append(info.manifest)
+		if DistrictSet.refusal(trial) == "":
+			set_manifests.append(info.manifest)
+			out.append(other)
+	return out
+
+
+## The folders of the map in play and its districts, the map first.
+func district_dirs(id: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	var first := map_pack_dir(id)
+	if first == "":
+		return out
+	out.append(first)
+	for other in district_ids(id):
+		out.append(map_pack_dir(other))
+	return out
+
+
 func map_pack_dir(id: String) -> String:
 	if not packs.has(id):
 		return ""
