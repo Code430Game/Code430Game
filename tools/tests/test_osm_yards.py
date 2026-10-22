@@ -8,7 +8,7 @@ from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import unary_union
 
 from osm_import.yards import build_yards
-from tests.test_osm_houses import LANE, STREET, _build, _house
+from tests.test_osm_houses import LANE, STREET, _build, _house, ll
 
 SCHEMA = Path(__file__).parents[2] / "docs" / "pack-format" / "yards.schema.v0.json"
 
@@ -95,3 +95,33 @@ def test_yards_export_and_validate():
     assert list(Draft202012Validator(schema).iter_errors(data)) == []
     assert [y["house"] for y in data["yards"]] == ["w1.0", "w2.0"]
     assert _yards(houses)[2].to_dict() == data  # deterministic
+
+
+def test_a_degenerate_outline_beside_a_house_does_not_break_the_yards():
+    # Ottawa had outlines that make_valid turns into lines or collections; mixing those with
+    # polygons made GEOS refuse the overlay ("mixed-dimension") and stopped the export.
+    from shapely.geometry import GeometryCollection, MultiPolygon
+    from shapely.validation import make_valid
+
+    from osm_import.yards import _polygonal
+
+    sliver = make_valid(Polygon([(0, 0), (5, 0), (10, 0), (0, 0)]))  # a flat outline: a line
+    bowtie = make_valid(Polygon([(0, 0), (4, 4), (4, 0), (0, 4), (0, 0)]))
+    assert _polygonal(sliver).is_empty
+    assert isinstance(_polygonal(bowtie), (Polygon, MultiPolygon)) and _polygonal(bowtie).area > 0
+    mixed = GeometryCollection([LineString([(0, 0), (1, 1)]), Polygon([(2, 2), (3, 2), (3, 3)])])
+    assert _polygonal(mixed).geom_type == "Polygon"
+    houses = [
+        _house(1, -5, 10, 5, 20, building="detached"),
+        {
+            "type": "way",
+            "id": 2,
+            "tags": {"building": "shed"},
+            "geometry": [
+                {"lat": a, "lon": b} for a, b in [ll(7, 22), ll(9, 22), ll(11, 22), ll(7, 22)]
+            ],
+        },
+        _house(3, 6, 21, 9, 24, building="shed"),
+    ]
+    _, _, _, by = _yards(houses)
+    assert "w1.0" in by
