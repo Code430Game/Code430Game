@@ -14,9 +14,10 @@ const NODE_RADIUS_M := 40.0
 const EDGE_RADIUS_M := 40.0
 
 
-## Strips the home directory and the account name from strings. Generic account names (the
-## Steam Deck's `deck`, `root` and the like) identify nobody and are common words in the
-## diagnostics ("preset deck"), so only the home directory is replaced for them.
+## Strips the home directory and the account name from strings, and IP and email addresses (a
+## co-op join logs the host's address; reports are public). Generic account names (the Steam
+## Deck's `deck`, `root` and the like) identify nobody and are common words in the diagnostics
+## ("preset deck"), so only the home directory is replaced for them.
 class Redactor:
 	extends RefCounted
 	const GENERIC_USERS := ["deck", "root", "user", "admin", "steam", "player", "guest"]
@@ -27,9 +28,10 @@ class Redactor:
 		home = home_dir.trim_suffix("/").trim_suffix("\\")
 		user = "" if user_name.length() < 3 or user_name.to_lower() in GENERIC_USERS else user_name
 
-	## The string with the home directory as ~ and the account name as <user>.
+	## The string with the home directory as ~, the account name as <user>, and IP and email
+	## addresses as <ip> and <email>.
 	func redact(s: String) -> String:
-		var out := s
+		var out := Redactor.scrub(s)
 		if home.length() > 1:
 			out = out.replace(home, "~")
 		if user != "":
@@ -52,6 +54,21 @@ class Redactor:
 				a.append(redact_value(item))
 			return a
 		return v
+
+	static var _email: RegEx
+	static var _ipv4: RegEx
+	static var _ipv6: RegEx
+
+	## `s` with email addresses as <email> and IP addresses as <ip> (the relay does the same).
+	static func scrub(s: String) -> String:
+		if _email == null:
+			_email = RegEx.create_from_string("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")
+			_ipv4 = RegEx.create_from_string("(?<![\\d.])(?:(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)(?![\\d.])")
+			# Written out in full (eight groups) or shortened with ::, so clock times (12:34:56) are left alone.
+			_ipv6 = RegEx.create_from_string("(?<![\\w:])(?=[0-9A-Fa-f:]*::|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![\\w:])")
+		var out := _email.sub(s, "<email>", true)
+		out = _ipv4.sub(out, "<ip>", true)
+		return _ipv6.sub(out, "<ip>", true)
 
 	static func _escape(s: String) -> String:
 		var out := ""

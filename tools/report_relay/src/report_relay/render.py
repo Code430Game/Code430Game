@@ -50,12 +50,19 @@ def defuse_title(text: str) -> str:
 
 
 def labels(report: dict) -> list[str]:
-    return [
-        "in-game-report",
-        "needs-triage",
-        f"area:{report['area']}",
-        f"severity:{report['severity']}",
-    ] + [f"tag:{t}" for t in report.get("tags", [])]
+    return (
+        [
+            "in-game-report",
+            "needs-triage",
+            f"area:{report['area']}",
+            f"severity:{report['severity']}",
+        ]
+        + [f"tag:{t}" for t in report.get("tags", [])]
+        + (
+            # The public reporter hash (privacy.public), so one tester's reports filter together.
+            [f"reporter:{report['reporter_id']}"] if report.get("reporter_id") else []
+        )
+    )
 
 
 def tag_name(tag_id: str) -> str:
@@ -163,7 +170,10 @@ def body(report: dict, screenshot_url: str | None) -> str:
         head += [f"![screenshot]({screenshot_url})", ""]
     if report["reporter_id"]:
         head += [
-            f"Reporter id `{report['reporter_id']}` (chosen by the player; random per install).",
+            (
+                f"Reporter `{report['reporter_id']}` (included by the player: a one-way hash of a"
+                " random id made on their install, the same on each of its reports)."
+            ),
             "",
         ]
     head += ["<details><summary>Diagnostics</summary>", ""] + _table(report) + [""]

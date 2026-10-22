@@ -161,3 +161,18 @@ func test_schema_check_catches_bad_diagnostics() -> void:
 	(diag["settings"] as Dictionary).erase("preset")
 	var errors := ReportSchema.check(diag, node)
 	assert_int(errors.size()).is_equal(3)
+
+
+func test_ip_and_email_addresses_are_scrubbed_and_times_and_versions_kept() -> void:
+	# Reports are public: a co-op join logs the host's address.
+	var r := Diagnostics.Redactor.new("/home/deck", "deck")
+	var out := r.redact("net: joining 192.168.86.30:7777 via fe80::1c2b:3d4e, mail a.b@example.com")
+	assert_str(out).not_contains("192.168").not_contains("fe80").not_contains("example.com")
+	assert_str(out).contains("<ip>").contains("<email>")
+	var keep := "Godot 4.7.2.stable at 13:10, 14:39:32, build 0.2.0, preset deck"
+	assert_str(r.redact(keep)).is_equal(keep)
+
+
+func test_the_description_is_scrubbed_too() -> void:
+	var report := ReportStore.build({"description": "Hosting on 10.0.0.5, I'm me@example.org"}, {"place": Diagnostics.empty_place()}, [], false)
+	assert_str(report["description"]).is_equal("Hosting on <ip>, I'm <email>")

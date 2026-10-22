@@ -66,7 +66,8 @@ request or another branch can read it.
 - **Switch off** without a game update: set `RELAY_ENABLED` to `false` and deploy (or edit the
   variable in the dashboard). Games keep reports queued and retry later.
 - **Limits:** 5 reports an hour and 20 a day per sender, 200 a day in all; counted in KV under a
-  salted hash of the sender's IP, never the IP itself. Change them in `ratelimit.Limits`.
+  salted hash of the sender's IP, never the IP itself. The same secret keys the public reporter
+  hash (`report_relay/privacy.py`): changing `RATE_SALT` gives every install a new one. Change them in `ratelimit.Limits`.
 - **Screenshots** are committed to the `issue-attachments` branch (created on first use, never
   merged) and linked from the issue. Prune it by hand if it grows.
 - Nothing is stored apart from the rate-limit counters, which expire within a day.
