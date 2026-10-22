@@ -10,3 +10,4 @@
 ## 3. Verification
 - [ ] 3.1 Deck benchmark on the usual route and a drive under Place du Centre; no regression
 - [ ] 3.2 **Stop: human drives Boulevard Maisonneuve under Place du Centre and walks a footbridge on the Deck**
+  - 2026-10-22 Deck, on the Mackenzie King Bridge (human): "now i remember the complexity because the building has two levels and there are entrances at bridge level". The Rideau Centre meets the bridge deck at its upper level: entrances at bridge height as well as at street level.

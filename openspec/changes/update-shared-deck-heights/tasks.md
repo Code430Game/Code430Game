@@ -45,3 +45,4 @@ elevated"):
 ## 2. Verification
 - [ ] 2.1 Human drives the Mackenzie King Bridge on the Deck
   - 2026-10-21 Deck: not done: the Mackenzie King Bridge wasn't revisited.
+  - 2026-10-22 Deck (Centretown 0.3.0): the human "got mostly across it. Before accidentally holding R3"; asked whether the joined carriageways felt right (no step) up to there.

@@ -178,7 +178,8 @@ func test_a_catch_resets_the_weapons_and_a_second_catch_keeps_its_banner() -> vo
 
 
 ## Human, 2026-10-06: on foot there was no way back from being stuck short of closing the game.
-## Holding reset for the hold time takes the player to the start, standing on built ground.
+## Holding reset for the hold time takes the player to the nearest street (#140), or, with none
+## near, to the start, standing on built ground. This holds it far off the map, so: the start.
 func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
 	var player: Variant = _bed.get("_player")
 	if player.is_driving():
@@ -187,9 +188,10 @@ func test_holding_reset_on_foot_goes_back_to_the_start() -> void:
 	var pack: MapPack = _bed.get("_pack")
 	# #81: the on-foot start beside the start car, not the car's own spot (inside the car the
 	# push-out could go down through the road), from far enough away that the start's ground
-	# had been dropped to the far tier (past 900 m).
+	# had been dropped to the far tier (past 900 m), and off the map, where no street is near (the
+	# 0.3.0 Centretown reaches a street within reach of the old spot, 1.5 km out).
 	var start: Vector3 = _bed.call("_on_foot_start", pack.spawn_transform())
-	var away := start + Vector3(1200.0, 0.0, 900.0)
+	var away := start + Vector3(4000.0, 0.0, 3000.0)
 	player.global_position = away + Vector3.UP * 50.0
 	player.velocity = Vector3.ZERO
 	var half := Controls.hold_s() * 0.6

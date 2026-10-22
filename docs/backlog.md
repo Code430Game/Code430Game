@@ -223,6 +223,13 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   "There are still some curbs that stop the car"; since car damage, they dent it too. Not
   located yet: a report from the spot (the issue reporter records x, z) or the HUD's x, z next
   time. Check them against `BarrierBuilder.clip_curbs` (update-junction-surfaces 2.2).
+  2026-10-22 later, Deck on Centretown 0.3.0: bike lanes too ("I had some issues with bike lanes
+  and the car got damaged. So i think we have some flattening work to do still"): the
+  cycle-track separators and kerbs. Two parts: flatten them where a car crosses, and (proposed
+  to the human, not yet agreed) let a bump under kerb height (about 0.25 m) do no car damage.
+- **Holding R3 by accident resets the car** (human, 2026-10-22, Deck, on the Mackenzie King
+  Bridge: "I got mostly across it. Before accidentally holding R3"). A tap looks behind, a 1 s
+  hold resets (`Controls.hold_s`). Proposed to the human: a longer hold (1.5 s); not yet agreed.
 - **Curb inside a junction at a curved road join** → proposal `update-junction-surfaces` (human, 2026-10-03, Deck drive for
   `update-cluster-junction-arms`).** A curb stands on the interior of the junction where a
   curved road joins; not the clustered-X issue, which the drive confirmed fixed. Location not
