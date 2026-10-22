@@ -6,6 +6,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from osm_import.border import BorderResult, clip_graph
 from osm_import.cluster import ClusterStats, cluster_junctions
 from osm_import.config import DEFAULT_CONFIG_PATH, ImportConfig, load_config
 from osm_import.crossings import infer_bridges
@@ -22,6 +23,7 @@ from osm_import.forks import shape_forks, shape_splits
 from osm_import.gores import build_gores
 from osm_import.graph import RoadGraph, build_graph
 from osm_import.osm_data import BBox, OsmData
+from osm_import.pack import CHUNK_SIZE_M
 from osm_import.projection import Projector
 from osm_import.shoulders import trim_shoulders
 from osm_import.validation import ValidationReport, render_markdown, validate
@@ -37,6 +39,7 @@ class PipelineResult:
     cluster_stats: ClusterStats
     graph_dict: dict
     elevation_stats: ElevationStats | None = None
+    border: BorderResult | None = None  # the district border's cut and crossings (border.py)
 
 
 def run_pipeline(
@@ -46,9 +49,12 @@ def run_pipeline(
     config_name: str = "road_classes.json",
     elevation: ElevationSource | None = None,
     proj: Projector | None = None,
+    border_chunks: tuple[int, int, int, int] | None = None,
 ) -> PipelineResult:
     """Filter, project, build, cluster, elevate, validate. Does not touch disk. `proj`
-    defaults to a frame on the bbox centre."""
+    defaults to a frame on the bbox centre. With `border_chunks` (a district on the city's
+    chunk grid) the graph is cut at the border once its heights are final, so the heights at
+    the cut were graded with the road beyond it, as the neighbouring district grades them."""
     fr = filter_ways(data, cfg)
     log.info(
         "filter: %d drivable, %d pedestrian, dropped %s",
@@ -98,6 +104,11 @@ def run_pipeline(
             len(elev_stats.edges_over_grade),
         )
     bounds = proj.bbox_local(bbox)
+    border = None
+    if border_chunks is not None:
+        border = clip_graph(graph, border_chunks, CHUNK_SIZE_M)
+        bounds = border.rect
+        log.info("border: %s", border.counts())
     report = validate(graph, cfg, bounds, fr.dropped_by_node())
     report.junction_clusters = stats.to_list()
     if elev_stats is not None:
@@ -117,7 +128,7 @@ def run_pipeline(
             )
     sources = [dict(sorted(data.source.items()))]
     gd = graph_to_dict(graph, bbox, proj.frame, sources, config_name, elev_meta)
-    return PipelineResult(graph, report, fr, stats, gd, elev_stats)
+    return PipelineResult(graph, report, fr, stats, gd, elev_stats, border)
 
 
 def write_outputs(result: PipelineResult, out_dir: Path, title: str) -> dict[str, Path]:

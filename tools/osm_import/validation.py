@@ -183,7 +183,15 @@ def validate(
         else:
             cat = "suspicious"
         categories[cat].append(
-            DeadEndEntry(nid, node.osm_node_ids[0], e.id, e.osm_way_id, e.road_class, e.name, cat)
+            DeadEndEntry(
+                nid,
+                node.osm_node_ids[0] if node.osm_node_ids else 0,
+                e.id,
+                e.osm_way_id,
+                e.road_class,
+                e.name,
+                cat,
+            )
         )
     report.dead_ends = categories
 

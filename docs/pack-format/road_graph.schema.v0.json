@@ -9,7 +9,7 @@
   "$defs": {
     "point": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
     "polyline": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 2},
-    "node_id": {"type": "string", "pattern": "^[nc][0-9]+$"},
+    "node_id": {"type": "string", "pattern": "^[ncb][0-9]+$", "description": "n: an OSM node, c: a merged junction, b: a dead end on the district border (add-district-stitching)."},
     "road_class": {
       "enum": ["motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street", "service", "parking"]
     }
@@ -54,7 +54,7 @@
           "id": {"$ref": "#/$defs/node_id"},
           "position": {"$ref": "#/$defs/point"},
           "ground_y": {"type": "number"},
-          "osm_node_ids": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+          "osm_node_ids": {"type": "array", "items": {"type": "integer"}, "description": "The OSM nodes merged into this one; empty for a node on the district border (b...), where the importer cut a road."},
           "junction_type": {"enum": ["junction", "pass_through", "dead_end", "fork", "merge"]},
           "control": {"enum": ["none", "signals", "stop", "give_way"]}
         }
@@ -67,7 +67,7 @@
         "additionalProperties": false,
         "required": ["id", "from", "to", "polyline", "class", "lanes_forward", "lanes_backward", "oneway", "speed_kph", "width_m", "layer", "bridge", "tunnel", "name", "osm_way_id", "defaulted_fields", "access", "length_m"],
         "properties": {
-          "id": {"type": "string", "pattern": "^w[0-9]+\\.[0-9]+$"},
+          "id": {"type": "string", "pattern": "^w[0-9]+\\.[0-9]+(b[0-9]+)?$", "description": "w<way>.<segment>; bN: piece N of an edge the district border cut in several"},
           "from": {"$ref": "#/$defs/node_id"},
           "to": {"$ref": "#/$defs/node_id"},
           "polyline": {"$ref": "#/$defs/polyline"},
@@ -128,7 +128,7 @@
         "additionalProperties": false,
         "required": ["id", "polyline", "class", "kind", "width_m", "osm_way_id", "name"],
         "properties": {
-          "id": {"type": "string", "pattern": "^p[0-9]+(\\.[0-9]+)?$"},
+          "id": {"type": "string", "pattern": "^p[0-9]+(\\.[0-9]+)?(b[0-9]+)?$"},
           "polyline": {"$ref": "#/$defs/polyline"},
           "class": {"type": "string"},
           "kind": {"enum": ["sidewalk", "crossing", "footway", "path", "steps", "cycleway", "pedestrian", "track", "living_street"]},

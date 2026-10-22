@@ -34,6 +34,7 @@ import logging
 import math
 from dataclasses import dataclass, field
 
+from osm_import.border import side_of
 from osm_import.buildings import BuildingsResult
 from osm_import.config import ImportConfig
 from osm_import.elevation import ElevationSource, _seg_dist, _SegmentIndex
@@ -52,6 +53,9 @@ class Barrier:
     height_m: float
     edge_id: str
     points: list[tuple[float, float, float]]
+    border_side: str = (
+        ""  # a roadblock where the district border cut the road: west | east | north | south
+    )
 
 
 @dataclass
@@ -65,6 +69,7 @@ class BarriersResult:
             "units": "metres, x east, y up, z south; points are the wall base line",
             "barriers": [
                 {
+                    **({"border_side": b.border_side} if b.border_side else {}),
                     "id": b.id,
                     "kind": b.kind,
                     "height_m": round(b.height_m, 2),
@@ -171,6 +176,7 @@ def build_barriers(
     cfg: ImportConfig,
     bounds: tuple[float, float, float, float] | None = None,
     infill: list | None = None,
+    border: bool = False,
 ) -> BarriersResult:
     """Every barrier for the graph. `infill` is the bridges' infill strips (DeckStrip): a deck
     edge that faces one has floor beyond it, not a drop, so no parapet stands there. The
@@ -185,12 +191,12 @@ def build_barriers(
     step = float(rules.get("sample_step_m", 8.0))
     runs: dict[tuple[str, str], int] = {}
 
-    def add(kind: str, height: float, edge_id: str, pts: list) -> None:
+    def add(kind: str, height: float, edge_id: str, pts: list, side: str = "") -> None:
         # Stable id: the kind, the edge and the run's number along that edge, so regenerating
         # the pack only changes the ids of barriers that changed.
         n = runs.get((kind, edge_id), 0)
         runs[(kind, edge_id)] = n + 1
-        result.barriers.append(Barrier(f"b:{kind}:{edge_id}:{n}", kind, height, edge_id, pts))
+        result.barriers.append(Barrier(f"b:{kind}:{edge_id}:{n}", kind, height, edge_id, pts, side))
         result.counts[kind] = result.counts.get(kind, 0) + 1
 
     # Index highway segments for the median search and building centroids for sound walls.
@@ -517,6 +523,8 @@ def build_barriers(
         for nid in sorted(at_edge):
             if len(inc[nid]) != 1 or graph.nodes[nid].junction_type != "dead_end":
                 continue
+            if border and not nid.startswith("b"):
+                continue  # a real dead end near the border, not one the border cut
             e = graph.edges[inc[nid][0]]
             pl = e.polyline
             end, prev = (pl[0], pl[1]) if e.from_node == nid else (pl[-1], pl[-2])
@@ -534,6 +542,7 @@ def build_barriers(
                 float(rules.get("roadblock_height_m", 1.1)),
                 e.id,
                 [(bx - nx * hw, by, bz - nz * hw), (bx + nx * hw, by, bz + nz * hw)],
+                side_of((end[0], end[2]), bounds) if border else "",
             )
     log.info("barriers: %s", result.counts)
     return result
