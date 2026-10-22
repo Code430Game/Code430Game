@@ -139,3 +139,20 @@ func test_a_roof_building_is_a_canopy_open_underneath() -> void:
 			assert_float(minf(absf(absf(v.x) - 6.0), absf(absf(v.z) - 6.0))).is_less(BuildingBuilder.CANOPY_POST_M * 2.0)
 			assert_bool(absf(v.x) > 5.0 and absf(v.z) > 5.0).override_failure_message("something below the canopy away from its corners at %s" % v).is_true()
 	assert_int(low).is_greater(0)  # the posts are there
+
+
+## Houses wear black shingles whatever their walls; other buildings keep a darker wall colour.
+func test_house_roofs_are_black_shingles() -> void:
+	var house := _box("w1", 0, 0, 5, 7, 60)
+	house.colour = "#d8c8a0"  # a pale tagged wall
+	var wall := BuildingBuilder.color_for(house)
+	var roof := BuildingBuilder.roof_color_for(house, wall)
+	assert_float(roof.get_luminance()).is_less(0.2)
+	assert_float(absf(roof.r - roof.b)).is_less(0.05)  # grey-black, not brown
+	var office := _box("w2", 0, 0, 20, 40, 60)
+	office.kind = "office"
+	var ow := BuildingBuilder.color_for(office)
+	assert_that(BuildingBuilder.roof_color_for(office, ow)).is_equal(ow.darkened(BuildingBuilder.ROOF_DARKEN))
+	# Neighbouring houses differ a little.
+	var other := _box("w3", 20, 0, 5, 7, 60)
+	assert_bool(BuildingBuilder.roof_color_for(other, wall) != roof).is_true()

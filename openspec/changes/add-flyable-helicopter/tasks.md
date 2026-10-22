@@ -23,4 +23,5 @@
   - 2026-10-07: parked on its marked pad by the river (`--spawn=-928,43.4,-998`); lifting off at 11 m with two stars (`--fly --fly-input=0,0,0.25,0.1`); over downtown at 151 km/h, 79 m up, seen from 13 m behind (`--fly-at=420,150,1060 --fly-input=0.3,-1,0,0`); landed on Police HQ's roof (`--fly-at=665,100,850 --fly-input=0,0,-1,0`). Mac benchmark (deck preset, 40 s): autodrive route render CPU 0.45 ms, physics 5.00 ms, 503 draw calls; flying over downtown render CPU 0.68 ms, physics 6.77 ms, 1031 draw calls, 41 chunks downgraded, shape attach max 11.7 ms. Flying shows more of the city: the Deck pass (4.2) decides whether `aircraft_lookahead_m` or LOD reach need trimming.
 - [ ] 4.2 Deck benchmark flying over downtown
 - [ ] 4.3 Human steals and flies it on the Deck and says how it handles
+  - 2026-10-21 Deck (Testing tab): flying works (human: "The helicopter worked well! The only thing was landing left to try."); it wedged in a glass tower at 21 m, issue #140 (no reset in the air). Landing still to try.
   - 2026-10-21 Deck: not done: the human found no helicopter to fly ("No heli"); to investigate.

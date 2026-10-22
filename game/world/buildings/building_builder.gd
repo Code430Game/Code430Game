@@ -12,6 +12,10 @@ const WALL_EMBED_M := 2.0
 const LOD1_MIN_HEIGHT_M := 12.0
 const LOD1_MIN_AREA_M2 := 300.0
 const ROOF_DARKEN := 0.12
+## Houses get black asphalt shingles whatever their walls (human, 2026-10-21: "a simple
+## improvement is to make all house roofs black shingles"), a little lighter or darker each.
+const SHINGLE_COLOR := Color(0.13, 0.13, 0.14)
+const SHINGLE_VARIATION := 0.08
 const VARIATION := 0.08
 const FACADE_SHADER := preload("res://world/buildings/facade.gdshader")
 ## Facade treatments (see facade.gdshader): 0 plain, 1 punched brick, 2 glass grid, 3 stone,
@@ -219,6 +223,14 @@ static func color_for(b: Building) -> Color:
 	return base.lightened((h - 0.5) * VARIATION) if h >= 0.5 else base.darkened((0.5 - h) * VARIATION)
 
 
+## A building's roof colour: black shingles on houses, else its walls a little darker.
+static func roof_color_for(b: Building, wall: Color) -> Color:
+	if b.kind in HOUSE_KINDS:
+		var h := float(hash(b.id + ":roof") % 1000) / 1000.0
+		return SHINGLE_COLOR.lightened((h - 0.5) * SHINGLE_VARIATION)
+	return wall.darkened(ROOF_DARKEN)
+
+
 ## Oriented bounding box of a ring: {"centre", "axis" (unit long axis), "half_long", "half_short", "fill"}.
 ## Fill is the ring area over the box area: 1 for a rectangle.
 static func oriented_box(ring: PackedVector2Array) -> Dictionary:
@@ -297,7 +309,7 @@ static func _extrude(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
 		_canopy(b, out)
 		return
 	var wall := color_for(b)
-	var roof := wall.darkened(ROOF_DARKEN)
+	var roof := roof_color_for(b, wall)
 	var y0 := b.ground_y - WALL_EMBED_M
 	var y1 := b.ground_y + b.height_m
 	var seed := seed_for(b.id)
@@ -397,7 +409,7 @@ static func _canopy(b: Building, out: RoadMeshBuilder.ChunkTriangles) -> void:
 			var p := here + inward * CANOPY_POST_M
 			var foot := b.ground_y - WALL_EMBED_M
 			_box(Vector3(p.x, (y0 + foot) * 0.5, p.y), Vector3(CANOPY_POST_M, y0 - foot, CANOPY_POST_M), Vector2.RIGHT, wall.darkened(0.15), uv2, out)
-	var roof := wall.darkened(ROOF_DARKEN)
+	var roof := roof_color_for(b, wall)
 	var roof_uv2 := Vector2(-1.0, seed_for(b.id))
 	for t in range(0, b.roof_triangles.size(), 3):
 		var p := b.roof_vertices[b.roof_triangles[t]]

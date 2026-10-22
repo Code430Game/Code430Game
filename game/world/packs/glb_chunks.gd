@@ -7,7 +7,7 @@ extends RefCounted
 
 const BUILD_MANIFEST := "build.json"
 ## Bump whenever mesh generation changes, so chunks built by older code are rebuilt.
-const GENERATOR_VERSION := 10
+const GENERATOR_VERSION := 11  # 11: black shingle house roofs
 
 
 ## Pack files that never feed chunk geometry: the manifest, ads, service places, importer
