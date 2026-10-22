@@ -219,6 +219,10 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
 
 ## 2026-10-03
 
+- **Curbs that still stop the car** (human, 2026-10-22, Deck, after `add-vehicle-and-building-damage` 1.1-1.3).**
+  "There are still some curbs that stop the car"; since car damage, they dent it too. Not
+  located yet: a report from the spot (the issue reporter records x, z) or the HUD's x, z next
+  time. Check them against `BarrierBuilder.clip_curbs` (update-junction-surfaces 2.2).
 - **Curb inside a junction at a curved road join** → proposal `update-junction-surfaces` (human, 2026-10-03, Deck drive for
   `update-cluster-junction-arms`).** A curb stands on the interior of the junction where a
   curved road joins; not the clustered-X issue, which the drive confirmed fixed. Location not
