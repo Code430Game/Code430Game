@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/border.schema.v0.json",
+  "title": "Code 430 district border v0",
+  "description": "Optional file in a map pack whose district has a border on its city's chunk grid (add-district-stitching). The importer cuts the road graph at the border; each road that leaves the district ends on a border line at a dead-end node, listed here as a crossing so the game can join it to the matching crossing of the neighbouring district. Local metres, x east, z south.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "chunks", "rect", "crossings"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "chunks": {"description": "The border in chunks, [x0, z0, x1, z1] (x0..x1-1, z0..z1-1), as in pack.json map.border.", "type": "array", "items": {"type": "integer"}, "minItems": 4, "maxItems": 4},
+    "rect": {"description": "The border in metres, [x0, z0, x1, z1].", "type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+    "crossings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["edge", "node", "osm_way_id", "side", "position", "heading", "lanes_out", "lanes_in", "class", "width_m", "layer", "bridge", "tunnel"],
+        "properties": {
+          "edge": {"description": "The road graph edge that ends here.", "type": "string"},
+          "node": {"description": "Its dead-end node on the border line.", "type": "string", "pattern": "^b[0-9]+$"},
+          "osm_way_id": {"type": "integer"},
+          "side": {"enum": ["west", "east", "north", "south"]},
+          "position": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+          "heading": {"description": "Unit (x, z) along the road, pointing out of the district.", "type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+          "lanes_out": {"description": "Lanes leaving the district here.", "type": "integer", "minimum": 0},
+          "lanes_in": {"description": "Lanes coming in.", "type": "integer", "minimum": 0},
+          "class": {"type": "string"},
+          "width_m": {"type": "number", "exclusiveMinimum": 0},
+          "layer": {"type": "integer"},
+          "bridge": {"type": "boolean"},
+          "tunnel": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

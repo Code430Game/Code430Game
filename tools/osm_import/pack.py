@@ -20,6 +20,7 @@ from pathlib import Path
 import numpy as np
 
 from osm_import.barriers import BarriersResult
+from osm_import.border import BorderResult
 from osm_import.bridges import BridgesResult
 from osm_import.buildings import BuildingsResult
 from osm_import.config import ImportConfig
@@ -572,6 +573,7 @@ def write_pack(
     build: dict | None = None,
     border: tuple[int, int, int, int] | None = None,
     license: dict | None = None,
+    border_result: BorderResult | None = None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
     fixed start on the manifest for packs whose author chose one. `build` ({importer, inputs})
@@ -691,6 +693,9 @@ def write_pack(
     if yards is not None:
         paths["yards"] = out_dir / "yards.v0.json"
         dump_json(yards.to_dict(), paths["yards"])
+    if border_result is not None:
+        paths["border"] = out_dir / "border.v0.json"
+        dump_json(border_result.to_dict(), paths["border"])
     return paths
 
 

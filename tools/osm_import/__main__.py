@@ -149,7 +149,7 @@ def _import(args: argparse.Namespace) -> int:
         elevation = FlatSource()
     else:
         elevation = None
-    result = run_pipeline(data, bbox, cfg, cfg_name, elevation, proj)
+    result = run_pipeline(data, bbox, cfg, cfg_name, elevation, proj, border_chunks=border)
     title = args.title or bbox.overpass()
     if args.pack_out:
         if elevation is None:
@@ -205,8 +205,15 @@ def _import(args: argparse.Namespace) -> int:
         # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
         result.graph_dict["pedestrian_ways"] = pedestrian_to_list(result.graph)
         # Barriers use final pedestrian heights (curbs), so they come after the terrain.
+        # With a border, roads end on its lines: those ends get the roadblocks, tagged by side.
         barriers = build_barriers(
-            result.graph, elevation, buildings, cfg, proj.bbox_local(bbox), bridges.infill()
+            result.graph,
+            elevation,
+            buildings,
+            cfg,
+            result.border.rect if result.border else proj.bbox_local(bbox),
+            bridges.infill(),
+            border=result.border is not None,
         )
         result.report.summary["barriers"] = barriers.counts
         parking = None
@@ -286,6 +293,7 @@ def _import(args: argparse.Namespace) -> int:
             spawn=getattr(args, "spawn", None),
             yards=yards,
             border=border,
+            border_result=result.border,
             license=getattr(args, "license", None),
             build=build_stamp(result.graph_dict["meta"]["sources"], importer_commit())
             if args.build_stamp

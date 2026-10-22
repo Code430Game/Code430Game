@@ -20,6 +20,7 @@
           "kind": {"enum": ["parapet", "median", "guardrail", "soundwall", "curb", "roadblock"]},
           "height_m": {"type": "number", "exclusiveMinimum": 0},
           "edge_id": {"type": "string"},
+          "border_side": {"description": "A roadblock where the district border cut the road (add-district-stitching): the side it stands on. The game drops it when the neighbouring district is loaded and the crossing joins.", "enum": ["west", "east", "north", "south"]},
           "points": {"type": "array", "minItems": 2, "items": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}}
         }
       }
