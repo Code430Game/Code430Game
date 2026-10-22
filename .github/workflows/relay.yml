@@ -49,6 +49,9 @@ jobs:
         with:
           persist-credentials: false
       - run: uv sync --frozen
+      # The tools suite's conftest wants the pinned packs (add-pack-repositories 2.2), even
+      # for the relay's own tests.
+      - run: ../scripts/fetch-packs.sh
       - run: uv run ruff check report_relay && uv run ruff format --check report_relay
       - run: uv run pytest -q tests/test_report_relay.py
 
