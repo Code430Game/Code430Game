@@ -13,6 +13,8 @@ extends VehicleBody3D
 ## gently, never destroyed) or "damage" (bounce, lose health, and at zero auto-rotate down to a
 ## heavy landing that leaves it disabled). With nobody flying it, it lands where it is and,
 ## once still, freezes in place (parked), so ground streaming away under it never drops it.
+## It slides along what it touches rather than pressing into it, and the pilot holding reset
+## (R3 / R) lifts it clear above whatever is under it (#140: it wedged in a tower's wall).
 ## Tunables come from helicopter_flight.json.
 
 signal impacted(speed_mps: float)
@@ -62,6 +64,7 @@ var _auto_land: bool = false  # clean's bounce: control comes back once it has l
 var _still_s: float = 0.0
 var _touching: bool = false
 var _ground_known: bool = false  # the ray below found ground (it may not have streamed in yet)
+var _reset_hold_s: float = 0.0  # seconds the pilot has held reset; -1 once it fired
 var _rotor: Node3D
 var _tail_rotor: Node3D
 var _rotor_voice: AudioStreamPlayer
@@ -79,6 +82,7 @@ const DEFAULTS := {
 	"crash_damage_per_mps": 6.0, "autorotate_mps": 9.0, "autorotate_glide": 0.6,
 	"mass_kg": 2400.0, "chase_distance_m": 9.0, "chase_height_m": 3.5,
 	"chase_pull_per_mps": 0.08, "rotor_gain": 0.6, "lookahead_s": 8.0, "lookahead_per_height": 1.0, "settle_m": 5.0, "chase_smoothing": 14.0,
+	"lift_clear_m": 10.0, "lift_probe_m": 400.0,
 }
 
 
@@ -94,6 +98,7 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 6
 	can_sleep = false
+	continuous_cd = true  # fast into a thin wall: stop at it, not inside the building
 	heading = global_rotation.y
 	var parts := HelicopterModel.build(self)
 	_rotor = parts["rotor"]
@@ -202,9 +207,56 @@ func altitude_m() -> float:
 	return height_above_ground
 
 
-## No hold-to-reset in the air (the HUD's ring reads this).
+## How far the pilot's reset hold has got, 0..1, for the HUD ring.
 func reset_progress() -> float:
-	return 0.0
+	return clampf(_reset_hold_s / Controls.hold_s(), 0.0, 1.0) if _reset_hold_s > 0.0 else 0.0
+
+
+## Reset fires once it has been held for the hold time (a tap of R3 looks behind), then waits
+## for a release so a long hold lifts it once.
+func _step_reset_hold(held: bool, delta: float) -> void:
+	if not held:
+		_reset_hold_s = 0.0
+		return
+	if _reset_hold_s < 0.0:
+		return
+	_reset_hold_s += delta
+	if _reset_hold_s >= Controls.hold_s():
+		_reset_hold_s = -1.0
+		lift_clear()
+
+
+## Unsticks it: up to `lift_clear_m` above the highest static surface over or under it (a roof,
+## a deck, the ground), never lower than it is, hovering there with no speed and the pilot in
+## control. Returns where it went.
+func lift_clear() -> Vector3:
+	var p := global_position
+	var top := p.y
+	if is_inside_tree():
+		var from := Vector3(p.x, p.y + tun("lift_probe_m"), p.z)
+		var q := PhysicsRayQueryParameters3D.create(from, Vector3(p.x, p.y - tun("ground_ray_m"), p.z))
+		var exclude: Array[RID] = [get_rid()]
+		for i in range(8):
+			q.exclude = exclude
+			var hit := get_world_3d().direct_space_state.intersect_ray(q)
+			if hit.is_empty():
+				break
+			if hit["collider"] is StaticBody3D:
+				top = (hit["position"] as Vector3).y
+				break
+			exclude.append(hit["rid"])
+	var at := Vector3(p.x, maxf(p.y, top + tun("lift_clear_m")), p.z)
+	global_transform = Transform3D(Basis(Vector3.UP, heading), at)
+	_velocity = Vector3.ZERO
+	_yaw_rate = 0.0
+	_tilt = Vector2.ZERO
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	_recover_s = 0.0
+	_auto_land = false
+	settled = false
+	freeze = false
+	return at
 
 
 ## What a hard hit does, from the mode data (`outcomes.aircraft`): "bounce" or "damage". A
@@ -230,6 +282,8 @@ func _physics_process(delta: float) -> void:
 			park()
 	else:
 		_still_s = 0.0
+	var pilot_here := driver_peer_id == Players.LOCAL_PEER_ID and not disabled and not get_tree().paused
+	_step_reset_hold(pilot_here and Input.is_action_pressed("reset_vehicle"), delta)
 	_fill_rotor()
 
 
@@ -276,7 +330,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 		vy = 0.0
 		if _auto_land:
 			_auto_land = false  # clean's bounce: down safely, the pilot has it again
-	_velocity = Vector3(h.x, vy, h.z)
+	_velocity = slide_along(Vector3(h.x, vy, h.z), _contact_normals(state))
 	state.linear_velocity = _velocity
 	state.angular_velocity = Vector3.ZERO
 	# Looks: pitch and roll from the velocity in its own frame, levelling when it slows.
@@ -378,6 +432,25 @@ func _height_above_ground(state: PhysicsDirectBodyState3D) -> float:
 		exclude.append(hit["rid"])
 	_ground_known = false
 	return tun("ground_ray_m")
+
+
+## The normals of what it touches this step.
+func _contact_normals(state: PhysicsDirectBodyState3D) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for i in range(state.get_contact_count()):
+		out.append(state.get_contact_local_normal(i))
+	return out
+
+
+## `v` with no part pushing into any of `normals` (each pointing out of what it touches), so it
+## slides along a wall or a roof instead of pressing into it. Before, the stick's velocity kept
+## pushing it into a wall until it went through and wedged inside (#140).
+static func slide_along(v: Vector3, normals: Array[Vector3]) -> Vector3:
+	for n in normals:
+		var into := v.dot(n)
+		if into < 0.0:
+			v -= n * into
+	return v
 
 
 ## A hard contact (a wall, a deck's side, a roof edge, or the ground hit too fast) starts a hit.

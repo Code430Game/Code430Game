@@ -26,7 +26,7 @@
     {"context": "foot", "label": "pick a weapon by number", "actions": ["weapon_slot_1", "weapon_slot_2", "weapon_slot_3", "weapon_slot_4", "weapon_slot_5", "weapon_slot_6", "weapon_slot_7", "weapon_slot_8", "weapon_slot_9"], "pad": "-", "key": "1 to 9"},
     {"context": "foot", "label": "weapon wheel: next page", "action": "wheel_page", "reserved": true},
     {"context": "foot", "label": "reload", "action": "reload"},
-    {"context": "foot", "label": "back to the start (when stuck)", "action": "reset_vehicle", "hold": true},
+    {"context": "foot", "label": "to the nearest street (when stuck)", "action": "reset_vehicle", "hold": true},
     {"context": "foot", "label": "map", "action": "map_toggle"},
     {"context": "foot", "label": "pause menu", "action": "pause"},
 
@@ -51,6 +51,7 @@
     {"context": "fly", "label": "turn left", "action": "fly_yaw_left"},
     {"context": "fly", "label": "turn right", "action": "fly_yaw_right"},
     {"context": "fly", "label": "look behind", "action": "look_behind"},
+    {"context": "fly", "label": "lift clear (when stuck)", "action": "reset_vehicle", "hold": true},
     {"context": "fly", "label": "get out (landed, or hovering low)", "action": "interact"},
     {"context": "fly", "label": "camera: chase, top-down, high", "action": "camera_cycle"},
     {"context": "fly", "label": "radio: next station", "action": "radio_cycle"},

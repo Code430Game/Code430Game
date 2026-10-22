@@ -409,3 +409,65 @@ func test_a_guest_flying_the_helicopter_keeps_the_pad_empty_until_they_are_gone(
 	assert_int(pm.guest_pilot_peer).is_equal(0)
 	await _frames(3)
 	assert_object(pm.parked_helicopter).is_not_null()
+
+
+# --- unsticking (#140) ------------------------------------------------------------------
+
+## A tower 30 m tall, 20 m across, centred on the origin.
+func _tower(holder: Node3D) -> void:
+	var tower := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(20, 30, 20)
+	shape.shape = box
+	tower.add_child(shape)
+	holder.add_child(tower)
+	tower.position = Vector3(0, 15, 0)
+
+
+func test_it_slides_along_a_wall_instead_of_pressing_into_it() -> void:
+	var walls: Array[Vector3] = [Vector3(0, 0, 1)]
+	var v := FlyableHelicopter.slide_along(Vector3(3, 1, -10), walls)
+	assert_vector(v).is_equal_approx(Vector3(3, 1, 0), Vector3.ONE * 0.001)
+	# Moving away from it is left alone.
+	assert_vector(FlyableHelicopter.slide_along(Vector3(0, 0, 5), walls)).is_equal(Vector3(0, 0, 5))
+
+
+func test_lifting_clear_puts_it_above_the_tower_it_is_stuck_in() -> void:
+	var world := _world()
+	_tower(world)
+	var h := _heli(world, Vector3(2, 21, 0), Players.LOCAL_PEER_ID)
+	await _frames(2)
+	var x := h.global_position.x
+	var at := h.lift_clear()
+	assert_float(at.y).is_equal_approx(30.0 + h.tun("lift_clear_m"), 0.1)
+	assert_float(at.x).is_equal_approx(x, 0.01)
+	assert_bool(h.is_parked()).is_false()
+	await _frames(30)
+	# It hovers there: nothing below pulls it down while the pilot holds nothing.
+	assert_float(h.global_position.y).is_equal_approx(at.y, 0.5)
+
+
+func test_lifting_clear_in_the_open_never_takes_it_lower() -> void:
+	var world := _world()
+	var h := _heli(world, Vector3(50, 60, 0), Players.LOCAL_PEER_ID)
+	await _frames(2)
+	assert_float(h.lift_clear().y).is_equal_approx(60.0, 0.01)
+	h.global_position = Vector3(50, 2, 0)
+	assert_float(h.lift_clear().y).is_equal_approx(h.tun("lift_clear_m"), 0.1)
+
+
+func test_holding_reset_while_flying_lifts_it_clear() -> void:
+	var world := _world()
+	_tower(world)
+	var h := _heli(world, Vector3(2, 21, 0), Players.LOCAL_PEER_ID)
+	await _frames(2)
+	Input.action_press("reset_vehicle")
+	var frames := int(ceil(Controls.hold_s() * Engine.physics_ticks_per_second)) + 10
+	var saw_ring := false
+	for i in range(frames):
+		await get_tree().physics_frame
+		saw_ring = saw_ring or h.reset_progress() > 0.0
+	Input.action_release("reset_vehicle")
+	assert_bool(saw_ring).is_true()
+	assert_float(h.global_position.y).is_greater(30.0)

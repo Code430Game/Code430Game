@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Flyable Helicopter
-The police helicopter SHALL park on its helipad when idle, and the player SHALL be able to take it there and fly it with arcade controls that hold position when released. The player SHALL be able to get out only when landed or hovering low. Stealing it SHALL be a crime, and crashes SHALL follow the tone's outcome data.
+The police helicopter SHALL park on its helipad when idle, and the player SHALL be able to take it there and fly it with arcade controls that hold position when released. The player SHALL be able to get out only when landed or hovering low. Stealing it SHALL be a crime, and crashes SHALL follow the tone's outcome data. Holding reset SHALL unstick the helicopter by lifting it clear, and SHALL put a player on foot on the nearest street.
 
 #### Scenario: Stealing it from the pad
 - **WHEN** the player walks up to the parked police helicopter and presses get in
@@ -14,6 +14,14 @@ The police helicopter SHALL park on its helipad when idle, and the player SHALL 
 #### Scenario: Getting out in the air
 - **WHEN** the player presses get out 30 m above the ground
 - **THEN** nothing happens except a "Land first" hint
+
+#### Scenario: Stuck in a building
+- **WHEN** the helicopter is wedged in a tower's wall and the pilot holds reset
+- **THEN** it rises clear above the tower and hovers there with the pilot in control
+
+#### Scenario: Stuck on foot
+- **WHEN** the player on foot is stuck in a building's wall and holds reset
+- **THEN** the player is put on the nearest street, or at the start if no street is near
 
 #### Scenario: Hitting a building in clean
 - **WHEN** the player flies into a building in the clean tone
