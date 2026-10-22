@@ -289,7 +289,8 @@ func load_districts(dirs: PackedStringArray) -> bool:
 		for g in parts[k].garages:
 			if g.lot != null:
 				garage_lots[g.lot] = true
-			if _owner_xz(Vector2(g.start.x, g.start.z), rects) == k:
+			var at := _centre(g.outer) if not g.outer.is_empty() else (Vector2(g.ramps[0].start.x, g.ramps[0].start.z) if not g.ramps.is_empty() else Vector2.ZERO)
+			if _owner_xz(at, rects) == k:
 				garages.append(g)
 	parking_lots = []
 	for k in range(parts.size()):
