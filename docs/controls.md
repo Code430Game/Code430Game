@@ -10,8 +10,9 @@ On foot, a tap of LB (Tab) steps to the next weapon; holding it opens the weapon
 with the right stick (or the mouse) and let go to take it, or press B (Esc) to keep what you
 have. The game keeps running while the wheel is open. Keys 1 to 9 pick a weapon directly.
 
-R3 does two things while driving: a tap looks behind, and holding it for a second resets a
-stuck car (a ring on the HUD fills while you hold). The debug buttons work while View / Back
+R3 does two things: a tap looks behind, and holding it for a second gets you unstuck (a ring
+on the HUD fills while you hold). A car goes back on the nearest road, on foot you go to the
+nearest street, and the helicopter lifts clear above whatever it is over and hovers. The debug buttons work while View / Back
 is held; their keys work alone.
 
 The tables below are generated from the input map; edit `game/core/input/controls.json` or
@@ -33,7 +34,7 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | next weapon (tap), weapon wheel (hold, point, let go) | LB | Tab |
 | pick a weapon by number | - | 1 to 9 |
 | reload | B | R |
-| back to the start (when stuck) | hold R3 | hold R |
+| to the nearest street (when stuck) | hold R3 | hold R |
 | map | View | M |
 | pause menu | Menu | Esc |
 
@@ -66,6 +67,7 @@ the bindings in `game/project.godot` and run `uv run python controls_doc.py` in 
 | turn left | LB | Left |
 | turn right | RB | Right |
 | look behind | R3 | C |
+| lift clear (when stuck) | hold R3 | hold R |
 | get out (landed, or hovering low) | Y | E |
 | camera: chase, top-down, high | D-pad down | V |
 | radio: next station | D-pad left | Q |

@@ -14,6 +14,8 @@ const PLAYER_SCENE := preload("res://actors/player/player.tscn")
 const ON_FOOT_OFFSET_M := 2.2
 const GO_TO_STEP_M := 4.0  # "Go to": how far from the place, toward its street, the player stands
 const FALL_BELOW_GROUND_M := 25.0  # on foot this far under the terrain: fell out of the world
+const FOOT_RESET_REACH_M := 150.0  # on-foot reset: the nearest street within this, else the start
+const FOOT_RESET_DY_M := 12.0  # prefer a street about level with the player (not a bridge overhead)
 const BENCH_WARMUP_S := 3.0
 const HORN_STARTLE_M := 25.0  # pedestrians this close turn to look when the horn sounds
 
@@ -624,9 +626,9 @@ func _catch_fallen_player() -> void:
 	_place_player(at)
 
 
-## On foot, holding reset (R3 / R, like a stuck car) for the hold time takes the player back to
-## the start, so a player stuck somewhere needn't restart the game. Returns the hold's progress
-## (0..1) for the HUD ring.
+## On foot, holding reset (R3 / R, like a stuck car) for the hold time puts the player on the
+## nearest street (the start if none is near), so a player stuck somewhere, even in a building's
+## wall, needn't restart the game. Returns the hold's progress (0..1) for the HUD ring.
 func _step_foot_reset(held: bool, delta: float) -> float:
 	if not held:
 		_foot_reset_s = 0.0
@@ -637,10 +639,20 @@ func _step_foot_reset(held: bool, delta: float) -> float:
 	if _foot_reset_s < Controls.hold_s():
 		return _foot_reset_s / Controls.hold_s()
 	_foot_reset_s = -1.0
-	# The on-foot start, beside the start car: its own spot put the player inside the car if it
-	# was still there, and the push out of it could go down through the road (#81).
-	_place_player(_on_foot_start(_pack.spawn_transform()) - Vector3.UP * 1.0)
+	_place_player(foot_reset_point(_pack.graph, _player.global_position, _on_foot_start(_pack.spawn_transform()) - Vector3.UP * 1.0))
 	return 0.0
+
+
+## Where an on-foot reset from `at` goes: the nearest point on a street within FOOT_RESET_REACH_M,
+## else `start` (the on-foot start beside the start car: the car's own spot put the player inside
+## it if it was still there, and the push out could go down through the road, #81).
+static func foot_reset_point(graph: RoadGraph, at: Vector3, start: Vector3) -> Vector3:
+	if graph == null:
+		return start
+	var hit := graph.nearest_edge(at, FOOT_RESET_REACH_M, FOOT_RESET_DY_M)
+	if hit.is_empty():
+		hit = graph.nearest_edge(at, FOOT_RESET_REACH_M)
+	return hit["point"] if not hit.is_empty() else start
 
 
 ## Shows `text` on the banner for `banner_s`; a newer banner restarts the time.
