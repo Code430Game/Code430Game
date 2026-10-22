@@ -69,8 +69,9 @@ reference.
 `user://packs.cfg` lists the enabled pack ids; first-party packs are enabled by default and a
 newly found pack is enabled and announced once. Map packs are not toggled there: the active
 map is chosen by `--pack=<id>`, the `[map] pack` setting, or the Ottawa default, and the
-other map packs stay available. The Packs tab in the pause menu toggles the rest; changes
-apply at the next load. For co-op the host's enabled set is the session's: `hello` and
+other map packs stay available. On the Packs tab in the pause menu, A twice on another map
+pack saves it as the `[map] pack` setting and restarts the game on it (not during co-op); A
+toggles the rest, and those changes apply at the next load. For co-op the host's enabled set is the session's: `hello` and
 `welcome` carry every enabled pack's id, version and content hash, and a join is refused
 naming the first pack that differs or is missing on either side.
 

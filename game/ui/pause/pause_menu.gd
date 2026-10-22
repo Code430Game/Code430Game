@@ -47,6 +47,10 @@ const TEST_DAY_MINUTES: PackedFloat32Array = [6.0, 12.0, 24.0, 48.0, 96.0]
 @onready var _hint: HBoxContainer = $Panel/VBox/Footer/Hint
 @onready var _pages_root: Control = $Panel/VBox/Pages
 
+## The map pack waiting for a second press before the game restarts on it ("" for none).
+var _map_confirm: String = ""
+## What the second press calls: a restart on the saved map (tests swap it).
+var restart_game: Callable = PauseMenu.restart_with_saved_map
 var overview_map: OverviewMap
 ## The radio whose music volume the Options tab sets (the scene hands it over).
 var radio: Radio
@@ -658,8 +662,9 @@ func _build_packs_page() -> Control:
 
 
 ## One row per discovered pack: `[x] Name  type  version`, with the loader's state on the
-## right. Accept toggles a data-only non-map pack; map packs name the active one; system packs
-## and refused packs say why they cannot be enabled. Changes apply at the next load.
+## right. Accept toggles a data-only non-map pack; on another map pack it asks once, then saves
+## that map and restarts the game there; system packs and refused packs say why they cannot be
+## enabled. Other changes apply at the next load.
 func _rebuild_packs() -> void:
 	if _packs_list == null:
 		return
@@ -688,7 +693,7 @@ func _rebuild_packs() -> void:
 			enabled_maps += 1
 	_packs_note.text = "Changes apply at the next load. The map in play is %s%s" % [
 		PackLoader.active_map if PackLoader.active_map != "" else "(none)",
-		"; start with --pack=<id> or the map setting to change it." if maps > 1 else ".",
+		"; A on another map plays it (the game restarts)." if maps > 1 else ".",
 	]
 
 
@@ -718,12 +723,15 @@ func _toggle_pack(id: String) -> void:
 	if not PackLoader.packs.has(id):
 		return
 	var info: PackLoader.PackInfo = PackLoader.packs[id]
+	if not info.is_map():
+		_map_confirm = ""
 	if info.type == "system":
 		_packs_note.text = "%s runs code; system packs are not supported yet." % info.name
 	elif not info.valid:
 		_packs_note.text = "%s cannot be enabled: %s" % [info.name, info.reason]
 	elif info.is_map():
-		_packs_note.text = "%s is a map pack: start with --pack=%s or set it in the map setting." % [info.name, info.id]
+		_choose_map(info)
+		return
 	elif Session.is_online():
 		_packs_note.text = "Packs cannot change during a co-op session."
 	else:
@@ -732,6 +740,41 @@ func _toggle_pack(id: String) -> void:
 		_packs_note.text = "%s %s; applies at the next load." % [info.name, "enabled" if on else "disabled"]
 	_rebuild_packs()
 	_highlight()
+
+
+## A map pack row: the map in play says so; another asks for a second press, then is saved as
+## the map (`[map] pack` in settings.cfg) and the game restarts on it. Not during co-op.
+func _choose_map(info: PackLoader.PackInfo) -> void:
+	if info.id == PackLoader.active_map:
+		_map_confirm = ""
+		_packs_note.text = "%s is the map in play." % info.name
+	elif Session.is_online():
+		_map_confirm = ""
+		_packs_note.text = "The map cannot change during a co-op session."
+	elif _map_confirm != info.id:
+		_map_confirm = info.id
+		_packs_note.text = "Press A again to play %s: the game restarts there." % info.name
+	else:
+		_map_confirm = ""
+		Settings.map_pack = info.id
+		Settings.save_settings()
+		_packs_note.text = "Restarting on %s..." % info.name
+		restart_game.call()
+	_highlight()
+
+
+## Restarts the game with the same command line, less any --pack= (the saved map wins).
+static func restart_with_saved_map() -> void:
+	var args := OS.get_cmdline_args()
+	var user := PackedStringArray()
+	for a in OS.get_cmdline_user_args():
+		if not a.begins_with("--pack="):
+			user.append(a)
+	if not user.is_empty():
+		args.append("--")
+		args.append_array(user)
+	OS.set_restart_on_exit(true, args)
+	Engine.get_main_loop().quit()
 
 
 func _process(delta: float) -> void:
@@ -754,6 +797,7 @@ func toggle() -> void:
 
 
 func open() -> void:
+	_map_confirm = ""
 	if overview_map != null and overview_map.visible:
 		overview_map.close()
 	capture()
