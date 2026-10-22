@@ -18,6 +18,9 @@
 - [x] 3.2 Pause menu "Packs" list with controller toggles, warnings for system packs and two map packs; Mac screenshots of the list and of the creator with pack presets
   - 2026-10-08: a sixth tab, Packs: one row per discovered pack (`[x]`/`[ ]`/`[!]`, name, type, version, the loader's state on the right in a key cap, warning tint for system and refused packs); A toggles data-only non-map packs and saves; map rows explain `--pack=` and the setting; toggles are refused during a co-op session; footer says changes apply at the next load. `test_pause_menu.gd` drives it with D-pad and A. Screenshots: see the PR body.
 
+- [x] 3.3 Map switching on the Packs tab: A on another map pack asks once, then saves it as `[map] pack` and restarts the game on it (the command line kept, less `--pack=`); refused in co-op; the map in play says so; tests
+  - 2026-10-22: the human, for coworkers building their own area (on Windows no flags can be passed). `PauseMenu._choose_map`, `restart_with_saved_map` (`OS.set_restart_on_exit`), `restart_game` swappable for tests; `test_pause_menu.gd` saves the proving ground and checks the restart call. README and `docs/pack-format/README.md` updated, with the user packs folder corrected (`app_userdata/Code 430/packs`).
+
 ## 4. Verification
 - [x] 4.1 CI green (`scripts/ci-local.sh`): pack validator over `packs/`, gdUnit, pytest
   - 2026-10-08: All checks passed: 400 pytest, 4 packs valid, 54 specs, 600 gdUnit cases, 0 failures, 0 orphans. Mac deck-preset 40 s autodrive on Ottawa, main 7aa89e3 against the branch: first playable 422 vs 348 ms, frame avg 8.37 vs 8.36 ms, render cpu 0.46 vs 0.46 ms, physics mean 6.20 vs 6.07 ms, draw calls 465 both.

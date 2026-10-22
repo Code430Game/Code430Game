@@ -51,6 +51,7 @@ func _restore_settings() -> void:
 	Settings.settings_path = _settings_path_before
 	Settings.binding_overrides = {}
 	Settings.tester_options = false
+	Settings.map_pack = ""
 	InputMap.load_from_project_settings()
 
 
@@ -263,11 +264,28 @@ func test_packs_tab_toggles_a_character_pack_with_the_controller() -> void:
 	assert_bool(enabled.has("code430.characters")).is_false()
 	await _press(JOY_BUTTON_A)
 	assert_bool(PackLoader.is_enabled("code430.characters")).is_true()
-	# A map pack row does not toggle; it says how the map is chosen. (Every toggle rebuilds the rows.)
+	# The map in play says so and doesn't toggle. (Every toggle rebuilds the rows.)
 	rows = menu.rows(PauseMenu.PACKS_TAB)
 	(rows[ottawa] as Button).pressed.emit()
 	assert_bool(PackLoader.is_enabled("code430.ottawa-centretown")).is_true()
-	assert_str(menu._packs_note.text).contains("--pack=")
+	assert_str(menu._packs_note.text).contains("map in play")
+	# Another map asks once, then saves it and restarts there.
+	var restarts := []
+	menu.restart_game = func() -> void: restarts.append(Settings.map_pack)
+	var proving := -1
+	rows = menu.rows(PauseMenu.PACKS_TAB)
+	for i in range(rows.size()):
+		if str((rows[i] as Button).get_meta("pack_id")) == "code430.proving-ground":
+			proving = i
+	assert_int(proving).is_greater_equal(0)
+	(rows[proving] as Button).pressed.emit()
+	assert_array(restarts).is_empty()
+	assert_str(menu._packs_note.text).contains("Press A again")
+	(menu.rows(PauseMenu.PACKS_TAB)[proving] as Button).pressed.emit()
+	assert_array(restarts).is_equal(["code430.proving-ground"])
+	var saved := ConfigFile.new()
+	assert_int(saved.load(Settings.settings_path)).is_equal(OK)
+	assert_str(str(saved.get_value(Settings.SECTION_MAP, Settings.KEY_PACK, ""))).is_equal("code430.proving-ground")
 	menu.close()
 	await get_tree().process_frame  # the rebuilt rows' old buttons free at the frame's end
 	await get_tree().process_frame

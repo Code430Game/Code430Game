@@ -687,7 +687,7 @@ func state_text(info: PackInfo) -> String:
 	if not info.valid:
 		return info.reason
 	if info.is_map():
-		return "active map" if info.id == active_map else "available: start with --pack or the map setting"
+		return "active map" if info.id == active_map else "map: A to play it"
 	if not info.enabled:
 		return "disabled"
 	if info.reason != "":
