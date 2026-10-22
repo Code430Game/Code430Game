@@ -490,7 +490,7 @@ func _rebuild_settings() -> void:
 	if Settings.tester_for_run and not Settings.tester_options:
 		tester_text = "On for this run (--tester)"
 	_set_text(_rows[SETTINGS_TAB][1], "Tester options: <  %s  >" % tester_text)
-	(page.get_node("Note") as Label).text = "Auto picks Deck on a Steam Deck (%s here) and High elsewhere. Saved for next time." % ("detected" if Settings.is_steam_deck else "not detected")
+	(page.get_node("Note") as Label).text = "Auto picks Deck on a Steam Deck (%s here) and High elsewhere. Tester options adds a Testing tab (weather, time) and Go to (Y) on the map's places. Saved for next time." % ("detected" if Settings.is_steam_deck else "not detected")
 
 
 func _step_preset(delta: int) -> void:

@@ -9,5 +9,7 @@
 - [x] 2.2 `docs/controls.md`; Mac screenshots: the Testing tab, a rain pick, the legend with "Go to"
   - 2026-10-21: `docs/controls.md` (Tester options, the Testing tab, Go to, `--tester`, `--go-to`). Mac screenshots: the Testing tab, Go to the helipad, Go to the turf.
 ## 3. Check
-- [ ] 3.1 Deck: package, deploy, benchmark against main (unchanged)
+- [x] 3.1 Deck: package, deploy, benchmark against main (unchanged)
+  - 2026-10-21 Deck benchmark (scripts/deck-bench.sh, median of 2, `--benchmark=40 --autodrive --preset=deck`): 6d84c1f 6d84c1f: render cpu 1.61 / gpu 11.60 ms measured, physics mean 12.75 ms (max 26.61), frame avg 13.05 / p99 24.30 ms (paced), first playable 864 ms; main 64ee06b: render cpu 1.67 / gpu 11.93 ms measured, physics mean 15.09 ms (max 89.04), frame avg 13.50 / p99 26.55 ms (paced), first playable 870 ms.
+  - 2026-10-21: within noise. Main's second run had one physics spike (max 152.75 ms); a rerun of the same build gave max 26.48 and 27.70 ms, render cpu 2.15 and 1.63 ms, gpu 12.65 and 11.59 ms, against 6d84c1f's 1.61 / 11.60 ms medians. Nothing in the change runs per frame unless a value is changed.
 - [ ] 3.2 **Stop: the human turns on Tester options, picks rain then snow, sets 22:00, and goes to the helipad and the turf on the Deck**
