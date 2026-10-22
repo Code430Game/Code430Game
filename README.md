@@ -1,8 +1,8 @@
 # Code 430
 
 A free, open-source open-world city game in the spirit of GTA III–IV, built on real streets
-from OpenStreetMap. The first city is central Ottawa. It's made with Godot, largely by AI
-agents working with a human maintainer, and it's early: expect rough edges.
+from OpenStreetMap. The first city is central Ottawa. It's made with Godot by people working
+with AI agents, and it's early: expect rough edges.
 
 ![Dusk on the Queensway in Centretown](docs/images/centretown-dusk.jpg)
 
@@ -37,8 +37,9 @@ Not yet: missions, an economy, more cities. [`docs/open-work.md`](docs/open-work
 what's next, and `openspec/changes/` holds each planned change.
 
 ## Help out
-- **Code:** read [`CONTRIBUTING.md`](CONTRIBUTING.md) (agents welcome; `AGENTS.md` has the
-  rules) and pick something from [`docs/open-work.md`](docs/open-work.md). Pull requests from
+- **Code:** read [`CONTRIBUTING.md`](CONTRIBUTING.md) and pick something from
+  [`docs/open-work.md`](docs/open-work.md). Bring your agent: `AGENTS.md` has the rules you
+  both work to. Pull requests from
   forks run CI once a maintainer approves them.
 - **Cities, stories and ads:** packs live in their own repositories under
   [Code430Packs](https://github.com/Code430Packs); start from
