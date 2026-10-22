@@ -27,9 +27,16 @@ jobs:
   validate:
     name: OpenSpec (validate --strict --all)
     timeout-minutes: 5
-    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
+    # The maintainer's Mac, except a fork's pull request: GitHub's runners (see ci.yml).
+    runs-on: ${{ fromJSON((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && '"ubuntu-latest"' || '["self-hosted","code430-mac"]') }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - run: openspec validate --strict --all --no-interactive  # the Mac's installed OpenSpec
+      - if: runner.environment == 'github-hosted'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: runner.environment == 'github-hosted'
+        run: npm install -g "@fission-ai/openspec@$(cat .openspec-version)"
+      - run: openspec validate --strict --all --no-interactive  # on the Mac, its installed OpenSpec

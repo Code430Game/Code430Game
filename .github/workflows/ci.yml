@@ -1,10 +1,12 @@
 name: CI
 
-# Runs on the maintainer's Mac (a self-hosted runner labelled `code430-mac`, set up 2026-10-09),
-# not on GitHub's runners: the private repo's 2,000 free minutes ran out. Jobs wait in the queue
-# while that Mac is off. The one job runs scripts/ci-local.sh, the same check as by hand.
-# Before the repo goes public, PRs from forks must not run here (they would run a stranger's
-# code on that Mac): move pull_request jobs back to GitHub's runners then.
+# Runs on the maintainer's Mac (a self-hosted runner labelled `code430-mac`, set up 2026-10-09)
+# for pushes and for pull requests from branches of this repository: the private repo's 2,000
+# free minutes ran out, and the Mac costs none. Jobs wait in the queue while that Mac is off.
+# A pull request from a fork runs on GitHub's runners instead (free once the repo is public):
+# it must never run a stranger's code on the Mac. The `hosted` input of a manual run does the
+# same, to check that path. Either way the one job runs scripts/ci-local.sh, the same check as
+# by hand.
 # It still skips what a change can't affect:
 # - docs, OpenSpec and Markdown-only changes don't build or test the game (OpenSpec has its own
 #   quick check in openspec.yml);
@@ -25,6 +27,14 @@ on:
       - "**/*.md"
       - "LICENSE*"
   workflow_dispatch:
+    inputs:
+      hosted:
+        description: "Run on GitHub's runners, as a fork's pull request would"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.sha }}
@@ -37,13 +47,35 @@ jobs:
   local-ci:
     name: Local CI (pytest, ruff, packs, OpenSpec, gdUnit4)
     timeout-minutes: 30  # a hang must not tie up the Mac
-    runs-on: [self-hosted, code430-mac]
+    # A fork's pull request (or a manual run asking for it): GitHub's runners, never the Mac.
+    runs-on: ${{ fromJSON(((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || inputs.hosted) && '"ubuntu-latest"' || '["self-hosted","code430-mac"]') }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      # GitHub's runners start empty: uv, the pinned Godot and OpenSpec (the Mac has them).
+      - if: runner.environment == 'github-hosted'
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - if: runner.environment == 'github-hosted'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Godot and OpenSpec (GitHub's runners)
+        if: runner.environment == 'github-hosted'
+        run: |
+          set -euo pipefail
+          V="$(cat .godot-version)"
+          mkdir -p ~/godot
+          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${V}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+          echo "GODOT_BIN=$HOME/godot/godot" >> "$GITHUB_ENV"
+          npm install -g "@fission-ai/openspec@$(cat .openspec-version)"
       - name: scripts/ci-local.sh
-        run: scripts/ci-local.sh  # GODOT_BIN comes from the runner's .env
+        run: scripts/ci-local.sh  # on the Mac, GODOT_BIN comes from the runner's .env
 
   export-linux:
     name: Linux export
