@@ -24,3 +24,4 @@
 - [ ] 4.1 Mac screenshots: each stage, a wreck in each tone, a broken pane, a crash mark; `docs/` updated
 - [ ] 4.2 Deck: package, deploy, benchmark a pile-up (five wrecks, two burning) against main
 - [ ] 4.3 **Stop: the human crashes and shoots cars and windows on the Deck and says how it looks**
+  - 2026-10-22 Deck (1.1-1.3 only): "Damage is fun." "The dents looked visible. I think it's a good first pass for sure." Some curbs still stop the car, and hitting them damages it too (human: "Which is good for the second half meaning environmental damage works"). Windows, traffic and the garage still to check.
