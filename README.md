@@ -1,23 +1,59 @@
 # Code 430
 
-A free, open-source, AI-built open-world crime game framework in the spirit of GTA III–IV, set on real city road networks from OpenStreetMap. Codename Code 430. Read `VISION.md` for the why and `AGENTS.md` for the rules. Want to help? See `CONTRIBUTING.md` and the list of ready work in `docs/open-work.md`.
+A free, open-source open-world city game in the spirit of GTA III–IV, built on real streets
+from OpenStreetMap. The first city is central Ottawa. It's made with Godot by people working
+with AI agents, and it's early: expect rough edges.
 
-Status (2026-10-06): a playable sandbox in one district, central Ottawa, built from OpenStreetMap and NRCan elevation. It has:
-- roads, bridges, buildings, water, parking and garages;
-- traffic and pedestrians, with a day-night cycle;
-- an on-foot player with a character creator, and cars to drive or take, each with a radio;
-- weapons and fists in three tone modes, with a weapon wheel;
-- police with a wanted level and a helicopter, and ambulances;
-- an in-game issue reporter;
-- LAN co-op (in progress).
+![Dusk on the Queensway in Centretown](docs/images/centretown-dusk.jpg)
 
-Not yet built: missions, a pack browser, and an economy. `docs/open-work.md` lists what is next.
+## Play it
+1. **Download** the zip for your system from [Releases](https://github.com/Code430Game/Code430Game/releases):
+   - **Windows:** unzip anywhere and run `code430.exe`, keeping the `packs` folder beside it.
+     The build isn't code-signed, so SmartScreen warns the first time: More info > Run anyway.
+   - **Steam Deck / Linux:** see [Put a build on a Steam Deck](#put-a-build-on-a-steam-deck).
+2. **Controls:** an Xbox-style controller or keyboard and mouse. The pause menu's Controls tab
+   lists them and rebinds them; the same list is in [`docs/controls.md`](docs/controls.md).
+   On a strong PC, set the graphics preset to High in the pause menu's Settings tab.
+3. **Found a problem?** Hold Menu (Start) for a second, or press F8, or pick "Report a problem"
+   in the pause menu. It saves a screenshot and where you were, and files a GitHub issue; you
+   need no account. Reports are **public**: IP and email addresses are removed and the
+   reporter id is shown only as a one-way hash, but leave personal details out of what you type.
 
-## Requirements
+## What's in it
+A playable sandbox in central Ottawa (Centretown), plus Double Cross, a small generated test
+district:
+- roads, bridges, buildings with houses and yards, water, parking lots and garages, trees;
+- traffic, pedestrians and buses, a day-night cycle and weather (rain, snow, fog);
+- an on-foot player with a character creator; cars to drive or take (each with a radio), and
+  the police helicopter to fly;
+- weapons and fists, with a weapon wheel, in three tone modes (clean, gritty, dystopia);
+- car damage: dents, smoke, and wrecks that stall, burn or explode by tone;
+- police with a wanted level, patrol cars and a helicopter; ambulances; a rival gang's turf;
+- a full map with a legend of places and addresses;
+- map, story and character packs (the Packs tab), and LAN co-op (in progress);
+- the in-game issue reporter.
+
+Not yet: missions, an economy, more cities. [`docs/open-work.md`](docs/open-work.md) lists
+what's next, and `openspec/changes/` holds each planned change.
+
+## Help out
+- **Code:** read [`CONTRIBUTING.md`](CONTRIBUTING.md) and pick something from
+  [`docs/open-work.md`](docs/open-work.md). Bring your agent: `AGENTS.md` has the rules you
+  both work to. Pull requests from forks run CI once a maintainer approves them.
+- **Cities, stories and ads:** packs live in their own repositories under
+  [Code430Packs](https://github.com/Code430Packs); start from
+  [PackTemplate](https://github.com/Code430Packs/PackTemplate).
+- **Play and report:** reports from the game are the most useful thing a player can send.
+
+[`VISION.md`](VISION.md) has the why.
+
+## Develop
+### Requirements
 - Godot `4.7.2-stable` (see `.godot-version`). macOS: `brew install --cask godot`. Others: https://godotengine.org/download.
 - Python 3.11+ and [uv](https://docs.astral.sh/uv/) for the tools.
+- Optional: Node 22 and the OpenSpec CLI (`npm install -g @fission-ai/openspec@$(cat .openspec-version)`) for `openspec validate`.
 
-## Get the packs
+### Get the packs
 The Ottawa map lives in its own repository,
 [Code430Packs/Location-OttawaOnCa](https://github.com/Code430Packs/Location-OttawaOnCa). The
 game pins the release it uses in `packs.lock.json`; fetch it once after cloning, and again
@@ -26,7 +62,7 @@ when the lock changes (CI and packaging do this themselves):
 scripts/fetch-packs.sh
 ```
 
-## Open the project
+### Open the project
 ```
 godot --path game --editor
 ```
@@ -42,7 +78,7 @@ godot --path game -- --benchmark=60 --autodrive --preset=deck --screenshot=/tmp/
 ```
 More testbed flags: `--traffic=N` caps traffic cars (0 disables), `--spawn=x,z` starts on the nearest road to a local coordinate (`--spawn=x,y,z` puts the player on foot exactly there, such as a garage floor), `--topdown=<height>` looks straight down, `--graph` shows the road graph overlay, `--telemetry` prints the car state every second, `--junction-report` prints junctions whose surface bulges into the grass, leaves part of a road uncovered, falls back to a hull or has terrain above it, with x, z (headless: `godot --headless --path game -s res://world/build/junction_report.gd`).
 
-## Build a map pack
+### Build a map pack
 Map packs are built in their own repositories (start one from
 [Code430Packs/PackTemplate](https://github.com/Code430Packs/PackTemplate)). From this
 checkout, rebuild a district of one of them with its region file:
@@ -61,7 +97,7 @@ To play a new release here, tag it in the pack's repository, then update its ent
 
 Debug overlay: press F3, or hold Back (View) and press X on a gamepad. It shows fps, frame time, draw calls, and the active preset.
 
-## Run the tests
+### Run the tests
 Godot (gdUnit4, vendored under `game/addons/gdUnit4`):
 ```
 cd game
@@ -78,16 +114,18 @@ uv run pytest
 uv run python -m pack_tools ../packs      # validate pack manifests
 ```
 
-## Export a Linux build
+### Build and package
 Install the export templates for the pinned version once (Editor > Manage Export Templates), then:
 ```
-mkdir -p build/linux
-godot --headless --path game --export-release "Linux" ../build/linux/code430.x86_64
+scripts/package.sh linux|windows [--with-chunks] [--zip]
 ```
-CI does the same on every push to `main` and uploads `build/linux` as an artifact named `code430-linux-<sha>`.
+It fetches the pinned packs, exports `build/<platform>/` with the packs beside the executable,
+and with `--zip` makes `build/code430-<platform>-<commit>.zip` to hand out. The CI workflow can
+also export the Linux build when run by hand (Actions > CI > Run workflow); it uploads
+`build/linux` as an artifact named `code430-linux-<sha>`.
 
-## Put a build on a Steam Deck
-With SSH enabled on the Deck and your key installed, `scripts/package-linux.sh && scripts/deploy-deck.sh` exports and syncs the build to `~/Games/code430` on the Deck in one go. A benchmark can then be run remotely while the Deck is in Game Mode:
+### Put a build on a Steam Deck
+With SSH enabled on the Deck and your key installed, `scripts/package.sh linux && scripts/deploy-deck.sh` exports and syncs the build to `~/Games/code430` on the Deck in one go. A benchmark can then be run remotely while the Deck is in Game Mode:
 ```
 ssh deck@steamdeck.local 'cd ~/Games/code430 && DISPLAY=:0 ./code430.x86_64 -- --benchmark=40 --autodrive --preset=deck'
 ```
@@ -95,7 +133,7 @@ Or let `scripts/deck-bench.sh` do all of it: package, deploy, run the benchmark 
 To get it into the Game Mode library without Desktop Mode, `uv run scripts/deck-add-shortcut.py` writes the non-Steam shortcut over SSH; restart the Deck afterwards and it shows up under the Non-Steam tab.
 
 Manual route:
-1. Run `scripts/package-linux.sh` (or download the `code430-linux-*` artifact from GitHub Actions). You get `build/linux/` with `code430.x86_64`, `code430.pck`, and a `packs/` folder. The game looks for packs next to the executable, in `~/.local/share/Code 430/packs`, or in the repo when run from the editor. Every pack found is listed on the pause menu's Packs tab, where data-only packs (characters, stories) can be enabled or disabled for the next load; `--packs=id,id` pins the enabled set for one run. The format is documented in `docs/pack-format/README.md`.
+1. Run `scripts/package.sh linux`, or unzip a Linux release. You get `build/linux/` with `code430.x86_64`, `code430.pck`, and a `packs/` folder. The game looks for packs next to the executable, in `~/.local/share/Code 430/packs`, or in the repo when run from the editor. Every pack found is listed on the pause menu's Packs tab, where data-only packs (characters, stories) can be enabled or disabled for the next load; `--packs=id,id` pins the enabled set for one run. The format is documented in `docs/pack-format/README.md`.
 2. On the Deck, switch to Desktop Mode (Power menu > Switch to Desktop).
 3. Copy both files to the Deck, for example with a USB stick, or from a Mac over the network:
    ```
@@ -106,16 +144,16 @@ Manual route:
 5. In Steam (Desktop Mode): Games > Add a Non-Steam Game to My Library > Browse to `code430.x86_64`. Optional: in its properties, set Launch Options to `--fullscreen`.
 6. Switch back to Game Mode and launch it from the Non-Steam tab. The `deck` graphics preset is selected automatically; F3 has no key on the Deck, so use Back + X for the overlay.
 
-### Windows
+#### Windows
 
 `scripts/package.sh windows --zip` exports `build/windows/` (`code430.exe`, `code430.pck`,
-`packs/`) and zips it to `build/code430-windows-<commit>.zip`. Unzip it anywhere and run
-`code430.exe`; the `packs` folder must stay beside it. The build isn't code-signed, so Windows
-SmartScreen warns the first time: More info > Run anyway. A controller works (Xbox layout); so do
-keyboard and mouse (see `docs/controls.md`). `scripts/package.sh linux` is the Deck build
-(`scripts/package-linux.sh` still works).
+`packs/`) and zips it to `build/code430-windows-<commit>.zip`; see [Play it](#play-it) for
+running it. `scripts/package-linux.sh` still works as `scripts/package.sh linux`.
 
-## Repo layout
+### Run the CI checks locally
+`scripts/ci-local.sh` runs the same steps as `.github/workflows/ci.yml` on this machine: ruff, pytest, pack validation, `openspec validate --strict --all` (skipped with a note if the OpenSpec CLI isn't installed; the version CI uses is in `.openspec-version`), gdUnit4 (orphan nodes fail the run), and optionally the Linux export (`--export`, needs the export templates installed).
+
+### Repo layout
 ```
 game/                 Godot project (res:// root)
   core/               audio, content modes, input, net (co-op), settings, streaming, debug, report
@@ -127,9 +165,10 @@ game/                 Godot project (res:// root)
   tests/              gdUnit4 tests
 tools/                Python tools (uv project): osm_import, pack_tools, report_relay,
                       region_picker, controls_doc.py; tests/ with the golden fixture
-packs/                first-party packs (the Ottawa map pack)
+packs/                first-party packs (proving ground, characters, example); the Ottawa map
+                      is fetched here by scripts/fetch-packs.sh (gitignored)
 regions/              region definitions for the importer
-scripts/              CI, Linux packaging, Steam Deck deploy and shortcut, build stamp
+scripts/              CI, packaging (Linux, Windows), Steam Deck deploy and shortcut, build stamp
 docs/                 controls, backlog, open work, graphics presets, licensing
   pack-format/        pack schemas and docs
   report-format/      issue report format
@@ -137,11 +176,14 @@ openspec/             specs and changes
 .github/workflows/    CI
 ```
 
-## Licensing
+## Licensing and credits
 Three-way split, see `docs/licensing-options.md` for the reasoning:
 - Code, schemas, and tools: MIT (`LICENSE`).
 - First-party assets: CC BY-SA 4.0 (`LICENSE-ASSETS`).
-- Map data derived from OpenStreetMap: ODbL 1.0, credited "© OpenStreetMap contributors". Elevation from Natural Resources Canada under the Open Government Licence – Canada.
+- Map data derived from OpenStreetMap: ODbL 1.0, credited "© OpenStreetMap contributors"
+  (map packs carry their own licence). Elevation from Natural Resources Canada under the Open
+  Government Licence – Canada.
 
-## Run the CI checks locally
-`scripts/ci-local.sh` runs the same steps as `.github/workflows/ci.yml` on this machine: ruff, pytest, pack validation, `openspec validate --strict --all` (skipped with a note if the OpenSpec CLI isn't installed; the version CI uses is in `.openspec-version`), gdUnit4 (orphan nodes fail the run), and optionally the Linux export (`--export`, needs the export templates installed).
+Made with [Godot Engine](https://godotengine.org) (MIT; the splash's Godot icon is CC BY 4.0,
+Andrea Calabró). Vehicle and character models by [Quaternius](https://quaternius.com), CC0.
+Third-party licences are listed in `LICENSE-ASSETS`.
