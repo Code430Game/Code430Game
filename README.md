@@ -39,8 +39,7 @@ what's next, and `openspec/changes/` holds each planned change.
 ## Help out
 - **Code:** read [`CONTRIBUTING.md`](CONTRIBUTING.md) and pick something from
   [`docs/open-work.md`](docs/open-work.md). Bring your agent: `AGENTS.md` has the rules you
-  both work to. Pull requests from
-  forks run CI once a maintainer approves them.
+  both work to. Pull requests from forks run CI once a maintainer approves them.
 - **Cities, stories and ads:** packs live in their own repositories under
   [Code430Packs](https://github.com/Code430Packs); start from
   [PackTemplate](https://github.com/Code430Packs/PackTemplate).
