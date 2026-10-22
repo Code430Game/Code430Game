@@ -3,8 +3,9 @@
 Order matters: cheap refusals first (switch, method, size, parsing, schema, image), then the
 rate limit is read (a sender over it never reaches GitHub, so replaying one valid body cannot
 spend the App's API quota), then the idempotency check, so a game resending a report that was
-already filed gets its issue back without being counted, then the count, then GitHub. Nothing
-from the report is logged or stored here.
+already filed gets its issue back without being counted, then the count, then GitHub. The issue
+is public, so what is posted goes through `privacy.public` first (the reporter id as a one-way
+hash, IP and email addresses scrubbed). Nothing from the report is logged or stored here.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 
-from report_relay import jpeg, multipart, render, validate
+from report_relay import jpeg, multipart, privacy, render, validate
 from report_relay.github import GitHub, GitHubError
 from report_relay.ratelimit import Limits, Store, check, count, sender_key
 
@@ -98,8 +99,9 @@ async def handle(req: Request, cfg: Config, github: GitHub, store: Store, now: f
             return Response(200, {"issue_url": existing, "report_id": report["id"]})
         await count(store, sender, now, cfg.limits)
         shot_url = await github.put_screenshot(report["id"], shot, now) if shot else None
+        posted = privacy.public(report, cfg.salt)
         url = await github.create_issue(
-            render.title(report), render.body(report, shot_url), render.labels(report), now
+            render.title(posted), render.body(posted, shot_url), render.labels(posted), now
         )
     except GitHubError as e:
         # The step and GitHub's status only; never the report's content.

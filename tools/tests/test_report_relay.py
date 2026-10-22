@@ -232,7 +232,7 @@ def test_body_has_screenshot_ids_diagnostics_and_marker():
         in text
     )
     assert "junction `c901050337`" in text and "edge `w435115744.0`" in text
-    assert "Reporter id `3fa9c2d1`" in text
+    assert "Reporter `3fa9c2d1`" in text
     assert "<details><summary>Diagnostics</summary>" in text
     assert render.marker(report["id"]) in text
     comment = text.split("<!-- code430-report ", 1)[1].rsplit(" -->", 1)[0]
@@ -559,3 +559,51 @@ def test_whole_numbers_read_back_as_floats_print_as_integers():
     text = render.body(report, None)
     assert "×8," in text and "14809 MB" in text and "1280×800" in text
     assert validate.errors(report) == []
+
+
+# --- what is posted publicly -----------------------------------------------------------
+
+
+def test_the_reporter_id_is_published_only_as_a_keyed_one_way_hash():
+    from report_relay import privacy
+
+    h = privacy.reporter_hash("3fa9c2d1", "pepper")
+    assert len(h) == privacy.REPORTER_HASH_LEN and "3fa9c2d1" not in h
+    assert privacy.reporter_hash("3fa9c2d1", "pepper") == h  # the same install, the same hash
+    assert privacy.reporter_hash("3fa9c2d2", "pepper") != h
+    assert privacy.reporter_hash("3fa9c2d1", "salt") != h  # needs the secret
+    # Without a secret it could be brute-forced: it is left out.
+    assert privacy.public({"reporter_id": "3fa9c2d1"}, "")["reporter_id"] == ""
+
+
+def test_ip_and_email_addresses_are_scrubbed_and_times_and_versions_kept():
+    from report_relay import privacy
+
+    text = "net: joining 192.168.86.30:7777 then fe80::1c2b:3d4e and mail me at a.b@example.com"
+    out = privacy.scrub(text)
+    assert "192.168" not in out and "fe80" not in out and "example.com" not in out
+    assert out.count("<ip>") == 2 and "<email>" in out
+    keep = (
+        "Godot 4.7.2.stable at 13:10, 14:39:32, build 0.2.0, 2026-10-22T14:39:32Z, edge c901050337"
+    )
+    assert privacy.scrub(keep) == keep
+
+
+def test_the_filed_issue_has_the_hash_and_no_addresses():
+    relay = Relay()
+    report = copy.deepcopy(EXAMPLE)
+    report["reporter_id"] = "a1b2c3d4"
+    report["description"] = "Joined my friend at 10.0.0.5, email me: me@example.org"
+    report["log_tail"] = ["net: joining 10.0.0.5:7777"]
+    assert relay.post(report).status == 201
+    body = relay.gh_fake.issues[0]["body"]
+    assert "a1b2c3d4" not in body
+    assert "10.0.0.5" not in body and "me@example.org" not in body
+    from report_relay import privacy
+
+    h = privacy.reporter_hash("a1b2c3d4", "pepper")
+    assert f"Reporter `{h}`" in body
+    # One tester's reports share a label, for filtering; a report without the id has none.
+    assert f"reporter:{h}" in relay.gh_fake.issues[0]["labels"]
+    relay.post(report_with_id(9))
+    assert not any(x.startswith("reporter:") for x in relay.gh_fake.issues[1]["labels"])

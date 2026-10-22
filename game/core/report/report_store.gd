@@ -14,7 +14,8 @@ const SCREENSHOT_QUALITY := 0.8
 const TITLE_MAX := 120
 const DESCRIPTION_MAX := 4000
 ## A random id made once per install (never derived from the hardware), included only when the
-## player chooses, so reports from one install can be told apart without naming anyone.
+## player chooses, so reports from one install can be told apart without naming anyone. The
+## relay posts it only as a keyed one-way hash, so the public issue can't be matched to this file.
 const REPORTER_ID_PATH := "user://reporter_id.txt"
 ## GitHub's new-issue page takes the body in the URL; keep the encoded URL under about 8 KB.
 const HANDOFF_URL_MAX := 7500
@@ -125,7 +126,7 @@ static func build(fields: Dictionary, diagnostics: Dictionary, log_tail: Array, 
 		"id": new_id(unix_time),
 		"created_at": "%04d-%02d-%02dT%02d:%02d:%02dZ" % [t.year, t.month, t.day, t.hour, t.minute, t.second],
 		"title": title.substr(0, TITLE_MAX),
-		"description": str(fields.get("description", "")).strip_edges().substr(0, DESCRIPTION_MAX),
+		"description": Diagnostics.Redactor.scrub(str(fields.get("description", "")).strip_edges().substr(0, DESCRIPTION_MAX)),
 		"area": area,
 		"severity": severity,
 		"reporter_id": str(fields.get("reporter_id", "")),

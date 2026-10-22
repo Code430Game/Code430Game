@@ -22,7 +22,7 @@ SCHEMA_JSON = r"""
     "tags": {"type": "array", "maxItems": 8, "items": {"type": "string", "pattern": "^[a-z][a-z_]{0,23}$"}, "description": "Optional quick tags the player picked (game/ui/report/report_tags.json), in list order; sent only when the player picked some, so a report without tags is unchanged. Each becomes a `tag:<id>` label."},
     "area": {"enum": ["roads", "traffic", "pedestrians", "vehicles", "world", "visuals", "performance", "controls", "audio", "crash", "other"]},
     "severity": {"enum": ["cosmetic", "annoying", "blocks_play", "crash"]},
-    "reporter_id": {"type": "string", "pattern": "^([0-9a-f]{8})?$", "description": "This install's random reporter id when the player chose to include it; empty otherwise. Never derived from the hardware."},
+    "reporter_id": {"type": "string", "pattern": "^([0-9a-f]{8})?$", "description": "This install's random reporter id when the player chose to include it; empty otherwise. Never derived from the hardware. The relay publishes it only as a keyed one-way hash (and a reporter:<hash> label)."},
     "has_screenshot": {"type": "boolean"},
     "log_tail": {"type": "array", "maxItems": 200, "items": {"type": "string", "maxLength": 500}},
     "diagnostics": {

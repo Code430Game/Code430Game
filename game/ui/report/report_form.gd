@@ -275,7 +275,7 @@ func _review_body() -> String:
 	var report := preview()
 	var lines := PackedStringArray([
 		"Everything below is sent with the report%s." % (", plus the screenshot" if report["has_screenshot"] else ""),
-		"Reports go to the project's GitHub issues: visible to its collaborators now, and to everyone once the project is public.",
+		"Reports are posted as public GitHub issues. IP and email addresses are removed, and the reporter id is shown only as a one-way hash; leave names and other personal details out of the description.",
 		"",
 	])
 	lines.append(JSON.stringify(report, "  ", false))
@@ -294,8 +294,8 @@ func _refresh() -> void:
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity",
 		"tags": "Tags (Left / Right, A to pick)",
-		"description": "What happened, optional (A to type, B when done)", "reporter": "Reporter id", "review": "Review what will be sent",
-		"send": "Send report", "queue": "Saved reports", "cancel": "Cancel",
+		"description": "What happened, optional, no personal details (A to type, B when done)", "reporter": "Reporter id (public only as a one-way hash)", "review": "Review what will be sent",
+		"send": "Send report (public on GitHub)", "queue": "Saved reports", "cancel": "Cancel",
 	}
 	for i in range(ROWS.size()):
 		var row: String = ROWS[i]
