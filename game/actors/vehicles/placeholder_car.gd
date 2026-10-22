@@ -58,6 +58,13 @@ var length_m: float = 4.6
 ## Emitted when the car hits something at `speed_mps` (closing speed estimate).
 signal impacted(speed_mps: float)
 var _last_velocity: Vector3 = Vector3.ZERO
+## Health, dents, smoke and a wreck's fire (add-vehicle-and-building-damage).
+var damage: VehicleDamage
+var _base_mesh: ArrayMesh  # the undented body; dents go on a copy
+var _height_m: float = 1.5
+var _width_m: float = 1.8
+const BODY_DULL := [0.0, 0.1, 0.18, 0.26, 0.32]  # how much each damage stage darkens the paint
+const SHELL_COLOR := Color(0.07, 0.06, 0.055)  # a burnt-out wreck
 
 
 func _ready() -> void:
@@ -65,6 +72,11 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+	damage = VehicleDamage.new()
+	damage.name = "Damage"
+	add_child(damage)
+	damage.stage_changed.connect(func(_s: int) -> void: _refresh_damage_looks())
+	damage.exploded.connect(func(_at: Vector3, _r: float) -> void: _refresh_damage_looks())
 	apply_entry(vehicle_id if vehicle_id != "" else VehicleCatalogue.default_player)
 
 
@@ -95,7 +107,7 @@ func set_braking(on: bool) -> void:
 		return
 	_braking = on
 	var mesh_node := $Mesh as MeshInstance3D
-	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 3:
+	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 3 and not (damage != null and damage.lights_out.has("rear")):
 		mesh_node.set_surface_override_material(3, VehicleMesh.brake_material() if on else null)
 
 
@@ -117,9 +129,10 @@ func grip_factor() -> float:
 
 ## Brightness of the headlights, 0 off to 1 full; follows the night factor.
 func set_headlights(amount: float) -> void:
+	var out := damage != null and damage.lights_out.has("front")
 	for l in _headlights:
 		l.light_energy = 6.0 * amount
-		l.visible = amount > 0.02
+		l.visible = amount > 0.02 and not out
 
 
 ## Paints the body (surface 0) with `color`; glass, trim and lights keep theirs.
@@ -127,7 +140,36 @@ func set_body_color(color: Color) -> void:
 	body_color = color
 	var mesh_node := $Mesh as MeshInstance3D
 	if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0:
-		mesh_node.set_surface_override_material(0, VehicleMesh.body_material(color))
+		mesh_node.set_surface_override_material(0, VehicleMesh.body_material(_damaged_color(color)))
+
+
+## The paint as damage shows it: dulled by stage, a burnt shell once the fire is through.
+func _damaged_color(color: Color) -> Color:
+	if damage == null:
+		return color
+	if damage.fire == VehicleDamage.Fire.SHELL:
+		return SHELL_COLOR
+	return color.darkened(BODY_DULL[damage.stage])
+
+
+## The body after a hit: the dented copy (or the plain mesh once mended), the paint, the lights.
+func _refresh_damage_looks() -> void:
+	var mesh_node := $Mesh as MeshInstance3D
+	if _base_mesh == null:
+		return
+	var want: Mesh = _base_mesh
+	if not damage.dents.is_empty():
+		want = VehicleMesh.dented(_base_mesh, damage.dents, VehicleDamage.tun("dent_radius_m"))
+	mesh_node.mesh = want
+	set_body_color(body_color)
+	var front_out := damage.lights_out.has("front")
+	if mesh_node.mesh.get_surface_count() > 3:
+		mesh_node.set_surface_override_material(2, VehicleMesh.broken_light_material() if front_out else null)
+		var rear_out := damage.lights_out.has("rear")
+		mesh_node.set_surface_override_material(3, VehicleMesh.broken_light_material() if rear_out else (VehicleMesh.brake_material() if _braking else null))
+	for l in _headlights:
+		if front_out:
+			l.visible = false
 
 
 ## Builds the car from a catalogue entry: body mesh, wheel layout and radius, collision box,
@@ -152,7 +194,13 @@ func apply_entry(id: String) -> void:
 	# 0.5 m) the grip let every class roll over at full lock and 60. Entries may set their own.
 	center_of_mass = Vector3(0.0, float(d.get("com_height_m", height * COM_HEIGHT_FRACTION)), 0.0)
 	var mesh_node := $Mesh as MeshInstance3D
-	mesh_node.mesh = VehicleMesh.build(e, VehicleMesh.Lod.LOD0, false, VehicleCatalogue.livery(vehicle_id))
+	_base_mesh = VehicleMesh.build(e, VehicleMesh.Lod.LOD0, false, VehicleCatalogue.livery(vehicle_id))
+	mesh_node.mesh = _base_mesh
+	_height_m = height
+	_width_m = float(d["width_m"])
+	if damage != null:
+		damage.length_m = length_m
+		damage.height_m = height
 	mesh_node.material_override = null
 	mesh_node.transform = Transform3D.IDENTITY
 	for i in range(4):
@@ -194,11 +242,18 @@ func apply_entry(id: String) -> void:
 		l.position.z = -length_m * 0.5
 		l.position.y = minf(height * 0.5, 1.0)
 	set_body_color(body_color)
+	if damage != null and not damage.dents.is_empty():
+		_refresh_damage_looks()
 
 
 ## Speed along the car's forward axis in m/s (positive = forward).
 func forward_speed() -> float:
 	return -linear_velocity.dot(global_basis.z)
+
+
+## A player may get in: not a burning wreck (a stalled one, in clean, they may).
+func can_enter() -> bool:
+	return damage == null or not (damage.is_wrecked() and damage.burns())
 
 
 ## Speed in km/h, unsigned.
@@ -220,8 +275,24 @@ func reset_to_spawn() -> void:
 
 func _on_body_entered(_body: Node) -> void:
 	# The velocity before the contact resolved tells how hard we arrived.
-	var closing := (_last_velocity - linear_velocity).length()
-	impacted.emit(maxf(closing, _last_velocity.length() * 0.3))
+	var change := _last_velocity - linear_velocity
+	var closing := change.length()
+	var speed := maxf(closing, _last_velocity.length() * 0.3)
+	impacted.emit(speed)
+	if damage != null:
+		# The hit is on the side the car was thrown away from.
+		var dir := change if closing > 0.5 else _last_velocity
+		damage.crash(speed, hit_point(global_basis.inverse() * dir, _width_m, length_m, _height_m))
+
+
+## Where on a `width` x `length` body a hit from direction `local_dir` (the car's frame) lands:
+## where that direction leaves the body's footprint, a little under half its height.
+static func hit_point(local_dir: Vector3, width: float, length: float, height: float) -> Vector3:
+	var d := Vector2(local_dir.x, local_dir.z)
+	if d.length() < 0.001:
+		return Vector3(0.0, height, 0.0)  # from above: the roof
+	var t := 1.0 / maxf(absf(d.x) / (width * 0.5), absf(d.y) / (length * 0.5))
+	return Vector3(d.x * t, height * 0.45, d.y * t)
 
 
 var _speed_limit: float = INF
@@ -264,8 +335,9 @@ func _physics_process(delta: float) -> void:
 		engine_force = reverse_force_max * brk  # positive force = +Z = backwards
 		brake = 0.0
 	else:
-		var headroom := clampf(1.0 - forward_speed() * 3.6 / top_speed_kph, 0.0, 1.0)
-		engine_force = -engine_force_max * accel * headroom  # negative force = -Z = forward
+		var power := damage.power_factor() if damage != null else 1.0
+		var headroom := clampf(1.0 - forward_speed() * 3.6 / maxf(top_speed_kph * power, 1.0), 0.0, 1.0)
+		engine_force = -engine_force_max * accel * headroom * power  # negative force = -Z = forward
 		brake = brake_force_max * brk
 	if driven and Input.is_action_pressed("handbrake"):
 		brake = handbrake_force
@@ -273,6 +345,9 @@ func _physics_process(delta: float) -> void:
 		engine_force = 0.0
 		brake = handbrake_force
 		override_hold = false
+	if damage != null and damage.is_wrecked():
+		engine_force = 0.0  # dead: it rolls to a stop
+		brake = brake_force_max * 0.6
 	set_braking(brake > 0.0 and forward_speed() > -reverse_threshold_mps)
 	_step_reset_hold(driven and Input.is_action_pressed("reset_vehicle"), delta)
 	var upside_down := global_basis.y.y < 0.0
@@ -308,6 +383,10 @@ func reset_progress() -> float:
 
 func _recover() -> void:
 	_recover_timer = 0.0
+	if damage != null and damage.is_wrecked():
+		if damage.burns():
+			return  # a burning wreck stays where it is
+		damage.mend()  # a stalled wreck (clean) is mended by a reset; other damage stays
 	if recover_callback.is_valid():
 		recover_callback.call(self)
 	else:

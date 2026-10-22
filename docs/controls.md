@@ -130,6 +130,8 @@ Testbed flags worth knowing: `--time=HH` starts the clock at that hour (`--time=
 `--bus-share=0.5` makes half of the spawned traffic buses (default 8 %).
 For screenshots: `--camera=px,py,pz,tx,ty,tz` fixes the view, `--creator` opens the character
 creator once the world is up, `--screenshot=path` saves a PNG when the benchmark ends.
+`--damage=N` starts the car with N health of hits around its body (80 smokes, 100 or more wrecks it;
+with `--tone=gritty` a wreck burns and explodes about 10 s in).
 `--fly` starts in the police helicopter on its pad; `--fly-at=x,y,z` starts flying it there, and
 `--fly-input=x,z,climb,yaw` holds those controls (screenshots).
 `--radio=hilltop|redline|quest|crypt|chatter|off` tunes the car radio at start. `--record-music=path.wav` records the Music bus

@@ -1,0 +1,21 @@
+{
+  "_comment": "add-vehicle-and-building-damage. A drivable car's health is 100. A crash closing faster than crash_min_mps (m/s) loses crash_per_mps for each m/s over it (60 km/h into a wall: about 32); weapon hits lose combat_config.json's vehicle_damage for their impact kind. Stages by health: scuffed below scuffed_below, dented below dented_below, smoking below smoking_below (pull and top speed times smoking_power), wrecked at 0. A hit of dent_min or more leaves a dent dent_depth_per_damage m deep per point (at most dent_max_m, max_dents kept, dent_radius_m wide). A burning wreck catches fire burn_after_s after it was wrecked, explodes explode_after_s later, and its shell burns for shell_burn_s. The blast reaches blast_radius_m: vehicles get up to blast_impulse N·s and blast_car_damage health, the player up to blast_player_damage, all falling to none at the edge.",
+  "crash_min_mps": 6.0,
+  "crash_per_mps": 3.0,
+  "scuffed_below": 80.0,
+  "dented_below": 50.0,
+  "smoking_below": 25.0,
+  "smoking_power": 0.5,
+  "dent_min": 8.0,
+  "dent_depth_per_damage": 0.012,
+  "dent_max_m": 0.3,
+  "dent_radius_m": 0.9,
+  "max_dents": 8,
+  "burn_after_s": 4.0,
+  "explode_after_s": 6.0,
+  "shell_burn_s": 40.0,
+  "blast_radius_m": 9.0,
+  "blast_impulse": 14000.0,
+  "blast_car_damage": 110.0,
+  "blast_player_damage": 90.0
+}

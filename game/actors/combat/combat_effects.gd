@@ -5,8 +5,9 @@ extends Node3D
 ## past the preset's cap, a muzzle flash, a glowing tracer for energy bolts, and synthesised
 ## shot, zap, swish, pop and thud voices.
 
-const MARK_SIZE := {"splat": 0.55, "hole": 0.12, "scorch": 0.4, "blood": 0.9}
-const MARK_COLOR := {"hole": Color(0.08, 0.08, 0.08), "scorch": Color(0.1, 0.07, 0.05), "blood": Color(0.32, 0.02, 0.02)}
+const MARK_SIZE := {"splat": 0.55, "hole": 0.12, "scorch": 0.4, "blood": 0.9, "blast": 5.0}
+const MARK_COLOR := {"hole": Color(0.08, 0.08, 0.08), "scorch": Color(0.1, 0.07, 0.05), "blood": Color(0.32, 0.02, 0.02), "blast": Color(0.06, 0.05, 0.04)}
+const VOICE_S := {"boom": 1.6}  # how long a voice lasts; the rest are short (0.3 s)
 const TRACER_COLOR := Color(0.4, 0.9, 1.0)
 
 var cap: int = 48
@@ -111,6 +112,49 @@ func flash(at: Vector3, color: Color = Color(1.0, 0.85, 0.5)) -> void:
 	get_tree().create_timer(0.06, false).timeout.connect(l.queue_free)
 
 
+## A wreck exploding at `at` (add-vehicle-and-building-damage): a bright flash that fades, a
+## burst of fire, a scorch on the ground below, and a boom. `color` tints the flash and fire.
+func blast(at: Vector3, color: Color = Color(1.0, 0.6, 0.25)) -> void:
+	var l := OmniLight3D.new()
+	l.light_color = color
+	l.light_energy = 14.0
+	l.omni_range = 22.0
+	add_child(l)
+	l.global_position = at + Vector3.UP * 1.5
+	var tw := l.create_tween()
+	tw.tween_property(l, "light_energy", 0.0, 0.6)
+	tw.tween_callback(l.queue_free)
+	var p := CPUParticles3D.new()
+	p.one_shot = true
+	p.explosiveness = 0.95
+	p.amount = 40
+	p.lifetime = 0.9
+	p.direction = Vector3.UP
+	p.spread = 80.0
+	p.initial_velocity_min = 4.0
+	p.initial_velocity_max = 10.0
+	p.gravity = Vector3(0, -2.0, 0)
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 4.0
+	p.color = color
+	p.mesh = VehicleDamage.puff_mesh()
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 1))
+	fade.set_color(1, Color(0.2, 0.2, 0.2, 0))
+	p.color_ramp = fade
+	add_child(p)
+	p.global_position = at
+	p.emitting = true
+	get_tree().create_timer(1.5, false).timeout.connect(p.queue_free)
+	if is_inside_tree():
+		var q := PhysicsRayQueryParameters3D.create(at + Vector3.UP, at + Vector3.DOWN * 6.0)
+		q.collision_mask = 1
+		var hit := get_world_3d().direct_space_state.intersect_ray(q)
+		if not hit.is_empty() and hit["collider"] is StaticBody3D:
+			mark("blast", hit["position"], hit["normal"])
+	sound("boom")
+
+
 ## A glowing bolt from `a` to `b` that fades out (energy weapons).
 func tracer(a: Vector3, b: Vector3) -> void:
 	var len := a.distance_to(b)
@@ -134,7 +178,8 @@ func tracer(a: Vector3, b: Vector3) -> void:
 	get_tree().create_timer(0.09, false).timeout.connect(mi.queue_free)
 
 
-## Queues a voice: "shot", "zap", "swish", "pop" or "thud" (a punch or kick landing).
+## Queues a voice: "shot", "zap", "swish", "pop", "thud" (a punch or kick landing) or "boom"
+## (a wreck exploding).
 func sound(kind: String) -> void:
 	if kind != "":
 		_events.append([kind, 0.0])
@@ -156,7 +201,7 @@ func _process(_delta: float) -> void:
 			s += _sample(str(e[0]), t)
 		buf[i] = Vector2(s, s) * 0.6
 	pb.push_buffer(buf)
-	_events = _events.filter(func(e: Array) -> bool: return float(e[1]) < 0.3)
+	_events = _events.filter(func(e: Array) -> bool: return float(e[1]) < float(VOICE_S.get(e[0], 0.3)))
 
 
 func _sample(kind: String, t: float) -> float:
@@ -171,6 +216,8 @@ func _sample(kind: String, t: float) -> float:
 			return Synth.noise(_noise) * sin(clampf(t / 0.16, 0.0, 1.0) * PI) * 0.35
 		"pop":
 			return sin(t * TAU * 140.0) * exp(-t * 40.0) * 0.6 + Synth.noise(_noise) * exp(-t * 90.0) * 0.4
+		"boom":
+			return clampf((Synth.noise(_noise) * exp(-t * 3.0) + sin(t * TAU * 42.0) * exp(-t * 4.0)) * 0.9, -1.0, 1.0)
 		"thud":
 			return sin(t * TAU * 70.0) * exp(-t * 28.0) * 0.7 + Synth.noise(_noise) * exp(-t * 60.0) * 0.25
 	return 0.0

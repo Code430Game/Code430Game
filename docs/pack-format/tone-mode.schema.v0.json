@@ -86,6 +86,14 @@
           ],
           "description": "What a hard hit does to the flyable helicopter (add-flyable-helicopter): it bounces off and lands gently and is never wrecked, or it takes damage and at zero auto-rotates down, disabled. A mode without violence never wrecks it."
         },
+        "vehicle": {
+          "enum": [
+            "conk_out",
+            "burn",
+            "spark"
+          ],
+          "description": "What a wrecked car does (add-vehicle-and-building-damage): stalls with puffs of smoke and is mended by a reset; smokes, burns, explodes and is left a shell; or the same with sparks, a thin white smoke and blue-white flames. A mode without violence never burns."
+        },
         "officer": {
           "enum": [
             "knock_down",

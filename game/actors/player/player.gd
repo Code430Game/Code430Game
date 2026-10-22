@@ -201,6 +201,8 @@ func nearest_vehicle() -> VehicleBody3D:
 	for node in get_tree().get_nodes_in_group("vehicles"):
 		if not (node is VehicleBody3D):
 			continue
+		if node.has_method("can_enter") and not node.can_enter():
+			continue  # a burning wreck
 		var seat := node.get_node_or_null("Seat") as Node3D
 		var seat_pos := seat.global_position if seat != null else (node as Node3D).global_position
 		var d := seat_pos.distance_to(global_position)

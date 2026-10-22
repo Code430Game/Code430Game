@@ -2,7 +2,9 @@
 
 **Status: proposed 2026-10-22 (human, after the helicopter unstick fix: "We can also look at
 vehicle and building damage"; "Yes, lets write it up."). The choices marked _(to confirm)_
-are the open questions; the rest follows the helicopter's damage and the tone outcomes.**
+were the open questions, answered 2026-10-22: explosions yes ("Oh. Explode sounds fun!"),
+dystopia sparks with a little white smoke, and garage repair only when the police don't see
+you.**
 
 ## Why
 Crashes and gunfire leave no trace. A car hit at 80 km/h drives on as new, shooting a car
@@ -14,24 +16,31 @@ way, so a chase leaves a car that looks like it was in one.
 - **Car damage.** Every drivable car (the player's, a taken traffic car, a parked car once
   disturbed) gets health, 100 to 0, lost to:
   - crashes, by closing speed above a threshold (the `impacted` speed the car already emits);
-  - weapon hits, by a new per-weapon `vehicle_damage` in the weapons data (fists do little).
+  - weapon hits, by a new `vehicle_damage` per impact kind in `combat_config.json` (bullets
+    and energy bolts most, fists and blades little, paint none).
   It shows in stages:
-  - **Scuffed** (below 80): scrape marks near the hit.
-  - **Dented** (below 50): the body pushed in around each hard hit, a cracked windscreen, and a
-    headlight or tail light out on a front or rear hit.
+  - **Scuffed** (below 80): the paint dulled, scraped darker around each hard hit.
+  - **Dented** (below 50): the body pushed in around each hard hit (the dents start with the
+    first hard hit), and the headlights or tail lights out on a front or rear hit. A cracked
+    windscreen waits for the kit cars' glass to get its own surface.
   - **Smoking** (below 25): smoke from the engine, top speed and pull cut by half.
   - **Wrecked** (0): what happens comes from the tone's new `outcomes.vehicle` (below). The
     car can't be driven; the player gets out.
-- **Tone** (`outcomes.vehicle`, like `outcomes.aircraft`):
+- **Tone** (`outcomes.vehicle`, like `outcomes.aircraft`; gameplay code reads the outcome,
+  never the mode's name):
   - **clean, `conk_out`:** dents and cartoon puffs of smoke, never flames. A wreck stalls and
     can be driven again after a reset (hold R3).
   - **gritty, `burn`:** a wreck smokes, then burns for a while and leaves a blackened shell.
-  - **dystopia, `burn`:** the same, with sparks instead of the engine smoke _(to confirm)_.
-  - No explosions in this change _(to confirm: a burning wreck could blow after some seconds
-    in gritty and dystopia, hurting what is near)_.
+  - **dystopia, `spark`:** the same, with sparks and a thin white smoke instead of the black
+    engine smoke.
+  - **Explosions** (`burn` only): a burning wreck blows up after a few seconds. The blast
+    flings nearby cars and walkers, damages cars in its radius (so wrecks can chain), hurts
+    the player by distance, and leaves a scorch mark. Clean never explodes.
 - **Repair.** Holding reset (R3) puts a damaged car on the road as now and keeps its damage;
-  a wreck in clean is the exception (it is mended). Driving into one of the map's garages
-  mends it fully _(to confirm: free, or only when not wanted)_.
+  a wreck in clean is the exception (it is mended). Driving into one of the map's parking
+  garages mends it fully, free, unless the police see you right then (wanted but out of
+  sight is fine, so ducking in after losing them works). Repair shops from the map data can
+  take this over later.
 - **Traffic.** Traffic cars take the same damage when hit or shot. A traffic car wrecked with
   its driver aboard stops, the driver gets out and runs. Wrecks are removed by the normal
   traffic despawn once out of sight.
@@ -54,7 +63,7 @@ way, so a chase leaves a car that looks like it was in one.
   `vehicle_repaired`, `pane_broken`.
 
 ## Not in this change
-Buildings breaking apart, street furniture knocked over, explosions (unless confirmed),
+Buildings breaking apart, street furniture knocked over, explosions damaging buildings,
 tyres bursting, damage saved between sessions.
 
 ## Impact
@@ -68,10 +77,10 @@ tyres bursting, damage saved between sessions.
   - `vehicle_mesh.gd`: a damaged car gets its own copy of the shared mesh (only then), so
     undamaged traffic keeps sharing it; at most a few dented copies at once on the Deck preset;
   - `game/core/content/modes/*.json` and the mode schema (`outcomes.vehicle`);
-  - the weapons data (`vehicle_damage`), `shooter.gd` (hits on cars and glass);
+  - `combat_config.json` (`vehicle_damage` per impact kind), `shooter.gd` (hits on cars and glass);
   - `combat_effects.gd` (scrape, dent, broken pane, scorch marks; smoke and shards);
   - `building_builder.gd` (which faces are glass, for the pane hit);
   - `police_config.json` (`property_damage`), `wanted`;
   - `world_sync.gd` / `player_sync.gd` (damage state); `docs/`; tests.
-- Performance: smoke and fire particles capped (two burning wrecks on the Deck preset);
+- Performance: smoke, fire and blast particles capped (two burning wrecks on the Deck preset);
   dented mesh copies capped; Deck benchmark of a pile-up against main.
