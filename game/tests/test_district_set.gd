@@ -117,3 +117,20 @@ func test_the_loader_finds_a_maps_neighbouring_districts() -> void:
 	PackLoader.search_dirs = saved_dirs
 	PackLoader.active_map = saved_map
 	PackLoader.reload()
+
+
+func test_a_set_builds_the_meshes_once_for_the_whole_map() -> void:
+	# The districts only read their data; the set builds markings, sidewalks and buildings for
+	# both sides of the border, and times each step.
+	var set_pack: MapPack = auto_free(MapPack.new())
+	assert_bool(set_pack.load_districts(PackedStringArray([WEST, EAST]))).is_true()
+	var west := false
+	var east := false
+	for coord: Vector2i in set_pack.marking_chunks:
+		west = west or coord.x * RoadGeometry.CHUNK_SIZE_M < LINE_X
+		east = east or coord.x * RoadGeometry.CHUNK_SIZE_M >= LINE_X
+	assert_bool(west and east).override_failure_message("markings missing a side of the border").is_true()
+	assert_bool(set_pack.sidewalk_chunks.is_empty()).is_false()  # the fixture's footways are all east
+	assert_bool((set_pack.building_chunks["lod0"] as Dictionary).is_empty()).is_false()
+	var steps := ", ".join(set_pack.step_times.map(func(s: Array) -> String: return str(s[0])))
+	assert_str(steps).contains("west: building meshes").contains("east: roads").contains("joining the districts")

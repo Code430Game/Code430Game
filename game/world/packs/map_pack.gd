@@ -85,6 +85,9 @@ var content_hash_runs: int = 0  # how many times the files were hashed, for test
 
 ## Loads manifest, graph, and terrain index from a pack folder. Returns false on failure.
 func load(dir: String) -> bool:
+	if _sink == null:
+		step_times = []
+		_step_at_us = 0
 	districts = []
 	pack_dir = dir
 	_content_hash = ""
@@ -104,7 +107,13 @@ func load(dir: String) -> bool:
 		push_error("MapPack: %s is not a map pack" % manifest.get("id", dir))
 		return false
 	_step(0.0, "roads")
-	graph = RoadGraph.load_from_file(dir.path_join("road_graph.v0.json"))
+	# A district of a set reads the data only: the set builds the meshes once, for the whole map.
+	var part := _sink != null
+	if part:
+		_graph_dict = _read_json(dir.path_join("road_graph.v0.json"))
+		graph = RoadGraph.from_dict(_graph_dict) if not _graph_dict.is_empty() else null
+	else:
+		graph = RoadGraph.load_from_file(dir.path_join("road_graph.v0.json"))
 	if graph == null:
 		return false
 	terrain_index = TerrainBuilder.load_index(dir)
@@ -116,30 +125,41 @@ func load(dir: String) -> bool:
 	water_material = WaterBuilder.material()
 	water_polygons = WaterBuilder.load_polygons(dir)
 	water_chunks = WaterBuilder.build(water_polygons)
+	_step(0.35, "markings")
 	var markings := MarkingBuilder.new()
 	if markings.load_rules():
-		marking_chunks = markings.build(graph, junctions)
+		marking_chunks = markings.build(graph, junctions) if not part else {}
 		marking_visible_to_m = float(markings.rules["visible_to_m"])
 	marking_material = MarkingBuilder.material()
 	_step(0.45, "buildings")
 	building_material = BuildingBuilder.material()
 	buildings = BuildingBuilder.load_buildings(dir)
-	building_chunks = BuildingBuilder.build(buildings)
+	_step(0.55, "building meshes")
+	if not part:
+		building_chunks = BuildingBuilder.build(buildings)
 	_step(0.65, "sidewalks")
 	sidewalk_material = SidewalkBuilder.material()
-	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
-	underpass_chunks = UnderpassBuilder.build(graph.pedestrian)
-	terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
+	if not part:
+		sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
+		underpass_chunks = UnderpassBuilder.build(graph.pedestrian)
+		terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
 	_step(0.75, "curbs, bridges and lots")
 	barrier_material = BarrierBuilder.material()
 	barriers = BarrierBuilder.clip_curbs(BarrierBuilder.load_barriers(dir), junctions)
-	barrier_chunks = BarrierBuilder.build(barriers)
+	_step(0.78, "curb meshes")
+	if not part:
+		barrier_chunks = BarrierBuilder.build(barriers)
+	_step(0.8, "bridges")
 	bridge_material = BridgeBuilder.material()
 	bridges = BridgeBuilder.load_bridges(dir)
-	bridge_chunks = BridgeBuilder.build(bridges)
+	if not part:
+		bridge_chunks = BridgeBuilder.build(bridges)
+	_step(0.82, "lots")
 	parking_lots = ParkingLotBuilder.load_lots(dir, graph)
 	parking_chunks = ParkingLotBuilder.by_chunk(parking_lots, RoadGeometry.CHUNK_SIZE_M)
+	_step(0.84, "yards")
 	yard_chunks = YardBuilder.by_chunk(YardBuilder.load_yards(dir), RoadGeometry.CHUNK_SIZE_M)
+	_step(0.86, "trees and places")
 	# Garages after the surface lots' chunks: their stalls join parking_lots (for parked cars)
 	# but are drawn by GarageBuilder at floor height, not draped on the terrain.
 	vegetation_chunks = VegetationBuilder.load_by_chunk(dir, RoadGeometry.CHUNK_SIZE_M)
@@ -161,28 +181,42 @@ func load(dir: String) -> bool:
 		services.append(p)
 	_step(0.9, "garages")
 	garages = GarageBuilder.load_garages(dir, graph)
-	var built := GarageBuilder.build(garages)
-	garage_chunks = built["structure"]
-	garage_light_chunks = built["lights"]
+	if not part:
+		var built := GarageBuilder.build(garages)
+		garage_chunks = built["structure"]
+		garage_light_chunks = built["lights"]
 	garage_material = GarageBuilder.material()
 	garage_light_material = GarageBuilder.light_material()
 	GarageBuilder.clear_ramps(parking_lots, garages)  # no surface stall on a ramp cut
 	for g in garages:
 		if g.lot != null:
 			parking_lots.append(g.lot)
-	var garage_holes := GarageBuilder.holes_by_chunk(garages)
-	for coord: Vector2i in garage_holes:
-		if not terrain_holes.has(coord):
-			terrain_holes[coord] = []
-		(terrain_holes[coord] as Array).append_array(garage_holes[coord])
+	if not part:
+		var garage_holes := GarageBuilder.holes_by_chunk(garages)
+		for coord: Vector2i in garage_holes:
+			if not terrain_holes.has(coord):
+				terrain_holes[coord] = []
+			(terrain_holes[coord] as Array).append_array(garage_holes[coord])
+	_step(1.0, "done")
 	return terrain_index.size() > 0
 
 
 var _label: String = ""  # the district a part's progress text names
+var _graph_dict: Dictionary = {}  # a district of a set keeps its parsed road graph for the join
+
+
+## [text, ms] for each load step, in order: how long the step before it took (the loading bar's
+## steps, timed; the testbed prints them).
+var step_times: Array = []
+var _step_at_us: int = 0
 
 
 func _step(fraction: float, text: String) -> void:
 	var to := _sink if _sink != null else self
+	var now := Time.get_ticks_usec()
+	if to._step_at_us != 0:
+		to.step_times.append([to.progress_text, (now - to._step_at_us) / 1000.0])
+	to._step_at_us = now
 	to.progress = _span.x + fraction * (_span.y - _span.x)
 	to.progress_text = (_label + ": " + text) if _label != "" else text
 
@@ -195,6 +229,8 @@ func _step(fraction: float, text: String) -> void:
 ## joined go. One directory loads as `load`. False, with `set_refusal`, when they don't fit.
 func load_districts(dirs: PackedStringArray) -> bool:
 	set_refusal = ""
+	step_times = []
+	_step_at_us = 0
 	if dirs.size() == 1:
 		return self.load(dirs[0])
 	if dirs.is_empty():
@@ -221,9 +257,9 @@ func load_districts(dirs: PackedStringArray) -> bool:
 		rects.append(DistrictSet.border_rect(m["map"]["border"]))
 	var graphs: Array = []
 	var borders: Array = []
-	for d in dirs:
-		graphs.append(_read_json(d.path_join("road_graph.v0.json")))
-		borders.append(_read_json(d.path_join("border.v0.json")))
+	for k in range(dirs.size()):
+		graphs.append(parts[k]._graph_dict)  # read once, by the district's own load
+		borders.append(_read_json(dirs[k].path_join("border.v0.json")))
 	_step(0.75, "joining the districts")
 	var merged := DistrictSet.merge_graphs(graphs, borders, rects)
 	joined_crossings = int(merged["pairs"])
@@ -354,6 +390,7 @@ func load_districts(dirs: PackedStringArray) -> bool:
 			if not seen.has("t:" + t.id):
 				seen["t:" + t.id] = true
 				turfs.append(t)
+	_step(1.0, "done")
 	return not chunks.is_empty()
 
 
