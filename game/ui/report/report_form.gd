@@ -2,7 +2,7 @@ class_name ReportForm
 extends CanvasLayer
 ## "Report a problem": screenshot, area and severity, quick tags (report_tags.json; Left / Right
 ## and A, or a click), what happened (optional: tags alone are enough on a Deck with no keyboard),
-## whether to include this install's random id (and a row to regenerate it), a review page listing everything that will be
+## whether to include the player id (random, one per device; a row generates a new one), a review page listing everything that will be
 ## sent, and the queue. The title is generated from the area, severity, place and tags.
 ##
 ## Opened from the pause menu (any input device) or with F8, while the tree is paused. Handles its
@@ -79,7 +79,7 @@ func open(screenshot: Image, diagnostics: Dictionary, log_tail: Array) -> void:
 	_area = 0
 	_severity = 1
 	_sent_id = ""
-	_include_reporter = false
+	_include_reporter = ReportStore.include_reporter_id(reporter_path)
 	_reporter_id = ReportStore.reporter_id(reporter_path)
 	_tags = []
 	_tag_cursor = 0
@@ -244,6 +244,7 @@ func _change(row: String, delta: int) -> void:
 			_severity = posmod(_severity + delta, ReportStore.SEVERITIES.size())
 		"reporter":
 			_include_reporter = not _include_reporter
+			ReportStore.set_include_reporter_id(_include_reporter, reporter_path)  # kept for next time
 		"tags":
 			if not _tag_table.is_empty():
 				_tag_cursor = posmod(_tag_cursor + delta, _tag_table.size())
@@ -293,13 +294,13 @@ func _refresh() -> void:
 		"area": "<  %s  >" % ReportStore.AREAS[_area][1],
 		"severity": "<  %s  >" % ReportStore.SEVERITIES[_severity][1],
 		"tags": ("%d picked" % _tags.size()) if not _tags.is_empty() else "",
-		"description": "", "reporter": ("<  %s  >" % _reporter_id) if _include_reporter else "<  off  >", "new_id": "",
+		"description": "", "reporter": ("<  yes: %s  >" % _reporter_id) if _include_reporter else "<  no  >", "new_id": "",
 		"review": "", "send": _send_state(), "queue": "%d saved" % _saved_rows.size(), "cancel": "",
 	}
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity",
 		"tags": "Tags (Left / Right, A to pick)",
-		"description": "What happened (optional)", "reporter": "Random id", "new_id": "Regenerate random id",
+		"description": "What happened (optional)", "reporter": "Include player id (random, for this device)", "new_id": "Generate new player id",
 		"review": "Review what will be sent", "send": "Send report (public and anonymous)", "queue": "Saved reports", "cancel": "Cancel",
 	}
 	for i in range(ROWS.size()):

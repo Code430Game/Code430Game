@@ -107,6 +107,21 @@ static func reporter_id(path: String = REPORTER_ID_PATH) -> String:
 	return made
 
 
+## Whether the player chose to include their id, as they left it last time (no, until they say).
+## Kept next to the id, in `<id path>.include`.
+static func include_reporter_id(path: String = REPORTER_ID_PATH) -> bool:
+	var at := path + ".include"
+	return FileAccess.file_exists(at) and FileAccess.get_file_as_string(at).strip_edges() == "yes"
+
+
+static func set_include_reporter_id(on: bool, path: String = REPORTER_ID_PATH) -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	var f := FileAccess.open(path + ".include", FileAccess.WRITE)
+	if f != null:
+		f.store_string("yes" if on else "no")
+		f.close()
+
+
 ## Throws away this install's reporter id and makes a new one, so later reports no longer link to
 ## earlier ones. Returns the new id.
 static func regenerate_reporter_id(path: String = REPORTER_ID_PATH) -> String:

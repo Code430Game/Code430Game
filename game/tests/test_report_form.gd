@@ -28,6 +28,7 @@ func after_test() -> void:
 		ReportStore.new(_base).delete(row["id"])
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(_base))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(_base + "_reporter_id.txt"))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(_base + "_reporter_id.txt.include"))
 
 
 func _press(button: int) -> void:
@@ -125,7 +126,7 @@ func test_reporter_id_is_only_sent_when_chosen() -> void:
 	assert_str(report["reporter_id"]).is_equal(ReportStore.reporter_id(_form.reporter_path))
 
 
-func test_regenerate_gives_a_new_random_id_and_sends_that() -> void:
+func test_generate_new_player_id_gives_a_new_random_id_and_sends_that() -> void:
 	await _go_to("reporter")
 	await _press(JOY_BUTTON_DPAD_RIGHT)
 	var before := _form._reporter_id
@@ -274,3 +275,18 @@ func test_navigation_does_not_rescan_saved_reports() -> void:
 	await _press(JOY_BUTTON_DPAD_RIGHT)
 	await _press(JOY_BUTTON_DPAD_LEFT)
 	assert_int(counting.list_calls).is_equal(after_open)
+
+
+func test_include_player_id_is_remembered_next_time() -> void:
+	await _go_to("reporter")
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	assert_bool(_form._include_reporter).is_true()
+	_form.close()
+	_form.open(null, {}, [])
+	assert_bool(_form._include_reporter).is_true()
+	assert_str(_form.fields()["reporter_id"]).is_equal(_form._reporter_id)
+	await _go_to("reporter")
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	_form.close()
+	_form.open(null, {}, [])
+	assert_bool(_form._include_reporter).is_false()
