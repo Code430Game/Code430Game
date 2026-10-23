@@ -19,8 +19,12 @@ What the junction-ground session leaves for this one.
   there, then confirm with `scripts/terrain-trial.sh` and the game's reports.
 - **The bar is the real districts.** The proving ground is only a guard (it passed every
   variant while Centretown swung from 590 to 1,300 traps); judge on Centretown, then the Glebe
-  and Hintonburg, against the numbers in `update-junction-ground`'s design.md (Centretown
-  669 traps, 16 junctions poking, Metcalfe under the 417 passing).
+  and Hintonburg. The bar, from `update-junction-ground`'s design.md: under 700 Centretown
+  wheel traps; at most 1% of junctions with terrain through the drawn surface, none over
+  0.5 m; Metcalfe under the 417 passing; no proving-ground street drop over 0.5 m; the Glebe
+  and Hintonburg with no new junction pokes. Where that change left Centretown, to beat not
+  to match: 669 traps, 16 junctions poking (0.7%, worst 0.16 m); the Glebe 294 traps and 3
+  junctions, Hintonburg 208 and 6.
 - **Versions.** A new pack file (`retaining_walls.v0.json`) is a minor bump: Centretown 0.6.0,
   the Glebe and Hintonburg 0.3.0 (`python -m pack_tools version check` confirms). The pack
   repo's `code430.json` pins the game commit the packs were exported from; its PR, tags and

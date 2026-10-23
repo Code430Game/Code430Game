@@ -66,31 +66,42 @@ def capture(region: Path, out: Path) -> Path:
         state["graph"] = graph
         return real_bridges(graph, sample, *args, **kwargs)
 
-    pack.flatten_roads = flatten_stub
-    pack.lift_buried_paths = lambda graph, sample: 0
-    pack.cut_under_deep_paths = lambda chunks, graph, sample: 0
-    pack.clamp_under_decks = clamp_stub
-    pack.restore_road_beds = lambda chunks, graph: 0
-    for name in (
-        "build_terrain",
-        "clamp_under_decks",
-        "restore_road_beds",
+    pack_names = (
+        "flatten_roads",
         "lift_buried_paths",
         "cut_under_deep_paths",
-    ):
-        setattr(main_mod, name, getattr(pack, name))
-    main_mod.build_bridges = bridges_wrap
-    main_mod.main(
-        [
-            "--region",
-            str(region),
-            "--pack-out",
-            str(out),
-            "--pack-version",
-            "0.0.0",
-            "--build-stamp",
-        ]
+        "clamp_under_decks",
+        "restore_road_beds",
     )
+    main_names = (*pack_names[1:], "build_terrain", "build_bridges")
+    original_pack = {name: getattr(pack, name) for name in pack_names}
+    original_main = {name: getattr(main_mod, name) for name in main_names}
+    try:
+        pack.flatten_roads = flatten_stub
+        pack.lift_buried_paths = lambda graph, sample: 0
+        pack.cut_under_deep_paths = lambda chunks, graph, sample: 0
+        pack.clamp_under_decks = clamp_stub
+        pack.restore_road_beds = lambda chunks, graph: 0
+        for name in main_names[:-1]:
+            setattr(main_mod, name, getattr(pack, name))
+        main_mod.build_bridges = bridges_wrap
+        main_mod.main(
+            [
+                "--region",
+                str(region),
+                "--pack-out",
+                str(out),
+                "--pack-version",
+                "0.0.0",
+                "--build-stamp",
+            ]
+        )
+    finally:
+        # Put the real passes back, so a replay in the same process runs them.
+        for name, function in original_pack.items():
+            setattr(pack, name, function)
+        for name, function in original_main.items():
+            setattr(main_mod, name, function)
     pkl = out.with_suffix(".pkl")
     with pkl.open("wb") as f:
         pickle.dump(state, f)
@@ -327,9 +338,10 @@ def replay(pkl: Path, label: str = "") -> None:
     pokes, checked = junction_pokes(rep)
     rows = wheel_traps(rep)
     worst = pokes[0][0] if pokes else 0.0
+    share = 100 * len(pokes) / checked if checked else 0.0
     print(
         f"== {label}: {len(rows)} wheel traps; {len(pokes)} of {checked} junctions "
-        f"({100 * len(pokes) / checked:.1f}%) with terrain through the surface, worst "
+        f"({share:.1f}%) with terrain through the surface, worst "
         f"{worst:.2f} m; passes {seconds:.0f} s, measure {time.time() - t1:.0f} s"
     )
     by_class = collections.Counter(r["cls"] for r in rows).most_common(8)
