@@ -7,13 +7,16 @@ import json
 import math
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from osm_import import __main__ as importer
+from osm_import.png import read_rgb8
 
 REPO = Path(__file__).resolve().parents[2]
 PACK = REPO / "packs" / "proving-ground"
 REGION = REPO / "regions" / "proving-ground.json"
+HEIGHT_STEPS = 2  # terrain heights may differ by this many 16-bit steps across platforms
 
 
 def _load(name: str) -> dict:
@@ -44,10 +47,23 @@ def test_committed_pack_matches_a_fresh_import(tmp_path: Path, monkeypatch: pyte
         if p.is_file() and "chunks" not in p.parts and p.name != "build.json"
     )
     assert fresh == committed
+    differs = []
     for rel in committed:
-        assert (out / rel).read_bytes() == (PACK / rel).read_bytes(), (
-            f"{rel} differs; run scripts/regen-proving-ground.sh"
-        )
+        a, b = (out / rel).read_bytes(), (PACK / rel).read_bytes()
+        if a == b:
+            continue
+        if rel.suffix == ".png" and rel.parts[0] == "terrain":
+            # Heights come out of float maths that rounds a little differently on x86 Linux
+            # (CI) than on arm64 macOS: a step of the 16-bit height (well under a millimetre)
+            # is the same terrain. Anything more is a real change.
+            ha = read_rgb8(a).astype(np.int32)
+            hb = read_rgb8(b).astype(np.int32)
+            qa = ha[..., 0] * 256 + ha[..., 1]
+            qb = hb[..., 0] * 256 + hb[..., 1]
+            if qa.shape == qb.shape and int(np.abs(qa - qb).max()) <= HEIGHT_STEPS:
+                continue
+        differs.append(str(rel))
+    assert not differs, f"{', '.join(differs)} differ; run scripts/regen-proving-ground.sh"
 
 
 def test_pack_has_one_of_everything():
