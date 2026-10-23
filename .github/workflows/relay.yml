@@ -40,7 +40,7 @@ jobs:
   test:
     name: Relay tests
     timeout-minutes: 10
-    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
+    runs-on: ubuntu-latest  # GitHub's runners (see ci.yml)
     defaults:
       run:
         working-directory: tools
@@ -48,6 +48,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
         with:
           persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6.8.0
+        with:
+          version: ${{ env.UV_VERSION }}
       - run: uv sync --frozen
       # The tools suite's conftest wants the pinned packs (add-pack-repositories 2.2), even
       # for the relay's own tests.
@@ -60,7 +63,7 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
     timeout-minutes: 10
-    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
+    runs-on: ubuntu-latest  # GitHub's runners (see ci.yml)
     environment:
       name: relay-production
       url: ${{ env.RELAY_URL }}/health
@@ -74,6 +77,9 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: "22"  # wrangler needs Node 22
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e  # v6.8.0
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Token present
         id: token
         env:
@@ -106,7 +112,7 @@ jobs:
     name: Report labels
     needs: deploy
     timeout-minutes: 5
-    runs-on: [self-hosted, code430-mac]  # the maintainer's Mac (see ci.yml)
+    runs-on: ubuntu-latest  # GitHub's runners (see ci.yml)
     permissions:
       contents: read
       issues: write  # labels are created through the issues API
