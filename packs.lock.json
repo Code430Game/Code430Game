@@ -5,28 +5,28 @@
       "id": "code430.ottawa-centretown",
       "folder": "ottawa-centretown",
       "repo": "Code430Packs/Location-OttawaOnCa",
-      "tag": "centretown-v0.4.0",
-      "commit": "2a059523eb3835cd6f49414ab2c00bae35a8f779",
-      "asset": "centretown-v0.4.0.zip",
-      "sha256": "e9ea2682ece859607163af5bc2eccd649432143e2b630ccbe9cf6e244b748333"
+      "tag": "centretown-v0.5.1",
+      "commit": "039a2a9331e40880e6d23a04549f19707f8cec2e",
+      "asset": "centretown-v0.5.1.zip",
+      "sha256": "b05d7faa7eb87d7ee66fea5c076cd6d9f4e2c03c9f1e0844d014784da390204d"
     },
     {
       "id": "code430.ottawa-glebe",
       "folder": "ottawa-glebe",
       "repo": "Code430Packs/Location-OttawaOnCa",
-      "tag": "glebe-v0.1.0",
-      "commit": "2a059523eb3835cd6f49414ab2c00bae35a8f779",
-      "asset": "glebe-v0.1.0.zip",
-      "sha256": "f07968fbba7b1ed3cc85ccdd1af435f3c3c3f050b5e697cf32b5dc8a2a008f7c"
+      "tag": "glebe-v0.2.1",
+      "commit": "039a2a9331e40880e6d23a04549f19707f8cec2e",
+      "asset": "glebe-v0.2.1.zip",
+      "sha256": "b08a22e57278f1a0e248939a69060c37545dca3974b8c911285627204456f2d5"
     },
     {
       "id": "code430.ottawa-hintonburg",
       "folder": "ottawa-hintonburg",
       "repo": "Code430Packs/Location-OttawaOnCa",
-      "tag": "hintonburg-v0.1.0",
-      "commit": "2a059523eb3835cd6f49414ab2c00bae35a8f779",
-      "asset": "hintonburg-v0.1.0.zip",
-      "sha256": "43e2fc1fc5e5cf3259ca1a4e52884f857320d9dcd4bb7d510e4da67bca0168c4"
+      "tag": "hintonburg-v0.2.1",
+      "commit": "039a2a9331e40880e6d23a04549f19707f8cec2e",
+      "asset": "hintonburg-v0.2.1.zip",
+      "sha256": "0244f73a9318282296799f0629f482b3996c400cebccf35964299dc61cd0cb6a"
     }
   ]
 }

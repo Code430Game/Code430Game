@@ -15,9 +15,8 @@ const PACK_ID := "code430.ottawa-centretown"
 ## 2,198, none over 0.35 m. 2026-10-23 (update-junction-ground: the terrain under a junction
 ## follows the surface the game draws, and this check measures against that surface instead
 ## of a fan from the node, which at a clustered junction is not what is drawn): 16 of 2,198,
-## none over 0.16 m, with 672 wheel traps (EdgeDropReport) in the same build. Measured this way
-## the locked Centretown 0.4.0 has 41 (1.9%): this test is red until the lock moves to the packs
-## exported with the junction ground (update-junction-ground 4.1).
+## none over 0.16 m, with 669 wheel traps (EdgeDropReport) in the same build (Centretown 0.5.1;
+## measured this way the 0.4.0 pack had 41, 1.9%).
 const MAX_POKING_SHARE := 0.01
 const MAX_POKE_M := 0.5
 
