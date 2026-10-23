@@ -110,7 +110,10 @@ func load(dir: String) -> bool:
 	# A district of a set reads the data only: the set builds the meshes once, for the whole map.
 	var part := _sink != null
 	if part:
-		_graph_dict = _read_json(dir.path_join("road_graph.v0.json"))
+		var graph_path := dir.path_join("road_graph.v0.json")
+		_graph_dict = _read_json(graph_path)
+		if _graph_dict.is_empty():
+			push_error("MapPack: cannot read %s (missing, or not a JSON object)" % graph_path)
 		graph = RoadGraph.from_dict(_graph_dict) if not _graph_dict.is_empty() else null
 	else:
 		graph = RoadGraph.load_from_file(dir.path_join("road_graph.v0.json"))

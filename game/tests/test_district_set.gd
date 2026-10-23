@@ -134,3 +134,21 @@ func test_a_set_builds_the_meshes_once_for_the_whole_map() -> void:
 	assert_bool((set_pack.building_chunks["lod0"] as Dictionary).is_empty()).is_false()
 	var steps := ", ".join(set_pack.step_times.map(func(s: Array) -> String: return str(s[0])))
 	assert_str(steps).contains("west: building meshes").contains("east: roads").contains("joining the districts")
+
+
+
+func test_a_district_loading_into_a_set_builds_no_meshes_of_its_own() -> void:
+	# The same district, alone and as part of a set: the data is the same, the meshes only alone.
+	var alone: MapPack = auto_free(MapPack.new())
+	assert_bool(alone.load(EAST)).is_true()
+	var part: MapPack = auto_free(MapPack.new())
+	part._sink = auto_free(MapPack.new())
+	assert_bool(part.load(EAST)).is_true()
+	assert_int(part.buildings.size()).is_equal(alone.buildings.size())
+	assert_int(part.barriers.size()).is_equal(alone.barriers.size())
+	assert_bool(alone.marking_chunks.is_empty() or (alone.building_chunks["lod0"] as Dictionary).is_empty()).is_false()
+	assert_bool(part.marking_chunks.is_empty()).is_true()
+	assert_bool((part.building_chunks["lod0"] as Dictionary).is_empty()).is_true()
+	assert_bool(part.sidewalk_chunks.is_empty()).is_true()
+	assert_bool(part.barrier_chunks.is_empty()).is_true()
+	assert_bool(part._graph_dict.is_empty()).is_false()  # kept for the join
