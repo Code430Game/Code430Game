@@ -2,7 +2,7 @@ class_name ReportForm
 extends CanvasLayer
 ## "Report a problem": screenshot, area and severity, quick tags (report_tags.json; Left / Right
 ## and A, or a click), what happened (optional: tags alone are enough on a Deck with no keyboard),
-## whether to include this install's reporter id, a review page listing everything that will be
+## whether to include this install's random id (and a row to regenerate it), a review page listing everything that will be
 ## sent, and the queue. The title is generated from the area, severity, place and tags.
 ##
 ## Opened from the pause menu (any input device) or with F8, while the tree is paused. Handles its
@@ -16,15 +16,17 @@ extends CanvasLayer
 signal closed
 
 enum Page { MAIN, REVIEW, QUEUE }
-const ROWS := ["shot", "area", "severity", "tags", "description", "reporter", "review", "send", "queue", "cancel"]
-const THUMB_SIZE := Vector2(176, 110)  # small enough that the form, tags row included, fits 1280x800
-const DESCRIPTION_HEIGHT := 64.0
+const ROWS := ["shot", "area", "severity", "tags", "description", "reporter", "new_id", "review", "send", "queue", "cancel"]
+const THUMB_SIZE := Vector2(160, 100)  # small enough that the form, tags row included, fits 1280x800
+const DESCRIPTION_HEIGHT := 56.0
 
 var store: ReportStore
 ## Sends saved reports: `send(id)` and `send_due()`, signal `report_state_changed(id, state)`. Optional.
 var sender: Object = null
 ## "owner/name" for the browser hand-off; empty hides it.
 var repo: String = ""
+## Where this install's random id is kept (tests point it elsewhere).
+var reporter_path: String = ReportStore.REPORTER_ID_PATH
 
 var _page: int = Page.MAIN
 var _selected: int = 0
@@ -78,7 +80,7 @@ func open(screenshot: Image, diagnostics: Dictionary, log_tail: Array) -> void:
 	_severity = 1
 	_sent_id = ""
 	_include_reporter = false
-	_reporter_id = ReportStore.reporter_id()
+	_reporter_id = ReportStore.reporter_id(reporter_path)
 	_tags = []
 	_tag_cursor = 0
 	_description.text = ""
@@ -255,6 +257,9 @@ func _activate(row: String) -> void:
 		"tags":
 			if not _tag_table.is_empty():
 				toggle_tag(str(_tag_table[_tag_cursor]["id"]))
+		"new_id":
+			_reporter_id = ReportStore.regenerate_reporter_id(reporter_path)
+			_refresh()
 		"description":
 			_description.grab_focus()
 		"review":
@@ -275,7 +280,7 @@ func _review_body() -> String:
 	var report := preview()
 	var lines := PackedStringArray([
 		"Everything below is sent with the report%s." % (", plus the screenshot" if report["has_screenshot"] else ""),
-		"Reports are posted as public GitHub issues. IP and email addresses are removed, and the reporter id is shown only as a one-way hash; leave names and other personal details out of the description.",
+		"Reports are public and anonymous.",
 		"",
 	])
 	lines.append(JSON.stringify(report, "  ", false))
@@ -288,14 +293,14 @@ func _refresh() -> void:
 		"area": "<  %s  >" % ReportStore.AREAS[_area][1],
 		"severity": "<  %s  >" % ReportStore.SEVERITIES[_severity][1],
 		"tags": ("%d picked" % _tags.size()) if not _tags.is_empty() else "",
-		"description": "", "reporter": ("<  included: %s  >" % _reporter_id) if _include_reporter else "<  not included  >",
+		"description": "", "reporter": ("<  %s  >" % _reporter_id) if _include_reporter else "<  off  >", "new_id": "",
 		"review": "", "send": _send_state(), "queue": "%d saved" % _saved_rows.size(), "cancel": "",
 	}
 	var captions := {
 		"shot": "Screenshot", "area": "Area", "severity": "Severity",
 		"tags": "Tags (Left / Right, A to pick)",
-		"description": "What happened, optional, no personal details (A to type, B when done)", "reporter": "Reporter id (public only as a one-way hash)", "review": "Review what will be sent",
-		"send": "Send report (public on GitHub)", "queue": "Saved reports", "cancel": "Cancel",
+		"description": "What happened (optional)", "reporter": "Random id", "new_id": "Regenerate random id",
+		"review": "Review what will be sent", "send": "Send report (public and anonymous)", "queue": "Saved reports", "cancel": "Cancel",
 	}
 	for i in range(ROWS.size()):
 		var row: String = ROWS[i]

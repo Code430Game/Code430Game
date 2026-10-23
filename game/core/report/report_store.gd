@@ -107,6 +107,14 @@ static func reporter_id(path: String = REPORTER_ID_PATH) -> String:
 	return made
 
 
+## Throws away this install's reporter id and makes a new one, so later reports no longer link to
+## earlier ones. Returns the new id.
+static func regenerate_reporter_id(path: String = REPORTER_ID_PATH) -> String:
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	return reporter_id(path)
+
+
 ## A new report id: UTC timestamp plus eight random hex digits.
 static func new_id(unix_time: float = Time.get_unix_time_from_system()) -> String:
 	var t := Time.get_datetime_dict_from_unix_time(int(unix_time))

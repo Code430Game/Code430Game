@@ -13,6 +13,7 @@ func before_test() -> void:
 	_form = auto_free(FORM_SCENE.instantiate())
 	add_child(_form)
 	_form.store = ReportStore.new(_base)
+	_form.reporter_path = _base + "_reporter_id.txt"
 	var shot := Image.create(320, 200, false, Image.FORMAT_RGB8)
 	shot.fill(Color(0.3, 0.3, 0.3))
 	var place := Diagnostics.empty_place()
@@ -26,6 +27,7 @@ func after_test() -> void:
 	for row in ReportStore.new(_base).list():
 		ReportStore.new(_base).delete(row["id"])
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(_base))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(_base + "_reporter_id.txt"))
 
 
 func _press(button: int) -> void:
@@ -120,7 +122,22 @@ func test_reporter_id_is_only_sent_when_chosen() -> void:
 	await _go_to("send")
 	await _press(JOY_BUTTON_A)
 	var report := _form.store.load_report(_form.store.list()[0]["id"])
-	assert_str(report["reporter_id"]).is_equal(ReportStore.reporter_id())
+	assert_str(report["reporter_id"]).is_equal(ReportStore.reporter_id(_form.reporter_path))
+
+
+func test_regenerate_gives_a_new_random_id_and_sends_that() -> void:
+	await _go_to("reporter")
+	await _press(JOY_BUTTON_DPAD_RIGHT)
+	var before := _form._reporter_id
+	await _go_to("new_id")
+	await _press(JOY_BUTTON_A)
+	assert_str(_form._reporter_id).is_not_equal(before)
+	assert_str(_form._reporter_id).is_equal(ReportStore.reporter_id(_form.reporter_path))  # kept for next time
+	assert_str(_form._labels["reporter"].text).contains(_form._reporter_id)
+	await _go_to("send")
+	await _press(JOY_BUTTON_A)
+	var report := _form.store.load_report(_form.store.list()[0]["id"])
+	assert_str(report["reporter_id"]).is_equal(_form._reporter_id)
 
 
 func test_review_page_lists_what_will_be_sent() -> void:
