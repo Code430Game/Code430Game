@@ -19,9 +19,9 @@ func _init() -> void:
 	add_child(root)
 	SplashCard.build(root)
 	var col := VBoxContainer.new()
-	col.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	col.offset_top = -210
-	col.offset_bottom = -130
+	col.set_anchors_preset(Control.PRESET_CENTER)
+	col.offset_top = 180  # under the tagline, clear of the credits and the call to help
+	col.offset_bottom = 240
 	col.offset_left = -BAR_SIZE.x * 0.5
 	col.offset_right = BAR_SIZE.x * 0.5
 	col.add_theme_constant_override("separation", 10)

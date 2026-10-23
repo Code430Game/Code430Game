@@ -1,6 +1,6 @@
 extends Control
 ## The Code 430 splash card: the wordmark, "Made with Godot Engine" with Godot's icon, the
-## OpenStreetMap credit, and a call to help at the GitHub repository. It is rendered once to
+## OpenStreetMap credit, and a call to help at the GitHub organisation. It is rendered once to
 ## `res://assets/splash/boot_splash.png` (scripts/render-splash.sh), which project.godot shows
 ## as the boot splash while the game loads. With `--render-to=path` it draws itself off screen at
 ## RENDER_SIZE, saves that there and quits.
@@ -9,7 +9,7 @@ const BG := Color(0.06, 0.07, 0.09)
 const ACCENT := Color(0.85, 0.64, 0.25)  # gritty's HUD accent
 const TEXT := Color(0.92, 0.93, 0.95)
 const DIM := Color(0.62, 0.65, 0.7)
-const REPO_URL := "github.com/Code430Game/Code430Game"
+const REPO_URL := "github.com/Code430Game"  # the organisation, with the game repository pinned
 const GODOT_ICON := preload("res://assets/splash/godot_icon.svg")
 const RENDER_SIZE := Vector2i(1920, 1200)  # the Deck's 16:10, twice over
 
@@ -41,35 +41,44 @@ static func build(root: Control) -> void:
 	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(rule)
 	col.add_child(_label("An open-world city game, built from real maps", 30, DIM))
-	col.add_child(_spacer(70))
-	col.add_child(_label("Help us improve it", 34, ACCENT))
-	col.add_child(_label(REPO_URL, 30, TEXT))
-	# Credits along the bottom: Godot on the left, OpenStreetMap on the right.
+	# Along the bottom: the credits on the left, the call to help on the right. The middle below
+	# the tagline is left for the loading bar.
 	var foot := HBoxContainer.new()
 	foot.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	foot.offset_top = -96
-	foot.offset_bottom = -36
+	foot.offset_top = -132
+	foot.offset_bottom = -40
 	foot.offset_left = 48
 	foot.offset_right = -48
 	root.add_child(foot)
+	var credits := VBoxContainer.new()
+	credits.alignment = BoxContainer.ALIGNMENT_END
+	credits.add_theme_constant_override("separation", 6)
+	foot.add_child(credits)
+	var godot := HBoxContainer.new()
 	var icon := TextureRect.new()
 	icon.texture = GODOT_ICON
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.custom_minimum_size = Vector2(56, 56)
-	foot.add_child(icon)
-	foot.add_child(_spacer(12, true))
-	foot.add_child(_label("Made with Godot Engine", 24, DIM))
+	icon.custom_minimum_size = Vector2(44, 44)
+	godot.add_child(icon)
+	godot.add_child(_spacer(10, true))
+	godot.add_child(_label("Made with Godot Engine", 24, DIM, 0, HORIZONTAL_ALIGNMENT_LEFT))
+	credits.add_child(godot)
+	credits.add_child(_label("Map data © OpenStreetMap contributors", 24, DIM, 0, HORIZONTAL_ALIGNMENT_LEFT))
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(gap)
-	foot.add_child(_label("Map data © OpenStreetMap contributors", 24, DIM))
+	var help := VBoxContainer.new()
+	help.alignment = BoxContainer.ALIGNMENT_END
+	help.add_theme_constant_override("separation", 4)
+	foot.add_child(help)
+	help.add_child(_label("Help us improve it", 30, ACCENT, 0, HORIZONTAL_ALIGNMENT_RIGHT))
+	help.add_child(_label(REPO_URL, 26, TEXT, 0, HORIZONTAL_ALIGNMENT_RIGHT))
 
-
-static func _label(text: String, size: int, color: Color, spacing: int = 0) -> Label:
+static func _label(text: String, size: int, color: Color, spacing: int = 0, align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.horizontal_alignment = align
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
