@@ -99,6 +99,10 @@ spots. Branch as it was: 590 traps, 143 junctions poking, Metcalfe steps.
 | arm floor with 0.2 m slack | 699 | 14 (0.6%, worst 0.13 m) | ok |
 | **arm floor with 0.15 m slack (kept; the trial confirms it)** | **672** | **16 (0.7%, worst 0.16 m)** | **ok** |
 
+The trap counts above take a junction as cover only within 1 m of its node's height; with the
+drawn surface's height instead (the review of #175) Centretown reads 669 and main 1,887, the
+other districts unchanged.
+
 The Glebe: 819 traps on main -> 294, junctions poking 19 -> 3 (of 1,020). Hintonburg: 748 -> 208,
 19 -> 6 (of 827). Both measured against the drawn surface.
 

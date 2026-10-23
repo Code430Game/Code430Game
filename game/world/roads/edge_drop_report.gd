@@ -96,7 +96,10 @@ static func _cover_grid(pack: MapPack) -> Dictionary:
 	for j: JunctionBuilder.Junction in pack.junctions.values():
 		if j.polygon_xz.size() < 3:
 			continue
-		var item := {"poly": j.polygon_xz, "y": j.centre.y}
+		# The drawn surface's height at the sample, not the node's: an arm a metre or more off
+		# the node's height (the junctions update-junction-ground is about) would otherwise
+		# leave its side of the outline uncovered, and count the surface there as a trap.
+		var item := {"poly": j.polygon_xz, "j": j, "tris": Geometry2D.triangulate_polygon(j.polygon_xz)}
 		var box := Rect2(j.polygon_xz[0], Vector2.ZERO)
 		for v in j.polygon_xz:
 			box = box.expand(v)
@@ -126,8 +129,11 @@ static func _add_box(grid: Dictionary, box: Rect2, item: Dictionary) -> void:
 static func _covered(grid: Dictionary, q: Vector2, y: float) -> bool:
 	for item: Dictionary in grid.get(Vector2i(floori(q.x / CELL_M), floori(q.y / CELL_M)), []):
 		if item.has("poly"):
-			if absf(float(item["y"]) - y) <= COVER_DY_M and Geometry2D.is_point_in_polygon(q, item["poly"]):
-				return true
+			if Geometry2D.is_point_in_polygon(q, item["poly"]):
+				var j: JunctionBuilder.Junction = item["j"]
+				var sy := JunctionReport.surface_height(j, item["tris"], q, j.centre.y)
+				if absf(sy - y) <= COVER_DY_M:
+					return true
 			continue
 		var a: Vector2 = item["a"]
 		var b: Vector2 = item["b"]
