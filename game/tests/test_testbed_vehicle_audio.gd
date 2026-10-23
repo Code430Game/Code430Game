@@ -21,10 +21,16 @@ func before() -> void:
 
 
 ## Land whatever the streamer still has queued: queued meshes are outside the tree, and gdUnit
-## counted them as orphans of every test here (about 1,100 per suite).
+## counted them as orphans of every test here (about 1,100 per suite). Background builds still
+## running land after a flush, so wait for them first (bounded), as test_testbed_menus.gd does:
+## with Ottawa's neighbouring districts loaded, a drive here left 58.
 func after_test() -> void:
 	var streamer: Node = _bed.get("_streamer") if _bed != null else null
 	if streamer != null and streamer.has_method("flush"):
+		for i in range(600):
+			if not streamer.call("is_busy"):
+				break
+			await get_tree().process_frame
 		streamer.flush()
 
 

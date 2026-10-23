@@ -66,4 +66,6 @@ tools/report_relay/.venv-workers/
 
 # Packs pinned in packs.lock.json, fetched by scripts/fetch-packs.sh (their own repositories)
 packs/ottawa-centretown/
+packs/ottawa-glebe/
+packs/ottawa-hintonburg/
 packs/.fetched/
