@@ -206,12 +206,9 @@ func apply_entry(id: String) -> void:
 	for i in range(4):
 		mesh_node.set_surface_override_material(i, null)
 	_braking = false
-	var clearance := wr * 0.6
-	var box := BoxShape3D.new()
-	box.size = Vector3(float(d["width_m"]), height - clearance - 0.1, length_m)
 	var shape := $Shape as CollisionShape3D
-	shape.shape = box
-	shape.transform = Transform3D(Basis(), Vector3(0.0, clearance + box.size.y * 0.5, 0.0))
+	shape.shape = body_shape(float(d["width_m"]), height, length_m, wr * 0.6, VehicleDamage.tun("small_bump_m"))
+	shape.transform = Transform3D.IDENTITY
 	var rest := 0.2
 	var wheel_mesh := CylinderMesh.new()
 	wheel_mesh.top_radius = wr
@@ -244,6 +241,26 @@ func apply_entry(id: String) -> void:
 	set_body_color(body_color)
 	if damage != null and not damage.dents.is_empty():
 		_refresh_damage_looks()
+
+
+## The body's collision hull in the car's frame: a box from `clearance` up to 0.1 under the roof,
+## its underside sloping up at the nose and tail to `small_bump` (plus a little) so a curb or a
+## path edge that low lifts the car over it instead of catching the body.
+static func body_shape(width: float, height: float, length: float, clearance: float, small_bump: float) -> ConvexPolygonShape3D:
+	var top := height - 0.1
+	var lift := clampf(small_bump + 0.05, clearance, top - 0.3)
+	var ramp := minf((lift - clearance) * 4.0, length * 0.25)
+	var w := width * 0.5
+	var l := length * 0.5
+	var pts := PackedVector3Array()
+	for x in [-w, w]:
+		for z in [-l, l]:
+			pts.append(Vector3(x, top, z))
+			pts.append(Vector3(x, lift, z))
+			pts.append(Vector3(x, clearance, z - signf(z) * ramp))
+	var hull := ConvexPolygonShape3D.new()
+	hull.points = pts
+	return hull
 
 
 ## Speed along the car's forward axis in m/s (positive = forward).
@@ -279,10 +296,26 @@ func _on_body_entered(_body: Node) -> void:
 	var closing := change.length()
 	var speed := maxf(closing, _last_velocity.length() * 0.3)
 	impacted.emit(speed)
+	if damage != null and not _hit_above_small_bump():
+		return  # a curb or a path edge: it thumps, it doesn't dent
 	if damage != null:
 		# The hit is on the side the car was thrown away from.
 		var dir := change if closing > 0.5 else _last_velocity
 		damage.crash(speed, hit_point(global_basis.inverse() * dir, _width_m, length_m, _height_m))
+
+
+## Whether any contact the body is touching right now is higher off the ground under the car
+## than vehicle_damage.json's small_bump_m. With no contact to read, it counts as a real hit.
+func _hit_above_small_bump() -> bool:
+	var state := PhysicsServer3D.body_get_direct_state(get_rid())
+	if state == null or state.get_contact_count() == 0:
+		return true
+	var inv := global_transform.affine_inverse()
+	var limit := VehicleDamage.tun("small_bump_m")
+	for i in state.get_contact_count():
+		if (inv * state.get_contact_local_position(i)).y > limit:
+			return true
+	return false
 
 
 ## Where on a `width` x `length` body a hit from direction `local_dir` (the car's frame) lands:
