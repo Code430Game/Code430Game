@@ -21,3 +21,20 @@ func test_the_card_credits_godot_and_osm_and_asks_for_help() -> void:
 		texts.append((l as Label).text)
 	assert_array(texts).contains(["CODE 430", "Made with Godot Engine", "Map data © OpenStreetMap contributors", "Help us improve it", SplashCard.REPO_URL])
 	assert_int(root.find_children("*", "TextureRect", true, false).size()).is_equal(1)  # the Godot icon
+
+
+func test_the_loading_bar_only_moves_forward_and_says_what_is_loading() -> void:
+	var screen: LoadingScreen = auto_free(LoadingScreen.new())
+	add_child(screen)
+	screen.set_progress(0.4, "Loading ottawa-glebe: buildings")
+	screen.set_progress(0.2, "Loading ottawa-glebe: sidewalks")
+	assert_float(screen.progress()).is_equal_approx(0.4, 0.001)
+	assert_str(screen.status_text()).is_equal("Loading ottawa-glebe: sidewalks")
+
+
+func test_a_district_set_reports_progress_through_each_part_to_the_end() -> void:
+	var pack := MapPack.new()
+	var dirs := PackedStringArray(["res://tests/fixtures/districts/west", "res://tests/fixtures/districts/east"])
+	assert_bool(pack.load_districts(dirs)).is_true()
+	assert_float(pack.progress).is_greater_equal(0.85)
+	assert_str(pack.progress_text).is_not_empty()

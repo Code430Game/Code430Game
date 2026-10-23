@@ -15,7 +15,7 @@ it possible, and where to help.
 - **The card** (`game/ui/splash/splash_card.tscn`, rendered to
   `game/assets/splash/boot_splash.png` by `scripts/render-splash.sh` at 1920x1200):
   - the wordmark "CODE 430" over an accent rule and a one-line description;
-  - a call to action: "Help us improve it" and `github.com/Code430Game/Code430Game`;
+  - a call to action: "Help us improve it" and `github.com/Code430Game` (the organisation, the game repository pinned), bottom right, the Godot and OpenStreetMap credits bottom left, the middle left for the loading bar;
   - credits along the bottom: Godot's icon and "Made with Godot Engine" (the icon is CC BY
     4.0, receipt in `game/assets/splash/`), and "Map data © OpenStreetMap contributors" (text
     only: OSM's trademark policy limits its logo).

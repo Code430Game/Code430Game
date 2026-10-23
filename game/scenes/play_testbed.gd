@@ -77,6 +77,10 @@ var _mute: bool = false
 var _start_hour: float = -1.0  # --time=HH
 var _day_minutes: float = -1.0  # --day-minutes=N
 
+## Emitted once the map has loaded and the player is in it; `map_loaded` is then true.
+signal map_ready
+var map_loaded: bool = false
+var _loading: LoadingScreen
 var _pack: MapPack
 var _streamer: ChunkStreamer
 var _first_playable_ms: int = -1
@@ -200,12 +204,23 @@ func _ready() -> void:
 		push_error(_hud.text)
 		return
 	print("packs: %s" % ", ".join(PackLoader.loaded_ids))
-	_pack = MapPack.new()
+	_loading = LoadingScreen.new()
+	add_child(_loading)
+	_load_and_start(dir)  # on into the map once it has loaded, frames from now
+
+
+
+## Loads the map under the loading screen, then builds everything on it. Runs from _ready and
+## finishes frames later: wait for `map_ready` (or `map_loaded`) before touching the map.
+func _load_and_start(dir: String) -> void:
+	var pack := MapPack.new()
 	# The map's neighbouring districts, when installed, load with it as one map.
-	var dirs := PackLoader.district_dirs(_pack_id)
-	if not _pack.load_districts(dirs):
-		_hud.text = "Failed to load pack at %s%s" % [dir, (": " + _pack.set_refusal) if _pack.set_refusal != "" else ""]
+	if not await _load_pack(pack, PackLoader.district_dirs(_pack_id)):
+		_hud.text = "Failed to load pack at %s%s" % [dir, (": " + pack.set_refusal) if pack.set_refusal != "" else ""]
+		push_error(_hud.text)
+		_end_loading()
 		return
+	_pack = pack
 	if not _pack.districts.is_empty():
 		print("districts: %s, %d crossings joined" % [", ".join(_pack.districts), _pack.joined_crossings])
 	VehicleCatalogue.merge_pack_dir(dir)  # a pack may add vehicles
@@ -222,6 +237,7 @@ func _ready() -> void:
 		_lap_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 		_lap_label.visible = false
 		$HUD.add_child(_lap_label)
+	await _loading_step(0.8, "Building the streets around you...")
 	var t0 := Time.get_ticks_msec()
 	_streamer = ChunkStreamer.new()
 	_streamer.name = "Streamer"
@@ -246,6 +262,7 @@ func _ready() -> void:
 			spawn = _spawn_on_edge(hit)
 			spawn_edge = hit["edge"]
 			spawn_distance = RoadGeometry.length_xz(spawn_edge.polyline.slice(0, int(hit["segment"]) + 1)) + float(hit["t"]) if hit.has("t") else 0.0
+	await _loading_step(0.86, "Building where you start...")
 	var t_ring := Time.get_ticks_msec()
 	var ring := _streamer.build_now(spawn.origin)
 	_first_playable_ms = Time.get_ticks_msec() - t0
@@ -274,6 +291,7 @@ func _ready() -> void:
 		_player.enter_vehicle(_car)
 	else:
 		_player.activate_camera()
+	await _loading_step(0.92, "Adding traffic and people...")
 	_setup_maps()
 	_setup_traffic()
 	_setup_pedestrians()
@@ -337,7 +355,38 @@ func _ready() -> void:
 	if _bench_seconds > 0.0:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	_end_loading()
+	map_loaded = true
+	map_ready.emit()
 
+
+
+## Loads `dirs` into `pack` on a thread, moving the loading bar with the pack's own progress
+## (the first 80% of the bar). Returns whether it loaded.
+func _load_pack(pack: MapPack, dirs: PackedStringArray) -> bool:
+	SurfaceDetail.preset()  # the graphics preset, read here: the thread may not reach Settings
+	VegetationBuilder.read_preset()
+	var thread := Thread.new()
+	thread.start(pack.load_districts.bind(dirs))
+	while thread.is_alive():
+		_loading.set_progress(pack.progress * 0.8, "Loading " + pack.progress_text if pack.progress_text != "" else "Loading...")
+		await get_tree().process_frame
+	return thread.wait_to_finish()
+
+
+## Moves the bar to `fraction` on `text`, and lets it draw before the next blocking step.
+func _loading_step(fraction: float, text: String) -> void:
+	if _loading == null:
+		return
+	_loading.set_progress(fraction, text)
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+
+func _end_loading() -> void:
+	if _loading != null:
+		_loading.queue_free()
+		_loading = null
 
 func _on_entered_vehicle(car: VehicleBody3D) -> void:
 	if _vehicle_audio != null and not (car is FlyableHelicopter):
@@ -1400,7 +1449,7 @@ func _process(delta: float) -> void:
 	if _player != null and (get_tree().paused or _player.is_driving() or not _keyboard) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	($HUD as CanvasLayer).visible = not menu_open()
-	if _car != null:
+	if _car != null and map_loaded:  # not while the map is still being set up
 		var body: Node3D = Players.local_controlled_body()
 		if _lap_label != null and _pack != null:
 			var was_visible := _lap.visible

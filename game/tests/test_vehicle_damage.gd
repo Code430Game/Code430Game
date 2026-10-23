@@ -146,6 +146,37 @@ func test_a_car_driven_into_a_wall_is_damaged_and_dented() -> void:
 	assert_object((car.get_node("Mesh") as MeshInstance3D).mesh).is_not_same(car._base_mesh)
 
 
+func test_the_body_slopes_up_at_nose_and_tail_to_the_small_bump_height() -> void:
+	var hull := CarScript.body_shape(1.8, 1.5, 4.6, 0.2, 0.3)
+	var nose_low := INF
+	for p in hull.points:
+		if is_equal_approx(p.z, -2.3):
+			nose_low = minf(nose_low, p.y)
+	assert_float(nose_low).is_equal_approx(0.35, 0.001)  # the nose clears a 30 cm edge
+	var aabb := AABB(hull.points[0], Vector3.ZERO)
+	for p in hull.points:
+		aabb = aabb.expand(p)
+	assert_vector(aabb.size).is_equal_approx(Vector3(1.8, 1.2, 4.6), Vector3.ONE * 0.001)
+
+
+func test_a_curb_under_the_small_bump_height_does_no_damage_and_the_car_rides_over() -> void:
+	var world := _world()
+	var curb := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(20, 0.2, 10)
+	shape.shape = box
+	curb.add_child(shape)
+	world.add_child(curb)
+	curb.position = Vector3(0, 0.1, -12)  # a 20 cm step up onto a 10 m wide kerb
+	var car := _car(world, Vector3(0, 0.3, 0))
+	await _frames(10)
+	car.linear_velocity = Vector3(0, 0, -20.0)
+	await _frames(45)
+	assert_float(car.damage.health).is_equal(VehicleDamage.MAX_HEALTH)
+	assert_float(car.global_position.z).is_less(-9.0)  # it got onto the step, not stopped at it
+
+
 func test_a_wreck_stops_pulling() -> void:
 	var world := _world()
 	var car := _car(world, Vector3(0, 0.3, 0))

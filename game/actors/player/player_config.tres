@@ -11,6 +11,7 @@ deceleration_mps2 = 30.0
 jump_height_m = 1.2
 turn_speed_rad_s = 10.0
 floor_max_angle_deg = 50.0
+step_height_m = 0.35
 camera_distance_m = 3.5
 camera_height_m = 1.5
 camera_orbit_speed_rad_s = 2.8
