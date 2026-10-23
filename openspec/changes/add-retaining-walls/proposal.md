@@ -18,9 +18,11 @@ underpasses and cuttings in Ottawa have vertical concrete retaining walls there.
 ## What Changes
 - **The importer finds wall lines.** Along every ground-level road, it walks the outer edge
   of what the road carries beside it: the sidewalk's outer edge where there is one, the
-  shoulder's or the road's edge where not. Wherever the finished terrain a short way past
-  that edge stands more than `wall_min_m` (1.0 m) above the road and rises faster than a
-  bank can (steeper than `wall_slope` 1:1.5), that stretch becomes a retaining wall line.
+  shoulder's or the road's edge where not. Every 2 m along that edge it samples the
+  finished terrain at 4 m out, perpendicular to the road, away from it. Where that sample
+  stands more than `wall_min_m` (1.0 m) above the edge and the rise is steeper than
+  `wall_slope` (1 m up for every 1.5 m out), that stretch becomes a retaining wall line.
+  The numbers are the spec's (see `specs/road-network/spec.md`).
   - Short gaps between wall stretches on one side are joined; stretches shorter than
     `wall_min_length_m` (6 m) are dropped.
   - Under a bridge deck, the wall's top is the deck's soffit (the wall carries the deck, as
@@ -32,8 +34,17 @@ underpasses and cuttings in Ottawa have vertical concrete retaining walls there.
   The step is the wall's face, so no slope reaches the road.
 - **The game draws the walls.** Concrete (the bridge piers' material), straight down from the
   top to the ground in front, with collision, in the chunks they cross. They are written as a
-  new barrier kind `retaining_wall` in `barriers.v0.json` with a top height per point, so the
-  existing barrier streaming, LODs and collision carry them.
+  new barrier kind `retaining_wall` in `barriers.v0.json`, so the existing barrier streaming,
+  LODs and collision carry them.
+  - **Height per point.** A wall's top follows the ground behind it or a deck's soffit, so a
+    `retaining_wall` carries `tops_m`: one number per entry of `points`, the wall's height
+    above that point (a point is the wall's foot, on the ground in front). `height_m` stays
+    required and is the tallest of them, so readers that only know `height_m` still get a
+    safe bound.
+  - Between points the top is interpolated linearly along the segment, like the points
+    themselves. Where the game splits a barrier at a chunk boundary (`BarrierBuilder`'s chunk
+    split), the cut point's top is interpolated the same way, so the two halves meet.
+  - Other kinds don't carry `tops_m`; for them every point is `height_m` high, as today.
 - **Where it shows:** every street under the 417 (Metcalfe, Elgin, O'Connor, Kent, Bank,
   Bronson), the Laurier and Mackenzie King approaches, and any cutting the scan finds.
 - **Not in this change:** decorative wall caps, graffiti or posters on the walls (a tone
@@ -41,12 +52,15 @@ underpasses and cuttings in Ottawa have vertical concrete retaining walls there.
   parking lots.
 
 ## Impact
-- Affected specs: `road-network` (ADDED: Retaining Walls).
+- Affected specs: `specs/road-network/spec.md` (ADDED: Retaining Walls).
 - Affected code:
   - `tools/osm_import/` (a new `walls.py` after the terrain and bridges; terrain held in front
-    of walls; `barriers.py` writes the new kind; schema `barrier.schema.v0.json`);
-  - `game/world/roads/barrier_builder.gd` (the wall mesh: a quad strip from the top line to
-    the ground line, with a top face);
+    of walls; `barriers.py` writes the new kind);
+  - `docs/pack-format/barriers.schema.v0.json` (`retaining_wall` in the kind enum; optional
+    `tops_m`, required for that kind, the same length as `points`);
+  - `game/world/barriers/barrier_builder.gd` (`Barrier.tops_m`, read in the loader, split at
+    chunk boundaries with the points; the wall mesh: a quad strip from each point up by its
+    top, with a top face);
   - tests on both sides; the proving ground regenerated (it has a street under the motorway,
     Park Road); the Ottawa packs re-exported.
 - `EdgeDropReport` and a new count in the validation report (wall metres per district) show
