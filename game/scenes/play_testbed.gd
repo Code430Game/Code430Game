@@ -368,10 +368,15 @@ func _load_pack(pack: MapPack, dirs: PackedStringArray) -> bool:
 	VegetationBuilder.read_preset()
 	var thread := Thread.new()
 	thread.start(pack.load_districts.bind(dirs))
+	var t0 := Time.get_ticks_msec()
 	while thread.is_alive():
 		_loading.set_progress(pack.progress * 0.8, "Loading " + pack.progress_text if pack.progress_text != "" else "Loading...")
 		await get_tree().process_frame
-	return thread.wait_to_finish()
+	var ok: bool = thread.wait_to_finish()
+	var slowest := pack.step_times.duplicate()
+	slowest.sort_custom(func(a: Array, b: Array) -> bool: return float(a[1]) > float(b[1]))
+	print("testbed: map loaded in %d ms; slowest: %s" % [Time.get_ticks_msec() - t0, ", ".join(slowest.slice(0, 3).map(func(x: Array) -> String: return "%s %d ms" % [x[0], int(x[1])]))])
+	return ok
 
 
 ## Moves the bar to `fraction` on `text`, and lets it draw before the next blocking step.
