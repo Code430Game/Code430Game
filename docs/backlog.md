@@ -227,6 +227,11 @@ Deck session on ed2ee5a (dystopia tone). The human's verdict: "the cops are fun"
   and the car got damaged. So i think we have some flattening work to do still"): the
   cycle-track separators and kerbs. Two parts: flatten them where a car crosses, and (proposed
   to the human, not yet agreed) let a bump under kerb height (about 0.25 m) do no car damage.
+- **"Invalid polygon data, triangulation failed" with the three Ottawa districts** (2026-10-22,
+  found when Centretown 0.4.0, the Glebe 0.1.0 and Hintonburg 0.1.0 first loaded together in
+  CI: 227 errors in `test_testbed_vehicle_audio`, none with Centretown 0.3.0 alone). Some
+  polygon doesn't triangulate and isn't drawn; which builder (junctions at the joined border
+  nodes, lots, garages, the minimap or the map texture) isn't known yet. Visual only.
 - **Holding R3 by accident resets the car** (human, 2026-10-22, Deck, on the Mackenzie King
   Bridge: "I got mostly across it. Before accidentally holding R3"). A tap looks behind, a 1 s
   hold resets (`Controls.hold_s`). Proposed to the human: a longer hold (1.5 s); not yet agreed.

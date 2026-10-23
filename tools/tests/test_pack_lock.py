@@ -60,7 +60,11 @@ def releases(tmp_path, monkeypatch):
 
 def test_the_game_lock_file_is_valid_and_its_packs_are_fetched():
     entries = lock.load_lock()
-    assert [e["folder"] for e in entries] == ["ottawa-centretown"]
+    assert [e["folder"] for e in entries] == [
+        "ottawa-centretown",
+        "ottawa-glebe",
+        "ottawa-hintonburg",
+    ]
     assert lock.check(entries) == []
 
 
