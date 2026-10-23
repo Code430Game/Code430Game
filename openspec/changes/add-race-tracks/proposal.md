@@ -55,7 +55,7 @@ GeoTIFF that works for any such source.
 - **Second phase (separate tasks, same change):** the Nürburgring GP circuit with
   `copernicus-30`, and the Nordschleife if a 20.8 km loop loads on the Deck. Its area is
   about 7 × 5 km, mostly forest, so the Deck load time and memory decide.
-- **Not in this change:**
+- **Not in this change** (listed as later todos in `tasks.md` section 4):
   - kerbs, gravel traps, tyre walls, grandstands and pit buildings beyond what OSM's
     building outlines already give;
   - AI racers, a race mode, a lap leaderboard across players;

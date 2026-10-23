@@ -11,3 +11,8 @@
 - [ ] 3.1 `regions/nurburgring-gp.json` with `copernicus-30` (or a German state's 1 m model, if its licence allows redistribution), in a `Location-NurburgDe` pack repo; screenshots against photos of the same corners
 - [ ] 3.2 The Nordschleife only if its Deck load time and memory are acceptable; else noted here and left out
 - [ ] 3.3 **Stop: the human drives the Nürburgring on the Deck**
+## 4. Later (follow-up changes, not this one; human, 2026-10-23: "put kerbs and gravel traps as later todos so we remember"). They do not block archiving: before archiving, each becomes its own proposal or stays on the backlog
+- [ ] 4.1 Kerbs: the red and white kerbs on the apexes and exits (OSM rarely maps them; from the track's curvature, or mapped `barrier=kerb` where present), with a rumble the car feels
+- [ ] 4.2 Gravel traps: run-off areas outside the corners (OSM `surface=gravel` areas where mapped), with grip and drag that slow a car that runs wide
+- [ ] 4.3 Tyre walls, grandstands and pit buildings beyond OSM's building outlines
+- [ ] 4.4 AI racers or a race mode; a lap leaderboard across players
