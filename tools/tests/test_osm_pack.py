@@ -249,3 +249,153 @@ def test_a_turf_in_the_overrides_becomes_the_packs_turf_file(tmp_path: Path):
     assert json.loads(paths["turf"].read_text()) == {"schema_version": 0, "turfs": [turf]}
     reports = validate_root(out)
     assert reports and all(r.ok for r in reports), [r.errors for r in reports]
+
+
+def test_a_lower_sidewalk_beside_a_road_does_not_pull_the_road_edge_down():
+    """A corner where the street climbs away from the junction: the sidewalk 1 m lower than the
+    road beside it used to win the cells at the road's edge, leaving a 1 m wheel trap."""
+    from osm_import.pack import PEDESTRIAN
+
+    road = (-100.0, 20.0, 200.0, 20.0, 52.0, 52.0, 4.0)  # 8 m wide at 52 m: edge at z = 24
+    sidewalk = (-100.0, 26.0, 200.0, 26.0, 51.0, 51.0, 1.0, 4.0, 3.0, PEDESTRIAN)
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    flatten_roads(chunk, [road, sidewalk])
+    edge_row = int(24 / TERRAIN_RES_M)
+    assert chunk.heights[edge_row, 10] == pytest.approx(52.0 - 0.03, abs=1e-3)
+    assert chunk.heights[int(20 / TERRAIN_RES_M), 10] == pytest.approx(52.0 - 0.03, abs=1e-3)
+
+
+def test_a_road_under_a_sidewalk_still_owns_the_ground_it_covers():
+    """The lower-surface rule still holds where one surface is over another: a road under a
+    curb-height sidewalk keeps the ground at the road."""
+    from osm_import.pack import PEDESTRIAN
+
+    road = (-100.0, 20.0, 200.0, 20.0, 50.0, 50.0, 4.0)
+    sidewalk = (-100.0, 21.0, 200.0, 21.0, 50.12, 50.12, 1.0, 4.0, 3.0, PEDESTRIAN)
+    chunk = sample_chunk(FlatSource(49.0), 0, 0)
+    flatten_roads(chunk, [road, sidewalk])
+    assert chunk.heights[int(20 / TERRAIN_RES_M), 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
+
+
+def test_paths_the_finished_terrain_buries_a_little_are_lifted_onto_it():
+    from types import SimpleNamespace
+
+    from osm_import.pack import LIFT_ABOVE_M, lift_buried_paths
+
+    buried = SimpleNamespace(
+        covered=False, profile="", kind="sidewalk", polyline=[(0.0, 51.7, 0.0), (10.0, 52.0, 0.0)]
+    )
+    deep = SimpleNamespace(
+        covered=False, profile="", kind="sidewalk", polyline=[(0.0, 47.0, 0.0)]
+    )  # under an embankment: it keeps its height, the ground is cut instead
+    tunnel = SimpleNamespace(
+        covered=False, profile="tunnel", kind="footway", polyline=[(0.0, 51.8, 0.0)]
+    )
+    graph = SimpleNamespace(pedestrian=[buried, deep, tunnel])
+    assert lift_buried_paths(graph, lambda x, z: 52.0) == 1
+    assert buried.polyline[0][1] == pytest.approx(52.0 + LIFT_ABOVE_M)
+    assert buried.polyline[1][1] == pytest.approx(52.0)  # level with the ground already
+    assert deep.polyline[0][1] == 47.0 and tunnel.polyline[0][1] == 51.8
+
+
+def test_the_ground_is_cut_along_a_path_buried_deep_but_never_under_a_road():
+    from types import SimpleNamespace
+
+    from osm_import.pack import cut_under_deep_paths
+
+    chunk = sample_chunk(FlatSource(55.0), 0, 0)  # an embankment 5 m over the path
+    path = SimpleNamespace(
+        covered=False,
+        profile="",
+        kind="sidewalk",
+        width_m=2.0,
+        polyline=[(10.0, 50.0, 40.0), (240.0, 50.0, 40.0)],
+    )
+    from osm_import.graph import RoadGraph
+
+    graph = RoadGraph(nodes={}, edges={}, pedestrian=[path])
+    from osm_import.pack import ChunkSampler
+
+    changed = cut_under_deep_paths([chunk], graph, ChunkSampler([chunk]).sample)
+    assert changed > 0
+    row = int(40 / TERRAIN_RES_M)
+    assert chunk.heights[row, 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
+    assert chunk.heights[row + 3, 10] == pytest.approx(55.0)  # 12 m away: untouched
+
+
+def _bridge_graph():
+    """A level street at 50 m running east along z = 100, and a 7 m deck at 58 m crossing it
+    north to south at x = 100 (its approaches are ground roads at 58 m on either side)."""
+    from osm_import.graph import RoadEdge, RoadGraph, RoadNode
+
+    def edge(eid, a, b, pts, bridge=False):
+        return RoadEdge(
+            eid, a, b, pts, "residential", 1, 1, False, 40, 7.0, 0, bridge, False, eid, 1, []
+        )
+
+    nodes = {
+        "w": RoadNode("w", (0.0, 50.0, 100.0), [1]),
+        "e": RoadNode("e", (200.0, 50.0, 100.0), [2]),
+        "n0": RoadNode("n0", (100.0, 58.0, 0.0), [3]),
+        "n1": RoadNode("n1", (100.0, 58.0, 70.0), [4]),
+        "s1": RoadNode("s1", (100.0, 58.0, 130.0), [5]),
+        "s0": RoadNode("s0", (100.0, 58.0, 200.0), [6]),
+    }
+    edges = {
+        "street": edge("street", "w", "e", [(0.0, 50.0, 100.0), (200.0, 50.0, 100.0)]),
+        "north": edge("north", "n0", "n1", [(100.0, 58.0, 0.0), (100.0, 58.0, 70.0)]),
+        "deck": edge("deck", "n1", "s1", [(100.0, 58.0, 70.0), (100.0, 58.0, 130.0)], bridge=True),
+        "south": edge("south", "s1", "s0", [(100.0, 58.0, 130.0), (100.0, 58.0, 200.0)]),
+    }
+    return RoadGraph(nodes, edges, [])
+
+
+def test_cells_past_a_decks_end_are_not_under_it():
+    from osm_import.pack import _road_footprints, _under_decks
+
+    _ground, bridges = _road_footprints(_bridge_graph(), include_pedestrian=False)
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    under, deck_y = _under_decks(chunk, bridges)
+    row, col = int(100 / TERRAIN_RES_M), int(100 / TERRAIN_RES_M)
+    assert under[row, col] and deck_y[row, col] == pytest.approx(58.0)
+    assert under[row, col + 1]  # 4 m beside the centreline: under the 7 m deck plus its reach
+    assert not under[int(60 / TERRAIN_RES_M), col]  # 10 m past the deck's north end
+    assert not under[int(140 / TERRAIN_RES_M), col]  # and its south end
+
+
+def test_the_under_deck_lowering_stops_short_of_where_a_deck_meets_the_ground():
+    from types import SimpleNamespace
+
+    from osm_import.pack import _deck_end_fences, _lower_disc
+
+    pts = [(100.0, 58.0, 70.0), (100.0, 58.0, 130.0)]
+    ends = [SimpleNamespace(x=100.0, y=58.0, z=70.0), SimpleNamespace(x=100.0, y=58.0, z=130.0)]
+    fences = _deck_end_fences(pts, [(e.x, e.y, e.z) for e in ends])
+    assert len(fences) == 2
+    assert _deck_end_fences(pts, []) == []  # a strip ending in mid-air gets no fence
+    chunk = sample_chunk(FlatSource(58.0), 0, 0)
+    by_key = {(0, 0): chunk}
+    _lower_disc(by_key, 100.0, 70.0, 8.0, 52.0, fences)  # the station at the north end
+    col = int(100 / TERRAIN_RES_M)
+    assert chunk.heights[int(68 / TERRAIN_RES_M), col] == pytest.approx(58.0)  # behind the end
+    assert chunk.heights[int(72 / TERRAIN_RES_M), col] == pytest.approx(58.0)  # one cell inside
+    assert chunk.heights[int(76 / TERRAIN_RES_M), col] == pytest.approx(52.0)  # under the deck
+
+
+def test_a_road_beneath_a_deck_gets_its_bed_back_and_an_approach_does_not_raise_the_ground():
+    from osm_import.pack import ROAD_SURFACE_DROP_M, restore_road_beds
+
+    graph = _bridge_graph()
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    row, col = int(100 / TERRAIN_RES_M), int(100 / TERRAIN_RES_M)
+    chunk.heights[row, col] = 48.0  # the under-deck lowering dug under the street
+    chunk.heights[int(80 / TERRAIN_RES_M), col] = 50.0  # ground under the deck, past the street
+    chunk.heights[int(60 / TERRAIN_RES_M), col] = 52.0  # under the north approach, lowered
+    restore_road_beds([chunk], graph)
+    assert chunk.heights[row, col] == pytest.approx(50.0 - ROAD_SURFACE_DROP_M, abs=1e-3)
+    # Under the deck the approach road's bed (at deck height) is not put back.
+    assert chunk.heights[int(80 / TERRAIN_RES_M), col] == pytest.approx(50.0)
+    # Past the deck's end the approach owns its bed again.
+    assert chunk.heights[int(60 / TERRAIN_RES_M), col] == pytest.approx(
+        58.0 - ROAD_SURFACE_DROP_M, abs=1e-3
+    )

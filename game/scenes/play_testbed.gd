@@ -13,6 +13,7 @@ const CAR_SCENE := preload("res://actors/vehicles/placeholder_car.tscn")
 const PLAYER_SCENE := preload("res://actors/player/player.tscn")
 const ON_FOOT_OFFSET_M := 2.2
 const GO_TO_STEP_M := 4.0  # "Go to": how far from the place, toward its street, the player stands
+const GO_TO_CLEAR_M := 1.0  # and at least this far outside any building on the way
 const FALL_BELOW_GROUND_M := 25.0  # on foot this far under the terrain: fell out of the world
 const FOOT_RESET_REACH_M := 150.0  # on-foot reset: the nearest street within this, else the start
 const FOOT_RESET_DY_M := 12.0  # prefer a street about level with the player (not a bridge overhead)
@@ -646,7 +647,7 @@ func _go_to_place(place: Services.Place) -> void:
 	if node != null:
 		toward = Vector3(node.position.x - at.x, 0.0, node.position.z - at.z)
 	if toward.length() > 1.0:
-		at += toward.normalized() * minf(GO_TO_STEP_M, toward.length() * 0.5)
+		at = go_to_point(at, node.position, _pack.buildings)
 	at.y = _pack.ground_height(at.x, at.z)
 	_overview.close()
 	if _player.is_driving():
@@ -702,6 +703,58 @@ func _step_foot_reset(held: bool, delta: float) -> float:
 	_foot_reset_s = -1.0
 	_place_player(foot_reset_point(_pack.graph, _player.global_position, _on_foot_start(_pack.spawn_transform()) - Vector3.UP * 1.0))
 	return 0.0
+
+
+## Where "Go to" puts the player for a place at `at` whose street is at `node`: GO_TO_STEP_M
+## toward the street (at most half way), and on from there, a metre at a time, until the spot is
+## outside every building footprint with a metre to spare. A shop's place is its OSM point,
+## usually inside the building, and a player put down inside a block's building could not get
+## out. Falls back to the street itself when the whole way is built over.
+static func go_to_point(at: Vector3, node: Vector3, buildings: Array[BuildingBuilder.Building]) -> Vector3:
+	var toward := Vector3(node.x - at.x, 0.0, node.z - at.z)
+	var length := toward.length()
+	if length <= 1.0:
+		return at
+	var dir := toward / length
+	var s := minf(GO_TO_STEP_M, length * 0.5)
+	while s < length:
+		var p := at + dir * s
+		if not _in_a_building(Vector2(p.x, p.z), buildings, GO_TO_CLEAR_M):
+			return p
+		s += 1.0
+	return Vector3(node.x, at.y, node.z)
+
+
+## Whether `p` lies inside a building's outer ring (and not in a courtyard it holds), or within
+## `clear` of one.
+static func _in_a_building(p: Vector2, buildings: Array[BuildingBuilder.Building], clear: float) -> bool:
+	for b in buildings:
+		if b.rings.is_empty():
+			continue
+		var outer := b.rings[0]
+		var box := Rect2(outer[0], Vector2.ZERO)
+		for v in outer:
+			box = box.expand(v)
+		if not box.grow(clear).has_point(p):
+			continue
+		var inside := Geometry2D.is_point_in_polygon(p, outer)
+		if not inside:
+			var n := outer.size()
+			for i in range(n):
+				var q := Geometry2D.get_closest_point_to_segment(p, outer[i], outer[(i + 1) % n])
+				if p.distance_to(q) <= clear:
+					inside = true
+					break
+		if not inside:
+			continue
+		var in_court := false
+		for k in range(1, b.rings.size()):
+			if Geometry2D.is_point_in_polygon(p, b.rings[k]):
+				in_court = true
+				break
+		if not in_court:
+			return true
+	return false
 
 
 ## Where an on-foot reset from `at` goes: the nearest point on a street within FOOT_RESET_REACH_M,

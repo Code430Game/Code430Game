@@ -1,14 +1,22 @@
 extends GdUnitTestSuite
 ## Grass through roads: on the Ottawa pack, how many junction surfaces have terrain poking up
 ## through them (JunctionReport.terrain_above: sampled 60% and 85% of the way from the centre to
-## each outline vertex, at least 5 cm). Junctions with a tunnel arm are left out: the terrain over
-## a tunnel mouth is the hillside the tunnel goes into (update-junction-surfaces).
+## each outline vertex against the drawn surface, at least 5 cm). Junctions with a tunnel arm are
+## left out: the terrain over a tunnel mouth is the hillside the tunnel goes into
+## (update-junction-surfaces).
 
 const PACK_ID := "code430.ottawa-centretown"
 ## A regression guard as a share of junctions, so it holds as the graph grows: 2026-10-04, 16 of
 ## 915 (1.7%) on main's pack, 47 of 1,936 (2.4%) with parking aisles and driveways; 2026-10-06
 ## (update-junction-surfaces: outlines that follow their roads, corners flattened in the
-## importer, tunnels apart) 14 of about 1,930, none over 0.25 m.
+## importer, tunnels apart) 14 of about 1,930, none over 0.25 m. 2026-10-23 (no wheel traps at
+## road edges): a lower road no longer keeps the ground within 4 m of it, so at corners where a
+## junction's arms sit at different heights the higher arm's ground pokes up a little: 51 of
+## 2,198, none over 0.35 m. 2026-10-23 (update-junction-ground: the terrain under a junction
+## follows the surface the game draws, and this check measures against that surface instead
+## of a fan from the node, which at a clustered junction is not what is drawn): 16 of 2,198,
+## none over 0.16 m, with 669 wheel traps (EdgeDropReport) in the same build (Centretown 0.5.1;
+## measured this way the 0.4.0 pack had 41, 1.9%).
 const MAX_POKING_SHARE := 0.01
 const MAX_POKE_M := 0.5
 
