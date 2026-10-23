@@ -5,15 +5,54 @@ from __future__ import annotations
 
 import json
 import math
+import platform
+import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
+from shapely.geometry import Polygon
 
 from osm_import import __main__ as importer
+from osm_import.png import read_rgb8
 
 REPO = Path(__file__).resolve().parents[2]
 PACK = REPO / "packs" / "proving-ground"
 REGION = REPO / "regions" / "proving-ground.json"
+# The pack is regenerated on an arm64 Mac and checked byte for byte there. Floating-point
+# geometry (GEOS cutting the yards, the terrain carved under them) comes out a little different
+# on x86 Linux (GitHub's runners), so there the terrain and yards only have to be close.
+HEIGHT_STEPS = 2  # 16-bit height steps any terrain sample may be off by
+HEIGHT_OUTLIERS = 4  # samples per chunk that may be off by more
+YARD_AREA_M2 = 5.0  # how far a yard's pieces may differ in area
+
+
+def _close_enough(rel: Path, fresh: bytes, committed: bytes) -> bool:
+    """Off the Mac: the terrain and yards the same within floating-point slack."""
+    if rel.suffix == ".png" and rel.parts[0] == "terrain":
+        ha, hb = read_rgb8(fresh).astype(np.int32), read_rgb8(committed).astype(np.int32)
+        if ha.shape != hb.shape:
+            return False
+        d = np.abs((ha[..., 0] * 256 + ha[..., 1]) - (hb[..., 0] * 256 + hb[..., 1]))
+        return int((d > HEIGHT_STEPS).sum()) <= HEIGHT_OUTLIERS
+    if rel.name == "yards.v0.json":
+        ya, yb = json.loads(fresh), json.loads(committed)
+        if ya["fences"] != yb["fences"] or len(ya["yards"]) != len(yb["yards"]):
+            return False
+        for x, y in zip(ya["yards"], yb["yards"]):
+            if x.keys() != y.keys():
+                return False
+            for k in x:
+                if x[k] == y[k]:
+                    continue
+                if not isinstance(x[k], list) or abs(_area(x[k]) - _area(y[k])) > YARD_AREA_M2:
+                    return False
+        return True
+    return False
+
+
+def _area(polygons: list) -> float:
+    return sum(Polygon(p[0], p[1:]).area for p in polygons)
 
 
 def _load(name: str) -> dict:
@@ -44,10 +83,14 @@ def test_committed_pack_matches_a_fresh_import(tmp_path: Path, monkeypatch: pyte
         if p.is_file() and "chunks" not in p.parts and p.name != "build.json"
     )
     assert fresh == committed
+    exact = sys.platform == "darwin" and platform.machine() == "arm64"
+    differs = []
     for rel in committed:
-        assert (out / rel).read_bytes() == (PACK / rel).read_bytes(), (
-            f"{rel} differs; run scripts/regen-proving-ground.sh"
-        )
+        a, b = (out / rel).read_bytes(), (PACK / rel).read_bytes()
+        if a == b or (not exact and _close_enough(rel, a, b)):
+            continue
+        differs.append(str(rel))
+    assert not differs, f"{', '.join(differs)} differ; run scripts/regen-proving-ground.sh"
 
 
 def test_pack_has_one_of_everything():
