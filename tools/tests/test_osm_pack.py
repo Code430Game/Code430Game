@@ -277,20 +277,47 @@ def test_a_road_under_a_sidewalk_still_owns_the_ground_it_covers():
     assert chunk.heights[int(20 / TERRAIN_RES_M), 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
 
 
-def test_paths_the_finished_terrain_buries_are_lifted_onto_it():
+def test_paths_the_finished_terrain_buries_a_little_are_lifted_onto_it():
     from types import SimpleNamespace
 
     from osm_import.pack import LIFT_ABOVE_M, lift_buried_paths
 
     buried = SimpleNamespace(
-        covered=False, profile="", kind="sidewalk", polyline=[(0.0, 51.0, 0.0), (10.0, 52.0, 0.0)]
+        covered=False, profile="", kind="sidewalk", polyline=[(0.0, 51.7, 0.0), (10.0, 52.0, 0.0)]
     )
+    deep = SimpleNamespace(
+        covered=False, profile="", kind="sidewalk", polyline=[(0.0, 47.0, 0.0)]
+    )  # under an embankment: it keeps its height, the ground is cut instead
     tunnel = SimpleNamespace(
-        covered=False, profile="tunnel", kind="footway", polyline=[(0.0, 45.0, 0.0)]
+        covered=False, profile="tunnel", kind="footway", polyline=[(0.0, 51.8, 0.0)]
     )
-    steps = SimpleNamespace(covered=False, profile="", kind="steps", polyline=[(0.0, 40.0, 0.0)])
-    graph = SimpleNamespace(pedestrian=[buried, tunnel, steps])
+    graph = SimpleNamespace(pedestrian=[buried, deep, tunnel])
     assert lift_buried_paths(graph, lambda x, z: 52.0) == 1
     assert buried.polyline[0][1] == pytest.approx(52.0 + LIFT_ABOVE_M)
     assert buried.polyline[1][1] == pytest.approx(52.0)  # level with the ground already
-    assert tunnel.polyline[0][1] == 45.0 and steps.polyline[0][1] == 40.0
+    assert deep.polyline[0][1] == 47.0 and tunnel.polyline[0][1] == 51.8
+
+
+def test_the_ground_is_cut_along_a_path_buried_deep_but_never_under_a_road():
+    from types import SimpleNamespace
+
+    from osm_import.pack import cut_under_deep_paths
+
+    chunk = sample_chunk(FlatSource(55.0), 0, 0)  # an embankment 5 m over the path
+    path = SimpleNamespace(
+        covered=False,
+        profile="",
+        kind="sidewalk",
+        width_m=2.0,
+        polyline=[(10.0, 50.0, 40.0), (240.0, 50.0, 40.0)],
+    )
+    from osm_import.graph import RoadGraph
+
+    graph = RoadGraph(nodes={}, edges={}, pedestrian=[path])
+    from osm_import.pack import ChunkSampler
+
+    changed = cut_under_deep_paths([chunk], graph, ChunkSampler([chunk]).sample)
+    assert changed > 0
+    row = int(40 / TERRAIN_RES_M)
+    assert chunk.heights[row, 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
+    assert chunk.heights[row + 3, 10] == pytest.approx(55.0)  # 12 m away: untouched

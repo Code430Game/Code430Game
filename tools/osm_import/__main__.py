@@ -27,6 +27,7 @@ from osm_import.pack import (
     ChunkSampler,
     build_terrain,
     clamp_under_decks,
+    cut_under_deep_paths,
     elevation_attribution_for,
     lift_buried_paths,
     restore_road_beds,
@@ -204,9 +205,12 @@ def _import(args: argparse.Namespace) -> int:
         tstats["cells_lowered_under_decks"] = clamp_under_decks(chunks, bridges)
         # Lowering under the decks must not leave a ground road above its own bed (a street
         # passing under a viaduct, a ramp beside a deck): put the beds back, then lift any path
-        # that now runs under the ground.
+        # a little under the ground onto it, and cut the ground along any path deep under it.
         tstats["cells_restored_under_roads"] = restore_road_beds(chunks, result.graph)
         tstats["path_points_lifted"] += lift_buried_paths(result.graph, ChunkSampler(chunks).sample)
+        tstats["cells_cut_under_paths"] += cut_under_deep_paths(
+            chunks, result.graph, ChunkSampler(chunks).sample
+        )
         bridges.reset_pier_feet(ChunkSampler(chunks).sample)
         result.report.summary["bridges"] = bridges.counts()
         # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
