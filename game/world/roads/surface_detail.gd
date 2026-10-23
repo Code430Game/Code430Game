@@ -21,14 +21,21 @@ static var _cache: Dictionary = {}  # "kind:size" -> ImageTexture
 const RECIPE_VERSION := 3  # bump when build_image changes, so cached PNGs are rebuilt
 
 
-## The preset's detail texture size and macro switch (defaults when there is no preset).
+static var _last_preset: Dictionary = {}  # the last preset() read on the main thread, for loads on others
+
+
+## The preset's detail texture size and macro switch (defaults when there is no preset). Off the
+## main thread (a map loading under the loading screen) it is the last one read on it.
 static func preset() -> Dictionary:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return _last_preset if not _last_preset.is_empty() else {"px": 512, "macro": false}
 	var tree := Engine.get_main_loop() as SceneTree
 	var settings: Node = tree.root.get_node_or_null("Settings") if tree != null else null
 	var p: Dictionary = {}
 	if settings != null:
 		p = (settings.get("presets") as Dictionary).get(str(settings.get("current_preset_name")), {})
-	return {"px": int(p.get("surface_detail_px", 512)), "macro": bool(p.get("surface_detail_macro", false))}
+	_last_preset = {"px": int(p.get("surface_detail_px", 512)), "macro": bool(p.get("surface_detail_macro", false))}
+	return _last_preset
 
 
 ## Greyscale detail image for `kind` at `size` px (fresh; see texture() for the cached one).

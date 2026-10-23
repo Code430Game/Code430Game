@@ -16,6 +16,9 @@ func before() -> void:
 	_bed.set("_traffic_cap", 0)
 	_bed.set("_peds_cap", 0)
 	add_child(_bed)
+	var until := Time.get_ticks_msec() + 180000  # the map loads on a thread under the loading screen
+	while not _bed.get("map_loaded") and Time.get_ticks_msec() < until:
+		await get_tree().process_frame
 	for i in range(600):
 		await get_tree().process_frame
 		var player: Variant = _bed.get("_player")

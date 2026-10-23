@@ -73,6 +73,12 @@ var districts: PackedStringArray = []
 var set_refusal: String = ""
 ## How many border crossings joined between the districts.
 var joined_crossings: int = 0
+## How far a load or load_districts has got, 0 to 1, and what it is on: a loading screen reads
+## these from the main thread while the load runs on another.
+var progress: float = 0.0
+var progress_text: String = ""
+var _sink: MapPack = null  # a district part reports into the set loading it
+var _span := Vector2(0.0, 1.0)  # the part of the set's bar this load fills
 var _content_hash: String = ""  # cached per load: the pack files cannot change underneath a loaded pack
 var content_hash_runs: int = 0  # how many times the files were hashed, for tests
 
@@ -97,11 +103,14 @@ func load(dir: String) -> bool:
 	if manifest.get("type", "") != "map":
 		push_error("MapPack: %s is not a map pack" % manifest.get("id", dir))
 		return false
+	_step(0.0, "roads")
 	graph = RoadGraph.load_from_file(dir.path_join("road_graph.v0.json"))
 	if graph == null:
 		return false
 	terrain_index = TerrainBuilder.load_index(dir)
+	_step(0.15, "junctions")
 	junctions = JunctionBuilder.build_all(graph)
+	_step(0.3, "water and markings")
 	road_material = _road_material()
 	terrain_material = _terrain_material()
 	water_material = WaterBuilder.material()
@@ -112,13 +121,16 @@ func load(dir: String) -> bool:
 		marking_chunks = markings.build(graph, junctions)
 		marking_visible_to_m = float(markings.rules["visible_to_m"])
 	marking_material = MarkingBuilder.material()
+	_step(0.45, "buildings")
 	building_material = BuildingBuilder.material()
 	buildings = BuildingBuilder.load_buildings(dir)
 	building_chunks = BuildingBuilder.build(buildings)
+	_step(0.65, "sidewalks")
 	sidewalk_material = SidewalkBuilder.material()
 	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
 	underpass_chunks = UnderpassBuilder.build(graph.pedestrian)
 	terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
+	_step(0.75, "curbs, bridges and lots")
 	barrier_material = BarrierBuilder.material()
 	barriers = BarrierBuilder.clip_curbs(BarrierBuilder.load_barriers(dir), junctions)
 	barrier_chunks = BarrierBuilder.build(barriers)
@@ -147,6 +159,7 @@ func load(dir: String) -> bool:
 		p.road_node = ""
 		p.address = ""
 		services.append(p)
+	_step(0.9, "garages")
 	garages = GarageBuilder.load_garages(dir, graph)
 	var built := GarageBuilder.build(garages)
 	garage_chunks = built["structure"]
@@ -165,6 +178,15 @@ func load(dir: String) -> bool:
 	return terrain_index.size() > 0
 
 
+var _label: String = ""  # the district a part's progress text names
+
+
+func _step(fraction: float, text: String) -> void:
+	var to := _sink if _sink != null else self
+	to.progress = _span.x + fraction * (_span.y - _span.x)
+	to.progress_text = (_label + ": " + text) if _label != "" else text
+
+
 ## Loads neighbouring districts of one city as one map (add-district-stitching): each loads
 ## as on its own, then the map takes the joined road graph (DistrictSet.merge_graphs, its
 ## junctions, markings and footways rebuilt), each terrain chunk from the district owning it,
@@ -179,8 +201,12 @@ func load_districts(dirs: PackedStringArray) -> bool:
 		return false
 	var parts: Array[MapPack] = []
 	var manifests: Array = []
+	var share := 0.75 / dirs.size()  # each district's own load; the join takes the rest
 	for d in dirs:
 		var p := MapPack.new()
+		p._sink = self
+		p._span = Vector2(parts.size() * share, (parts.size() + 1) * share)
+		p._label = d.get_file()
 		if not p.load(d):
 			set_refusal = "%s did not load" % d
 			return false
@@ -198,6 +224,7 @@ func load_districts(dirs: PackedStringArray) -> bool:
 	for d in dirs:
 		graphs.append(_read_json(d.path_join("road_graph.v0.json")))
 		borders.append(_read_json(d.path_join("border.v0.json")))
+	_step(0.75, "joining the districts")
 	var merged := DistrictSet.merge_graphs(graphs, borders, rects)
 	joined_crossings = int(merged["pairs"])
 	var base: MapPack = parts[0]
@@ -261,6 +288,7 @@ func load_districts(dirs: PackedStringArray) -> bool:
 	building_ids.sort()
 	for id: String in building_ids:
 		buildings.append(by_id[id][0])
+	_step(0.85, "joined buildings and sidewalks")
 	building_chunks = BuildingBuilder.build(buildings)
 	sidewalk_chunks = SidewalkBuilder.build(graph.pedestrian)
 	underpass_chunks = UnderpassBuilder.build(graph.pedestrian)

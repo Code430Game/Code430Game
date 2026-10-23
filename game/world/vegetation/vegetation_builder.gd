@@ -66,6 +66,8 @@ static var _preset: Dictionary = {}
 
 
 static func read_preset() -> void:
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		return  # a map loading on another thread keeps what the main thread read
 	var tree := Engine.get_main_loop() as SceneTree
 	var settings: Node = tree.root.get_node_or_null("Settings") if tree != null else null
 	_preset = {}
