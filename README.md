@@ -10,14 +10,15 @@ with AI agents, and it's early: expect rough edges.
 1. **Download** the zip for your system from [Releases](https://github.com/Code430Game/Code430Game/releases):
    - **Windows:** unzip anywhere and run `code430.exe`, keeping the `packs` folder beside it.
      The build isn't code-signed, so SmartScreen warns the first time: More info > Run anyway.
-   - **Steam Deck / Linux:** see [Put a build on a Steam Deck](#put-a-build-on-a-steam-deck).
+   - **Linux:** unzip and run `code430.x86_64`, keeping the `packs` folder beside it.
+   - **Steam Deck:** see [Put a build on a Steam Deck](#put-a-build-on-a-steam-deck).
 2. **Controls:** an Xbox-style controller or keyboard and mouse. The pause menu's Controls tab
    lists them and rebinds them; the same list is in [`docs/controls.md`](docs/controls.md).
    On a strong PC, set the graphics preset to High in the pause menu's Settings tab.
 3. **Found a problem?** Hold Menu (Start) for a second, or press F8, or pick "Report a problem"
    in the pause menu. It saves a screenshot and where you were, and files a GitHub issue; you
-   need no account. Reports are **public**: IP and email addresses are removed and the
-   reporter id is shown only as a one-way hash, but leave personal details out of what you type.
+   need no account. Reports are **public and anonymous**: leave personal details out of what
+   you type.
 
 ## What's in it
 A playable sandbox in central Ottawa (Centretown), plus Double Cross, a small generated test
