@@ -39,6 +39,21 @@ GeoTIFF that works for any such source.
     the map has one. Otherwise, at the loop's point nearest the pit lane's exit.
   - **Readout:** `loop_names` lists the loop's names (the circuit's name and each section's),
     so the readout shows anywhere on the loop. The lap file format does not change.
+- **A paddock with every car.** Each track pack has one showroom lot: the largest mapped
+  `amenity=parking` inside the facility (Calabogie has two surface lots there). The idea is to
+  try any car on the track without a car selector, which would sit outside the game's usual
+  play (human, 2026-10-23: "we should include a parking lot with all the cars on these too").
+  - It holds every vehicle in the catalogue once, in catalogue order, including vehicles a pack
+    adds. A new car shows up here as soon as it's in the catalogue.
+  - It's always full, at every hour, with no occupancy draw. The per-chunk parked-car cap
+    doesn't drop any of its cars.
+  - A car the player takes comes back to its stall once the player is more than 100 m from it,
+    so the lineup is never short.
+  - The importer names the lot in a new optional file, `showroom.v0.json` (`lots`: lot ids).
+    `parking.v0.json` doesn't change, so an older game ignores the file and fills the lot the
+    usual way.
+  - If the lot has fewer stalls than there are cars, the export's validation report says so.
+    The overflow continues in a second lot when there is one.
 - **More elevation sources.** A region's `dem` picks the source. The licence and credit go in
   the pack manifest (the existing attribution requirement):
   - `hrdem` (today's NRCan 2 m mosaic);
@@ -62,7 +77,7 @@ GeoTIFF that works for any such source.
   - racing lines.
 
 ## Impact
-- Affected specs: `specs/road-network/spec.md` (ADDED: Race Tracks, Laps From Raceways,
+- Affected specs: `specs/road-network/spec.md` (ADDED: Race Tracks, Laps From Raceways, Track Showroom,
   Elevation Sources).
 - Affected code:
   - `tools/osm_import/road_classes.json`: `raceway` in `drivable_classes`, its defaults, and
@@ -70,8 +85,12 @@ GeoTIFF that works for any such source.
   - `tools/osm_import/`: a new `circuits.py` (facility names, loops, start lines, the lap
     file); `elevation.py` (a source table, `hrdem-1m`, `copernicus-30` with lowest-cell sampling
     under roads); `__main__.py` (`--dem` choices from the table);
-  - `game/`: no new code expected. Traffic, parking and pedestrians already read the class
-    lists. To check: speed-limit signs and the HUD's road name on a raceway;
+  - `tools/osm_import/`: `showroom.v0.json` from the facility's largest lot;
+    `docs/pack-format/showroom.schema.v0.json` (new), checked by the pack validator;
+  - `game/world/dressing/parked_cars.gd`: showroom lots filled with the whole catalogue,
+    exempt from occupancy and the chunk cap, and taken cars returned to their stalls;
+  - `game/`: otherwise no new code expected. Traffic, parking and pedestrians already read the
+    class lists. To check: speed-limit signs and the HUD's road name on a raceway;
   - tests on both sides; a raceway loop on the proving ground is not needed (its ring already
     tests laps).
 - New pack repo `Location-CalabogieOnCa`; `packs.lock.json` gains it once its release passes.

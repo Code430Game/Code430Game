@@ -25,6 +25,21 @@ For each closed loop of raceway pieces, chained end to end in their one-way dire
 - **WHEN** a loop is made of pieces named "Hohe Acht", "Sprintstrecke" and others
 - **THEN** the lap readout stays visible on every one of them
 
+### Requirement: Track Showroom
+Each track pack SHALL name one showroom lot, the largest mapped parking lot inside the facility, in `showroom.v0.json`. The game SHALL fill a showroom lot with every vehicle in the catalogue once, in catalogue order and including vehicles added by packs, at every hour, without occupancy or the per-chunk parked-car cap removing any. A car taken from it SHALL return to its stall once the player is more than 100 m from the stall. A game or pack without the file SHALL fill lots as before.
+
+#### Scenario: Every car at Calabogie
+- **WHEN** the player walks into the Calabogie paddock
+- **THEN** every vehicle in the catalogue is parked there, once each
+
+#### Scenario: A new car
+- **WHEN** a pack adds a vehicle to the catalogue
+- **THEN** it is parked in the showroom on the next load
+
+#### Scenario: Back in its stall
+- **WHEN** the player takes the van from the showroom, drives a lap and leaves it on the track
+- **THEN** a van is back in the van's stall once the player is 100 m from the stall
+
 ### Requirement: Elevation Sources
 A region's `dem` SHALL choose the elevation source from a table of sources. Each entry gives the source's URL, licence, credit, and whether it is a surface model (trees and buildings included). The pack manifest SHALL credit the source used. For a surface model, the importer SHALL take a road's ground height from the lowest nearby cell, not an interpolated one.
 

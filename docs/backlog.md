@@ -9,7 +9,7 @@ Each entry names the place (local x,z where known) so a fresh session can go str
   traps as later todos so we remember").** Kerbs on the apexes and exits (with a rumble the car
   feels), gravel traps outside the corners (grip and drag that slow a car running wide), then
   tyre walls, grandstands and pit buildings, and later AI racers or a race mode with a lap
-  leaderboard. Listed in `openspec/changes/add-race-tracks/tasks.md` section 4.
+  leaderboard. Listed in `openspec/changes/add-race-tracks/tasks.md` section 5.
 
 ## 2026-10-21
 
