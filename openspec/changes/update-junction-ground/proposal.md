@@ -36,6 +36,9 @@ own.
   deeper, it keeps its height and the ground is cut along it, never under a road.
 - **One command to judge it.** `scripts/terrain-trial.sh <district>` exports a district, runs the
   wheel-trap scan, the junction test and the Metcalfe test, and puts the locked pack back.
+- **The junction check measures the drawn surface.** `JunctionReport.terrain_above` samples the
+  triangulated outline the game draws instead of a fan from the node's height, which at a
+  clustered junction is not what is drawn (design.md, lesson 2).
 - **Not in this change:** retaining walls (`add-retaining-walls`, #168), which handle a steep
   bank beside a road once the ground at the edge is right.
 
@@ -45,6 +48,8 @@ own.
   `_junction_corners` or its replacement, `clamp_under_decks`, `restore_road_beds`,
   `lift_buried_paths`, `cut_under_deep_paths`), `tools/osm_import/__main__.py` (order of the
   terrain passes); `game/world/roads/edge_drop_report.gd` and its test (already on the branch);
+  `game/world/roads/junction_report.gd` (the surface sampled), `tools/osm_import/junctions.py`
+  (new: the outline port) and `game/world/build/junction_outline_dump.gd` (new: the fixture);
   the proving ground regenerated; the three Ottawa districts re-exported and released (next
   versions: Centretown 0.5.1, the Glebe 0.2.1, Hintonburg 0.2.1; 0.5.0 and 0.2.0 exist as
   releases but are superseded and must not go in the lock).

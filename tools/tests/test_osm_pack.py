@@ -321,3 +321,81 @@ def test_the_ground_is_cut_along_a_path_buried_deep_but_never_under_a_road():
     row = int(40 / TERRAIN_RES_M)
     assert chunk.heights[row, 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
     assert chunk.heights[row + 3, 10] == pytest.approx(55.0)  # 12 m away: untouched
+
+
+def _bridge_graph():
+    """A level street at 50 m running east along z = 100, and a 7 m deck at 58 m crossing it
+    north to south at x = 100 (its approaches are ground roads at 58 m on either side)."""
+    from osm_import.graph import RoadEdge, RoadGraph, RoadNode
+
+    def edge(eid, a, b, pts, bridge=False):
+        return RoadEdge(
+            eid, a, b, pts, "residential", 1, 1, False, 40, 7.0, 0, bridge, False, eid, 1, []
+        )
+
+    nodes = {
+        "w": RoadNode("w", (0.0, 50.0, 100.0), [1]),
+        "e": RoadNode("e", (200.0, 50.0, 100.0), [2]),
+        "n0": RoadNode("n0", (100.0, 58.0, 0.0), [3]),
+        "n1": RoadNode("n1", (100.0, 58.0, 70.0), [4]),
+        "s1": RoadNode("s1", (100.0, 58.0, 130.0), [5]),
+        "s0": RoadNode("s0", (100.0, 58.0, 200.0), [6]),
+    }
+    edges = {
+        "street": edge("street", "w", "e", [(0.0, 50.0, 100.0), (200.0, 50.0, 100.0)]),
+        "north": edge("north", "n0", "n1", [(100.0, 58.0, 0.0), (100.0, 58.0, 70.0)]),
+        "deck": edge("deck", "n1", "s1", [(100.0, 58.0, 70.0), (100.0, 58.0, 130.0)], bridge=True),
+        "south": edge("south", "s1", "s0", [(100.0, 58.0, 130.0), (100.0, 58.0, 200.0)]),
+    }
+    return RoadGraph(nodes, edges, [])
+
+
+def test_cells_past_a_decks_end_are_not_under_it():
+    from osm_import.pack import _road_footprints, _under_decks
+
+    _ground, bridges = _road_footprints(_bridge_graph(), include_pedestrian=False)
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    under, deck_y = _under_decks(chunk, bridges)
+    row, col = int(100 / TERRAIN_RES_M), int(100 / TERRAIN_RES_M)
+    assert under[row, col] and deck_y[row, col] == pytest.approx(58.0)
+    assert under[row, col + 1]  # 4 m beside the centreline: under the 7 m deck plus its reach
+    assert not under[int(60 / TERRAIN_RES_M), col]  # 10 m past the deck's north end
+    assert not under[int(140 / TERRAIN_RES_M), col]  # and its south end
+
+
+def test_the_under_deck_lowering_stops_short_of_where_a_deck_meets_the_ground():
+    from types import SimpleNamespace
+
+    from osm_import.pack import _deck_end_fences, _lower_disc
+
+    pts = [(100.0, 58.0, 70.0), (100.0, 58.0, 130.0)]
+    ends = [SimpleNamespace(x=100.0, y=58.0, z=70.0), SimpleNamespace(x=100.0, y=58.0, z=130.0)]
+    fences = _deck_end_fences(pts, [(e.x, e.y, e.z) for e in ends])
+    assert len(fences) == 2
+    assert _deck_end_fences(pts, []) == []  # a strip ending in mid-air gets no fence
+    chunk = sample_chunk(FlatSource(58.0), 0, 0)
+    by_key = {(0, 0): chunk}
+    _lower_disc(by_key, 100.0, 70.0, 8.0, 52.0, fences)  # the station at the north end
+    col = int(100 / TERRAIN_RES_M)
+    assert chunk.heights[int(68 / TERRAIN_RES_M), col] == pytest.approx(58.0)  # behind the end
+    assert chunk.heights[int(72 / TERRAIN_RES_M), col] == pytest.approx(58.0)  # one cell inside
+    assert chunk.heights[int(76 / TERRAIN_RES_M), col] == pytest.approx(52.0)  # under the deck
+
+
+def test_a_road_beneath_a_deck_gets_its_bed_back_and_an_approach_does_not_raise_the_ground():
+    from osm_import.pack import ROAD_SURFACE_DROP_M, restore_road_beds
+
+    graph = _bridge_graph()
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    row, col = int(100 / TERRAIN_RES_M), int(100 / TERRAIN_RES_M)
+    chunk.heights[row, col] = 48.0  # the under-deck lowering dug under the street
+    chunk.heights[int(80 / TERRAIN_RES_M), col] = 50.0  # ground under the deck, past the street
+    chunk.heights[int(60 / TERRAIN_RES_M), col] = 52.0  # under the north approach, lowered
+    restore_road_beds([chunk], graph)
+    assert chunk.heights[row, col] == pytest.approx(50.0 - ROAD_SURFACE_DROP_M, abs=1e-3)
+    # Under the deck the approach road's bed (at deck height) is not put back.
+    assert chunk.heights[int(80 / TERRAIN_RES_M), col] == pytest.approx(50.0)
+    # Past the deck's end the approach owns its bed again.
+    assert chunk.heights[int(60 / TERRAIN_RES_M), col] == pytest.approx(
+        58.0 - ROAD_SURFACE_DROP_M, abs=1e-3
+    )

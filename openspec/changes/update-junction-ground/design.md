@@ -82,3 +82,47 @@ Lessons:
   parking lot, a path under the roadway, the bridge exits).
 - The Mackenzie King Bridge: its walkway to the Rideau Centre and the DND building's upper
   entrances is a real elevated path, correct as it is.
+
+## What this session found (2026-10-23, Fable)
+Measured on Centretown with `scripts/terrain-trial.sh`, then with a replay harness that reran
+only the road passes on the carved terrain (24 s a variant instead of 4 min) with Python ports of
+`EdgeDropReport` and `JunctionReport.terrain_above`, which agreed with the game to within two
+spots. Branch as it was: 590 traps, 143 junctions poking, Metcalfe steps.
+
+| Variant | Traps | Junctions poking (drawn surface) | Metcalfe |
+|---|---|---|---|
+| junction ground only (fan from the node, cell at the surface) | 614 | 74 (fan: 3.4%, worst 0.80 m) | step |
+| + cells pooled to the surface's low point within a cell, + bridge pieces | 740 | 25 (1.1%, worst 0.23 m) | step |
+| + the margin pooled too, arms held at their ribbon | 1,021 | 81 | ok |
+| + roads beneath a deck own their shoulder (the Metcalfe fix), margin at the surface's own edge | 839 | 17 (0.8%) | ok |
+| drawn surface (the triangulated outline) instead of the fan, arm floor at 0 slack | 615 | 42 (1.9%) | ok |
+| arm floor with 0.2 m slack | 699 | 14 (0.6%, worst 0.13 m) | ok |
+| **arm floor with 0.15 m slack (kept; the trial confirms it)** | **672** | **16 (0.7%, worst 0.16 m)** | **ok** |
+
+The Glebe: 819 traps on main -> 294, junctions poking 19 -> 3 (of 1,020). Hintonburg: 748 -> 208,
+19 -> 6 (of 827). Both measured against the drawn surface.
+
+Lessons:
+1. A 4 m terrain grid cannot both meet an arm's edge and stay under a surface that drops
+   away within a cell of that edge. Every lever trades wheel traps for grass through the
+   surface: pooling cells to the surface's low point removes pokes and makes traps at the
+   arms' edges; holding the ground at the arms removes traps and makes pokes. The floor with
+   a little slack (less than a wheel trap, more than a poke) is the balance point.
+2. The fan from the node to the outline, which `JunctionReport.terrain_above` sampled, is not
+   the surface the game draws: at a clustered junction the node's height is no arm's, and the
+   fan ran up to 1.5 m from the drawn triangles. The report now measures against the
+   triangulated outline (`JunctionReport.surface_height`), and the importer follows the same
+   triangulation (`osm_import.junctions.triangulate`, Godot's ear clipping ported).
+3. The remaining traps are mostly not junctions: of 697 at 0.2 m slack, about 330 are
+   0.25-0.35 m on sloping streets, where cells 4 m apart on a diagonal road project to
+   different stations (the grid's own noise, not a hole), about 95 are under-deck lowering
+   beside embankments (the 417 at Nicholas, the Alexandra and Portage bridge abutments), and
+   about 90 are junction corners where two arms differ by more than a metre within a few
+   metres. Banks beside roads (sidewalks at the foot of an embankment) are the
+   `add-retaining-walls` case (#168), not this change's.
+4. The deck-end fence and "set the beds, don't only raise them" were both needed for the
+   proving ground's bridge approaches (Mill Bridge Road, Bridge Street: 1.9 m pits), and the
+   fence then kept the 417's abutment refill standing beside Metcalfe until a road beneath a
+   deck was allowed its shoulder as well as its flat zone.
+5. `fetch-packs.sh` trusting its stamps bit once more: the trial script's restore is the only
+   safe way to swap a pack in and out, and two trials must not run at once.

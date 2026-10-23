@@ -202,14 +202,19 @@ static func allowed_pieces(graph: RoadGraph, j: JunctionBuilder.Junction) -> Arr
 ## Highest terrain above the junction's surface, sampled 60% and 85% of the way from its centre
 ## to each outline vertex (the outline itself sits on the 4 m terrain grid's edge). -INF when no
 ## terrain chunk covers it.
+## How far the terrain stands above the junction's drawn surface at the worst of the sample
+## points: 60% and 85% of the way from the centre to each outline vertex, against the surface
+## RoadMeshBuilder draws (the triangulated outline with its vertex heights), or, for a point
+## outside every triangle, the straight line from the node's height to the vertex's.
 static func terrain_above(pack: MapPack, j: JunctionBuilder.Junction, chunks: Dictionary, loaded: Dictionary) -> float:
 	var worst := -INF
+	var tris := Geometry2D.triangulate_polygon(j.polygon_xz)
 	for i in range(j.polygon_xz.size()):
 		var v := j.polygon_xz[i]
 		for f: float in [0.6, 0.85]:
 			var x := lerpf(j.centre.x, v.x, f)
 			var z := lerpf(j.centre.z, v.y, f)
-			var y := lerpf(j.centre.y, j.heights[i], f)
+			var y := surface_height(j, tris, Vector2(x, z), lerpf(j.centre.y, j.heights[i], f))
 			var key := RoadGeometry.chunk_of(Vector3(x, 0.0, z))
 			if not chunks.has(key):
 				continue
@@ -219,6 +224,24 @@ static func terrain_above(pack: MapPack, j: JunctionBuilder.Junction, chunks: Di
 			if h != null:
 				worst = maxf(worst, h.sample(x, z) - y)
 	return worst
+
+
+## Height of the drawn surface at `p`: the vertex heights interpolated over the triangle of
+## `tris` (from Geometry2D.triangulate_polygon) that holds it, or `fallback` when none does.
+static func surface_height(j: JunctionBuilder.Junction, tris: PackedInt32Array, p: Vector2, fallback: float) -> float:
+	for t in range(0, tris.size() - 2, 3):
+		var a := j.polygon_xz[tris[t]]
+		var b := j.polygon_xz[tris[t + 1]]
+		var c := j.polygon_xz[tris[t + 2]]
+		var det := (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
+		if absf(det) < 1e-9:
+			continue
+		var wb := ((p.x - a.x) * (c.y - a.y) - (c.x - a.x) * (p.y - a.y)) / det
+		var wc := ((b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y)) / det
+		var wa := 1.0 - wb - wc
+		if wa >= -1e-6 and wb >= -1e-6 and wc >= -1e-6:
+			return wa * j.heights[tris[t]] + wb * j.heights[tris[t + 1]] + wc * j.heights[tris[t + 2]]
+	return fallback
 
 
 ## Area of a simple polygon (shoelace), always positive.
