@@ -30,47 +30,65 @@ GeoTIFF that works for any such source.
   - It gets no sidewalks, lane markings or street furniture.
   - Junctions with the pit lane and service roads are built like any other junction.
 - **Every piece of a circuit is named.** OSM splits a circuit into pieces: CTMP's loop is
-  unnamed, the Nürburgring's pieces are named by section. A raceway inside a named facility
-  outline (a named `leisure=sports_centre` or `leisure=track` area, or any named area with `sport=motor`) gets
-  the facility's name as `circuit` on the edge. Its own `name` stays the section's.
+  unnamed, the Nürburgring's pieces are named by section. A facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`.
+  A raceway edge whose midpoint lies inside a facility gets the facility's name as `circuit`;
+  inside two, the smaller one's. Its own `name` stays the section's.
 - **Laps from the map.** For each closed raceway loop (pieces chained end to end by one-way
   direction), the importer writes a lap to `lap.v0.json`.
   - **Start line:** at a node on the loop tagged or named as the start/finish or timing line where
-    the map has one. Otherwise, at the loop's point nearest the pit lane's exit.
+    the map has one. Otherwise, at the loop's point nearest the pit lane's exit. A loop with
+    neither gets its start line at the middle of its longest straight segment, where a real
+    start line usually is.
   - **Readout:** `loop_names` lists the loop's names (the circuit's name and each section's),
     so the readout shows anywhere on the loop. The lap file format does not change.
-- **A paddock with every car.** Each track pack has one showroom lot: the largest mapped
-  `amenity=parking` inside the facility (Calabogie has two surface lots there). The idea is to
+- **A paddock with every car.** Each track pack has a showroom: the mapped `amenity=parking`
+  lots whose centroid is inside the facility (Calabogie has two surface lots there), largest
+  first, ties broken by the lower OSM id. The idea is to
   try any car on the track without a car selector, which would sit outside the game's usual
   play (human, 2026-10-23: "we should include a parking lot with all the cars on these too").
   - It holds every vehicle in the catalogue once, in catalogue order, including vehicles a pack
-    adds. A new car shows up here as soon as it's in the catalogue.
+    adds. The cars fill the first lot's stalls, then the next lot's, in that order. A car added
+    to the catalogue is there the next time the pack loads.
   - It's always full, at every hour, with no occupancy draw. The per-chunk parked-car cap
     doesn't drop any of its cars.
   - A car the player takes comes back to its stall once the player is more than 100 m from it,
     so the lineup is never short.
-  - The importer names the lot in a new optional file, `showroom.v0.json` (`lots`: lot ids).
-    `parking.v0.json` doesn't change, so an older game ignores the file and fills the lot the
-    usual way.
-  - If the lot has fewer stalls than there are cars, the export's validation report says so.
-    The overflow continues in a second lot when there is one.
-- **More elevation sources.** A region's `dem` picks the source. The licence and credit go in
-  the pack manifest (the existing attribution requirement):
-  - `hrdem` (today's NRCan 2 m mosaic);
+  - The importer lists the lots, in that order, in a new optional file, `showroom.v0.json`
+    (`lots`: lot ids). `parking.v0.json` doesn't change, so an older game ignores the file and
+    fills the lots the usual way.
+  - **Not enough stalls.** The export's validation report gives the showroom's stalls against
+    the base catalogue's cars. If the catalogue outgrows the stalls at load (pack vehicles),
+    the cars that don't fit are left out, the last in catalogue order first, with a warning
+    naming them.
+- **More elevation sources.** A region's `dem` picks the source. The source's licence and
+  credit both go in the pack manifest (the existing attribution requirement asks for the
+  credit). `synthetic`, `flat` and `none` stay as they are (tests and debugging); they download
+  nothing and are not in the table.
+  - `hrdem` (today's NRCan 2 m mosaic, unchanged and still the default);
   - `hrdem-1m` (NRCan's 1 m mosaic, needed for Calabogie);
   - `copernicus-30` (the global Copernicus GLO-30, free with credit). It is a *surface*
-    model: trees and buildings are in its heights. Under a road the importer uses the
-    lowest nearby cell, not the average, so a tree line doesn't lift the track;
+    model: trees and buildings are in its heights. Under a road the importer takes the
+    lowest valid cell under the road's ribbon within 15 m along the road, not an
+    interpolated height, so a tree line doesn't lift the track. On a slope this reads low by
+    at most the grade times 15 m (3 m at 20%), which the grade limiter then smooths. Nodata
+    cells are skipped; with none valid in the window, the nearest valid cell is used, as the
+    importer does today;
   - more later, per country (USGS 3DEP for the US, the German states' 1 m models). Each is
     one entry in a table: URL pattern, licence, credit, and whether it is a surface model.
+    A source is added to the table only once its licence is checked to allow redistribution
+    in a pack.
+  - Every source fails an export it has no data for, naming the source and suggesting
+    another (as `hrdem` does today).
 - **Track packs.** Each circuit is its own pack (not a district set), chosen in the Packs tab
   like the proving ground. Calabogie goes first, in a new pack repo
   `Code430Packs/Location-CalabogieOnCa`, made from PackTemplate. Its border is the
   facility's outline plus 200 m.
 - **Second phase (separate tasks, same change):** the Nürburgring GP circuit with
-  `copernicus-30`, and the Nordschleife if a 20.8 km loop loads on the Deck. Its area is
-  about 7 × 5 km, mostly forest, so the Deck load time and memory decide.
-- **Not in this change** (listed as later todos in `tasks.md` section 4):
+  `copernicus-30` (a German state's 1 m model only once it is in the table), and the
+  Nordschleife if a 20.8 km loop loads on the Deck. Its area is about 7 × 5 km, mostly
+  forest. The Deck benchmark gives its load time, memory and frame time, and the human
+  decides from those whether it goes in.
+- **Not in this change** (listed as later todos in `tasks.md` section 5):
   - kerbs, gravel traps, tyre walls, grandstands and pit buildings beyond what OSM's
     building outlines already give;
   - AI racers, a race mode, a lap leaderboard across players;

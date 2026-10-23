@@ -1,6 +1,6 @@
 ## ADDED Requirements
 ### Requirement: Race Tracks
-The importer SHALL import `highway=raceway` ways as drivable roads with their own defaults: three lanes, one-way unless tagged otherwise, the OSM `width` when tagged, and a `max_grade` of 0.20. It SHALL give every raceway inside a named motorsport facility the facility's name as its `circuit`. The game SHALL spawn no traffic, parked cars or pedestrians on a raceway, and SHALL build no sidewalks, lane markings or street furniture on one.
+The importer SHALL import `highway=raceway` ways as drivable roads with their own defaults: three lanes, one-way unless tagged otherwise, the OSM `width` when tagged, and a `max_grade` of 0.20. A motorsport facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`. The importer SHALL give every raceway edge whose midpoint lies inside a facility that facility's name as its `circuit`, the smallest such facility's when there are several. The game SHALL spawn no traffic, parked cars or pedestrians on a raceway, and SHALL build no sidewalks, lane markings or street furniture on one.
 
 #### Scenario: Calabogie imported
 - **WHEN** the Calabogie region is exported
@@ -15,18 +15,22 @@ The importer SHALL import `highway=raceway` ways as drivable roads with their ow
 - **THEN** no traffic car, parked car or pedestrian is on it
 
 ### Requirement: Laps From Raceways
-For each closed loop of raceway pieces, chained end to end in their one-way direction, the importer SHALL write a lap to `lap.v0.json`. The start line SHALL be at a mapped timing or start-finish node when there is one, else at the loop's point nearest the pit lane's exit. The lap's `loop_names` SHALL list every name on the loop (the circuit's and each section's).
+For each closed loop of raceway pieces, chained end to end in their one-way direction, the importer SHALL write a lap to `lap.v0.json`. The start line SHALL be at a mapped timing or start-finish node when there is one, else at the loop's point nearest the pit lane's exit, else at the middle of the loop's longest straight segment. The lap's `loop_names` SHALL list every name on the loop (the circuit's and each section's).
 
 #### Scenario: A lap at Calabogie
 - **WHEN** the player drives the circuit and crosses the start line twice in its direction
 - **THEN** the HUD shows the lap time and keeps the best of the session
+
+#### Scenario: No pit lane
+- **WHEN** a closed raceway loop has no mapped start line and no pit lane
+- **THEN** its lap starts at the middle of its longest straight segment
 
 #### Scenario: Sections with their own names
 - **WHEN** a loop is made of pieces named "Hohe Acht", "Sprintstrecke" and others
 - **THEN** the lap readout stays visible on every one of them
 
 ### Requirement: Track Showroom
-Each track pack SHALL name one showroom lot, the largest mapped parking lot inside the facility, in `showroom.v0.json`. The game SHALL fill a showroom lot with every vehicle in the catalogue once, in catalogue order and including vehicles added by packs, at every hour, without occupancy or the per-chunk parked-car cap removing any. A car taken from it SHALL return to its stall once the player is more than 100 m from the stall. A game or pack without the file SHALL fill lots as before.
+Each track pack SHALL list its showroom lots in `showroom.v0.json`: the `amenity=parking` lots whose centroid lies inside the facility, largest area first, ties broken by the lower OSM id. The game SHALL fill the showroom with every vehicle in the catalogue once, in catalogue order and including vehicles added by packs, filling each lot's stalls in turn in the listed order, at every hour, without occupancy or the per-chunk parked-car cap removing any. When the catalogue has more vehicles than the showroom has stalls, the game SHALL leave out the last ones in catalogue order and warn, naming them; the export's validation report SHALL give the showroom's stalls against the base catalogue's vehicles. A car taken from it SHALL return to its stall once the player is more than 100 m from the stall. A game or pack without the file SHALL fill lots as before.
 
 #### Scenario: Every car at Calabogie
 - **WHEN** the player walks into the Calabogie paddock
@@ -34,14 +38,18 @@ Each track pack SHALL name one showroom lot, the largest mapped parking lot insi
 
 #### Scenario: A new car
 - **WHEN** a pack adds a vehicle to the catalogue
-- **THEN** it is parked in the showroom on the next load
+- **THEN** it is parked in the showroom the next time the pack loads
+
+#### Scenario: More cars than stalls
+- **WHEN** the catalogue holds more vehicles than the showroom's lots have stalls
+- **THEN** the lots are full in catalogue order and the game warns, naming the vehicles left out
 
 #### Scenario: Back in its stall
 - **WHEN** the player takes the van from the showroom, drives a lap and leaves it on the track
 - **THEN** a van is back in the van's stall once the player is 100 m from the stall
 
 ### Requirement: Elevation Sources
-A region's `dem` SHALL choose the elevation source from a table of sources. Each entry gives the source's URL, licence, credit, and whether it is a surface model (trees and buildings included). The pack manifest SHALL credit the source used. For a surface model, the importer SHALL take a road's ground height from the lowest nearby cell, not an interpolated one.
+A region's `dem` SHALL choose the elevation source from a table of sources. Each entry gives the source's URL, licence, credit, and whether it is a surface model (trees and buildings included). The modes `synthetic`, `flat` and `none` SHALL remain, outside the table. The pack manifest SHALL carry the licence and credit of the source used. For a surface model, the importer SHALL take a road's ground height from the lowest valid source cell under the road's ribbon within 15 m along the road, not an interpolated one, skipping nodata cells and falling back to the nearest valid cell when the window has none.
 
 #### Scenario: Outside Canada
 - **WHEN** a region with `dem: copernicus-30` is exported
