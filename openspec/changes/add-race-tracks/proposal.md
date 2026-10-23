@@ -32,15 +32,18 @@ GeoTIFF that works for any such source.
 - **Every piece of a circuit is named.** OSM splits a circuit into pieces: CTMP's loop is
   unnamed, the Nürburgring's pieces are named by section. A facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`.
   A raceway edge whose midpoint lies inside a facility gets the facility's name as `circuit`;
-  inside two, the smaller one's. Its own `name` stays the section's.
+  inside two, the smaller one's. A piece with its own `name` keeps it (the section's); an
+  unnamed piece also takes the facility's name as its `name`, because the lap timer finds
+  the loop by edge `name`.
 - **Laps from the map.** For each closed raceway loop (pieces chained end to end by one-way
   direction), the importer writes a lap to `lap.v0.json`.
   - **Start line:** at a node on the loop tagged or named as the start/finish or timing line where
     the map has one. Otherwise, at the loop's point nearest the pit lane's exit. A loop with
     neither gets its start line at the middle of its longest straight segment, where a real
     start line usually is.
-  - **Readout:** `loop_names` lists the loop's names (the circuit's name and each section's),
-    so the readout shows anywhere on the loop. The lap file format does not change.
+  - **Readout:** `loop_names` lists every edge `name` on the loop (each section's, and the
+    circuit's on the pieces that took it), so the readout shows anywhere on the loop. The lap
+    file format and the lap timer do not change.
 - **A paddock with every car.** Each track pack has a showroom: the mapped `amenity=parking`
   lots whose centroid is inside the facility (Calabogie has two surface lots there), largest
   first, ties broken by the lower OSM id. The idea is to
@@ -103,7 +106,7 @@ GeoTIFF that works for any such source.
   - `tools/osm_import/`: a new `circuits.py` (facility names, loops, start lines, the lap
     file); `elevation.py` (a source table, `hrdem-1m`, `copernicus-30` with lowest-cell sampling
     under roads); `__main__.py` (`--dem` choices from the table);
-  - `tools/osm_import/`: `showroom.v0.json` from the facility's largest lot;
+  - `tools/osm_import/`: `showroom.v0.json` listing the facility's showroom lots in order;
     `docs/pack-format/showroom.schema.v0.json` (new), checked by the pack validator;
   - `game/world/dressing/parked_cars.gd`: showroom lots filled with the whole catalogue,
     exempt from occupancy and the chunk cap, and taken cars returned to their stalls;

@@ -1,6 +1,6 @@
 ## ADDED Requirements
 ### Requirement: Race Tracks
-The importer SHALL import `highway=raceway` ways as drivable roads with their own defaults: three lanes, one-way unless tagged otherwise, the OSM `width` when tagged, and a `max_grade` of 0.20. A motorsport facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`. The importer SHALL give every raceway edge whose midpoint lies inside a facility that facility's name as its `circuit`, the smallest such facility's when there are several. The game SHALL spawn no traffic, parked cars or pedestrians on a raceway, and SHALL build no sidewalks, lane markings or street furniture on one.
+The importer SHALL import `highway=raceway` ways as drivable roads with their own defaults: three lanes, one-way unless tagged otherwise, a speed of 200 km/h, the OSM `width` when tagged, and a `max_grade` of 0.20. A motorsport facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`. The importer SHALL give every raceway edge whose midpoint lies inside a facility that facility's name as its `circuit`, the smallest such facility's when there are several, and SHALL give a raceway edge without a `name` that `circuit` as its `name`. The game SHALL spawn no traffic, parked cars or pedestrians on a raceway, and SHALL build no sidewalks, lane markings or street furniture on one.
 
 #### Scenario: Calabogie imported
 - **WHEN** the Calabogie region is exported
@@ -8,14 +8,14 @@ The importer SHALL import `highway=raceway` ways as drivable roads with their ow
 
 #### Scenario: Unnamed pieces
 - **WHEN** a raceway piece has no `name` but lies inside a facility named "Canadian Tire Motorsport Park"
-- **THEN** its edge carries `circuit` "Canadian Tire Motorsport Park"
+- **THEN** its edge carries `circuit` and `name` "Canadian Tire Motorsport Park"
 
 #### Scenario: An empty track
 - **WHEN** the player drives the circuit
 - **THEN** no traffic car, parked car or pedestrian is on it
 
 ### Requirement: Laps From Raceways
-For each closed loop of raceway pieces, chained end to end in their one-way direction, the importer SHALL write a lap to `lap.v0.json`. The start line SHALL be at a mapped timing or start-finish node when there is one, else at the loop's point nearest the pit lane's exit, else at the middle of the loop's longest straight segment. The lap's `loop_names` SHALL list every name on the loop (the circuit's and each section's).
+For each closed loop of raceway pieces, chained end to end in their one-way direction, the importer SHALL write a lap to `lap.v0.json`. The start line SHALL be at a mapped timing or start-finish node when there is one, else at the loop's point nearest the pit lane's exit, else at the middle of the loop's longest straight segment. The lap's `loop_names` SHALL list every edge `name` on the loop.
 
 #### Scenario: A lap at Calabogie
 - **WHEN** the player drives the circuit and crosses the start line twice in its direction
@@ -24,6 +24,10 @@ For each closed loop of raceway pieces, chained end to end in their one-way dire
 #### Scenario: No pit lane
 - **WHEN** a closed raceway loop has no mapped start line and no pit lane
 - **THEN** its lap starts at the middle of its longest straight segment
+
+#### Scenario: An unnamed piece
+- **WHEN** the player drives a raceway piece that had no `name` in OSM
+- **THEN** the lap readout stays visible and a crossing on that piece counts
 
 #### Scenario: Sections with their own names
 - **WHEN** a loop is made of pieces named "Hohe Acht", "Sprintstrecke" and others
