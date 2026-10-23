@@ -104,3 +104,43 @@ func test_player_wades_on_a_water_floor_and_cars_do_not() -> void:
 	for i in range(40):
 		await get_tree().physics_frame
 	assert_float(car.global_position.y).is_less(-MapPack.WADE_DEPTH_M - 0.5)
+
+
+## A floor at y 0 and a box `h` tall whose near face is at z -2.
+func _floor_and_step(h: float) -> void:
+	for spec in [[Vector3(200, 1, 200), Vector3(0, -0.5, 0)], [Vector3(10, h, 10), Vector3(0, h * 0.5, -7)]]:
+		var body: StaticBody3D = auto_free(StaticBody3D.new())
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = spec[0]
+		shape.shape = box
+		body.add_child(shape)
+		body.position = spec[1]
+		add_child(body)
+
+
+func _walk_forward(player: Player, frames: int) -> void:
+	Input.action_press("move_forward")
+	for i in range(frames):
+		await get_tree().physics_frame
+	Input.action_release("move_forward")
+
+
+func test_the_player_walks_up_a_curb_a_foot_tall() -> void:
+	_floor_and_step(0.3)
+	var player: Player = auto_free(PLAYER_SCENE.instantiate())
+	add_child(player)
+	player.global_position = Vector3(0, 0.05, 0)
+	await _walk_forward(player, 120)
+	assert_float(player.global_position.y).is_equal_approx(0.3, 0.06)
+	assert_float(player.global_position.z).is_less(-2.5)
+
+
+func test_a_wall_is_not_a_step() -> void:
+	_floor_and_step(0.8)
+	var player: Player = auto_free(PLAYER_SCENE.instantiate())
+	add_child(player)
+	player.global_position = Vector3(0, 0.05, 0)
+	await _walk_forward(player, 120)
+	assert_float(player.global_position.y).is_less(0.1)
+	assert_float(player.global_position.z).is_greater(-2.1)

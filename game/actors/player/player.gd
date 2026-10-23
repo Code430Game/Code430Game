@@ -180,7 +180,37 @@ func _move(delta: float) -> void:
 		horizontal = horizontal.move_toward(Vector3.ZERO, config.deceleration_mps2 * delta)
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
+	var was_on_floor := is_on_floor()
 	move_and_slide()
+	if was_on_floor and is_on_wall() and wish.length_squared() > 0.0:
+		step_up(wish * maxf(speed * delta, STEP_REACH_M))
+
+
+const STEP_REACH_M := 0.15  # how far forward a step-up looks for the top of the step
+
+
+## Climbs a step no taller than config.step_height_m (a curb, a stair) in the way of `motion`:
+## lifts, moves over, and drops onto the top if there is room overhead and the top is a floor.
+## Returns whether it stepped.
+func step_up(motion: Vector3) -> bool:
+	var h := config.step_height_m
+	if h <= 0.0 or motion.length_squared() < 1e-6:
+		return false
+	var at := global_transform
+	if test_move(at, Vector3.UP * h):
+		return false  # no headroom
+	var raised := at.translated(Vector3.UP * h)
+	if test_move(raised, motion):
+		return false  # taller than a step: a wall
+	var ahead := raised.translated(motion)
+	var hit := KinematicCollision3D.new()
+	if not test_move(ahead, Vector3.DOWN * h, hit):
+		return false  # nothing to stand on up there
+	if hit.get_normal().angle_to(Vector3.UP) > floor_max_angle:
+		return false
+	global_position = ahead.origin + hit.get_travel()
+	velocity.y = 0.0
+	return true
 
 
 ## True while standing on a wading floor (chest deep in water): slower, no jumping.

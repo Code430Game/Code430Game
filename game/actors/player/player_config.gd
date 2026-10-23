@@ -11,6 +11,8 @@ extends Resource
 @export var turn_speed_rad_s: float = 10.0
 @export var floor_max_angle_deg: float = 50.0
 @export var wade_speed_factor: float = 0.45
+## Tallest curb or stair the player walks straight up without jumping.
+@export var step_height_m: float = 0.35
 
 @export_group("Camera")
 @export var camera_distance_m: float = 3.5
