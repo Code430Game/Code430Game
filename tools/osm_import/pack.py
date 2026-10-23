@@ -114,11 +114,18 @@ class ChunkSampler:
         return {"kind": "chunks"}
 
 
+PEDESTRIAN = "ped"  # marks a pedestrian way's ground segment (its 10th field)
+COVER_MARGIN_M = (
+    0.5  # a surface covers the cells this close to its ribbon, not its whole flat margin
+)
+
+
 def _road_footprints(
     graph: RoadGraph, include_pedestrian: bool = True
 ) -> tuple[list[tuple], list[tuple]]:
-    """(ground segments, bridge segments): (ax, az, bx, bz, ay, by, half_width).
-    Pedestrian ways count as ground segments so the terrain meets their surface."""
+    """(ground segments, bridge segments): (ax, az, bx, bz, ay, by, half_width[, margin
+    [, shoulder[, PEDESTRIAN]]]). Pedestrian ways count as ground segments so the terrain
+    meets their surface, but a road owns the ground beside it (see _distance_field)."""
     ground: list[tuple] = []
     bridges: list[tuple] = []
     for w in graph.pedestrian if include_pedestrian else []:
@@ -129,7 +136,7 @@ def _road_footprints(
         shoulder = SHOULDER_M if w.shoulder_m is None else w.shoulder_m
         for i in range(len(w.polyline) - 1):
             a, b = w.polyline[i], w.polyline[i + 1]
-            ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, margin, shoulder))
+            ground.append((a[0], a[2], b[0], b[2], a[1], b[1], hw, margin, shoulder, PEDESTRIAN))
     for g in graph.gores:  # paved gores (add-road-shoulders 1.4): flat like the roads beside them
         for i in range(len(g.points) - 1):
             a, b = g.points[i], g.points[i + 1]
@@ -256,7 +263,13 @@ def _distance_field(
     chunk: ChunkTerrain, segments: list[tuple], reach: float
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Per cell: distance to the nearest segment centreline, the road height there, and that
-    segment's half width plus its flat margin."""
+    segment's half width plus its flat margin.
+
+    A road owns the ground within its own half width plus margin, ahead of any nearer
+    sidewalk or path: a sidewalk lower than the road beside it (a corner where a street climbs
+    away from the junction) must not pull the ground down at the road's edge, where a wheel
+    would drop in. Only a surface the cell is actually under (its ribbon plus COVER_MARGIN_M)
+    can lower it below the nearest one."""
     s = SAMPLES_PER_CHUNK
     dist = np.full((s, s), np.inf, dtype=np.float64)
     road_y = np.zeros((s, s), dtype=np.float64)
@@ -265,11 +278,17 @@ def _distance_field(
     xs = chunk.min_x + np.arange(s) * TERRAIN_RES_M
     zs = chunk.min_z + np.arange(s) * TERRAIN_RES_M
     gx, gz = np.meshgrid(xs, zs)
-    covered_y = np.full((s, s), np.inf, dtype=np.float64)  # lowest road surface covering the cell
+    covered_y = np.full((s, s), np.inf, dtype=np.float64)  # lowest surface over the cell
+    # The nearest road (not a pedestrian way), kept apart so it can own the ground beside it.
+    r_dist = np.full((s, s), np.inf, dtype=np.float64)
+    r_y = np.zeros((s, s), dtype=np.float64)
+    r_half = np.zeros((s, s), dtype=np.float64)
+    r_sh = np.full((s, s), SHOULDER_M, dtype=np.float64)
     for seg in _segments_near(segments, chunk.min_x, chunk.min_z, CHUNK_SIZE_M, reach):
         ax, az, bx, bz, ay, by, hw = seg[:7]
         margin = seg[7] if len(seg) > 7 else FLAT_MARGIN_M
         sh = seg[8] if len(seg) > 8 else SHOULDER_M
+        is_road = not (len(seg) > 9 and seg[9] == PEDESTRIAN)
         dx, dz = bx - ax, bz - az
         l2 = dx * dx + dz * dz
         if l2 < 1e-9:
@@ -282,11 +301,22 @@ def _distance_field(
         road_y = np.where(closer, y_here, road_y)
         half_w = np.where(closer, hw + margin, half_w)
         shoulder = np.where(closer, sh, shoulder)
+        if is_road:
+            rc = d < r_dist
+            r_dist = np.where(rc, d, r_dist)
+            r_y = np.where(rc, y_here, r_y)
+            r_half = np.where(rc, hw + margin, r_half)
+            r_sh = np.where(rc, sh, r_sh)
         # Where two roads cross without sharing a node (an untagged embankment over an
-        # underpass), the lower road must own the ground or a wall cuts across it.
-        under = d <= hw + margin
+        # underpass), the lower road must own the ground under it or a wall cuts across it.
+        under = d <= hw + COVER_MARGIN_M
         covered_y = np.where(under, np.minimum(covered_y, y_here), covered_y)
-    # Any lower covering surface wins, including a road under a curb-height sidewalk.
+    owned = r_dist <= r_half  # within a road's own flat zone: that road, not a nearer path
+    dist = np.where(owned, r_dist, dist)
+    road_y = np.where(owned, r_y, road_y)
+    half_w = np.where(owned, r_half, half_w)
+    shoulder = np.where(owned, r_sh, shoulder)
+    # A lower surface the cell is under wins, including a road under a curb-height sidewalk.
     lower = covered_y < road_y - 0.02
     road_y = np.where(lower, covered_y, road_y)
     return dist, road_y, half_w, shoulder
@@ -349,6 +379,9 @@ def clamp_under_decks(chunks: list[ChunkTerrain], bridges) -> int:
         ends = [(e.x, e.y, e.z) for e in b.ends]
         for deck in b.decks:
             pts = deck.points
+            # Each end of the deck faces along it: ground behind an end is the approach road's
+            # (flattened to it), so the discs below stop there rather than dig a pit beside it.
+            fences = _deck_end_fences(pts)
             for i in range(len(pts) - 1):
                 a, c = pts[i], pts[i + 1]
                 seg = math.dist((a[0], a[2]), (c[0], c[2]))
@@ -384,11 +417,31 @@ def clamp_under_decks(chunks: list[ChunkTerrain], bridges) -> int:
                     else:
                         slope = -math.inf
                     target = min(soffit, max(slope, beside))
-                    changed += _lower_disc(by_key, x, z, reach, target)
+                    changed += _lower_disc(by_key, x, z, reach, target, fences)
     return changed
 
 
-def _lower_disc(by_key: dict, x: float, z: float, radius: float, target: float) -> int:
+def _deck_end_fences(pts: list) -> list[tuple[float, float, float, float]]:
+    """(x, z, ux, uz) per end of a deck: the end, and the direction into the deck from it."""
+    fences = []
+    for end, nxt in ((pts[0], pts[1]), (pts[-1], pts[-2])) if len(pts) >= 2 else ():
+        dx, dz = nxt[0] - end[0], nxt[2] - end[2]
+        length = math.hypot(dx, dz)
+        if length > 0:
+            fences.append((end[0], end[2], dx / length, dz / length))
+    return fences
+
+
+def _behind_an_end(px: float, pz: float, fences: list) -> bool:
+    """Behind a deck end, or within one terrain cell in front of it: the grid interpolates
+    between cells 4 m apart, so a cell lowered just inside the end would drag the approach
+    road's edge down with it. The first cell under the deck is the abutment's."""
+    return any((px - ex) * ux + (pz - ez) * uz < TERRAIN_RES_M for ex, ez, ux, uz in fences)
+
+
+def _lower_disc(
+    by_key: dict, x: float, z: float, radius: float, target: float, fences: list | None = None
+) -> int:
     n = 0
     for cx in range(
         math.floor((x - radius) / CHUNK_SIZE_M),
@@ -408,9 +461,12 @@ def _lower_disc(by_key: dict, x: float, z: float, radius: float, target: float) 
             for r in range(r0, r1 + 1):
                 for c in range(c0, c1 + 1):
                     px, pz = ch.min_x + c * TERRAIN_RES_M, ch.min_z + r * TERRAIN_RES_M
-                    if math.hypot(px - x, pz - z) <= radius and ch.heights[r, c] > target:
-                        ch.heights[r, c] = target
-                        n += 1
+                    if math.hypot(px - x, pz - z) > radius or ch.heights[r, c] <= target:
+                        continue
+                    if fences and _behind_an_end(px, pz, fences):
+                        continue
+                    ch.heights[r, c] = target
+                    n += 1
     return n
 
 
@@ -546,7 +602,48 @@ def build_terrain(
     ground, _bridges = _road_footprints(graph)
     for chunk in chunks:
         stats["cells_flattened"] += flatten_roads(chunk, ground)
+    stats["path_points_lifted"] = lift_buried_paths(graph, ChunkSampler(chunks).sample)
     return chunks, stats
+
+
+def restore_road_beds(chunks: list[ChunkTerrain], graph: RoadGraph) -> int:
+    """Raises the ground within every ground-level road's flat zone back to its bed (the road
+    surface less ROAD_SURFACE_DROP_M) wherever a later step lowered it. Only ever raises.
+    Returns cells changed."""
+    ground, _bridges = _road_footprints(graph, include_pedestrian=False)
+    changed = 0
+    for chunk in chunks:
+        dist, road_y, half_w, _sh = _distance_field(chunk, ground, FLAT_MARGIN_M)
+        target = road_y - ROAD_SURFACE_DROP_M
+        low = (dist <= half_w) & (chunk.heights < target - 0.005)
+        if low.any():
+            chunk.heights = np.where(low, target, chunk.heights).astype(np.float32)
+            changed += int(low.sum())
+    return changed
+
+
+BURIED_M = 0.05  # a path point this far under the finished terrain is lifted onto it
+LIFT_ABOVE_M = 0.02
+
+
+def lift_buried_paths(graph: RoadGraph, sample) -> int:
+    """Lifts path points the finished terrain buries back onto it. A road owns the ground
+    beside it (_distance_field), so a sidewalk lower than that road, at a corner where the
+    street climbs away from the junction, would otherwise run under the grass. Covered ways,
+    dug passages, trenches and steps keep their heights. Returns the points lifted."""
+    lifted = 0
+    for w in graph.pedestrian:
+        if w.covered or w.profile in ("tunnel", "trench") or w.kind == "steps":
+            continue
+        pts = []
+        for x, y, z in w.polyline:
+            g = sample(x, z)
+            if not math.isnan(g) and g > y + BURIED_M:
+                y = g + LIFT_ABOVE_M
+                lifted += 1
+            pts.append((x, y, z))
+        w.polyline = pts
+    return lifted
 
 
 def write_pack(

@@ -249,3 +249,48 @@ def test_a_turf_in_the_overrides_becomes_the_packs_turf_file(tmp_path: Path):
     assert json.loads(paths["turf"].read_text()) == {"schema_version": 0, "turfs": [turf]}
     reports = validate_root(out)
     assert reports and all(r.ok for r in reports), [r.errors for r in reports]
+
+
+def test_a_lower_sidewalk_beside_a_road_does_not_pull_the_road_edge_down():
+    """A corner where the street climbs away from the junction: the sidewalk 1 m lower than the
+    road beside it used to win the cells at the road's edge, leaving a 1 m wheel trap."""
+    from osm_import.pack import PEDESTRIAN
+
+    road = (-100.0, 20.0, 200.0, 20.0, 52.0, 52.0, 4.0)  # 8 m wide at 52 m: edge at z = 24
+    sidewalk = (-100.0, 26.0, 200.0, 26.0, 51.0, 51.0, 1.0, 4.0, 3.0, PEDESTRIAN)
+    chunk = sample_chunk(FlatSource(50.0), 0, 0)
+    flatten_roads(chunk, [road, sidewalk])
+    edge_row = int(24 / TERRAIN_RES_M)
+    assert chunk.heights[edge_row, 10] == pytest.approx(52.0 - 0.03, abs=1e-3)
+    assert chunk.heights[int(20 / TERRAIN_RES_M), 10] == pytest.approx(52.0 - 0.03, abs=1e-3)
+
+
+def test_a_road_under_a_sidewalk_still_owns_the_ground_it_covers():
+    """The lower-surface rule still holds where one surface is over another: a road under a
+    curb-height sidewalk keeps the ground at the road."""
+    from osm_import.pack import PEDESTRIAN
+
+    road = (-100.0, 20.0, 200.0, 20.0, 50.0, 50.0, 4.0)
+    sidewalk = (-100.0, 21.0, 200.0, 21.0, 50.12, 50.12, 1.0, 4.0, 3.0, PEDESTRIAN)
+    chunk = sample_chunk(FlatSource(49.0), 0, 0)
+    flatten_roads(chunk, [road, sidewalk])
+    assert chunk.heights[int(20 / TERRAIN_RES_M), 10] == pytest.approx(50.0 - 0.03, abs=1e-3)
+
+
+def test_paths_the_finished_terrain_buries_are_lifted_onto_it():
+    from types import SimpleNamespace
+
+    from osm_import.pack import LIFT_ABOVE_M, lift_buried_paths
+
+    buried = SimpleNamespace(
+        covered=False, profile="", kind="sidewalk", polyline=[(0.0, 51.0, 0.0), (10.0, 52.0, 0.0)]
+    )
+    tunnel = SimpleNamespace(
+        covered=False, profile="tunnel", kind="footway", polyline=[(0.0, 45.0, 0.0)]
+    )
+    steps = SimpleNamespace(covered=False, profile="", kind="steps", polyline=[(0.0, 40.0, 0.0)])
+    graph = SimpleNamespace(pedestrian=[buried, tunnel, steps])
+    assert lift_buried_paths(graph, lambda x, z: 52.0) == 1
+    assert buried.polyline[0][1] == pytest.approx(52.0 + LIFT_ABOVE_M)
+    assert buried.polyline[1][1] == pytest.approx(52.0)  # level with the ground already
+    assert tunnel.polyline[0][1] == 45.0 and steps.polyline[0][1] == 40.0
