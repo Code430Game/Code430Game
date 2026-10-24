@@ -33,8 +33,9 @@ GeoTIFF that works for any such source.
   unnamed, the Nürburgring's pieces are named by section. A facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`.
   A raceway edge whose midpoint lies inside a facility gets the facility's name as `circuit`;
   inside two, the smaller one's. A piece with its own `name` keeps it (the section's); an
-  unnamed piece also takes the facility's name as its `name`, because the lap timer finds
-  the loop by edge `name`.
+  unnamed piece *of a closed loop* also takes the facility's name as its `name`, because the
+  lap timer finds the loop by edge `name`. Unnamed pit lanes and connectors stay unnamed, so
+  the lap readout doesn't show on them.
 - **Laps from the map.** For each closed raceway loop (pieces chained end to end by one-way
   direction), the importer writes a lap to `lap.v0.json`.
   - **Start line:** at a node on the loop tagged or named as the start/finish or timing line where
@@ -44,6 +45,11 @@ GeoTIFF that works for any such source.
   - **Readout:** `loop_names` lists every edge `name` on the loop (each section's, and the
     circuit's on the pieces that took it), so the readout shows anywhere on the loop. The lap
     file format and the lap timer do not change.
+  - **The other lap fields:** `name` is the circuit's name; `id` is that name as a slug
+    (`calabogie-motorsports-park`), with `-2`, `-3` after it for a facility's second and
+    third loops, longest first; `direction` is the loop's unit direction of travel at the
+    start line; `half_width_m` is half the road's width plus 2 m; `rearm_s` takes the
+    default.
 - **A paddock with every car.** Each track pack has a showroom: the mapped `amenity=parking`
   lots whose centroid is inside the facility (Calabogie has two surface lots there), largest
   first, ties broken by the lower OSM id. The idea is to
