@@ -7,13 +7,16 @@ outward from that edge, perpendicular to the road, for the first 1 m window that
 than 1 m for every `slope` m out. Where the climb starts within `probe_m` of the edge, the wall
 stands at the edge; where it starts further out, up to `reach_m` (a bare road's own flat
 margin and shoulder put every bank at least that far from its edge), the wall stands where
-the climb starts. Where the ground `probe_m` past the wall's foot then stands more than
-`min_rise_m` above the foot, that station is wall. Stations where a way leaves the road
+the climb starts (the running median of that over `smooth_stations`, so the line is
+straight). Where the ground `probe_m` past the wall's foot then stands more than 1 m per
+`slope` m above the foot (and over `min_rise_m`), and is not another carriageway running
+alongside, that station is wall. Stations where a way leaves the road
 through the foot (a junction's outline, another road's ribbon, a path crossing the edge
 line, all at about the road's level) are hard breaks; short gaps of no-wall stations between
 two wall stretches are joined; stretches shorter than `min_length_m` are dropped. A wall's top
-is the highest ground within two terrain cells behind it, or the soffit of a deck over it,
-whichever is lower; its foot is the edge's level.
+is the ground `probe_m` behind it (at a sidewalk's edge, the highest ground within two cells),
+or the soffit of a deck over it, whichever is lower, and at most `max_top_m`; its foot is the
+edge's level.
 
 Then the terrain in front of each wall (from the road's edge out to the wall) is held at the
 edge's level, and where the wall stands at a sidewalk's edge the first cell behind it too, so
@@ -64,8 +67,10 @@ DEFAULTS = {
     "join_gap_m": 4.0,  # no-wall gaps up to this long between two stretches are filled
     "sidewalk_range_m": 3.5,  # a sidewalk this close to the ribbon edge is the road's
     "sidewalk_along_deg": 40.0,  # and runs within this angle of the road
-    "top_reach_cells": 2,  # the top is the highest ground within this many cells behind
+    "top_reach_cells": 2,  # at a sidewalk's edge the top is the highest ground this many cells behind
     "min_top_m": 0.3,  # a wall never stands shorter than this (joined gaps, deck soffits)
+    "max_top_m": 8.0,  # and never taller: above that the bank goes on as a slope
+    "smooth_stations": 9,  # a bare road's wall line: the running median over this many stations, then the mean over a quarter
 }
 COORD_DECIMALS = 2
 SLOPE_SAMPLE_M = 1.0  # the climb is read over windows this long between the edge and the probe
@@ -207,6 +212,9 @@ def build_walls(
     along_cos = math.cos(math.radians(float(rules["sidewalk_along_deg"])))
     reach_cells = int(rules["top_reach_cells"])
     min_top = float(rules["min_top_m"])
+    max_top = float(rules["max_top_m"])
+    smooth_n = max(1, int(rules["smooth_stations"]))
+    min_probe_rise = max(min_rise, probe / float(rules["slope"]))  # the spec's 1 m per 1.5 m out
     join_gap = float(rules["join_gap_m"])
     min_length = float(rules["min_length_m"])
 
@@ -280,6 +288,25 @@ def build_walls(
                 low = min(low, sa + (sb - sa) * t)
         return low
 
+    def on_parallel_road(x, z, dx, dz, own) -> bool:
+        """True when (x, z) lies in the grading zone (ribbon, flat margin and shoulder) of
+        another way running along this road: the other carriageway of a split, a ramp beside
+        the mainline, a motorway above its frontage road. That ground is the other road's
+        surface or its embankment, not a bank to wall (gores, medians and embankments are
+        theirs); a road crossing over, like the 417 over Metcalfe Street, still is."""
+        way = own.split(".")[0]
+        zone = FLAT_MARGIN_M + SHOULDER_M
+        for a, b, (oid, ohw, _ya, _yb) in road_index.near(x, z, widest / 2.0 + zone):
+            if oid.split(".")[0] == way:
+                continue
+            odx, odz = b[0] - a[0], b[1] - a[1]
+            ol = math.hypot(odx, odz)
+            if ol < 1e-6 or abs(odx * dx + odz * dz) / ol < along_cos:
+                continue
+            if _seg_dist(x, z, a[0], a[1], b[0], b[1]) <= ohw + zone:
+                return True
+        return False
+
     def level_with(a, b, ya, yb, x, z, y) -> bool:
         """True when segment a-b's height at its point nearest (x, z) is within LEVEL_M of y."""
         dx, dz = b[0] - a[0], b[1] - a[1]
@@ -318,14 +345,9 @@ def build_walls(
             continue
         hw = e.width_m / 2.0
         for side in (-1.0, 1.0):
-            pts: list = []  # (x, y, z) the foot
-            tops: list = []
-            depths: list = []
-            road_ys: list = []
-            behinds: list = []
-            keep: list = []  # wall here
-            hard: list = []  # a way leaves here: never joined across
-            for x, y, z, dx, dz in _samples(e.polyline, step):
+            stations = list(_samples(e.polyline, step))
+            feet: list = []  # per station: (outer, edge_y, start, at_edge, beside)
+            for x, y, z, dx, dz in stations:
                 nx, nz = -dz * side, dx * side
                 beside = sidewalk_beside(x, y, z, nx, nz, dx, dz, hw)
                 outer, edge_y = beside if beside is not None else (hw, y)
@@ -342,17 +364,54 @@ def build_walls(
                         break
                     last = g
                     k += SLOPE_SAMPLE_M
-                at_edge = start is not None and start < probe
-                foot = outer if at_edge else outer + (start or 0.0)
+                # At a sidewalk's edge when the climb starts within the probe of it; a bare
+                # road's wall always stands where the climb starts (its own margin is level).
+                at_edge = beside is not None and start is not None and start < probe
+                feet.append((outer, edge_y, start, at_edge, beside))
+            # A bare road's wall stands where the climb starts, which jumps from station to
+            # station on the 4 m grid: the running median of the offsets straightens it.
+            offsets = [
+                outer if (at_edge or start is None) else outer + start
+                for outer, _ey, start, at_edge, _b in feet
+            ]
+            walked = [not at_edge and start is not None for _o, _ey, start, at_edge, _b in feet]
+            smoothed = _smooth(offsets, walked, smooth_n)
+            pts: list = []  # (x, y, z) the foot
+            tops: list = []
+            depths: list = []
+            road_ys: list = []
+            behinds: list = []
+            keep: list = []  # wall here
+            hard: list = []  # a way leaves here: never joined across
+            for (x, y, z, dx, dz), (outer, edge_y, start, at_edge, beside), foot in zip(
+                stations, feet, smoothed
+            ):
+                nx, nz = -dz * side, dx * side
                 fx, fz = x + nx * foot, z + nz * foot
                 foot_y = edge_y if at_edge else max(edge_y, sample(fx, fz) + ROAD_SURFACE_DROP_M)
                 leaves = way_leaves(fx, fz, foot_y, eid, dx, dz)
-                rise = sample(fx + nx * probe, fz + nz * probe) - foot_y
-                top = -math.inf
-                for c in range(1, reach_cells + 1):
-                    top = max(top, sample(fx + nx * TERRAIN_RES_M * c, fz + nz * TERRAIN_RES_M * c))
-                top = min(top, soffit_over(fx, fz)) - foot_y
-                is_wall = start is not None and rise > min_rise and not leaves and top > min_top
+                px, pz = fx + nx * probe, fz + nz * probe
+                bank = not on_parallel_road(px, pz, dx, dz, eid)
+                if at_edge:
+                    # The bank is right behind the sidewalk, and the cell behind the wall is
+                    # held down to the foot: the top is the highest ground within reach.
+                    ground = max(
+                        sample(fx + nx * TERRAIN_RES_M * c, fz + nz * TERRAIN_RES_M * c)
+                        for c in range(1, reach_cells + 1)
+                    )
+                else:
+                    # Beside a bare road the wall holds the first cell of the bank only; a
+                    # taller wall would leave a slot between its back and the slope.
+                    ground = sample(px, pz)
+                rise = ground - foot_y  # what the wall would hold back
+                top = min(min(ground, soffit_over(fx, fz)) - foot_y, max_top)
+                is_wall = (
+                    start is not None
+                    and bank
+                    and rise > min_probe_rise
+                    and not leaves
+                    and top > min_top
+                )
                 if is_wall:
                     result.wall_stations += 1
                 pts.append((fx, foot_y, fz))
@@ -381,6 +440,35 @@ def build_walls(
                 n += 1
     log.info("retaining walls: %s", result.counts())
     return result
+
+
+def _smooth(offsets: list[float], walked: list[bool], n: int) -> list[float]:
+    """The walked stations' offsets, each replaced by the running median over `n` walked
+    stations and then the running mean over half as many, so a bare road's wall line runs
+    straight instead of stepping with the terrain grid. Other stations keep their offset."""
+    half = n // 2
+    medians = list(offsets)
+    for i, is_walked in enumerate(walked):
+        if not is_walked:
+            continue
+        window = sorted(
+            offsets[j]
+            for j in range(max(0, i - half), min(len(offsets), i + half + 1))
+            if walked[j]
+        )
+        medians[i] = window[len(window) // 2]
+    quarter = max(1, n // 4)
+    out = list(medians)
+    for i, is_walked in enumerate(walked):
+        if not is_walked:
+            continue
+        window = [
+            medians[j]
+            for j in range(max(0, i - quarter), min(len(offsets), i + quarter + 1))
+            if walked[j]
+        ]
+        out[i] = sum(window) / len(window)
+    return out
 
 
 def _stretches(keep: list[bool]) -> list[tuple[int, int]]:

@@ -219,7 +219,9 @@ def test_beside_a_bare_road_the_wall_stands_where_the_bank_starts():
     # probe_m, so the wall stands at the last flat metre station, not at the road's edge.
     assert all(-8.0 <= z <= -7.0 for _x, _y, z in w.points)
     assert all(y == pytest.approx(ROAD_Y, abs=0.05) for _x, y, _z in w.points)
-    assert all(t == pytest.approx(6.0, abs=0.1) for t in w.tops_m)
+    # The top is the ground 4 m behind the foot (between the z = -8 and z = -12 cells), so no
+    # slot opens between the wall's back and the slope.
+    assert all(t == pytest.approx(5.25, abs=0.3) for t in w.tops_m)
     chunk = chunks[0]
     col = int(120 / TERRAIN_RES_M)
     hold_in_front_of_walls(chunks, graph, result)

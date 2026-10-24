@@ -76,3 +76,25 @@ Measured with `tools/terrain_replay.py` on a Centretown capture (40 s a variant)
 - **The proving ground has no bank for Park Road.** Its viaduct stands on piers over level
   ground, so Park Road gets no wall (rightly). The regenerated pack has 4 walls (62 m) along
   Viaduct Road South and 5 Lane; it is the guard, not the bar.
+
+### After the first Deck look (the same evening)
+The human's Deck screenshots showed zigzag walls on the verges beside the 417 near the start,
+a wall between a ramp and its mainline, and walls tall enough to drop in behind. Four rules
+followed, measured again on the capture:
+- **The rise is the spec's.** A 1 m rise at 4 m with any 1:1.5 window between caught every
+  shoulder blend up to a higher verge. Now the ground the wall would hold back must stand
+  1 m per 1.5 m out above the foot (2.67 m at 4 m).
+- **A parallel road's grading zone is not a bank.** The ground within another road's ribbon,
+  flat margin and shoulder (7 m) that runs within 40 degrees of this one is its surface or its
+  embankment: the mainline beside a ramp, the 417 above its frontage road. A road crossing
+  over (the 417 over Metcalfe) still counts, so the underpass walls stay.
+- **A bare road's wall is a straight line and holds one cell.** Its foot is the running median
+  (9 stations) then mean of where the climb starts, never "at the edge" (the margin there is
+  always level), and its top is the ground 4 m behind, capped at 8 m, so a slope above a wall
+  shows as a slope and the slot behind a tall wall is gone. Behind a sidewalk the top stays
+  the highest ground within two cells (that cell is held down to the foot).
+- Centretown: 145 walls / 3.6 km (from 279 / 6.2 km), 667 wheel traps, pokes unchanged; the
+  Glebe 25 / 0.4 km and 294 traps, Hintonburg 36 / 0.8 km and 208;
+  Metcalfe keeps its walls on both sides. The verges at x 681 and 736 beside the 417 have none.
+  The proving ground's four walls along Viaduct Road South were the viaduct ramp's own
+  embankment and are gone: it now writes an empty `retaining_walls.v0.json`.

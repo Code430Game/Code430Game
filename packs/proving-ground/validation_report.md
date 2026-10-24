@@ -330,7 +330,7 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 ## Retaining walls
 
-- 4 walls, 62.0 m in all, the tallest 6.44 m (35 of 46850 edge stations)
+- 0 walls, 0 m in all, the tallest 0.0 m (0 of 46850 edge stations)
 
 ## Buildings
 
