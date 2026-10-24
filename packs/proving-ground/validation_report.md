@@ -328,6 +328,10 @@ No traps: every node inside the bbox can reach and be reached from the main netw
 
 - median 4, soundwall 8, guardrail 12, parapet 10, curb 8, roadblock 1
 
+## Retaining walls
+
+- 4 walls, 62.0 m in all, the tallest 6.44 m (35 of 46850 edge stations)
+
 ## Buildings
 
 - Footprints written: 2511; height from tag/levels/default: {'levels': 2490, 'default': 6, 'tag': 15}

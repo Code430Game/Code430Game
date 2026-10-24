@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://code430.dev/schemas/retaining_walls.schema.v0.json",
+  "title": "Code 430 retaining walls v0",
+  "description": "Optional file in a map pack (add-retaining-walls). Vertical retaining walls where the ground rises steeply beside a road: the foot line of each (on the ground in front, at the road's or sidewalk's level) and its height above each point. The game extrudes a concrete wall from each point up by its top, interpolating the top between points and where it splits the wall at a chunk boundary; height_m is the tallest top, for bounds. tops_m must be as long as points: the pack validator checks that, and the game skips a wall that fails it. A game from before this file ignores it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "walls"],
+  "properties": {
+    "schema_version": {"const": 0},
+    "units": {"type": "string"},
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "edge_id", "height_m", "points", "tops_m"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^w:.+:[lr][0-9]+$", "description": "w:<edge id>:<side l or r><run number on that side>"},
+          "edge_id": {"type": "string"},
+          "height_m": {"type": "number", "exclusiveMinimum": 0, "description": "the largest of tops_m"},
+          "points": {"type": "array", "minItems": 2, "items": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}},
+          "tops_m": {"type": "array", "minItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}, "description": "height of the wall above each point, one per entry of points"}
+        }
+      }
+    }
+  }
+}

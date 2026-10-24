@@ -8,10 +8,12 @@ add-retaining-walls) needs many runs, so:
         Exports the district once with the road passes stubbed out and pickles what they need
         (the carved chunks, the graph after pedestrian heights, the bridges) next to the pack.
     uv run python terrain_replay.py replay <out dir>/<district>.pkl [label]
-        Runs flatten, the sidewalk lift and cut, the under-deck lowering and the bed restore
-        with the importer as it stands now, then measures wheel traps (a port of the game's
+        Runs flatten, the sidewalk lift and cut, the under-deck lowering, the bed restore and
+        the retaining walls (the scan and the hold in front of them, add-retaining-walls) with
+        the importer as it stands now, then measures wheel traps (a port of the game's
         EdgeDropReport) and junctions with terrain through their drawn surface (a port of
-        JunctionReport.terrain_above), and says which pass last moved each trap's lowest cell.
+        JunctionReport.terrain_above), says which pass last moved each trap's lowest cell, and
+        counts the walls' metres.
 
 On Centretown (2026-10-23) a replay took 25 s and its two counts were within three of the
 game's own reports on the same terrain. The capture builds the bridges from the carved, not
@@ -32,6 +34,8 @@ from pathlib import Path
 
 from osm_import import junctions as J
 from osm_import import pack
+from osm_import import walls as W
+from osm_import.config import load_config
 from osm_import.pack import CHUNK_SIZE_M, SAMPLES_PER_CHUNK, TERRAIN_RES_M, ChunkSampler
 
 # EdgeDropReport's constants (game/world/roads/edge_drop_report.gd)
@@ -50,7 +54,7 @@ def capture(region: Path, out: Path) -> Path:
     """Export `region` to `out` with the road passes stubbed, pickling their inputs beside it."""
     import osm_import.__main__ as main_mod
 
-    state: dict = {"chunks": [], "bridges": None, "graph": None}
+    state: dict = {"chunks": [], "bridges": None, "graph": None, "buildings": None}
 
     def flatten_stub(chunk, ground, junctions=None):
         state["chunks"].append(chunk)
@@ -61,10 +65,15 @@ def capture(region: Path, out: Path) -> Path:
         return 0
 
     real_bridges = main_mod.build_bridges
+    real_buildings = main_mod.build_buildings
 
     def bridges_wrap(graph, sample, *args, **kwargs):
         state["graph"] = graph
         return real_bridges(graph, sample, *args, **kwargs)
+
+    def buildings_wrap(*args, **kwargs):
+        state["buildings"] = real_buildings(*args, **kwargs)
+        return state["buildings"]
 
     pack_names = (
         "flatten_roads",
@@ -73,7 +82,14 @@ def capture(region: Path, out: Path) -> Path:
         "clamp_under_decks",
         "restore_road_beds",
     )
-    main_names = (*pack_names[1:], "build_terrain", "build_bridges")
+    main_names = (
+        *pack_names[1:],
+        "build_terrain",
+        "build_bridges",
+        "build_buildings",
+        "build_walls",
+        "hold_in_front_of_walls",
+    )
     original_pack = {name: getattr(pack, name) for name in pack_names}
     original_main = {name: getattr(main_mod, name) for name in main_names}
     try:
@@ -82,9 +98,13 @@ def capture(region: Path, out: Path) -> Path:
         pack.cut_under_deep_paths = lambda chunks, graph, sample: 0
         pack.clamp_under_decks = clamp_stub
         pack.restore_road_beds = lambda chunks, graph: 0
-        for name in main_names[:-1]:
+        for name in pack_names[1:]:
             setattr(main_mod, name, getattr(pack, name))
+        main_mod.build_terrain = pack.build_terrain
         main_mod.build_bridges = bridges_wrap
+        main_mod.build_buildings = buildings_wrap
+        main_mod.build_walls = lambda graph, sample, bridges, cfg: W.WallsResult()
+        main_mod.hold_in_front_of_walls = lambda chunks, graph, walls, buildings=None: 0
         main_mod.main(
             [
                 "--region",
@@ -116,6 +136,8 @@ class Replay:
         self.chunks = copy.deepcopy(cap["chunks"])
         self.graph = copy.deepcopy(cap["graph"])
         self.bridges = cap["bridges"]
+        self.buildings = cap.get("buildings")
+        self.walls = W.WallsResult()
         self.snaps: list[tuple[str, dict]] = []
         self.by_key = {(c.cx, c.cz): c for c in self.chunks}
 
@@ -137,6 +159,11 @@ class Replay:
         pack.lift_buried_paths(self.graph, ChunkSampler(self.chunks).sample)
         pack.cut_under_deep_paths(self.chunks, self.graph, ChunkSampler(self.chunks).sample)
         self._snap("cut again")
+        self.walls = W.build_walls(
+            self.graph, ChunkSampler(self.chunks).sample, self.bridges, load_config()
+        )
+        W.hold_in_front_of_walls(self.chunks, self.graph, self.walls, self.buildings)
+        self._snap("walls")
         return time.time() - t0
 
     def _snap(self, name: str) -> None:
@@ -345,6 +372,7 @@ def replay(pkl: Path, label: str = "") -> None:
         f"{worst:.2f} m; passes {seconds:.0f} s, measure {time.time() - t1:.0f} s"
     )
     by_class = collections.Counter(r["cls"] for r in rows).most_common(8)
+    print("   retaining walls:", rep.walls.counts())
     print("   traps by class:", by_class)
     blames = collections.Counter(rep.blame(*r["at"]) for r in rows).most_common()
     print("   traps by the pass that last moved the low cell:", blames)

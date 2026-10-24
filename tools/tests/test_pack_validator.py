@@ -509,3 +509,38 @@ def test_semver_ranges(version: str, spec: str, ok: bool) -> None:
     from pack_tools.validate import semver_satisfies
 
     assert semver_satisfies(version, spec) is ok
+
+
+def test_a_retaining_wall_needs_a_top_per_point(tmp_path: Path) -> None:
+    manifest = {
+        **GOOD,
+        "type": "map",
+        "license": "ODbL-1.0",
+        "attribution": [OSM_CREDIT],
+        "map": {"crs": "EPSG:32618", "origin": {"easting": 0, "northing": 0}, "bbox": [0, 0, 1, 1]},
+    }
+
+    def wall(wid: str, tops: list) -> dict:
+        return {
+            "id": wid,
+            "edge_id": "w1.0",
+            "height_m": 2.0,
+            "points": [[0, 50, 0], [10, 50, 0], [20, 50, 0]],
+            "tops_m": tops,
+        }
+
+    good = {"schema_version": 0, "units": "m", "walls": [wall("w:w1.0:l0", [2.0, 1.5, 1.0])]}
+    write_pack(tmp_path, "walls", manifest, {"retaining_walls.v0.json": json.dumps(good).encode()})
+    assert not [e for e in errors_for(tmp_path) if "retaining_walls" in e]
+    bad = {
+        "schema_version": 0,
+        "units": "m",
+        "walls": [
+            wall("w:w1.0:l0", [2.0, 1.5]),
+            {**wall("w:w1.0:r0", [1.0, 1.0, 1.0]), "tops_m": None},
+        ],
+    }
+    (tmp_path / "walls" / "retaining_walls.v0.json").write_text(json.dumps(bad), encoding="utf-8")
+    errors = [e for e in errors_for(tmp_path) if "retaining_walls" in e]
+    assert any("'w:w1.0:l0' has 2 tops_m for 3 points" in e for e in errors)
+    assert any("tops_m" in e and "w:w1.0:r0" in e or "None is not of type" in e for e in errors)

@@ -892,12 +892,15 @@ def write_pack(
     border: tuple[int, int, int, int] | None = None,
     license: dict | None = None,
     border_result: BorderResult | None = None,
+    walls=None,
 ) -> dict[str, Path]:
     """Write the pack folder. Returns the paths written. `spawn` ({x, z, heading_deg}) puts a
     fixed start on the manifest for packs whose author chose one. `build` ({importer, inputs})
     records which importer commit and which input snapshots made the pack. `license`
     ({license, attribution, description}) is for a pack that isn't OpenStreetMap data, such as
-    a generated test district: it replaces the ODbL licence and the OpenStreetMap credit."""
+    a generated test district: it replaces the ODbL licence and the OpenStreetMap credit.
+    `walls` (walls.WallsResult) is written to retaining_walls.v0.json when given; a game from
+    before add-retaining-walls doesn't know the file and ignores it."""
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "terrain").mkdir(exist_ok=True)
     license = license or {}
@@ -1014,6 +1017,9 @@ def write_pack(
     if border_result is not None:
         paths["border"] = out_dir / "border.v0.json"
         dump_json(border_result.to_dict(), paths["border"])
+    if walls is not None:
+        paths["walls"] = out_dir / "retaining_walls.v0.json"
+        dump_json(walls.to_dict(), paths["walls"])
     return paths
 
 

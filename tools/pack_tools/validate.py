@@ -37,6 +37,8 @@ PARKING_SCHEMA_PATH = FORMAT_DIR / "parking.schema.v0.json"
 PARKING_NAME = "parking.v0.json"
 BRIDGES_SCHEMA_PATH = FORMAT_DIR / "bridges.schema.v0.json"
 BRIDGES_NAME = "bridges.v0.json"
+WALLS_SCHEMA_PATH = FORMAT_DIR / "retaining_walls.schema.v0.json"
+WALLS_NAME = "retaining_walls.v0.json"
 VEGETATION_SCHEMA_PATH = FORMAT_DIR / "vegetation.schema.v0.json"
 VEGETATION_NAME = "vegetation.v0.json"
 WEAPONS_SCHEMA_PATH = FORMAT_DIR / "weapons.schema.v0.json"
@@ -95,6 +97,7 @@ GENERATED = [
         ],
     ),
     ("barriers.v0.json", FORMAT_DIR / "barriers.schema.v0.json", [("barriers", "id")]),
+    (WALLS_NAME, WALLS_SCHEMA_PATH, [("walls", "id")]),
     (
         BRIDGES_NAME,
         BRIDGES_SCHEMA_PATH,
@@ -661,6 +664,26 @@ def validate_generated(pack_dir: Path) -> list[str]:
         errors.extend(_schema_errors(name, data, load_schema(schema_path)))
         if isinstance(data, dict):
             errors.extend(duplicate_ids(name, data, id_paths))
+        if name == WALLS_NAME and isinstance(data, dict):
+            errors.extend(wall_top_errors(data))
+    return errors
+
+
+def wall_top_errors(data: dict) -> list[str]:
+    """A retaining wall carries one top per point (add-retaining-walls): the schema can require
+    `tops_m`, not that it is as long as `points`, so that is checked here."""
+    errors: list[str] = []
+    for w in data.get("walls", []):
+        if not isinstance(w, dict):
+            continue
+        points, tops = w.get("points"), w.get("tops_m")
+        if isinstance(points, list) and isinstance(tops, list) and len(points) != len(tops):
+            errors.append(
+                f"{WALLS_NAME}: wall '{w.get('id')}' has {len(tops)} tops_m for "
+                f"{len(points)} points"
+            )
+        if len(errors) >= MAX_ERRORS_PER_FILE:
+            break
     return errors
 
 

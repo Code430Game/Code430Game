@@ -38,3 +38,41 @@ What the junction-ground session leaves for this one.
   (#172) ends four metres in the air because its steps are missing from OSM and the importer
   gives a node shared by an elevated path and a ground way one height; a pedestrian-elevation
   fix, not a wall.
+
+## What this session found (2026-10-23, Fable)
+Measured with `tools/terrain_replay.py` on a Centretown capture (40 s a variant), then with
+`scripts/terrain-trial.sh` and the game's own reports on the exports.
+
+- **A 4 m probe from a bare road's edge never finds a bank.** Every ground road's own
+  grading keeps the terrain at its level for `FLAT_MARGIN_M` (4 m) past its edge and blends it
+  over `SHOULDER_M` (3 m) more; under a deck `restore_road_beds` gives the road its shoulder
+  too, so the bank beside Metcalfe Street's west side (no sidewalk in OSM) starts 7 m from the
+  edge. The spec's probe (4 m out from the outer edge) found walls only beside sidewalks, where
+  a higher road's zone or a deck's abutment refill reaches within 4 m. So the scan walks out
+  from the outer edge for the first metre that climbs more than 1:1.5, up to `reach_m` (8 m):
+  where the climb starts within `probe_m` the wall stands at the edge; further out it stands
+  where the climb starts. The delta spec says so now. Centretown: 160 walls / 2.6 km with the
+  edge-only probe, 279 walls / 6.2 km with the walk; Metcalfe under the 417 gets walls on both
+  sides (east at the sidewalk's edge, 4.6-6.2 m to the soffit; west at the bank's foot).
+- **Ways above or below the edge don't break a wall.** The 417's ground approach ends 7 m from
+  Metcalfe's sidewalk, and its ribbon end counted as "a road leaving the road": no wall at the
+  one place the change is for. A road, path or junction only breaks the wall within `LEVEL_M`
+  (2.5 m) of the edge's height.
+- **The hold must respect the road's own rule and other roads' grading.** First attempts cost
+  wheel traps (669 -> 679): cells lowered just past another road's flat margin pulled the
+  interpolated ground at that road's edge down (a 5.5 m drop on the 417 beside Bronson), and a
+  sidewalk a little below its road pulled the ground between them down (Nelson, King Edward).
+  Now: in front of the wall the ground follows the higher of the road and the sidewalk and keeps
+  off other roads' ribbons plus 1.5 m (EdgeDropReport reads to 1 m); behind the wall (held only
+  where the wall stands at a sidewalk's edge, so the bank cannot poke through the sidewalk) it
+  keeps off other roads' whole grading zone (7 m); junction zones and building footprints are
+  never touched; nothing is raised over another road's bed. Sidewalks more than 0.75 m off
+  their road's level are some other street's and are ignored.
+- **Walls neither make nor fix wheel traps, as expected.** They answer rises; the traps are
+  drops. Centretown by the game's reports: 668 wheel traps (669 before), 16 of 2,198 junctions
+  with terrain through the drawn surface (0.7%, worst 0.16 m, as before), Metcalfe under the 417
+  passes. The tallest walls (15-18 m) stand at the Alexandra Bridge approach and Commissioner
+  Street under the Portage Bridge's embankment, where the DTM's real embankments are.
+- **The proving ground has no bank for Park Road.** Its viaduct stands on piers over level
+  ground, so Park Road gets no wall (rightly). The regenerated pack has 4 walls (62 m) along
+  Viaduct Road South and 5 Lane; it is the guard, not the bar.
