@@ -76,6 +76,22 @@
     "median_curb_max_gap_m": 30.0,
     "curb_classes": ["primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street"]
   },
+  "walls": {
+    "_comment": "add-retaining-walls (walls.py): along every ground road's outer edge (the sidewalk's outer edge, else the road's), every step_m, where the finished terrain starts climbing more than 1 m per slope m within reach_m of the edge, and probe_m past the wall's foot stands more than 1 m per slope m (and min_rise_m) above it, there is a retaining wall: at the edge when the climb starts within probe_m of it, else where the climb starts (the running median over smooth_stations). Not where that ground is a carriageway running alongside. Stretches under min_length_m are dropped, gaps up to join_gap_m joined. A sidewalk within sidewalk_range_m of the ribbon edge, running within sidewalk_along_deg of the road, is the road's. The top is the ground probe_m behind (at a sidewalk's edge, the highest within top_reach_cells cells), or the deck soffit over it; between min_top_m and max_top_m.",
+    "min_rise_m": 1.0,
+    "slope": 1.5,
+    "probe_m": 4.0,
+    "reach_m": 8.0,
+    "step_m": 2.0,
+    "min_length_m": 6.0,
+    "join_gap_m": 4.0,
+    "sidewalk_range_m": 3.5,
+    "sidewalk_along_deg": 40.0,
+    "top_reach_cells": 2,
+    "min_top_m": 0.3,
+    "max_top_m": 8.0,
+    "smooth_stations": 9
+  },
   "pedestrian": {
     "curb_height_m": 0.12,
     "follow_road_within_m": 8.0,

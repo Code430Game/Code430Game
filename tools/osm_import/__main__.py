@@ -46,6 +46,7 @@ from osm_import.region import (
 from osm_import.services import build_services, services_query
 from osm_import.validation import render_markdown
 from osm_import.vegetation import build_vegetation, vegetation_query
+from osm_import.walls import build_walls, hold_in_front_of_walls
 from osm_import.water import build_water, water_query
 from osm_import.yards import build_yards
 
@@ -211,6 +212,14 @@ def _import(args: argparse.Namespace) -> int:
         tstats["cells_cut_under_paths"] += cut_under_deep_paths(
             chunks, result.graph, ChunkSampler(chunks).sample
         )
+        # Retaining walls where the finished terrain rises steeply beside a road (add-retaining-
+        # walls): the ground in front of each is held at the road's or sidewalk's level, so the
+        # step up to the bank is the wall's face.
+        walls = build_walls(result.graph, ChunkSampler(chunks).sample, bridges, cfg)
+        tstats["cells_held_before_walls"] = hold_in_front_of_walls(
+            chunks, result.graph, walls, buildings
+        )
+        result.report.summary["retaining_walls"] = walls.counts()
         bridges.reset_pier_feet(ChunkSampler(chunks).sample)
         result.report.summary["bridges"] = bridges.counts()
         # The terrain stage sets pedestrian heights and cuts paths under bridges: re-export them.
@@ -306,6 +315,7 @@ def _import(args: argparse.Namespace) -> int:
             border=border,
             border_result=result.border,
             license=getattr(args, "license", None),
+            walls=walls,
             build=build_stamp(result.graph_dict["meta"]["sources"], importer_commit())
             if args.build_stamp
             else None,
@@ -317,6 +327,7 @@ def _import(args: argparse.Namespace) -> int:
             paths[extra.stem] = target
         print(f"terrain: {tstats}")
         print(f"barriers: {barriers.counts}")
+        print(f"retaining walls: {walls.counts()}")
         print(f"bridges: {bridges.counts()}")
         print(f"vegetation: {vegetation.counts()}")
         print(f"services: {services.counts()}, addresses {services.address_sources()}")

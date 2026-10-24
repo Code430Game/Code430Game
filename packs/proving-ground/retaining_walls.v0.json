@@ -1,0 +1,5 @@
+{
+ "schema_version": 0,
+ "units": "metres, x east, y up, z south; points are the wall's foot, tops_m its height above each",
+ "walls": []
+}
