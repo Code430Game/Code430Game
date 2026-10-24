@@ -33,7 +33,7 @@ GeoTIFF that works for any such source.
   unnamed, the Nürburgring's pieces are named by section. A facility is a named `leisure=sports_centre` or `leisure=track` area, or any other named area tagged `sport=motor`.
   A raceway edge whose midpoint lies inside a facility gets the facility's name as `circuit`;
   inside two, the smaller one's. A piece with its own `name` keeps it (the section's); an
-  unnamed piece *of a closed loop* also takes the facility's name as its `name`, because the
+  unnamed piece *of a closed loop* also takes the loop's name as its `name`, because the
   lap timer finds the loop by edge `name`. Unnamed pit lanes and connectors stay unnamed, so
   the lap readout doesn't show on them.
 - **Laps from the map.** For each closed raceway loop (pieces chained end to end by one-way
@@ -45,9 +45,11 @@ GeoTIFF that works for any such source.
   - **Readout:** `loop_names` lists every edge `name` on the loop (each section's, and the
     circuit's on the pieces that took it), so the readout shows anywhere on the loop. The lap
     file format and the lap timer do not change.
-  - **The other lap fields:** `name` is the circuit's name; `id` is that name as a slug
-    (`calabogie-motorsports-park`), with `-2`, `-3` after it for a facility's second and
-    third loops, longest first; `direction` is the loop's unit direction of travel at the
+  - **The loop's name** is its circuit's; for a loop outside any facility, its longest named
+    piece's; with neither, "Race track".
+  - **The other lap fields:** `name` is the loop's name; `id` is that name as a slug
+    (`calabogie-motorsports-park`), with `-2`, `-3` after it for further loops of the same
+    name, longest first; `direction` is the loop's unit direction of travel at the
     start line; `half_width_m` is half the road's width plus 2 m; `rearm_s` takes the
     default.
 - **A paddock with every car.** Each track pack has a showroom: the mapped `amenity=parking`
