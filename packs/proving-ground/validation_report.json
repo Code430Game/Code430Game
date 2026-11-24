@@ -2682,6 +2682,7 @@
    "metres": 0,
    "stations": 46850,
    "tallest_m": 0.0,
+   "tops_lowered": 0,
    "wall_stations": 0,
    "walls": 0
   },
@@ -2705,6 +2706,7 @@
    "cells_held_before_walls": 0,
    "cells_lowered_for_water": 7789,
    "cells_lowered_under_decks": 12710,
+   "cells_raised_behind_walls": 0,
    "cells_restored_under_roads": 496,
    "cells_under_buildings": 24686,
    "chunks": 80,

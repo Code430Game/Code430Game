@@ -5,10 +5,17 @@ extends RefCounted
 ## colour; heights come from the file. Walls are embedded 0.3 m below the base
 ## line so slopes leave no gaps. Retaining walls (retaining_walls.v0.json,
 ## add-retaining-walls) are barriers of kind "wall" whose height follows the
-## ground behind them: one top per point (`tops_m`), interpolated along the line.
+## ground behind them: one top per point (`tops_m`), interpolated along the line. The terrain is
+## a 4 m grid and cannot step at the wall's face: it is low for a cell behind the face and climbs
+## to the wall's top in the cells after that. So a wall with `cap_m` is a solid block: a level
+## top reaches back `cap_m` over that strip to the raised ground, in the terrain's colour, closed
+## at both ends. Nothing can drop in behind a wall, and the bank carries on from its top.
 
 const EMBED_M := 0.3
 const WALLS_FILE := "retaining_walls.v0.json"
+## A wall's cap sinks this far from the face to its back edge, so it runs into the raised
+## ground there instead of lying in its plane (the importer's walls.CAP_SINK_M).
+const CAP_SINK_M := 0.5
 const STYLE := {
 	"curb": {"thickness": 0.25, "color": Color(0.62, 0.62, 0.60)},
 	"parapet": {"thickness": 0.35, "color": Color(0.66, 0.66, 0.64)},
@@ -32,6 +39,8 @@ class Barrier:
 	var points: PackedVector3Array
 	var border_side: String = ""  # a roadblock where the district border cut the road (add-district-stitching)
 	var tops_m: PackedFloat32Array = PackedFloat32Array()  # a retaining wall: its height above each point (empty: height_m throughout)
+	var cap_m: float = 0.0  # a retaining wall: how far behind its face its solid top reaches (0: a plain wall)
+	var cap_side: float = 0.0  # which side of the points' direction that is: -1 left, +1 right
 
 
 ## Reads barriers.v0.json; empty when the pack has none.
@@ -84,6 +93,10 @@ static func load_walls(pack_dir: String) -> Array[Barrier]:
 			bar.points.append(Vector3(float(p[0]), float(p[1]), float(p[2])))
 		for t in tops:
 			bar.tops_m.append(float(t))
+		var side := str(w.get("side", ""))
+		if side == "left" or side == "right":
+			bar.cap_side = -1.0 if side == "left" else 1.0
+			bar.cap_m = maxf(float(w.get("cap_m", 0.0)), 0.0)
 		if bar.height_m <= 0.0:
 			bar.height_m = bar.tops_m[bar.tops_m.size() - 1] if bar.tops_m.size() > 0 else 0.0
 			for t in bar.tops_m:
@@ -205,7 +218,33 @@ static func build(barriers: Array[Barrier]) -> Dictionary:
 			if not buckets.has(chunk):
 				buckets[chunk] = RoadMeshBuilder.ChunkTriangles.new()
 			_segment(buckets[chunk], pl[i], pl[i + 1], normals[i], normals[i + 1], half, tops[i], tops[i + 1], color, i == 0, i == pl.size() - 2)
+			if b.cap_m > half and b.cap_side != 0.0:
+				_cap(buckets[chunk], pl[i], pl[i + 1], normals[i] * b.cap_side, normals[i + 1] * b.cap_side, half, b.cap_m, tops[i], tops[i + 1], color, i == 0, i == pl.size() - 2)
 	return buckets
+
+
+## A retaining wall's solid top over one segment: from the back of the wall at its top, `reach`
+## behind the face (`na`, `nb` point behind), sinking CAP_SINK_M to the back edge. In the
+## terrain's colour: it is the ground at the top of the wall. The wall's two ends are closed
+## from the cap down to the foot, in the wall's colour.
+static func _cap(out: RoadMeshBuilder.ChunkTriangles, a: Vector3, b: Vector3, na: Vector2, nb: Vector2, half: float, reach: float, height_a: float, height_b: float, color: Color, close_start: bool, close_end: bool) -> void:
+	var ba := Vector3(na.x, 0.0, na.y)
+	var bb := Vector3(nb.x, 0.0, nb.y)
+	var sink := Vector3(0.0, -CAP_SINK_M, 0.0)
+	var a_face := a + ba * half + Vector3(0.0, height_a, 0.0)
+	var b_face := b + bb * half + Vector3(0.0, height_b, 0.0)
+	var a_back := a + ba * reach + Vector3(0.0, height_a, 0.0) + sink
+	var b_back := b + bb * reach + Vector3(0.0, height_b, 0.0) + sink
+	_quad_facing(out, a_face, a_back, b_face, b_back, Vector3.UP, TerrainBuilder.TERRAIN_COLOR)
+	var down := Vector3(0.0, -EMBED_M, 0.0)
+	if close_start:
+		var back := a - b
+		back.y = 0.0
+		_quad_facing(out, a + ba * half + down, a_face, a + ba * reach + down, a_back, back.normalized(), color)
+	if close_end:
+		var fwd := b - a
+		fwd.y = 0.0
+		_quad_facing(out, b + bb * half + down, b_face, b + bb * reach + down, b_back, fwd.normalized(), color)
 
 
 ## RoadGeometry.split_at_chunk_bounds for a line with a height per point: a point inserted at a

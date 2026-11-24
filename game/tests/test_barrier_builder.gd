@@ -167,6 +167,63 @@ func test_a_retaining_wall_rises_by_its_tops_and_meets_itself_at_the_chunk_bound
 	assert_bool(zs.has(snappedf(thickness * 0.5, 0.001))).is_true()
 
 
+## A wall with a cap is a solid block: a top in the terrain's colour reaches back over the
+## strip where the terrain climbs, on the side the bank is on, and both ends are closed.
+func test_a_retaining_wall_with_a_cap_has_a_solid_top_behind_its_face() -> void:
+	var plain := _barrier("wall", 3.0, [[10, 10, 0], [30, 10, 0]])
+	plain.tops_m = PackedFloat32Array([3.0, 3.0])
+	var capped := _barrier("wall", 3.0, [[10, 10, 0], [30, 10, 0]])
+	capped.tops_m = PackedFloat32Array([3.0, 3.0])
+	capped.cap_m = 11.5
+	capped.cap_side = -1.0  # heading east, left is north (-z)
+	var plain_tris: RoadMeshBuilder.ChunkTriangles = BarrierBuilder.build([plain] as Array[BarrierBuilder.Barrier])[Vector2i(0, 0)]
+	var tris: RoadMeshBuilder.ChunkTriangles = BarrierBuilder.build([capped] as Array[BarrierBuilder.Barrier])[Vector2i(0, 0)]
+	# The cap (two triangles) and the two closed ends (two each) on top of the plain wall.
+	assert_int(tris.vertices.size()).is_equal(plain_tris.vertices.size() + 18)
+	var back_z := INF
+	var grass := 0
+	for i in range(0, tris.vertices.size(), 3):
+		var a := tris.vertices[i]
+		var b := tris.vertices[i + 1]
+		var c := tris.vertices[i + 2]
+		for v in [a, b, c]:
+			back_z = minf(back_z, v.z)
+			assert_float(v.z).is_less_equal(BarrierBuilder.STYLE["wall"]["thickness"] * 0.5 + 1e-4)  # nothing in front of the face
+		if tris.colors[i].is_equal_approx(TerrainBuilder.TERRAIN_COLOR):
+			grass += 1
+			assert_float((c - a).cross(b - a).normalized().y).is_greater(0.9)  # the top faces up
+			for v in [a, b, c]:
+				# At the wall's top by the face, CAP_SINK_M lower at the back edge.
+				assert_float(v.y).is_equal_approx(13.0 if v.z > -1.0 else 13.0 - BarrierBuilder.CAP_SINK_M, 1e-4)
+	assert_float(back_z).is_equal_approx(-11.5, 1e-4)
+	assert_int(grass).is_equal(2)
+
+
+func test_load_walls_reads_the_side_and_the_cap() -> void:
+	var dir := "user://test_wall_caps_%d" % randi()
+	DirAccess.make_dir_recursive_absolute(dir)
+	var walls := {
+		"schema_version": 0,
+		"units": "m",
+		"walls": [
+			{"id": "w:a:l0", "edge_id": "a", "height_m": 3.0, "side": "left", "cap_m": 11.5, "points": [[0, 1, 0], [10, 1, 0]], "tops_m": [3.0, 2.0]},
+			{"id": "w:a:r0", "edge_id": "a", "height_m": 3.0, "side": "right", "cap_m": 11.5, "points": [[0, 1, 5], [10, 1, 5]], "tops_m": [3.0, 2.0]},
+			{"id": "w:b:l0", "edge_id": "b", "height_m": 3.0, "points": [[0, 1, 9], [10, 1, 9]], "tops_m": [3.0, 2.0]},
+		],
+	}
+	var f := FileAccess.open(dir.path_join(BarrierBuilder.WALLS_FILE), FileAccess.WRITE)
+	f.store_string(JSON.stringify(walls))
+	f.close()
+	var loaded := BarrierBuilder.load_walls(dir)
+	assert_int(loaded.size()).is_equal(3)
+	assert_float(loaded[0].cap_side).is_equal(-1.0)
+	assert_float(loaded[0].cap_m).is_equal_approx(11.5, 1e-5)
+	assert_float(loaded[1].cap_side).is_equal(1.0)
+	assert_float(loaded[2].cap_m).is_equal(0.0)  # an older pack's wall: plain
+	DirAccess.remove_absolute(dir.path_join(BarrierBuilder.WALLS_FILE))
+	DirAccess.remove_absolute(dir)
+
+
 func test_split_with_tops_interpolates_the_cut_points_top() -> void:
 	var split := BarrierBuilder.split_with_tops(PackedVector3Array([Vector3(250, 0, 10), Vector3(262, 0, 10), Vector3(262, 0, 260)]), PackedFloat32Array([1.0, 3.0, 5.0]))
 	var pts: PackedVector3Array = split["points"]

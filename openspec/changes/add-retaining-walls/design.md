@@ -98,3 +98,47 @@ followed, measured again on the capture:
   Metcalfe keeps its walls on both sides. The verges at x 681 and 736 beside the 417 have none.
   The proving ground's four walls along Viaduct Road South were the viaduct ramp's own
   embankment and are gone: it now writes an empty `retaining_walls.v0.json`.
+
+### After the Deck stop (2026-11-24): walls that hold the ground back
+The human's verdict at 3.2: the walls are chaotic and not smooth; they got stuck behind one;
+some go too high and retain nothing. "The retaining wall should shift the slope: the slope
+would go to the retaining wall, the wall would be vertical, and then the slope would continue
+at the top of the wall." Measured on the same Centretown capture with the walls as they stood:
+at 1,615 of 1,779 wall stations the ground 2 m behind the wall lay more than a metre below
+its top. The wall was drawn on a slope that carried on under it as before, with a wedge to
+fall into behind it; and its line followed where the climb started, cell by cell.
+
+What changed, and why each part is as it is:
+- **The ground is made to fit the wall.** In front of the wall the ground is held at the
+  foot (as before); behind it the ground is raised to the wall's top out to `FILL_M`
+  (15.5 m), never lowered. So the bank carries on from the top of the wall.
+- **A 4 m grid cannot step, so the wall is a block.** Between a low cell and a high cell
+  the terrain is a 4 m ramp. If the ramp starts in front of the face the grass climbs the
+  wall and spills on the sidewalk; so every cell that touches the face is low, which means
+  every cell within one cell's diagonal (5.66 m) behind the line. The ramp then lies behind
+  the face, within two diagonals. The game closes it: each wall has a level top reaching
+  `cap_m` (11.5 m) back, in the terrain's colour, sinking 0.5 m to its back edge so it runs
+  into the raised ground, with both ends closed. Nothing is behind a wall to drop into; a
+  player on the bank walks onto the wall's top and to its face.
+- **The line is the road's, not the bank's.** The foot runs at the sidewalk's outer edge, or
+  4 m from a bare road's edge (where the road's own level margin ends), wherever the climb
+  starts; between the two it moves 1 m per 4 m along. The running median of climb starts is
+  gone, and with it the review's finding that a joined station pulled the line back to the
+  road's edge. A sidewalk up to 8 m from the ribbon is the road's (Metcalfe's west sidewalk
+  under the 417 stands 4 m off, and the wall would have covered it) unless another road lies
+  between.
+- **Tops.** The ground 4 m into the climb; the bank's crest where that is within 2 m above
+  (the top is then level with the ground up there); the soffit where the bank climbs to a
+  deck. The median of five then the mean of three along the wall, a taper of 1 m per metre
+  to the ground at an end, none where the wall carries on along the road's next edge (the
+  first try dipped to the ground at every split in a way). After the ground is shaped a top
+  is lowered to the ground at the back of its cap where the fill was kept off it (another
+  road's grading, a building), so no wall stands above what it holds.
+- **Not a wall:** where the cap would cover a lower road, junction or path; a line that
+  turns over 30 degrees at a point (the inside of a loop tighter than the offset); a wall
+  under 1.5 m at its tallest; the shorter of two walls two roads build along each other.
+- **What is left.** Where another road's grading zone reaches the face (the 417's ground
+  approaches beside its underpasses) the cells behind the face may not be lowered, or that
+  road gets a wheel trap; there the bank still starts at the wall's face, and at a corner of
+  the embankment a little in front of it. And a wall's end: the bank beside it comes round
+  the end as a slope. Both were so before.

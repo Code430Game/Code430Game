@@ -46,7 +46,7 @@ from osm_import.region import (
 from osm_import.services import build_services, services_query
 from osm_import.validation import render_markdown
 from osm_import.vegetation import build_vegetation, vegetation_query
-from osm_import.walls import build_walls, hold_in_front_of_walls
+from osm_import.walls import build_walls, shape_ground_at_walls
 from osm_import.water import build_water, water_query
 from osm_import.yards import build_yards
 
@@ -213,11 +213,11 @@ def _import(args: argparse.Namespace) -> int:
             chunks, result.graph, ChunkSampler(chunks).sample
         )
         # Retaining walls where the finished terrain rises steeply beside a road (add-retaining-
-        # walls): the ground in front of each is held at the road's or sidewalk's level, so the
-        # step up to the bank is the wall's face.
+        # walls): the ground in front of each is held at the road's or sidewalk's level and
+        # the ground behind raised to its top, so the step up to the bank is the wall's face.
         walls = build_walls(result.graph, ChunkSampler(chunks).sample, bridges, cfg)
-        tstats["cells_held_before_walls"] = hold_in_front_of_walls(
-            chunks, result.graph, walls, buildings
+        tstats["cells_held_before_walls"], tstats["cells_raised_behind_walls"] = (
+            shape_ground_at_walls(chunks, result.graph, walls, buildings)
         )
         result.report.summary["retaining_walls"] = walls.counts()
         bridges.reset_pier_feet(ChunkSampler(chunks).sample)

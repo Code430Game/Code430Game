@@ -9,7 +9,7 @@ add-retaining-walls) needs many runs, so:
         (the carved chunks, the graph after pedestrian heights, the bridges) next to the pack.
     uv run python terrain_replay.py replay <out dir>/<district>.pkl [label]
         Runs flatten, the sidewalk lift and cut, the under-deck lowering, the bed restore and
-        the retaining walls (the scan and the hold in front of them, add-retaining-walls) with
+        the retaining walls (the scan and the ground shaped to them, add-retaining-walls) with
         the importer as it stands now, then measures wheel traps (a port of the game's
         EdgeDropReport) and junctions with terrain through their drawn surface (a port of
         JunctionReport.terrain_above), says which pass last moved each trap's lowest cell, and
@@ -88,7 +88,7 @@ def capture(region: Path, out: Path) -> Path:
         "build_bridges",
         "build_buildings",
         "build_walls",
-        "hold_in_front_of_walls",
+        "shape_ground_at_walls",
     )
     original_pack = {name: getattr(pack, name) for name in pack_names}
     original_main = {name: getattr(main_mod, name) for name in main_names}
@@ -104,7 +104,7 @@ def capture(region: Path, out: Path) -> Path:
         main_mod.build_bridges = bridges_wrap
         main_mod.build_buildings = buildings_wrap
         main_mod.build_walls = lambda graph, sample, bridges, cfg: W.WallsResult()
-        main_mod.hold_in_front_of_walls = lambda chunks, graph, walls, buildings=None: 0
+        main_mod.shape_ground_at_walls = lambda chunks, graph, walls, buildings=None: (0, 0)
         main_mod.main(
             [
                 "--region",
@@ -162,7 +162,7 @@ class Replay:
         self.walls = W.build_walls(
             self.graph, ChunkSampler(self.chunks).sample, self.bridges, load_config()
         )
-        W.hold_in_front_of_walls(self.chunks, self.graph, self.walls, self.buildings)
+        W.shape_ground_at_walls(self.chunks, self.graph, self.walls, self.buildings)
         self._snap("walls")
         return time.time() - t0
 

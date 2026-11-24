@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://code430.dev/schemas/retaining_walls.schema.v0.json",
   "title": "Code 430 retaining walls v0",
-  "description": "Optional file in a map pack (add-retaining-walls). Vertical retaining walls where the ground rises steeply beside a road: the foot line of each (on the ground in front, at the road's or sidewalk's level) and its height above each point. The game extrudes a concrete wall from each point up by its top, interpolating the top between points and where it splits the wall at a chunk boundary; height_m is the tallest top, for bounds. tops_m must be as long as points: the pack validator checks that, and the game skips a wall that fails it. A game from before this file ignores it.",
+  "description": "Optional file in a map pack (add-retaining-walls). Vertical retaining walls where the ground rises steeply beside a road: the foot line of each (on the ground in front, at the road's or sidewalk's level, parallel to the road) and its height above each point. The game extrudes a concrete wall from each point up by its top, interpolating the top between points and where it splits the wall at a chunk boundary; height_m is the tallest top, for bounds. tops_m must be as long as points: the pack validator checks that, and the game skips a wall that fails it. The terrain in the pack is shaped to the walls: at the foot's level in front of each wall and for a terrain cell behind it, and at least as high as the top behind that. The strip where the 4 m terrain grid climbs from one to the other lies behind the face, so a wall with side and cap_m is built as a solid block: a level top from the face back cap_m on that side (sinking 0.5 m to its back edge, where it meets the raised ground), closed at both ends. A game from before this file ignores it.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "units", "walls"],
@@ -19,6 +19,8 @@
           "id": {"type": "string", "pattern": "^w:.+:[lr][0-9]+$", "description": "w:<edge id>:<side l or r><run number on that side>"},
           "edge_id": {"type": "string"},
           "height_m": {"type": "number", "exclusiveMinimum": 0, "description": "the largest of tops_m"},
+          "side": {"enum": ["left", "right"], "description": "the side of the points' direction the held-back ground is on (x east, z south: heading east, left is north)"},
+          "cap_m": {"type": "number", "minimum": 0, "description": "how far behind its face the wall's solid top reaches; needs side. 0 or absent: a plain wall"},
           "points": {"type": "array", "minItems": 2, "items": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}},
           "tops_m": {"type": "array", "minItems": 2, "items": {"type": "number", "exclusiveMinimum": 0}, "description": "height of the wall above each point, one per entry of points"}
         }

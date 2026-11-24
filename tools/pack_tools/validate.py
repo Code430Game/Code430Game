@@ -682,6 +682,10 @@ def wall_top_errors(data: dict) -> list[str]:
                 f"{WALLS_NAME}: wall '{w.get('id')}' has {len(tops)} tops_m for "
                 f"{len(points)} points"
             )
+        if w.get("cap_m") and w.get("side") not in ("left", "right"):
+            errors.append(
+                f"{WALLS_NAME}: wall '{w.get('id')}' has cap_m without side (left or right)"
+            )
         if len(errors) >= MAX_ERRORS_PER_FILE:
             break
     return errors
