@@ -30,6 +30,7 @@
 - [x] 5.1 Importer: no wall along a stretch where a level verge (3 m) or a ditch lies between the line and the bank, judged a stretch at a time; walls that together run under 12 m dropped; tests
 - [x] 5.2 Measured on the Centretown capture (`tools/terrain_replay.py`)
   - 2026-11-27: 109 walls / 3.3 km (185 / 4.2 km before): 75 walls fewer by place: 36 had over 3 m of level ground before the bank (both on Wellington Street at Parliament Hill among them, with 4.5 and 5 m of lawn), the other 39 were short (one of 12 m, the rest under). Of walls under 10 m 5 are left (46 before), each part of a longer run. The four walls of Metcalfe under the 417 are as they were. 669 wheel traps and 17 of 2,198 junctions with terrain through the surface, as before.
-  - Not measured: no fresh export (`scripts/terrain-trial.sh` needs the OSM cache, which was not mounted), so the game's own reports, the Glebe and Hintonburg were not rerun.
+  - The game's reports on fresh exports (`scripts/terrain-trial.sh`, the same day): Centretown 109 walls / 3.3 km, 669 wheel traps, 16 of 2,198 junctions with terrain through the surface, Metcalfe under the 417 passes; the Glebe 23 walls / 0.7 km (51 / 1.1 km), 294 wheel traps; Hintonburg 16 walls / 0.4 km (40 / 0.7 km), 208 wheel traps. Traps and junctions as before the pass.
+  - Not measured: the Deck benchmark (the Deck was in another game); no new screenshots.
   - The two in-game reports of that Deck try (#179 fell through a parking lot at x 384, z 400; #180 sunken sidewalk at x -281, z -151) are not from the walls: the nearest wall is over 190 m from either, and the wall pass moved no terrain cell within 150 m of them.
 - [ ] 5.3 **Stop: the human looks at Parliament Hill and the walls again on the Deck**
