@@ -74,8 +74,10 @@ DEFAULTS = {
     "slope": 1.5,  # the climb that is a bank: more than 1 m per this many metres out
     "probe_m": 4.0,  # how far into the climb the bank's height is read
     "reach_m": 8.0,  # the climb starts within this of the outer edge
+    "max_toe_m": 3.0,  # the ground is rising within this of the wall's line: past a wider level verge the bank has room
     "step_m": 2.0,
     "min_length_m": 6.0,
+    "min_run_m": 12.0,  # walls that follow on end to end and together are shorter are dropped
     "min_height_m": 1.5,  # a wall whose tallest point is lower than this is dropped
     "join_gap_m": 4.0,  # no-wall gaps up to this long between two stretches are filled
     "sidewalk_range_m": 8.0,  # a sidewalk this close to the ribbon edge is the road's
@@ -94,6 +96,8 @@ SLOPE_SAMPLE_M = 1.0  # the climb is read over windows this long between the edg
 WAY_MARGIN_M = 0.3  # a way's ribbon this much wider still breaks the wall
 BED_SLACK_M = 0.2  # the ground is never raised more than this above another way's bed
 LEVEL_M = 2.5  # a way further than this above or below the edge passes over or under it
+VERGE_M = 0.5  # ground within this of the foot behind the line is still the verge
+DIP_M = 0.75  # ground this far below the foot just behind the line is a dip, not a bank
 SIDEWALK_LEVEL_M = 0.75  # a sidewalk further than this from the road's level is not its own
 # In front of a wall another road's ribbon plus this stays: EdgeDropReport reads the ground up
 # to 1 m outside a ribbon, and a cell lowered there is a wheel trap on that road. Behind the
@@ -247,6 +251,7 @@ def build_walls(
     step = float(rules["step_m"])
     probe = float(rules["probe_m"])
     reach = float(rules["reach_m"])
+    max_toe = float(rules["max_toe_m"])
     min_rise = float(rules["min_rise_m"])
     slope_rise = SLOPE_SAMPLE_M / float(rules["slope"])  # the climb over one window that is a wall
     sw_range = float(rules["sidewalk_range_m"])
@@ -256,6 +261,7 @@ def build_walls(
     min_probe_rise = max(min_rise, probe / float(rules["slope"]))  # the spec's 1 m per 1.5 m out
     join_gap = float(rules["join_gap_m"])
     min_length = float(rules["min_length_m"])
+    min_run = float(rules["min_run_m"])
     min_height = float(rules["min_height_m"])
     setback = float(rules["bare_setback_m"])
     slew = float(rules["line_slew"])
@@ -488,6 +494,7 @@ def build_walls(
             depths: list = []
             road_ys: list = []
             keep: list = []  # wall here
+            loose: list = []  # a wall here would stand clear of its bank
             hard: list = []  # a way leaves here: never joined across
             for (x, y, z, dx, dz), (outer, edge_y, start, _sw), foot in zip(stations, feet, line):
                 nx, nz = -dz * side, dx * side
@@ -496,7 +503,7 @@ def build_walls(
                 leaves = way_leaves(fx, fz, foot_y, eid, dx, dz)
                 top = min_top
                 ceiling = None
-                is_wall = to_deck = False
+                is_wall = to_deck = is_loose = False
                 if start is not None and not leaves:
                     # The bank's height: the ground `probe` into the climb.
                     back = outer + start + probe
@@ -527,6 +534,15 @@ def build_walls(
                         why = "a road alongside"
                     elif under_the_cap(x, z, nx, nz, foot, foot_y + top - CAP_SINK_M, eid):
                         why = "a way under the cap"
+                    behind = [
+                        sample(x + nx * (foot + d), z + nz * (foot + d)) - foot_y
+                        for d in np.arange(1.0, max_toe + 1e-6, 1.0)
+                    ]
+                    # Level ground from the line to max_toe behind it: the bank has the room
+                    # it needs, and a wall here would hold back nothing but a lawn. Or the
+                    # ground falls away before it climbs (a ditch, a sunken way's cutting):
+                    # the bank is across that, not at the road. Judged a stretch at a time.
+                    is_loose = all(g < VERGE_M for g in behind) or any(g < -DIP_M for g in behind)
                     is_wall = why == "wall"
                     if result.trace is not None:
                         result.trace.append((fx, fz, side, why))
@@ -542,11 +558,16 @@ def build_walls(
                 depths.append(foot - hw)
                 road_ys.append(y)
                 keep.append(is_wall)
+                loose.append(is_wall and is_loose)
                 hard.append(leaves)
             measured = list(keep)
             _join_gaps(pts, keep, hard, join_gap)
             n = 0
             for lo, hi in _stretches(keep):
+                if sum(loose[lo:hi]) * 2 > sum(measured[lo:hi]):
+                    if result.trace is not None:
+                        result.trace.append((*pts[(lo + hi) // 2][::2], side, "clear of its bank"))
+                    continue
                 for i in range(lo, hi):
                     if ceilings[i] is None:  # a joined station: its soffit was never read
                         ceilings[i] = min(soffit_over(pts[i][0], pts[i][2]) - pts[i][1], max_top)
@@ -581,7 +602,7 @@ def build_walls(
                     continue  # the inside of a loop tighter than the line's offset: no line
                 result.walls.append(wall)
                 n += 1
-    result.walls = _without_doubles(result.walls)
+    result.walls = _without_stubs(_without_doubles(result.walls), min_run, join_gap)
     log.info("retaining walls: %s", result.counts())
     return result
 
@@ -621,6 +642,29 @@ def _without_doubles(walls: list[Wall], near: float = 2.5) -> list[Wall]:
         for x, _y, z in w.points:
             taken.setdefault((math.floor(x / cell), math.floor(z / cell)), []).append((x, z))
     return sorted(kept, key=lambda w: w.id)
+
+
+def _without_stubs(walls: list[Wall], min_run: float, near: float) -> list[Wall]:
+    """A road's wall is cut wherever its data is split, so one bank's wall is several that
+    follow on end to end (within `near`): a run. A run shorter than `min_run` altogether is
+    a stub, a slab of concrete on its own, and is dropped."""
+    run = list(range(len(walls)))  # each wall's run: the index at the root
+
+    def root(i: int) -> int:
+        while run[i] != i:
+            run[i] = run[run[i]]
+            i = run[i]
+        return i
+
+    ends = [((w.points[0][0], w.points[0][2]), (w.points[-1][0], w.points[-1][2])) for w in walls]
+    for i, mine in enumerate(ends):
+        for j in range(i + 1, len(ends)):
+            if any(math.hypot(a[0] - b[0], a[1] - b[1]) <= near for a in mine for b in ends[j]):
+                run[root(i)] = root(j)
+    length: dict[int, float] = {}
+    for i, w in enumerate(walls):
+        length[root(i)] = length.get(root(i), 0.0) + w.length_m()
+    return [w for i, w in enumerate(walls) if length[root(i)] >= min_run]
 
 
 def _sharpest_turn(pts: list) -> float:

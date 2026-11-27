@@ -26,6 +26,7 @@ from osm_import.walls import (
     _envelope,
     _wall_tops,
     _without_doubles,
+    _without_stubs,
     build_walls,
     shape_ground_at_walls,
 )
@@ -345,3 +346,40 @@ def test_of_two_walls_along_each_other_the_longer_stays():
     kept = _without_doubles([double, beyond, long])
     # The one that only meets the long wall end to end stays; the one beside it goes.
     assert [w.id for w in kept] == ["w:a:l0", "w:c:l0"]
+
+
+def test_no_wall_where_a_level_verge_or_a_dip_lies_between_the_line_and_the_bank():
+    graph = _graph()
+    # The same 6 m bank, but starting 5.5 m behind the sidewalk (within reach_m): the ground
+    # max_toe_m behind the line is still level with the foot, so the bank has its room.
+    assert _walls(graph, _terrain(bank_from_z=-16.0)).walls == []
+    # A bank that starts 1.5 m behind the line, across a ditch 3 m deep: not the road's.
+    chunks = _terrain(bank_from_z=-12.0)
+    chunks[0].heights[_row(chunks[0], -8.0), :] = ROAD_Y - 3.0
+    assert _walls(graph, chunks).walls == []
+    # Without the ditch that bank is a wall.
+    assert len(_walls(graph, _terrain(bank_from_z=-12.0)).walls) == 1
+
+
+def test_a_stretch_is_judged_whole_a_verge_at_a_few_stations_does_not_cut_it():
+    graph = _graph()
+    chunks = _terrain()
+    # Along 12 m of the 200 m bank its foot stands back behind a level verge.
+    chunk = chunks[0]
+    cols = slice(int(100 / TERRAIN_RES_M), int(112 / TERRAIN_RES_M) + 1)
+    chunk.heights[_row(chunk, -8.0), cols] = ROAD_Y
+    chunk.heights[_row(chunk, -12.0), cols] = ROAD_Y
+    walls = _walls(graph, chunks).walls
+    assert len(walls) == 1 and walls[0].length_m() == pytest.approx(200.0, abs=2.0)
+
+
+def test_walls_that_together_run_under_min_run_m_are_dropped():
+    def wall(wid, x0, x1, z=0.0):
+        xs = range(x0, x1 + 1, 2)
+        return Wall(wid, wid, [(float(x), 50.0, z) for x in xs], [3.0] * len(xs))
+
+    alone = wall("w:a:l0", 0, 8)
+    first, second = wall("w:b:l0", 100, 108), wall("w:c:l0", 110, 118, z=1.0)  # end to end
+    long = wall("w:d:l0", 200, 220)
+    kept = _without_stubs([alone, first, second, long], 12.0, 4.0)
+    assert [w.id for w in kept] == ["w:b:l0", "w:c:l0", "w:d:l0"]

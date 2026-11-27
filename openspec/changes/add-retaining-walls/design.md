@@ -142,3 +142,32 @@ What changed, and why each part is as it is:
   road gets a wheel trap; there the bank still starts at the wall's face, and at a corner of
   the embankment a little in front of it. And a wall's end: the bank beside it comes round
   the end as a slope. Both were so before.
+
+### After the second Deck try (2026-11-27): only walls that hold a bank at the road
+
+The human: it works and is better, but a couple of walls stand on the edge of Parliament Hill
+that should not be there. Both were on Wellington Street (9 m and 28 m, about 4 m tall),
+where the lawn's bank comes within `reach_m` of the sidewalk for a short way. Behind their
+line the ground is level for 4.5 and 5 m before it climbs: nothing to hold at the road, and
+the bank runs on both ways without a wall, so the two stood as slabs on a lawn.
+
+- **A verge before the bank.** Measured on every wall of the Centretown capture: the walls
+  that work (Metcalfe under the 417, the Alexandra Bridge approach, Lady Grey Drive) have
+  ground 0.75 m up within 2.5 m of the line; 42 of 185 had 3.5 m or more of level ground
+  first. Rule: no wall where the ground is within 0.5 m of the foot from the line to
+  `max_toe_m` (3 m) behind it. `reach_m` stays 8 m: it finds the climb, this says whether
+  the climb is the road's.
+- **A dip before the bank.** Three walls stood with the ground up to 4 m below the foot just
+  behind them (a cutting beside the road, the bank across it). No wall where the ground
+  within those 3 m is over 0.75 m below the foot.
+- **Judged a stretch at a time.** The first try tested each station: a bank whose foot
+  wanders across the 3 m was cut into pieces, and the pieces fell under the minimum (the
+  Metcalfe walls lost 4 to 10 m each, one went). A stretch goes when over half its stations
+  fail, else it stays whole. Tried first with the place the climb starts (`start`) as the
+  measure: that also took banks that rise gently from the line and steepen further back
+  (Rideau Street 41 m, Henderson Avenue 40 m), which do hold ground at the road; the
+  ground's level does not.
+- **Stubs.** 46 of 185 walls were under 10 m, with a cap 11.5 m deep behind each: blocks
+  deeper than long. A wall is cut wherever its road's data is split, so the test is on the
+  run: walls whose ends meet within `join_gap_m` are one run, and a run under `min_run_m`
+  (12 m) is dropped. `min_length_m` stays 6 m for a piece of a longer run.

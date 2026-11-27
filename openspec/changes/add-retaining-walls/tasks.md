@@ -23,4 +23,13 @@
   - On the Centretown capture (`tools/terrain_replay.py`): before the rework the ground 2 m behind the wall lay over a metre below its top at 1,615 of 1,779 stations; now no top stands above the ground at the back of its solid top (25 tops lowered to it). The sharpest turn in any wall's line is 28 degrees (160 before the folded lines were dropped); the median top changes 6 cm per metre along.
   - Screenshots (Mac, high preset, 13:00, clear, same flags as 2.2): `rework_metcalfe_north.jpg` (the west wall with level grass on top), `rework_metcalfe_from_the_417.jpg`, `rework_ramp_cutting_east.jpg` (the wall of `after_ramp_cutting_east.jpg`: straight, the hill carrying on from its top), `rework_sunken_street.jpg` (x 405, z -582).
   - Not measured: the Deck benchmark was not rerun (each wall segment gains two triangles for its top, the ends four each).
-- [ ] 4.4 **Stop: the human drives and walks the walls on the Deck again (on top of one, and behind where one used to be)**
+- [x] 4.4 **Stop: the human drives and walks the walls on the Deck again (on top of one, and behind where one used to be)**
+  - 2026-11-27, the human on the Deck (build `1d5e56e`): "it works", "for sure an improvement over the first round", but with oddities: a couple of walls on the edge of Parliament Hill that should not be there. Asked for a third pass.
+
+## 5. Only walls that hold a bank at the road (after the second Deck try)
+- [x] 5.1 Importer: no wall along a stretch where a level verge (3 m) or a ditch lies between the line and the bank, judged a stretch at a time; walls that together run under 12 m dropped; tests
+- [x] 5.2 Measured on the Centretown capture (`tools/terrain_replay.py`)
+  - 2026-11-27: 109 walls / 3.3 km (185 / 4.2 km before): 75 walls fewer by place: 36 had over 3 m of level ground before the bank (both on Wellington Street at Parliament Hill among them, with 4.5 and 5 m of lawn), the other 39 were short (one of 12 m, the rest under). Of walls under 10 m 5 are left (46 before), each part of a longer run. The four walls of Metcalfe under the 417 are as they were. 669 wheel traps and 17 of 2,198 junctions with terrain through the surface, as before.
+  - Not measured: no fresh export (`scripts/terrain-trial.sh` needs the OSM cache, which was not mounted), so the game's own reports, the Glebe and Hintonburg were not rerun.
+  - The two in-game reports of that Deck try (#179 fell through a parking lot at x 384, z 400; #180 sunken sidewalk at x -281, z -151) are not from the walls: the nearest wall is over 190 m from either, and the wall pass moved no terrain cell within 150 m of them.
+- [ ] 5.3 **Stop: the human looks at Parliament Hill and the walls again on the Deck**

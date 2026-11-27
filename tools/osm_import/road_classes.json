@@ -77,13 +77,15 @@
     "curb_classes": ["primary", "primary_link", "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified", "residential", "living_street"]
   },
   "walls": {
-    "_comment": "add-retaining-walls (walls.py): along every ground road's outer edge (the sidewalk's outer edge, else the road's), every step_m, where the finished terrain starts climbing more than 1 m per slope m within reach_m of the edge, and probe_m into that climb stands more than 1 m per slope m (and min_rise_m) above the edge, there is a retaining wall. Its line runs parallel to the road: at the sidewalk's outer edge, or bare_setback_m from a bare road's edge, moving between the two at most line_slew m per m along. Not where the bank is a carriageway running alongside, nor where the wall's cap would cover a lower way. Stretches under min_length_m, lower than min_height_m or turning more than max_turn_deg at a point are dropped, gaps up to join_gap_m joined. A sidewalk within sidewalk_range_m of the ribbon edge, running within sidewalk_along_deg of the road, is the road's. The top is the ground probe_m into the climb, or the bank's crest where that is within crest_gap_m above it, or the deck soffit where the bank climbs to within deck_gap_m of it; between min_top_m and max_top_m, smoothed, and tapered to min_top_m at both ends by taper m per m. The ground is held at the foot in front of the wall and raised to the top behind it.",
+    "_comment": "add-retaining-walls (walls.py): along every ground road's outer edge (the sidewalk's outer edge, else the road's), every step_m, where the finished terrain starts climbing more than 1 m per slope m within reach_m of the edge, and probe_m into that climb stands more than 1 m per slope m (and min_rise_m) above the edge, there is a retaining wall. Its line runs parallel to the road: at the sidewalk's outer edge, or bare_setback_m from a bare road's edge, moving between the two at most line_slew m per m along. Not a stretch where, at over half its stations, the ground is still level with the foot max_toe_m behind that line (a verge: the bank has room) or dips below the foot there; nor where the bank is a carriageway running alongside, nor where the wall's cap would cover a lower way. Stretches under min_length_m, lower than min_height_m or turning more than max_turn_deg at a point are dropped, gaps up to join_gap_m joined; walls that follow on end to end and together are shorter than min_run_m are dropped too. A sidewalk within sidewalk_range_m of the ribbon edge, running within sidewalk_along_deg of the road, is the road's. The top is the ground probe_m into the climb, or the bank's crest where that is within crest_gap_m above it, or the deck soffit where the bank climbs to within deck_gap_m of it; between min_top_m and max_top_m, smoothed, and tapered to min_top_m at both ends by taper m per m. The ground is held at the foot in front of the wall and raised to the top behind it.",
     "min_rise_m": 1.0,
     "slope": 1.5,
     "probe_m": 4.0,
     "reach_m": 8.0,
+    "max_toe_m": 3.0,
     "step_m": 2.0,
     "min_length_m": 6.0,
+    "min_run_m": 12.0,
     "min_height_m": 1.5,
     "join_gap_m": 4.0,
     "sidewalk_range_m": 8.0,
