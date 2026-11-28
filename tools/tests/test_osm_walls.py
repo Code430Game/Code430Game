@@ -383,3 +383,29 @@ def test_walls_that_together_run_under_min_run_m_are_dropped():
     long = wall("w:d:l0", 200, 220)
     kept = _without_stubs([alone, first, second, long], 12.0, 4.0)
     assert [w.id for w in kept] == ["w:b:l0", "w:c:l0", "w:d:l0"]
+
+
+def test_beside_a_bare_road_the_wall_moves_in_to_a_bank_that_starts_inside_the_margin():
+    graph = _graph()
+    graph.pedestrian = []  # the road's edge at z = -3.5; its wall would stand at z = -7.5
+    # The bank climbs from z = -4 to z = -8 (an embankment the grading may not cut): 0.5 m up
+    # under a metre from the road's edge.
+    result = _walls(graph, _terrain(bank_from_z=-8.0))
+    assert len(result.walls) == 1
+    # At the bank's toe, not 4 m out and buried in it; the same all the way along.
+    zs = [z for _x, _y, z in result.walls[0].points]
+    assert all(-4.6 <= z <= -3.9 for z in zs) and max(zs) - min(zs) < 0.01
+    # A footpath in the margin: what stands up there may be its bed, so the line stays.
+    path = PedestrianWay(
+        "p2",
+        [(20.0, ROAD_Y + 1.0, -6.0), (220.0, ROAD_Y + 1.0, -6.0)],
+        "footway",
+        1,
+        None,
+        "footway",
+        1.5,
+    )
+    graph.pedestrian = [path]
+    assert all(
+        z < -7.0 for w in _walls(graph, _terrain(bank_from_z=-8.0)).walls for _x, _y, z in w.points
+    )

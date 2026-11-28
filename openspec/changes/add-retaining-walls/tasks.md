@@ -33,4 +33,10 @@
   - The game's reports on fresh exports (`scripts/terrain-trial.sh`, the same day): Centretown 109 walls / 3.3 km, 669 wheel traps, 16 of 2,198 junctions with terrain through the surface, Metcalfe under the 417 passes; the Glebe 23 walls / 0.7 km (51 / 1.1 km), 294 wheel traps; Hintonburg 16 walls / 0.4 km (40 / 0.7 km), 208 wheel traps. Traps and junctions as before the pass.
   - Not measured: the Deck benchmark (the Deck was in another game); no new screenshots.
   - The two in-game reports of that Deck try (#179 fell through a parking lot at x 384, z 400; #180 sunken sidewalk at x -281, z -151) are not from the walls: the nearest wall is over 190 m from either, and the wall pass moved no terrain cell within 150 m of them.
-- [ ] 5.3 **Stop: the human looks at Parliament Hill and the walls again on the Deck**
+- [x] 5.3 **Stop: the human looks at Parliament Hill and the walls again on the Deck**
+  - 2026-11-28, the human on the Deck (build `c1ac949`, eight screenshots): "most look really good"; the winding road down to the Alexandra Bridge is open for the first time; one bend under the highway "caused some issues" (the ramp under the 417 at x 113, z 1333).
+
+## 6. A wall at the bank's toe (after the third Deck try)
+- [x] 6.1 Importer: beside a road with no sidewalk the wall moves in to a bank that starts inside the level margin; tests
+- [x] 6.2 Measured on the Centretown capture: 109 walls / 3.2 km (the same walls); wall stations with ground over the foot just in front 334 (468 before); 669 wheel traps, 17 of 2,198 junctions, as before
+- [ ] 6.3 **Stop: the human drives the bend under the 417 on the Deck**

@@ -96,6 +96,9 @@ SLOPE_SAMPLE_M = 1.0  # the climb is read over windows this long between the edg
 WAY_MARGIN_M = 0.3  # a way's ribbon this much wider still breaks the wall
 BED_SLACK_M = 0.2  # the ground is never raised more than this above another way's bed
 LEVEL_M = 2.5  # a way further than this above or below the edge passes over or under it
+TOE_STEP_M = 0.5  # a bank's toe inside a bare road's level margin is found to this
+TOE_SLEW = 0.3  # of line_slew: how fast the line moves in to a toe and back out
+MIN_SETBACK_M = 0.5  # and the wall stands at least this far from the road's edge
 VERGE_M = 0.5  # ground within this of the foot behind the line is still the verge
 DIP_M = 0.75  # ground this far below the foot just behind the line is a dip, not a bank
 SIDEWALK_LEVEL_M = 0.75  # a sidewalk further than this from the road's level is not its own
@@ -414,6 +417,20 @@ def build_walls(
                 return True
         return False
 
+    def path_within(x, z, nx, nz, hw, out) -> bool:
+        """A path within `out` of the road's edge on this side: what stands up in the
+        margin there is the path's bed, or a bank the path runs on, not a toe for the wall."""
+        k = 0.0
+        while k <= out + 1e-6:
+            px, pz = x + nx * (hw + k), z + nz * (hw + k)
+            if any(
+                _seg_dist(px, pz, a[0], a[1], b[0], b[1]) <= whw + WAY_MARGIN_M
+                for a, b, (_wid, whw, _ya, _yb) in ped_index.near(px, pz, 6.0)
+            ):
+                return True
+            k += 1.0
+        return False
+
     def under_the_cap(x, z, nx, nz, foot, level, own) -> bool:
         """True when another road, a junction or a path lies behind the foot within the cap's
         reach and below `level` (the cap's underside): the wall's solid top would cover it. A
@@ -471,7 +488,18 @@ def build_walls(
                         break
                     last = g
                     k += SLOPE_SAMPLE_M
-                feet.append([outer, edge_y, start, beside is not None])
+                # Beside a bare road the bank may start inside the level margin (another
+                # road's embankment the grading may not cut, at an underpass): the wall must
+                # stand at its toe there, or it is buried in the bank with grass before it.
+                toe = setback
+                if beside is None and not path_within(x, z, nx, nz, hw, setback + 1.5):
+                    k = TOE_STEP_M
+                    while k < setback:
+                        if sample(x + nx * (hw + k), z + nz * (hw + k)) > y + VERGE_M:
+                            toe = max(k - TOE_STEP_M, MIN_SETBACK_M)
+                            break
+                        k += TOE_STEP_M
+                feet.append([outer, edge_y, start, beside is not None, toe])
             # A station that read some other sidewalk's level (two run side by side) would
             # put a step in the foot: each level is the median of three.
             levels = [f[1] for f in feet]
@@ -482,10 +510,20 @@ def build_walls(
             # as the road; where a sidewalk starts or ends it moves over gently, and never
             # inside any station's own line.
             line = _envelope(
-                [outer + (0.0 if has_sw else setback) for outer, _ey, _s, has_sw in feet],
+                [outer + (0.0 if has_sw else setback) for outer, _ey, _s, has_sw, _toe in feet],
                 along,
                 slew,
             )
+            # Never behind a bank's toe: in to it as gently as the line moves out.
+            # Far more gently than the line moves out: a toe is read to TOE_STEP_M, and the
+            # line must not follow that from station to station.
+            toes = _envelope(
+                [-(f[0] + f[4]) if not f[3] else -math.inf for f in feet], along, slew * TOE_SLEW
+            )
+            # Only along a side with no sidewalk at all: where one comes and goes the line
+            # is the sidewalk's, and a toe read in a gap would pull the wall across it.
+            if not any(f[3] for f in feet):
+                line = [min(a, -b) for a, b in zip(line, toes)]
             pts: list = []  # (x, y, z) the foot
             normals: list = []
             tops: list = []
@@ -496,7 +534,9 @@ def build_walls(
             keep: list = []  # wall here
             loose: list = []  # a wall here would stand clear of its bank
             hard: list = []  # a way leaves here: never joined across
-            for (x, y, z, dx, dz), (outer, edge_y, start, _sw), foot in zip(stations, feet, line):
+            for (x, y, z, dx, dz), (outer, edge_y, start, _sw, _toe), foot in zip(
+                stations, feet, line
+            ):
                 nx, nz = -dz * side, dx * side
                 fx, fz = x + nx * foot, z + nz * foot
                 foot_y = edge_y

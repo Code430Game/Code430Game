@@ -171,3 +171,28 @@ the bank runs on both ways without a wall, so the two stood as slabs on a lawn.
   deeper than long. A wall is cut wherever its road's data is split, so the test is on the
   run: walls whose ends meet within `join_gap_m` are one run, and a run under `min_run_m`
   (12 m) is dropped. `min_length_m` stays 6 m for a piece of a longer run.
+
+### After the third Deck try (2026-11-28): a wall at the bank's toe
+
+The human: most walls look really good; a bend under the highway had issues (the ramp under
+the 417 at x 113, z 1333). There the 417's embankment comes down to the ramp's edge: its
+cells are in the 417's grading zone, so the ramp's level margin was never cut and the hold
+may not lower them. The wall stood 4 m out all the same, 4 m inside the bank, its top below
+the grass, with the bank sloping down in front of it to the road.
+
+- **Rule.** Beside a road with no sidewalk the bank's toe is read in the margin (the first
+  ground 0.5 m above the road, in 0.5 m steps); the line is the lesser of the 4 m setback and
+  the toe (never under 0.5 m from the edge). A wall at the toe needs no ground moved: the
+  bank is behind its face and under its cap.
+- **Gently.** A toe read to 0.5 m every 2 m made a line that turned up to 28 degrees at
+  every station (99 turns over 15 degrees, 4 before). The line moves in to a toe and out
+  again at 0.3 of `line_slew`: 4 turns over 15 degrees again.
+- **Not where a sidewalk or path is.** On Percy Street a few stations read no sidewalk and
+  pulled the whole line in across it; on Daly Avenue a footpath runs on the bank inside the
+  margin. Both lost their walls (a way under the cap). The rule holds only along a side with
+  no sidewalk at any station, and at a station with no path within 5.5 m of the edge.
+- **What is left.** Beside a sidewalk the wall stays at the sidewalk's outer edge. Where the
+  cells just behind it are in the 417's grading zone they are still not lowered, and grass
+  wedges stand before the face (Metcalfe, Bank and O'Connor under the 417 in the Deck
+  screenshots): about 110 stations on Centretown. Lowering them puts a drop within reach of
+  the 417's edge (a wheel trap by the game's report); not done.
