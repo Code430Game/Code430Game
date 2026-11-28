@@ -148,7 +148,11 @@ func load(dir: String) -> bool:
 		terrain_holes = UnderpassBuilder.holes_by_chunk(graph.pedestrian)
 	_step(0.75, "curbs, bridges and lots")
 	barrier_material = BarrierBuilder.material()
-	barriers = BarrierBuilder.clip_curbs(BarrierBuilder.load_barriers(dir), junctions)
+	# Retaining walls ride along as barriers of kind "wall" (add-retaining-walls); a pack
+	# without the file has none.
+	var all_barriers := BarrierBuilder.load_barriers(dir)
+	all_barriers.append_array(BarrierBuilder.load_walls(dir))
+	barriers = BarrierBuilder.clip_curbs(all_barriers, junctions)
 	_step(0.78, "curb meshes")
 	if not part:
 		barrier_chunks = BarrierBuilder.build(barriers)

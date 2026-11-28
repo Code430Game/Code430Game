@@ -30,8 +30,12 @@ underpasses and cuttings in Ottawa have vertical concrete retaining walls there.
   - Any way that leaves the road through the wall line breaks it: junctions, side streets,
     driveways and paths. A wall never crosses a way.
 - **The terrain steps at the wall.** In front of the wall (between it and the road), the
-  ground is held at the road's or sidewalk's level; behind it the ground is left as it is.
-  The step is the wall's face, so no slope reaches the road.
+  ground is held at the road's or sidewalk's level; behind it the ground is raised to the
+  wall's top where it stood lower, so the bank carries on from the top of the wall. The step
+  is the wall's face, so no slope reaches the road. (Revised 2026-11-24 after the Deck stop:
+  first the ground behind was left as it was, and the wall stood on a slope with a slot
+  behind it. The wall's line now runs parallel to the road, and the wall is solid back over
+  the strip where the 4 m terrain grid climbs; see design.md.)
 - **The game draws the walls.** Concrete (the bridge piers' material), straight down from the
   top to the ground in front, with collision, in the chunks they cross. They are written to a
   new optional file, `retaining_walls.v0.json`, one entry per wall in the barrier shape (`id`,

@@ -395,6 +395,22 @@ def render_markdown(report: ValidationReport, title: str) -> str:
             "",
             "- " + (", ".join(f"{k} {v}" for k, v in s["barriers"].items()) or "none"),
         ]
+    if "retaining_walls" in s:
+        rw = s["retaining_walls"]
+        lines += [
+            "",
+            "## Retaining walls",
+            "",
+            (
+                f"- {rw['walls']} walls, {rw['metres']} m in all, the tallest {rw['tallest_m']} m "
+                f"({rw['wall_stations']} of {rw['stations']} edge stations)"
+            ),
+        ]
+        if rw.get("tops_lowered"):
+            lines.append(
+                f"- {rw['tops_lowered']} tops lowered to the ground behind them (the fill was "
+                "kept off another road's grading or a building)"
+            )
     if "buildings" in s:
         b = s["buildings"]
         lines += [

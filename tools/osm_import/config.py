@@ -27,6 +27,7 @@ class ImportConfig:
     buildings: dict
     pedestrian: dict
     barriers: dict
+    walls: dict
     forks: dict
     clusters: dict
     drivable_classes: tuple[str, ...]
@@ -62,6 +63,7 @@ def load_config(path: Path = DEFAULT_CONFIG_PATH) -> ImportConfig:
         buildings=dict(raw.get("buildings", {})),
         pedestrian=dict(raw.get("pedestrian", {})),
         barriers=dict(raw.get("barriers", {})),
+        walls=dict(raw.get("walls", {})),
         forks=dict(raw.get("forks", {})),
         clusters=dict(raw.get("clusters", {})),
         drivable_classes=tuple(raw["drivable_classes"]),
