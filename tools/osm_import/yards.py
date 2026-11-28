@@ -264,11 +264,13 @@ def build_yards(
             continue
         cut = [obstacles[j] for j in obstacle_tree.query(lot) if not obstacles[j].is_empty]
         if cut:
-            # Polygons only: a cut can leave a line or a point where two outlines touch, and
-            # the next overlay refuses a collection of mixed dimension.
-            lot = _polygonal(
-                shapely.difference(lot, shapely.union_all(cut, grid_size=GRID_M), grid_size=GRID_M)
+            lot = shapely.difference(
+                lot, shapely.union_all(cut, grid_size=GRID_M), grid_size=GRID_M
             )
+            # A cut can leave a line or a point where two outlines touch, and the next
+            # overlay refuses a collection of mixed dimension: polygons only then.
+            if lot.geom_type not in ("Polygon", "MultiPolygon"):
+                lot = _polygonal(lot)
             if lot.is_empty:
                 continue
         lot = shapely.difference(lot, house, grid_size=GRID_M)
