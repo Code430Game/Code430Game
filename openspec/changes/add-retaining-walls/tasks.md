@@ -39,4 +39,5 @@
 ## 6. A wall at the bank's toe (after the third Deck try)
 - [x] 6.1 Importer: beside a road with no sidewalk the wall moves in to a bank that starts inside the level margin; tests
 - [x] 6.2 Measured on the Centretown capture: 109 walls / 3.2 km (the same walls); wall stations with ground over the foot just in front 334 (468 before); 669 wheel traps, 17 of 2,198 junctions, as before
+  - A fresh Centretown export (2026-11-28, that day's OSM data, so not comparable count for count): 109 walls / 3.2 km, 653 wheel traps, 16 of 2,180 junctions, Metcalfe under the 417 passes. The export first failed in `yards.py` on the new data (a lot cut to a line: "Overlay input is mixed-dimension"); fixed there, polygons only after the cut. The Glebe and Hintonburg were not exported again (no OSM cache; Overpass was failing).
 - [ ] 6.3 **Stop: the human drives the bend under the 417 on the Deck**
